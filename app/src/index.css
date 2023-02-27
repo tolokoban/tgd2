@@ -1,0 +1,9 @@
+html {
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+body {
+    background-color: var(--theme-color-neutral);
+    color: var(--theme-color-on-neutral);
+}

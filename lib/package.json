@@ -1,0 +1,47 @@
+{
+    "name": "tgd2",
+    "version": "2.0.0",
+    "description": "ToloGameDev library for WebGL2",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc --build --force --verbose --pretty",
+        "postbuild": "shx cp ./package.lib.json ../dist/package.json && shx cp ../README.md ../LICENSE ../dist/",
+        "start": "tsc --build --pretty --watch",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tolokoban/tgd2.git"
+    },
+    "keywords": [
+        "WebGL2",
+        "game",
+        "framework"
+    ],
+    "author": "Tolokoban",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/tolokoban/tgd2/issues"
+    },
+    "homepage": "https://github.com/tolokoban/tgd2#readme",
+    "devDependencies": {
+        "@types/jest": "^29.2.3",
+        "jest-environment-jsdom": "^29.3.1",
+        "jst": "^0.0.13",
+        "shx": "^0.3.4",
+        "ts-jest": "^29.0.3",
+        "typescript": "^4.9.3"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 3 chrome version",
+            "last 3 firefox version",
+            "last 3 safari version"
+        ]
+    }
+}

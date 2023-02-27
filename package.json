@@ -1,0 +1,32 @@
+{
+    "name": "tgd2",
+    "version": "2.0.0",
+    "description": "ToloGameDev library for WebGL2",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "workspaces": [
+        "./dist/*"
+    ],
+    "scripts": {
+        "build": "cd lib && npm run build && cd ..",
+        "postbuild": "cd dist && npm link && cd .."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tolokoban/tgd2.git"
+    },
+    "keywords": [
+        "WebGL2",
+        "game",
+        "framework"
+    ],
+    "author": "Tolokoban",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/tolokoban/tgd2/issues"
+    },
+    "homepage": "https://github.com/tolokoban/tgd2#readme"
+}

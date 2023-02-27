@@ -1,0 +1,45 @@
+.themePage {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25em;
+}
+
+.themePage > div {
+    box-shadow: 0 2px 4px #000a;
+    text-align: center;
+}
+
+.neutral {
+    grid-column: 1/2;
+}
+
+.primary {
+    grid-column: 2/3;
+}
+
+.secondary {
+    grid-column: 3/4;
+}
+
+.tertiary {
+    grid-column: 4/5;
+}
+
+.other {
+    grid-column: 5/6;
+}
+
+.row2 {
+    composes: other;
+    grid-row: 2/3;
+}
+
+.row3 {
+    composes: other;
+    grid-row: 3/4;
+}
+
+.row4 {
+    composes: other;
+    grid-row: 4/5;
+}
