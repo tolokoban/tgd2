@@ -1,0 +1,1 @@
+{"version":3,"file":"asset.d.ts","sourceRoot":"","sources":["../../../../../../lib/src/scene/asset/asset.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,aAAa,CAAA;AAG3C,MAAM,CAAC,OAAO,OAAO,KAAK;IACtB,OAAO,CAAC,QAAQ,CAAC,MAAM,CAAsC;IAE7D,WAAW,CAAC,GAAG,EAAE,MAAM,GAAG,aAAa;IAkBvC,YAAY,CAAC,KAAK,EAAE,aAAa;CAGpC"}

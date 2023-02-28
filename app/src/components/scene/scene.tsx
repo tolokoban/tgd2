@@ -15,13 +15,20 @@ export default function SceneView({
         if (!canvas) return
 
         const scene = new Scene(canvas, options)
-        scene
-            .initialize()
-            .then(() => {
-                scene.draw()
-                if (onReady) onReady(scene)
-            })
-            .catch(console.error)
+        scene.paint()
+        if (onReady) onReady(scene)
     }
-    return <canvas ref={mountCanvas} className={className}></canvas>
+    return (
+        <canvas
+            style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+            }}
+            ref={mountCanvas}
+            className={className}
+            width={480}
+            height={640}
+        ></canvas>
+    )
 }

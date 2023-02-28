@@ -6,7 +6,7 @@
     "scripts": {
         "build": "tsc --build --force --verbose --pretty",
         "postbuild": "shx cp ./package.lib.json ../dist/package.json && shx cp ../README.md ../LICENSE ../dist/",
-        "start": "tsc --build --pretty --watch",
+        "start": "tsc --build --pretty --force --watch",
         "test": "jest"
     },
     "repository": {

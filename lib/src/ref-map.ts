@@ -14,7 +14,7 @@ export default class RefMap<KeyType, ValType> {
     add(key: KeyType, factory: () => ValType): ValType {
         const { map, count } = this
         if (count.has(key)) {
-            count.set(key, 1 + count.get(key))
+            count.set(key, 1 + (count.get(key) ?? 0))
             const curVal = map.get(key)
             if (!curVal) throw Error("[CountMap] Map should not be empty!")
             return curVal
@@ -23,27 +23,7 @@ export default class RefMap<KeyType, ValType> {
         const newVal = factory()
         map.set(key, newVal)
         count.set(key, 1)
-    }
-
-    /**
-     * Async version of `add()`
-     * @see add()
-     */
-    async addAsync(
-        key: KeyType,
-        factory: () => Promise<ValType>
-    ): Promise<ValType> {
-        const { map, count } = this
-        if (count.has(key)) {
-            count.set(key, 1 + count.get(key))
-            const curVal = map.get(key)
-            if (!curVal) throw Error("[CountMap] Map should not be empty!")
-            return curVal
-        }
-
-        const newVal = await factory()
-        map.set(key, newVal)
-        count.set(key, 1)
+        return newVal
     }
 
     /**
@@ -56,7 +36,7 @@ export default class RefMap<KeyType, ValType> {
         const { map, count } = this
         if (!map.has(key)) return
 
-        const newCount = count.get(key) - 1
+        const newCount = (count.get(key) ?? 0) - 1
         if (newCount > 0) {
             count.set(key, newCount)
             return

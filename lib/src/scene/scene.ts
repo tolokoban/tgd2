@@ -1,13 +1,13 @@
 import PainterGroup from "../painter/group"
 import { PainterInterface } from "./../painter/painter-interface"
 import Asset from "./asset"
-import TextureManager from "./texture/texture-manager"
+import TextureHelper from "./helpers/texture-helper"
 import Resources from "./resources"
 
 export default class Scene {
     public readonly gl: WebGL2RenderingContext
     public readonly asset: Asset
-    public readonly texture: TextureManager
+    public readonly texture: TextureHelper
 
     private readonly painters = new PainterGroup()
     private isAnimated = false
@@ -25,11 +25,21 @@ export default class Scene {
 
         this.gl = gl
         this.asset = new Asset()
-        this.texture = new TextureManager(gl)
+        this.texture = new TextureHelper(gl)
     }
 
     getResources(id: string) {
         return Resources.make(this.gl, id)
+    }
+
+    getUniformLocation(
+        program: WebGLProgram,
+        name: string
+    ): WebGLUniformLocation {
+        const uni = this.gl.getUniformLocation(program, name)
+        if (!uni) throw Error(`Unable to get uniform location of "${name}"!`)
+
+        return uni
     }
 
     get screenRatio() {
@@ -52,7 +62,7 @@ export default class Scene {
     set animate(value: boolean) {
         if (this.isAnimated === value) return
         this.isAnimated = value
-        if (value) this.draw()
+        if (value) this.paint()
     }
 
     async addPainter(...painters: PainterInterface[]): Promise<void> {
@@ -61,16 +71,16 @@ export default class Scene {
         }
     }
 
-    draw() {
-        window.requestAnimationFrame(this.paint)
+    paint() {
+        window.requestAnimationFrame(this.actualPaint)
     }
 
-    private readonly paint = (time: number) => {
+    private readonly actualPaint = (time: number) => {
         const { gl, lastCanvasWidth, lastCanvasHeight, lastTime } = this
         if (lastTime < 0) {
             this.lastTime = time
             // First frame, let's skip it to get better timing.
-            this.draw()
+            this.paint()
             return
         }
 
@@ -95,16 +105,12 @@ export default class Scene {
 
         const delay = time - this.lastTime
         this.lastTime = time
-        this.painters.paint(time, delay, this)
-        this.painters.update(time, delay, this)
-        if (this.isAnimated) this.draw()
-    }
-
-    initialize(): Promise<boolean> {
-        return this.painters.initialize(this)
+        this.painters.paint(time, delay)
+        this.painters.update(time, delay)
+        if (this.isAnimated) this.paint()
     }
 
     destroy() {
-        this.painters.destroy(this)
+        this.painters.destroy()
     }
 }

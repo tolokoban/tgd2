@@ -43,6 +43,7 @@ module.exports = env => {
             extensions: [".tsx", ".ts", ".js", ".jsx", ".wasm"],
             enforceExtension: false,
             alias: {
+                tgd2: Path.resolve(__dirname, "../lib/src"),
                 "@": Path.resolve(__dirname, "src"),
                 react: require.resolve("react"),
             },

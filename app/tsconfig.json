@@ -22,6 +22,8 @@
         "noImplicitThis": true,
         "outDir": "./dist/",
         "paths": {
+            "tgd2/*": ["../../lib/src/*"],
+            "tgd2": ["../../lib/src/index.ts"],
             "@/*": ["./*"],
             "*": ["*", "../node_modules/*"]
         },
@@ -43,11 +45,7 @@
         "./src/**/*.jpg",
         "./src/**/*.jpeg",
         "./src/**/*.gif",
-        "./src/**/*.webp"],
-    "exclude": [
-        "node_modules/",
-        "doc/",
-        "**/*.spec.*",
-        "**/*.test.*"
-    ]
+        "./src/**/*.webp"
+    ],
+    "exclude": ["node_modules/", "doc/", "**/*.spec.*", "**/*.test.*"]
 }

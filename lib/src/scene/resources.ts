@@ -57,6 +57,7 @@ export default class Resources {
             const newShader = gl.createShader(
                 type === "vertex" ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER
             )
+            console.log(`🚀 [resources] newShader(${type}) = `, newShader) // @FIXME: Remove this line written on 2023-02-28 at 18:31
             if (!newShader)
                 throw Error("Unable to create a Vertex Shader handle!")
 
@@ -86,17 +87,22 @@ export default class Resources {
             return newPrg
         })
         const vertShader = this.createShader("vertex", code.vert, key)
+        console.log("🚀 [resources] vertShader = ", vertShader) // @FIXME: Remove this line written on 2023-02-28 at 18:33
         gl.attachShader(prg, vertShader)
         const fragShader = this.createShader("fragment", code.frag, key)
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
+        if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+            var info = gl.getProgramInfoLog(prg)
+            throw new Error("Could NOT link WebGL2 program!\n" + info)
+        }
         return prg
     }
 
     deleteProgram(key = "default") {
         const { bag, gl } = this
         const prg = bag.programs.delete(key)
-        gl.deleteProgram(prg)
+        if (prg) gl.deleteProgram(prg)
     }
 
     createTexture(key = "default") {

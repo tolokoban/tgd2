@@ -61,6 +61,22 @@ class Data<T extends { [key: string]: DataAttribute | number }> {
         return this.buffer
     }
 
+    sendToArrayBuffer(
+        gl: WebGL2RenderingContext,
+        buffer: WebGLBuffer,
+        verticesCount: number,
+        dynamic: boolean
+    ) {
+        const data = this.get(verticesCount)
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            data,
+            dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW
+        )
+        return data
+    }
+
     set(attribName: keyof T, value: ArrayBuffer) {
         if (isObject(value) && value.buffer instanceof ArrayBuffer) {
             value = value.buffer
