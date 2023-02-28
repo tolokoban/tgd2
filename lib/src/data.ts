@@ -1,4 +1,3 @@
-import { type } from "cypress/types/jquery"
 export interface DataAttribute {
     dimension: number
     type: "float"

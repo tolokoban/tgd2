@@ -2,10 +2,11 @@ import Resources from "../../scene/resources"
 import { PainterInterface } from "./../painter-interface"
 import VERT from "./sprites-painter.vert"
 import FRAG from "./sprites-painter.frag"
-import Scene from "../../scene/scene"
+import Scene from "../../scene"
 
 export default class SpritesPainter implements PainterInterface {
     private readonly vao: WebGLVertexArrayObject
+    private readonly prg: WebGLProgram
 
     constructor(
         private readonly gl: WebGL2RenderingContext,
@@ -14,22 +15,24 @@ export default class SpritesPainter implements PainterInterface {
         const res = Resources.make(gl, "SpritesPainter")
         const buffVert = res.createBuffer("buffVert")
         const buffInstDynamic = res.createBuffer("buffInstDynamic")
+        const prg = res.createProgram({ vert: VERT, frag: FRAG })
         this.vao = createVAO(gl, prg, buffVert, buffInstDynamic)
+        this.prg = prg
     }
 
     initialize(scene: Scene): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
 
-    destroy(scene: Scene): void {
+    destroy(): void {
         throw new Error("Method not implemented.")
     }
 
-    paint(time: number, delay: number, scene: Scene): void {
+    paint(time: number, delay: number): void {
         throw new Error("Method not implemented.")
     }
 
-    update(time: number, delay: number, scene: Scene): void {
+    update(time: number, delay: number): void {
         throw new Error("Method not implemented.")
     }
 }

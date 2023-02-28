@@ -1,17 +1,15 @@
-import PainterArray from "../painter/array"
+import PainterGroup from "../painter/group"
 import { PainterInterface } from "./../painter/painter-interface"
 import Asset from "./asset"
 import TextureManager from "./texture/texture-manager"
-import ProgramManager from "./program/program-manager"
 import Resources from "./resources"
 
 export default class Scene {
     public readonly gl: WebGL2RenderingContext
     public readonly asset: Asset
-    public readonly program: ProgramManager
     public readonly texture: TextureManager
 
-    private readonly painters = new PainterArray()
+    private readonly painters = new PainterGroup()
     private isAnimated = false
     private lastCanvasWidth = 0
     private lastCanvasHeight = 0
@@ -27,7 +25,6 @@ export default class Scene {
 
         this.gl = gl
         this.asset = new Asset()
-        this.program = new ProgramManager(gl)
         this.texture = new TextureManager(gl)
     }
 

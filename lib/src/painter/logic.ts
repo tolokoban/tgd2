@@ -9,10 +9,6 @@ export default class PainterLogic implements PainterInterface {
         private readonly logicFunction: (time: number, delay: number) => void
     ) {}
 
-    initialize(scene: Scene): Promise<boolean> {
-        return new Promise(resolve => resolve(true))
-    }
-
     destroy(): void {}
 
     paint(time: number, delay: number): void {}

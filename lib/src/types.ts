@@ -1,4 +1,3 @@
-import { type } from "cypress/types/jquery"
 export interface TgdAssetImage {
     readonly type: "TgdAssetImage"
     readonly key: string
