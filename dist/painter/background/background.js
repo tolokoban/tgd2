@@ -38,10 +38,10 @@ var TgdPainterBackground = (function () {
         this.uniTexture = scene.getUniformLocation(this.program, "uniTexture");
         var attributes = new TgdAttributes({
             attPoint: 2,
-            attUV666: 2,
+            attUV: 2,
         });
         attributes.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]));
-        attributes.set("attUV666", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]));
+        attributes.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]));
         attributes.sendToArrayBuffer(scene.gl, this.buffer, 4, false);
         this.vao = createVAO(scene.gl, this.program, this.buffer, attributes);
     }

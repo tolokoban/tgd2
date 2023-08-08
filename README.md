@@ -1,6 +1,6 @@
 # tgd2
 
-ToloGameDev library for WebGL2
+ToloGameDev library for WebGL2. Please look at the [online documentation](https://tolokoban.github.io/tgd2/) (in french).
 
 ## Development
 

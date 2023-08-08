@@ -1,38 +1,45 @@
-import React from "react"
-import { createHashRouter, RouterProvider } from "react-router-dom"
-import Layout from "./layout"
-import Page from "./page.mdx"
-import PagePainter from "./painter/page.mdx"
-import PagePainterBackground from "./painter/background/page.mdx"
-
-const router = createHashRouter(
-    [
+    /**
+     * WARNING! this file has been generated automatically.
+     * Please do not edit it because it will probably be overwritten.
+     * 2023-08-08T19:57:52.896Z
+     */
+    import React from "react"
+    import { createHashRouter, RouterProvider } from "react-router-dom"
+    import Loading from "./loading"
+    import Page from "./page.mdx"
+    import Layout from "./layout"
+    
+    const Page0 = React.lazy(() => import("./painter"))
+    const Page1 = React.lazy(() => import("./painter/background"))
+    const Page2 = React.lazy(() => import("./scene"))
+    
+    const router = createHashRouter(
+        [
+            {
+                path: "/",
+                element: <Page />
+            },
+            {
+                path: "/painter",
+                element: <React.Suspense fallback={<Loading />}><Page0 /></React.Suspense>
+            },
+            {
+                path: "/painter/background",
+                element: <React.Suspense fallback={<Loading />}><Page1 /></React.Suspense>
+            },
+            {
+                path: "/scene",
+                element: <React.Suspense fallback={<Loading />}><Page2 /></React.Suspense>
+            },
+        ],
         {
-            path: "/",
-            element: <Page />,
-        },
-        {
-            path: "painter",
-            element: <PagePainter />,
-        },
-        {
-            path: "painter/background",
-            element: <PagePainterBackground />,
-        },
-    ],
-    {
-        basename: window.location.pathname.startsWith("/tgd2") ? "/tgd2" : "",
-    }
-)
-
-console.log("🚀 [index] window.location.pathname = ", window.location.pathname) // @FIXME: Remove this line written on 2022-11-18 at 17:27
-
-export default function App() {
-    return (
-        <React.StrictMode>
+            basename: ""
+        }
+    )
+    export default function App() {
+        return (
             <Layout>
                 <RouterProvider router={router} />
             </Layout>
-        </React.StrictMode>
-    )
-}
+        )
+    }

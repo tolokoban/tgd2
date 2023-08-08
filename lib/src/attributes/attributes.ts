@@ -88,7 +88,7 @@ export class TgdAttributes<
             const def = definitions[name]
             const att = gl.getAttribLocation(prg, name)
             if (att < 0) {
-                throw Error(makeNotFoundAttributeError())
+                throw Error(makeNotFoundAttributeError(name, gl, prg))
             }
             console.log(name, att)
             gl.enableVertexAttribArray(att)
@@ -182,4 +182,12 @@ function makeDataDefinitionFloat(
 function isObject(data: unknown): data is Record<string, unknown> {
     if (!data) return false
     return typeof data === "object"
+}
+
+function makeNotFoundAttributeError(
+    name: string,
+    gl: WebGL2RenderingContext,
+    prg: WebGLProgram
+): string {
+    return `Unable to find atribute "${name}"!`
 }
