@@ -1,10 +1,10 @@
-import Scene from "../scene"
-import { PainterInterface } from "./painter-interface"
+import { TgdScene } from "../scene"
+import { TgdPainter } from "./painter"
 
 /**
  * This painter paints nothing but execute some logic at every frame.
  */
-export default class PainterLogic implements PainterInterface {
+export class TgdPainterLogic implements TgdPainter {
     constructor(
         private readonly logicFunction: (time: number, delay: number) => void
     ) {}

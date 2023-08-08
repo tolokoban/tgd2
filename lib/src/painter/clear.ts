@@ -1,16 +1,16 @@
-import Scene from "../scene/scene"
-import { PainterInterface } from "./painter-interface"
+import { TgdScene } from "../scene"
+import { TgdPainter } from "./painter"
 
 export interface PainterClearOptions {
     color: [red: number, green: number, blue: number, alpha: number]
 }
 
-export default class PainterClear implements PainterInterface {
+export class TgdPainterClear implements TgdPainter {
     private clearMask = 0
     private readonly options: PainterClearOptions
 
     constructor(
-        private readonly scene: Scene,
+        private readonly scene: TgdScene,
         options: Partial<PainterClearOptions>
     ) {
         this.options = {

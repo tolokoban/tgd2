@@ -1,15 +1,15 @@
-import PainterGroup from "../painter/group"
-import { PainterInterface } from "./../painter/painter-interface"
+import { TgdPainterGroup } from "../painter/group"
+import { TgdPainter } from "../painter/painter"
 import Asset from "./asset"
 import TextureHelper from "./helpers/texture-helper"
 import Resources from "./resources"
 
-export default class Scene {
+export class TgdScene {
     public readonly gl: WebGL2RenderingContext
     public readonly asset: Asset
     public readonly texture: TextureHelper
 
-    private readonly painters = new PainterGroup()
+    private readonly painters = new TgdPainterGroup()
     private isAnimated = false
     private lastCanvasWidth = 0
     private lastCanvasHeight = 0
@@ -65,7 +65,7 @@ export default class Scene {
         if (value) this.paint()
     }
 
-    async addPainter(...painters: PainterInterface[]): Promise<void> {
+    async addPainter(...painters: TgdPainter[]): Promise<void> {
         for (const painter of painters) {
             this.painters.add(painter)
         }

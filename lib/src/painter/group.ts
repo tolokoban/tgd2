@@ -1,17 +1,17 @@
-import { PainterInterface } from "./painter-interface"
+import { TgdPainter } from "./painter"
 
 /**
  * Group several painters together.
  */
-export default class PainterGroup implements PainterInterface {
+export class TgdPainterGroup implements TgdPainter {
     public enabled = true
-    private readonly painters: PainterInterface[]
+    private readonly painters: TgdPainter[]
 
-    constructor(painters: PainterInterface[] = []) {
+    constructor(painters: TgdPainter[] = []) {
         this.painters = [...painters]
     }
 
-    add(...painters: PainterInterface[]) {
+    add(...painters: TgdPainter[]) {
         for (const painter of painters) {
             this.painters.push(painter)
         }

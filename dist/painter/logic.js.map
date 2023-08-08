@@ -1,0 +1,1 @@
+{"version":3,"file":"logic.js","sourceRoot":"","sources":["../../lib/src/painter/logic.ts"],"names":[],"mappings":"AAMA;IACI,yBACqB,aAAoD;QAApD,kBAAa,GAAb,aAAa,CAAuC;IACtE,CAAC;IAEJ,iCAAO,GAAP,cAAiB,CAAC;IAElB,+BAAK,GAAL,UAAM,IAAY,EAAE,KAAa,IAAS,CAAC;IAE3C,gCAAM,GAAN,UAAO,IAAY,EAAE,KAAa;QAC9B,IAAI,CAAC,aAAa,CAAC,IAAI,EAAE,KAAK,CAAC,CAAA;IACnC,CAAC;IACL,sBAAC;AAAD,CAAC,AAZD,IAYC"}

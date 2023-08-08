@@ -1,10 +1,10 @@
 import Resources from "../../scene/resources"
-import { PainterInterface } from "./../painter-interface"
+import { TgdPainter } from "../painter"
 import VERT from "./sprites-painter.vert"
 import FRAG from "./sprites-painter.frag"
-import Scene from "../../scene"
+import { TgdScene } from "../../scene"
 
-export default class SpritesPainter implements PainterInterface {
+export class TgdPainterSprites implements TgdPainter {
     private readonly vao: WebGLVertexArrayObject
     private readonly prg: WebGLProgram
 
@@ -20,7 +20,7 @@ export default class SpritesPainter implements PainterInterface {
         this.prg = prg
     }
 
-    initialize(scene: Scene): Promise<boolean> {
+    initialize(scene: TgdScene): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
 
