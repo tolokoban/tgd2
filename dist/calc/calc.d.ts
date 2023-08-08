@@ -1,6 +1,7 @@
+export type Vector2 = [x: number, y: number];
 export type Vector3 = [x: number, y: number, z: number];
 export type Quaternion = [x: number, y: number, z: number, w: number];
-export type Vector = Vector3 | Quaternion;
+export type Vector = Vector2 | Vector3 | Quaternion;
 export declare function isZero(x: number): boolean;
 export declare function project(vector: Vector3, base: Vector3): number;
 export declare function vectorSquareLength(vec: number[]): number;

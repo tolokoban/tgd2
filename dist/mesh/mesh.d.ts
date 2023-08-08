@@ -1,18 +1,9 @@
-interface TgdMeshOptions {
-    vertices: number[];
-    normals?: number[];
-    faces?: number[];
-    faceNormals?: number[];
-    elements?: number[];
-}
+import { TgdTypeMeshData, TgdTypeMeshFace } from "./type";
 export declare class TgdMesh {
-    private dirty;
-    private readonly vertices;
-    private readonly normals;
     private readonly faces;
-    private readonly faceNormals;
-    private readonly elements;
-    constructor(options?: TgdMeshOptions);
-    private update;
+    private data;
+    constructor(faces?: TgdTypeMeshFace[]);
+    addFace(...faces: TgdTypeMeshFace[]): void;
+    get facesCount(): number;
+    getData(): TgdTypeMeshData;
 }
-export {};

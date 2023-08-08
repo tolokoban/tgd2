@@ -1,7 +1,7 @@
-import { makeData } from "./data"
+import { TgdAttributes } from "./attributes"
 
 describe("data.ts", () => {
-    const data = makeData({
+    const data = new TgdAttributes({
         xy: 2,
         z: 1,
     })

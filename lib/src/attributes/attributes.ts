@@ -1,28 +1,32 @@
-export interface DataAttribute {
-    dimension: number
+export interface TgdAttribute {
     type: "float"
+    dimension: number
+    divisor: number
 }
 
-interface DataDefinition {
+interface TgdAttributeDefinition {
     dimension: number
+    divisor: number
     bytesPerElement: number
     getter(view: DataView, byteOffset: number): number
     setter(view: DataView, byteOffset: number, value: number): void
 }
 
-class Data<T extends { [key: string]: DataAttribute | number }> {
-    public readonly stride
+export class TgdAttributes<
+    T extends { [key: string]: Partial<TgdAttribute> | number }
+> {
+    public readonly stride: number
     private buffer: ArrayBuffer | undefined = undefined
     private readonly data: { [key: string]: ArrayBufferLike } = {}
-    private readonly definitions: { [key: string]: DataDefinition }
+    private readonly definitions: { [key: string]: TgdAttributeDefinition }
 
     constructor(def: T) {
         let stride = 0
         const data: { [key: string]: ArrayBuffer } = {}
-        const definitions: { [key: string]: DataDefinition } = {}
+        const definitions: { [key: string]: TgdAttributeDefinition } = {}
         for (const key of Object.keys(def)) {
             data[key] = new ArrayBuffer(0)
-            const dataDef = makeDataDefinition(def[key])
+            const dataDef: TgdAttributeDefinition = makeDataDefinition(def[key])
             definitions[key] = dataDef
             stride += dataDef.bytesPerElement * dataDef.dimension
         }
@@ -77,6 +81,31 @@ class Data<T extends { [key: string]: DataAttribute | number }> {
         return data
     }
 
+    define(gl: WebGL2RenderingContext, prg: WebGLProgram) {
+        let offsetDestination = 0
+        const { definitions } = this
+        for (const name of Object.keys(definitions)) {
+            const def = definitions[name]
+            const att = gl.getAttribLocation(prg, name)
+            if (att < 0) {
+                throw Error(makeNotFoundAttributeError())
+            }
+            console.log(name, att)
+            gl.enableVertexAttribArray(att)
+            gl.vertexAttribPointer(
+                att,
+                def.dimension,
+                gl.FLOAT,
+                false,
+                this.stride,
+                offsetDestination
+            )
+            gl.vertexAttribDivisor(att, def.divisor)
+            const bytes = def.dimension * def.bytesPerElement
+            offsetDestination += bytes
+        }
+    }
+
     set(attribName: keyof T, value: ArrayBuffer) {
         if (isObject(value) && value.buffer instanceof ArrayBuffer) {
             value = value.buffer
@@ -106,25 +135,26 @@ class Data<T extends { [key: string]: DataAttribute | number }> {
     }
 }
 
-export function makeData<T extends { [key: string]: DataAttribute | number }>(
-    def: T
-): Data<typeof def> {
-    return new Data<typeof def>(def)
-}
-
-function makeDataDefinition(attribute: DataAttribute | number): DataDefinition {
-    const dataDef: DataAttribute =
+function makeDataDefinition(
+    attribute: Partial<TgdAttribute> | number
+): TgdAttributeDefinition {
+    const dataDef: TgdAttribute =
         typeof attribute === "number"
             ? {
                   dimension: attribute,
                   type: "float",
+                  divisor: 0,
               }
-            : attribute
+            : {
+                  type: "float",
+                  dimension: 1,
+                  divisor: 0,
+                  ...attribute,
+              }
 
     switch (dataDef.type) {
         case "float":
             return makeDataDefinitionFloat(dataDef)
-            break
         default:
             throw Error(
                 `Unable to create a Data for an attribute of type "${dataDef.type}"!`
@@ -132,10 +162,13 @@ function makeDataDefinition(attribute: DataAttribute | number): DataDefinition {
     }
 }
 
-function makeDataDefinitionFloat(dataDef: DataAttribute): DataDefinition {
+function makeDataDefinitionFloat(
+    dataDef: TgdAttribute
+): TgdAttributeDefinition {
     const bytesPerElement = Float32Array.BYTES_PER_ELEMENT
     return {
         dimension: dataDef.dimension,
+        divisor: dataDef.divisor,
         bytesPerElement,
         getter(view: DataView, byteOffset: number) {
             return view.getFloat32(byteOffset)

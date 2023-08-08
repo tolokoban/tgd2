@@ -44,7 +44,6 @@ var Resources = (function () {
         var _a = this, bag = _a.bag, gl = _a.gl;
         var shader = bag.shaders.add("".concat(type, "\n").concat(key), function () {
             var newShader = gl.createShader(type === "vertex" ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER);
-            console.log("\uD83D\uDE80 [resources] newShader(".concat(type, ") = "), newShader);
             if (!newShader)
                 throw Error("Unable to create a Vertex Shader handle!");
             gl.shaderSource(newShader, code);
@@ -69,7 +68,6 @@ var Resources = (function () {
             return newPrg;
         });
         var vertShader = this.createShader("vertex", code.vert, key);
-        console.log("🚀 [resources] vertShader = ", vertShader);
         gl.attachShader(prg, vertShader);
         var fragShader = this.createShader("fragment", code.frag, key);
         gl.attachShader(prg, fragShader);

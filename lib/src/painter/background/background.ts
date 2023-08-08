@@ -1,7 +1,7 @@
 import { TgdPainter } from "../painter"
-import { makeData } from "../../data"
 import Resources from "../../scene/resources"
 import { TgdScene } from "../../scene"
+import { TgdAttributes } from "../../attributes"
 
 export interface TgdPainterBackgroundOptions {
     image: HTMLImageElement | HTMLCanvasElement
@@ -59,14 +59,17 @@ export class TgdPainterBackground implements TgdPainter {
         this.uniScroll = scene.getUniformLocation(this.program, "uniScroll")
         this.uniZ = scene.getUniformLocation(this.program, "uniZ")
         this.uniTexture = scene.getUniformLocation(this.program, "uniTexture")
-        const data = makeData({
+        const attributes = new TgdAttributes({
             attPoint: 2,
-            attUV: 2,
+            attUV666: 2,
         })
-        data.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]))
-        data.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-        data.sendToArrayBuffer(scene.gl, this.buffer, 4, false)
-        this.vao = createVAO(scene.gl, this.program, this.buffer)
+        attributes.set(
+            "attPoint",
+            new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
+        )
+        attributes.set("attUV666", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
+        attributes.sendToArrayBuffer(scene.gl, this.buffer, 4, false)
+        this.vao = createVAO(scene.gl, this.program, this.buffer, attributes)
     }
 
     destroy(): void {
@@ -114,20 +117,22 @@ export class TgdPainterBackground implements TgdPainter {
 function createVAO(
     gl: WebGL2RenderingContext,
     prg: WebGLProgram,
-    buffVert: WebGLBuffer
+    buffVert: WebGLBuffer,
+    attributes: TgdAttributes<any>
 ): WebGLVertexArrayObject {
     const vao = gl.createVertexArray()
     if (!vao) throw Error("Unable to create a WebGLVertexArrayObject!")
     gl.bindVertexArray(vao)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffVert)
-    const $attPoint = gl.getAttribLocation(prg, "attPoint") // float attPoint[2]
-    gl.enableVertexAttribArray($attPoint)
-    gl.vertexAttribPointer($attPoint, 2, gl.FLOAT, false, 16, 0)
-    gl.vertexAttribDivisor($attPoint, 0)
-    const $attUV = gl.getAttribLocation(prg, "attUV") // float attUV[2]
-    gl.enableVertexAttribArray($attUV)
-    gl.vertexAttribPointer($attUV, 2, gl.FLOAT, false, 16, 8)
-    gl.vertexAttribDivisor($attUV, 0)
+    attributes.define(gl, prg)
+    // const $attPoint = gl.getAttribLocation(prg, "attPoint") // float attPoint[2]
+    // gl.enableVertexAttribArray($attPoint)
+    // gl.vertexAttribPointer($attPoint, 2, gl.FLOAT, false, 16, 0)
+    // gl.vertexAttribDivisor($attPoint, 0)
+    // const $attUV = gl.getAttribLocation(prg, "attUV") // float attUV[2]
+    // gl.enableVertexAttribArray($attUV)
+    // gl.vertexAttribPointer($attUV, 2, gl.FLOAT, false, 16, 8)
+    // gl.vertexAttribDivisor($attUV, 0)
     gl.bindVertexArray(null)
     return vao
 }

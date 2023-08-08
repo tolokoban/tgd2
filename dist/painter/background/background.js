@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import { makeData } from "../../data";
+import { TgdAttributes } from "../../attributes";
 var TgdPainterBackground = (function () {
     function TgdPainterBackground(scene, options) {
         this.scene = scene;
@@ -36,14 +36,14 @@ var TgdPainterBackground = (function () {
         this.uniScroll = scene.getUniformLocation(this.program, "uniScroll");
         this.uniZ = scene.getUniformLocation(this.program, "uniZ");
         this.uniTexture = scene.getUniformLocation(this.program, "uniTexture");
-        var data = makeData({
+        var attributes = new TgdAttributes({
             attPoint: 2,
-            attUV: 2,
+            attUV666: 2,
         });
-        data.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]));
-        data.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]));
-        data.sendToArrayBuffer(scene.gl, this.buffer, 4, false);
-        this.vao = createVAO(scene.gl, this.program, this.buffer);
+        attributes.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]));
+        attributes.set("attUV666", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]));
+        attributes.sendToArrayBuffer(scene.gl, this.buffer, 4, false);
+        this.vao = createVAO(scene.gl, this.program, this.buffer, attributes);
     }
     TgdPainterBackground.prototype.destroy = function () {
         var res = this.res;
@@ -76,20 +76,13 @@ var TgdPainterBackground = (function () {
     return TgdPainterBackground;
 }());
 export { TgdPainterBackground };
-function createVAO(gl, prg, buffVert) {
+function createVAO(gl, prg, buffVert, attributes) {
     var vao = gl.createVertexArray();
     if (!vao)
         throw Error("Unable to create a WebGLVertexArrayObject!");
     gl.bindVertexArray(vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffVert);
-    var $attPoint = gl.getAttribLocation(prg, "attPoint");
-    gl.enableVertexAttribArray($attPoint);
-    gl.vertexAttribPointer($attPoint, 2, gl.FLOAT, false, 16, 0);
-    gl.vertexAttribDivisor($attPoint, 0);
-    var $attUV = gl.getAttribLocation(prg, "attUV");
-    gl.enableVertexAttribArray($attUV);
-    gl.vertexAttribPointer($attUV, 2, gl.FLOAT, false, 16, 8);
-    gl.vertexAttribDivisor($attUV, 0);
+    attributes.define(gl, prg);
     gl.bindVertexArray(null);
     return vao;
 }
