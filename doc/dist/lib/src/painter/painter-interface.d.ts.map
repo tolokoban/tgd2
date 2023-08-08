@@ -1,1 +1,0 @@
-{"version":3,"file":"painter-interface.d.ts","sourceRoot":"","sources":["../../../../../lib/src/painter/painter-interface.ts"],"names":[],"mappings":"AAEA,MAAM,WAAW,gBAAgB;IAC7B,OAAO,IAAI,IAAI,CAAA;IACf,KAAK,CAAC,IAAI,EAAE,MAAM,EAAE,KAAK,EAAE,MAAM,GAAG,IAAI,CAAA;IACxC,MAAM,CAAC,IAAI,EAAE,MAAM,EAAE,KAAK,EAAE,MAAM,GAAG,IAAI,CAAA;CAC5C"}
