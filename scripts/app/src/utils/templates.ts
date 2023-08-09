@@ -1,33 +1,4 @@
-    /**
-     * WARNING! this file has been generated automatically.
-     * Please do not edit it because it will probably be overwritten.
-     * 2023-08-09T14:20:32.562Z
-     */
-    import React from "react"
-    import Layout0 from "./layout"
-    import Loading0 from "./loading"
-    import Loading1 from "./painter/loading"
-    
-    const Page0 = React.lazy(() => import("./"))
-    const Page1 = React.lazy(() => import("./painter"))
-    const Page2 = React.lazy(() => import("./painter/background"))
-    const Page3 = React.lazy(() => import("./painter/logic"))
-    const Page4 = React.lazy(() => import("./scene"))
-    
-    export default function App() {
-        return (
-            <Layout0>
-                <Route path="/" element={<Page0 />} fallback={<Loading0 />}>
-                    <Route path="/painter" element={<Page1 />} fallback={<Loading1 />}>
-                        <Route path="/painter/background" element={<Page2 />} fallback={<Loading1 />} />
-                        <Route path="/painter/logic" element={<Page3 />} fallback={<Loading1 />} />
-                    </Route>
-                    <Route path="/scene" element={<Page4 />} fallback={<Loading0 />} />
-                </Route>
-            </Layout0>
-        )
-    }
-    
+export const ROUTES_CODE = `
 function useHash() {
     const [hash, setHash] = React.useState(
         extractHash(window.location.toString())
@@ -39,7 +10,7 @@ function useHash() {
             const absHash = ensureAbsoluteHash(newHash, oldHash)
             if (absHash !== newHash) {
                 console.log(">>>", absHash)
-                history.replaceState({}, "", `#${absHash}`)
+                history.replaceState({}, "", \`#$\{absHash}\`)
             }
             setHash(absHash)
         }
@@ -71,7 +42,7 @@ function ensureAbsoluteHash(newHash: string, oldHash: string) {
             path.push(item)
         }
     }
-    return `/${path.join("/")}`
+    return \`/$\{path.join("/")}\`
 }
 
 interface HashMatch {
@@ -105,3 +76,4 @@ function Route({ path, element, fallback, children }: RouteProps) {
     }
     return <>{children}</>
 }
+`

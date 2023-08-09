@@ -31,7 +31,8 @@ export async function saveTextIfNew(
     content: string
 ): Promise<boolean> {
     if (existsSync(path)) return false
-    await FS.writeFile(path, content, { encoding: "utf-8" })
+
+    await saveText(path, content)
     return true
 }
 
@@ -45,7 +46,6 @@ export async function saveText(path: string, content: string): Promise<void> {
 
 export async function listDirs(path: string): Promise<string[]> {
     const files = await FS.readdir(path, { withFileTypes: true })
-    const [f] = files
     return files
         .filter(f => f.isDirectory())
         .map(f => f.name)
