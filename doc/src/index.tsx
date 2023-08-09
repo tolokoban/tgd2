@@ -12,6 +12,12 @@ function start() {
 
     const root = createRoot(container)
     root.render(<App />)
+
+    const splash = document.getElementById("splash-screen")
+    if (!splash) throw Error("Unable to find element #splash-screen!")
+
+    splash.classList.add("vanish")
+    window.setTimeout(() => splash.parentNode?.removeChild(splash), 1000)
 }
 
 start()

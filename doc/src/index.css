@@ -7,3 +7,25 @@ body {
     background-color: var(--theme-color-neutral);
     color: var(--theme-color-on-neutral);
 }
+
+a,
+a:visited {
+    color: var(--theme-color-secondary-2);
+    text-decoration-color: var(--theme-color-secondary-2-4);
+    text-decoration-thickness: 1px;
+}
+
+a:hover,
+a:active {
+    text-decoration-color: var(--theme-color-secondary-2);
+    text-decoration-thickness: 2px;
+}
+
+#splash-screen {
+    transition: all 1s;
+    pointer-events: none;
+}
+
+#splash-screen.vanish {
+    opacity: 0;
+}

@@ -65,7 +65,7 @@ export class TgdAttributes<
         return this.buffer
     }
 
-    sendToArrayBuffer(
+    update(
         gl: WebGL2RenderingContext,
         buffer: WebGLBuffer,
         verticesCount: number,

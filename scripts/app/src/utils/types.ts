@@ -13,6 +13,7 @@ export interface Route {
     page?: "tsx" | "mdx"
     layout: boolean
     loading: boolean
+    template: boolean
     children: Route[]
     parent?: Route
 }

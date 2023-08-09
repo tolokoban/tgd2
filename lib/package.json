@@ -6,8 +6,10 @@
     "scripts": {
         "build": "tsc --build --force --verbose --pretty",
         "postbuild": "shx cp ./package.lib.json ../dist/package.json && shx cp ../README.md ../LICENSE ../dist/",
-        "start": "tsc --build --pretty --force --watch",
-        "test": "jest"
+        "start": "tsc-watch --build --pretty --force",
+        "test": "jest",
+        "prestart": "tsc -p ../scripts/shaders/tsconfig.json && npm run shaders &",
+        "shaders": "node ../scripts/shaders/dist/shaders.js ./src"
     },
     "repository": {
         "type": "git",
@@ -43,5 +45,8 @@
             "last 3 firefox version",
             "last 3 safari version"
         ]
+    },
+    "dependencies": {
+        "tsc-watch": "^6.0.4"
     }
 }

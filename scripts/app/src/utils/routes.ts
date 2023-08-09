@@ -48,6 +48,7 @@ export async function browseRoutes(
         name: parent ? Path.join(parent.name, basename) : "/",
         layout: exists(path, "layout.tsx"),
         loading: exists(path, "loading.tsx"),
+        template: exists(path, "template.tsx"),
         children: [],
         parent,
     }
@@ -86,7 +87,7 @@ function exists(path: string, filename: string): boolean {
 }
 
 export async function generateRoutes(rootPath: string, routes: Route[]) {
-    const [firstRoute, ...restOfRoutes] = routes
+    const [firstRoute] = routes
     await saveText(
         Path.resolve(rootPath, "index.tsx"),
         codeToString([
@@ -110,14 +111,23 @@ export async function generateRoutes(rootPath: string, routes: Route[]) {
                             "loading"
                         )}"`
                 ),
+            ...routes
+                .filter(({ template }) => Boolean(template))
+                .map(
+                    ({ id, path }) =>
+                        `import Template${id} from "./${Path.join(
+                            Path.relative(rootPath, path),
+                            "template"
+                        )}"`
+                ),
             "",
             ...routes.map(
                 route =>
                     `const Page${
                         route.id
-                    } = React.lazy(() => import("./${Path.relative(
-                        rootPath,
-                        route.path
+                    } = React.lazy(() => import("./${Path.join(
+                        Path.relative(rootPath, route.path),
+                        pageName(route)
                     )}"))`
             ),
             "",
@@ -127,31 +137,6 @@ export async function generateRoutes(rootPath: string, routes: Route[]) {
             ROUTES_CODE,
         ])
     )
-    for (const route of restOfRoutes) {
-        const layouts: string[] = findLayoutsPathesInHierarchy(route)
-        await saveText(
-            Path.resolve(route.path, "index.tsx"),
-            codeToString([
-                ...DISCLAIMER,
-                ...(layouts.length === 0
-                    ? [`export { default } from "./${pageName(route)}"`]
-                    : [
-                          `import Content from "./${pageName(route)}"`,
-                          ...layouts.map(
-                              (layoutPath, index) =>
-                                  `import Layout${index} from "${Path.join(
-                                      Path.relative(route.path, layoutPath),
-                                      "layout"
-                                  )}"`
-                          ),
-                          "",
-                          "export default function Page() {",
-                          ["return (", embedLayouts(layouts), ")"],
-                          "}",
-                      ]),
-            ])
-        )
-    }
 }
 
 function pageName(route: Route): string {
@@ -161,27 +146,22 @@ function pageName(route: Route): string {
     return `page.${extension}`
 }
 
-function embedLayouts(layouts: string[]): CodeSection {
-    let code: CodeSection = "<Content />"
-    while (layouts.length > 0) {
-        layouts.pop()
-        const level = layouts.length
-        code = [`<Layout${level}>`, [code], `</Layout${level}>`]
-    }
-    return code
-}
-
-function findLayoutsPathesInHierarchy(route: Route): string[] {
-    const pathes: string[] = []
-    let current: Route | undefined = route
-    while (current) {
-        if (current.layout) pathes.push(current.path)
-        current = current.parent
-    }
-    return pathes
-}
-
 function createRoutesTree(route: Route): CodeSection {
+    const loading = getLoading(route)
+    const template = getTemplate(route)
+    const routeCode = `Route path="${route.name}" Page={Page${route.id}}${
+        route.layout ? ` Layout={Layout${route.id}}` : ""
+    }${template ? ` Template={${template}}` : ""} fallback={${loading}}`
+    return route.children.length > 0
+        ? [
+              `<${routeCode}>`,
+              ...route.children.map(createRoutesTree),
+              `</Route>`,
+          ]
+        : [`<${routeCode} />`]
+}
+
+function getLoading(route: Route) {
     let loading = `<div>Loading...</div>`
     let current: Route | undefined = route
     while (current) {
@@ -191,19 +171,18 @@ function createRoutesTree(route: Route): CodeSection {
         }
         current = current.parent
     }
-    const content: CodeSection =
-        route.children.length > 0
-            ? [
-                  `<Route path="${route.name}" element={<Page${route.id} />} fallback={${loading}}>`,
-                  ...route.children.map(createRoutesTree),
-                  `</Route>`,
-              ]
-            : [
-                  `<Route path="${route.name}" element={<Page${route.id} />} fallback={${loading}} />`,
-              ]
-    if (route.layout) {
-        return [`<Layout${route.id}>`, content, `</Layout${route.id}>`]
-    } else {
-        return content
+    return loading
+}
+
+function getTemplate(route: Route) {
+    let template: string | null = null
+    let current: Route | undefined = route
+    while (current) {
+        if (current.template) {
+            template = `Template${current.id}`
+            break
+        }
+        current = current.parent
     }
+    return template
 }

@@ -6,7 +6,9 @@
         "build": "webpack --mode=production",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d ./build",
-        "start": "webpack serve --mode=development"
+        "prestart": "npm run routes &",
+        "start": "webpack serve --mode=development",
+        "routes": "tsc -p ../scripts/app/tsconfig.json && node ../scripts/app/dist/generate.js ./src/app"
     },
     "dependencies": {
         "@tolokoban/react-state": "^0.1.0",

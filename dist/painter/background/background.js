@@ -10,6 +10,8 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import { TgdAttributes } from "../../attributes";
+import VERT from "./background.vert";
+import FRAG from "./background.frag";
 var TgdPainterBackground = (function () {
     function TgdPainterBackground(scene, options) {
         this.scene = scene;
@@ -42,7 +44,7 @@ var TgdPainterBackground = (function () {
         });
         attributes.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]));
         attributes.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]));
-        attributes.sendToArrayBuffer(scene.gl, this.buffer, 4, false);
+        attributes.update(scene.gl, this.buffer, 4, false);
         this.vao = createVAO(scene.gl, this.program, this.buffer, attributes);
     }
     TgdPainterBackground.prototype.destroy = function () {
@@ -86,6 +88,6 @@ function createVAO(gl, prg, buffVert, attributes) {
     gl.bindVertexArray(null);
     return vao;
 }
-var VERT = "#version 300 es\n\nuniform vec2 uniScale;\nuniform vec2 uniScroll;\nuniform float uniZ;\nin vec2 attPoint;\nin vec2 attUV;\nout vec2 varUV;\n\nvoid main() {\n    varUV = attUV + uniScroll;\n    float x = uniScale.x * attPoint.x;\n    float y = uniScale.y * attPoint.y;\n    gl_Position = vec4(x, y, uniZ, 1.0);\n}";
-var FRAG = "#version 300 es\n\nprecision mediump float;\n\nuniform sampler2D uniTexture;\nin vec2 varUV;\nout vec4 FragColor;\n\nvoid main() {\n    FragColor = texture(uniTexture, varUV);\n}";
+var _VERT = "#version 300 es\n\nuniform vec2 uniScale;\nuniform vec2 uniScroll;\nuniform float uniZ;\nin vec2 attPoint;\nin vec2 attUV;\nout vec2 varUV;\n\nvoid main() {\n    varUV = attUV + uniScroll;\n    float x = uniScale.x * attPoint.x;\n    float y = uniScale.y * attPoint.y;\n    gl_Position = vec4(x, y, uniZ, 1.0);\n}";
+var _FRAG = "#version 300 es\n\nprecision mediump float;\n\nuniform sampler2D uniTexture;\nin vec2 varUV;\nout vec4 FragColor;\n\nvoid main() {\n    FragColor = texture(uniTexture, varUV);\n}";
 //# sourceMappingURL=background.js.map

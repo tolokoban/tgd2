@@ -64,16 +64,31 @@ interface RouteProps {
     element?: JSX.Element
     fallback?: JSX.Element
     children?: React.ReactNode
+    Page?: React.FC<{}>
+    Layout?: React.FC<{ children: React.ReactNode }>
+    Template?: React.FC<{ children: React.ReactNode }>
 }
 
-function Route({ path, element, fallback, children }: RouteProps) {
+function Route({ path, fallback, children, Page, Layout, Template }: RouteProps) {
     const hash = useHash()
     const m = match(hash, path)
     if (!m) return null
 
     if (m.full) {
+        if (!Page) return null
+        
+        const element = Template ? <Template><Page /></Template> : <Page />
+        if (Layout) {
+            return (
+                <Layout>
+                    <React.Suspense fallback={fallback}>
+                        {element}
+                    </React.Suspense>
+                </Layout>
+            )
+        }
         return <React.Suspense fallback={fallback}>{element}</React.Suspense>
     }
-    return <>{children}</>
+    return Layout ? <Layout>{children}</Layout> : <>{children}</>
 }
 `

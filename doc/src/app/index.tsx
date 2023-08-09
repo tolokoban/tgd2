@@ -1,30 +1,31 @@
     /**
      * WARNING! this file has been generated automatically.
      * Please do not edit it because it will probably be overwritten.
-     * 2023-08-09T14:20:32.562Z
+     * 2023-08-09T19:54:45.819Z
      */
     import React from "react"
     import Layout0 from "./layout"
+    import Layout2 from "./painter/layout"
     import Loading0 from "./loading"
-    import Loading1 from "./painter/loading"
+    import Template0 from "./template"
     
-    const Page0 = React.lazy(() => import("./"))
-    const Page1 = React.lazy(() => import("./painter"))
-    const Page2 = React.lazy(() => import("./painter/background"))
-    const Page3 = React.lazy(() => import("./painter/logic"))
-    const Page4 = React.lazy(() => import("./scene"))
+    const Page0 = React.lazy(() => import("./page.mdx"))
+    const Page1 = React.lazy(() => import("./attributes/page.mdx"))
+    const Page2 = React.lazy(() => import("./painter/page.mdx"))
+    const Page3 = React.lazy(() => import("./painter/background/page.mdx"))
+    const Page4 = React.lazy(() => import("./painter/logic/page.mdx"))
+    const Page5 = React.lazy(() => import("./scene/page.mdx"))
     
     export default function App() {
         return (
-            <Layout0>
-                <Route path="/" element={<Page0 />} fallback={<Loading0 />}>
-                    <Route path="/painter" element={<Page1 />} fallback={<Loading1 />}>
-                        <Route path="/painter/background" element={<Page2 />} fallback={<Loading1 />} />
-                        <Route path="/painter/logic" element={<Page3 />} fallback={<Loading1 />} />
-                    </Route>
-                    <Route path="/scene" element={<Page4 />} fallback={<Loading0 />} />
+            <Route path="/" Page={Page0} Layout={Layout0} Template={Template0} fallback={<Loading0 />}>
+                <Route path="/attributes" Page={Page1} Template={Template0} fallback={<Loading0 />} />
+                <Route path="/painter" Page={Page2} Layout={Layout2} Template={Template0} fallback={<Loading0 />}>
+                    <Route path="/painter/background" Page={Page3} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/logic" Page={Page4} Template={Template0} fallback={<Loading0 />} />
                 </Route>
-            </Layout0>
+                <Route path="/scene" Page={Page5} Template={Template0} fallback={<Loading0 />} />
+            </Route>
         )
     }
     
@@ -93,15 +94,30 @@ interface RouteProps {
     element?: JSX.Element
     fallback?: JSX.Element
     children?: React.ReactNode
+    Page?: React.FC<{}>
+    Layout?: React.FC<{ children: React.ReactNode }>
+    Template?: React.FC<{ children: React.ReactNode }>
 }
 
-function Route({ path, element, fallback, children }: RouteProps) {
+function Route({ path, fallback, children, Page, Layout, Template }: RouteProps) {
     const hash = useHash()
     const m = match(hash, path)
     if (!m) return null
 
     if (m.full) {
+        if (!Page) return null
+        
+        const element = Template ? <Template><Page /></Template> : <Page />
+        if (Layout) {
+            return (
+                <Layout>
+                    <React.Suspense fallback={fallback}>
+                        {element}
+                    </React.Suspense>
+                </Layout>
+            )
+        }
         return <React.Suspense fallback={fallback}>{element}</React.Suspense>
     }
-    return <>{children}</>
+    return Layout ? <Layout>{children}</Layout> : <>{children}</>
 }

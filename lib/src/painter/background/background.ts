@@ -2,6 +2,8 @@ import { TgdPainter } from "../painter"
 import Resources from "../../scene/resources"
 import { TgdScene } from "../../scene"
 import { TgdAttributes } from "../../attributes"
+import VERT from "./background.vert"
+import FRAG from "./background.frag"
 
 export interface TgdPainterBackgroundOptions {
     image: HTMLImageElement | HTMLCanvasElement
@@ -68,7 +70,7 @@ export class TgdPainterBackground implements TgdPainter {
             new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
         )
         attributes.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-        attributes.sendToArrayBuffer(scene.gl, this.buffer, 4, false)
+        attributes.update(scene.gl, this.buffer, 4, false)
         this.vao = createVAO(scene.gl, this.program, this.buffer, attributes)
     }
 
@@ -137,7 +139,7 @@ function createVAO(
     return vao
 }
 
-const VERT = `#version 300 es
+const _VERT = `#version 300 es
 
 uniform vec2 uniScale;
 uniform vec2 uniScroll;
@@ -153,7 +155,7 @@ void main() {
     gl_Position = vec4(x, y, uniZ, 1.0);
 }`
 
-const FRAG = `#version 300 es
+const _FRAG = `#version 300 es
 
 precision mediump float;
 

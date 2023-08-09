@@ -1,0 +1,10 @@
+# TgdAttributes
+
+WebGL2 peut dessiner des points, des lignes et des triangles à partir d'une
+liste de **vertex**. Pour un triangle, par exemple, il faudra utiliser trois
+vertex.
+
+Les coordonnées de ces vertex `(x, y, z, w)` ne sont pas définies directement.
+Elles sont calculées par une fonction qui prend, en entrée, une liste de données
+que l'on appelle les **attributs** du vertex. Et toutes ce données sont
+enchaînées bout à bout dans un tableau linéaire.
