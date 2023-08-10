@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[950],{950:(n,s,e)=>{e.r(s),e.d(s,{default:()=>r});var c=e(893);function t(n){const s=Object.assign({h1:"h1"},n.components);return(0,c.jsx)(s.h1,{children:"TgdPainterLogic"})}const r=function(n={}){const{wrapper:s}=n.components||{};return s?(0,c.jsx)(s,Object.assign({},n,{children:(0,c.jsx)(t,n)})):t(n)}}}]);
