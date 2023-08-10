@@ -1,0 +1,7 @@
+{
+    name: "TgdScene Demo",
+    params: {
+        name: "Demo's name",
+    },
+    open: "{{name}}.demo/{{name}}.demo.tsx",
+}

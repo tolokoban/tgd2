@@ -1,3 +1,14 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,6 +59,20 @@ var TgdScene = (function () {
         this.lastCanvasHeight = 0;
         this.lastTime = -1;
         this._screenRatio = 1;
+        this.requestAnimationFrame = 0;
+        this.requestFullscreen = function (options) {
+            return _this.canvas.requestFullscreen(__assign({ navigationUI: "hide" }, options));
+        };
+        this.toggleFullscreen = function (options) {
+            if (document.fullscreenElement) {
+                return document.exitFullscreen();
+            }
+            return _this.requestFullscreen(options);
+        };
+        this.paint = function () {
+            window.cancelAnimationFrame(_this.requestAnimationFrame);
+            _this.requestAnimationFrame = window.requestAnimationFrame(_this.actualPaint);
+        };
         this.actualPaint = function (time) {
             var _a = _this, gl = _a.gl, lastCanvasWidth = _a.lastCanvasWidth, lastCanvasHeight = _a.lastCanvasHeight, lastTime = _a.lastTime;
             if (lastTime < 0) {
@@ -81,6 +106,8 @@ var TgdScene = (function () {
         this.gl = gl;
         this.asset = new Asset();
         this.texture = new TextureHelper(gl);
+        var observer = new ResizeObserver(this.paint);
+        observer.observe(canvas);
     }
     TgdScene.prototype.getResources = function (id) {
         return Resources.make(this.gl, id);
@@ -144,9 +171,6 @@ var TgdScene = (function () {
                 return [2];
             });
         });
-    };
-    TgdScene.prototype.paint = function () {
-        window.requestAnimationFrame(this.actualPaint);
     };
     TgdScene.prototype.destroy = function () {
         this.painters.destroy();

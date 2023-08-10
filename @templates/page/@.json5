@@ -1,0 +1,6 @@
+{
+    name: "Page",
+    params: {
+        name: "Component's name",
+    },
+}

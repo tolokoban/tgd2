@@ -15,6 +15,7 @@ export class TgdScene {
     private lastCanvasHeight = 0
     private lastTime = -1
     private _screenRatio = 1
+    private requestAnimationFrame = 0
 
     constructor(
         public readonly canvas: HTMLCanvasElement,
@@ -26,6 +27,23 @@ export class TgdScene {
         this.gl = gl
         this.asset = new Asset()
         this.texture = new TextureHelper(gl)
+        // Repaint if the size has changed.
+        const observer = new ResizeObserver(this.paint)
+        observer.observe(canvas)
+    }
+
+    readonly requestFullscreen = (options?: FullscreenOptions) => {
+        return this.canvas.requestFullscreen({
+            navigationUI: "hide",
+            ...options,
+        })
+    }
+
+    readonly toggleFullscreen = (options?: FullscreenOptions) => {
+        if (document.fullscreenElement) {
+            return document.exitFullscreen()
+        }
+        return this.requestFullscreen(options)
     }
 
     getResources(id: string) {
@@ -71,8 +89,11 @@ export class TgdScene {
         }
     }
 
-    paint() {
-        window.requestAnimationFrame(this.actualPaint)
+    readonly paint = () => {
+        window.cancelAnimationFrame(this.requestAnimationFrame)
+        this.requestAnimationFrame = window.requestAnimationFrame(
+            this.actualPaint
+        )
     }
 
     private readonly actualPaint = (time: number) => {

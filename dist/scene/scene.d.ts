@@ -13,7 +13,10 @@ export declare class TgdScene {
     private lastCanvasHeight;
     private lastTime;
     private _screenRatio;
+    private requestAnimationFrame;
     constructor(canvas: HTMLCanvasElement, options?: WebGLContextAttributes);
+    readonly requestFullscreen: (options?: FullscreenOptions) => Promise<void>;
+    readonly toggleFullscreen: (options?: FullscreenOptions) => Promise<void>;
     getResources(id: string): Resources;
     getUniformLocation(program: WebGLProgram, name: string): WebGLUniformLocation;
     get screenRatio(): number;
@@ -23,7 +26,7 @@ export declare class TgdScene {
     get animate(): boolean;
     set animate(value: boolean);
     addPainter(...painters: TgdPainter[]): Promise<void>;
-    paint(): void;
+    readonly paint: () => void;
     private readonly actualPaint;
     destroy(): void;
 }

@@ -1,7 +1,7 @@
     /**
      * WARNING! this file has been generated automatically.
      * Please do not edit it because it will probably be overwritten.
-     * 2023-08-09T19:54:45.819Z
+     * 2023-08-10T08:59:27.114Z
      */
     import React from "react"
     import Layout0 from "./layout"
@@ -13,8 +13,9 @@
     const Page1 = React.lazy(() => import("./attributes/page.mdx"))
     const Page2 = React.lazy(() => import("./painter/page.mdx"))
     const Page3 = React.lazy(() => import("./painter/background/page.mdx"))
-    const Page4 = React.lazy(() => import("./painter/logic/page.mdx"))
-    const Page5 = React.lazy(() => import("./scene/page.mdx"))
+    const Page4 = React.lazy(() => import("./painter/clear/page.mdx"))
+    const Page5 = React.lazy(() => import("./painter/logic/page.mdx"))
+    const Page6 = React.lazy(() => import("./scene/page.mdx"))
     
     export default function App() {
         return (
@@ -22,9 +23,10 @@
                 <Route path="/attributes" Page={Page1} Template={Template0} fallback={<Loading0 />} />
                 <Route path="/painter" Page={Page2} Layout={Layout2} Template={Template0} fallback={<Loading0 />}>
                     <Route path="/painter/background" Page={Page3} Template={Template0} fallback={<Loading0 />} />
-                    <Route path="/painter/logic" Page={Page4} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/clear" Page={Page4} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/logic" Page={Page5} Template={Template0} fallback={<Loading0 />} />
                 </Route>
-                <Route path="/scene" Page={Page5} Template={Template0} fallback={<Loading0 />} />
+                <Route path="/scene" Page={Page6} Template={Template0} fallback={<Loading0 />} />
             </Route>
         )
     }
