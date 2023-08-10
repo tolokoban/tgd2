@@ -80,8 +80,9 @@ export default class Resources {
         const { bag, gl } = this
         const prg = bag.programs.add(key, () => {
             const newPrg = gl.createProgram()
-            if (!newPrg)
+            if (!newPrg) {
                 throw Error(`Unable to create a WebGL program "${key}"!`)
+            }
 
             return newPrg
         })
@@ -91,7 +92,12 @@ export default class Resources {
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+            console.log("Vertex Shader:")
+            console.log(`%c${code.vert}`, "font-family:monospace;font-size:80%")
+            console.log("Fragment Shader:")
+            console.log(`%c${code.frag}`, "font-family:monospace;font-size:80%")
             var info = gl.getProgramInfoLog(prg)
+            console.warn(info)
             throw new Error("Could NOT link WebGL2 program!\n" + info)
         }
         return prg

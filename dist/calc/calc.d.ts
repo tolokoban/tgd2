@@ -20,3 +20,5 @@ export declare function computeBoundingBox(points: Vector3[]): {
 };
 export declare function crossProduct(vecA: Vector3, vecB: Vector3): Vector3;
 export declare function clamp(value: number, min: number, max: number): number;
+export declare function range(size: number, transfo?: (value: number) => number): number[];
+export declare function intervals(from: number, to: number, count: number): number[];

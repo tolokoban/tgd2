@@ -1,10 +1,14 @@
-export interface TgdAttribute {
+export interface TgdTypeAttribute {
     type: "float"
     dimension: number
     divisor: number
 }
 
-interface TgdAttributeDefinition {
+export type TgdTypeAttributesDefinitions = {
+    [key: string]: Partial<TgdTypeAttribute> | number
+}
+
+interface AttributeInternalRepresentation {
     dimension: number
     divisor: number
     bytesPerElement: number
@@ -12,27 +16,68 @@ interface TgdAttributeDefinition {
     setter(view: DataView, byteOffset: number, value: number): void
 }
 
-export class TgdAttributes<
-    T extends { [key: string]: Partial<TgdAttribute> | number }
-> {
+interface AttributesInternalRepresentations {
+    [attribName: string]: AttributeInternalRepresentation
+}
+
+export class TgdAttributes<T extends TgdTypeAttributesDefinitions> {
     public readonly stride: number
     private buffer: ArrayBuffer | undefined = undefined
     private readonly data: { [key: string]: ArrayBufferLike } = {}
-    private readonly definitions: { [key: string]: TgdAttributeDefinition }
+    private readonly definitions: AttributesInternalRepresentations
 
     constructor(def: T) {
         let stride = 0
         const data: { [key: string]: ArrayBuffer } = {}
-        const definitions: { [key: string]: TgdAttributeDefinition } = {}
+        const definitions: AttributesInternalRepresentations = {}
         for (const key of Object.keys(def)) {
             data[key] = new ArrayBuffer(0)
-            const dataDef: TgdAttributeDefinition = makeDataDefinition(def[key])
+            const dataDef = makeAttributeInternalRepresentation(def[key])
             definitions[key] = dataDef
             stride += dataDef.bytesPerElement * dataDef.dimension
         }
         this.data = data
         this.definitions = definitions
         this.stride = stride
+    }
+
+    /**
+     * @return List of the names of the attributes.
+     */
+    getNames(): (keyof T)[] {
+        return Object.keys(this.definitions)
+    }
+
+    getDefinitions(): TgdTypeAttributesDefinitions {
+        return structuredClone(this.definitions) as TgdTypeAttributesDefinitions
+    }
+
+    getAttribDef(
+        attribName: keyof T
+    ): AttributeInternalRepresentation | undefined {
+        const def = this.definitions[attribName as string]
+        return def
+            ? (structuredClone(def) as AttributeInternalRepresentation)
+            : undefined
+    }
+
+    getGlslType(attribName: keyof T) {
+        const name = attribName as string
+        const def = this.definitions[name]
+        if (!def) return `/* "${name}" not found! */`
+
+        switch (def.dimension) {
+            case 1:
+                return "float"
+            case 2:
+                return "vec2"
+            case 3:
+                return "vec3"
+            case 4:
+                return "vec4"
+            default:
+                return `/* Don't know how to deal with dimension ${def.dimension}! */`
+        }
     }
 
     get(verticesCount: number): ArrayBuffer {
@@ -135,10 +180,10 @@ export class TgdAttributes<
     }
 }
 
-function makeDataDefinition(
-    attribute: Partial<TgdAttribute> | number
-): TgdAttributeDefinition {
-    const dataDef: TgdAttribute =
+function makeAttributeInternalRepresentation(
+    attribute: Partial<TgdTypeAttribute> | number
+): AttributeInternalRepresentation {
+    const dataDef: TgdTypeAttribute =
         typeof attribute === "number"
             ? {
                   dimension: attribute,
@@ -163,8 +208,8 @@ function makeDataDefinition(
 }
 
 function makeDataDefinitionFloat(
-    dataDef: TgdAttribute
-): TgdAttributeDefinition {
+    dataDef: TgdTypeAttribute
+): AttributeInternalRepresentation {
     const bytesPerElement = Float32Array.BYTES_PER_ELEMENT
     return {
         dimension: dataDef.dimension,

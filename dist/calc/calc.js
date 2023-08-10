@@ -92,4 +92,24 @@ export function clamp(value, min, max) {
         return max;
     return value;
 }
+export function range(size, transfo) {
+    var arr = [];
+    if (transfo)
+        for (var k = 0; k < size; k++)
+            arr.push(transfo(k));
+    else
+        for (var k = 0; k < size; k++)
+            arr.push(k);
+    return arr;
+}
+export function intervals(from, to, count) {
+    var arr = [];
+    if (count < 1)
+        return arr;
+    var a = (to - from) / (count - 1);
+    for (var i = 0; i < count; i++) {
+        arr.push(from + i * a);
+    }
+    return arr;
+}
 //# sourceMappingURL=calc.js.map

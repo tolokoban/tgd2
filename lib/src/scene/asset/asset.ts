@@ -1,10 +1,10 @@
-import { TgdAssetImage } from "../../types"
+import { TgdTypeAssetImage } from "../../types"
 import RefMap from "../../ref-map"
 
 export default class Asset {
-    private readonly images = new RefMap<string, TgdAssetImage>()
+    private readonly images = new RefMap<string, TgdTypeAssetImage>()
 
-    createImage(src: string): TgdAssetImage {
+    createImage(src: string): TgdTypeAssetImage {
         const key = src
         return this.images.add(key, () => {
             const image = new Image()
@@ -22,7 +22,7 @@ export default class Asset {
         })
     }
 
-    destroyImage(asset: TgdAssetImage) {
+    destroyImage(asset: TgdTypeAssetImage) {
         this.images.delete(asset.key)
     }
 }

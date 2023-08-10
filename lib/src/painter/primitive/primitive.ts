@@ -1,50 +1,63 @@
-import { TgdPainter } from "../painter"
+import {
+    TgdScene,
+    TgdPainter,
+    TgdAttributes,
+    TgdTypeAttributesDefinitions,
+    TgdTypeWebGlDrawMode,
+} from "@"
 import Resources from "../../scene/resources"
-import { TgdScene } from "../../scene"
-import { TgdAttribute, TgdAttributes } from "../../attributes"
+import VERT from "./primitive.vert"
+import FRAG from "./primitive.frag"
 
-export interface TgdPainterPrimitive<
-    T extends { [key: string]: Partial<TgdAttribute> | number }
+export interface TgdPainterPrimitiveOptions<
+    T extends TgdTypeAttributesDefinitions
 > {
-    vertexShader: string
+    compute: string
     attributes: TgdAttributes<T>
+    mode?: TgdTypeWebGlDrawMode
+    red?: number
+    green?: number
+    blue?: number
+    alpha?: number
 }
 
-export class TgdPainterPrimitive<
-    T extends { [key: string]: Partial<TgdAttribute> | number }
-> implements TgdPainter
+export class TgdPainterPrimitive<T extends TgdTypeAttributesDefinitions>
+    implements TgdPainter
 {
     private readonly program: WebGLProgram
     private readonly buffer: WebGLBuffer
     private readonly res: Resources
     private readonly vao: WebGLVertexArrayObject
     private readonly uniColor: WebGLUniformLocation
+    private readonly attributes: TgdAttributes<T>
     private verticesCount = 0
 
     public red = 0.5
     public green = 0.5
     public blue = 0.5
     public alpha = 1
-    public mode: "TRIANGLES" | "TRIANGLE_STRIP" | "TRIANGLE_FAN" = "TRIANGLES"
+    public mode: TgdTypeWebGlDrawMode = "TRIANGLES"
 
     constructor(
         private readonly scene: TgdScene,
-        private readonly options: TgdPainterPrimitive<T>
+        options: TgdPainterPrimitiveOptions<T>
     ) {
-        this.res = scene.getResources("TgdPainterBackground")
+        const { attributes, compute, mode, red, green, blue, alpha } = options
+        this.red = red ?? 0.5
+        this.green = green ?? 0.5
+        this.blue = blue ?? 0.5
+        this.alpha = alpha ?? 1
+        this.attributes = attributes
+        this.mode = mode ?? "TRIANGLES"
+        attributes.getNames()
+        this.res = scene.getResources("TgdPainterPrimitive")
         this.buffer = this.res.createBuffer()
         this.program = this.res.createProgram({
-            vert: VERT,
+            vert: createVertexShaderCode(VERT, attributes, options.compute),
             frag: FRAG,
         })
         this.uniColor = scene.getUniformLocation(this.program, "uniColor")
-
-        this.vao = createVAO(
-            scene.gl,
-            this.program,
-            this.buffer,
-            options.attributes
-        )
+        this.vao = createVAO(scene.gl, this.program, this.buffer, attributes)
     }
 
     updateAttributes(verticesCount: number, dynamic = false) {
@@ -82,42 +95,29 @@ function createVAO(
     gl.bindVertexArray(vao)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffVert)
     attributes.define(gl, prg)
-    // const $attPoint = gl.getAttribLocation(prg, "attPoint") // float attPoint[2]
-    // gl.enableVertexAttribArray($attPoint)
-    // gl.vertexAttribPointer($attPoint, 2, gl.FLOAT, false, 16, 0)
-    // gl.vertexAttribDivisor($attPoint, 0)
-    // const $attUV = gl.getAttribLocation(prg, "attUV") // float attUV[2]
-    // gl.enableVertexAttribArray($attUV)
-    // gl.vertexAttribPointer($attUV, 2, gl.FLOAT, false, 16, 8)
-    // gl.vertexAttribDivisor($attUV, 0)
     gl.bindVertexArray(null)
     return vao
 }
 
-const VERT = `#version 300 es
+function createVertexShaderCode<T extends TgdTypeAttributesDefinitions>(
+    template: string,
+    attributes: TgdAttributes<T>,
+    vertexShaderFunction: string
+): string {
+    const codeIn = attributes
+        .getNames()
+        .map(name => {
+            return `in ${attributes.getGlslType(name)} ${name as string};`
+        })
+        .join("\n")
 
-uniform vec2 uniScale;
-uniform vec2 uniScroll;
-uniform float uniZ;
-in vec2 attPoint;
-in vec2 attUV;
-out vec2 varUV;
+    return template
+        .split("\n")
+        .map(rawLine => {
+            const line = rawLine.trim()
+            if (line !== "{{COMPUTE}}") return line
 
-void main() {
-    varUV = attUV + uniScroll;
-    float x = uniScale.x * attPoint.x;
-    float y = uniScale.y * attPoint.y;
-    gl_Position = vec4(x, y, uniZ, 1.0);
-}`
-
-const FRAG = `#version 300 es
-
-precision mediump float;
-
-uniform sampler2D uniTexture;
-in vec2 varUV;
-out vec4 FragColor;
-
-void main() {
-    FragColor = texture(uniTexture, varUV);
-}`
+            return `${codeIn}\n${vertexShaderFunction}\n`
+        })
+        .join("\n")
+}

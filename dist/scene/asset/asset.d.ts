@@ -1,6 +1,6 @@
-import { TgdAssetImage } from "../../types";
+import { TgdTypeAssetImage } from "../../types";
 export default class Asset {
     private readonly images;
-    createImage(src: string): TgdAssetImage;
-    destroyImage(asset: TgdAssetImage): void;
+    createImage(src: string): TgdTypeAssetImage;
+    destroyImage(asset: TgdTypeAssetImage): void;
 }

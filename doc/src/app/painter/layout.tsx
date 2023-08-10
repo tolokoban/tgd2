@@ -1,6 +1,6 @@
 import Style from "./layout.module.css"
 
-const PAINTERS = ["Background", "Clear", "Logic"].sort()
+const PAINTERS = ["Background", "Clear", "Logic", "Primitive"].sort()
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (

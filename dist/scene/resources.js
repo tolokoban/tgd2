@@ -63,8 +63,9 @@ var Resources = (function () {
         var _a = this, bag = _a.bag, gl = _a.gl;
         var prg = bag.programs.add(key, function () {
             var newPrg = gl.createProgram();
-            if (!newPrg)
+            if (!newPrg) {
                 throw Error("Unable to create a WebGL program \"".concat(key, "\"!"));
+            }
             return newPrg;
         });
         var vertShader = this.createShader("vertex", code.vert, key);
@@ -73,7 +74,12 @@ var Resources = (function () {
         gl.attachShader(prg, fragShader);
         gl.linkProgram(prg);
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+            console.log("Vertex Shader:");
+            console.log("%c".concat(code.vert), "font-family:monospace;font-size:80%");
+            console.log("Fragment Shader:");
+            console.log("%c".concat(code.frag), "font-family:monospace;font-size:80%");
             var info = gl.getProgramInfoLog(prg);
+            console.warn(info);
             throw new Error("Could NOT link WebGL2 program!\n" + info);
         }
         return prg;

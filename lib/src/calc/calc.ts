@@ -93,3 +93,24 @@ export function clamp(value: number, min: number, max: number): number {
     if (value > max) return max
     return value
 }
+
+export function range(
+    size: number,
+    transfo?: (value: number) => number
+): number[] {
+    const arr: number[] = []
+    if (transfo) for (let k = 0; k < size; k++) arr.push(transfo(k))
+    else for (let k = 0; k < size; k++) arr.push(k)
+    return arr
+}
+
+export function intervals(from: number, to: number, count: number): number[] {
+    const arr: number[] = []
+    if (count < 1) return arr
+
+    const a = (to - from) / (count - 1)
+    for (let i = 0; i < count; i++) {
+        arr.push(from + i * a)
+    }
+    return arr
+}

@@ -13,8 +13,8 @@ export default function Loading() {
                     id="anim"
                     d="M100,0 A100 100 0 1 1 0 -100"
                     fill="none"
-                    stroke-dasharray="300 1000"
-                    stroke-dashoffset="0"
+                    strokeDasharray="300 1000"
+                    strokeDashoffset="0"
                 >
                     <animateTransform
                         attributeName="transform"
@@ -33,10 +33,10 @@ export default function Loading() {
                     />
                 </path>
             </defs>
-            <g stroke-linecap="round" stroke-linejoin="round">
-                <use href="#anim" stroke="#000" stroke-width="12" />
-                <use href="#anim" stroke="#f90" stroke-width="6" />
-                <g stroke="#000" stroke-width="2">
+            <g strokeLinecap="round" strokeLinejoin="round">
+                <use href="#anim" stroke="#000" strokeWidth="12" />
+                <use href="#anim" stroke="#f90" strokeWidth="6" />
+                <g stroke="#000" strokeWidth="2">
                     <path
                         d="M-35,-25 h10v-10h-10v-10h10v10h10v10h30v-10h10v-10h10v10h-10v10h10v10h10v10h10v30h-10v-20h-10v20h-10v10h-20v-10h20v-10h-50v10h20v10h-20v-10h-10v-20h-10v20h-10v-30h10v-10h10z"
                         fill="#05d"

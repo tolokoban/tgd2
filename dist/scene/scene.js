@@ -48,6 +48,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import { TgdPainterGroup } from "../painter/group";
 import Asset from "./asset";
 import TextureHelper from "./helpers/texture-helper";
+import TgdInputs from "./inputs/inputs";
 import Resources from "./resources";
 var TgdScene = (function () {
     function TgdScene(canvas, options) {
@@ -106,6 +107,7 @@ var TgdScene = (function () {
         this.gl = gl;
         this.asset = new Asset();
         this.texture = new TextureHelper(gl);
+        this.inputs = new TgdInputs(canvas);
         var observer = new ResizeObserver(this.paint);
         observer.observe(canvas);
     }

@@ -1,12 +1,14 @@
 import { TgdPainter } from "../painter/painter";
 import Asset from "./asset";
 import TextureHelper from "./helpers/texture-helper";
+import TgdInputs from "./inputs/inputs";
 import Resources from "./resources";
 export declare class TgdScene {
     readonly canvas: HTMLCanvasElement;
     readonly gl: WebGL2RenderingContext;
     readonly asset: Asset;
     readonly texture: TextureHelper;
+    readonly inputs: TgdInputs;
     private readonly painters;
     private isAnimated;
     private lastCanvasWidth;
