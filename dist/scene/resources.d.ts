@@ -15,4 +15,6 @@ export default class Resources {
     deleteProgram(key?: string): void;
     createTexture(key?: string): WebGLTexture;
     deteleTexture(key?: string): void;
+    createVertexArray(key?: string): WebGLVertexArrayObject;
+    deleteVertexArray(key?: string): void;
 }

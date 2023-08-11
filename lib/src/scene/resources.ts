@@ -5,6 +5,7 @@ class ResourceBag {
     readonly shaders = new RefMap<string, WebGLShader>()
     readonly programs = new RefMap<string, WebGLProgram>()
     readonly textures = new RefMap<string, WebGLTexture>()
+    readonly vertexArrays = new RefMap<string, WebGLVertexArrayObject>()
 }
 
 export default class Resources {
@@ -124,6 +125,23 @@ export default class Resources {
         const { bag, gl } = this
         const texture = bag.textures.delete(key)
         if (texture) gl.deleteTexture(texture)
+    }
+
+    createVertexArray(key = "default") {
+        const { bag, gl } = this
+        return bag.vertexArrays.add(key, () => {
+            const vao = gl.createVertexArray()
+            if (!vao)
+                throw Error(`Unable to create WebGL VertexArray "${key}"!`)
+
+            return vao
+        })
+    }
+
+    deleteVertexArray(key = "default") {
+        const { bag, gl } = this
+        const vao = bag.vertexArrays.delete(key)
+        if (vao) gl.deleteVertexArray(vao)
     }
 }
 

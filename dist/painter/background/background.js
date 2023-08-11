@@ -26,7 +26,7 @@ var TgdPainterBackground = (function () {
         this.imageHeight = image.height;
         this.buffer = this.res.createBuffer();
         this.texture = this.res.createTexture();
-        scene.texture.bindTexture2D(scene.gl, this.texture, {
+        scene.texture.bindTexture2D(this.texture, {
             image: image,
             placeholder: placeholder,
         });
@@ -88,6 +88,4 @@ function createVAO(gl, prg, buffVert, attributes) {
     gl.bindVertexArray(null);
     return vao;
 }
-var _VERT = "#version 300 es\n\nuniform vec2 uniScale;\nuniform vec2 uniScroll;\nuniform float uniZ;\nin vec2 attPoint;\nin vec2 attUV;\nout vec2 varUV;\n\nvoid main() {\n    varUV = attUV + uniScroll;\n    float x = uniScale.x * attPoint.x;\n    float y = uniScale.y * attPoint.y;\n    gl_Position = vec4(x, y, uniZ, 1.0);\n}";
-var _FRAG = "#version 300 es\n\nprecision mediump float;\n\nuniform sampler2D uniTexture;\nin vec2 varUV;\nout vec4 FragColor;\n\nvoid main() {\n    FragColor = texture(uniTexture, varUV);\n}";
 //# sourceMappingURL=background.js.map

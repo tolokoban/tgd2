@@ -10,19 +10,19 @@ function createScene(canvas: HTMLCanvasElement): TgdScene {
             clear.red = Math.max(0, clear.red - speed)
         }
         if (scene.inputs.key("g")) {
-            clear.red = Math.max(0, clear.red - speed)
+            clear.red = Math.max(0, clear.green - speed)
         }
         if (scene.inputs.key("b")) {
-            clear.red = Math.max(0, clear.red - speed)
+            clear.red = Math.max(0, clear.blue - speed)
         }
         if (scene.inputs.key("R")) {
             clear.red = Math.max(0, clear.red + speed)
         }
         if (scene.inputs.key("G")) {
-            clear.red = Math.max(0, clear.red + speed)
+            clear.red = Math.max(0, clear.green + speed)
         }
         if (scene.inputs.key("B")) {
-            clear.red = Math.max(0, clear.red + speed)
+            clear.red = Math.max(0, clear.blue + speed)
         }
     })
     scene.addPainter(clear, logic)

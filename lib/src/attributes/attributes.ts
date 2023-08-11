@@ -1,7 +1,6 @@
 export interface TgdTypeAttribute {
     type: "float"
     dimension: number
-    divisor: number
 }
 
 export type TgdTypeAttributesDefinitions = {
@@ -26,13 +25,16 @@ export class TgdAttributes<T extends TgdTypeAttributesDefinitions> {
     private readonly data: { [key: string]: ArrayBufferLike } = {}
     private readonly definitions: AttributesInternalRepresentations
 
-    constructor(def: T) {
+    constructor(def: T, public readonly divisor = 0) {
         let stride = 0
         const data: { [key: string]: ArrayBuffer } = {}
         const definitions: AttributesInternalRepresentations = {}
         for (const key of Object.keys(def)) {
             data[key] = new ArrayBuffer(0)
-            const dataDef = makeAttributeInternalRepresentation(def[key])
+            const dataDef = makeAttributeInternalRepresentation(
+                def[key],
+                divisor
+            )
             definitions[key] = dataDef
             stride += dataDef.bytesPerElement * dataDef.dimension
         }
@@ -126,7 +128,8 @@ export class TgdAttributes<T extends TgdTypeAttributesDefinitions> {
         return data
     }
 
-    define(gl: WebGL2RenderingContext, prg: WebGLProgram) {
+    define(gl: WebGL2RenderingContext, prg: WebGLProgram, buff?: WebGLBuffer) {
+        if (buff) gl.bindBuffer(gl.ARRAY_BUFFER, buff)
         let offsetDestination = 0
         const { definitions } = this
         for (const name of Object.keys(definitions)) {
@@ -181,25 +184,24 @@ export class TgdAttributes<T extends TgdTypeAttributesDefinitions> {
 }
 
 function makeAttributeInternalRepresentation(
-    attribute: Partial<TgdTypeAttribute> | number
+    attribute: Partial<TgdTypeAttribute> | number,
+    divisor: number
 ): AttributeInternalRepresentation {
     const dataDef: TgdTypeAttribute =
         typeof attribute === "number"
             ? {
                   dimension: attribute,
                   type: "float",
-                  divisor: 0,
               }
             : {
                   type: "float",
                   dimension: 1,
-                  divisor: 0,
                   ...attribute,
               }
 
     switch (dataDef.type) {
         case "float":
-            return makeDataDefinitionFloat(dataDef)
+            return makeDataDefinitionFloat(dataDef, divisor)
         default:
             throw Error(
                 `Unable to create a Data for an attribute of type "${dataDef.type}"!`
@@ -208,12 +210,13 @@ function makeAttributeInternalRepresentation(
 }
 
 function makeDataDefinitionFloat(
-    dataDef: TgdTypeAttribute
+    dataDef: TgdTypeAttribute,
+    divisor: number
 ): AttributeInternalRepresentation {
     const bytesPerElement = Float32Array.BYTES_PER_ELEMENT
     return {
         dimension: dataDef.dimension,
-        divisor: dataDef.divisor,
+        divisor,
         bytesPerElement,
         getter(view: DataView, byteOffset: number) {
             return view.getFloat32(byteOffset)

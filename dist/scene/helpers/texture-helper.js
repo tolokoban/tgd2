@@ -2,8 +2,9 @@ var TextureHelper = (function () {
     function TextureHelper(gl) {
         this.gl = gl;
     }
-    TextureHelper.prototype.bindTexture2D = function (gl, texture, _a) {
+    TextureHelper.prototype.bindTexture2D = function (texture, _a) {
         var image = _a.image, _b = _a.placeholder, placeholder = _b === void 0 ? [0, 0, 0, 1] : _b;
+        var gl = this.gl;
         gl.bindTexture(gl.TEXTURE_2D, texture);
         var level = 0;
         var internalFormat = gl.RGBA;

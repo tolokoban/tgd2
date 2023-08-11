@@ -49,7 +49,7 @@ export class TgdPainterBackground implements TgdPainter {
         this.imageHeight = image.height
         this.buffer = this.res.createBuffer()
         this.texture = this.res.createTexture()
-        scene.texture.bindTexture2D(scene.gl, this.texture, {
+        scene.texture.bindTexture2D(this.texture, {
             image,
             placeholder,
         })
@@ -127,42 +127,6 @@ function createVAO(
     gl.bindVertexArray(vao)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffVert)
     attributes.define(gl, prg)
-    // const $attPoint = gl.getAttribLocation(prg, "attPoint") // float attPoint[2]
-    // gl.enableVertexAttribArray($attPoint)
-    // gl.vertexAttribPointer($attPoint, 2, gl.FLOAT, false, 16, 0)
-    // gl.vertexAttribDivisor($attPoint, 0)
-    // const $attUV = gl.getAttribLocation(prg, "attUV") // float attUV[2]
-    // gl.enableVertexAttribArray($attUV)
-    // gl.vertexAttribPointer($attUV, 2, gl.FLOAT, false, 16, 8)
-    // gl.vertexAttribDivisor($attUV, 0)
     gl.bindVertexArray(null)
     return vao
 }
-
-const _VERT = `#version 300 es
-
-uniform vec2 uniScale;
-uniform vec2 uniScroll;
-uniform float uniZ;
-in vec2 attPoint;
-in vec2 attUV;
-out vec2 varUV;
-
-void main() {
-    varUV = attUV + uniScroll;
-    float x = uniScale.x * attPoint.x;
-    float y = uniScale.y * attPoint.y;
-    gl_Position = vec4(x, y, uniZ, 1.0);
-}`
-
-const _FRAG = `#version 300 es
-
-precision mediump float;
-
-uniform sampler2D uniTexture;
-in vec2 varUV;
-out vec4 FragColor;
-
-void main() {
-    FragColor = texture(uniTexture, varUV);
-}`

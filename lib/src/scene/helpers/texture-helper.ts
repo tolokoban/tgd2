@@ -7,7 +7,6 @@ export default class TextureHelper {
     constructor(private readonly gl: WebGL2RenderingContext) {}
 
     bindTexture2D(
-        gl: WebGL2RenderingContext,
         texture: WebGLTexture,
         {
             image,
@@ -16,6 +15,7 @@ export default class TextureHelper {
             image: HTMLImageElement | HTMLCanvasElement
         }
     ) {
+        const { gl } = this
         gl.bindTexture(gl.TEXTURE_2D, texture)
         const level = 0
         const internalFormat = gl.RGBA

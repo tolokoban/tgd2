@@ -5,6 +5,7 @@ var ResourceBag = (function () {
         this.shaders = new RefMap();
         this.programs = new RefMap();
         this.textures = new RefMap();
+        this.vertexArrays = new RefMap();
     }
     return ResourceBag;
 }());
@@ -108,6 +109,23 @@ var Resources = (function () {
         var texture = bag.textures.delete(key);
         if (texture)
             gl.deleteTexture(texture);
+    };
+    Resources.prototype.createVertexArray = function (key) {
+        if (key === void 0) { key = "default"; }
+        var _a = this, bag = _a.bag, gl = _a.gl;
+        return bag.vertexArrays.add(key, function () {
+            var vao = gl.createVertexArray();
+            if (!vao)
+                throw Error("Unable to create WebGL VertexArray \"".concat(key, "\"!"));
+            return vao;
+        });
+    };
+    Resources.prototype.deleteVertexArray = function (key) {
+        if (key === void 0) { key = "default"; }
+        var _a = this, bag = _a.bag, gl = _a.gl;
+        var vao = bag.vertexArrays.delete(key);
+        if (vao)
+            gl.deleteVertexArray(vao);
     };
     Resources.resources = new Map();
     return Resources;
