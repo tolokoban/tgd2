@@ -4,6 +4,7 @@ import Chokidar from "chokidar"
 import { color, logError } from "./utils/log"
 import { browseRoutes, flattenRoutes, generateRoutes } from "./utils/routes"
 import { Route } from "./utils/types"
+import { processDemo } from "./demo"
 
 function logRoute(route: Route) {
     console.log(
@@ -55,6 +56,12 @@ async function start() {
         Chokidar.watch(root).on("all", (event, path) => {
             clearTimeout(timeout)
             timeout = setTimeout(generate, 300)
+            if (
+                ["add", "change"].includes(event) &&
+                path.endsWith(".demo.tsx")
+            ) {
+                void processDemo(path)
+            }
         })
     } catch (ex) {
         logError(ex)

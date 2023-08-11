@@ -6,7 +6,7 @@ export interface ColumnProps {
         | "marginLeft"
         | "halfLeft"
         | "center"
-        | "halfRigh"
+        | "halfRight"
         | "marginRight"
         | "full"
     children: React.ReactNode

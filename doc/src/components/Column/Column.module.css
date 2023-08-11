@@ -21,3 +21,14 @@
 .halfRight {
     grid-column: 3/5;
 }
+
+@media (max-width: 1024px) {
+    .marginLeft,
+    .marginRight,
+    .center,
+    .full,
+    .halfLeft,
+    .halfRight {
+        grid-column: 2/4;
+    }
+}
