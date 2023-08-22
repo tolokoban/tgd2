@@ -19,7 +19,6 @@ export default function CodeViewerView(props: CodeViewerViewProps) {
             const code = refCode.current
             if (!code) return
 
-            console.log("🚀 [CodeViewer] props = ", props) // @FIXME: Remove this line written on 2023-08-11 at 10:20
             const html = Prism.highlight(
                 props.value,
                 getGrammarForLanguage(props.language),

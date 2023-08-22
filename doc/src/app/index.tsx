@@ -1,7 +1,7 @@
     /**
      * WARNING! this file has been generated automatically.
      * Please do not edit it because it will probably be overwritten.
-     * 2023-08-11T08:56:46.281Z
+     * 2023-08-22T09:54:07.035Z
      */
     import React from "react"
     import Layout0 from "./layout"
@@ -14,9 +14,10 @@
     const Page2 = React.lazy(() => import("./painter/page.mdx"))
     const Page3 = React.lazy(() => import("./painter/background/page.mdx"))
     const Page4 = React.lazy(() => import("./painter/clear/page.mdx"))
-    const Page5 = React.lazy(() => import("./painter/logic/page.mdx"))
-    const Page6 = React.lazy(() => import("./painter/primitive/page.mdx"))
-    const Page7 = React.lazy(() => import("./scene/page.mdx"))
+    const Page5 = React.lazy(() => import("./painter/isometric/page.mdx"))
+    const Page6 = React.lazy(() => import("./painter/logic/page.mdx"))
+    const Page7 = React.lazy(() => import("./painter/primitive/page.mdx"))
+    const Page8 = React.lazy(() => import("./scene/page.mdx"))
     
     export default function App() {
         return (
@@ -25,10 +26,11 @@
                 <Route path="/painter" Page={Page2} Layout={Layout2} Template={Template0} fallback={<Loading0 />}>
                     <Route path="/painter/background" Page={Page3} Template={Template0} fallback={<Loading0 />} />
                     <Route path="/painter/clear" Page={Page4} Template={Template0} fallback={<Loading0 />} />
-                    <Route path="/painter/logic" Page={Page5} Template={Template0} fallback={<Loading0 />} />
-                    <Route path="/painter/primitive" Page={Page6} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/isometric" Page={Page5} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/logic" Page={Page6} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/primitive" Page={Page7} Template={Template0} fallback={<Loading0 />} />
                 </Route>
-                <Route path="/scene" Page={Page7} Template={Template0} fallback={<Loading0 />} />
+                <Route path="/scene" Page={Page8} Template={Template0} fallback={<Loading0 />} />
             </Route>
         )
     }

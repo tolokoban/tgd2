@@ -1,6 +1,12 @@
 import Style from "./layout.module.css"
 
-const PAINTERS = ["Background", "Clear", "Logic", "Primitive"].sort()
+const PAINTERS = [
+    "Background",
+    "Clear",
+    "Isometric",
+    "Logic",
+    "Primitive",
+].sort()
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -8,11 +14,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div>
                 <ul>
                     {PAINTERS.map(name => (
-                        <li>
-                            <a
-                                key={name}
-                                href={`#/painter/${name.toLowerCase()}`}
-                            >
+                        <li key={name}>
+                            <a href={`#/painter/${name.toLowerCase()}`}>
                                 {name}
                             </a>
                         </li>

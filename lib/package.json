@@ -8,6 +8,7 @@
         "postbuild": "shx cp ./package.lib.json ../dist/package.json && shx cp ../README.md ../LICENSE ../dist/",
         "start": "tsc-watch --build --pretty --force",
         "test": "jest",
+        "test:watch": "jest --watch",
         "prestart": "tsc -p ../scripts/shaders/tsconfig.json && npm run shaders &",
         "shaders": "node ../scripts/shaders/dist/shaders.js ./src"
     },

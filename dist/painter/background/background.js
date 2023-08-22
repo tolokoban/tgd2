@@ -83,8 +83,7 @@ function createVAO(gl, prg, buffVert, attributes) {
     if (!vao)
         throw Error("Unable to create a WebGLVertexArrayObject!");
     gl.bindVertexArray(vao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffVert);
-    attributes.define(gl, prg);
+    attributes.define(gl, prg, buffVert);
     gl.bindVertexArray(null);
     return vao;
 }

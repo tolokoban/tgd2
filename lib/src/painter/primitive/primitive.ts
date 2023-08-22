@@ -4,7 +4,7 @@ import {
     TgdAttributes,
     TgdTypeAttributesDefinitions,
     TgdTypeWebGlDrawMode,
-} from "@"
+} from "../.."
 import Resources from "../../scene/resources"
 import VERT from "./primitive.vert"
 import FRAG from "./primitive.frag"

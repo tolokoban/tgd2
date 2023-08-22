@@ -17,7 +17,7 @@ export default function DemoContainer() {
                 onClick={() => setFull(!full)}
             >
                 <ViewPanel display="flex" gap={".5em"}>
-                    <input type="checkbox" checked={full} />
+                    <input type="checkbox" checked={full} onChange={() => setFull(!full)}/>
                     <label style={{ cursor: "pointer" }}>
                         Afficher le code complet
                     </label>

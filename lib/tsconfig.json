@@ -15,10 +15,7 @@
         "rootDir": "src/",
         "sourceMap": true,
         "target": "es5",
-        "paths": {
-            "@/*": ["./src/*"],
-            "@": ["./src/index.ts"]
-        }
+        "paths": {}
     },
     "files": ["./src/index.ts"],
     "include": ["src/**/*.ts"],

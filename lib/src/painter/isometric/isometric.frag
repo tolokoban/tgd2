@@ -13,4 +13,7 @@ void main() {
     if (color.a < EPSILON) discard;
 
     FragColor = color;
+    float light = color.g < 0.001 ? 1.0 : 0.0;
+    FragColor =mix(vec4(varUV, 0, 1), vec4(light, light, light, 1), 0.5);
+    if (color.b < 0.001) FragColor = vec4(0,0,1,1);
 }

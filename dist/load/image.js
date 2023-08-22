@@ -49,6 +49,28 @@ var TgdLoadImage = (function () {
             });
         });
     };
+    TgdLoadImage.loadInCanvas = function (url) {
+        return __awaiter(this, void 0, void 0, function () {
+            var img, canvas, ctx;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, TgdLoadImage.load(url)];
+                    case 1:
+                        img = _a.sent();
+                        if (!img)
+                            return [2, null];
+                        canvas = document.createElement("canvas");
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        ctx = canvas.getContext("2d");
+                        if (!ctx)
+                            throw Error("Unable to get a 2D context!");
+                        ctx.drawImage(img, 0, 0);
+                        return [2, canvas];
+                }
+            });
+        });
+    };
     return TgdLoadImage;
 }());
 export { TgdLoadImage };

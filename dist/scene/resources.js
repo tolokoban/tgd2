@@ -1,3 +1,12 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 import RefMap from "../ref-map";
 var ResourceBag = (function () {
     function ResourceBag() {
@@ -75,12 +84,11 @@ var Resources = (function () {
         gl.attachShader(prg, fragShader);
         gl.linkProgram(prg);
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
-            console.log("Vertex Shader:");
-            console.log("%c".concat(code.vert), "font-family:monospace;font-size:80%");
-            console.log("Fragment Shader:");
-            console.log("%c".concat(code.frag), "font-family:monospace;font-size:80%");
             var info = gl.getProgramInfoLog(prg);
             console.warn(info);
+            var errorLines = getErrorLines(info);
+            logCode.apply(void 0, __spreadArray(["Vertex Shader", code.vert], errorLines, false));
+            logCode.apply(void 0, __spreadArray(["Fragment Shader", code.frag], errorLines, false));
             throw new Error("Could NOT link WebGL2 program!\n" + info);
         }
         return prg;
@@ -138,5 +146,34 @@ function getOrMakeMapId(resources, gl) {
     var newItem = new Map();
     resources.set(gl, newItem);
     return newItem;
+}
+var RX_ERROR_LINE = /^ERROR:[ \t]+([0-9]+):([0-9]+):/g;
+function getErrorLines(message) {
+    var errorLines = [];
+    for (var _i = 0, _a = message.split("\n"); _i < _a.length; _i++) {
+        var line = _a[_i];
+        RX_ERROR_LINE.lastIndex = -1;
+        var match = RX_ERROR_LINE.exec(line);
+        if (match)
+            errorLines.push(parseInt(match[2], 10));
+    }
+    return errorLines;
+}
+function style(background, bold) {
+    if (bold === void 0) { bold = false; }
+    return "color:#fff;background:".concat(background, ";font-family:monospace;font-size:80%;font-weight:").concat(bold ? "bolder" : "100");
+}
+function logCode(title, code) {
+    var errorLines = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        errorLines[_i - 2] = arguments[_i];
+    }
+    console.log("%c".concat(title), "font-weight:bolder;font-size:120%");
+    code.split("\n").forEach(function (line, index) {
+        var num = index + 1;
+        var prefix = (num * 1e-4).toFixed(4).substring(2);
+        var background = errorLines.includes(num) ? "#f00" : "#000";
+        console.log("%c".concat(prefix, "  %c").concat(line), style(background), style(background, true));
+    });
 }
 //# sourceMappingURL=resources.js.map

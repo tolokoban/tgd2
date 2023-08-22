@@ -47,7 +47,7 @@ export async function processDemo(file: string): Promise<void> {
                         [
                             `<ViewPanel display="flex" gap={".5em"}>`,
                             [
-                                `<input type="checkbox" checked={full} />`,
+                                `<input type="checkbox" checked={full} onChange={() => setFull(!full)}/>`,
                                 `<label style={{ cursor: "pointer" }}>`,
                                 [`Afficher le code complet`],
                                 `</label>`,
