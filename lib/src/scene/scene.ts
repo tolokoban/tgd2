@@ -2,14 +2,12 @@ import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
 import Asset from "./asset"
 import TextureHelper from "./helpers/texture-helper"
-import TgdInputs from "./inputs/inputs"
 import Resources from "./resources"
 
 export class TgdScene {
     public readonly gl: WebGL2RenderingContext
     public readonly asset: Asset
     public readonly texture: TextureHelper
-    public readonly inputs: TgdInputs
     private readonly painters = new TgdPainterGroup()
     private isAnimated = false
     private lastCanvasWidth = 0
@@ -28,7 +26,6 @@ export class TgdScene {
         this.gl = gl
         this.asset = new Asset()
         this.texture = new TextureHelper(gl)
-        this.inputs = new TgdInputs(canvas)
         // Repaint if the size has changed.
         const observer = new ResizeObserver(this.paint)
         observer.observe(canvas)

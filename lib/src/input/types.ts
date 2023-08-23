@@ -308,7 +308,41 @@ export type TgdTypeKeyNumericKeypad =
     | "8"
     | "9"
 
+export type TgdTypeKeySymbols =
+    | "/"
+    | "*"
+    | "-"
+    | "+"
+    | "."
+    | "!"
+    | "@"
+    | "#"
+    | "$"
+    | "%"
+    | "^"
+    | "&"
+    | "("
+    | ")"
+    | "_"
+    | "="
+    | "{"
+    | "["
+    | "}"
+    | "]"
+    | ":"
+    | ";"
+    | "'"
+    | '"'
+    | "<"
+    | ","
+    | ">"
+    | "\\"
+    | "|"
+    | "~"
+    | " "
+
 export type TgdTypeKey =
+    | TgdTypeKeySymbols
     | TgdTypeKeyEditing
     | TgdTypeKeyFunction
     | TgdTypeKeyNavigation
