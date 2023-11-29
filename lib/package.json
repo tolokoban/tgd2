@@ -28,6 +28,7 @@
     },
     "homepage": "https://github.com/tolokoban/tgd2#readme",
     "devDependencies": {
+        "@types/gl-matrix": "^3.2.0",
         "@types/jest": "^29.2.3",
         "jest-environment-jsdom": "^29.3.1",
         "jst": "^0.0.13",
@@ -48,6 +49,7 @@
         ]
     },
     "dependencies": {
+        "gl-matrix": "^3.4.3",
         "tsc-watch": "^6.0.4"
     }
 }
