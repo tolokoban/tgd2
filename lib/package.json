@@ -3,14 +3,13 @@
     "version": "2.0.0",
     "description": "ToloGameDev library for WebGL2",
     "main": "index.js",
+    "typings": "",
     "scripts": {
-        "build": "tsc --build --force --verbose --pretty",
-        "postbuild": "shx cp ./package.lib.json ../dist/package.json && shx cp ../README.md ../LICENSE ../dist/",
-        "start": "tsc-watch --build --pretty --force",
-        "test": "jest",
-        "test:watch": "jest --watch",
-        "prestart": "tsc -p ../scripts/shaders/tsconfig.json && npm run shaders &",
-        "shaders": "node ../scripts/shaders/dist/shaders.js ./src"
+        "doc": "typedoc --watch",
+        "build": "webpack",
+        "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
+        "start": "webpack --watch",
+        "test": "jest"
     },
     "repository": {
         "type": "git",
@@ -29,12 +28,14 @@
     "homepage": "https://github.com/tolokoban/tgd2#readme",
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
-        "@types/jest": "^29.2.3",
-        "jest-environment-jsdom": "^29.3.1",
-        "jst": "^0.0.13",
-        "shx": "^0.3.4",
-        "ts-jest": "^29.0.3",
-        "typescript": "^4.9.3"
+        "@types/jest": "^29.5.11",
+        "jest-environment-jsdom": "^29.7.0",
+        "ts-jest": "^29.1.1",
+        "ts-loader": "^9.5.1",
+        "typedoc": "^0.25.7",
+        "typescript": "^5.3.3",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4"
     },
     "browserslist": {
         "production": [
@@ -49,7 +50,6 @@
         ]
     },
     "dependencies": {
-        "gl-matrix": "^3.4.3",
-        "tsc-watch": "^6.0.4"
+        "gl-matrix": "^3.4.3"
     }
 }

@@ -20,8 +20,8 @@ export async function processDemo(file: string): Promise<void> {
         codeLinesToString([
             `import React from "react"`,
             `import { ViewPanel } from "@tolokoban/ui"`,
-            `import Column from "@/components/Column"`,
-            `import CodeViewer from "@/components/CodeViewer"`,
+            `import Column from "@/components/demo/Column"`,
+            `import CodeViewer from "@/components/demo/CodeViewer"`,
             `import Demo from "./${filename.substring(
                 0,
                 filename.length - ".tsx".length

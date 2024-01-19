@@ -1,11 +1,11 @@
 import React from "react"
 import { ViewPanel } from "@tolokoban/ui"
-import Column from "@/components/Column"
-import CodeViewer from "@/components/CodeViewer"
+import Column from "@/components/demo/Column"
+import CodeViewer from "@/components/demo/CodeViewer"
 import Demo from "./main.demo"
 
-const FOCUS = "function createScene(canvas: HTMLCanvasElement): TgdScene {\n    const scene = new TgdScene(canvas)\n    const clear = new TgdPainterClear(scene, { color: [1, 0.7, 0, 1] })\n    scene.addPainter(clear)\n    canvas.addEventListener(\"click\", () => {\n        clear.red = Math.random()\n        clear.green = Math.random()\n        clear.blue = Math.random()\n        scene.paint()\n    })\n    return scene\n}"
-const FULL = "import { TgdPainterClear, TgdScene } from \"@tolokoban/tgd\"\n\nfunction createScene(canvas: HTMLCanvasElement): TgdScene {\n    const scene = new TgdScene(canvas)\n    const clear = new TgdPainterClear(scene, { color: [1, 0.7, 0, 1] })\n    scene.addPainter(clear)\n    canvas.addEventListener(\"click\", () => {\n        clear.red = Math.random()\n        clear.green = Math.random()\n        clear.blue = Math.random()\n        scene.paint()\n    })\n    return scene\n}\n\nexport default function Demo() {\n    const handleMount = (canvas: HTMLCanvasElement | null) => {\n        if (!canvas) return\n\n        const scene = createScene(canvas)\n        scene.canvas.addEventListener(\"dblclick\", () =>\n            scene.toggleFullscreen()\n        )\n    }\n    return (\n        <canvas\n            ref={handleMount}\n            style={{ width: \"100%\", height: \"50vh\" }}\n            title=\"Double-clic pour plein écran\"\n        ></canvas>\n    )\n}\n"
+const FOCUS = "function init(canvas: HTMLCanvasElement): TgdContext {\n    const ctx = new TgdContext(canvas)\n    const clear = new TgdPainterClear(ctx, { color: [1, 0.7, 0, 1] })\n    ctx.add(clear)\n    canvas.addEventListener(\"click\", () => {\n        clear.red = Math.random()\n        clear.green = Math.random()\n        clear.blue = Math.random()\n        ctx.paint()\n    })\n    ctx.paint()\n    return ctx\n}"
+const FULL = "import { TgdContext, TgdPainterClear } from \"@tolokoban/tgd\"\n\nfunction init(canvas: HTMLCanvasElement): TgdContext {\n    const ctx = new TgdContext(canvas)\n    const clear = new TgdPainterClear(ctx, { color: [1, 0.7, 0, 1] })\n    ctx.add(clear)\n    canvas.addEventListener(\"click\", () => {\n        clear.red = Math.random()\n        clear.green = Math.random()\n        clear.blue = Math.random()\n        ctx.paint()\n    })\n    ctx.paint()\n    return ctx\n}\n\nexport default function Demo() {\n    const handleMount = (canvas: HTMLCanvasElement | null) => {\n        if (canvas) init(canvas)\n    }\n    return (\n        <canvas\n            ref={handleMount}\n            style={{\n                width: \"100%\",\n                height: \"128px\",\n                background: \"#000\",\n            }}\n        ></canvas>\n    )\n}\n"
 
 export default function DemoContainer() {
     const [full, setFull] = React.useState(false)

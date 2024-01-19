@@ -3,9 +3,9 @@ import Style from "./layout.module.css"
 const PAINTERS = [
     "Background",
     "Clear",
-    "Isometric",
+    // "Isometric",
     "Logic",
-    "Primitive",
+    // "Primitive",
 ].sort()
 
 export default function Layout({ children }: { children: React.ReactNode }) {

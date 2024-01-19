@@ -1,5 +1,5 @@
-import { TgdScene } from "../scene"
-import { TgdPainter } from "./painter"
+import { TgdPainter } from "."
+import { TgdContext } from "@/context"
 
 export interface PainterClearOptions {
     color: [red: number, green: number, blue: number, alpha: number]
@@ -16,24 +16,37 @@ export class TgdPainterClear implements TgdPainter {
     public depth = 1
 
     constructor(
-        private readonly scene: TgdScene,
-        options: Partial<PainterClearOptions>
+        public readonly context: TgdContext,
+        options: Partial<PainterClearOptions> = {}
     ) {
+        const { gl } = context
         const color = options.color ?? [0, 0, 0, 1]
         const depth = options.depth ?? 1
         this.clearMask = 0
-        if (options.color) this.clearMask |= scene.gl.COLOR_BUFFER_BIT
-        if (options.depth) this.clearMask |= scene.gl.DEPTH_BUFFER_BIT
+        let hasAnyOption = false
+        if (options.color) {
+            this.clearMask |= gl.COLOR_BUFFER_BIT
+            hasAnyOption = true
+        }
+        if (typeof options.depth === "number") {
+            this.clearMask |= gl.DEPTH_BUFFER_BIT
+            hasAnyOption = true
+        }
+        if (!hasAnyOption) {
+            throw Error(
+                "[TgdPainterClear] You must give at least a color or a depth in the constructor!"
+            )
+        }
         ;[this.red, this.green, this.blue, this.alpha] = color
         this.depth = depth
     }
 
     /** Nothing to destroy. */
-    destroy(): void {}
+    delete(): void {}
 
     paint(_time: number, _delay: number): void {
-        const { clearMask, scene, red, green, blue, alpha, depth } = this
-        const { gl } = scene
+        const { clearMask, context, red, green, blue, alpha, depth } = this
+        const { gl } = context
         gl.clearColor(red, green, blue, alpha)
         gl.clearDepth(depth)
         gl.clear(clearMask)

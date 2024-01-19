@@ -1,34 +1,33 @@
-import { TgdPainterClear, TgdScene } from "@tolokoban/tgd"
+import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
 
 // #begin
-function createScene(canvas: HTMLCanvasElement): TgdScene {
-    const scene = new TgdScene(canvas)
-    const clear = new TgdPainterClear(scene, { color: [1, 0.7, 0, 1] })
-    scene.addPainter(clear)
+function init(canvas: HTMLCanvasElement): TgdContext {
+    const ctx = new TgdContext(canvas)
+    const clear = new TgdPainterClear(ctx, { color: [1, 0.7, 0, 1] })
+    ctx.add(clear)
     canvas.addEventListener("click", () => {
         clear.red = Math.random()
         clear.green = Math.random()
         clear.blue = Math.random()
-        scene.paint()
+        ctx.paint()
     })
-    return scene
+    ctx.paint()
+    return ctx
 }
 // #end
 
 export default function Demo() {
     const handleMount = (canvas: HTMLCanvasElement | null) => {
-        if (!canvas) return
-
-        const scene = createScene(canvas)
-        scene.canvas.addEventListener("dblclick", () =>
-            scene.toggleFullscreen()
-        )
+        if (canvas) init(canvas)
     }
     return (
         <canvas
             ref={handleMount}
-            style={{ width: "100%", height: "50vh" }}
-            title="Double-clic pour plein écran"
+            style={{
+                width: "100%",
+                height: "128px",
+                background: "#000",
+            }}
         ></canvas>
     )
 }

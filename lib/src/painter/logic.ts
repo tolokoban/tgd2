@@ -1,4 +1,3 @@
-import { TgdScene } from "../scene"
 import { TgdPainter } from "./painter"
 
 /**
@@ -9,7 +8,7 @@ export class TgdPainterLogic implements TgdPainter {
         private readonly logicFunction: (time: number, delay: number) => void
     ) {}
 
-    destroy(): void {}
+    delete(): void {}
 
     paint(time: number, delay: number): void {}
 

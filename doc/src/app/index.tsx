@@ -1,87 +1,32 @@
-/**
- * WARNING! this file has been generated automatically.
- * Please do not edit it because it will probably be overwritten.
- * 2023-11-28T15:22:17.288Z
- */
-import React from "react"
-import Layout0 from "./layout"
-import Layout2 from "./painter/layout"
-import Loading0 from "./loading"
-import Template0 from "./template"
-
-const Page0 = React.lazy(() => import("./page.mdx"))
-const Page1 = React.lazy(() => import("./attributes/page.mdx"))
-const Page2 = React.lazy(() => import("./painter/page.mdx"))
-const Page3 = React.lazy(() => import("./painter/background/page.mdx"))
-const Page4 = React.lazy(() => import("./painter/clear/page.mdx"))
-const Page5 = React.lazy(() => import("./painter/isometric/page.mdx"))
-const Page6 = React.lazy(() => import("./painter/logic/page.mdx"))
-const Page7 = React.lazy(() => import("./painter/primitive/page.mdx"))
-const Page8 = React.lazy(() => import("./scene/page.mdx"))
-
-export default function App() {
-    return (
-        <Route
-            path="/"
-            Page={Page0}
-            Layout={Layout0}
-            Template={Template0}
-            fallback={<Loading0 />}
-        >
-            <Route
-                path="/attributes"
-                Page={Page1}
-                Template={Template0}
-                fallback={<Loading0 />}
-            />
-            <Route
-                path="/painter"
-                Page={Page2}
-                Layout={Layout2}
-                Template={Template0}
-                fallback={<Loading0 />}
-            >
-                <Route
-                    path="/painter/background"
-                    Page={Page3}
-                    Template={Template0}
-                    fallback={<Loading0 />}
-                />
-                <Route
-                    path="/painter/clear"
-                    Page={Page4}
-                    Template={Template0}
-                    fallback={<Loading0 />}
-                />
-                <Route
-                    path="/painter/isometric"
-                    Page={Page5}
-                    Template={Template0}
-                    fallback={<Loading0 />}
-                />
-                <Route
-                    path="/painter/logic"
-                    Page={Page6}
-                    Template={Template0}
-                    fallback={<Loading0 />}
-                />
-                <Route
-                    path="/painter/primitive"
-                    Page={Page7}
-                    Template={Template0}
-                    fallback={<Loading0 />}
-                />
+    /**
+     * WARNING! this file has been generated automatically.
+     * Please do not edit it because it will probably be overwritten.
+     * 2024-01-19T13:59:10.295Z
+     */
+    import React from "react"
+    import Layout0 from "./layout"
+    import Layout1 from "./painter/layout"
+    import Loading0 from "./loading"
+    import Template0 from "./template"
+    
+    const Page0 = React.lazy(() => import("./page.mdx"))
+    const Page1 = React.lazy(() => import("./painter/page.mdx"))
+    const Page2 = React.lazy(() => import("./painter/background/page.mdx"))
+    const Page3 = React.lazy(() => import("./painter/clear/page.mdx"))
+    const Page4 = React.lazy(() => import("./painter/logic/page.mdx"))
+    
+    export default function App() {
+        return (
+            <Route path="/" Page={Page0} Layout={Layout0} Template={Template0} fallback={<Loading0 />}>
+                <Route path="/painter" Page={Page1} Layout={Layout1} Template={Template0} fallback={<Loading0 />}>
+                    <Route path="/painter/background" Page={Page2} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/clear" Page={Page3} Template={Template0} fallback={<Loading0 />} />
+                    <Route path="/painter/logic" Page={Page4} Template={Template0} fallback={<Loading0 />} />
+                </Route>
             </Route>
-            <Route
-                path="/scene"
-                Page={Page8}
-                Template={Template0}
-                fallback={<Loading0 />}
-            />
-        </Route>
-    )
-}
-
+        )
+    }
+    
 function useHash() {
     const [hash, setHash] = React.useState(
         extractHash(window.location.toString())
@@ -152,28 +97,15 @@ interface RouteProps {
     Template?: React.FC<{ children: React.ReactNode }>
 }
 
-function Route({
-    path,
-    fallback,
-    children,
-    Page,
-    Layout,
-    Template,
-}: RouteProps) {
+function Route({ path, fallback, children, Page, Layout, Template }: RouteProps) {
     const hash = useHash()
     const m = match(hash, path)
     if (!m) return null
 
     if (m.full) {
         if (!Page) return null
-
-        const element = Template ? (
-            <Template>
-                <Page />
-            </Template>
-        ) : (
-            <Page />
-        )
+        
+        const element = Template ? <Template><Page /></Template> : <Page />
         if (Layout) {
             return (
                 <Layout>

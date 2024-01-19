@@ -1,7 +1,5 @@
-import { TgdScene } from "../scene"
-
 export abstract class TgdPainter {
-    abstract destroy(): void
+    abstract delete(): void
     abstract paint(time: number, delay: number): void
     abstract update(time: number, delay: number): void
 }

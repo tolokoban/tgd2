@@ -17,9 +17,19 @@ export class TgdPainterGroup implements TgdPainter {
         }
     }
 
-    destroy(): void {
+    remove(...painters: TgdPainter[]) {
+        for (const painter of painters) {
+            const index = this.painters.indexOf(painter)
+            if (index < 0) continue
+
+            this.painters.splice(index, 1)
+            painter.delete()
+        }
+    }
+
+    delete(): void {
         for (const painter of this.painters) {
-            painter.destroy()
+            painter.delete()
         }
         this.painters.splice(0, this.painters.length)
     }

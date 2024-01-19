@@ -1,5 +1,7 @@
 **/dist/
 **/build/
-**/node_modules
+**/node_modules/
 **/*.vert.ts
 **/*.frag.ts
+node_modules/
+dist

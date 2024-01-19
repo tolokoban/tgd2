@@ -1,19 +1,16 @@
-import Column from "@/components/Column"
-import Ratio from "./_/Ratio.tsx"
-import Zoom from "./_/Zoom.tsx"
+import Demo from "./_/background.demo"
+import Demo2 from "./_/background2.demo"
 
-# TgdPainterBackground
+# [TgdPainterBackground](docs/classes/TgdPainterBackground.html)
 
-Ce painter dessine un arrière-plan en conservant son aspect ratio. Par defaut,
-l'image couvre l'écran. Exemples :
+Fill the background with an image.
 
-<Column align="full">
-    <Ratio />
-</Column>
+## Example
 
-Les paramètres suivants sont aussi disponibles :
+By default, the image is centered and covers the canvas entirely.
 
--   **`zoom`** : La valeur **1** correspond à la plus petite image recouvrant
-    entièrement la scène.
+<Demo />
 
-<Zoom />
+Here is an example where we make the size and the center vary.
+
+<Demo2 />

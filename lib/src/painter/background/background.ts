@@ -1,28 +1,25 @@
-import { TgdPainter } from "../painter"
-import Resources from "../../scene/resources"
-import { TgdScene } from "../../scene"
-import { TgdAttributes } from "../../attributes"
+import { TgdProgram } from "@/program/program"
+import { TdgTexture2D } from "@/texture/texture2d"
+import { TgdContext } from "@/context"
+import { TgdPainter } from "@/painter"
+
 import VERT from "./background.vert"
 import FRAG from "./background.frag"
+import { TgdDataset } from "@/dataset/dataset"
+import { TgdVAO } from "@/vao"
 
 export interface TgdPainterBackgroundOptions {
-    image: HTMLImageElement | HTMLCanvasElement
-    placeholder: [red: number, green: number, blue: number, alpha: number]
+    zoom: number
+    x: number
+    y: number
+    z: number
 }
 
 export class TgdPainterBackground implements TgdPainter {
-    private readonly options: TgdPainterBackgroundOptions
-    private readonly texture: WebGLTexture
-    private readonly program: WebGLProgram
-    private readonly buffer: WebGLBuffer
-    private readonly res: Resources
-    private readonly vao: WebGLVertexArrayObject
-    private readonly uniTexture: WebGLUniformLocation
-    private readonly uniScale: WebGLUniformLocation
-    private readonly uniScroll: WebGLUniformLocation
-    private readonly uniZ: WebGLUniformLocation
-    private readonly imageWidth: number
-    private readonly imageHeight: number
+    public texture: TdgTexture2D
+
+    private readonly program: TgdProgram
+    private readonly vao: TgdVAO
 
     /**
      * With a zoom of **1**, the image will have the smaller size to cover
@@ -34,98 +31,61 @@ export class TgdPainterBackground implements TgdPainter {
     public z = 1
 
     constructor(
-        private readonly scene: TgdScene,
-        options: Partial<TgdPainterBackgroundOptions> & {
-            image: HTMLImageElement | HTMLCanvasElement
-        }
+        private readonly context: TgdContext,
+        texture: TdgTexture2D,
+        {
+            x = 0,
+            y = 0,
+            z = 1,
+            zoom = 1,
+        }: Partial<TgdPainterBackgroundOptions> = {}
     ) {
-        this.res = scene.getResources("TgdPainterBackground")
-        this.options = {
-            placeholder: [0, 0, 0, 1],
-            ...options,
-        }
-        const { image, placeholder } = this.options
-        this.imageWidth = image.width
-        this.imageHeight = image.height
-        this.buffer = this.res.createBuffer()
-        this.texture = this.res.createTexture()
-        scene.texture.bindTexture2D(this.texture, {
-            image,
-            placeholder,
-        })
-        this.program = this.res.createProgram({
+        this.x = x
+        this.y = y
+        this.z = z
+        this.zoom = zoom
+        this.texture = texture
+        this.program = context.programs.create({
             vert: VERT,
             frag: FRAG,
         })
-        this.uniScale = scene.getUniformLocation(this.program, "uniScale")
-        this.uniScroll = scene.getUniformLocation(this.program, "uniScroll")
-        this.uniZ = scene.getUniformLocation(this.program, "uniZ")
-        this.uniTexture = scene.getUniformLocation(this.program, "uniTexture")
-        const attributes = new TgdAttributes({
-            attPoint: 2,
-            attUV: 2,
+        const dataset = new TgdDataset({
+            attPoint: "vec2",
+            attUV: "vec2",
         })
-        attributes.set(
+        dataset.set(
             "attPoint",
             new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
         )
-        attributes.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-        attributes.update(scene.gl, this.buffer, 4, false)
-        this.vao = createVAO(scene.gl, this.program, this.buffer, attributes)
+        dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
+        this.vao = context.createVAO(this.program, [dataset])
     }
 
-    destroy(): void {
-        const { res } = this
-        res.deleteProgram()
-        res.deteleTexture()
-        res.deleteBuffer()
+    delete(): void {
+        const { vao } = this
+        vao.delete
     }
 
     paint(time: number, delay: number): void {
-        const { gl } = this.scene
-        const {
-            vao,
-            program,
-            texture,
-            imageWidth,
-            imageHeight,
-            zoom,
-            x,
-            y,
-            z,
-        } = this
-        gl.useProgram(program)
-        const { width, height } = this.scene
-        const horizontal = imageWidth * height > imageHeight * width
+        const { gl } = this.context
+        const { vao, program, texture, zoom, x, y, z } = this
+        program.use()
+        const { width, height } = this.context
+        const horizontal = texture.width * height > texture.height * width
         const scaleX = horizontal
-            ? (imageWidth * height) / (width * imageHeight)
+            ? (texture.width * height) / (width * texture.height)
             : 1
         const scaleY = horizontal
             ? 1
-            : (imageHeight * width) / (height * imageWidth)
-        gl.uniform2f(this.uniScale, scaleX * zoom, scaleY * zoom)
-        gl.uniform2f(this.uniScroll, x, y)
-        gl.uniform1f(this.uniZ, z)
-        gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_2D, texture)
-        gl.uniform1i(this.uniTexture, 0)
-        gl.bindVertexArray(vao)
+            : (texture.height * width) / (height * texture.width)
+        program.uniform2f("uniScale", scaleX, scaleY)
+        program.uniform2f("uniScroll", x, y)
+        program.uniform1f("uniZoom", 1 / zoom)
+        program.uniform1f("uniZ", z)
+        texture.activate(program, "uniTexture")
+        vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
 
     update(time: number, delay: number): void {}
-}
-
-function createVAO(
-    gl: WebGL2RenderingContext,
-    prg: WebGLProgram,
-    buffVert: WebGLBuffer,
-    attributes: TgdAttributes<any>
-): WebGLVertexArrayObject {
-    const vao = gl.createVertexArray()
-    if (!vao) throw Error("Unable to create a WebGLVertexArrayObject!")
-    gl.bindVertexArray(vao)
-    attributes.define(gl, prg, buffVert)
-    gl.bindVertexArray(null)
-    return vao
 }
