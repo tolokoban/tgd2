@@ -1,3 +1,5 @@
+import { TgdMat4, TgdVec3, TgdVec4 } from "@/math"
+
 export interface TgdProgramOptions {
     /** Code of the vertex shader */
     vert: string
@@ -85,9 +87,19 @@ export class TgdProgram {
         gl.uniform3f(this.getUniformLocation(name), x, y, z)
     }
 
+    uniform3fv(name: string, vec3: TgdVec3) {
+        const { gl } = this
+        gl.uniform3fv(this.getUniformLocation(name), vec3)
+    }
+
     uniform4f(name: string, x: number, y: number, z: number, w: number) {
         const { gl } = this
         gl.uniform4f(this.getUniformLocation(name), x, y, z, w)
+    }
+
+    uniform4fv(name: string, vec4: TgdVec4) {
+        const { gl } = this
+        gl.uniform4fv(this.getUniformLocation(name), vec4)
     }
 
     uniform1i(name: string, value: number) {
@@ -128,6 +140,11 @@ export class TgdProgram {
     uniform4ui(name: string, x: number, y: number, z: number, w: number) {
         const { gl } = this
         gl.uniform4ui(this.getUniformLocation(name), x, y, z, w)
+    }
+
+    uniformMatrix4fv(name: string, mat4: TgdMat4) {
+        const { gl } = this
+        gl.uniformMatrix4fv(this.getUniformLocation(name), false, mat4)
     }
 
     /**
