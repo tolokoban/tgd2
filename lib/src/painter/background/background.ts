@@ -2,11 +2,11 @@ import { TgdProgram } from "@/program/program"
 import { TdgTexture2D } from "@/texture/texture2d"
 import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter"
+import { TgdDataset } from "@/dataset/dataset"
+import { TgdVAO } from "@/vao"
 
 import VERT from "./background.vert"
 import FRAG from "./background.frag"
-import { TgdDataset } from "@/dataset/dataset"
-import { TgdVAO } from "@/vao"
 
 export interface TgdPainterBackgroundOptions {
     zoom: number

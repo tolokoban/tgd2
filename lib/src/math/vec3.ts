@@ -1,3 +1,7 @@
+import { TgdMat3 } from "./mat3"
+import { TgdMat4 } from "./mat4"
+import { TgdVec4 } from "./vec4"
+
 export class TgdVec3 extends Float32Array {
     constructor()
     constructor(x: TgdVec3)
@@ -35,6 +39,24 @@ export class TgdVec3 extends Float32Array {
         return true
     }
 
+    /**
+     * V := M×V
+     */
+    applyMatrix(mat: TgdMat3 | TgdMat4): TgdVec3 {
+        const { x, y, z } = this
+        this.x = x * mat.m00 + y * mat.m10 + z * mat.m20
+        this.y = x * mat.m01 + y * mat.m11 + z * mat.m21
+        this.z = x * mat.m02 + y * mat.m12 + z * mat.m22
+        return this
+    }
+
+    from({ x, y, z }: TgdVec3): this {
+        this.x = x
+        this.y = y
+        this.z = z
+        return this
+    }
+
     get x() {
         return this[0]
     }
@@ -56,12 +78,19 @@ export class TgdVec3 extends Float32Array {
         this[2] = value
     }
 
-    add(...vectors: TgdVec3[]): TgdVec3 {
+    add(...vectors: TgdVec3[]): this {
         for (const vec of vectors) {
             this[0] += vec[0]
             this[1] += vec[1]
             this[2] += vec[2]
         }
+        return this
+    }
+
+    addWithScale({ x, y, z }: TgdVec3 | TgdVec4, scale = 1): this {
+        this[0] += x * scale
+        this[1] += y * scale
+        this[2] += z * scale
         return this
     }
 

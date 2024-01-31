@@ -48,7 +48,7 @@ export class TgdParserMeshWavefront {
                         .split(" ")
                         // Warning! We need to remove 1 to the index.
                         .map(face => {
-                            const [v, n, t] = face.split("/")
+                            const [v, t, n] = face.split("/")
                             return {
                                 vertex: Number(v) - 1,
                                 normal: n ? Number(n) - 1 : undefined,

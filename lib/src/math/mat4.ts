@@ -1,4 +1,5 @@
 import { PainterClearOptions } from "./../painter/clear"
+import { TgdMat3 } from "./mat3"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
@@ -83,27 +84,40 @@ export class TgdMat4 extends Float32Array {
         this.m32 = vec.z
     }
 
-    toAxis(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3) {
+    fromMat3(mat: TgdMat3): this {
+        this.m00 = mat.m00
+        this.m01 = mat.m01
+        this.m02 = mat.m02
+        this.m10 = mat.m10
+        this.m11 = mat.m11
+        this.m12 = mat.m12
+        this.m20 = mat.m20
+        this.m21 = mat.m21
+        this.m22 = mat.m22
+        return this
+    }
+
+    toAxis(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3): this {
         this.toAxisX(axisX)
         this.toAxisY(axisY)
         return this.toAxisZ(axisZ)
     }
 
-    toAxisX(axisX: TgdVec3) {
+    toAxisX(axisX: TgdVec3): this {
         axisX.x = this.m00
         axisX.y = this.m01
         axisX.z = this.m02
         return this
     }
 
-    toAxisY(axisY: TgdVec3) {
+    toAxisY(axisY: TgdVec3): this {
         axisY.x = this.m10
         axisY.y = this.m11
         axisY.z = this.m12
         return this
     }
 
-    toAxisZ(axisZ: TgdVec3) {
+    toAxisZ(axisZ: TgdVec3): this {
         axisZ.x = this.m20
         axisZ.y = this.m21
         axisZ.z = this.m22

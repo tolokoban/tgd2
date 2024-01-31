@@ -1,5 +1,5 @@
 names = []
-dim = 4
+dim = 3
 for col in range(dim):
     for row in range(dim):
         names.append(f"m{col}{row}")

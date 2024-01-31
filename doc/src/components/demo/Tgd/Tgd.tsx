@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { TgdContext } from "@tolokoban/tgd"
 import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
 

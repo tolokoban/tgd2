@@ -1,7 +1,7 @@
     /**
      * WARNING! this file has been generated automatically.
      * Please do not edit it because it will probably be overwritten.
-     * 2024-01-19T13:59:10.295Z
+     * 2024-01-31T14:39:41.466Z
      */
     import React from "react"
     import Layout0 from "./layout"
@@ -14,6 +14,7 @@
     const Page2 = React.lazy(() => import("./painter/background/page.mdx"))
     const Page3 = React.lazy(() => import("./painter/clear/page.mdx"))
     const Page4 = React.lazy(() => import("./painter/logic/page.mdx"))
+    const Page5 = React.lazy(() => import("./test/page.mdx"))
     
     export default function App() {
         return (
@@ -23,6 +24,7 @@
                     <Route path="/painter/clear" Page={Page3} Template={Template0} fallback={<Loading0 />} />
                     <Route path="/painter/logic" Page={Page4} Template={Template0} fallback={<Loading0 />} />
                 </Route>
+                <Route path="/test" Page={Page5} Template={Template0} fallback={<Loading0 />} />
             </Route>
         )
     }
