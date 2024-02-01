@@ -1,3 +1,4 @@
+import { padColOfNumbers } from "@/debug"
 import { TgdQuat, TgdVec3 } from "."
 
 /**
@@ -67,17 +68,17 @@ export class TgdMat3 extends Float32Array {
         const wy = w * y2
         const wz = w * z2
 
-        this[0] = 1 - yy - zz
-        this[1] = yx + wz
-        this[2] = zx - wy
+        this.m00 = 1 - yy - zz
+        this.m10 = yx - wz
+        this.m20 = zx + wy
 
-        this[3] = yx - wz
-        this[4] = 1 - xx - zz
-        this[5] = zy + wx
+        this.m01 = yx + wz
+        this.m11 = 1 - xx - zz
+        this.m21 = zy - wx
 
-        this[6] = zx + wy
-        this[7] = zy - wx
-        this[8] = 1 - xx - yy
+        this.m02 = zx - wy
+        this.m12 = zy + wx
+        this.m22 = 1 - xx - yy
 
         return this
     }
@@ -106,6 +107,19 @@ export class TgdMat3 extends Float32Array {
         axisZ.x = this.m20
         axisZ.y = this.m21
         axisZ.z = this.m22
+        return this
+    }
+
+    scale(factor: number): this {
+        this[0] *= factor
+        this[1] *= factor
+        this[2] *= factor
+        this[3] *= factor
+        this[4] *= factor
+        this[5] *= factor
+        this[6] *= factor
+        this[7] *= factor
+        this[8] *= factor
         return this
     }
 
@@ -170,5 +184,16 @@ export class TgdMat3 extends Float32Array {
     }
     set m22(v: number) {
         this[8] = v
+    }
+
+    debug(caption = "Mat3") {
+        const c0 = padColOfNumbers([this.m00, this.m01, this.m02])
+        const c1 = padColOfNumbers([this.m10, this.m11, this.m12])
+        const c2 = padColOfNumbers([this.m20, this.m21, this.m22])
+
+        console.log(caption)
+        console.log("   ", [c0[0], c1[0], c2[0]].join(" | "))
+        console.log("   ", [c0[1], c1[1], c2[1]].join(" | "))
+        console.log("   ", [c0[2], c1[2], c2[2]].join(" | "))
     }
 }

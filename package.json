@@ -10,6 +10,7 @@
     ],
     "scripts": {
         "ci": "cd lib && npm install && npm run build",
+        "doc": "cd lib && npm run doc",
         "test": "cd lib && npm test"
     },
     "repository": {

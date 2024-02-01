@@ -1,4 +1,4 @@
-import { TgdQuat, TgdVec3, TgdMat4 } from "@/math"
+import { TgdQuat, TgdVec3, TgdMat4, TgdVec4 } from "@/math"
 import { TgdMat3 } from "@/math/mat3"
 
 export abstract class TgdCamera {
@@ -26,6 +26,9 @@ export abstract class TgdCamera {
 
     abstract get matrixProjection(): TgdMat4
 
+    get orientation() {
+        return this._orientation
+    }
     set orientation(quat: TgdQuat) {
         const { orientation } = this
         if (quat.isEqual(orientation)) return
@@ -38,11 +41,14 @@ export abstract class TgdCamera {
         this.dirty = true
     }
 
+    get target(): TgdVec3 {
+        return this._target
+    }
     set target(vec: TgdVec3) {
         const { target } = this
         if (vec.isEqual(target)) return
 
-        const [x, y, z] = target
+        const [x, y, z] = vec
         target.x = x
         target.y = y
         target.z = z
@@ -98,12 +104,19 @@ export abstract class TgdCamera {
         this.dirty = true
     }
 
+    orbitAroundX(angleInRadians: number) {
+        const { axisX, axisY, axisZ, orientation } = this
+        axisX.rotateAround(axisZ, angleInRadians)
+        axisY.rotateAround(axisZ, angleInRadians)
+        orientation.fromAxis(axisX, axisY, axisZ)
+    }
+
     private updateIfDirty() {
         if (!this.dirty) return
 
         const { tmpMat3, tmpVec3 } = this
         const mat = this._matrixViewModel
-        tmpMat3.fromQuat(this._orientation)
+        tmpMat3.fromQuat(this._orientation).transpose()
         tmpMat3.toAxis(this.axisX, this.axisY, this.axisZ)
         const d = this._distance
         const { x: tx, y: ty, z: tz } = this._target
@@ -111,23 +124,14 @@ export abstract class TgdCamera {
         tmpVec3.x = tx + d * ax
         tmpVec3.y = ty + d * ay
         tmpVec3.z = tz + d * az
-        tmpVec3.applyMatrix(tmpMat3).scale(-1)
+        tmpVec3.applyMatrix(tmpMat3.transpose()).scale(-1)
         mat.m30 = tmpVec3.x
         mat.m31 = tmpVec3.y
         mat.m32 = tmpVec3.z
-        mat.fromMat3(tmpMat3.transpose())
         const zoom = this._zoom
-        if (zoom !== 1) {
-            mat.m00 *= zoom
-            mat.m01 *= zoom
-            mat.m02 *= zoom
-            mat.m10 *= zoom
-            mat.m11 *= zoom
-            mat.m12 *= zoom
-            mat.m20 *= zoom
-            mat.m21 *= zoom
-            mat.m22 *= zoom
-        }
+        if (zoom !== 1) tmpMat3.scale(zoom)
+        mat.fromMat3(tmpMat3.transpose())
+        mat.fromMat3(tmpMat3)
         this.dirty = false
     }
 }

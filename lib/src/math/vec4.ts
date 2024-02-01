@@ -1,22 +1,33 @@
+import { TgdMat4 } from "./mat4"
+import { TgdVec3 } from "./vec3"
+
 export class TgdVec4 extends Float32Array {
     constructor()
-    constructor(x: TgdVec4)
+    constructor(vec4: TgdVec4)
+    constructor(vec3: TgdVec3, w: number)
     constructor(x: number)
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
     constructor(
-        x: number | TgdVec4 = 0,
+        x: number | TgdVec4 | TgdVec3 = 0,
         y: number = 0,
         z: number = 0,
         w: number = 1
     ) {
         super(4)
-        if (typeof x !== "number") {
+        if (x instanceof TgdVec4) {
             this.x = x.x
             this.y = x.y
             this.z = x.z
             this.w = x.w
+            return
+        }
+        if (x instanceof TgdVec3) {
+            this.x = x.x
+            this.y = x.y
+            this.z = x.z
+            this.w = w
             return
         }
         this.x = x
@@ -43,6 +54,18 @@ export class TgdVec4 extends Float32Array {
         if (Math.abs(z - this.z) > epsilon) return false
         if (Math.abs(w - this.w) > epsilon) return false
         return true
+    }
+
+    /**
+     * V := M×V
+     */
+    applyMatrix(mat: TgdMat4): this {
+        const { x, y, z, w } = this
+        this.x = x * mat.m00 + y * mat.m10 + z * mat.m20 + w * mat.m30
+        this.y = x * mat.m01 + y * mat.m11 + z * mat.m21 + w * mat.m31
+        this.z = x * mat.m02 + y * mat.m12 + z * mat.m22 + w * mat.m32
+        this.w = x * mat.m03 + y * mat.m13 + z * mat.m23 + w * mat.m33
+        return this
     }
 
     get x() {
@@ -126,5 +149,11 @@ export class TgdVec4 extends Float32Array {
         if (squareLength === 0) return this
 
         return this.scale(1 / Math.sqrt(squareLength))
+    }
+
+    debug(caption = "vec4") {
+        const { x, y, z, w } = this
+        const out: string[] = [x, y, z, w].map(n => n.toFixed(6))
+        console.log(`${caption}:   `, out.join(" | "))
     }
 }

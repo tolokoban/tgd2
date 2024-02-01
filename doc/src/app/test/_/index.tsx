@@ -24,6 +24,7 @@ function init(ctx: TgdContext) {
         .then(content => {
             const painter = new Painter(ctx, content)
             ctx.add(painter)
+            ctx.paint()
             ctx.play()
         })
 }

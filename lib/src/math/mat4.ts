@@ -1,3 +1,4 @@
+import { padColOfNumbers } from "@/debug"
 import { PainterClearOptions } from "./../painter/clear"
 import { TgdMat3 } from "./mat3"
 import { TgdQuat } from "./quat"
@@ -124,7 +125,7 @@ export class TgdMat4 extends Float32Array {
         return this
     }
 
-    fromQuat({ x, y, z, w }: TgdQuat): TgdMat4 {
+    fromQuat({ x, y, z, w }: TgdQuat): this {
         const x2 = x + x
         const y2 = y + y
         const z2 = z + z
@@ -138,17 +139,17 @@ export class TgdMat4 extends Float32Array {
         const wy = w * y2
         const wz = w * z2
 
-        this[0] = 1 - yy - zz
-        this[1] = yx + wz
-        this[2] = zx - wy
+        this.m00 = 1 - yy - zz
+        this.m10 = yx - wz
+        this.m20 = zx + wy
 
-        this[4] = yx - wz
-        this[5] = 1 - xx - zz
-        this[6] = zy + wx
+        this.m01 = yx + wz
+        this.m11 = 1 - xx - zz
+        this.m21 = zy - wx
 
-        this[8] = zx + wy
-        this[9] = zy - wx
-        this[10] = 1 - xx - yy
+        this.m02 = zx - wy
+        this.m12 = zy + wx
+        this.m22 = 1 - xx - yy
 
         return this
     }
@@ -263,5 +264,18 @@ export class TgdMat4 extends Float32Array {
     }
     set m33(v: number) {
         this[15] = v
+    }
+
+    debug(caption = "Mat4") {
+        const c0 = padColOfNumbers([this.m00, this.m01, this.m02, this.m03])
+        const c1 = padColOfNumbers([this.m10, this.m11, this.m12, this.m13])
+        const c2 = padColOfNumbers([this.m20, this.m21, this.m22, this.m23])
+        const c3 = padColOfNumbers([this.m30, this.m31, this.m32, this.m33])
+
+        console.log(caption)
+        console.log("   ", [c0[0], c1[0], c2[0], c3[0]].join(" | "))
+        console.log("   ", [c0[1], c1[1], c2[1], c3[1]].join(" | "))
+        console.log("   ", [c0[2], c1[2], c2[2], c3[2]].join(" | "))
+        console.log("   ", [c0[3], c1[3], c2[3], c3[3]].join(" | "))
     }
 }

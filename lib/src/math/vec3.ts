@@ -39,6 +39,23 @@ export class TgdVec3 extends Float32Array {
         return true
     }
 
+    rotateAround(axis: TgdVec3, angleInRadians: number) {
+        // result := V.cos(a) + (KxV).sin(a) + K(K.V)(1 - cos(a))
+        const C = Math.cos(angleInRadians)
+        const S = Math.sin(angleInRadians)
+        const [Vx, Vy, Vz] = this
+        const [Kx, Ky, Kz] = axis
+        const dot = Vx * Kx + Vy * Ky + Vz * Kz
+        const crossX = Ky * Vz - Kz * Vy
+        const crossY = Kz * Vx - Kx * Vz
+        const crossZ = Kx * Vy - Ky * Vx
+        const a = dot * (1 - C)
+        this.x = Vx * C + crossX * S + Kx * a
+        this.y = Vy * C + crossY * S + Ky * a
+        this.z = Vz * C + crossZ * S + Kz * a
+        return this
+    }
+
     /**
      * V := M×V
      */
@@ -124,5 +141,11 @@ export class TgdVec3 extends Float32Array {
         if (squareLength === 0) return this
 
         return this.scale(1 / Math.sqrt(squareLength))
+    }
+
+    debug(caption = "vec3") {
+        const { x, y, z } = this
+        const out: string[] = [x, y, z].map(n => n.toFixed(6))
+        console.log(`${caption}:   `, out.join(" | "))
     }
 }
