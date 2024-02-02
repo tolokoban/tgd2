@@ -7,6 +7,8 @@ import {
     TgdVAO,
     TdgInputKeyboard,
     TgdVec3,
+    TdgTexture2D,
+    TgdControllerCameraOrbit,
 } from "@tolokoban/tgd"
 
 import VERT from "./test.vert"
@@ -14,29 +16,38 @@ import FRAG from "./test.frag"
 import { parse } from "./parser"
 
 export default class Painter implements TgdPainter {
+    public texture: TdgTexture2D
+
+    private readonly orbitControl: TgdControllerCameraOrbit
     private readonly axisZ = new TgdVec3()
     private readonly program: TgdProgram
     private readonly vao: TgdVAO
     private readonly count: number
-    private readonly orientation = new TgdQuat()
     private readonly target = new TgdVec3()
+    private readonly camera = new TgdCameraPerspective()
     private readonly cameraL = new TgdCameraPerspective()
     private readonly cameraR = new TgdCameraPerspective()
     private readonly keyboard = new TdgInputKeyboard()
     private readonly type: "UNSIGNED_BYTE" | "UNSIGNED_SHORT" | "UNSIGNED_INT"
     private radius = 0
 
-    constructor(private readonly context: TgdContext, meshContent: string) {
+    constructor(
+        private readonly context: TgdContext,
+        meshContent: string,
+        texture: TdgTexture2D
+    ) {
+        this.texture = texture
         this.program = context.programs.create({
             vert: VERT,
             frag: FRAG,
         })
         const { dataset, elements, type } = parse(meshContent)
         this.type = type
-        console.log("🚀 [painter] type, elements = ", type, elements) // @FIXME: Remove this line written on 2024-01-31 at 16:39
         this.vao = context.createVAO(this.program, [dataset], elements)
         this.count = elements.length
-        this.orientation.rotateAroundX(-Math.PI / 8)
+        this.camera.distance = 3
+        this.orbitControl = new TgdControllerCameraOrbit(this.camera)
+        this.orbitControl.attach(context.canvas)
     }
 
     delete(): void {
@@ -45,12 +56,14 @@ export default class Painter implements TgdPainter {
 
     paint(time: number, delay: number): void {
         const { gl } = this.context
-        const { vao, program, type, count, cameraL, cameraR, axisZ } = this
+        const { texture, vao, program, type, count, cameraL, cameraR, axisZ } =
+            this
         cameraL.width = gl.drawingBufferWidth
         cameraL.height = gl.drawingBufferHeight
         cameraR.width = gl.drawingBufferWidth
         cameraR.height = gl.drawingBufferHeight
         program.use()
+        texture.activate(program, "uniTexture")
         program.uniform3fv("uniAxisZ", axisZ)
         program.uniformMatrix4fv("uniCameraViewModelL", cameraL.matrixViewModel)
         program.uniformMatrix4fv("uniCameraViewModelR", cameraR.matrixViewModel)
@@ -58,7 +71,7 @@ export default class Painter implements TgdPainter {
             "uniCameraProjection",
             cameraL.matrixProjection
         )
-        gl.enable(gl.CULL_FACE)
+        gl.disable(gl.CULL_FACE)
         gl.cullFace(gl.BACK)
         gl.enable(gl.DEPTH_TEST)
         gl.clearDepth(1)
@@ -71,42 +84,37 @@ export default class Painter implements TgdPainter {
     }
 
     update(time: number, delay: number): void {
-        const { orientation, keyboard, target, cameraL, cameraR, axisZ } = this
-        orientation.rotateAroundY(delay * 1e-3)
-        const camSpeed = 5e-3
+        const { keyboard, camera, cameraL, cameraR, axisZ } = this
+        camera.toAxisZ(axisZ)
+        const camSpeed = 1e-3
         if (keyboard.isPressed("ArrowRight")) {
-            target.x += delay * camSpeed
-            console.log("🚀 [painter] target = ", target) // @FIXME: Remove this line written on 2024-01-31 at 22:02
-        }
-        if (keyboard.isPressed("ArrowLeft")) {
-            target.x -= delay * camSpeed
+            camera.orbitAroundY(delay * camSpeed)
+        } else if (keyboard.isPressed("ArrowLeft")) {
+            camera.orbitAroundY(-delay * camSpeed)
         }
         if (keyboard.isPressed("ArrowUp")) {
-            target.y += delay * camSpeed
-        }
-        if (keyboard.isPressed("ArrowDown")) {
-            target.y -= delay * camSpeed
+            camera.orbitAroundX(delay * camSpeed)
+        } else if (keyboard.isPressed("ArrowDown")) {
+            camera.orbitAroundX(-delay * camSpeed)
         }
         if (keyboard.isPressed("0")) {
-            target.x = 0
-            target.y = 0
+            camera.setOrientation(new TgdQuat())
         }
         const speedRadius = 1e-3
         if (keyboard.isPressed("+")) {
-            this.radius = Math.min(10, this.radius + delay * speedRadius)
-            this.orientation.rotateAroundY(delay * speedRadius)
+            this.radius = Math.min(
+                Math.PI * 0.5,
+                this.radius + delay * speedRadius
+            )
         }
         if (keyboard.isPressed("-")) {
             this.radius = Math.max(0, this.radius - delay * speedRadius)
-            this.orientation.rotateAroundY(-delay * speedRadius)
         }
         if (keyboard.isPressed("Space")) this.radius = 0
-        cameraL.target = target
-        cameraL.orientation = orientation
-        cameraL.orientation.rotateAroundY(this.radius)
-        cameraR.target = target
-        cameraR.orientation = orientation
-        cameraR.orientation.rotateAroundY(-this.radius)
-        orientation.toAxisZ(axisZ)
+        const { radius } = this
+        cameraL.from(camera)
+        cameraR.from(camera)
+        cameraL.orbitAroundY(+radius)
+        cameraR.orbitAroundY(-radius)
     }
 }

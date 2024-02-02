@@ -4,32 +4,95 @@ import { TgdMat3 } from "@/math/mat3"
 export abstract class TgdCamera {
     /** Do we need recalculation? */
     private dirty = true
+    private dirtyAxis = true
     private readonly axisX = new TgdVec3()
     private readonly axisY = new TgdVec3()
     private readonly axisZ = new TgdVec3()
     // transformation
     private readonly _matrixViewModel = new TgdMat4()
-    private readonly _orientation = new TgdQuat(0, 0, 0, 1)
-    private readonly _target = new TgdVec3(0, 0, 0)
-    private _distance = 5
+    private readonly orientation = new TgdQuat(0, 0, 0, 1)
+    private readonly target = new TgdVec3(0, 0, 0)
+    private _distance = 10
     private _zoom = 1
     // For fast calculations (we don't want to recreate them).
     private readonly tmpMat3 = new TgdMat3()
     private readonly tmpVec3 = new TgdVec3()
 
-    constructor() {}
+    constructor() {
+        this.orientation.face("+X+Y+Z")
+        this.orbitAroundY(Math.PI)
+        this.updateAxisIfNeeded()
+        console.log("****************************************")
+        this.axisX.debug("X")
+        this.axisY.debug("Y")
+        this.axisZ.debug("Z")
+        this.matrixViewModel.debug()
+        this.orientation.debug("Quat")
+
+        const eq = (a: number, b: number) => {
+            return Math.abs(a - b) < 1e-5
+        }
+        const name = ({ x, y, z }: TgdVec3) => {
+            if (eq(x, +1)) return "+X"
+            if (eq(x, -1)) return "-X"
+            if (eq(y, +1)) return "+Y"
+            if (eq(y, -1)) return "-Y"
+            if (eq(z, +1)) return "+Z"
+            if (eq(z, -1)) return "-Z"
+        }
+        const A = Math.sqrt(2) / 2
+        const q = ({ x, y, z, w }: TgdQuat) => {
+            return [x, y, z, w]
+                .map(v => {
+                    if (eq(v, +0)) return "+0"
+                    if (eq(v, +1)) return "+1"
+                    if (eq(v, -1)) return "-1"
+                    if (eq(v, +A)) return "+A"
+                    if (eq(v, -A)) return "-A"
+                    return v
+                })
+                .join(", ")
+        }
+        const lines: string[] = []
+        for (let i = 0; i < 4; i++) {
+            this.orientation.face("+X+Y+Z")
+            this.orbitAroundY(i * (Math.PI / 2))
+            this.updateAxisIfNeeded()
+            this.updateIfNeeded()
+            lines.push(
+                `\n"${name(this.axisX)}${name(this.axisY)}${name(
+                    this.axisZ
+                )}": [${q(this.orientation)}],`
+            )
+        }
+        console.log(lines.join(""))
+
+        this.orientation.face()
+    }
+
+    from({ orientation, target, distance, zoom }: TgdCamera): this {
+        this.orientation.from(orientation)
+        this.target.from(target)
+        this.distance = distance
+        this.zoom = zoom
+        this.dirty = true
+        this.dirtyAxis = true
+        return this
+    }
+
+    toAxisZ(axis: TgdVec3): this {
+        this.orientation.toAxisZ(axis)
+        return this
+    }
 
     get matrixViewModel(): TgdMat4 {
-        this.updateIfDirty()
+        this.updateIfNeeded()
         return this._matrixViewModel
     }
 
     abstract get matrixProjection(): TgdMat4
 
-    get orientation() {
-        return this._orientation
-    }
-    set orientation(quat: TgdQuat) {
+    setOrientation(quat: TgdQuat) {
         const { orientation } = this
         if (quat.isEqual(orientation)) return
 
@@ -39,12 +102,10 @@ export abstract class TgdCamera {
         orientation.z = z
         orientation.w = w
         this.dirty = true
+        this.dirtyAxis = true
     }
 
-    get target(): TgdVec3 {
-        return this._target
-    }
-    set target(vec: TgdVec3) {
+    setTarget(vec: TgdVec3) {
         const { target } = this
         if (vec.isEqual(target)) return
 
@@ -55,12 +116,45 @@ export abstract class TgdCamera {
         this.dirty = true
     }
 
+    get x() {
+        return this.target.x
+    }
+    set x(v: number) {
+        const { target } = this
+        if (v === target.x) return
+
+        this.x = v
+        this.dirty = true
+    }
+
+    get y() {
+        return this.target.y
+    }
+    set y(v: number) {
+        const { target } = this
+        if (v === target.y) return
+
+        this.y = v
+        this.dirty = true
+    }
+
+    get z() {
+        return this.target.z
+    }
+    set z(v: number) {
+        const { target } = this
+        if (v === target.z) return
+
+        this.z = v
+        this.dirty = true
+    }
+
     get distance() {
         return this._distance
     }
     set distance(v: number) {
-        if (this._distance !== v) return
-        0.004
+        if (this._distance === v) return
+
         this._distance = v
         this.dirty = true
     }
@@ -69,20 +163,9 @@ export abstract class TgdCamera {
         return this._zoom
     }
     set zoom(v: number) {
-        if (this._zoom !== v) return
+        if (this._zoom === v) return
 
         this._zoom = v
-        this.dirty = true
-    }
-
-    /**
-     * Move the target to absolute coords.
-     */
-    setTarget(x: number, y: number, z: number) {
-        const target = this._target
-        target.x = x
-        target.y = y
-        target.z = z
         this.dirty = true
     }
 
@@ -91,7 +174,8 @@ export abstract class TgdCamera {
      * That means we are moving along the camera axis.
      */
     moveTarget(x: number, y: number, z: number) {
-        const target = this._target
+        const { target } = this
+        this.updateAxisIfNeeded()
         const { axisX, axisY, axisZ, tmpVec3 } = this
         tmpVec3
             .from(axisX)
@@ -104,22 +188,54 @@ export abstract class TgdCamera {
         this.dirty = true
     }
 
-    orbitAroundX(angleInRadians: number) {
+    orbitAroundX(angleInRadians: number): this {
+        this.updateAxisIfNeeded()
+        const { axisX, axisY, axisZ, orientation } = this
+        axisY.rotateAround(axisX, angleInRadians)
+        axisZ.rotateAround(axisX, angleInRadians)
+        orientation.fromAxis(axisX, axisY, axisZ)
+        this.dirty = true
+        return this
+    }
+
+    orbitAroundY(angleInRadians: number): this {
+        this.updateAxisIfNeeded()
+        const { axisX, axisY, axisZ, orientation } = this
+        axisX.rotateAround(axisY, angleInRadians)
+        axisZ.rotateAround(axisY, angleInRadians)
+        orientation.fromAxis(axisX, axisY, axisZ)
+        this.dirty = true
+        return this
+    }
+
+    orbitAroundZ(angleInRadians: number): this {
+        this.updateAxisIfNeeded()
         const { axisX, axisY, axisZ, orientation } = this
         axisX.rotateAround(axisZ, angleInRadians)
         axisY.rotateAround(axisZ, angleInRadians)
         orientation.fromAxis(axisX, axisY, axisZ)
+        this.dirty = true
+        return this
     }
 
-    private updateIfDirty() {
+    private updateAxisIfNeeded() {
+        if (!this.dirtyAxis) return
+
+        const { tmpMat3 } = this
+        tmpMat3.fromQuat(this.orientation) //.transpose()
+        tmpMat3.toAxis(this.axisX, this.axisY, this.axisZ)
+        this.dirtyAxis = false
+    }
+
+    private updateIfNeeded(): void {
         if (!this.dirty) return
 
         const { tmpMat3, tmpVec3 } = this
         const mat = this._matrixViewModel
-        tmpMat3.fromQuat(this._orientation).transpose()
-        tmpMat3.toAxis(this.axisX, this.axisY, this.axisZ)
+        this.dirtyAxis = true
+        this.updateAxisIfNeeded()
         const d = this._distance
-        const { x: tx, y: ty, z: tz } = this._target
+        const { x: tx, y: ty, z: tz } = this.target
         const { x: ax, y: ay, z: az } = this.axisZ
         tmpVec3.x = tx + d * ax
         tmpVec3.y = ty + d * ay
@@ -130,7 +246,6 @@ export abstract class TgdCamera {
         mat.m32 = tmpVec3.z
         const zoom = this._zoom
         if (zoom !== 1) tmpMat3.scale(zoom)
-        mat.fromMat3(tmpMat3.transpose())
         mat.fromMat3(tmpMat3)
         this.dirty = false
     }

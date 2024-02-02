@@ -1,6 +1,9 @@
-import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
+import { TdgTexture2D, TgdContext, TgdPainterClear } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 import Painter from "./painter"
+
+import PaletteURL from "./palette.jpg"
+import ChestURL from "./chest.jpg"
 
 export default function DemoContainer() {
     return <View onReady={init} />
@@ -8,13 +11,13 @@ export default function DemoContainer() {
 
 function init(ctx: TgdContext) {
     const clear = new TgdPainterClear(ctx, {
-        color: [0.2, 0.2, 0.2, 1],
+        color: [0, 0, 0, 1],
     })
     ctx.add(clear)
     ctx.paint()
 
-    // fetch("mesh/icosphere.obj")
     fetch("mesh/test.obj")
+        // fetch("mesh/axis.obj")
         .then(resp => {
             if (!resp.ok) {
                 throw Error(`Error #${resp.status}: ${resp.statusText}!`)
@@ -22,7 +25,10 @@ function init(ctx: TgdContext) {
             return resp.text()
         })
         .then(content => {
-            const painter = new Painter(ctx, content)
+            const texture = new TdgTexture2D(ctx, {
+                image: ChestURL,
+            })
+            const painter = new Painter(ctx, content, texture)
             ctx.add(painter)
             ctx.paint()
             ctx.play()

@@ -6,7 +6,7 @@ export class TgdCameraPerspective extends TgdCamera {
     private readonly _matrixProjection = new TgdMat4()
     private _width = 1920
     private _height = 1080
-    private _fovy = Math.PI / 2
+    private _fovy = Math.PI / 4
     private _near = 1e-3
     private _far = Infinity
 
@@ -61,11 +61,11 @@ export class TgdCameraPerspective extends TgdCamera {
         this.dirtyProjection = true
     }
     get matrixProjection(): TgdMat4 {
-        this.updateIfNeeded()
+        this.updateProjectionIfNeeded()
         return this._matrixProjection
     }
 
-    private updateIfNeeded() {
+    private updateProjectionIfNeeded(): void {
         if (!this.dirtyProjection) return
 
         const fovy = this._fovy

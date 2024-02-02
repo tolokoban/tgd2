@@ -8,6 +8,15 @@ import { forEachLine } from "../for-each-line"
  * - There can be only one object per file.
  * - Normals and UVs are optional.
  * - All faces **must** be triangles.
+ *
+ * To export an obj file from blender, please use the following options:
+ *
+ * - Forward axis: **Y**
+ * - Up axis: **Z**
+ * - Object / Apply Modifiers: **True**
+ * - Geometry / UV Coordinates: **True**
+ * - Geometry / Normals: **True**
+ * - Geometry / Triangulated Mesh: **True**
  */
 export class TgdParserMeshWavefront {
     private name = "Mesh"
@@ -59,6 +68,7 @@ export class TgdParserMeshWavefront {
         if (this.attUV.length > 0) {
             result.attUV = new Float32Array(this.attUV)
         }
+        console.log("🚀 [wavefront] this.attUV = ", this.attUV) // @FIXME: Remove this line written on 2024-02-02 at 15:13
         const { elementIndex } = this
         if (elementIndex <= 256) {
             console.log("UNSIGNED_BYTE")
@@ -127,8 +137,14 @@ export class TgdParserMeshWavefront {
 
         const [vx, vy, vz] = this.vertices[v.vertex]
         this.attPosition.push(vx, vy, vz)
-        const [nx, ny, nz] = this.normals[v.normal ?? -1]
-        this.attNormal.push(nx, ny, nz)
+        if (typeof v.normal === "number") {
+            const [nx, ny, nz] = this.normals[v.normal]
+            this.attNormal.push(nx, ny, nz)
+        }
+        if (typeof v.uv === "number") {
+            const [tx, ty] = this.uvs[v.uv]
+            this.attUV.push(tx, ty)
+        }
         this.map.set(k, this.elementIndex)
         return this.elementIndex++
     }

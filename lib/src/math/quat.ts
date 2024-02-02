@@ -33,33 +33,33 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
-    fromAxis(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3) {
+    fromAxis(X: TgdVec3, Y: TgdVec3, Z: TgdVec3) {
         // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
         // article "Quaternion Calculus and Fast Animation".
-        const fTrace = axisX.x + axisY.y + axisZ.z
-
+        const fTrace = X.x + Y.y + Z.z
         if (fTrace > 0.0) {
             // |w| > 1/2, may as well choose w > 1/2
             const fRoot = Math.sqrt(fTrace + 1.0) // 2w
             this.w = 0.5 * fRoot
             const halfRoot = 0.5 / fRoot // 1/(4w)
-            this.x = (axisY.z - axisZ.y) * halfRoot
-            this.y = (axisZ.x - axisX.z) * halfRoot
-            this.z = (axisX.y - axisY.x) * halfRoot
+            this.x = (Y.z - Z.y) * halfRoot
+            this.y = (Z.x - X.z) * halfRoot
+            this.z = (X.y - Y.x) * halfRoot
         } else {
             // |w| <= 1/2
+            const axis = [X, Y, Z]
             let i = 0
-            if (m[4] > m[0]) i = 1
-            if (m[8] > m[i * 3 + i]) i = 2
-            let j = (i + 1) % 3
-            let k = (i + 2) % 3
+            if (Y.y > X.x) i = 1
+            if (Z.z > axis[i][i]) i = 2
+            const j = (i + 1) % 3
+            const k = (i + 2) % 3
 
-            fRoot = Math.sqrt(m[i * 3 + i] - m[j * 3 + j] - m[k * 3 + k] + 1.0)
-            out[i] = 0.5 * fRoot
+            let fRoot = Math.sqrt(axis[i][i] - axis[j][j] - axis[k][k] + 1.0)
+            this[i] = 0.5 * fRoot
             fRoot = 0.5 / fRoot
-            out[3] = (m[j * 3 + k] - m[k * 3 + j]) * fRoot
-            out[j] = (m[j * 3 + i] + m[i * 3 + j]) * fRoot
-            out[k] = (m[k * 3 + i] + m[i * 3 + k]) * fRoot
+            this[3] = (axis[j][k] - axis[k][j]) * fRoot
+            this[j] = (axis[j][i] + axis[i][j]) * fRoot
+            this[k] = (axis[k][i] + axis[i][k]) * fRoot
         }
     }
 
@@ -131,4 +131,22 @@ export class TgdQuat extends TgdVec4 {
 
         return vec
     }
+
+    face(face: keyof typeof FACES = "+X+Y+Z"): this {
+        const [x, y, z, w] = FACES[face]
+        this.x = x
+        this.y = y
+        this.z = z
+        this.w = w
+        return this
+    }
+}
+
+const A = Math.sqrt(2) / 2
+
+const FACES = {
+    "+X+Y+Z": [+0, +0, +0, +1],
+    "-Z+Y+X": [+0, +A, +0, +A],
+    "-X+Y-Z": [+0, +1, +0, +0],
+    "+Z+Y-X": [+0, -A, +0, +A],
 }

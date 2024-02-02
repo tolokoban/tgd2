@@ -36,6 +36,22 @@ export class TgdVec4 extends Float32Array {
         this.w = w
     }
 
+    reset(x = 0, y = 0, z = 0, w = 1): this {
+        this.x = x
+        this.y = y
+        this.z = z
+        this.w = w
+        return this
+    }
+
+    from(vec: TgdVec4): this {
+        this.x = vec.x
+        this.y = vec.y
+        this.z = vec.z
+        this.w = vec.w
+        return this
+    }
+
     clone() {
         return new TgdVec4(this)
     }

@@ -9,7 +9,8 @@
         "build": "webpack",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
         "start": "webpack --watch",
-        "test": "jest"
+        "test": "jest",
+        "test:watch": "jest --watch"
     },
     "repository": {
         "type": "git",
@@ -28,13 +29,13 @@
     "homepage": "https://github.com/tolokoban/tgd2#readme",
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
-        "@types/jest": "^29.5.11",
+        "@types/jest": "^29.5.12",
         "jest-environment-jsdom": "^29.7.0",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",
         "typedoc": "^0.25.7",
         "typescript": "^5.3.3",
-        "webpack": "^5.90.0",
+        "webpack": "^5.90.1",
         "webpack-cli": "^5.1.4"
     },
     "browserslist": {

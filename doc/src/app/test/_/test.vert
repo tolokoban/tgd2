@@ -1,20 +1,20 @@
 #version 300 es
 
+uniform sampler2D uniTexture;
 uniform mat4 uniCameraViewModelL;
 uniform mat4 uniCameraViewModelR;
 uniform mat4 uniCameraProjection;
 
 in vec4 attPosition;
 in vec3 attNormal;
+in vec2 attUV;
+
 out vec3 varColor;
 out vec3 varNormal;
 
 void main() {
     varNormal = attNormal;
-    float light = 1.0 / length(attPosition) + 0.5;
-    float sum = attNormal.x + attNormal.y + attNormal.z;
-    varColor = sum > 0.0 ? abs(attNormal) : vec3(1) - abs(attNormal);
-    varColor *= light;
+    varColor = texture(uniTexture, attUV).rgb;
     vec4 pointL = uniCameraViewModelL * attPosition;
     vec4 pointR = uniCameraViewModelR * attPosition;
     float L = dot(pointL, pointL);

@@ -9,13 +9,58 @@ out vec4 FragColor;
 in vec3 varColor;
 in vec3 varNormal;
 
-const vec3 SUN = normalize(vec3(1, 2, 3));
+const vec3 SUN = normalize(vec3(1, 2, 4));
+
+float calcDiffuse(vec3 normal, vec3 lightVector, float lightIntensity);
+float calcSpecular(vec3 normal, vec3 cameraZ, vec3 lightVector, float lightIntensity, float sharpness);
 
 void main() {
     vec3 normal = normalize(varNormal);
-    vec3 ray = reflect(SUN, normal);
-    float d = clamp(dot(ray, uniAxisZ), 0.0, 1.0);
-    float s = pow(d, 2.0);
-    d += 0.5;
-    FragColor = vec4(varColor * d + vec3(s), 1);
+    float ambient = 0.3;
+    float diffuse = calcDiffuse(
+        normal,
+        SUN,
+        1.5
+    );
+    float specular = calcSpecular(
+        normal,
+        uniAxisZ,
+        SUN,
+        2.0,
+        10.0
+    );
+    diffuse = dot(normal, uniAxisZ);
+    specular = 0.0;
+    FragColor = vec4(
+        varColor * (ambient + diffuse) + vec3(specular), 
+        1
+    );
+}
+
+float calcDiffuse(
+    vec3 normal,
+    vec3 lightVector,
+    float lightIntensity
+) {
+    return lightIntensity * max(
+        0.0,
+        dot(normal, lightVector)
+    );
+}
+
+float calcSpecular(
+    vec3 normal,
+    vec3 cameraZ,
+    vec3 lightVector,
+    float lightIntensity,
+    float sharpness
+) {
+    if (dot(normal, lightVector) > 0.0) {
+        vec3 H = normalize(cameraZ + lightVector);
+        return lightIntensity * pow(
+            dot(normal, cameraZ),
+            sharpness
+        );
+    }
+    return 0.0;
 }
