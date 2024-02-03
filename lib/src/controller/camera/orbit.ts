@@ -53,7 +53,7 @@ export class TgdControllerCameraOrbit {
             return
         }
 
-        const speed = 25 / dt
+        const speed = 2
         const dx = (evt.current.x - evt.previous.x) * speed
         const dy = (evt.current.y - evt.previous.y) * speed
         if (!keyboard.isPressed("x")) camera.orbitAroundY(-dx)

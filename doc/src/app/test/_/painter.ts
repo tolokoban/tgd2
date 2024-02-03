@@ -45,7 +45,7 @@ export default class Painter implements TgdPainter {
         this.type = type
         this.vao = context.createVAO(this.program, [dataset], elements)
         this.count = elements.length
-        this.camera.distance = 3
+        this.camera.distance = 10
         this.orbitControl = new TgdControllerCameraOrbit(this.camera)
         this.orbitControl.attach(context.canvas)
     }

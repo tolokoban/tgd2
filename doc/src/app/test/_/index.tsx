@@ -16,8 +16,8 @@ function init(ctx: TgdContext) {
     ctx.add(clear)
     ctx.paint()
 
-    fetch("mesh/test.obj")
-        // fetch("mesh/axis.obj")
+    // fetch("mesh/test.obj")
+    fetch("mesh/axis.obj")
         .then(resp => {
             if (!resp.ok) {
                 throw Error(`Error #${resp.status}: ${resp.statusText}!`)
@@ -26,7 +26,7 @@ function init(ctx: TgdContext) {
         })
         .then(content => {
             const texture = new TdgTexture2D(ctx, {
-                image: ChestURL,
+                image: PaletteURL,
             })
             const painter = new Painter(ctx, content, texture)
             ctx.add(painter)
