@@ -6,6 +6,6 @@ export * from "./input"
 export * from "./math"
 export * from "./painter"
 export * from "./parser"
-export * from "./program"
-export * from "./texture"
 export * from "./vao"
+
+export * from "./types"

@@ -1,18 +1,12 @@
 import { TgdMat4, TgdVec3, TgdVec4 } from "@/math"
-
-export interface TgdProgramOptions {
-    /** Code of the vertex shader */
-    vert: string
-    /** Code of the fragment shader */
-    frag: string
-}
+import { TgdProgram, TgdProgramOptions } from "@/types"
 
 /**
  * This class helps to manage a WebGLProgram.
  * It will report meaninfull errors and help you with
  * the uniforms.
  */
-export class TgdProgram {
+export class TgdProgramImpl implements TgdProgram {
     /** Access to the real WebGLProgram object. */
     public readonly program: WebGLProgram
 

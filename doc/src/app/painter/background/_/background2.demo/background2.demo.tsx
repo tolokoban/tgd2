@@ -1,5 +1,4 @@
 import {
-    TdgTexture2D,
     TgdContext,
     TgdPainterBackground,
     TgdPainterLogic,
@@ -10,7 +9,7 @@ import BackgroundURL from "./locomotive.webp"
 
 function init(ctx: TgdContext) {
     // #begin
-    const texture = new TdgTexture2D(ctx, {
+    const texture = ctx.textures2D.create({
         image: BackgroundURL,
     })
     const background = new TgdPainterBackground(ctx, texture)

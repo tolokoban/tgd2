@@ -1,4 +1,4 @@
-import { TdgTexture2D, TgdContext, TgdPainterClear } from "@tolokoban/tgd"
+import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 import Painter from "./painter"
 
@@ -16,8 +16,8 @@ function init(ctx: TgdContext) {
     ctx.add(clear)
     ctx.paint()
 
-    // fetch("mesh/test.obj")
-    fetch("mesh/axis.obj")
+    fetch("mesh/test.obj")
+        // fetch("mesh/axis.obj")
         .then(resp => {
             if (!resp.ok) {
                 throw Error(`Error #${resp.status}: ${resp.statusText}!`)
@@ -25,8 +25,8 @@ function init(ctx: TgdContext) {
             return resp.text()
         })
         .then(content => {
-            const texture = new TdgTexture2D(ctx, {
-                image: PaletteURL,
+            const texture = ctx.textures2D.create({
+                image: ChestURL,
             })
             const painter = new Painter(ctx, content, texture)
             ctx.add(painter)

@@ -3,11 +3,11 @@ import {
     TgdContext,
     TgdPainter,
     TgdProgram,
+    TdgTexture2D,
     TgdQuat,
     TgdVAO,
     TdgInputKeyboard,
     TgdVec3,
-    TdgTexture2D,
     TgdControllerCameraOrbit,
 } from "@tolokoban/tgd"
 
@@ -23,7 +23,6 @@ export default class Painter implements TgdPainter {
     private readonly program: TgdProgram
     private readonly vao: TgdVAO
     private readonly count: number
-    private readonly target = new TgdVec3()
     private readonly camera = new TgdCameraPerspective()
     private readonly cameraL = new TgdCameraPerspective()
     private readonly cameraR = new TgdCameraPerspective()
@@ -52,6 +51,7 @@ export default class Painter implements TgdPainter {
 
     delete(): void {
         this.keyboard.detach()
+        this.context.programs.delete(this.program)
     }
 
     paint(time: number, delay: number): void {

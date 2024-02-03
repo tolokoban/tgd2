@@ -4,8 +4,8 @@ import Column from "@/components/demo/Column"
 import CodeViewer from "@/components/demo/CodeViewer"
 import Demo from "./background.demo"
 
-const FOCUS = "    const texture = new TdgTexture2D(ctx, {\n        image: BackgroundURL,\n    })\n    const background = new TgdPainterBackground(ctx, texture)\n    ctx.add(background)\n    ctx.paint()"
-const FULL = "import { TdgTexture2D, TgdContext, TgdPainterBackground } from \"@tolokoban/tgd\"\nimport View from \"@/components/demo/Tgd\"\n\nimport BackgroundURL from \"./helmet.webp\"\n\nfunction init(ctx: TgdContext) {\n    const texture = new TdgTexture2D(ctx, {\n        image: BackgroundURL,\n    })\n    const background = new TgdPainterBackground(ctx, texture)\n    ctx.add(background)\n    ctx.paint()\n}\n\nexport default function Demo() {\n    return <View onReady={init} />\n}\n"
+const FOCUS = ""
+const FULL = ""
 
 export default function DemoContainer() {
     const [full, setFull] = React.useState(false)

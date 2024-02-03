@@ -1,4 +1,4 @@
-import { TgdProgram } from "@/program/program"
+import { TgdProgram } from "@/types"
 import {
     TgdBufferOptionTarget,
     TgdBufferOptionUsage,
@@ -109,6 +109,11 @@ export class TgdDataset<T extends Record<string, TgdDatasetType>> {
         return this.data
     }
 
+    /**
+     * Enable the vertex attrib array, and set
+     * the vertex attrib pointer for every declared
+     * attribute.
+     */
     defineAttributes(gl: WebGL2RenderingContext, prg: TgdProgram) {
         let offsetDestination = 0
         const { definitions } = this

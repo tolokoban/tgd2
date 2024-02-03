@@ -1,5 +1,4 @@
-import { TgdProgram } from "@/program/program"
-import { TdgTexture2D } from "@/texture/texture2d"
+import { TgdProgram, TdgTexture2D } from "@/types"
 import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter"
 import { TgdDataset } from "@/dataset/dataset"

@@ -1,6 +1,6 @@
 import { TgdBuffer } from "@/buffer"
 import { TgdDataset } from "@/dataset"
-import { TgdProgram } from "@/program"
+import { TgdProgram } from "@/types"
 
 export class TgdVAO {
     public readonly vao: WebGLVertexArrayObject

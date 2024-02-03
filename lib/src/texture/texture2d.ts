@@ -1,40 +1,12 @@
-import { TgdProgram } from "@/program"
 import { TgdLoaderImage } from "@/loader"
-import { TgdContext } from ".."
 import { TgdEvent } from "@/event/event"
+import { TgdProgram, TdgTexture2D, TdgTexture2DOptions } from "@/types"
 
-export type TdgTexture2DOptionWrap =
-    | "REPEAT"
-    | "CLAMP_TO_EDGE"
-    | "MIRRORED_REPEAT"
+const DEFAULT_DATA = new Uint8Array([200, 200, 200, 255])
 
-export type TdgTexture2DOptionMinFilter =
-    | "LINEAR"
-    | "NEAREST"
-    | "NEAREST_MIPMAP_NEAREST"
-    | "LINEAR_MIPMAP_NEAREST"
-    | "NEAREST_MIPMAP_LINEAR"
-    | "LINEAR_MIPMAP_LINEAR"
-
-export type TdgTexture2DOptionMagFilter = "LINEAR" | "NEAREST"
-
-export interface TdgTexture2DOptions {
-    wrapS: TdgTexture2DOptionWrap
-    wrapT: TdgTexture2DOptionWrap
-    wrapR: TdgTexture2DOptionWrap
-    minFilter: TdgTexture2DOptionMinFilter
-    magFilter: TdgTexture2DOptionMagFilter
-    image?:
-        | string
-        | ImageData
-        | HTMLImageElement
-        | HTMLCanvasElement
-        | HTMLVideoElement
-        | ImageBitmap
-}
-
-export class TdgTexture2D {
+export class TdgTexture2DImpl implements TdgTexture2D {
     public readonly texture: WebGLTexture
+    public readonly eventImageUpdate = new TgdEvent<TdgTexture2D>()
 
     private readonly options: TdgTexture2DOptions
     private _width = 0
@@ -48,10 +20,10 @@ export class TdgTexture2D {
         | ImageBitmap = null
 
     constructor(
-        public readonly context: TgdContext,
+        public readonly gl: WebGL2RenderingContext,
+        private readonly refresh: () => void,
         options: Partial<TdgTexture2DOptions> = {}
     ) {
-        const { gl } = context
         this.options = {
             wrapS: "REPEAT",
             wrapT: "REPEAT",
@@ -65,6 +37,17 @@ export class TdgTexture2D {
 
         this.texture = texture
         gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            1,
+            1,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            DEFAULT_DATA
+        )
 
         // The texture doesn't wrap and it uses linear interpolation.
         const { wrapS, wrapT, wrapR, minFilter, magFilter } = this.options
@@ -74,6 +57,10 @@ export class TdgTexture2D {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[minFilter])
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
         if (options.image) this.loadImage(options.image)
+    }
+
+    delete() {
+        this.gl.deleteTexture(this.texture)
     }
 
     get image() {
@@ -89,13 +76,12 @@ export class TdgTexture2D {
     }
 
     bind() {
-        const { gl } = this.context
+        const { gl } = this
         gl.bindTexture(gl.TEXTURE_2D, this.texture)
     }
 
     activate(program: TgdProgram, uniformName: string, slot = 0) {
-        const { context, texture } = this
-        const { gl } = context
+        const { gl, texture } = this
         gl.activeTexture(gl.TEXTURE0 + slot)
         gl.bindTexture(gl.TEXTURE_2D, texture)
         program.uniform1i(uniformName, slot)
@@ -113,8 +99,10 @@ export class TdgTexture2D {
         if (typeof image === "string") {
             TgdLoaderImage.image(image)
                 .then(img => {
-                    if (img) this.loadImage(img)
-                    else {
+                    if (img) {
+                        this.loadImage(img)
+                        this.refresh()
+                    } else {
                         console.error(
                             "[TgdTexture2D]Unable to load image:",
                             image
@@ -125,8 +113,7 @@ export class TdgTexture2D {
             return
         }
 
-        const { context, texture } = this
-        const { gl } = context
+        const { gl, texture } = this
         gl.bindTexture(gl.TEXTURE_2D, texture)
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
         gl.texImage2D(
@@ -141,8 +128,6 @@ export class TdgTexture2D {
         this._width = image.width
         this._height = image.height
         this._image = image
-        // Textures can be loaded lazily, so we want to
-        // refresh the canvas when its done.
-        this.context.paint()
+        this.eventImageUpdate.dispatch(this)
     }
 }

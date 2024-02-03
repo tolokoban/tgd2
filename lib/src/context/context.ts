@@ -1,8 +1,7 @@
-import { TgdResource } from "@/resource/resource"
 import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
-import { TgdProgram, TgdProgramOptions } from "@/program/program"
-import { TgdFactoryProgram } from "@/factory/program"
+import { TgdProgram } from "@/types"
+import { TgdResourceProgram, TdgResourceTexture2D } from "@/resource"
 import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdVAO } from "@/vao"
@@ -13,7 +12,8 @@ export interface TgdContextOptions extends WebGLContextAttributes {
 
 export class TgdContext {
     public readonly gl: WebGL2RenderingContext
-    public readonly programs: TgdResource<TgdProgramOptions, TgdProgram>
+    public readonly programs: TgdResourceProgram
+    public readonly textures2D: TdgResourceTexture2D
 
     private readonly observer: ResizeObserver
     private readonly painters = new TgdPainterGroup()
@@ -29,7 +29,8 @@ export class TgdContext {
         if (!gl) throw Error("Unable to create a WebGL2 context!")
 
         this.gl = gl
-        this.programs = new TgdResource(new TgdFactoryProgram(gl))
+        this.programs = new TgdResourceProgram(gl)
+        this.textures2D = new TdgResourceTexture2D(gl, this.paint)
         const onResize = options.onResize ?? handleResize
         this.observer = new ResizeObserver(() => {
             onResize(gl, canvas.clientWidth, canvas.clientHeight)
