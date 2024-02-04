@@ -130,7 +130,7 @@ export class TgdVec4 extends Float32Array {
         return this
     }
 
-    scale(factor: number): TgdVec4 {
+    scale(factor: number): this {
         this[0] *= factor
         this[1] *= factor
         this[2] *= factor
@@ -156,7 +156,7 @@ export class TgdVec4 extends Float32Array {
         )
     }
 
-    normalize(): TgdVec4 {
+    normalize(): this {
         const squareLength =
             this[0] * this[0] +
             this[1] * this[1] +

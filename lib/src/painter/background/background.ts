@@ -2,7 +2,7 @@ import { TgdProgram, TdgTexture2D } from "@/types"
 import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter"
 import { TgdDataset } from "@/dataset/dataset"
-import { TgdVAO } from "@/vao"
+import { TgdVertexArray } from "@/vao"
 
 import VERT from "./background.vert"
 import FRAG from "./background.frag"
@@ -18,7 +18,7 @@ export class TgdPainterBackground implements TgdPainter {
     public texture: TdgTexture2D
 
     private readonly program: TgdProgram
-    private readonly vao: TgdVAO
+    private readonly vao: TgdVertexArray
 
     /**
      * With a zoom of **1**, the image will have the smaller size to cover

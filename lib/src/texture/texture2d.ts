@@ -104,7 +104,7 @@ export class TdgTexture2DImpl implements TdgTexture2D {
                         this.refresh()
                     } else {
                         console.error(
-                            "[TgdTexture2D]Unable to load image:",
+                            "[TgdTexture2D] Unable to load image:",
                             image
                         )
                     }

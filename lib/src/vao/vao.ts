@@ -2,7 +2,7 @@ import { TgdBuffer } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdProgram } from "@/types"
 
-export class TgdVAO {
+export class TgdVertexArray {
     public readonly vao: WebGLVertexArrayObject
 
     private readonly drawBuffers: TgdBuffer[] = []

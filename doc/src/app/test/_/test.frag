@@ -3,36 +3,47 @@
 precision mediump float;
 
 uniform vec3 uniAxisZ;
+uniform sampler2D uniTexture;
 
 out vec4 FragColor;
 
-in vec3 varColor;
+in vec2 varUV;
 in vec3 varNormal;
 
-const vec3 SUN = normalize(vec3(1, 2, 4));
+const vec3 SUN_1 = normalize(vec3(1, 2, 4));
+const vec3 SUN_2 = normalize(vec3(0, 0, -1));
 
 float calcDiffuse(vec3 normal, vec3 lightVector, float lightIntensity);
 float calcSpecular(vec3 normal, vec3 cameraZ, vec3 lightVector, float lightIntensity, float sharpness);
 
 void main() {
+    vec3 color = texture(uniTexture, varUV).rgb;
     vec3 normal = normalize(varNormal);
-    float ambient = 0.3;
+    float ambient = 0.2;
     float diffuse = calcDiffuse(
         normal,
-        SUN,
-        1.5
+        SUN_1,
+        1.0
+    ) + calcDiffuse(
+        normal,
+        SUN_2,
+        0.0
     );
     float specular = calcSpecular(
         normal,
         uniAxisZ,
-        SUN,
-        2.0,
-        10.0
+        SUN_1,
+        0.7,
+        50.0
+    ) + calcSpecular(
+        normal,
+        uniAxisZ,
+        SUN_2,
+        0.0,
+        1.0
     );
-    diffuse = dot(normal, uniAxisZ);
-    specular = 0.0;
     FragColor = vec4(
-        varColor * (ambient + diffuse) + vec3(specular), 
+        color * (ambient + diffuse) + vec3(specular), 
         1
     );
 }

@@ -1,10 +1,14 @@
 import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
 import { TgdProgram } from "@/types"
-import { TgdResourceProgram, TdgResourceTexture2D } from "@/resource"
+import {
+    TgdResourceProgram,
+    TdgResourceTexture2D,
+    TdgResourceTextureCube,
+} from "@/resource"
 import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
-import { TgdVAO } from "@/vao"
+import { TgdVertexArray } from "@/vao"
 
 export interface TgdContextOptions extends WebGLContextAttributes {
     onResize?(gl: WebGL2RenderingContext, width: number, height: number): void
@@ -14,6 +18,7 @@ export class TgdContext {
     public readonly gl: WebGL2RenderingContext
     public readonly programs: TgdResourceProgram
     public readonly textures2D: TdgResourceTexture2D
+    public readonly texturesCube: TdgResourceTextureCube
 
     private readonly observer: ResizeObserver
     private readonly painters = new TgdPainterGroup()
@@ -31,6 +36,7 @@ export class TgdContext {
         this.gl = gl
         this.programs = new TgdResourceProgram(gl)
         this.textures2D = new TdgResourceTexture2D(gl, this.paint)
+        this.texturesCube = new TdgResourceTextureCube(gl, this.paint)
         const onResize = options.onResize ?? handleResize
         this.observer = new ResizeObserver(() => {
             onResize(gl, canvas.clientWidth, canvas.clientHeight)
@@ -109,8 +115,8 @@ export class TgdContext {
         program?: TgdProgram,
         datasets?: TgdDataset<any>[],
         elements?: Uint8Array | Uint16Array | Uint32Array
-    ): TgdVAO {
-        return new TgdVAO(this.gl, program, datasets, elements)
+    ): TgdVertexArray {
+        return new TgdVertexArray(this.gl, program, datasets, elements)
     }
 
     /**

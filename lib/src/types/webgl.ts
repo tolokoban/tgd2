@@ -18,3 +18,10 @@ export type WebglDrawMode =
     | "TRIANGLE_STRIP"
     | "TRIANGLE_FAN"
     | "TRIANGLES"
+
+export type WebglImage =
+    | ImageData
+    | HTMLImageElement
+    | HTMLCanvasElement
+    | HTMLVideoElement
+    | ImageBitmap

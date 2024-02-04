@@ -1,5 +1,5 @@
 import { TgdProgram } from "./program"
-import { WebglMagFilter, WebglMinFilter, WebglWrap } from "./webgl"
+import { WebglImage, WebglMagFilter, WebglMinFilter, WebglWrap } from "./webgl"
 
 export interface TdgTexture2DOptions {
     wrapS: WebglWrap
@@ -7,34 +7,14 @@ export interface TdgTexture2DOptions {
     wrapR: WebglWrap
     minFilter: WebglMinFilter
     magFilter: WebglMagFilter
-    image?:
-        | string
-        | ImageData
-        | HTMLImageElement
-        | HTMLCanvasElement
-        | HTMLVideoElement
-        | ImageBitmap
+    image?: string | WebglImage
 }
 
 export interface TdgTexture2D {
     readonly width: number
     readonly height: number
-    readonly image:
-        | null
-        | ImageData
-        | HTMLImageElement
-        | HTMLCanvasElement
-        | HTMLVideoElement
-        | ImageBitmap
+    readonly image: null | WebglImage
     bind(): void
     activate(program: TgdProgram, uniformName: string, slot?: number): void
-    loadImage(
-        image:
-            | string
-            | ImageData
-            | HTMLImageElement
-            | HTMLCanvasElement
-            | HTMLVideoElement
-            | ImageBitmap
-    ): void
+    loadImage(image: string | WebglImage): void
 }

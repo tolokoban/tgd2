@@ -5,7 +5,7 @@ import {
     TgdProgram,
     TdgTexture2D,
     TgdQuat,
-    TgdVAO,
+    TgdVertexArray,
     TdgInputKeyboard,
     TgdVec3,
     TgdControllerCameraOrbit,
@@ -17,13 +17,13 @@ import { parse } from "./parser"
 
 export default class Painter implements TgdPainter {
     public texture: TdgTexture2D
+    public readonly camera = new TgdCameraPerspective()
 
     private readonly orbitControl: TgdControllerCameraOrbit
     private readonly axisZ = new TgdVec3()
     private readonly program: TgdProgram
-    private readonly vao: TgdVAO
+    private readonly vao: TgdVertexArray
     private readonly count: number
-    private readonly camera = new TgdCameraPerspective()
     private readonly cameraL = new TgdCameraPerspective()
     private readonly cameraR = new TgdCameraPerspective()
     private readonly keyboard = new TdgInputKeyboard()
