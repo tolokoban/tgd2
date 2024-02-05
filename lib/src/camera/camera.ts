@@ -219,10 +219,12 @@ export abstract class TgdCamera {
     }
 
     private updateAxisIfNeeded() {
-        if (!this.dirtyAxis) return
+        if (this.dirtyAxis) this.updateAxis()
+    }
 
+    private updateAxis() {
         const { tmpMat3 } = this
-        tmpMat3.fromQuat(this.orientation) //.transpose()
+        tmpMat3.fromQuat(this.orientation)
         tmpMat3.toAxis(this.axisX, this.axisY, this.axisZ)
         this.dirtyAxis = false
     }
@@ -232,8 +234,7 @@ export abstract class TgdCamera {
 
         const { tmpMat3, tmpVec3 } = this
         const mat = this._matrixViewModel
-        this.dirtyAxis = true
-        this.updateAxisIfNeeded()
+        this.updateAxis()
         const d = this._distance
         const { x: tx, y: ty, z: tz } = this.target
         const { x: ax, y: ay, z: az } = this.axisZ
