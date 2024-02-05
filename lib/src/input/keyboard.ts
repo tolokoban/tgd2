@@ -1,5 +1,6 @@
 export class TdgInputKeyboard {
-    private readonly keys = new Set<string>()
+    private readonly keysDown = new Set<string>()
+    private readonly keysUp = new Set<string>()
     private attached = false
 
     constructor() {
@@ -18,16 +19,26 @@ export class TdgInputKeyboard {
 
     isPressed(...keys: string[]): boolean {
         for (const key of keys) {
-            if (!this.keys.has(key)) return false
+            if (!this.keysDown.has(key)) return false
         }
         return true
     }
 
+    hasClicked(key: string): boolean {
+        if (this.keysUp.has(key)) {
+            this.keysUp.delete(key)
+            return true
+        }
+        return false
+    }
+
     private readonly handleKeyDown = (evt: KeyboardEvent) => {
-        this.keys.add(evt.key)
+        this.keysDown.add(evt.key)
+        this.keysUp.delete(evt.key)
     }
 
     private readonly handleKeyUp = (evt: KeyboardEvent) => {
-        this.keys.delete(evt.key)
+        this.keysDown.delete(evt.key)
+        this.keysUp.add(evt.key)
     }
 }

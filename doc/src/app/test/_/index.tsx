@@ -7,12 +7,12 @@ import {
 import View from "@/components/demo/Tgd"
 import Painter from "./painter"
 
-import PosX from "@/gfx/cubemap/test/px.webp"
-import NegX from "@/gfx/cubemap/test/nx.webp"
-import PosY from "@/gfx/cubemap/test/py.webp"
-import NegY from "@/gfx/cubemap/test/ny.webp"
-import PosZ from "@/gfx/cubemap/test/pz.webp"
-import NegZ from "@/gfx/cubemap/test/nz.webp"
+import PosX from "@/gfx/cubemap/train-station/px.webp"
+import NegX from "@/gfx/cubemap/train-station/nx.webp"
+import PosY from "@/gfx/cubemap/train-station/py.webp"
+import NegY from "@/gfx/cubemap/train-station/ny.webp"
+import PosZ from "@/gfx/cubemap/train-station/pz.webp"
+import NegZ from "@/gfx/cubemap/train-station/nz.webp"
 
 import PaletteURL from "./palette.jpg"
 

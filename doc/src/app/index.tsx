@@ -15,6 +15,8 @@
     const Page3 = React.lazy(() => import("./painter/clear/page.mdx"))
     const Page4 = React.lazy(() => import("./painter/logic/page.mdx"))
     const Page5 = React.lazy(() => import("./test/page.mdx"))
+    const Page6 = React.lazy(() => import("./texture/page.mdx"))
+    const Page7 = React.lazy(() => import("./texture/cube/page.mdx"))
     
     export default function App() {
         return (
@@ -25,6 +27,9 @@
                     <Route path="/painter/logic" Page={Page4} Template={Template0} fallback={<Loading0 />} />
                 </Route>
                 <Route path="/test" Page={Page5} Template={Template0} fallback={<Loading0 />} />
+                <Route path="/texture" Page={Page6} Template={Template0} fallback={<Loading0 />}>
+                    <Route path="/texture/cube" Page={Page7} Template={Template0} fallback={<Loading0 />} />
+                </Route>
             </Route>
         )
     }

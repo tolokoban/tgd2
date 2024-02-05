@@ -47,6 +47,7 @@ export default class Painter implements TgdPainter {
         this.camera.distance = 10
         this.orbitControl = new TgdControllerCameraOrbit(this.camera)
         this.orbitControl.attach(context.canvas)
+        this.camera.face("-Y+Z-X")
     }
 
     delete(): void {
@@ -56,12 +57,21 @@ export default class Painter implements TgdPainter {
 
     paint(time: number, delay: number): void {
         const { gl } = this.context
-        const { texture, vao, program, type, count, cameraL, cameraR, axisZ } =
-            this
-        cameraL.width = gl.drawingBufferWidth
-        cameraL.height = gl.drawingBufferHeight
-        cameraR.width = gl.drawingBufferWidth
-        cameraR.height = gl.drawingBufferHeight
+        const {
+            texture,
+            vao,
+            program,
+            type,
+            count,
+            camera,
+            cameraL,
+            cameraR,
+            axisZ,
+        } = this
+        cameraL.screenWidth = gl.drawingBufferWidth
+        cameraL.screenHeight = gl.drawingBufferHeight
+        cameraR.screenWidth = gl.drawingBufferWidth
+        cameraR.screenHeight = gl.drawingBufferHeight
         program.use()
         texture.activate(program, "uniTexture")
         program.uniform3fv("uniAxisZ", axisZ)
@@ -99,6 +109,9 @@ export default class Painter implements TgdPainter {
         }
         if (keyboard.isPressed("0")) {
             camera.setOrientation(new TgdQuat())
+        }
+        if (keyboard.hasClicked("d")) {
+            camera.debug()
         }
         const speedRadius = 1e-3
         if (keyboard.isPressed("+")) {

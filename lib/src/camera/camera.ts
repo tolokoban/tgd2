@@ -1,4 +1,4 @@
-import { TgdQuat, TgdVec3, TgdMat4, TgdVec4 } from "@/math"
+import { TgdQuat, TgdVec3, TgdMat4, TgdVec4, TgdQuatFace } from "@/math"
 import { TgdMat3 } from "@/math/mat3"
 
 export abstract class TgdCamera {
@@ -39,8 +39,18 @@ export abstract class TgdCamera {
             if (eq(y, -1)) return "-Y"
             if (eq(z, +1)) return "+Z"
             if (eq(z, -1)) return "-Z"
+            return "??"
         }
+        const Axis = [
+            new TgdVec3(+1, +0, +0),
+            new TgdVec3(-1, +0, +0),
+            new TgdVec3(+0, +1, +0),
+            new TgdVec3(+0, -1, +0),
+            new TgdVec3(+0, +0, +1),
+            new TgdVec3(+0, +0, -1),
+        ]
         const A = Math.sqrt(2) / 2
+        const H = 1 / 2
         const q = ({ x, y, z, w }: TgdQuat) => {
             return [x, y, z, w]
                 .map(v => {
@@ -49,25 +59,84 @@ export abstract class TgdCamera {
                     if (eq(v, -1)) return "-1"
                     if (eq(v, +A)) return "+A"
                     if (eq(v, -A)) return "-A"
+                    if (eq(v, +H)) return "+H"
+                    if (eq(v, -H)) return "-H"
                     return v
                 })
                 .join(", ")
         }
-        const lines: string[] = []
-        for (let i = 0; i < 4; i++) {
-            this.orientation.face("+X+Y+Z")
-            this.orbitAroundY(i * (Math.PI / 2))
-            this.updateAxisIfNeeded()
-            this.updateIfNeeded()
-            lines.push(
-                `\n"${name(this.axisX)}${name(this.axisY)}${name(
-                    this.axisZ
-                )}": [${q(this.orientation)}],`
-            )
+        const colin = ([x1, y1, z1]: TgdVec3, [x2, y2, z2]: TgdVec3) => {
+            const dot = x1 * x2 + y1 * y2 + z1 * z2
+            return Math.abs(dot) > 0.5
         }
+        const ortho = (
+            [x1, y1, z1]: TgdVec3,
+            [x2, y2, z2]: TgdVec3,
+            [x3, y3, z3]: TgdVec3
+        ) => {
+            const x = y1 * z2 - y2 * z1 + x3
+            const y = x2 * z1 - x1 * z2 + y3
+            const z = x1 * y2 - x2 * y1 + z3
+            return Math.abs(x * x + y * y + z * z) > 0.01
+        }
+        const lines: string[] = []
+        for (const X of Axis) {
+            for (const Y of Axis) {
+                if (colin(X, Y)) continue
+
+                for (const Z of Axis) {
+                    if (colin(X, Z) || colin(Y, Z)) continue
+
+                    if (!ortho(X, Y, Z)) continue
+
+                    this.orientation.fromAxis(X, Y, Z)
+                    this.updateAxis()
+                    lines.push(
+                        `\n"${name(X)}${name(Y)}${name(Z)}": [${q(
+                            this.orientation
+                        )}],`
+                    )
+                }
+            }
+        }
+        // for (let j = 0; j < 4; j++) {
+        //     for (let i = 0; i < 4; i++) {
+        //         this.orientation.face("+X+Y+Z")
+        //         this.orbitAroundY(i * (Math.PI / 2))
+        //         this.updateAxis()
+        //         this.orbitAroundZ(j * (Math.PI / 2))
+        //         this.updateAxis()
+        //         lines.push(
+        //             `\n"${name(this.axisX)}${name(this.axisY)}${name(
+        //                 this.axisZ
+        //             )}": [${q(this.orientation)}],`
+        //         )
+        //     }
+        // }
+        // lines.push("\n")
+        // for (let i = 0; i < 4; i += 2) {
+        //     for (let j = 0; j < 4; j++) {
+        //         this.orientation.face("+X+Y+Z")
+        //         this.orbitAroundX(i * (Math.PI / 2))
+        //         this.updateAxis()
+        //         this.orbitAroundZ(j * (Math.PI / 2))
+        //         this.updateAxis()
+        //         lines.push(
+        //             `\n"${name(this.axisX)}${name(this.axisY)}${name(
+        //                 this.axisZ
+        //             )}": [${q(this.orientation)}],`
+        //         )
+        //     }
+        // }
         console.log(lines.join(""))
 
         this.orientation.face()
+    }
+
+    face(face: TgdQuatFace) {
+        this.orientation.face(face)
+        this.dirty = true
+        this.dirtyAxis = true
     }
 
     from({ orientation, target, distance, zoom }: TgdCamera): this {
@@ -80,8 +149,21 @@ export abstract class TgdCamera {
         return this
     }
 
-    toAxisZ(axis: TgdVec3): this {
-        this.orientation.toAxisZ(axis)
+    toAxisX(axisX: TgdVec3): this {
+        this.updateAxisIfNeeded()
+        axisX.from(this.axisX)
+        return this
+    }
+
+    toAxisY(axisY: TgdVec3): this {
+        this.updateAxisIfNeeded()
+        axisY.from(this.axisY)
+        return this
+    }
+
+    toAxisZ(axisZ: TgdVec3): this {
+        this.updateAxisIfNeeded()
+        axisZ.from(this.axisZ)
         return this
     }
 
@@ -218,6 +300,10 @@ export abstract class TgdCamera {
         return this
     }
 
+    debug(caption = "Camera") {
+        this.orientation.debug(`${caption} quaternion:`)
+    }
+
     private updateAxisIfNeeded() {
         if (this.dirtyAxis) this.updateAxis()
     }
@@ -227,6 +313,17 @@ export abstract class TgdCamera {
         tmpMat3.fromQuat(this.orientation)
         tmpMat3.toAxis(this.axisX, this.axisY, this.axisZ)
         this.dirtyAxis = false
+
+        if (
+            Math.abs(1 - this.axisX.size) > 0.1 ||
+            Math.abs(1 - this.axisY.size) > 0.1 ||
+            Math.abs(1 - this.axisZ.size) > 0.1
+        ) {
+            this.axisX.debug("Axis X")
+            this.axisY.debug("Axis Y")
+            this.axisZ.debug("Axis Z")
+            throw Error("STOP!")
+        }
     }
 
     private updateIfNeeded(): void {

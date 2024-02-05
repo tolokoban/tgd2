@@ -1,17 +1,27 @@
 import { TgdMat4 } from "@/math"
 import { TgdCamera } from "./camera"
 
-export class TgdCameraPerspective extends TgdCamera {
+export class TgdCameraOrthographic extends TgdCamera {
     private dirtyProjection = true
     private readonly _matrixProjection = new TgdMat4()
     private _width = 1920
     private _height = 1080
-    private _fovy = Math.PI / 4
+    private _spaceHeight = 10
     private _near = 1e-3
-    private _far = Infinity
+    private _far = 1e3
 
     constructor() {
         super()
+    }
+
+    get spaceHeight() {
+        return this._spaceHeight
+    }
+    set spaceHeight(v: number) {
+        if (v === this._spaceHeight) return
+
+        this._spaceHeight = v
+        this.dirtyProjection = true
     }
 
     get screenWidth() {
@@ -33,15 +43,7 @@ export class TgdCameraPerspective extends TgdCamera {
         this._height = v
         this.dirtyProjection = true
     }
-    get fovy() {
-        return this._fovy
-    }
-    set fovy(v: number) {
-        if (v === this._fovy) return
 
-        this._fovy = v
-        this.dirtyProjection = true
-    }
     get near() {
         return this._near
     }
@@ -51,6 +53,7 @@ export class TgdCameraPerspective extends TgdCamera {
         this._near = v
         this.dirtyProjection = true
     }
+
     get far() {
         return this._far
     }
@@ -60,6 +63,7 @@ export class TgdCameraPerspective extends TgdCamera {
         this._far = v
         this.dirtyProjection = true
     }
+
     get matrixProjection(): TgdMat4 {
         this.updateProjectionIfNeeded()
         return this._matrixProjection
@@ -68,34 +72,31 @@ export class TgdCameraPerspective extends TgdCamera {
     private updateProjectionIfNeeded(): void {
         if (!this.dirtyProjection) return
 
-        const fovy = this._fovy
-        const aspect = this._width / this._height
-        const near = this._near
-        const far = this._far
+        const { near, far, _width, _height, _spaceHeight } = this
+        const top = _spaceHeight * 0.5
+        const bottom = -top
+        const right = (top * _width) / _height
+        const left = -right
         const out = this._matrixProjection
-        const f = 1.0 / Math.tan(fovy / 2)
-        out[0] = f / aspect
+        const lr = 1 / (left - right)
+        const bt = 1 / (bottom - top)
+        const nf = 1 / (near - far)
+        out[0] = -2 * lr
         out[1] = 0
         out[2] = 0
         out[3] = 0
         out[4] = 0
-        out[5] = f
+        out[5] = -2 * bt
         out[6] = 0
         out[7] = 0
         out[8] = 0
         out[9] = 0
-        out[11] = -1
-        out[12] = 0
-        out[13] = 0
-        out[15] = 0
-        if (far !== Infinity) {
-            const nf = 1 / (near - far)
-            out[10] = (far + near) * nf
-            out[14] = 2 * far * near * nf
-        } else {
-            out[10] = -1
-            out[14] = -2 * near
-        }
+        out[10] = nf
+        out[11] = 0
+        out[12] = (left + right) * lr
+        out[13] = (top + bottom) * bt
+        out[14] = near * nf
+        out[15] = 1
         this.dirtyProjection = true
     }
 }

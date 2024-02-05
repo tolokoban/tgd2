@@ -3,27 +3,45 @@ import { WebglImage, WebglMagFilter, WebglMinFilter, WebglWrap } from "./webgl"
 
 export interface TdgTextureCubeOptions {
     /**
-     * (-Z, -Y)
+     * When you look at this image the
+     *
+     * - Right points toward `-Z`
+     * - Top points toward `-Y`
      */
     imagePosX: string | WebglImage
     /**
-     * (+Z, -Y)
+     * When you look at this image the
+     *
+     * - Right points toward `+Z`
+     * - Top points toward `-Y`
      */
     imageNegX: string | WebglImage
     /**
-     * (+X, +Z)
+     * When you look at this image the
+     *
+     * - Right points toward `+X`
+     * - Top points toward `+Z`
      */
     imagePosY: string | WebglImage
     /**
-     * (+X, -Z)
+     * When you look at this image the
+     *
+     * - Right points toward `+X`
+     * - Top points toward `-Z`
      */
     imageNegY: string | WebglImage
     /**
-     * (+X, -Y)
+     * When you look at this image the
+     *
+     * - Right points toward `+X`
+     * - Top points toward `-Y`
      */
     imagePosZ: string | WebglImage
     /**
-     * (-X, -Y)
+     * When you look at this image the
+     *
+     * - Right points toward `-X`
+     * - Top points toward `-Y`
      */
     imageNegZ: string | WebglImage
 }

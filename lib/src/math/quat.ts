@@ -1,6 +1,8 @@
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 
+export type TgdQuatFace = keyof typeof FACES
+
 export class TgdQuat extends TgdVec4 {
     constructor()
     constructor(source: TgdQuat)
@@ -33,7 +35,7 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
-    fromAxis(X: TgdVec3, Y: TgdVec3, Z: TgdVec3) {
+    fromAxis(X: TgdVec3, Y: TgdVec3, Z: TgdVec3): this {
         // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
         // article "Quaternion Calculus and Fast Animation".
         const fTrace = X.x + Y.y + Z.z
@@ -61,6 +63,7 @@ export class TgdQuat extends TgdVec4 {
             this[j] = (axis[j][i] + axis[i][j]) * fRoot
             this[k] = (axis[k][i] + axis[i][k]) * fRoot
         }
+        return this.normalize()
     }
 
     rotateAroundX(angleInRadians: number): this {
@@ -132,7 +135,7 @@ export class TgdQuat extends TgdVec4 {
         return vec
     }
 
-    face(face: keyof typeof FACES = "+X+Y+Z"): this {
+    face(face: TgdQuatFace = "+X+Y+Z"): this {
         const [x, y, z, w] = FACES[face]
         this.x = x
         this.y = y
@@ -143,10 +146,31 @@ export class TgdQuat extends TgdVec4 {
 }
 
 const A = Math.sqrt(2) / 2
+const H = 0.5
 
 const FACES = {
     "+X+Y+Z": [+0, +0, +0, +1],
     "-Z+Y+X": [+0, +A, +0, +A],
     "-X+Y-Z": [+0, +1, +0, +0],
     "+Z+Y-X": [+0, -A, +0, +A],
+    "+X+Z-Y": [+A, +0, +0, +A],
+    "+Y+Z+X": [+H, +H, +H, +H],
+    "-X+Z+Y": [+0, +A, +A, +0],
+    "-Y+Z-X": [+H, -H, -H, +H],
+    "+X-Y-Z": [+1, +0, +0, +0],
+    "+X-Z+Y": [-A, +0, +0, +A],
+    "-X-Y+Z": [+0, +0, +1, +0],
+    "-X-Z-Y": [+0, +A, -A, +0],
+    "+Y+X-Z": [+A, +A, +0, +0],
+    "+Y-X+Z": [+0, +0, +A, +A],
+    "+Y-Z-X": [+H, +H, -H, -H],
+    "-Y+X+Z": [+0, +0, -A, +A],
+    "-Y-X-Z": [+A, -A, +0, +0],
+    "-Y-Z+X": [+H, -H, +H, -H],
+    "+Z+X+Y": [+H, +H, +H, -H],
+    "+Z-X-Y": [+H, -H, +H, +H],
+    "+Z-Y+X": [+A, +0, +A, +0],
+    "-Z+X-Y": [+H, +H, -H, +H],
+    "-Z-X+Y": [+H, -H, -H, -H],
+    "-Z-Y-X": [+A, +0, -A, +0],
 }

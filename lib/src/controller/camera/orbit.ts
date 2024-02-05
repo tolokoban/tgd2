@@ -13,7 +13,6 @@ export class TgdControllerCameraOrbit {
 
         this.pointer = new TgdInputPointer({
             canvas,
-            onMoveStart: this.handleMoveStart,
             onMove: this.handleMove,
             onZoom: this.handleZoom,
         })
@@ -25,8 +24,6 @@ export class TgdControllerCameraOrbit {
             this.pointer = null
         }
     }
-
-    private readonly handleMoveStart = ({ x, y, t }: TgdInputPointerEvent) => {}
 
     private readonly handleMove = (evt: {
         current: TgdInputPointerEvent
