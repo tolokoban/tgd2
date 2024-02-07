@@ -5,3 +5,4 @@
 **/*.frag.ts
 node_modules/
 dist
+lib/test_coverage/
