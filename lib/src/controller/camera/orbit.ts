@@ -2,11 +2,25 @@ import { TgdCamera } from "@/camera"
 import { TdgInputKeyboard } from "@/input"
 import { TgdInputPointer, TgdInputPointerEvent } from "@/input/pointer"
 
+export interface TgdControllerCameraOrbitOptions {
+    /** Drag inertia in milliseconds. */
+    inertia: number
+}
+
 export class TgdControllerCameraOrbit {
     private pointer: TgdInputPointer | null = null
     private keyboard = new TdgInputKeyboard()
+    private readonly options: TgdControllerCameraOrbitOptions
 
-    constructor(private readonly camera: TgdCamera) {}
+    constructor(
+        private readonly camera: TgdCamera,
+        options: Partial<TgdControllerCameraOrbitOptions> = {}
+    ) {
+        this.options = {
+            inertia: 500,
+            ...options,
+        }
+    }
 
     attach(canvas: HTMLCanvasElement) {
         if (this.pointer) this.pointer.detach()
@@ -15,6 +29,7 @@ export class TgdControllerCameraOrbit {
             canvas,
             onMove: this.handleMove,
             onZoom: this.handleZoom,
+            inertia: this.options.inertia,
         })
     }
 
