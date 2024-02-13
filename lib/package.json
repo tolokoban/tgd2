@@ -2,8 +2,8 @@
     "name": "tgd2",
     "version": "2.0.0",
     "description": "ToloGameDev library for WebGL2",
-    "main": "index.js",
-    "typings": "",
+    "main": "./dist/index.js",
+    "typings": "./dist/index.d.ts",
     "scripts": {
         "doc": "typedoc --watch",
         "build": "webpack",
@@ -33,7 +33,7 @@
         "jest-environment-jsdom": "^29.7.0",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",
-        "typedoc": "^0.25.7",
+        "typedoc": "^0.25.8",
         "typescript": "^5.3.3",
         "webpack": "^5.90.1",
         "webpack-cli": "^5.1.4"
@@ -49,8 +49,5 @@
             "last 3 firefox version",
             "last 3 safari version"
         ]
-    },
-    "dependencies": {
-        "gl-matrix": "^3.4.3"
     }
 }

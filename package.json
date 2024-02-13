@@ -1,17 +1,18 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "ToloGameDev library for WebGL2",
-    "main": "./dist/index.js",
+    "main": "./lib/dist/index.js",
     "module": "./lib/dist/index.js",
-    "types": "./lib/dist",
+    "types": "./lib/dist/index.d.ts",
     "files": [
         "./lib/dist"
     ],
     "scripts": {
         "ci": "cd lib && npm install && npm run build",
-        "doc": "cd lib && npm run doc",
-        "test": "cd lib && npm test"
+        "doc": "cd lib && npm run doc && cd ../doc && npm run deploy",
+        "test": "cd lib && npm test",
+        "deploy": "npm run ci && npm publish"
     },
     "repository": {
         "type": "git",

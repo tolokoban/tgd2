@@ -3,4 +3,9 @@ node_modules/
 doc/
 lib/
 @templates/
+_backup_/
+scripts/
+DEV.md
+!lib/dist/
+
 
