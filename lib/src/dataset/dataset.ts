@@ -80,6 +80,10 @@ export class TgdDataset<T extends Record<string, TgdDatasetType>> {
         this.data = null
     }
 
+    get(attribName: keyof T): ArrayBuffer {
+        return this.dataPerAttribute[attribName] ?? new ArrayBuffer(0)
+    }
+
     get dataView(): DataView {
         if (!this.data) {
             const data = new ArrayBuffer(this.stride * this.count)

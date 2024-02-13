@@ -19,118 +19,7 @@ export abstract class TgdCamera {
     private readonly tmpVec3 = new TgdVec3()
 
     constructor() {
-        this.orientation.face("+X+Y+Z")
-        this.orbitAroundY(Math.PI)
-        this.updateAxisIfNeeded()
-        console.log("****************************************")
-        this.axisX.debug("X")
-        this.axisY.debug("Y")
-        this.axisZ.debug("Z")
-        this.matrixViewModel.debug()
-        this.orientation.debug("Quat")
-
-        const eq = (a: number, b: number) => {
-            return Math.abs(a - b) < 1e-5
-        }
-        const name = ({ x, y, z }: TgdVec3) => {
-            if (eq(x, +1)) return "+X"
-            if (eq(x, -1)) return "-X"
-            if (eq(y, +1)) return "+Y"
-            if (eq(y, -1)) return "-Y"
-            if (eq(z, +1)) return "+Z"
-            if (eq(z, -1)) return "-Z"
-            return "??"
-        }
-        const Axis = [
-            new TgdVec3(+1, +0, +0),
-            new TgdVec3(-1, +0, +0),
-            new TgdVec3(+0, +1, +0),
-            new TgdVec3(+0, -1, +0),
-            new TgdVec3(+0, +0, +1),
-            new TgdVec3(+0, +0, -1),
-        ]
-        const A = Math.sqrt(2) / 2
-        const H = 1 / 2
-        const q = ({ x, y, z, w }: TgdQuat) => {
-            return [x, y, z, w]
-                .map(v => {
-                    if (eq(v, +0)) return "+0"
-                    if (eq(v, +1)) return "+1"
-                    if (eq(v, -1)) return "-1"
-                    if (eq(v, +A)) return "+A"
-                    if (eq(v, -A)) return "-A"
-                    if (eq(v, +H)) return "+H"
-                    if (eq(v, -H)) return "-H"
-                    return v
-                })
-                .join(", ")
-        }
-        const colin = ([x1, y1, z1]: TgdVec3, [x2, y2, z2]: TgdVec3) => {
-            const dot = x1 * x2 + y1 * y2 + z1 * z2
-            return Math.abs(dot) > 0.5
-        }
-        const ortho = (
-            [x1, y1, z1]: TgdVec3,
-            [x2, y2, z2]: TgdVec3,
-            [x3, y3, z3]: TgdVec3
-        ) => {
-            const x = y1 * z2 - y2 * z1 + x3
-            const y = x2 * z1 - x1 * z2 + y3
-            const z = x1 * y2 - x2 * y1 + z3
-            return Math.abs(x * x + y * y + z * z) > 0.01
-        }
-        const lines: string[] = []
-        for (const X of Axis) {
-            for (const Y of Axis) {
-                if (colin(X, Y)) continue
-
-                for (const Z of Axis) {
-                    if (colin(X, Z) || colin(Y, Z)) continue
-
-                    if (!ortho(X, Y, Z)) continue
-
-                    this.orientation.fromAxis(X, Y, Z)
-                    this.updateAxis()
-                    lines.push(
-                        `\n"${name(X)}${name(Y)}${name(Z)}": [${q(
-                            this.orientation
-                        )}],`
-                    )
-                }
-            }
-        }
-        // for (let j = 0; j < 4; j++) {
-        //     for (let i = 0; i < 4; i++) {
-        //         this.orientation.face("+X+Y+Z")
-        //         this.orbitAroundY(i * (Math.PI / 2))
-        //         this.updateAxis()
-        //         this.orbitAroundZ(j * (Math.PI / 2))
-        //         this.updateAxis()
-        //         lines.push(
-        //             `\n"${name(this.axisX)}${name(this.axisY)}${name(
-        //                 this.axisZ
-        //             )}": [${q(this.orientation)}],`
-        //         )
-        //     }
-        // }
-        // lines.push("\n")
-        // for (let i = 0; i < 4; i += 2) {
-        //     for (let j = 0; j < 4; j++) {
-        //         this.orientation.face("+X+Y+Z")
-        //         this.orbitAroundX(i * (Math.PI / 2))
-        //         this.updateAxis()
-        //         this.orbitAroundZ(j * (Math.PI / 2))
-        //         this.updateAxis()
-        //         lines.push(
-        //             `\n"${name(this.axisX)}${name(this.axisY)}${name(
-        //                 this.axisZ
-        //             )}": [${q(this.orientation)}],`
-        //         )
-        //     }
-        // }
-        console.log(lines.join(""))
-
-        this.orientation.face()
+        this.face("+X+Y+Z")
     }
 
     face(face: TgdQuatFace) {
@@ -205,7 +94,7 @@ export abstract class TgdCamera {
         const { target } = this
         if (v === target.x) return
 
-        this.x = v
+        target.x = v
         this.dirty = true
     }
 
@@ -216,7 +105,7 @@ export abstract class TgdCamera {
         const { target } = this
         if (v === target.y) return
 
-        this.y = v
+        target.y = v
         this.dirty = true
     }
 
@@ -227,7 +116,7 @@ export abstract class TgdCamera {
         const { target } = this
         if (v === target.z) return
 
-        this.z = v
+        target.z = v
         this.dirty = true
     }
 

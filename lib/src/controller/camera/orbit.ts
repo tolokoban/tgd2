@@ -1,4 +1,5 @@
 import { TgdCamera } from "@/camera"
+import { TgdEvent } from "@/event"
 import { TdgInputKeyboard } from "@/input"
 import { TgdInputPointer, TgdInputPointerEvent } from "@/input/pointer"
 
@@ -8,12 +9,19 @@ export interface TgdControllerCameraOrbitOptions {
 }
 
 export class TgdControllerCameraOrbit {
+    /**
+     * The camera will only move if `enabled === true`.
+     */
+    public enabled = true
+    public readonly eventZoomChange = new TgdEvent<TgdControllerCameraOrbit>()
+    public readonly eventOrbitChange = new TgdEvent<TgdControllerCameraOrbit>()
+
     private pointer: TgdInputPointer | null = null
     private keyboard = new TdgInputKeyboard()
     private readonly options: TgdControllerCameraOrbitOptions
 
     constructor(
-        private readonly camera: TgdCamera,
+        public readonly camera: TgdCamera,
         options: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
         this.options = {
@@ -23,7 +31,7 @@ export class TgdControllerCameraOrbit {
     }
 
     attach(canvas: HTMLCanvasElement) {
-        if (this.pointer) this.pointer.detach()
+        this.detach()
 
         this.pointer = new TgdInputPointer({
             canvas,
@@ -45,6 +53,8 @@ export class TgdControllerCameraOrbit {
         previous: TgdInputPointerEvent
         start: TgdInputPointerEvent
     }) => {
+        if (!this.enabled) return
+
         const { camera, keyboard } = this
         const dt = evt.current.t - evt.previous.t
         if (dt <= 0) return
@@ -62,6 +72,7 @@ export class TgdControllerCameraOrbit {
             const y = x1 * y2 - y1 * x2
             const ang = Math.atan2(y, x)
             camera.orbitAroundZ(-ang)
+            this.eventOrbitChange.dispatch(this)
             return
         }
 
@@ -70,15 +81,19 @@ export class TgdControllerCameraOrbit {
         const dy = (evt.current.y - evt.previous.y) * speed
         if (!keyboard.isPressed("x")) camera.orbitAroundY(-dx)
         if (!keyboard.isPressed("y")) camera.orbitAroundX(dy)
+        this.eventOrbitChange.dispatch(this)
     }
 
     private readonly handleZoom = (
         direction: number,
         preventDefault: () => void
     ) => {
+        if (!this.enabled) return
+
         const { camera } = this
         const dz = -direction * 1e-3
         camera.zoom = Math.max(1, camera.zoom + dz)
         preventDefault()
+        this.eventZoomChange.dispatch(this)
     }
 }

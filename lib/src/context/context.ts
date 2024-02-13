@@ -10,12 +10,52 @@ import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdVertexArray } from "@/vao"
 
+/**
+ * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
+ * object.
+ * @see {@link TgdContext}
+ */
 export interface TgdContextOptions extends WebGLContextAttributes {
+    /**
+     * You can override the behaviour for when a resize even occurs,
+     * by providing a callback `onResize(...)`.
+     *
+     * By default, this is what will happen:
+     * ```
+     * gl.canvas.width = width
+     * gl.canvas.height = height
+     * gl.viewport(0, 0, width, height)
+     * ```
+     * @param gl WebGL2 context.
+     * @param width New width of the viewport.
+     * @param height New height of the viewport.
+     */
     onResize?(gl: WebGL2RenderingContext, width: number, height: number): void
 }
 
+/**
+ * This class gives you a [WebGL2RenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext) for a given canvas,
+ * through its public readonly attribute `gl`.
+ *
+ * It also acts as a resource manager for most of the WebGL2 reources you need.
+ *
+ * @example
+ * ```
+ * import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
+ *
+ * export function paint(canvas: HTMLCanvasElement) {
+ *     const ctx = new TgdContext(canvas)
+ *     const clear = new TgdPainterClear(ctx, { color: [1, 0.667, 0, 1] })
+ *     ctx.add(clear)
+ *     ctx.paint()
+ * }
+ * ```
+ */
 export class TgdContext {
     public readonly gl: WebGL2RenderingContext
+    /**
+     * Resource manager for WebGLProgram.
+     */
     public readonly programs: TgdResourceProgram
     public readonly textures2D: TdgResourceTexture2D
     public readonly texturesCube: TdgResourceTextureCube
@@ -26,6 +66,10 @@ export class TgdContext {
     private requestAnimationFrame = -1
     private lastTime = -1
 
+    /**
+     * @param canvas The canvas to which attach a WebGL2 context.
+     * @see {@link TgdContextOptions}
+     */
     constructor(
         public readonly canvas: HTMLCanvasElement,
         options: TgdContextOptions = {}

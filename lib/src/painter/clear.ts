@@ -1,11 +1,14 @@
 import { TgdPainter } from "."
 import { TgdContext } from "@/context"
 
-export interface PainterClearOptions {
+export interface TgdPainterClearOptions {
     color: [red: number, green: number, blue: number, alpha: number]
     depth: number
 }
 
+/**
+ * @see {@link TgdPainterClearOptions}
+ */
 export class TgdPainterClear implements TgdPainter {
     private clearMask = 0
 
@@ -17,7 +20,7 @@ export class TgdPainterClear implements TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: Partial<PainterClearOptions> = {}
+        options: Partial<TgdPainterClearOptions> = {}
     ) {
         const { gl } = context
         const color = options.color ?? [0, 0, 0, 1]

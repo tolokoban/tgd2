@@ -26,7 +26,7 @@
     "bugs": {
         "url": "https://github.com/tolokoban/tgd2/issues"
     },
-    "homepage": "https://github.com/tolokoban/tgd2#readme",
+    "homepage": "https://tolokoban.github.io/tgd2",
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
         "@types/jest": "^29.5.12",

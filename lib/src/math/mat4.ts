@@ -1,5 +1,5 @@
 import { padColOfNumbers } from "@/debug"
-import { PainterClearOptions } from "./../painter/clear"
+import { TgdPainterClearOptions } from "./../painter/clear"
 import { TgdMat3 } from "./mat3"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"

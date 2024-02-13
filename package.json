@@ -15,7 +15,7 @@
         "doc": "cd lib && npm run doc && cd ../doc && npm run deploy",
         "test": "cd lib && npm test",
         "predeploy": "node scripts/copy-pkg-info.js . ./lib ./doc",
-        "deploy": "npm run ci && npm publish"
+        "deploy": "npm run ci && npm publish --access=public"
     },
     "repository": {
         "type": "git",
