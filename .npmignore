@@ -6,6 +6,6 @@ lib/
 _backup_/
 scripts/
 DEV.md
+test_coverage/
+
 !lib/dist/
-
-
