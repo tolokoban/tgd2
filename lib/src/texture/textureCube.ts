@@ -4,6 +4,7 @@ import {
     TdgTextureCube,
     TdgTextureCubeOptions,
     WebglImage,
+    TgdContextInterface,
 } from "@/types"
 
 export class TdgTextureCubeImpl implements TdgTextureCube {
@@ -14,10 +15,10 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
     private numberOfImagesToLoad = 6
 
     constructor(
-        public readonly gl: WebGL2RenderingContext,
-        private readonly refresh: () => void,
+        public readonly context: TgdContextInterface,
         options: TdgTextureCubeOptions
     ) {
+        const { gl } = context
         const texture = gl.createTexture()
         if (!texture) throw Error("Unable to create a WebGLTexture!")
 
@@ -31,7 +32,7 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
     }
 
     delete() {
-        this.gl.deleteTexture(this.texture)
+        this.context.gl.deleteTexture(this.texture)
     }
 
     get ready() {
@@ -47,14 +48,15 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
     }
 
     bind() {
-        const { gl } = this
+        const { gl } = this.context
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture)
     }
 
     activate(program: TgdProgram, uniformName: string, slot = 0) {
         if (!this.ready) return
 
-        const { gl, texture } = this
+        const { context, texture } = this
+        const { gl } = context
         gl.activeTexture(gl.TEXTURE0 + slot)
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
         program.uniform1i(uniformName, slot)
@@ -96,7 +98,8 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
                 `Images in a CubeMap must all have the same size, but we got ${this._width}×${this._height} and ${width}×${height}!`
             )
         }
-        const { gl, texture } = this
+        const { context, texture } = this
+        const { gl } = context
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
         gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
         this.numberOfImagesToLoad--
@@ -109,7 +112,7 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
                 gl.TEXTURE_MIN_FILTER,
                 gl.LINEAR_MIPMAP_LINEAR
             )
-            this.refresh()
+            context.paint()
         }
     }
 }

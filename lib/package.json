@@ -8,7 +8,6 @@
         "doc": "typedoc --watch",
         "build": "webpack",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
-        "prestart": "npm run doc &",
         "start": "webpack --watch",
         "test": "jest",
         "test:watch": "jest --watch"
@@ -31,6 +30,7 @@
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
         "@types/jest": "^29.5.12",
+        "circular-dependency-plugin": "^5.2.2",
         "jest-environment-jsdom": "^29.7.0",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",

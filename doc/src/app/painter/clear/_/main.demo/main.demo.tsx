@@ -2,6 +2,7 @@ import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
 
 // #begin
 function init(canvas: HTMLCanvasElement): TgdContext {
+    console.log("TR", 1)
     const ctx = new TgdContext(canvas)
     const clear = new TgdPainterClear(ctx, { color: [1, 0.7, 0, 1] })
     ctx.add(clear)

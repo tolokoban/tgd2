@@ -2,10 +2,7 @@ import { TgdMat4 } from "@/math"
 import { TgdCamera } from "./camera"
 
 export class TgdCameraPerspective extends TgdCamera {
-    private dirtyProjection = true
     private readonly _matrixProjection = new TgdMat4()
-    private _width = 1920
-    private _height = 1080
     private _fovy = Math.PI / 4
     private _near = 1e-3
     private _far = Infinity
@@ -14,25 +11,6 @@ export class TgdCameraPerspective extends TgdCamera {
         super()
     }
 
-    get screenWidth() {
-        return this._width
-    }
-    set screenWidth(v: number) {
-        if (v === this._width) return
-
-        this._width = v
-        this.dirtyProjection = true
-    }
-
-    get screenHeight() {
-        return this._height
-    }
-    set screenHeight(v: number) {
-        if (v === this._height) return
-
-        this._height = v
-        this.dirtyProjection = true
-    }
     get fovy() {
         return this._fovy
     }
@@ -69,7 +47,7 @@ export class TgdCameraPerspective extends TgdCamera {
         if (!this.dirtyProjection) return
 
         const fovy = this._fovy
-        const aspect = this._width / this._height
+        const aspect = this.screenAspectRatio
         const near = this._near
         const far = this._far
         const out = this._matrixProjection

@@ -1,6 +1,7 @@
-import { TdgInputKeyboardImpl, TgdInputPointerImpl } from "@/input"
+import { TdgInputKeyboardImpl } from "@/input/keyboard"
+import { TgdInputPointerImpl } from "@/input/pointer"
 import { TgdInputKeyboard } from "@/types/input-keyboard"
-import { TgdInputPointer } from ".."
+import { TgdInputPointer } from "@/types/input-pointer"
 
 export class TgdInputs {
     private _keyboard: TgdInputKeyboard | null = null

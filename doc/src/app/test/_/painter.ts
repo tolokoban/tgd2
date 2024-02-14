@@ -1,5 +1,5 @@
 import {
-    TgdCameraPerspective,
+    TgdCameraOrthographic,
     TgdContext,
     TgdPainter,
     TgdProgram,
@@ -7,7 +7,8 @@ import {
     TgdQuat,
     TgdVertexArray,
     TgdVec3,
-    TgdControllerCameraOrbit,
+    TgdCameraPerspective,
+    TgdCamera,
 } from "@tolokoban/tgd"
 
 import { parse } from "./parser"
@@ -17,15 +18,13 @@ import FRAG from "./test.frag"
 
 export default class Painter implements TgdPainter {
     public texture: TdgTexture2D
-    public readonly camera = new TgdCameraPerspective()
 
-    private readonly orbitControl: TgdControllerCameraOrbit
     private readonly axisZ = new TgdVec3()
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly count: number
-    private readonly cameraL = new TgdCameraPerspective()
-    private readonly cameraR = new TgdCameraPerspective()
+    private readonly cameraL: TgdCamera
+    private readonly cameraR: TgdCamera
     private readonly type: "UNSIGNED_BYTE" | "UNSIGNED_SHORT" | "UNSIGNED_INT"
     private radius = 0
 
@@ -43,30 +42,26 @@ export default class Painter implements TgdPainter {
         this.type = type
         this.vao = context.createVAO(this.program, [dataset], elements)
         this.count = elements.length
-        this.camera.distance = 10
-        context.inputs.pointer.inertia = 1000
-        this.orbitControl = new TgdControllerCameraOrbit(this.camera, context)
-        this.camera.face("-Y+Z-X")
+        const camera = context.camera
+        camera.distance = 10
+        camera.face("-Y+Z-X")
+        if (camera instanceof TgdCameraPerspective) {
+            this.cameraL = new TgdCameraPerspective()
+            this.cameraR = new TgdCameraPerspective()
+        } else {
+            this.cameraL = new TgdCameraOrthographic()
+            this.cameraR = new TgdCameraOrthographic()
+        }
     }
 
     delete(): void {
         this.context.programs.delete(this.program)
-        this.orbitControl.enabled = false
     }
 
     paint(time: number, delay: number): void {
         const { gl } = this.context
-        const {
-            texture,
-            vao,
-            program,
-            type,
-            count,
-            camera,
-            cameraL,
-            cameraR,
-            axisZ,
-        } = this
+        const { texture, vao, program, type, count, cameraL, cameraR, axisZ } =
+            this
         cameraL.screenWidth = gl.drawingBufferWidth
         cameraL.screenHeight = gl.drawingBufferHeight
         cameraR.screenWidth = gl.drawingBufferWidth
@@ -93,8 +88,9 @@ export default class Painter implements TgdPainter {
     }
 
     update(time: number, delay: number): void {
-        const { context, camera, cameraL, cameraR, axisZ } = this
+        const { context, cameraL, cameraR, axisZ } = this
         const { keyboard } = context.inputs
+        const { camera } = context
         camera.toAxisZ(axisZ)
         const camSpeed = 1e-3
         if (keyboard.isDown("ArrowRight")) {

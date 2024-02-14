@@ -3,21 +3,18 @@ import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter"
 import { TgdDataset } from "@/dataset/dataset"
 import { TgdVertexArray } from "@/vao"
+import { TgdCameraPerspective } from "@/camera"
+import { TgdMat4 } from "@/math"
 
 import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
-import { TgdCamera } from "@/camera"
-import { TgdMat4 } from "@/math"
 
-export interface TgdPainterSkyboxOptions {
-    zoom: number
-    x: number
-    y: number
-    z: number
+export type TgdPainterSkyboxOptions = TdgTextureCubeOptions & {
+    camera?: TgdCameraPerspective
 }
 
 export class TgdPainterSkybox implements TgdPainter {
-    public camera: TgdCamera
+    private camera: TgdCameraPerspective
 
     private readonly texture: TdgTextureCube
     private readonly program: TgdProgram
@@ -27,9 +24,9 @@ export class TgdPainterSkybox implements TgdPainter {
 
     constructor(
         private readonly context: TgdContext,
-        options: TdgTextureCubeOptions & { camera: TgdCamera }
+        options: TgdPainterSkyboxOptions
     ) {
-        this.camera = options.camera
+        this.camera = options.camera ?? new TgdCameraPerspective()
         this.texture = context.texturesCube.create(options)
         this.program = context.programs.create({
             vert: VERT,
@@ -51,8 +48,8 @@ export class TgdPainterSkybox implements TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        const { gl } = this.context
-        const { vao, program, texture } = this
+        const { context, vao, program, texture } = this
+        const { gl } = context
 
         gl.enable(gl.DEPTH_TEST)
         gl.depthFunc(gl.LESS)
@@ -66,7 +63,10 @@ export class TgdPainterSkybox implements TgdPainter {
     }
 
     update(time: number, delay: number): void {
-        const { camera, matrix, tmpMat } = this
+        const { camera, matrix, tmpMat, context } = this
+        if (camera !== context.camera) {
+            camera.copyOrientationFrom(context.camera)
+        }
         matrix.from(camera.matrixProjection)
         tmpMat.fromMat3(camera.matrixViewModel)
         tmpMat.m30 = 0

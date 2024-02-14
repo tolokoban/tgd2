@@ -1,6 +1,7 @@
+import { TgdCamera, TgdCameraPerspective } from "@/camera"
 import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
-import { TgdProgram } from "@/types"
+import { TgdContextInterface, TgdProgram } from "@/types"
 import {
     TgdResourceProgram,
     TdgResourceTexture2D,
@@ -9,14 +10,14 @@ import {
 import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdVertexArray } from "@/vao"
-import { TgdInputs } from ".."
+import { TgdInputs } from "@/input"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
  * object.
  * @see {@link TgdContext}
  */
-export interface TgdContextOptions extends WebGLContextAttributes {
+export type TgdContextOptions = WebGLContextAttributes & {
     /**
      * You can override the behaviour for when a resize even occurs,
      * by providing a callback `onResize(...)`.
@@ -52,18 +53,19 @@ export interface TgdContextOptions extends WebGLContextAttributes {
  * }
  * ```
  */
-export class TgdContext {
+export class TgdContext implements TgdContextInterface {
     public readonly gl: WebGL2RenderingContext
     public readonly inputs: TgdInputs
+    public camera: TgdCamera
     /**
      * Resource manager for WebGLProgram.
      */
     public readonly programs: TgdResourceProgram
     public readonly textures2D: TdgResourceTexture2D
-    public readonly texturesCube: TdgResourceTextureCube
+    private _texturesCube: TdgResourceTextureCube | null = null
 
     private readonly observer: ResizeObserver
-    private readonly painters = new TgdPainterGroup()
+    private readonly painters: TgdPainterGroup
     private isPlaying = false
     private requestAnimationFrame = -1
     private lastTime = -1
@@ -76,19 +78,28 @@ export class TgdContext {
         public readonly canvas: HTMLCanvasElement,
         options: TgdContextOptions = {}
     ) {
+        console.log("TR", 1)
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw Error("Unable to create a WebGL2 context!")
 
         this.gl = gl
         this.programs = new TgdResourceProgram(gl)
         this.textures2D = new TdgResourceTexture2D(gl, this.paint)
-        this.texturesCube = new TdgResourceTextureCube(gl, this.paint)
         const onResize = options.onResize ?? handleResize
         this.observer = new ResizeObserver(() => {
             onResize(gl, canvas.clientWidth, canvas.clientHeight)
         })
         this.observer.observe(canvas)
         this.inputs = new TgdInputs(canvas)
+        this.camera = new TgdCameraPerspective()
+        this.painters = new TgdPainterGroup()
+    }
+
+    get texturesCube(): TdgResourceTextureCube {
+        if (!this._texturesCube) {
+            this._texturesCube = new TdgResourceTextureCube(this)
+        }
+        return this._texturesCube
     }
 
     get width() {
@@ -188,7 +199,7 @@ export class TgdContext {
     }
 
     private readonly actualPaint = (time: number) => {
-        const { lastTime } = this
+        const { lastTime, gl } = this
         if (lastTime < 0) {
             this.lastTime = time
             // First frame, let's skip it to get better timing.
@@ -198,6 +209,8 @@ export class TgdContext {
 
         const delay = time - this.lastTime
         this.lastTime = time
+        this.camera.screenWidth = gl.drawingBufferWidth
+        this.camera.screenHeight = gl.drawingBufferHeight
         this.painters.paint(time, delay)
         this.painters.update(time, delay)
         if (this.isPlaying) this.paint()

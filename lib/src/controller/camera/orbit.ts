@@ -2,7 +2,7 @@ import { TgdCamera } from "@/camera"
 import { TgdEvent } from "@/event"
 import { TdgInputKeyboardImpl, TgdInputs } from "@/input"
 import { TgdInputPointerImpl } from "@/input/pointer"
-import { TgdInputPointerEvent } from "@/types"
+import { TgdContextInterface, TgdInputPointerEvent } from "@/types"
 
 export class TgdControllerCameraOrbit {
     /**
@@ -12,10 +12,7 @@ export class TgdControllerCameraOrbit {
     public readonly eventZoomChange = new TgdEvent<TgdControllerCameraOrbit>()
     public readonly eventOrbitChange = new TgdEvent<TgdControllerCameraOrbit>()
 
-    constructor(
-        private readonly camera: TgdCamera,
-        private readonly context: { inputs: TgdInputs; paint: () => void }
-    ) {
+    constructor(private readonly context: TgdContextInterface) {
         const { inputs } = context
         inputs.pointer.eventMove.addListener(this.handleMove)
         inputs.pointer.eventZoom.addListener(this.handleZoom)
@@ -34,7 +31,7 @@ export class TgdControllerCameraOrbit {
     }) => {
         if (!this.enabled) return
 
-        const { camera, context } = this
+        const { context } = this
         const dt = evt.current.t - evt.previous.t
         if (dt <= 0) return
 
@@ -51,7 +48,7 @@ export class TgdControllerCameraOrbit {
             const x = x1 * x2 + y1 * y2
             const y = x1 * y2 - y1 * x2
             const ang = Math.atan2(y, x)
-            camera.orbitAroundZ(-ang)
+            context.camera.orbitAroundZ(-ang)
             this.fireOrbitChange()
             return
         }
@@ -59,8 +56,8 @@ export class TgdControllerCameraOrbit {
         const speed = 2
         const dx = (evt.current.x - evt.previous.x) * speed
         const dy = (evt.current.y - evt.previous.y) * speed
-        if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
-        if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
+        if (!keyboard.isDown("x")) context.camera.orbitAroundY(-dx)
+        if (!keyboard.isDown("y")) context.camera.orbitAroundX(dy)
         this.fireOrbitChange()
     }
 
@@ -77,7 +74,7 @@ export class TgdControllerCameraOrbit {
     }) => {
         if (!this.enabled) return
 
-        const { camera } = this
+        const { camera } = this.context
         const dz = -evt.direction * 1e-3
         camera.zoom = Math.max(1e-5, camera.zoom + dz)
         evt.preventDefault()

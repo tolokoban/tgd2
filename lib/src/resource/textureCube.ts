@@ -1,20 +1,21 @@
 import { TgdResource } from "@/resource/resource"
 import { TdgTextureCubeImpl } from "@/texture"
-import { TdgTextureCube, TdgTextureCubeOptions } from "@/types"
+import {
+    TdgTextureCube,
+    TdgTextureCubeOptions,
+    TgdContextInterface,
+} from "@/types"
 
 export class TdgResourceTextureCube extends TgdResource<
     TdgTextureCubeOptions,
     TdgTextureCube
 > {
-    constructor(
-        private readonly gl: WebGL2RenderingContext,
-        private readonly refresh: () => void
-    ) {
+    constructor(public readonly context: TgdContextInterface) {
         super()
     }
 
     protected actualCreate(input: TdgTextureCubeOptions): TdgTextureCube {
-        return new TdgTextureCubeImpl(this.gl, this.refresh, input)
+        return new TdgTextureCubeImpl(this.context, input)
     }
 
     protected actualDelete(object: TdgTextureCube): void {

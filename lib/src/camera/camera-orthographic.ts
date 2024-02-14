@@ -2,7 +2,6 @@ import { TgdMat4 } from "@/math"
 import { TgdCamera } from "./camera"
 
 export class TgdCameraOrthographic extends TgdCamera {
-    private dirtyProjection = true
     private readonly _matrixProjection = new TgdMat4()
     private _width = 1920
     private _height = 1080

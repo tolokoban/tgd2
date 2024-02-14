@@ -2,6 +2,12 @@ import { TgdQuat, TgdVec3, TgdMat4, TgdVec4, TgdQuatFace } from "@/math"
 import { TgdMat3 } from "@/math/mat3"
 
 export abstract class TgdCamera {
+    protected dirtyProjection = true
+
+    private _screenWidth = 1920
+    private _screenHeight = 1080
+    private _screenAspectRatio = 1920 / 1080
+
     /** Do we need recalculation? */
     private dirty = true
     private dirtyAxis = true
@@ -22,6 +28,32 @@ export abstract class TgdCamera {
         this.face("+X+Y+Z")
     }
 
+    get screenAspectRatio() {
+        return this._screenAspectRatio
+    }
+
+    get screenWidth() {
+        return this._screenWidth
+    }
+    set screenWidth(v: number) {
+        if (v === this._screenWidth) return
+
+        this._screenWidth = v
+        this.dirtyProjection = true
+        this._screenAspectRatio = this._screenWidth / this._screenHeight
+    }
+
+    get screenHeight() {
+        return this._screenHeight
+    }
+    set screenHeight(v: number) {
+        if (v === this._screenHeight) return
+
+        this._screenHeight = v
+        this.dirtyProjection = true
+        this._screenAspectRatio = this._screenWidth / this._screenHeight
+    }
+
     face(face: TgdQuatFace) {
         this.orientation.face(face)
         this.dirty = true
@@ -36,6 +68,13 @@ export abstract class TgdCamera {
         this.dirty = true
         this.dirtyAxis = true
         return this
+    }
+
+    /**
+     * Copy the orientation from another camera.
+     */
+    copyOrientationFrom({ orientation }: TgdCamera) {
+        this.setOrientation(orientation)
     }
 
     toAxisX(axisX: TgdVec3): this {
@@ -227,7 +266,7 @@ export abstract class TgdCamera {
         tmpVec3.x = tx + d * ax
         tmpVec3.y = ty + d * ay
         tmpVec3.z = tz + d * az
-        tmpVec3.applyMatrix(tmpMat3.transpose()).scale(-1)
+        tmpVec3.applyMatrix(tmpMat3.transpose()).scale(-1 / this.zoom)
         mat.m30 = tmpVec3.x
         mat.m31 = tmpVec3.y
         mat.m32 = tmpVec3.z
