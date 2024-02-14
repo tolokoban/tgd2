@@ -11,6 +11,10 @@ export class TgdPainterGroup implements TgdPainter {
         this.painters = [...painters]
     }
 
+    has(painter: TgdPainter): boolean {
+        return this.painters.includes(painter)
+    }
+
     add(...painters: TgdPainter[]) {
         for (const painter of painters) {
             this.painters.push(painter)
@@ -25,6 +29,13 @@ export class TgdPainterGroup implements TgdPainter {
             this.painters.splice(index, 1)
             painter.delete()
         }
+    }
+
+    removeAll() {
+        for (const painter of this.painters) {
+            painter.delete()
+        }
+        this.painters.splice(0, this.painters.length)
     }
 
     delete(): void {

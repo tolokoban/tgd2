@@ -1,12 +1,8 @@
 import { TgdCamera } from "@/camera"
 import { TgdEvent } from "@/event"
-import { TdgInputKeyboard } from "@/input"
-import { TgdInputPointer, TgdInputPointerEvent } from "@/input/pointer"
-
-export interface TgdControllerCameraOrbitOptions {
-    /** Drag inertia in milliseconds. */
-    inertia: number
-}
+import { TdgInputKeyboardImpl, TgdInputs } from "@/input"
+import { TgdInputPointerImpl } from "@/input/pointer"
+import { TgdInputPointerEvent } from "@/types"
 
 export class TgdControllerCameraOrbit {
     /**
@@ -16,36 +12,19 @@ export class TgdControllerCameraOrbit {
     public readonly eventZoomChange = new TgdEvent<TgdControllerCameraOrbit>()
     public readonly eventOrbitChange = new TgdEvent<TgdControllerCameraOrbit>()
 
-    private pointer: TgdInputPointer | null = null
-    private keyboard = new TdgInputKeyboard()
-    private readonly options: TgdControllerCameraOrbitOptions
-
     constructor(
-        public readonly camera: TgdCamera,
-        options: Partial<TgdControllerCameraOrbitOptions> = {}
+        private readonly camera: TgdCamera,
+        private readonly context: { inputs: TgdInputs; paint: () => void }
     ) {
-        this.options = {
-            inertia: 500,
-            ...options,
-        }
-    }
-
-    attach(canvas: HTMLCanvasElement) {
-        this.detach()
-
-        this.pointer = new TgdInputPointer({
-            canvas,
-            onMove: this.handleMove,
-            onZoom: this.handleZoom,
-            inertia: this.options.inertia,
-        })
+        const { inputs } = context
+        inputs.pointer.eventMove.addListener(this.handleMove)
+        inputs.pointer.eventZoom.addListener(this.handleZoom)
     }
 
     detach() {
-        if (this.pointer) {
-            this.pointer.detach()
-            this.pointer = null
-        }
+        const { inputs } = this.context
+        inputs.pointer.eventMove.removeListener(this.handleMove)
+        inputs.pointer.eventZoom.removeListener(this.handleZoom)
     }
 
     private readonly handleMove = (evt: {
@@ -55,11 +34,12 @@ export class TgdControllerCameraOrbit {
     }) => {
         if (!this.enabled) return
 
-        const { camera, keyboard } = this
+        const { camera, context } = this
         const dt = evt.current.t - evt.previous.t
         if (dt <= 0) return
 
-        if (keyboard.isPressed("z")) {
+        const { keyboard } = context.inputs
+        if (keyboard.isDown("z")) {
             const x1 = evt.previous.x
             const y1 = evt.previous.y
             if (Math.abs(x1) + Math.abs(y1) === 0) return
@@ -72,28 +52,40 @@ export class TgdControllerCameraOrbit {
             const y = x1 * y2 - y1 * x2
             const ang = Math.atan2(y, x)
             camera.orbitAroundZ(-ang)
-            this.eventOrbitChange.dispatch(this)
+            this.fireOrbitChange()
             return
         }
 
         const speed = 2
         const dx = (evt.current.x - evt.previous.x) * speed
         const dy = (evt.current.y - evt.previous.y) * speed
-        if (!keyboard.isPressed("x")) camera.orbitAroundY(-dx)
-        if (!keyboard.isPressed("y")) camera.orbitAroundX(dy)
-        this.eventOrbitChange.dispatch(this)
+        if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
+        if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
+        this.fireOrbitChange()
     }
 
-    private readonly handleZoom = (
-        direction: number,
+    private fireOrbitChange() {
+        console.log("Fire!")
+        this.eventOrbitChange.dispatch(this)
+        this.context.paint()
+    }
+
+    private readonly handleZoom = (evt: {
+        current: TgdInputPointerEvent
+        direction: number
         preventDefault: () => void
-    ) => {
+    }) => {
         if (!this.enabled) return
 
         const { camera } = this
-        const dz = -direction * 1e-3
-        camera.zoom = Math.max(1, camera.zoom + dz)
-        preventDefault()
+        const dz = -evt.direction * 1e-3
+        camera.zoom = Math.max(1e-5, camera.zoom + dz)
+        evt.preventDefault()
+        this.fireZoomChange()
+    }
+
+    private fireZoomChange() {
         this.eventZoomChange.dispatch(this)
+        this.context.paint()
     }
 }

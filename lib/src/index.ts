@@ -10,4 +10,4 @@ export * from "./parser"
 export * from "./resource"
 export * from "./vao"
 
-export * from "./types"
+export type * from "./types"

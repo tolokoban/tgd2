@@ -6,14 +6,14 @@ import {
     TdgTexture2D,
     TgdQuat,
     TgdVertexArray,
-    TdgInputKeyboard,
     TgdVec3,
     TgdControllerCameraOrbit,
 } from "@tolokoban/tgd"
 
+import { parse } from "./parser"
+
 import VERT from "./test.vert"
 import FRAG from "./test.frag"
-import { parse } from "./parser"
 
 export default class Painter implements TgdPainter {
     public texture: TdgTexture2D
@@ -26,7 +26,6 @@ export default class Painter implements TgdPainter {
     private readonly count: number
     private readonly cameraL = new TgdCameraPerspective()
     private readonly cameraR = new TgdCameraPerspective()
-    private readonly keyboard = new TdgInputKeyboard()
     private readonly type: "UNSIGNED_BYTE" | "UNSIGNED_SHORT" | "UNSIGNED_INT"
     private radius = 0
 
@@ -45,14 +44,14 @@ export default class Painter implements TgdPainter {
         this.vao = context.createVAO(this.program, [dataset], elements)
         this.count = elements.length
         this.camera.distance = 10
-        this.orbitControl = new TgdControllerCameraOrbit(this.camera)
-        this.orbitControl.attach(context.canvas)
+        context.inputs.pointer.inertia = 1000
+        this.orbitControl = new TgdControllerCameraOrbit(this.camera, context)
         this.camera.face("-Y+Z-X")
     }
 
     delete(): void {
-        this.keyboard.detach()
         this.context.programs.delete(this.program)
+        this.orbitControl.enabled = false
     }
 
     paint(time: number, delay: number): void {
@@ -94,36 +93,37 @@ export default class Painter implements TgdPainter {
     }
 
     update(time: number, delay: number): void {
-        const { keyboard, camera, cameraL, cameraR, axisZ } = this
+        const { context, camera, cameraL, cameraR, axisZ } = this
+        const { keyboard } = context.inputs
         camera.toAxisZ(axisZ)
         const camSpeed = 1e-3
-        if (keyboard.isPressed("ArrowRight")) {
+        if (keyboard.isDown("ArrowRight")) {
             camera.orbitAroundY(delay * camSpeed)
-        } else if (keyboard.isPressed("ArrowLeft")) {
+        } else if (keyboard.isDown("ArrowLeft")) {
             camera.orbitAroundY(-delay * camSpeed)
         }
-        if (keyboard.isPressed("ArrowUp")) {
+        if (keyboard.isDown("ArrowUp")) {
             camera.orbitAroundX(delay * camSpeed)
-        } else if (keyboard.isPressed("ArrowDown")) {
+        } else if (keyboard.isDown("ArrowDown")) {
             camera.orbitAroundX(-delay * camSpeed)
         }
-        if (keyboard.isPressed("0")) {
+        if (keyboard.isDown("0")) {
             camera.setOrientation(new TgdQuat())
         }
         if (keyboard.hasClicked("d")) {
             camera.debug()
         }
         const speedRadius = 1e-3
-        if (keyboard.isPressed("+")) {
+        if (keyboard.isDown("+")) {
             this.radius = Math.min(
                 Math.PI * 0.5,
                 this.radius + delay * speedRadius
             )
         }
-        if (keyboard.isPressed("-")) {
+        if (keyboard.isDown("-")) {
             this.radius = Math.max(0, this.radius - delay * speedRadius)
         }
-        if (keyboard.isPressed("Space")) this.radius = 0
+        if (keyboard.isDown("Space")) this.radius = 0
         const { radius } = this
         cameraL.from(camera)
         cameraR.from(camera)

@@ -53,6 +53,6 @@ function init(ctx: TgdContext) {
             })
             skybox.camera = painter.camera
             ctx.add(skybox, painter)
-            ctx.play()
+            ctx.paint()
         })
 }

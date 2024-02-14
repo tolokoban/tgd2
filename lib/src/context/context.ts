@@ -9,6 +9,7 @@ import {
 import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdVertexArray } from "@/vao"
+import { TgdInputs } from ".."
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -53,6 +54,7 @@ export interface TgdContextOptions extends WebGLContextAttributes {
  */
 export class TgdContext {
     public readonly gl: WebGL2RenderingContext
+    public readonly inputs: TgdInputs
     /**
      * Resource manager for WebGLProgram.
      */
@@ -86,6 +88,7 @@ export class TgdContext {
             onResize(gl, canvas.clientWidth, canvas.clientHeight)
         })
         this.observer.observe(canvas)
+        this.inputs = new TgdInputs(canvas)
     }
 
     get width() {
@@ -135,6 +138,13 @@ export class TgdContext {
     }
 
     /**
+     * Check if `painter` already exist in the current list of painters.
+     */
+    has(painter: TgdPainter): boolean {
+        return this.painters.has(painter)
+    }
+
+    /**
      * Add one or more painters.
      */
     add(...painters: TgdPainter[]) {
@@ -146,6 +156,10 @@ export class TgdContext {
      * */
     remove(...painters: TgdPainter[]) {
         this.painters.remove(...painters)
+    }
+
+    removeAll() {
+        this.painters.removeAll()
     }
 
     createBuffer(

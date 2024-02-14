@@ -8,6 +8,7 @@
         "doc": "typedoc --watch",
         "build": "webpack",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
+        "prestart": "npm run doc &",
         "start": "webpack --watch",
         "test": "jest",
         "test:watch": "jest --watch"

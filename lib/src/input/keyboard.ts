@@ -1,4 +1,6 @@
-export class TdgInputKeyboard {
+import { TgdInputKeyboard } from "@/types/input-keyboard"
+
+export class TdgInputKeyboardImpl implements TgdInputKeyboard {
     private readonly keysDown = new Set<string>()
     private readonly keysUp = new Set<string>()
     private attached = false
@@ -17,7 +19,7 @@ export class TdgInputKeyboard {
         this.attached = false
     }
 
-    isPressed(...keys: string[]): boolean {
+    isDown(...keys: string[]): boolean {
         for (const key of keys) {
             if (!this.keysDown.has(key)) return false
         }
