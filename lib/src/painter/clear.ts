@@ -1,9 +1,9 @@
 import { TgdPainter } from "."
 import { TgdContext } from "@/context"
-import { TgdContextInterface } from ".."
+import { TgdContextInterface, TgdVec4 } from ".."
 
 export interface TgdPainterClearOptions {
-    color: [red: number, green: number, blue: number, alpha: number]
+    color: [red: number, green: number, blue: number, alpha: number] | TgdVec4
     depth: number
 }
 

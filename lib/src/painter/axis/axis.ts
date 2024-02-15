@@ -1,3 +1,4 @@
+import { TgdAttributes } from "./../../../../_backup_/lib/attributes/attributes"
 import { TgdContext } from "@/context"
 import { TgdProgram } from "@/types"
 import { TgdPainter } from "@/painter/painter"
@@ -6,12 +7,24 @@ import { TgdVertexArray } from "@/vao"
 
 import VERT from "./axis.vert"
 import FRAG from "./axis.frag"
+import { TgdVec4 } from "@/math"
+
+export type TgdPainterAxisOptions = {
+    x: number
+    y: number
+    z: number
+    scale: number
+}
 
 export class TgdPainterAxis extends TgdPainter {
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
+    private readonly translateAndScale: TgdVec4
 
-    constructor(public readonly context: TgdContext) {
+    constructor(
+        public readonly context: TgdContext,
+        { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxisOptions> = {}
+    ) {
         super()
         const prg = context.programs.create({
             vert: VERT,
@@ -32,7 +45,7 @@ export class TgdPainterAxis extends TgdPainter {
             0, 0, 0, -0, -0, -1,
         ]))
         const a = 1
-        const b = 0.5
+        const b = 0.25
         // prettier-ignore
         dataset.set("attColor", new Float32Array([
             a, 0, 0, 1, a, 0, 0, 1,
@@ -43,6 +56,35 @@ export class TgdPainterAxis extends TgdPainter {
             0, 0, b, 1, 0, 0, b, 1,
         ]))
         this.vao = context.createVAO(prg, [dataset])
+        this.translateAndScale = new TgdVec4(x, y, z, scale)
+    }
+
+    get x(): number {
+        return this.translateAndScale.x
+    }
+    set x(v: number) {
+        this.translateAndScale.x = v
+    }
+
+    get y(): number {
+        return this.translateAndScale.y
+    }
+    set y(v: number) {
+        this.translateAndScale.y = v
+    }
+
+    get z(): number {
+        return this.translateAndScale.z
+    }
+    set z(v: number) {
+        this.translateAndScale.z = v
+    }
+
+    get scale(): number {
+        return this.translateAndScale.w
+    }
+    set scale(v: number) {
+        this.translateAndScale.w = v
     }
 
     delete(): void {
@@ -50,9 +92,10 @@ export class TgdPainterAxis extends TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        const { context, prg, vao } = this
+        const { context, prg, vao, translateAndScale } = this
         const { gl, camera } = context
         prg.use()
+        prg.uniform4fv("uniTS", translateAndScale)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixViewModel)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()

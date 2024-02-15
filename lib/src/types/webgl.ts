@@ -25,3 +25,21 @@ export type WebglImage =
     | HTMLCanvasElement
     | HTMLVideoElement
     | ImageBitmap
+
+export type WebglDepthFunc =
+    /** never pass */
+    | "NEVER"
+    /** pass if the incoming value is less than the depth buffer value */
+    | "LESS"
+    /** pass if the incoming value equals the depth buffer value */
+    | "EQUAL"
+    /** pass if the incoming value is less than or equal to the depth buffer value */
+    | "LEQUAL"
+    /** pass if the incoming value is greater than the depth buffer value */
+    | "GREATER"
+    /** pass if the incoming value is not equal to the depth buffer value */
+    | "NOTEQUAL"
+    /** pass if the incoming value is greater than or equal to the depth buffer value */
+    | "GEQUAL"
+    /** always pass */
+    | "ALWAYS"

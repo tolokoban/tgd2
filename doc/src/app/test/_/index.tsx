@@ -27,11 +27,16 @@ export default function DemoContainer() {
 function init(context: TgdContext) {
     context.inputs.pointer.inertia = 1000
     context.camera = new TgdCameraPerspective()
+    context.camera.distance = 10
+    context.camera.face("-Y+Z-X")
     new TgdControllerCameraOrbit(context)
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
+        depth: 1,
     })
     context.add(clear)
+    const depth = new TgdPainterDepth()
+    context.add(depth)
     const options: Partial<TdgTexture2DOptions> = {
         image: PaletteURL,
         magFilter: "NEAREST",
@@ -47,7 +52,7 @@ function init(context: TgdContext) {
         imageNegZ: NegZ,
     })
     context.add(skybox)
-    const axis = new TgdPainterAxis(context)
+    const axis = new TgdPainterAxis(context, { scale: 100 })
     context.add(axis)
     context.paint()
 
@@ -60,7 +65,7 @@ function init(context: TgdContext) {
         })
         .then(content => {
             const painter = new Painter(context, content, texture)
-            context.add(painter)
+            // context.add(painter)
             context.paint()
         })
 }

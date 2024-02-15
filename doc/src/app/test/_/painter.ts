@@ -43,8 +43,6 @@ export default class Painter implements TgdPainter {
         this.vao = context.createVAO(this.program, [dataset], elements)
         this.count = elements.length
         const camera = context.camera
-        camera.distance = 10
-        camera.face("-Y+Z-X")
         if (camera instanceof TgdCameraPerspective) {
             this.cameraL = new TgdCameraPerspective()
             this.cameraR = new TgdCameraPerspective()
