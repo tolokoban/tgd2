@@ -60,15 +60,28 @@ export abstract class TgdCamera {
         this.dirtyAxis = true
     }
 
-    from({ orientation, target, distance, zoom }: TgdCamera): this {
+    from(camera: TgdCamera): this {
+        const {
+            orientation,
+            target,
+            distance,
+            zoom,
+            screenWidth,
+            screenHeight,
+        } = camera
         this.orientation.from(orientation)
         this.target.from(target)
         this.distance = distance
         this.zoom = zoom
+        this.screenWidth = screenWidth
+        this.screenHeight = screenHeight
         this.dirty = true
         this.dirtyAxis = true
+        this.copyProjectionFrom(camera)
         return this
     }
+
+    abstract copyProjectionFrom(camera: TgdCamera): this
 
     /**
      * Copy the orientation from another camera.

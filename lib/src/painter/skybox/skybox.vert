@@ -6,5 +6,5 @@ out vec4 varPoint;
 
 void main() {
     varPoint = attPoint;
-    gl_Position = vec4(attPoint.xy, 0.999, 1.0);
+    gl_Position = vec4(attPoint.xy, 0.99999, 1.0);
 }

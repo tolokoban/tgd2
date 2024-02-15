@@ -1,4 +1,3 @@
-import { TgdAttributes } from "./../../../../_backup_/lib/attributes/attributes"
 import { TgdContext } from "@/context"
 import { TgdProgram } from "@/types"
 import { TgdPainter } from "@/painter/painter"

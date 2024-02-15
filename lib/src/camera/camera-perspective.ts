@@ -11,6 +11,13 @@ export class TgdCameraPerspective extends TgdCamera {
         super()
     }
 
+    copyProjectionFrom(camera: TgdCameraPerspective): this {
+        this.fovy = camera.fovy
+        this.near = camera.near
+        this.far = camera.far
+        return this
+    }
+
     get fovy() {
         return this._fovy
     }

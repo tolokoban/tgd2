@@ -3,14 +3,17 @@ import { TgdCamera } from "./camera"
 
 export class TgdCameraOrthographic extends TgdCamera {
     private readonly _matrixProjection = new TgdMat4()
-    private _width = 1920
-    private _height = 1080
     private _spaceHeight = 10
     private _near = 1e-3
     private _far = 1e3
 
     constructor() {
         super()
+    }
+
+    copyProjectionFrom(camera: TgdCameraOrthographic): this {
+        this.spaceHeight = camera.spaceHeight
+        return this
     }
 
     get spaceHeight() {
@@ -20,26 +23,6 @@ export class TgdCameraOrthographic extends TgdCamera {
         if (v === this._spaceHeight) return
 
         this._spaceHeight = v
-        this.dirtyProjection = true
-    }
-
-    get screenWidth() {
-        return this._width
-    }
-    set screenWidth(v: number) {
-        if (v === this._width) return
-
-        this._width = v
-        this.dirtyProjection = true
-    }
-
-    get screenHeight() {
-        return this._height
-    }
-    set screenHeight(v: number) {
-        if (v === this._height) return
-
-        this._height = v
         this.dirtyProjection = true
     }
 
@@ -71,10 +54,10 @@ export class TgdCameraOrthographic extends TgdCamera {
     private updateProjectionIfNeeded(): void {
         if (!this.dirtyProjection) return
 
-        const { near, far, _width, _height, _spaceHeight } = this
+        const { near, far, screenAspectRatio, _spaceHeight } = this
         const top = _spaceHeight * 0.5
         const bottom = -top
-        const right = (top * _width) / _height
+        const right = top * screenAspectRatio
         const left = -right
         const out = this._matrixProjection
         const lr = 1 / (left - right)

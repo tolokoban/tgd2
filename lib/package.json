@@ -6,11 +6,12 @@
     "typings": "./dist/index.d.ts",
     "scripts": {
         "doc": "typedoc --watch",
-        "build": "webpack",
+        "build": "webpack --mode=production",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
-        "start": "webpack --watch",
+        "start": "webpack --watch --mode=development",
         "test": "jest",
-        "test:watch": "jest --watch"
+        "test:watch": "jest --watch",
+        "x": "tsc -b --clean && ls ./dist/"
     },
     "repository": {
         "type": "git",
@@ -31,7 +32,6 @@
         "@types/gl-matrix": "^3.2.0",
         "@types/jest": "^29.5.12",
         "circular-dependency-plugin": "^5.2.2",
-        "jest-environment-jsdom": "^29.7.0",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",
         "typedoc": "^0.25.8",

@@ -62,7 +62,6 @@ export class TgdControllerCameraOrbit {
     }
 
     private fireOrbitChange() {
-        console.log("Fire!")
         this.eventOrbitChange.dispatch(this)
         this.context.paint()
     }

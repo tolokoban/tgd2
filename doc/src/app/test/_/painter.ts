@@ -57,13 +57,21 @@ export default class Painter implements TgdPainter {
     }
 
     paint(time: number, delay: number): void {
+        const {
+            context,
+            texture,
+            vao,
+            program,
+            type,
+            count,
+            cameraL,
+            cameraR,
+            axisZ,
+        } = this
         const { gl } = this.context
-        const { texture, vao, program, type, count, cameraL, cameraR, axisZ } =
-            this
-        cameraL.screenWidth = gl.drawingBufferWidth
-        cameraL.screenHeight = gl.drawingBufferHeight
-        cameraR.screenWidth = gl.drawingBufferWidth
-        cameraR.screenHeight = gl.drawingBufferHeight
+        const { camera } = context
+        cameraL.from(camera)
+        cameraR.from(camera)
         program.use()
         texture.activate(program, "uniTexture")
         program.uniform3fv("uniAxisZ", axisZ)
@@ -74,13 +82,7 @@ export default class Painter implements TgdPainter {
             cameraL.matrixProjection
         )
         gl.disable(gl.CULL_FACE)
-        gl.cullFace(gl.BACK)
-        gl.enable(gl.DEPTH_TEST)
-        gl.clearDepth(1)
-        gl.depthFunc(gl.LESS)
-        gl.depthMask(true)
-        gl.depthRange(0, 1)
-        gl.clear(gl.DEPTH_BUFFER_BIT)
+        // gl.cullFace(gl.BACK)
         vao.bind()
         gl.drawElements(gl.TRIANGLES, count, gl[type], 0)
     }

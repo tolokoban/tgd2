@@ -51,10 +51,6 @@ export class TgdPainterSkybox implements TgdPainter {
         const { context, vao, program, texture } = this
         const { gl } = context
 
-        gl.enable(gl.DEPTH_TEST)
-        gl.depthFunc(gl.LESS)
-        gl.depthMask(true)
-        gl.depthRange(0, 1)
         program.use()
         program.uniformMatrix4fv("uniMatrix", this.matrix)
         texture.activate(program, "uniTexture")
