@@ -78,7 +78,6 @@ export class TgdContext implements TgdContextInterface {
         public readonly canvas: HTMLCanvasElement,
         options: TgdContextOptions = {}
     ) {
-        console.log("TR", 1)
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw Error("Unable to create a WebGL2 context!")
 
@@ -93,6 +92,8 @@ export class TgdContext implements TgdContextInterface {
         this.inputs = new TgdInputs(canvas)
         this.camera = new TgdCameraPerspective()
         this.painters = new TgdPainterGroup()
+        // Prevent system gestures.
+        canvas.style.touchAction = "none"
     }
 
     get texturesCube(): TdgResourceTextureCube {
