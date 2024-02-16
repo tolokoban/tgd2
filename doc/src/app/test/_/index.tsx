@@ -8,6 +8,7 @@ import {
     TgdPainterSkybox,
     TgdPainterDepth,
     TgdCameraOrthographic,
+    TgdPainterSegments,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -63,6 +64,10 @@ function init(context: TgdContext) {
         scale: 100,
     })
     context.add(axis)
+    const segments = new TgdPainterSegments(context, {
+        roundness: 3,
+    })
+    context.add(segments)
     context.paint()
 
     fetch("mesh/axis.obj")
@@ -74,7 +79,7 @@ function init(context: TgdContext) {
         })
         .then(content => {
             const painter = new Painter(context, content, texture)
-            context.add(painter)
+            // context.add(painter)
             context.paint()
         })
 }

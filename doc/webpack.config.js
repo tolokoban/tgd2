@@ -25,9 +25,10 @@ module.exports = env => {
         console.log("+-----------------+")
     }
     return {
-        cache: {
-            type: "memory",
-        },
+        cache: false,
+        // cache: {
+        //     type: "memory",
+        // },
         output: {
             filename: "scr/[name].[contenthash].js",
             path: Path.resolve(__dirname, "build"),

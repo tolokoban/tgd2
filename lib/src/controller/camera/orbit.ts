@@ -53,7 +53,7 @@ export class TgdControllerCameraOrbit {
             return
         }
 
-        const speed = 2
+        const speed = 3 * (keyboard.isDown("Shift") ? 0.1 : 1)
         const dx = (evt.current.x - evt.previous.x) * speed
         const dy = (evt.current.y - evt.previous.y) * speed
         if (!keyboard.isDown("x")) context.camera.orbitAroundY(-dx)
@@ -74,7 +74,9 @@ export class TgdControllerCameraOrbit {
         if (!this.enabled) return
 
         const { camera } = this.context
-        const dz = -evt.direction * 1e-3
+        let speed = 2e-2
+        if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
+        const dz = -evt.direction * speed
         camera.zoom = Math.max(1e-5, camera.zoom + dz)
         evt.preventDefault()
         this.fireZoomChange()

@@ -1,6 +1,6 @@
 import { TgdProgram, TdgTexture2D } from "@/types"
 import { TgdContext } from "@/context"
-import { TgdPainter } from "@/painter"
+import { TgdPainter } from "@/painter/painter"
 import { TgdDataset } from "@/dataset/dataset"
 import { TgdVertexArray } from "@/vao"
 
@@ -14,7 +14,7 @@ export interface TgdPainterBackgroundOptions {
     z: number
 }
 
-export class TgdPainterBackground implements TgdPainter {
+export class TgdPainterBackground extends TgdPainter {
     public texture: TdgTexture2D
 
     private readonly program: TgdProgram
@@ -39,6 +39,7 @@ export class TgdPainterBackground implements TgdPainter {
             zoom = 1,
         }: Partial<TgdPainterBackgroundOptions> = {}
     ) {
+        super()
         this.x = x
         this.y = y
         this.z = z
@@ -85,6 +86,4 @@ export class TgdPainterBackground implements TgdPainter {
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
-
-    update(time: number, delay: number): void {}
 }

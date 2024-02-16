@@ -100,6 +100,4 @@ export class TgdPainterAxis extends TgdPainter {
         vao.bind()
         gl.drawArrays(gl.LINES, 0, 12)
     }
-
-    update(time: number, delay: number): void {}
 }

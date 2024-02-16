@@ -1,6 +1,6 @@
 import { TgdProgram, TdgTextureCube, TdgTextureCubeOptions } from "@/types"
 import { TgdContext } from "@/context"
-import { TgdPainter } from "@/painter"
+import { TgdPainter } from "@/painter/painter"
 import { TgdDataset } from "@/dataset/dataset"
 import { TgdVertexArray } from "@/vao"
 import { TgdCameraPerspective } from "@/camera"
@@ -13,7 +13,7 @@ export type TgdPainterSkyboxOptions = TdgTextureCubeOptions & {
     camera?: TgdCameraPerspective
 }
 
-export class TgdPainterSkybox implements TgdPainter {
+export class TgdPainterSkybox extends TgdPainter {
     private camera: TgdCameraPerspective
 
     private readonly texture: TdgTextureCube
@@ -26,6 +26,7 @@ export class TgdPainterSkybox implements TgdPainter {
         private readonly context: TgdContext,
         options: TgdPainterSkyboxOptions
     ) {
+        super()
         this.camera = options.camera ?? new TgdCameraPerspective()
         this.texture = context.texturesCube.create(options)
         this.program = context.programs.create({
@@ -56,10 +57,9 @@ export class TgdPainterSkybox implements TgdPainter {
         texture.activate(program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    }
 
-    update(time: number, delay: number): void {
-        const { camera, matrix, tmpMat, context } = this
+        // Compute matrix for the next frame.
+        const { camera, matrix, tmpMat } = this
         if (camera !== context.camera) {
             camera.copyOrientationFrom(context.camera)
         }

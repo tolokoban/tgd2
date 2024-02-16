@@ -69,9 +69,12 @@ export class TgdInputPointerImpl implements TgdInputPointer {
     }
 
     private readonly handleCanvasWheel = (evt: WheelEvent) => {
+        let delta = evt.deltaX + evt.deltaY + evt.deltaZ
+        if (delta > 0) delta = 1
+        else delta = -1
         this.eventZoom.dispatch({
             current: this.getPoint(evt),
-            direction: evt.deltaX + evt.deltaY + evt.deltaZ,
+            direction: delta,
             preventDefault: () => evt.preventDefault(),
         })
     }
