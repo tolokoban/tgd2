@@ -29,11 +29,23 @@ export default function DemoContainer() {
 }
 
 function init(context: TgdContext) {
+    document.addEventListener("keydown", evt => {
+        console.log("🚀 [index] evt.key = ", evt.key) // @FIXME: Remove this line written on 2024-02-16 at 16:02
+        switch (evt.key) {
+            case "0":
+                context.camera.face("+X+Y+Z")
+                break
+            case ".":
+                context.camera.zoom = 1
+                break
+        }
+        context.paint()
+    })
     context.inputs.pointer.inertia = 1000
     context.camera = new TgdCameraOrthographic()
     const { camera } = context
     camera.distance = 10
-    camera.spaceHeight = 2
+    camera.spaceHeight = 5
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context)
     const clear = new TgdPainterClear(context, {
@@ -66,25 +78,38 @@ function init(context: TgdContext) {
     })
     context.add(axis)
     const data = new TgdPainterSegmentsData()
-    data.add([0, 0, 0, 0.2], [1, 0, 0, 0.1])
-    data.add([0, 0, 0, 0.2], [0, 1, 0, 0.1])
-    data.add([0, 0, 0, 0.2], [0, 0, 1, 0.1])
+    // prettier-ignore
+    data.add(
+        [0, 0, 0, 0.2], [0, 0],
+        [10, 0, 0, 0.1], [0, 0],
+    )
+    // prettier-ignore
+    data.add(
+        [0, 0, 0, 0.2], [0.5, 0],
+        [0, 10, 0, 0.1], [0.5, 0],
+    )
+    // prettier-ignore
+    data.add(
+        [0, 0, 0, 0.2], [1, 0],
+        [0, 0, 10, 0.1], [1, 0],
+    )
     const segments = new TgdPainterSegments(context, data, {
         roundness: 3,
+        minRadius: 1,
     })
     context.add(segments)
     context.paint()
 
-    fetch("mesh/axis.obj")
-        .then(resp => {
-            if (!resp.ok) {
-                throw Error(`Error #${resp.status}: ${resp.statusText}!`)
-            }
-            return resp.text()
-        })
-        .then(content => {
-            const painter = new Painter(context, content, texture)
-            // context.add(painter)
-            context.paint()
-        })
+    // fetch("mesh/axis.obj")
+    //     .then(resp => {
+    //         if (!resp.ok) {
+    //             throw Error(`Error #${resp.status}: ${resp.statusText}!`)
+    //         }
+    //         return resp.text()
+    //     })
+    //     .then(content => {
+    //         const painter = new Painter(context, content, texture)
+    //         context.add(painter)
+    //         context.paint()
+    //     })
 }

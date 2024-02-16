@@ -11,6 +11,7 @@ import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
 import { TgdVertexArray } from "@/vao"
 import { TgdInputs } from "@/input"
+import { TgdPainterFunction as TgdPainterFunctionType } from "@/types/painter"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -101,6 +102,20 @@ export class TgdContext implements TgdContextInterface {
             this._texturesCube = new TdgResourceTextureCube(this)
         }
         return this._texturesCube
+    }
+
+    get onEnter(): TgdPainterFunctionType | undefined {
+        return this.painters.onEnter
+    }
+    set onEnter(v: TgdPainterFunctionType | undefined) {
+        this.painters.onEnter = v
+    }
+
+    get onExit(): TgdPainterFunctionType | undefined {
+        return this.painters.onExit
+    }
+    set onExit(v: TgdPainterFunctionType | undefined) {
+        this.painters.onExit = v
     }
 
     get width() {

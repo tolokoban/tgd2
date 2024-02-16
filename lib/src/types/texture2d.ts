@@ -17,4 +17,6 @@ export interface TdgTexture2D {
     bind(): void
     activate(program: TgdProgram, uniformName: string, slot?: number): void
     loadImage(image: string | WebglImage): void
+    fillHorizontalGradient(size: number, ...colors: string[]): void
+    fillverticalGradient(size: number, ...colors: string[]): void
 }

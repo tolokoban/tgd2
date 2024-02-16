@@ -1,3 +1,4 @@
+import { TgdPainterFunction } from "@/types/painter"
 import { TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {
@@ -10,8 +11,8 @@ export type TgdPainterGroupOptions = {
  */
 export class TgdPainterGroup extends TgdPainter {
     public active = true
-    public onEnter: ((time: number, delay: number) => void) | undefined
-    public onExit: ((time: number, delay: number) => void) | undefined
+    public onEnter: TgdPainterFunction | undefined
+    public onExit: TgdPainterFunction | undefined
     private readonly painters: TgdPainter[]
 
     constructor(

@@ -3,7 +3,7 @@ import { TdgTexture2DImpl } from "@/texture"
 import { TdgTexture2D, TdgTexture2DOptions } from "@/types"
 
 export class TdgResourceTexture2D extends TgdResource<
-    TdgTexture2DOptions,
+    Partial<TdgTexture2DOptions>,
     TdgTexture2D
 > {
     constructor(
@@ -13,7 +13,7 @@ export class TdgResourceTexture2D extends TgdResource<
         super()
     }
 
-    protected actualCreate(input: TdgTexture2DOptions): TdgTexture2D {
+    protected actualCreate(input: Partial<TdgTexture2DOptions>): TdgTexture2D {
         return new TdgTexture2DImpl(this.gl, this.refresh, input)
     }
 
@@ -22,8 +22,8 @@ export class TdgResourceTexture2D extends TgdResource<
     }
 
     protected makeKeyFromInput(
-        input: TdgTexture2DOptions
-    ): TdgTexture2DOptions {
+        input: Partial<TdgTexture2DOptions>
+    ): Partial<TdgTexture2DOptions> {
         return input
     }
 }

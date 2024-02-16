@@ -3,10 +3,10 @@ import { TgdProgram } from "@/types"
 import { TgdPainter } from "@/painter/painter"
 import { TgdDataset } from "@/dataset"
 import { TgdVertexArray } from "@/vao"
+import { TgdVec4 } from "@/math"
 
 import VERT from "./axis.vert"
 import FRAG from "./axis.frag"
-import { TgdVec4 } from "@/math"
 
 export type TgdPainterAxisOptions = {
     x: number

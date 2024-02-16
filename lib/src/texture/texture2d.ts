@@ -59,6 +59,44 @@ export class TdgTexture2DImpl implements TdgTexture2D {
         if (options.image) this.loadImage(options.image)
     }
 
+    fillHorizontalGradient(size: number, ...colors: string[]): void {
+        this.fillGradient(size, 1, 1, 0, ...colors)
+    }
+
+    fillverticalGradient(size: number, ...colors: string[]): void {
+        this.fillGradient(1, size, 0, 1, ...colors)
+    }
+
+    private fillGradient(
+        width: number,
+        height: number,
+        dirX: number,
+        dirY: number,
+        ...colors: string[]
+    ) {
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext("2d")
+        if (!ctx) throw Error("Unable to create a 2D context!")
+
+        const gradient = ctx.createLinearGradient(
+            0,
+            0,
+            width * dirX,
+            height * dirY
+        )
+        for (let i = 0; i < colors.length; i++) {
+            gradient.addColorStop(i / (colors.length - 1), colors[i])
+        }
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, 0, width, height)
+        this.loadImage(canvas)
+
+        document.body.appendChild(canvas)
+        canvas.style.position = "fixed"
+    }
+
     delete() {
         this.gl.deleteTexture(this.texture)
     }
@@ -115,7 +153,9 @@ export class TdgTexture2DImpl implements TdgTexture2D {
 
         const { gl, texture } = this
         gl.bindTexture(gl.TEXTURE_2D, texture)
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+        if (image instanceof Image) {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+        }
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,

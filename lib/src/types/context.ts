@@ -8,6 +8,7 @@ import {
 } from "@/resource"
 import { TgdProgram } from "@/types"
 import { TgdVertexArray } from "@/vao"
+import { TgdPainterFunction } from "./painter"
 
 export type TgdContextInterface = {
     readonly gl: WebGL2RenderingContext
@@ -22,4 +23,6 @@ export type TgdContextInterface = {
         elements?: Uint8Array | Uint16Array | Uint32Array
     ): TgdVertexArray
     paint: () => void
+    onEnter: TgdPainterFunction | undefined
+    onExit: TgdPainterFunction | undefined
 }

@@ -1,4 +1,4 @@
-import { TgdContextInterface, TgdProgram } from "@/types"
+import { TdgTexture2D, TgdContextInterface, TgdProgram } from "@/types"
 import { TgdPainter } from "@/painter/painter"
 import { TgdVertexArray } from "@/vao"
 import { TgdDataset } from "@/dataset"
@@ -6,6 +6,7 @@ import { TgdDataset } from "@/dataset"
 import VERT from "./segments.vert"
 import FRAG from "./segments.frag"
 import { TgdVec4 } from "@/math"
+import { TgdCameraOrthographic } from "@/camera"
 
 export type TgdPainterSegmentsOptions = {
     /**
@@ -19,7 +20,11 @@ export type TgdPainterSegmentsOptions = {
      *
      * Default to **3**.
      */
-    roundness?: number
+    roundness: number
+    /**
+     * With orthographic camera, this is a value in pixels.
+     */
+    minRadius: number
 }
 
 /**
@@ -44,6 +49,9 @@ export type TgdPainterSegmentsOptions = {
  * ```
  */
 export class TgdPainterSegments extends TgdPainter {
+    public colorTexture: TdgTexture2D
+    public minRadius: number = 0
+
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
     private readonly vertexCount: number
@@ -52,15 +60,28 @@ export class TgdPainterSegments extends TgdPainter {
     constructor(
         private readonly context: TgdContextInterface,
         factory: { makeDataset: () => InstanceDataset; readonly count: number },
-        { roundness = 3 }: TgdPainterSegmentsOptions = {}
+        {
+            roundness = 3,
+            minRadius = 0,
+        }: Partial<TgdPainterSegmentsOptions> = {}
     ) {
         super()
+        this.minRadius = minRadius
         if (roundness > 125) {
             throw Error("[TgdPainterSegments] Max roundness is 125!")
         }
         if (roundness < 0) {
             throw Error("[TgdPainterSegments] Min roundness is 0!")
         }
+        const tex = context.textures2D.create({
+            magFilter: "NEAREST",
+            minFilter: "NEAREST",
+            wrapR: "CLAMP_TO_EDGE",
+            wrapS: "CLAMP_TO_EDGE",
+            wrapT: "CLAMP_TO_EDGE",
+        })
+        tex.fillHorizontalGradient(3, "#f00", "#0f0", "#00f")
+        this.colorTexture = tex
         const prg = context.programs.create({
             vert: VERT,
             frag: FRAG,
@@ -78,9 +99,17 @@ export class TgdPainterSegments extends TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        const { context, prg, vao, vertexCount, instanceCount } = this
+        const { context, prg, vao, colorTexture, vertexCount, instanceCount } =
+            this
         const { gl, camera } = context
         prg.use()
+        let minRadius = this.minRadius
+        if (camera instanceof TgdCameraOrthographic) {
+            minRadius *= camera.spaceHeight / camera.screenHeight
+        }
+        prg.uniform1f("uniMinRadius", minRadius)
+        colorTexture.activate(prg, "uniTexture")
+        prg.uniform1f("uniCameraZoom", camera.zoom)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixViewModel)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
@@ -95,16 +124,21 @@ export class TgdPainterSegments extends TgdPainter {
 }
 
 type Array4 = [x: number, y: number, z: number, r: number] | TgdVec4
+type Array2 = [u: number, v: number]
 
 type InstanceDataset = TgdDataset<{
     attAxyzr: "vec4"
+    attAuv: "vec2"
     attBxyzr: "vec4"
+    attBuv: "vec2"
 }>
 
 export class TgdPainterSegmentsData {
     private _count = 0
     private attAxyzr: number[] = []
+    private attAuv: number[] = []
     private attBxyzr: number[] = []
+    private attBuv: number[] = []
 
     get count() {
         return this._count
@@ -112,11 +146,18 @@ export class TgdPainterSegmentsData {
 
     /**
      * @param param0 Point A: coords and radius.
-     * @param param1 Point B: coords and radius.
+     * @param param2 Point B: coords and radius.
      */
-    add([xA, yA, zA, radiusA]: Array4, [xB, yB, zB, radiusB]: Array4) {
+    add(
+        [xA, yA, zA, radiusA]: Array4,
+        [uA, vA]: Array2,
+        [xB, yB, zB, radiusB]: Array4,
+        [uB, vB]: Array2
+    ) {
         this.attAxyzr.push(xA, yA, zA, radiusA)
+        this.attAuv.push(uA, vA)
         this.attBxyzr.push(xB, yB, zB, radiusB)
+        this.attBuv.push(uB, vB)
         this._count++
     }
 
@@ -124,14 +165,18 @@ export class TgdPainterSegmentsData {
         const dataset = new TgdDataset(
             {
                 attAxyzr: "vec4",
+                attAuv: "vec2",
                 attBxyzr: "vec4",
+                attBuv: "vec2",
             },
             {
                 divisor: 1,
             }
         )
         dataset.set("attAxyzr", new Float32Array(this.attAxyzr))
+        dataset.set("attAuv", new Float32Array(this.attAuv))
         dataset.set("attBxyzr", new Float32Array(this.attBxyzr))
+        dataset.set("attBuv", new Float32Array(this.attBuv))
         return dataset
     }
 }
@@ -147,7 +192,7 @@ type CapsuleDataset = TgdDataset<{
  * The tip pointing toward +Y is called A.
  * The tip pointing toward -Y is called B.
  * The z coodinates indicates to which tip the point
- * is attached: 1 for A and 0 for B.
+ * is attached: 0 for A and 1 for B.
  */
 function makeCapsule(roundness: number): {
     capsule: CapsuleDataset
@@ -155,12 +200,12 @@ function makeCapsule(roundness: number): {
 } {
     // prettier-ignore
     const offset: number[] =[
-         0, 0, 1,
-         1, 0, 1,
-        -1, 0, 1,
          0, 0, 0,
          1, 0, 0,
         -1, 0, 0,
+         0, 0, 1,
+         1, 0, 1,
+        -1, 0, 1,
     ]
     // prettier-ignore
     const elements: number[] = [
@@ -170,6 +215,19 @@ function makeCapsule(roundness: number): {
         3, 0, 5,
     ]
     if (roundness > 0) {
+        const L = (prefix: string, e0: number, e1: number, e2: number) => {
+            const i0 = elements[e0] * 3
+            const i1 = elements[e1] * 3
+            const i2 = elements[e2] * 3
+            console.log(
+                prefix,
+                `(${offset[i0]}, ${offset[i0 + 1]}, ${offset[i0 + 2]}) (${
+                    offset[i1]
+                }, ${offset[i1 + 1]}, ${offset[i1 + 2]}) (${offset[i2]}, ${
+                    offset[i2 + 1]
+                }, ${offset[i2 + 2]})`
+            )
+        }
         let oldIndexA = 1
         let oldIndexB = 4
         let elemIndex = 6
@@ -179,11 +237,13 @@ function makeCapsule(roundness: number): {
             const y = Math.sin(ang)
             // We set z to 0 because it's related to tip A.
             offset.push(x, y, 0)
+            L("A", 0, oldIndexA, elemIndex)
             elements.push(0, oldIndexA, elemIndex)
             oldIndexA = elemIndex
             elemIndex++
             // We set z to 1 because it's related to tip B.
             offset.push(x, -y, 1)
+            L("B", 3, elemIndex, oldIndexB)
             elements.push(3, elemIndex, oldIndexB)
             oldIndexB = elemIndex
             elemIndex++
