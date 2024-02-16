@@ -2,7 +2,7 @@
 
 precision mediump float;
 
-in vec3 varColor;
+in vec4 varColor;
 out vec4 FragColor;
 
 

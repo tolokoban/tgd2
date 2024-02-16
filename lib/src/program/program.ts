@@ -29,8 +29,8 @@ export class TgdProgramImpl implements TgdProgram {
             var info = gl.getProgramInfoLog(prg) ?? ""
             console.warn(info)
             const errorLines = getErrorLines(info)
-            logCode("Vertex Shader", code.vert, ...errorLines)
-            logCode("Fragment Shader", code.frag, ...errorLines)
+            logCode("Vertex Shader", code.vert, errorLines)
+            logCode("Fragment Shader", code.frag, errorLines)
             throw new Error("Could NOT link WebGL2 program!\n" + info)
         }
         this.program = prg
@@ -168,7 +168,7 @@ export class TgdProgramImpl implements TgdProgram {
         if (info) {
             console.error(`Error in ${type} code:`, info)
             const errorLines = getErrorLines(info)
-            logCode(type, code, ...errorLines)
+            logCode(type, code, errorLines)
             throw Error(`Unable to compile ${type}!`)
         }
         return shader
@@ -206,14 +206,21 @@ type ShaderType = "VERTEX_SHADER" | "FRAGMENT_SHADER"
 
 const RX_ERROR_LINE = /^ERROR:[ \t]+([0-9]+):([0-9]+):/g
 
-function getErrorLines(message: string): number[] {
-    const errorLines: number[] = []
+function getErrorLines(message: string): {
+    lines: number[]
+    messages: string[]
+} {
+    const lines: number[] = []
+    const messages: string[] = []
     for (const line of message.split("\n")) {
         RX_ERROR_LINE.lastIndex = -1
         const match = RX_ERROR_LINE.exec(line)
-        if (match) errorLines.push(parseInt(match[2], 10))
+        if (match) {
+            lines.push(parseInt(match[2], 10))
+            messages.push(line.substring(match[0].length).trim())
+        }
     }
-    return errorLines
+    return { lines, messages }
 }
 
 function style(background: string, bold = false) {
@@ -222,16 +229,23 @@ function style(background: string, bold = false) {
     }`
 }
 
-function logCode(title: string, code: string, ...errorLines: number[]) {
+function logCode(
+    title: string,
+    code: string,
+    errors: { lines: number[]; messages: string[] }
+) {
     console.log(`%c${title}`, "font-weight:bolder;font-size:120%")
     code.split("\n").forEach((line, index) => {
         const num = index + 1
         const prefix = (num * 1e-4).toFixed(4).substring(2)
-        const background = errorLines.includes(num) ? "#f00" : "#000"
+        const background = errors.lines.includes(num) ? "#f00" : "#000"
         console.log(
             `%c${prefix}  %c${line}`,
             style(background),
             style(background, true)
         )
+        if (errors.lines.includes(num)) {
+            console.error(errors.messages[errors.lines.indexOf(num)])
+        }
     })
 }

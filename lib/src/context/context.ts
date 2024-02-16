@@ -213,7 +213,6 @@ export class TgdContext implements TgdContextInterface {
         this.camera.screenWidth = gl.drawingBufferWidth
         this.camera.screenHeight = gl.drawingBufferHeight
         this.painters.paint(time, delay)
-        this.painters.update(time, delay)
         if (this.isPlaying) this.paint()
     }
 

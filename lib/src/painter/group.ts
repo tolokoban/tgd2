@@ -1,13 +1,26 @@
 import { TgdPainter } from "./painter"
 
+export type TgdPainterGroupOptions = {
+    onEnter?(time: number, delay: number): void
+    onExit?(time: number, delay: number): void
+}
+
 /**
  * Group several painters together.
  */
-export class TgdPainterGroup implements TgdPainter {
-    public enabled = true
+export class TgdPainterGroup extends TgdPainter {
+    public active = true
+    public onEnter: ((time: number, delay: number) => void) | undefined
+    public onExit: ((time: number, delay: number) => void) | undefined
     private readonly painters: TgdPainter[]
 
-    constructor(painters: TgdPainter[] = []) {
+    constructor(
+        painters: TgdPainter[] = [],
+        { onEnter, onExit }: TgdPainterGroupOptions = {}
+    ) {
+        super()
+        this.onEnter = onEnter
+        this.onExit = onExit
         this.painters = [...painters]
     }
 
@@ -46,18 +59,12 @@ export class TgdPainterGroup implements TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        if (!this.enabled) return
+        if (!this.active) return
 
+        this.onEnter?.(time, delay)
         for (const painter of this.painters) {
             painter.paint(time, delay)
         }
-    }
-
-    update(time: number, delay: number): void {
-        if (!this.enabled) return
-
-        for (const painter of this.painters) {
-            painter.update(time, delay)
-        }
+        this.onExit?.(time, delay)
     }
 }

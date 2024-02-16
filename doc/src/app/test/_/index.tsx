@@ -9,6 +9,7 @@ import {
     TgdPainterDepth,
     TgdCameraOrthographic,
     TgdPainterSegments,
+    TgdPainterSegmentsData,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -32,8 +33,8 @@ function init(context: TgdContext) {
     context.camera = new TgdCameraOrthographic()
     const { camera } = context
     camera.distance = 10
-    camera.face("+X+Z-Y")
-    camera.x = 2
+    camera.spaceHeight = 2
+    camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context)
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
@@ -61,10 +62,14 @@ function init(context: TgdContext) {
         x: camera.x,
         y: camera.y,
         z: camera.z,
-        scale: 100,
+        scale: 1,
     })
     context.add(axis)
-    const segments = new TgdPainterSegments(context, {
+    const data = new TgdPainterSegmentsData()
+    data.add([0, 0, 0, 0.2], [1, 0, 0, 0.1])
+    data.add([0, 0, 0, 0.2], [0, 1, 0, 0.1])
+    data.add([0, 0, 0, 0.2], [0, 0, 1, 0.1])
+    const segments = new TgdPainterSegments(context, data, {
         roundness: 3,
     })
     context.add(segments)
