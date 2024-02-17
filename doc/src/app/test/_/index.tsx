@@ -15,12 +15,12 @@ import {
 import View from "@/components/demo/Tgd"
 import Painter from "./painter"
 
-import PosX from "@/gfx/cubemap/train-station/px.webp"
-import NegX from "@/gfx/cubemap/train-station/nx.webp"
-import PosY from "@/gfx/cubemap/train-station/py.webp"
-import NegY from "@/gfx/cubemap/train-station/ny.webp"
-import PosZ from "@/gfx/cubemap/train-station/pz.webp"
-import NegZ from "@/gfx/cubemap/train-station/nz.webp"
+import PosX from "@/gfx/cubemap/test/1.webp"
+import PosY from "@/gfx/cubemap/test/2.webp"
+import PosZ from "@/gfx/cubemap/test/3.webp"
+import NegX from "@/gfx/cubemap/test/4.webp"
+import NegY from "@/gfx/cubemap/test/5.webp"
+import NegZ from "@/gfx/cubemap/test/6.webp"
 
 import PaletteURL from "./palette.jpg"
 
@@ -63,10 +63,10 @@ function init(context: TgdContext) {
     const texture = context.textures2D.create(options)
     const skybox = new TgdPainterSkybox(context, {
         imagePosX: PosX,
-        imageNegX: NegX,
         imagePosY: PosY,
-        imageNegY: NegY,
         imagePosZ: PosZ,
+        imageNegX: NegX,
+        imageNegY: NegY,
         imageNegZ: NegZ,
     })
     context.add(skybox)
