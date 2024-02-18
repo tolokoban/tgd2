@@ -55,12 +55,6 @@ function init(context: TgdContext) {
     context.add(clear)
     const depth = new TgdPainterDepth(context)
     context.add(depth)
-    const options: Partial<TdgTexture2DOptions> = {
-        image: PaletteURL,
-        magFilter: "NEAREST",
-        minFilter: "NEAREST",
-    }
-    const texture = context.textures2D.create(options)
     const skybox = new TgdPainterSkybox(context, {
         imagePosX: PosX,
         imagePosY: PosY,
@@ -69,7 +63,7 @@ function init(context: TgdContext) {
         imageNegY: NegY,
         imageNegZ: NegZ,
     })
-    context.add(skybox)
+    // context.add(skybox)
     const axis = new TgdPainterAxis(context, {
         x: camera.x,
         y: camera.y,
@@ -97,7 +91,7 @@ function init(context: TgdContext) {
         roundness: 3,
         minRadius: 1,
     })
-    context.add(segments)
+    // context.add(segments)
     context.paint()
 
     // fetch("mesh/axis.obj")
@@ -108,6 +102,12 @@ function init(context: TgdContext) {
     //         return resp.text()
     //     })
     //     .then(content => {
+    // const options: Partial<TdgTexture2DOptions> = {
+    //     image: PaletteURL,
+    //     magFilter: "NEAREST",
+    //     minFilter: "NEAREST",
+    // }
+    // const texture = context.textures2D.create(options)
     //         const painter = new Painter(context, content, texture)
     //         context.add(painter)
     //         context.paint()
