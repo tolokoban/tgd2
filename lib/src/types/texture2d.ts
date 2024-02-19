@@ -11,6 +11,7 @@ export interface TgdTexture2DOptions {
 }
 
 export interface TgdTexture2D {
+    readonly id: string
     readonly width: number
     readonly height: number
     readonly image: null | WebglImage
