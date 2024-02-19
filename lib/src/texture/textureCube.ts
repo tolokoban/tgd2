@@ -105,8 +105,6 @@ export class TgdTextureCubeImpl implements TgdTextureCube {
         gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
         this.numberOfImagesToLoad--
         if (this.numberOfImagesToLoad === 0) {
-            console.log("All images have been loaded!")
-            console.log(this.width, this.height)
             gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
             gl.texParameteri(
                 gl.TEXTURE_CUBE_MAP,

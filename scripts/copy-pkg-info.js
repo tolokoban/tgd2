@@ -1,5 +1,5 @@
-const FS = require("fs")
-const Path = require("path")
+import FS from "fs"
+import Path from "path"
 
 const [, prg, source, ...targets] = process.argv
 if (

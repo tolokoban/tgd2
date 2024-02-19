@@ -43,8 +43,8 @@ function init(context: TgdContext) {
         context.paint()
     })
     context.inputs.pointer.inertia = 1000
-    context.camera = new TgdCameraOrthographic()
-    const { camera } = context
+    const camera = new TgdCameraOrthographic()
+    context.camera = camera
     camera.distance = 100
     camera.spaceHeight = 100
     camera.face("+X+Y+Z")

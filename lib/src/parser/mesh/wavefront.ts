@@ -68,10 +68,8 @@ export class TgdParserMeshWavefront {
         if (this.attUV.length > 0) {
             result.attUV = new Float32Array(this.attUV)
         }
-        console.log("🚀 [wavefront] this.attUV = ", this.attUV) // @FIXME: Remove this line written on 2024-02-02 at 15:13
         const { elementIndex } = this
         if (elementIndex <= 256) {
-            console.log("UNSIGNED_BYTE")
             return {
                 ...result,
                 type: "UNSIGNED_BYTE",
@@ -79,14 +77,12 @@ export class TgdParserMeshWavefront {
             }
         }
         if (elementIndex <= 0x10000) {
-            console.log("UNSIGNED_SHORT")
             return {
                 ...result,
                 type: "UNSIGNED_SHORT",
                 elements: new Uint16Array(elements),
             }
         }
-        console.log("UNSIGNED_INT")
         return {
             ...result,
             type: "UNSIGNED_INT",

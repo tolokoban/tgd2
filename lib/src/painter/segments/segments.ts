@@ -234,14 +234,6 @@ function makeCapsule(roundness: number): {
             const i0 = elements[e0] * 3
             const i1 = elements[e1] * 3
             const i2 = elements[e2] * 3
-            console.log(
-                prefix,
-                `(${offset[i0]}, ${offset[i0 + 1]}, ${offset[i0 + 2]}) (${
-                    offset[i1]
-                }, ${offset[i1 + 1]}, ${offset[i1 + 2]}) (${offset[i2]}, ${
-                    offset[i2 + 1]
-                }, ${offset[i2 + 2]})`
-            )
         }
         let oldIndexA = 1
         let oldIndexB = 4
