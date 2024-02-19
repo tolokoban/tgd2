@@ -8,6 +8,7 @@ export * from "./math"
 export * from "./painter"
 export * from "./parser"
 export * from "./resource"
+export * from "./utils"
 export * from "./vao"
 
-export type * from "./types"
+export * from "./types"

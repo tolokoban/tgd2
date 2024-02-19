@@ -1,21 +1,33 @@
-import { TgdCamera } from "@/camera"
 import { TgdEvent } from "@/event"
-import { TdgInputKeyboardImpl, TgdInputs } from "@/input"
-import { TgdInputPointerImpl } from "@/input/pointer"
 import { TgdContextInterface, TgdInputPointerEvent } from "@/types"
+
+export interface TgdControllerCameraOrbitOptions {
+    speedOrbit: number
+    speedZoom: number
+}
 
 export class TgdControllerCameraOrbit {
     /**
      * The camera will only move if `enabled === true`.
      */
     public enabled = true
+    public speedZoom = 1
+    public speedOrbit = 1
     public readonly eventZoomChange = new TgdEvent<TgdControllerCameraOrbit>()
     public readonly eventOrbitChange = new TgdEvent<TgdControllerCameraOrbit>()
 
-    constructor(private readonly context: TgdContextInterface) {
+    constructor(
+        private readonly context: TgdContextInterface,
+        {
+            speedZoom = 1,
+            speedOrbit = 1,
+        }: Partial<TgdControllerCameraOrbitOptions> = {}
+    ) {
         const { inputs } = context
         inputs.pointer.eventMove.addListener(this.handleMove)
         inputs.pointer.eventZoom.addListener(this.handleZoom)
+        this.speedOrbit = speedOrbit
+        this.speedZoom = speedZoom
     }
 
     detach() {
@@ -47,13 +59,13 @@ export class TgdControllerCameraOrbit {
 
             const x = x1 * x2 + y1 * y2
             const y = x1 * y2 - y1 * x2
-            const ang = Math.atan2(y, x)
+            const ang = Math.atan2(y, x) * this.speedOrbit
             context.camera.orbitAroundZ(-ang)
             this.fireOrbitChange()
             return
         }
 
-        const speed = 3 * (keyboard.isDown("Shift") ? 0.1 : 1)
+        const speed = 3 * (keyboard.isDown("Shift") ? 0.1 : 1) * this.speedOrbit
         const dx = (evt.current.x - evt.previous.x) * speed
         const dy = (evt.current.y - evt.previous.y) * speed
         if (!keyboard.isDown("x")) context.camera.orbitAroundY(-dx)
@@ -74,7 +86,7 @@ export class TgdControllerCameraOrbit {
         if (!this.enabled) return
 
         const { camera } = this.context
-        let speed = 2e-2
+        let speed = 5e-2 * this.speedZoom
         if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
         const dz = -evt.direction * speed
         camera.zoom = Math.max(1e-5, camera.zoom + dz)

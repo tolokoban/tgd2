@@ -4,6 +4,7 @@
     "description": "ToloGameDev library for WebGL2",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
+    "type": "module",
     "scripts": {
         "doc": "typedoc --watch",
         "build": "webpack --mode=production",
@@ -34,8 +35,10 @@
         "circular-dependency-plugin": "^5.2.2",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",
+        "ts-patch": "^3.1.2",
         "typedoc": "^0.25.8",
         "typescript": "^5.3.3",
+        "typescript-transform-paths": "^3.4.6",
         "webpack": "^5.90.1",
         "webpack-cli": "^5.1.4"
     },

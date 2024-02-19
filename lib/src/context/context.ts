@@ -4,8 +4,8 @@ import { TgdPainter } from "../painter/painter"
 import { TgdContextInterface, TgdProgram } from "@/types"
 import {
     TgdResourceProgram,
-    TdgResourceTexture2D,
-    TdgResourceTextureCube,
+    TgdResourceTexture2D,
+    TgdResourceTextureCube,
 } from "@/resource"
 import { TgdBuffer, TgdBufferOptions } from "@/buffer"
 import { TgdDataset } from "@/dataset"
@@ -62,8 +62,8 @@ export class TgdContext implements TgdContextInterface {
      * Resource manager for WebGLProgram.
      */
     public readonly programs: TgdResourceProgram
-    public readonly textures2D: TdgResourceTexture2D
-    private _texturesCube: TdgResourceTextureCube | null = null
+    public readonly textures2D: TgdResourceTexture2D
+    private _texturesCube: TgdResourceTextureCube | null = null
 
     private readonly observer: ResizeObserver
     private readonly painters: TgdPainterGroup
@@ -84,7 +84,7 @@ export class TgdContext implements TgdContextInterface {
 
         this.gl = gl
         this.programs = new TgdResourceProgram(gl)
-        this.textures2D = new TdgResourceTexture2D(gl, this.paint)
+        this.textures2D = new TgdResourceTexture2D(this)
         const onResize = options.onResize ?? handleResize
         this.observer = new ResizeObserver(() => {
             onResize(gl, canvas.clientWidth, canvas.clientHeight)
@@ -97,9 +97,9 @@ export class TgdContext implements TgdContextInterface {
         canvas.style.touchAction = "none"
     }
 
-    get texturesCube(): TdgResourceTextureCube {
+    get texturesCube(): TgdResourceTextureCube {
         if (!this._texturesCube) {
-            this._texturesCube = new TdgResourceTextureCube(this)
+            this._texturesCube = new TgdResourceTextureCube(this)
         }
         return this._texturesCube
     }

@@ -1,13 +1,13 @@
 import { TgdLoaderImage } from "@/loader"
 import {
     TgdProgram,
-    TdgTextureCube,
-    TdgTextureCubeOptions,
+    TgdTextureCube,
+    TgdTextureCubeOptions,
     WebglImage,
     TgdContextInterface,
 } from "@/types"
 
-export class TdgTextureCubeImpl implements TdgTextureCube {
+export class TgdTextureCubeImpl implements TgdTextureCube {
     public readonly texture: WebGLTexture
 
     private _width = 0
@@ -16,7 +16,7 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
 
     constructor(
         public readonly context: TgdContextInterface,
-        options: TdgTextureCubeOptions
+        options: TgdTextureCubeOptions
     ) {
         const { gl } = context
         const texture = gl.createTexture()

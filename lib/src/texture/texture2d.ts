@@ -1,14 +1,20 @@
 import { TgdLoaderImage } from "@/loader"
 import { TgdEvent } from "@/event/event"
-import { TgdProgram, TdgTexture2D, TdgTexture2DOptions } from "@/types"
+import {
+    TgdProgram,
+    TgdTexture2D,
+    TgdTexture2DOptions,
+    TgdContextInterface,
+} from "@/types"
+import { tgdCreateCanvas2D } from "@/utils"
 
 const DEFAULT_DATA = new Uint8Array([200, 200, 200, 255])
 
-export class TdgTexture2DImpl implements TdgTexture2D {
+export class TgdTexture2DImpl implements TgdTexture2D {
     public readonly texture: WebGLTexture
-    public readonly eventImageUpdate = new TgdEvent<TdgTexture2D>()
+    public readonly eventImageUpdate = new TgdEvent<TgdTexture2D>()
 
-    private readonly options: TdgTexture2DOptions
+    private readonly options: TgdTexture2DOptions
     private _width = 0
     private _height = 0
     private _image:
@@ -20,10 +26,11 @@ export class TdgTexture2DImpl implements TdgTexture2D {
         | ImageBitmap = null
 
     constructor(
-        public readonly gl: WebGL2RenderingContext,
-        private readonly refresh: () => void,
-        options: Partial<TdgTexture2DOptions> = {}
+        public readonly context: TgdContextInterface,
+        public readonly id: string,
+        options: Partial<TgdTexture2DOptions> = {}
     ) {
+        const { gl } = context
         this.options = {
             wrapS: "REPEAT",
             wrapT: "REPEAT",
@@ -59,6 +66,20 @@ export class TdgTexture2DImpl implements TdgTexture2D {
         if (options.image) this.loadImage(options.image)
     }
 
+    makePalette(colors: string[], colums = 0) {
+        const width = colums > 0 ? colums : colors.length
+        const height = Math.ceil(colors.length / width)
+        const { canvas, ctx } = tgdCreateCanvas2D(width, height)
+        let i = 0
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                ctx.fillStyle = colors[i++]
+                ctx.fillRect(x, y, 1, 1)
+            }
+        }
+        this.loadImage(canvas)
+    }
+
     fillHorizontalGradient(size: number, ...colors: string[]): void {
         this.fillGradient(size, 1, 1, 0, ...colors)
     }
@@ -74,12 +95,7 @@ export class TdgTexture2DImpl implements TdgTexture2D {
         dirY: number,
         ...colors: string[]
     ) {
-        const canvas = document.createElement("canvas")
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext("2d")
-        if (!ctx) throw Error("Unable to create a 2D context!")
-
+        const { canvas, ctx } = tgdCreateCanvas2D(width, height)
         const gradient = ctx.createLinearGradient(
             0,
             0,
@@ -93,12 +109,11 @@ export class TdgTexture2DImpl implements TdgTexture2D {
         ctx.fillRect(0, 0, width, height)
         this.loadImage(canvas)
 
-        document.body.appendChild(canvas)
         canvas.style.position = "fixed"
     }
 
     delete() {
-        this.gl.deleteTexture(this.texture)
+        this.context.gl.deleteTexture(this.texture)
     }
 
     get image() {
@@ -114,12 +129,13 @@ export class TdgTexture2DImpl implements TdgTexture2D {
     }
 
     bind() {
-        const { gl } = this
+        const { gl } = this.context
         gl.bindTexture(gl.TEXTURE_2D, this.texture)
     }
 
     activate(program: TgdProgram, uniformName: string, slot = 0) {
-        const { gl, texture } = this
+        const { context, texture } = this
+        const { gl } = context
         gl.activeTexture(gl.TEXTURE0 + slot)
         gl.bindTexture(gl.TEXTURE_2D, texture)
         program.uniform1i(uniformName, slot)
@@ -139,7 +155,7 @@ export class TdgTexture2DImpl implements TdgTexture2D {
                 .then(img => {
                     if (img) {
                         this.loadImage(img)
-                        this.refresh()
+                        this.context.paint()
                     } else {
                         console.error(
                             "[TgdTexture2D] Unable to load image:",
@@ -151,7 +167,8 @@ export class TdgTexture2DImpl implements TdgTexture2D {
             return
         }
 
-        const { gl, texture } = this
+        const { context, texture } = this
+        const { gl } = context
         gl.bindTexture(gl.TEXTURE_2D, texture)
         if (image instanceof Image) {
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)

@@ -2,8 +2,8 @@ import { TgdCamera } from "@/camera"
 import { TgdDataset } from "@/dataset"
 import { TgdInputs } from "@/input"
 import {
-    TdgResourceTexture2D,
-    TdgResourceTextureCube,
+    TgdResourceTexture2D,
+    TgdResourceTextureCube,
     TgdResourceProgram,
 } from "@/resource"
 import { TgdProgram } from "@/types"
@@ -15,8 +15,8 @@ export type TgdContextInterface = {
     readonly inputs: TgdInputs
     camera: TgdCamera
     readonly programs: TgdResourceProgram
-    readonly textures2D: TdgResourceTexture2D
-    readonly texturesCube: TdgResourceTextureCube
+    readonly textures2D: TgdResourceTexture2D
+    readonly texturesCube: TgdResourceTextureCube
     createVAO(
         program?: TgdProgram,
         datasets?: TgdDataset<any>[],

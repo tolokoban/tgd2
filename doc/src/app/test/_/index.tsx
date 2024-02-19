@@ -1,5 +1,5 @@
 import {
-    TdgTexture2DOptions,
+    TgdTexture2DOptions,
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
@@ -83,7 +83,7 @@ function init(context: TgdContext) {
     //         return resp.text()
     //     })
     //     .then(content => {
-    // const options: Partial<TdgTexture2DOptions> = {
+    // const options: Partial<TgdTexture2DOptions> = {
     //     image: PaletteURL,
     //     magFilter: "NEAREST",
     //     minFilter: "NEAREST",

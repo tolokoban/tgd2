@@ -1,29 +1,23 @@
 import { TgdResource } from "@/resource/resource"
-import { TdgTexture2DImpl } from "@/texture"
-import { TdgTexture2D, TdgTexture2DOptions } from "@/types"
+import { TgdTexture2DImpl } from "@/texture"
+import { TgdTexture2D, TgdTexture2DOptions, TgdContextInterface } from "@/types"
 
-export class TdgResourceTexture2D extends TgdResource<
-    Partial<TdgTexture2DOptions>,
-    TdgTexture2D
+export class TgdResourceTexture2D extends TgdResource<
+    Partial<TgdTexture2DOptions>,
+    TgdTexture2D
 > {
-    constructor(
-        private readonly gl: WebGL2RenderingContext,
-        private readonly refresh: () => void
-    ) {
+    constructor(private readonly context: TgdContextInterface) {
         super()
     }
 
-    protected actualCreate(input: Partial<TdgTexture2DOptions>): TdgTexture2D {
-        return new TdgTexture2DImpl(this.gl, this.refresh, input)
+    protected actualCreate(
+        input: Partial<TgdTexture2DOptions>,
+        id: string
+    ): TgdTexture2D {
+        return new TgdTexture2DImpl(this.context, id, input)
     }
 
-    protected actualDelete(object: TdgTexture2D): void {
-        if (object instanceof TdgTexture2DImpl) object.delete()
-    }
-
-    protected makeKeyFromInput(
-        input: Partial<TdgTexture2DOptions>
-    ): Partial<TdgTexture2DOptions> {
-        return input
+    protected actualDelete(object: TgdTexture2D): void {
+        if (object instanceof TgdTexture2DImpl) object.delete()
     }
 }

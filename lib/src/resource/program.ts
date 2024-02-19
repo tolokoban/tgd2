@@ -4,8 +4,7 @@ import { TgdProgramImpl } from "@/program"
 
 export class TgdResourceProgram extends TgdResource<
     TgdProgramOptions,
-    TgdProgram,
-    string
+    TgdProgram
 > {
     constructor(public readonly gl: WebGL2RenderingContext) {
         super()

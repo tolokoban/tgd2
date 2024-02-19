@@ -3,7 +3,7 @@ import {
     TgdContext,
     TgdPainter,
     TgdProgram,
-    TdgTexture2D,
+    TgdTexture2D,
     TgdQuat,
     TgdVertexArray,
     TgdVec3,
@@ -17,7 +17,7 @@ import VERT from "./test.vert"
 import FRAG from "./test.frag"
 
 export default class Painter implements TgdPainter {
-    public texture: TdgTexture2D
+    public texture: TgdTexture2D
 
     private readonly axisZ = new TgdVec3()
     private readonly program: TgdProgram
@@ -31,7 +31,7 @@ export default class Painter implements TgdPainter {
     constructor(
         private readonly context: TgdContext,
         meshContent: string,
-        texture: TdgTexture2D
+        texture: TgdTexture2D
     ) {
         this.texture = texture
         this.program = context.programs.create({

@@ -1,4 +1,4 @@
-import { TdgInputKeyboardImpl } from "@/input/keyboard"
+import { TgdInputKeyboardImpl } from "@/input/keyboard"
 import { TgdInputPointerImpl } from "@/input/pointer"
 import { TgdInputKeyboard } from "@/types/input-keyboard"
 import { TgdInputPointer } from "@/types/input-pointer"
@@ -11,7 +11,7 @@ export class TgdInputs {
 
     get keyboard(): TgdInputKeyboard {
         if (!this._keyboard) {
-            this._keyboard = new TdgInputKeyboardImpl()
+            this._keyboard = new TgdInputKeyboardImpl()
         }
         return this._keyboard
     }

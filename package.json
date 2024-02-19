@@ -6,6 +6,7 @@
     "main": "./lib/dist/index.js",
     "module": "./lib/dist/index.js",
     "types": "./lib/dist/index.d.ts",
+    "type": "module",
     "private": false,
     "files": [
         "./lib/dist"

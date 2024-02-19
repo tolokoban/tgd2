@@ -1,6 +1,6 @@
 import { TgdInputKeyboard } from "@/types/input-keyboard"
 
-export class TdgInputKeyboardImpl implements TgdInputKeyboard {
+export class TgdInputKeyboardImpl implements TgdInputKeyboard {
     private readonly keysDown = new Set<string>()
     private readonly keysUp = new Set<string>()
     private attached = false

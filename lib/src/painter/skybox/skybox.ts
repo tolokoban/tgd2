@@ -1,4 +1,4 @@
-import { TgdProgram, TdgTextureCube, TdgTextureCubeOptions } from "@/types"
+import { TgdProgram, TgdTextureCube, TgdTextureCubeOptions } from "@/types"
 import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter/painter"
 import { TgdDataset } from "@/dataset/dataset"
@@ -9,14 +9,14 @@ import { TgdMat4 } from "@/math"
 import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
 
-export type TgdPainterSkyboxOptions = TdgTextureCubeOptions & {
+export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
     camera?: TgdCameraPerspective
 }
 
 export class TgdPainterSkybox extends TgdPainter {
     private camera: TgdCameraPerspective
 
-    private readonly texture: TdgTextureCube
+    private readonly texture: TgdTextureCube
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly matrix = new TgdMat4()

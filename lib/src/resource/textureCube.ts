@@ -1,30 +1,24 @@
 import { TgdResource } from "@/resource/resource"
-import { TdgTextureCubeImpl } from "@/texture"
+import { TgdTextureCubeImpl } from "@/texture"
 import {
-    TdgTextureCube,
-    TdgTextureCubeOptions,
+    TgdTextureCube,
+    TgdTextureCubeOptions,
     TgdContextInterface,
 } from "@/types"
 
-export class TdgResourceTextureCube extends TgdResource<
-    TdgTextureCubeOptions,
-    TdgTextureCube
+export class TgdResourceTextureCube extends TgdResource<
+    TgdTextureCubeOptions,
+    TgdTextureCube
 > {
     constructor(public readonly context: TgdContextInterface) {
         super()
     }
 
-    protected actualCreate(input: TdgTextureCubeOptions): TdgTextureCube {
-        return new TdgTextureCubeImpl(this.context, input)
+    protected actualCreate(input: TgdTextureCubeOptions): TgdTextureCube {
+        return new TgdTextureCubeImpl(this.context, input)
     }
 
-    protected actualDelete(object: TdgTextureCube): void {
-        if (object instanceof TdgTextureCubeImpl) object.delete()
-    }
-
-    protected makeKeyFromInput(
-        input: TdgTextureCubeOptions
-    ): TdgTextureCubeOptions {
-        return input
+    protected actualDelete(object: TgdTextureCube): void {
+        if (object instanceof TgdTextureCubeImpl) object.delete()
     }
 }

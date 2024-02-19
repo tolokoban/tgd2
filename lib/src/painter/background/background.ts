@@ -1,4 +1,4 @@
-import { TgdProgram, TdgTexture2D } from "@/types"
+import { TgdProgram, TgdTexture2D } from "@/types"
 import { TgdContext } from "@/context"
 import { TgdPainter } from "@/painter/painter"
 import { TgdDataset } from "@/dataset/dataset"
@@ -15,7 +15,7 @@ export interface TgdPainterBackgroundOptions {
 }
 
 export class TgdPainterBackground extends TgdPainter {
-    public texture: TdgTexture2D
+    public texture: TgdTexture2D
 
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
@@ -31,7 +31,7 @@ export class TgdPainterBackground extends TgdPainter {
 
     constructor(
         private readonly context: TgdContext,
-        texture: TdgTexture2D,
+        texture: TgdTexture2D,
         {
             x = 0,
             y = 0,

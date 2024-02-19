@@ -1,4 +1,4 @@
-import { TdgTexture2D, TgdContextInterface, TgdProgram } from "@/types"
+import { TgdTexture2D, TgdContextInterface, TgdProgram } from "@/types"
 import { TgdPainter } from "@/painter/painter"
 import { TgdVertexArray } from "@/vao"
 import { TgdDataset } from "@/dataset"
@@ -49,8 +49,11 @@ export type TgdPainterSegmentsOptions = {
  * ```
  */
 export class TgdPainterSegments extends TgdPainter {
-    public colorTexture: TdgTexture2D
+    public colorTexture: TgdTexture2D
     public minRadius: number = 0
+    public radiusMultiplier = 1
+    public light = 1
+    public shiftZ = 0
 
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
@@ -58,7 +61,7 @@ export class TgdPainterSegments extends TgdPainter {
     private readonly instanceCount: number
 
     constructor(
-        private readonly context: TgdContextInterface,
+        protected readonly context: TgdContextInterface,
         factory: { makeDataset: () => InstanceDataset; readonly count: number },
         {
             roundness = 3,
@@ -80,7 +83,7 @@ export class TgdPainterSegments extends TgdPainter {
             wrapS: "CLAMP_TO_EDGE",
             wrapT: "CLAMP_TO_EDGE",
         })
-        tex.fillHorizontalGradient(3, "#f00", "#0f0", "#00f")
+        tex.makePalette(["#f00", "#0f0", "#00f"])
         this.colorTexture = tex
         const prg = context.programs.create({
             vert: VERT,
@@ -99,8 +102,17 @@ export class TgdPainterSegments extends TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        const { context, prg, vao, colorTexture, vertexCount, instanceCount } =
-            this
+        const {
+            context,
+            prg,
+            vao,
+            colorTexture,
+            vertexCount,
+            instanceCount,
+            light,
+            radiusMultiplier,
+            shiftZ,
+        } = this
         const { gl, camera } = context
         prg.use()
         let minRadius = this.minRadius
@@ -108,6 +120,9 @@ export class TgdPainterSegments extends TgdPainter {
             minRadius *= camera.spaceHeight / camera.screenHeight
         }
         prg.uniform1f("uniMinRadius", minRadius)
+        prg.uniform1f("uniLight", light)
+        prg.uniform1f("uniShiftZ", shiftZ)
+        prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         colorTexture.activate(prg, "uniTexture")
         prg.uniform1f("uniCameraZoom", camera.zoom)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixViewModel)

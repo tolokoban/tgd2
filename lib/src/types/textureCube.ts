@@ -1,7 +1,12 @@
 import { TgdProgram } from "./program"
-import { WebglImage, WebglMagFilter, WebglMinFilter, WebglWrap } from "./webgl"
+import type {
+    WebglImage,
+    WebglMagFilter,
+    WebglMinFilter,
+    WebglWrap,
+} from "./webgl"
 
-export interface TdgTextureCubeOptions {
+export interface TgdTextureCubeOptions {
     /**
      * When you look at this image the
      *
@@ -46,7 +51,7 @@ export interface TdgTextureCubeOptions {
     imageNegZ: string | WebglImage
 }
 
-export interface TdgTextureCube {
+export interface TgdTextureCube {
     /**
      * TextureCube is ready only when the 6 images hve been loaded.
      */
