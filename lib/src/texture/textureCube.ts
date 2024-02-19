@@ -101,6 +101,7 @@ export class TdgTextureCubeImpl implements TdgTextureCube {
         const { context, texture } = this
         const { gl } = context
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, image instanceof Image)
         gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
         this.numberOfImagesToLoad--
         if (this.numberOfImagesToLoad === 0) {

@@ -1,7 +1,7 @@
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 
-export class TgdVec4 extends TgdVec3 {
+export class TgdVec4 extends Float32Array {
     constructor()
     constructor(vec4: TgdVec4)
     constructor(vec3: TgdVec3, w: number)
@@ -84,6 +84,27 @@ export class TgdVec4 extends TgdVec3 {
         return this
     }
 
+    get x() {
+        return this[0]
+    }
+    set x(value: number) {
+        this[0] = value
+    }
+
+    get y() {
+        return this[1]
+    }
+    set y(value: number) {
+        this[1] = value
+    }
+
+    get z() {
+        return this[2]
+    }
+    set z(value: number) {
+        this[2] = value
+    }
+
     get w() {
         return this[3]
     }
@@ -91,7 +112,7 @@ export class TgdVec4 extends TgdVec3 {
         this[3] = value
     }
 
-    add(...vectors: TgdVec4[]): this {
+    add(...vectors: TgdVec4[]): TgdVec4 {
         for (const vec of vectors) {
             this[0] += vec[0]
             this[1] += vec[1]
@@ -101,7 +122,7 @@ export class TgdVec4 extends TgdVec3 {
         return this
     }
 
-    subtract(vec: TgdVec4): this {
+    subtract(vec: TgdVec4): TgdVec4 {
         this[0] -= vec[0]
         this[1] -= vec[1]
         this[2] -= vec[2]
@@ -144,14 +165,6 @@ export class TgdVec4 extends TgdVec3 {
         if (squareLength === 0) return this
 
         return this.scale(1 / Math.sqrt(squareLength))
-    }
-
-    random(): this {
-        this[0] = Math.random() - 0.5
-        this[1] = Math.random() - 0.5
-        this[2] = Math.random() - 0.5
-        this[3] = Math.random() - 0.5
-        return this
     }
 
     debug(caption = "vec4") {

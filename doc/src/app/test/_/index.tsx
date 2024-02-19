@@ -10,6 +10,7 @@ import {
     TgdCameraOrthographic,
     TgdPainterSegments,
     TgdPainterSegmentsData,
+    TgdVec3,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -44,8 +45,8 @@ function init(context: TgdContext) {
     context.inputs.pointer.inertia = 1000
     context.camera = new TgdCameraOrthographic()
     const { camera } = context
-    camera.distance = 10
-    camera.spaceHeight = 5
+    camera.distance = 100
+    camera.spaceHeight = 100
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context)
     const clear = new TgdPainterClear(context, {
@@ -63,7 +64,7 @@ function init(context: TgdContext) {
         imageNegY: NegY,
         imageNegZ: NegZ,
     })
-    // context.add(skybox)
+    context.add(skybox)
     const axis = new TgdPainterAxis(context, {
         x: camera.x,
         y: camera.y,
@@ -71,27 +72,7 @@ function init(context: TgdContext) {
         scale: 1,
     })
     context.add(axis)
-    const data = new TgdPainterSegmentsData()
-    // prettier-ignore
-    data.add(
-        [0, 0, 0, 0.2], [0, 0],
-        [10, 0, 0, 0.1], [0, 0],
-    )
-    // prettier-ignore
-    data.add(
-        [0, 0, 0, 0.2], [0.5, 0],
-        [0, 10, 0, 0.1], [0.5, 0],
-    )
-    // prettier-ignore
-    data.add(
-        [0, 0, 0, 0.2], [1, 0],
-        [0, 0, 10, 0.1], [1, 0],
-    )
-    const segments = new TgdPainterSegments(context, data, {
-        roundness: 3,
-        minRadius: 1,
-    })
-    // context.add(segments)
+    addSegments(context)
     context.paint()
 
     // fetch("mesh/axis.obj")
@@ -112,4 +93,29 @@ function init(context: TgdContext) {
     //         context.add(painter)
     //         context.paint()
     //     })
+}
+
+function addSegments(context: TgdContext) {
+    const data = new TgdPainterSegmentsData()
+    for (let i = 0; i < 10; i++) {
+        data.add([0, 0, 0, 1], [0, 0], vec4(rndVec3(rnd(40, 60)), 0.75), [0, 0])
+    }
+    const segments = new TgdPainterSegments(context, data, {
+        roundness: 3,
+        minRadius: 1,
+    })
+    context.add(segments)
+}
+
+function rnd(min: number, max: number) {
+    return min + (max - min) * Math.random()
+}
+
+function rndVec3(scale: number): TgdVec3 {
+    const vec = new TgdVec3()
+    return vec.random().normalize().scale(scale)
+}
+
+function vec4(v: TgdVec3, w: number): [number, number, number, number] {
+    return [...v, w] as [number, number, number, number]
 }
