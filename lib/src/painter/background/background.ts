@@ -1,8 +1,8 @@
-import { TgdProgram, TgdTexture2D } from "@/types"
-import { TgdContext } from "@/context"
-import { TgdPainter } from "@/painter/painter"
-import { TgdDataset } from "@/dataset/dataset"
-import { TgdVertexArray } from "@/vao"
+import { TgdProgram, TgdTexture2D } from "@tgd/types"
+import { TgdContext } from "@tgd/context"
+import { TgdPainter } from "@tgd/painter/painter"
+import { TgdDataset } from "@tgd/dataset/dataset"
+import { TgdVertexArray } from "@tgd/vao"
 
 import VERT from "./background.vert"
 import FRAG from "./background.frag"

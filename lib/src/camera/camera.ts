@@ -1,5 +1,5 @@
-import { TgdQuat, TgdVec3, TgdMat4, TgdVec4, TgdQuatFace } from "@/math"
-import { TgdMat3 } from "@/math/mat3"
+import { TgdQuat, TgdVec3, TgdMat4, TgdVec4, TgdQuatFace } from "@tgd/math"
+import { TgdMat3 } from "@tgd/math/mat3"
 
 export abstract class TgdCamera {
     protected dirtyProjection = true

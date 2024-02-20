@@ -1,6 +1,10 @@
-import { TgdResource } from "@/resource/resource"
-import { TgdTexture2DImpl } from "@/texture"
-import { TgdTexture2D, TgdTexture2DOptions, TgdContextInterface } from "@/types"
+import { TgdResource } from "@tgd/resource/resource"
+import { TgdTexture2DImpl } from "@tgd/texture"
+import {
+    TgdTexture2D,
+    TgdTexture2DOptions,
+    TgdContextInterface,
+} from "@tgd/types"
 
 export class TgdResourceTexture2D extends TgdResource<
     Partial<TgdTexture2DOptions>,

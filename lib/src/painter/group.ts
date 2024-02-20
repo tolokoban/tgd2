@@ -1,4 +1,4 @@
-import { TgdPainterFunction } from "@/types/painter"
+import { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {

@@ -1,13 +1,13 @@
-import { TgdCamera } from "@/camera"
-import { TgdDataset } from "@/dataset"
-import { TgdInputs } from "@/input"
+import { TgdCamera } from "@tgd/camera"
+import { TgdDataset } from "@tgd/dataset"
+import { TgdInputs } from "@tgd/input"
 import {
     TgdResourceTexture2D,
     TgdResourceTextureCube,
     TgdResourceProgram,
-} from "@/resource"
-import { TgdProgram } from "@/types"
-import { TgdVertexArray } from "@/vao"
+} from "@tgd/resource"
+import { TgdProgram } from "@tgd/types"
+import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterFunction } from "./painter"
 
 export type TgdContextInterface = {

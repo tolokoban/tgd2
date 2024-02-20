@@ -1,9 +1,9 @@
-import { TgdProgram } from "@/types"
+import { TgdProgram } from "@tgd/types"
 import {
     TgdBufferOptionTarget,
     TgdBufferOptionUsage,
     TgdBufferOptions,
-} from "@/buffer"
+} from "@tgd/buffer"
 
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
 

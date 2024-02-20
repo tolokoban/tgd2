@@ -1,5 +1,5 @@
-import { TgdMat4, TgdVec3, TgdVec4 } from "@/math"
-import { TgdProgram, TgdProgramOptions } from "@/types"
+import { TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdProgram, TgdProgramOptions } from "@tgd/types"
 
 /**
  * This class helps to manage a WebGLProgram.

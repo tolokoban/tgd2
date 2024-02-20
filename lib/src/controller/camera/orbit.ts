@@ -1,5 +1,5 @@
-import { TgdEvent } from "@/event"
-import { TgdContextInterface, TgdInputPointerEvent } from "@/types"
+import { TgdEvent } from "@tgd/event"
+import { TgdContextInterface, TgdInputPointerEvent } from "@tgd/types"
 
 export interface TgdControllerCameraOrbitOptions {
     speedOrbit: number

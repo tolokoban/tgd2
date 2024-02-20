@@ -1,10 +1,10 @@
-import { TgdResource } from "@/resource/resource"
-import { TgdTextureCubeImpl } from "@/texture"
+import { TgdResource } from "@tgd/resource/resource"
+import { TgdTextureCubeImpl } from "@tgd/texture"
 import {
     TgdTextureCube,
     TgdTextureCubeOptions,
     TgdContextInterface,
-} from "@/types"
+} from "@tgd/types"
 
 export class TgdResourceTextureCube extends TgdResource<
     TgdTextureCubeOptions,

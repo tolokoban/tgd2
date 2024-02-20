@@ -1,4 +1,4 @@
-import { TgdEvent } from "@/event"
+import { TgdEvent } from "@tgd/event"
 
 export interface TgdInputPointerEvent {
     x: number

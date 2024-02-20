@@ -1,4 +1,4 @@
-import { TgdInputKeyboard } from "@/types/input-keyboard"
+import { TgdInputKeyboard } from "@tgd/types/input-keyboard"
 
 export class TgdInputKeyboardImpl implements TgdInputKeyboard {
     private readonly keysDown = new Set<string>()

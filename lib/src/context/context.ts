@@ -1,17 +1,17 @@
-import { TgdCamera, TgdCameraPerspective } from "@/camera"
+import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
-import { TgdContextInterface, TgdProgram } from "@/types"
+import { TgdContextInterface, TgdProgram } from "@tgd/types"
 import {
     TgdResourceProgram,
     TgdResourceTexture2D,
     TgdResourceTextureCube,
-} from "@/resource"
-import { TgdBuffer, TgdBufferOptions } from "@/buffer"
-import { TgdDataset } from "@/dataset"
-import { TgdVertexArray } from "@/vao"
-import { TgdInputs } from "@/input"
-import { TgdPainterFunction as TgdPainterFunctionType } from "@/types/painter"
+} from "@tgd/resource"
+import { TgdBuffer, TgdBufferOptions } from "@tgd/buffer"
+import { TgdDataset } from "@tgd/dataset"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdInputs } from "@tgd/input"
+import { TgdPainterFunction as TgdPainterFunctionType } from "@tgd/types/painter"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)

@@ -1,4 +1,4 @@
-import { TgdQuat, TgdVec3 } from "@/math"
+import { TgdQuat, TgdVec3 } from "@tgd/math"
 
 describe("math/quat.ts", () => {
     describe("TgdQuat.fromAxis()", () => {

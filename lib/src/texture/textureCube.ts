@@ -1,11 +1,11 @@
-import { TgdLoaderImage } from "@/loader"
+import { TgdLoaderImage } from "@tgd/loader"
 import {
     TgdProgram,
     TgdTextureCube,
     TgdTextureCubeOptions,
     WebglImage,
     TgdContextInterface,
-} from "@/types"
+} from "@tgd/types"
 
 export class TgdTextureCubeImpl implements TgdTextureCube {
     public readonly texture: WebGLTexture

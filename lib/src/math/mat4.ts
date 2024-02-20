@@ -1,4 +1,4 @@
-import { padColOfNumbers } from "@/debug"
+import { padColOfNumbers } from "@tgd/debug"
 import { TgdPainterClearOptions } from "./../painter/clear"
 import { TgdMat3 } from "./mat3"
 import { TgdQuat } from "./quat"

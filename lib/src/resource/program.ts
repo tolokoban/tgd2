@@ -1,6 +1,6 @@
-import { TgdProgram, TgdProgramOptions } from "@/types"
+import { TgdProgram, TgdProgramOptions } from "@tgd/types"
 import { TgdResource } from "./resource"
-import { TgdProgramImpl } from "@/program"
+import { TgdProgramImpl } from "@tgd/program"
 
 export class TgdResourceProgram extends TgdResource<
     TgdProgramOptions,

@@ -1,4 +1,4 @@
-import { TgdMat4 } from "@/math"
+import { TgdMat4 } from "@tgd/math"
 import { TgdCamera } from "./camera"
 
 export class TgdCameraPerspective extends TgdCamera {

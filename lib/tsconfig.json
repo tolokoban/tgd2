@@ -33,7 +33,7 @@
 
         "baseUrl": "./src/",
         "paths": {
-            "@/*": ["*"]
+            "@tgd/*": ["*"]
         },
         "plugins": [
             // Transform paths in output .js files

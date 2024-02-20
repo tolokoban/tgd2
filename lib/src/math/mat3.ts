@@ -1,4 +1,4 @@
-import { padColOfNumbers } from "@/debug"
+import { padColOfNumbers } from "@tgd/debug"
 import { TgdQuat, TgdVec3 } from "."
 
 /**

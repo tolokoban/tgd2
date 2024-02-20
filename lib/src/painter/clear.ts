@@ -1,5 +1,5 @@
 import { TgdPainter } from "."
-import { TgdContext } from "@/context"
+import { TgdContext } from "@tgd/context"
 import { TgdContextInterface, TgdVec4 } from ".."
 
 export interface TgdPainterClearOptions {

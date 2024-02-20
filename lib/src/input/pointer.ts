@@ -1,5 +1,5 @@
-import { TgdEvent } from "@/event"
-import { TgdInputPointer, TgdInputPointerEvent } from "@/types"
+import { TgdEvent } from "@tgd/event"
+import { TgdInputPointer, TgdInputPointerEvent } from "@tgd/types"
 
 export class TgdInputPointerImpl implements TgdInputPointer {
     readonly eventMoveStart = new TgdEvent<{ start: TgdInputPointerEvent }>()

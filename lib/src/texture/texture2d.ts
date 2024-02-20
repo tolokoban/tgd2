@@ -1,12 +1,12 @@
-import { TgdLoaderImage } from "@/loader"
-import { TgdEvent } from "@/event/event"
+import { TgdLoaderImage } from "@tgd/loader"
+import { TgdEvent } from "@tgd/event/event"
 import {
     TgdProgram,
     TgdTexture2D,
     TgdTexture2DOptions,
     TgdContextInterface,
-} from "@/types"
-import { tgdCreateCanvas2D } from "@/utils"
+} from "@tgd/types"
+import { tgdCreateCanvas2D } from "@tgd/utils"
 
 const DEFAULT_DATA = new Uint8Array([200, 200, 200, 255])
 
