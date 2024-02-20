@@ -11,8 +11,8 @@ export class TgdVertexArray {
     constructor(
         public readonly gl: WebGL2RenderingContext,
         program?: TgdProgram,
-        datasets?: TgdDataset<any>[],
-        elements?: Uint8Array | Uint16Array | Uint32Array
+        private readonly datasets?: TgdDataset<any>[],
+        private readonly elements?: Uint8Array | Uint16Array | Uint32Array
     ) {
         const vao = gl.createVertexArray()
         if (!vao) throw Error("Unable to create VertexArrayObject!")
@@ -38,6 +38,29 @@ export class TgdVertexArray {
             this.elemBuffer = buffer
         }
         gl.bindVertexArray(null)
+    }
+
+    toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
+        const lines: string[] = [
+            "function createVAO(",
+            `  gl: WebGL2RenderingContext,`,
+            `  prg: WebGLProgram${this.datasets
+                ?.map((ds, index) => `, data${index}: ArrayBuffer`)
+                .join("")}`,
+            ") {",
+            "  const vao = gl.createVertexArray()",
+            "  gl.bindVertexArray(vao)",
+        ]
+        this.datasets?.forEach((dataset, index) => {
+            lines.push(
+                `  const buff${index} = gl.createBuffer()`,
+                `  gl.bindBuffer(gl.${dataset.target}, buff${index})`,
+                `  gl.bufferData(gl.${dataset.target}, data${index}, gl.${dataset.usage})`,
+                dataset.toCode({ indent: `${indent}  ` })
+            )
+        })
+        lines.push("  return vao", "}")
+        return lines.map(line => `${indent}${line}`).join("\n")
     }
 
     bind() {

@@ -8,6 +8,8 @@ export interface TgdProgramOptions {
 }
 
 export interface TgdProgram {
+    toCode(options?: Partial<{ indent: string }>): void
+
     /**
      * @param name Vertex attribute name.
      */

@@ -98,10 +98,10 @@ export class TgdPainterSegments extends TgdPainter {
     }
 
     delete(): void {
-        throw new Error("Method not implemented.")
+        this.vao.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(_time: number, _delay: number): void {
         const {
             context,
             prg,

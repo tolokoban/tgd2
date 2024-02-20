@@ -1,9 +1,5 @@
 import { TgdProgram } from "@tgd/types"
-import {
-    TgdBufferOptionTarget,
-    TgdBufferOptionUsage,
-    TgdBufferOptions,
-} from "@tgd/buffer"
+import { TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
 
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
 
@@ -13,7 +9,9 @@ export interface TgdDatasetOptions {
     usage: TgdBufferOptionUsage
 }
 
-export class TgdDataset<T extends Record<string, TgdDatasetType>> {
+export class TgdDataset<
+    T extends Record<string, TgdDatasetType> = Record<string, TgdDatasetType>
+> {
     private readonly stride: number
     private readonly dataPerAttribute: Record<keyof T, ArrayBuffer>
     private readonly definitions: Record<
@@ -48,10 +46,10 @@ export class TgdDataset<T extends Record<string, TgdDatasetType>> {
                     if (byteOffset >= view.byteLength) {
                         byteOffset %= view.byteLength
                     }
-                    return view.getFloat32(byteOffset)
+                    return view.getFloat32(byteOffset, true)
                 },
                 setter(view: DataView, byteOffset: number, value: number) {
-                    view.setFloat32(byteOffset, value)
+                    view.setFloat32(byteOffset, value, true)
                 },
             }
             definitions[key] = def
@@ -137,6 +135,32 @@ export class TgdDataset<T extends Record<string, TgdDatasetType>> {
             const bytes = def.dimension * def.bytesPerElement
             offsetDestination += bytes
         }
+    }
+
+    toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
+        const lines: string[] = []
+        let offsetDestination = 0
+        const { definitions } = this
+        for (const name of Object.keys(definitions)) {
+            const def = definitions[name]
+            const att = `$${name}`
+            lines.push(
+                `const ${att} = gl.getAttribLocation(prg, "${name}")`,
+                `gl.enableVertexAttribArray(${att})`,
+                `gl.vertexAttribPointer(`,
+                `  ${att},`,
+                `  ${def.dimension},  // Dimension`,
+                `  gl.FLOAT,`,
+                `  false,`,
+                `  ${this.stride},   // Stride`,
+                `  ${offsetDestination}   // Offset`,
+                `)`,
+                `gl.vertexAttribDivisor(${att}, ${def.divisor})`
+            )
+            const bytes = def.dimension * def.bytesPerElement
+            offsetDestination += bytes
+        }
+        return lines.map(line => `${indent}${line}`).join("\n")
     }
 }
 

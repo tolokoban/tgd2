@@ -15,7 +15,7 @@ export class TgdProgramImpl implements TgdProgram {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        code: TgdProgramOptions
+        private readonly code: TgdProgramOptions
     ) {
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create WebGLProgram!")
@@ -26,7 +26,7 @@ export class TgdProgramImpl implements TgdProgram {
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
-            var info = gl.getProgramInfoLog(prg) ?? ""
+            const info = gl.getProgramInfoLog(prg) ?? ""
             console.warn(info)
             const errorLines = getErrorLines(info)
             logCode("Vertex Shader", code.vert, errorLines)
@@ -36,6 +36,29 @@ export class TgdProgramImpl implements TgdProgram {
         this.program = prg
         this.shaders = [vertShader, fragShader]
         this.uniformsLocations = this.getUniformsLocations()
+        gl.detachShader(prg, vertShader)
+        gl.deleteShader(vertShader)
+        gl.detachShader(prg, fragShader)
+        gl.deleteShader(fragShader)
+    }
+
+    toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
+        const lines: string[] = [
+            `function createProgram(gl: WebGL2RenderingContext) {`,
+            `  const prg = gl.createProgram()`,
+            `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
+            `  gl.shaderSource(vertexShader, \`${this.code.vert}\`)`,
+            `  gl.compileShader(vertexShader)`,
+            `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
+            `  gl.shaderSource(fragmentShader, \`${this.code.frag}\`)`,
+            `  gl.compileShader(fragmentShader)`,
+            `  gl.attachShader(prg, vertexShader)`,
+            `  gl.attachShader(prg, fragmentShader)`,
+            `  gl.linkProgram(prg)`,
+            `  return prg`,
+            `}`,
+        ]
+        return lines.map(line => `${indent}${line}`).join("\n")
     }
 
     getAttribLocation(name: string): number {
