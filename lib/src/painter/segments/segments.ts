@@ -131,7 +131,7 @@ export class TgdPainterSegments extends TgdPainter {
         prg.uniform1f("uniRadiusSwitch", radiusSwitch)
         colorTexture.activate(prg, "uniTexture")
         prg.uniform1f("uniCameraZoom", camera.zoom)
-        prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixViewModel)
+        prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
         gl.drawElementsInstanced(
