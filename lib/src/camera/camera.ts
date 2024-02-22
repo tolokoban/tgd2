@@ -1,7 +1,13 @@
 import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace } from "@tgd/math"
 import { TgdMat3 } from "@tgd/math/mat3"
+import { TgdEvent } from "../event"
 
 export abstract class TgdCamera {
+    /**
+     * A change in the position/orientation/size of the camera.
+     */
+    public eventTransformChange = new TgdEvent<TgdCamera>()
+
     private _screenWidth = 1920
     private _screenHeight = 1080
     private _screenAspectRatio = 1920 / 1080
@@ -99,6 +105,20 @@ export abstract class TgdCamera {
         this.copyProjectionFrom(camera)
         return this
     }
+
+    /**
+     * @param screenX -1 is the left edge, 0 id the center and +1 is the right edge.
+     * @param screenY -1 is the bottom edge, 0 id the center and +1 is the top edge.
+     * @returns The normalized ray vector that goes from the camera position
+     * to the point designed on the screen.
+     */
+    abstract castRay(
+        screenX: number,
+        screenY: number
+    ): Readonly<{
+        origin: TgdVec3
+        direction: TgdVec3
+    }>
 
     abstract copyProjectionFrom(camera: TgdCamera): this
 
@@ -356,7 +376,10 @@ export abstract class TgdCamera {
     }
     private set dirtyModelView(v: boolean) {
         this._dirtyModelView = v
-        if (v) this.dirtyModelViewInverse = true
+        if (v) {
+            this.dirtyModelViewInverse = true
+            this.eventTransformChange.dispatch(this)
+        }
     }
 
     private get dirtyAxis(): boolean {
