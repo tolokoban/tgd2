@@ -141,7 +141,7 @@ export abstract class TgdCamera {
     }
 
     get orientation(): Readonly<TgdQuat> {
-        return this.orientation
+        return this._orientation
     }
 
     set orientation(quat: TgdQuat) {
