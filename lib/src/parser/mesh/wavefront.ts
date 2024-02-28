@@ -174,6 +174,7 @@ export class TgdParserMeshWavefront {
         if (index > -1) return index
 
         const [vx, vy, vz] = this.vertices[v.vertex]
+        console.log(this.elementIndex, [vx, vy, vz])
         this.attPosition.push(vx, vy, vz)
         if (typeof v.normal === "number") {
             const [nx, ny, nz] = this.normals[v.normal]
