@@ -46,6 +46,8 @@ export class TgdPainterMeshNormals extends TgdPainter {
     public readonly paint = () => {
         const { context, prg } = this
         const { gl, camera } = context
+        gl.enable(gl.CULL_FACE)
+        gl.cullFace(gl.BACK)
         prg.use()
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)

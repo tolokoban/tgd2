@@ -1,5 +1,11 @@
 import { TgdProgram } from "./program"
-import { WebglImage, WebglMagFilter, WebglMinFilter, WebglWrap } from "./webgl"
+import {
+    WebglImage,
+    WebglMagFilter,
+    WebglMinFilter,
+    WebglPixelStoreFormat,
+    WebglWrap,
+} from "./webgl"
 
 export interface TgdTexture2DOptions {
     wrapS: WebglWrap
@@ -11,6 +17,8 @@ export interface TgdTexture2DOptions {
     image?: string | WebglImage
     width?: number
     height?: number
+    internalFormat?: WebglPixelStoreFormat
+    format?: WebglPixelStoreFormat
 }
 
 export interface TgdTexture2D {

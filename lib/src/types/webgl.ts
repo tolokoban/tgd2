@@ -43,3 +43,13 @@ export type WebglDepthFunc =
     | "GEQUAL"
     /** always pass */
     | "ALWAYS"
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
+ */
+export type WebglPixelStoreFormat =
+    | "RGB"
+    | "RGBA"
+    | "LUMINANCE_ALPHA"
+    | "ALPHA"
+    | "LUMINANCE"
