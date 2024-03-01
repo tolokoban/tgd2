@@ -102,7 +102,6 @@ export class TgdParserMeshWavefront {
         if (this.attUV.length > 0) {
             result.attUV = new Float32Array(this.attUV)
         }
-        console.log("🚀 [wavefront] result = ", result) // @FIXME: Remove this line written on 2024-02-29 at 09:51
         const { elementIndex } = this
         if (elementIndex <= 256) {
             return {

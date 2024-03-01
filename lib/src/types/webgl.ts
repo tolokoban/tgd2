@@ -53,3 +53,21 @@ export type WebglPixelStoreFormat =
     | "LUMINANCE_ALPHA"
     | "ALPHA"
     | "LUMINANCE"
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getTexParameter
+ */
+export type WebglTexParameter =
+    | "TEXTURE_MAG_FILTER"
+    | "TEXTURE_MIN_FILTER"
+    | "TEXTURE_WRAP_S"
+    | "TEXTURE_WRAP_T"
+    | "TEXTURE_BASE_LEVEL"
+    | "TEXTURE_COMPARE_FUNC"
+    | "TEXTURE_COMPARE_MODE"
+    | "TEXTURE_IMMUTABLE_FORMAT"
+    | "TEXTURE_IMMUTABLE_LEVELS"
+    | "TEXTURE_MAX_LEVEL"
+    | "TEXTURE_MAX_LOD"
+    | "TEXTURE_MIN_LOD"
+    | "TEXTURE_WRAP_R"

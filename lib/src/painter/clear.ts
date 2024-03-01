@@ -41,6 +41,7 @@ export class TgdPainterClear extends TgdPainter {
                 "[TgdPainterClear] You must give at least a color or a depth in the constructor!"
             )
         }
+        // eslint-disable-next-line no-extra-semi
         ;[this.red, this.green, this.blue, this.alpha] = color
         this.depth = depth
     }
@@ -48,7 +49,7 @@ export class TgdPainterClear extends TgdPainter {
     /** Nothing to destroy. */
     delete(): void {}
 
-    paint(_time: number, _delay: number): void {
+    paint(): void {
         const { clearMask, context, red, green, blue, alpha, depth, options } =
             this
         const { gl } = context

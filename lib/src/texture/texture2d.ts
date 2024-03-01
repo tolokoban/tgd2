@@ -6,6 +6,7 @@ import {
     TgdTexture2DOptions,
     TgdContextInterface,
     WebglImage,
+    WebglTexParameter,
 } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
 
@@ -40,11 +41,12 @@ export class TgdTexture2DImpl implements TgdTexture2D {
 
         this.glTexture = texture
         const {
-            wrapS,
-            wrapT,
-            wrapR,
-            minFilter,
-            magFilter,
+            wrapS = "CLAMP_TO_EDGE",
+            wrapT = "CLAMP_TO_EDGE",
+            wrapR = "CLAMP_TO_EDGE",
+            minFilter = "LINEAR",
+            magFilter = "LINEAR",
+            generateMipMap = false,
             width = 1,
             height = 1,
             internalFormat = "RGBA",
@@ -69,6 +71,18 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[minFilter])
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
         if (options.image) this.loadImage(options.image)
+        else if (generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
+    }
+
+    getParameter(param: WebglTexParameter): number | boolean | null {
+        const { context, glTexture } = this
+        const { gl } = context
+        gl.bindTexture(gl.TEXTURE_2D, glTexture)
+        const value = gl.getTexParameter(gl.TEXTURE_2D, gl[param]) as
+            | number
+            | boolean
+            | null
+        return value
     }
 
     makePalette(colors: string[], colums = 0) {
@@ -139,10 +153,10 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     }
 
     activate(program: TgdProgram, uniformName: string, slot = 0) {
-        const { context, glTexture: texture } = this
+        const { context, glTexture } = this
         const { gl } = context
         gl.activeTexture(gl.TEXTURE0 + slot)
-        gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.bindTexture(gl.TEXTURE_2D, glTexture)
         program.uniform1i(uniformName, slot)
     }
 
