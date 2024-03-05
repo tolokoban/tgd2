@@ -8,13 +8,17 @@ export interface TgdCameraOptions {
     target?: [number, number, number] | TgdVec3
     orientation?: [number, number, number, number] | TgdQuat
     distance?: number
+    name?: string
 }
 
 export abstract class TgdCamera {
+    private static incrementalId = 1
+
     /**
      * A change in the position/orientation/size of the camera.
      */
-    public eventTransformChange = new TgdEvent<TgdCamera>()
+    public readonly eventTransformChange = new TgdEvent<TgdCamera>()
+    public readonly name: string
 
     private _screenWidth = 1920
     private _screenHeight = 1080
@@ -38,6 +42,7 @@ export abstract class TgdCamera {
     private readonly _matrixModelViewInverse = new TgdMat4()
     private readonly _matrixProjectionInverse = new TgdMat4()
     private readonly _orientation = new TgdQuat(0, 0, 0, 1)
+    private readonly _shift = new TgdVec3(0, 0, 0)
     private readonly _target = new TgdVec3(0, 0, 0)
     private readonly _position = new TgdVec3(0, 0, 0)
     private _distance = 10
@@ -47,6 +52,7 @@ export abstract class TgdCamera {
     private readonly tmpVec3 = new TgdVec3()
 
     constructor(options: TgdCameraOptions = {}) {
+        this.name = options.name ?? `TgdCamera#${TgdCamera.incrementalId++}`
         this._near = options.near ?? 1e-3
         this._far = options.far ?? 1e6
         this._distance = options.distance ?? 10
@@ -247,6 +253,23 @@ export abstract class TgdCamera {
         return this
     }
 
+    get shift(): Readonly<TgdVec3> {
+        return this._shift
+    }
+    set shift(v: TgdVec3) {
+        this._shift.from(v)
+        this.dirtyModelView = true
+    }
+
+    setShift(x: number, y: number, z: number): this {
+        const { _shift } = this
+        _shift.x = x
+        _shift.y = y
+        _shift.z = z
+        this.dirtyModelView = true
+        return this
+    }
+
     get x() {
         return this._target.x
     }
@@ -319,6 +342,12 @@ export abstract class TgdCamera {
         this.dirtyModelView = true
     }
 
+    moveShift(x: number, y: number, z: number) {
+        const [sx, sy, sz] = this._shift
+        this._shift.reset(x + sx, y + sy, z + sz)
+        this._dirtyModelView = true
+    }
+
     orbitAroundX(angleInRadians: number): this {
         this.updateAxisIfNeeded()
         const {
@@ -364,8 +393,8 @@ export abstract class TgdCamera {
         return this
     }
 
-    debug(caption = "Camera") {
-        this._orientation.debug(`${caption} quaternion:`)
+    debug(caption?: string) {
+        this._orientation.debug(`${caption ?? this.name} quaternion:`)
     }
 
     protected abstract getSpaceHeightAtTarget(): number
@@ -390,11 +419,15 @@ export abstract class TgdCamera {
         const mat = this._matrixModelView
         this.updateAxis()
         const d = this._distance
+        const { x: sx, y: sy, z: sz } = this._shift
         const { x: tx, y: ty, z: tz } = this._target
         const { x: ax, y: ay, z: az } = this._axisZ
         _position.x = tx + d * ax
         _position.y = ty + d * ay
         _position.z = tz + d * az
+        _position.addWithScale(this._axisX, sx)
+        _position.addWithScale(this._axisY, sy)
+        _position.addWithScale(this._axisZ, sz)
         tmpVec3
             .from(_position)
             .applyMatrix(tmpMat3.transpose())
