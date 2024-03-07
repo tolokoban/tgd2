@@ -161,7 +161,7 @@ module.exports = env => {
                     },
                 },
                 {
-                    test: /\.(bin)$/i,
+                    test: /\.(bin|glb)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset",
                     generator: {

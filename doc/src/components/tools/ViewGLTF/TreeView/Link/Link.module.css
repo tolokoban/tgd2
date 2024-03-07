@@ -1,0 +1,43 @@
+.Link {
+    background-color: #fff;
+    border-radius: 999vmax;
+    border: none;
+    box-shadow: 0 0.125em 0.25em #0007;
+    margin: 0 0.5em 0.5em 0;
+    padding: 0 0.5em 0 0;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.5em;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+
+.Link:active {
+    transform: translateY(0.125em);
+    box-shadow: 0 0 0.125em #000a;
+}
+
+.ATT::before {
+    content: "ATT";
+    padding: 0 0.5em;
+    background-color: #f00;
+    color: #fff;
+    border-radius: 999vmax 0 0 999vmax;
+}
+
+.IDX::before {
+    content: "IDX";
+    padding: 0 0.5em;
+    background-color: #00f;
+    color: #fff;
+    border-radius: 999vmax 0 0 999vmax;
+}
+
+.IMG::before {
+    content: "IMG";
+    padding: 0 0.5em;
+    background-color: #ff0;
+    color: #000;
+    border-radius: 999vmax 0 0 999vmax;
+}

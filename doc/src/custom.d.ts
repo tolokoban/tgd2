@@ -31,6 +31,16 @@ declare module "*.webp" {
     export = value
 }
 
+declare module "*.bin" {
+    const value: any
+    export = value
+}
+
+declare module "*.glb" {
+    const value: any
+    export = value
+}
+
 declare module "*.yaml" {
     const value: any
     export = value

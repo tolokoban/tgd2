@@ -1,22 +1,21 @@
 import {
+    TgdCamera,
     TgdCameraOrthographic,
+    TgdCameraPerspective,
     TgdContext,
     TgdPainter,
     TgdProgram,
     TgdTexture2D,
-    TgdQuat,
-    TgdVertexArray,
     TgdVec3,
-    TgdCameraPerspective,
-    TgdCamera,
+    TgdVertexArray,
 } from "@tolokoban/tgd"
 
 import { parse } from "./parser"
 
-import VERT from "./test.vert"
 import FRAG from "./test.frag"
+import VERT from "./test.vert"
 
-export default class Painter implements TgdPainter {
+export default class Painter extends TgdPainter {
     public texture: TgdTexture2D
 
     private readonly axisZ = new TgdVec3()
@@ -33,6 +32,7 @@ export default class Painter implements TgdPainter {
         meshContent: string,
         texture: TgdTexture2D
     ) {
+        super()
         this.texture = texture
         this.program = context.programs.create({
             vert: VERT,
@@ -75,8 +75,8 @@ export default class Painter implements TgdPainter {
         program.use()
         texture.activate(program, "uniTexture")
         program.uniform3fv("uniAxisZ", axisZ)
-        program.uniformMatrix4fv("uniCameraViewModelL", cameraL.matrixViewModel)
-        program.uniformMatrix4fv("uniCameraViewModelR", cameraR.matrixViewModel)
+        program.uniformMatrix4fv("uniCameraViewModelL", cameraL.matrixModelView)
+        program.uniformMatrix4fv("uniCameraViewModelR", cameraR.matrixModelView)
         program.uniformMatrix4fv(
             "uniCameraProjection",
             cameraL.matrixProjection
@@ -91,7 +91,7 @@ export default class Painter implements TgdPainter {
         const { context, cameraL, cameraR, axisZ } = this
         const { keyboard } = context.inputs
         const { camera } = context
-        camera.toAxisZ(axisZ)
+        axisZ.from(camera.axisZ)
         const camSpeed = 1e-3
         if (keyboard.isDown("ArrowRight")) {
             camera.orbitAroundY(delay * camSpeed)
@@ -104,7 +104,7 @@ export default class Painter implements TgdPainter {
             camera.orbitAroundX(-delay * camSpeed)
         }
         if (keyboard.isDown("0")) {
-            camera.setOrientation(new TgdQuat())
+            camera.setOrientation(0, 0, 0, 1)
         }
         if (keyboard.hasClicked("d")) {
             camera.debug()

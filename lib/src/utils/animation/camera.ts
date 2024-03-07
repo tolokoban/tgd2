@@ -1,5 +1,5 @@
-import { TgdCamera } from "@/tgd/camera"
-import { TgdQuat, TgdVec3 } from "@/tgd/math"
+import { TgdCamera } from "@tgd/camera"
+import { TgdQuat, TgdVec3 } from "@tgd/math"
 import { mix } from "../math"
 
 interface CameraTarget {

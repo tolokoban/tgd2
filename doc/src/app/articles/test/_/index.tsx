@@ -42,13 +42,14 @@ function init(context: TgdContext) {
         }
         context.paint()
     })
-    context.inputs.pointer.inertia = 1000
     const camera = new TgdCameraOrthographic()
     context.camera = camera
     camera.distance = 100
     camera.spaceHeight = 100
     camera.face("+X+Y+Z")
-    new TgdControllerCameraOrbit(context)
+    new TgdControllerCameraOrbit(context, {
+        inertiaOrbit: 900,
+    })
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
         depth: 1,
@@ -98,7 +99,7 @@ function init(context: TgdContext) {
 function addSegments(context: TgdContext) {
     const data = new TgdPainterSegmentsData()
     for (let i = 0; i < 10; i++) {
-        data.add([0, 0, 0, 1], [0, 0], vec4(rndVec3(rnd(40, 60)), 0.75), [0, 0])
+        data.add([0, 0, 0, 1], vec4(rndVec3(rnd(40, 60)), 0.75), [0, 0], [0, 0])
     }
     const segments = new TgdPainterSegments(context, data, {
         roundness: 3,

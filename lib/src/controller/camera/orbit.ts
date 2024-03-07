@@ -1,6 +1,6 @@
-import { TgdAnimation } from "@/tgd/types/animation"
-import { tgdEasingFunctionOutQuad } from "@/tgd/utils"
-import { clamp } from "@/tgd/utils/math"
+import { TgdAnimation } from "@tgd/types/animation"
+import { tgdEasingFunctionOutQuad } from "@tgd/utils"
+import { clamp } from "@tgd/utils/math"
 import {
     TgdContextInterface,
     TgdInputPointerEventMove,
