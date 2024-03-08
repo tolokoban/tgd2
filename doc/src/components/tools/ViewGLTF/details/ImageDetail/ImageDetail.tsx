@@ -3,6 +3,7 @@ import { Theme } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
 import Style from "./ImageDetail.module.css"
+import Spinner from "@/components/Spinner"
 
 const $ = Theme.classNames
 
@@ -17,24 +18,21 @@ export default function ImageDetail({
     parser,
     id,
 }: ImageDetailProps) {
-    const [url, setUrl] = React.useState("")
+    const [img, setImg] = React.useState<HTMLImageElement | undefined>(
+        undefined
+    )
     React.useEffect(() => {
-        setUrl("")
-        const image = parser.gltf.images?.[id]
-        if (!image) return
-
-        const bufferView = parser.gltf.bufferViews?.[image.bufferView]
-        if (!bufferView) return
-
-        const blob = new Blob([parser.buffers[bufferView.buffer]], {
-            type: image.mimeType,
-        })
-        setUrl(URL.createObjectURL(blob))
+        setImg(undefined)
+        parser.loadImage(id).then(setImg).catch(console.error)
     }, [id, parser])
+    if (!img) return <Spinner />
+
     return (
         <div className={$.join(className, Style.ImageDetail)}>
-            <h1>Image...</h1>
-            <img src={url} />
+            <p>
+                <b>{parser.gltf.images?.[id].name}</b>: {img.width}×{img.height}
+            </p>
+            <img src={img.src} />
         </div>
     )
 }

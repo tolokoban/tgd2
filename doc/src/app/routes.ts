@@ -20,6 +20,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/background": ["/articles/painter/background"],
     "/articles/painter/clear": ["/articles/painter/clear"],
     "/articles/painter/logic": ["/articles/painter/logic"],
+    "/articles/suzanne": ["/articles/suzanne"],
     "/articles/test": ["/articles/test"],
     "/articles/texture": ["/articles/texture"],
     "/articles/texture/cube": ["/articles/texture/cube"],

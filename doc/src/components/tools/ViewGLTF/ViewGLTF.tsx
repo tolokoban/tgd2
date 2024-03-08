@@ -1,18 +1,17 @@
-import React from "react"
-import { Theme, ViewButton } from "@tolokoban/ui"
 import {
-    TgdParserGLTransfertFormatBinary,
     tgdFetchArrayBuffer,
+    TgdParserGLTransfertFormatBinary,
 } from "@tolokoban/tgd"
+import { Theme } from "@tolokoban/ui"
+import React from "react"
+
+import Spinner from "../../Spinner"
+import ImageDetail from "./details/ImageDetail"
+import TreeView from "./TreeView"
+import { MainSection } from "./TreeView/TreeView"
 
 import DanatiaURL from "./danatia.glb"
-
 import Style from "./ViewGLTF.module.css"
-import Primitive from "./TreeView/Primitive"
-import TreeView from "./TreeView"
-import Spinner from "../../Spinner"
-import { MainSection } from "./TreeView/TreeView"
-import ImageDetail from "./details/ImageDetail"
 
 const $ = Theme.classNames
 
@@ -24,13 +23,8 @@ export default function ViewGLTF({ className }: ViewGLTFProps) {
     const parser = useParser()
     const [section, setSection] = React.useState<MainSection | null>(null)
 
-    console.log(
-        "🚀 [ViewGLTF] section.type, section.id = ",
-        section?.type,
-        section?.id
-    ) // @FIXME: Remove this line written on 2024-03-07 at 18:10
     return (
-        <div>
+        <div className={$.join(className, Style.ViewGLTF)}>
             {parser ? (
                 <>
                     <aside>

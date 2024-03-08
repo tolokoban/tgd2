@@ -31,6 +31,11 @@ declare module "*.webp" {
     export = value
 }
 
+declare module "*.obj" {
+    const value: string
+    export = value
+}
+
 declare module "*.bin" {
     const value: any
     export = value

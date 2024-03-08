@@ -31,7 +31,7 @@
         "strict": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
-        "target": "ES5"
+        "target": "ES6"
     },
     "output": ["./dist"],
     "files": ["src/index.tsx"],

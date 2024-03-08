@@ -3,11 +3,21 @@
 import { assertType } from "@tgd/types/guards"
 
 export interface TgdFormatGltf {
+    accessors?: Array<{
+        bufferView?: number
+        byteOffset?: number
+        componentType: number
+        normalized?: boolean
+        count: number
+        type: number
+        name?: string
+    }>
     meshes?: Array<{
         name: string
         primitives: Array<{
             attributes: Record<string, number>
             indices?: number
+            mode?: number
         }>
     }>
     images?: Array<{
@@ -29,6 +39,18 @@ export function assertTgdFormatGltf(
     assertType(data, [
         "partial",
         {
+            accessors: [
+                "array",
+                {
+                    bufferView: ["?", "number"],
+                    byteOffset: ["?", "number"],
+                    componentType: "number",
+                    normalized: ["?", "boolean"],
+                    count: "number",
+                    type: "number",
+                    name: ["?", "string"],
+                },
+            ],
             meshes: [
                 "array",
                 {
@@ -38,6 +60,7 @@ export function assertTgdFormatGltf(
                         {
                             attributes: ["map", "number"],
                             indices: ["?", "number"],
+                            mode: ["?", "number"],
                         },
                     ],
                 },

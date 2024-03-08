@@ -15,7 +15,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <ul>
                     {PAINTERS.map(name => (
                         <li key={name}>
-                            <a href={`#/painter/${name.toLowerCase()}`}>
+                            <a
+                                href={`#/articles/painter/${name.toLowerCase()}`}
+                            >
                                 {name}
                             </a>
                         </li>

@@ -73,7 +73,7 @@ export class TgdCameraPerspective extends TgdCamera {
         const near = this._near
         const far = this._far
         const out = this._matrixProjection
-        const f = 1.0 / Math.tan(fovy / 2)
+        const f = this.zoom / Math.tan(fovy / 2)
         out[0] = f / aspect
         out[1] = 0
         out[2] = 0

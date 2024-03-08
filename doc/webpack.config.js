@@ -177,7 +177,7 @@ module.exports = env => {
                     },
                 },
                 {
-                    test: /\.(vert|frag)$/i,
+                    test: /\.(vert|frag|obj)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset/source",
                 },

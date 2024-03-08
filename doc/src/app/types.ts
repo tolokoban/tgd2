@@ -14,6 +14,7 @@ export type RoutePath =
     | "/articles/painter/background"
     | "/articles/painter/clear"
     | "/articles/painter/logic"
+    | "/articles/suzanne"
     | "/articles/test"
     | "/articles/texture"
     | "/articles/texture/cube"
