@@ -1,7 +1,4 @@
 import {
-    TgdCamera,
-    TgdCameraOrthographic,
-    TgdCameraPerspective,
     TgdContext,
     TgdPainter,
     TgdProgram,

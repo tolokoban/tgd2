@@ -247,7 +247,7 @@ export class TgdContext implements TgdContextInterface {
     createVAO(
         program?: TgdProgram,
         datasets?: TgdDataset[],
-        elements?: Uint8Array | Uint16Array | Uint32Array
+        elements?: Uint8Array | Uint16Array | Uint32Array | ArrayBuffer
     ): TgdVertexArray {
         return new TgdVertexArray(this.gl, program, datasets, elements)
     }

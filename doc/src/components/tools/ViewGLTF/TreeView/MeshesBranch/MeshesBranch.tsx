@@ -25,6 +25,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                             <details key={primitiveIndex}>
                                 <summary>Primitive #{primitiveIndex}</summary>
                                 <Primitive
+                                    parser={parser}
                                     attributes={primitive.attributes}
                                     indices={primitive.indices}
                                     onClick={onClick}
@@ -33,6 +34,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                         ))
                     ) : (
                         <Primitive
+                            parser={parser}
                             attributes={mesh.primitives[0].attributes}
                             indices={mesh.primitives[0].indices}
                             onClick={onClick}

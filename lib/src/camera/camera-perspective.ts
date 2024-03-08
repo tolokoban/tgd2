@@ -62,7 +62,7 @@ export class TgdCameraPerspective extends TgdCamera {
     }
 
     protected setSpaceHeightAtTarget(v: number) {
-        this.fovy = Math.atan(v / (2 * this.distance))
+        this.distance = v / (2 * Math.tan(this.fovy * 0.5))
     }
 
     private updateProjectionIfNeeded(): void {

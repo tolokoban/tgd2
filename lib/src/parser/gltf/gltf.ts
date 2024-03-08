@@ -1,5 +1,10 @@
+import { TgdDataset } from "@tgd/dataset"
 import { parseGLB } from "./parser"
-import { TgdFormatGltf } from "../../types/gltf"
+import {
+    TgdFormatGltf,
+    TgdFormatGltfAccessor,
+    TgdFormatGltfMesh,
+} from "../../types/gltf"
 
 export class TgdParserGLTransfertFormatBinary {
     public readonly gltf: Readonly<TgdFormatGltf>
@@ -28,20 +33,48 @@ export class TgdParserGLTransfertFormatBinary {
         }
     }
 
-    getDataset(
-        meshIndex: number,
-        primitiveIndex = 0,
-        attribNamesToPick?: string[]
-    ) {
-        const { gltf } = this
-        const mesh = gltf.meshes?.[meshIndex]
-        if (!mesh) return
+    getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
+        const accessor = this.gltf.accessors?.[accessorIndex]
+        if (!accessor) {
+            throw Error(`Asset has no accessor with index #${accessorIndex}!`)
+        }
 
+        return accessor
+    }
+
+    getMesh(meshIndex = 0): TgdFormatGltfMesh {
+        const mesh = this.gltf.meshes?.[meshIndex]
+        if (!mesh) {
+            throw Error(`Asset has no mesh with index #${meshIndex}!`)
+        }
+
+        return mesh
+    }
+
+    getMeshPrimitive(meshIndex = 0, primitiveIndex = 0) {
+        const mesh = this.getMesh(meshIndex)
         const primitive = mesh.primitives[primitiveIndex]
-        if (!primitive) return
+        if (!primitive) {
+            throw Error(
+                `Asset has no primitive #${primitiveIndex} in mesh #${meshIndex}!`
+            )
+        }
 
-        const { attributes } = primitive
-        const attributeNames = attribNamesToPick ?? Object.keys(attributes)
+        return primitive
+    }
+
+    getMeshPrimitiveIndices(
+        meshIndex = 0,
+        primitiveIndex = 0
+    ): { elemType: number; elemData: ArrayBuffer; elemCount: number } {
+        const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
+        const accessor = this.getAccessor(primitive.indices ?? 0)
+        const buffer = this.getBufferViewData(accessor.bufferView ?? 0)
+        return {
+            elemType: accessor.componentType,
+            elemData: buffer,
+            elemCount: accessor.count,
+        }
     }
 
     async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
@@ -84,13 +117,14 @@ export class TgdParserGLTransfertFormatBinary {
         return url
     }
 
-    getBufferViewData(bufferViewIndex: number): ArrayBuffer | undefined {
+    getBufferViewData(bufferViewIndex: number): ArrayBuffer {
         const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
         if (fromCache) return fromCache
 
         const { gltf } = this
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
-        if (!bufferView) return
+        if (!bufferView)
+            throw Error(`No bufferView with index #${bufferViewIndex}!`)
 
         const buffer = this.chunks[bufferView.buffer]
         const data = buffer.slice(
@@ -99,5 +133,39 @@ export class TgdParserGLTransfertFormatBinary {
         )
         this.cacheBufferViewDatas.set(bufferViewIndex, data)
         return data
+    }
+
+    setAttrib(
+        dataset: TgdDataset,
+        attribName: string,
+        meshIndex: number,
+        primitiveIndex = 0,
+        primitiveAttribName?: string
+    ) {
+        const { gltf } = this
+        const accessorIndex =
+            gltf.meshes?.[meshIndex].primitives[primitiveIndex].attributes[
+                primitiveAttribName ?? attribName
+            ] ?? -1
+        const accessor = gltf.accessors?.[accessorIndex]
+        if (!accessor) {
+            throw Error(
+                `No attribute "${
+                    primitiveAttribName ?? attribName
+                }" for primitive #${primitiveIndex} of mesh #${meshIndex}!`
+            )
+        }
+
+        const bufferViewIndex = accessor.bufferView ?? 0
+        const bufferView = gltf.bufferViews?.[bufferViewIndex]
+        if (!bufferView) {
+            throw Error(`No bufferView with index #${bufferViewIndex}!`)
+        }
+        const buffer = this.getBufferViewData(bufferViewIndex)
+        dataset.set(attribName, buffer, {
+            byteStride: bufferView.byteStride,
+            byteOffset: accessor.byteOffset,
+            count: accessor.count,
+        })
     }
 }

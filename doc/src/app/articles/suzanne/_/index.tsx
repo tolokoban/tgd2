@@ -27,6 +27,7 @@ import NegZ from "@/gfx/cubemap/test/6.webp"
 
 import FaceWEBP from "./face.webp"
 import MonkeyOBJ from "./monkey.obj"
+// import MonkeyOBJ from "./triangle.obj"
 
 export default function DemoContainer() {
     return <View onReady={init} />

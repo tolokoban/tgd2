@@ -2,24 +2,28 @@
 
 import { assertType } from "@tgd/types/guards"
 
+export interface TgdFormatGltfAccessor {
+    bufferView?: number
+    byteOffset?: number
+    componentType: number
+    normalized?: boolean
+    count: number
+    type: string
+    name?: string
+}
+
+export interface TgdFormatGltfMesh {
+    name: string
+    primitives: Array<{
+        attributes: Record<string, number>
+        indices?: number
+        mode?: number
+    }>
+}
+
 export interface TgdFormatGltf {
-    accessors?: Array<{
-        bufferView?: number
-        byteOffset?: number
-        componentType: number
-        normalized?: boolean
-        count: number
-        type: number
-        name?: string
-    }>
-    meshes?: Array<{
-        name: string
-        primitives: Array<{
-            attributes: Record<string, number>
-            indices?: number
-            mode?: number
-        }>
-    }>
+    accessors?: TgdFormatGltfAccessor[]
+    meshes?: TgdFormatGltfMesh[]
     images?: Array<{
         bufferView: number
         mimeType: string
@@ -29,6 +33,7 @@ export interface TgdFormatGltf {
         buffer: number
         byteLength: number
         byteOffset: number
+        byteStride?: number
         target?: number
     }>
 }
@@ -47,7 +52,7 @@ export function assertTgdFormatGltf(
                     componentType: "number",
                     normalized: ["?", "boolean"],
                     count: "number",
-                    type: "number",
+                    type: "string",
                     name: ["?", "string"],
                 },
             ],
@@ -79,6 +84,7 @@ export function assertTgdFormatGltf(
                     buffer: "number",
                     byteLength: "number",
                     byteOffset: "number",
+                    byteStride: ["?", "number"],
                     target: ["?", "number"],
                 },
             ],

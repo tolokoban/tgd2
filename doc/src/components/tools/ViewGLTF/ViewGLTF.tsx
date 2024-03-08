@@ -10,8 +10,9 @@ import ImageDetail from "./details/ImageDetail"
 import TreeView from "./TreeView"
 import { MainSection } from "./TreeView/TreeView"
 
-import DanatiaURL from "./danatia.glb"
+import DefaultModelURL from "./apple.2k.glb"
 import Style from "./ViewGLTF.module.css"
+import MeshPreview from "./details/MeshPreview"
 
 const $ = Theme.classNames
 
@@ -36,6 +37,11 @@ export default function ViewGLTF({ className }: ViewGLTFProps) {
                         {section && section.type === "IMG" && (
                             <ImageDetail id={section.id} parser={parser} />
                         )}
+                        <MeshPreview
+                            asset={parser}
+                            meshIndex={0}
+                            primitiveIndex={0}
+                        />
                     </main>
                 </>
             ) : (
@@ -49,7 +55,7 @@ function useParser() {
     const [parser, setParser] =
         React.useState<TgdParserGLTransfertFormatBinary | null>(null)
     React.useEffect(() => {
-        tgdFetchArrayBuffer(DanatiaURL)
+        tgdFetchArrayBuffer(DefaultModelURL)
             .then(content => {
                 const parser = new TgdParserGLTransfertFormatBinary(content)
                 setParser(parser)

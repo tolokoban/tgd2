@@ -1,5 +1,6 @@
 import React from "react"
 import { Theme } from "@tolokoban/ui"
+import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
 import Style from "./Primitive.module.css"
 import Link from "../Link"
@@ -9,6 +10,7 @@ const $ = Theme.classNames
 
 export interface PrimitiveProps {
     className?: string
+    parser: TgdParserGLTransfertFormatBinary
     attributes: { [key: string]: number }
     indices?: number
     onClick(section: MainSection): void
@@ -16,6 +18,7 @@ export interface PrimitiveProps {
 
 export default function Primitive({
     className,
+    parser,
     attributes,
     indices,
     onClick,
@@ -30,7 +33,7 @@ export default function Primitive({
                     id={attributes[name]}
                     onClick={onClick}
                 >
-                    {name}
+                    {name} <em>{getAccessorType(parser, attributes[name])}</em>
                 </Link>
             ))}
             {typeof indices === "number" && (
@@ -40,4 +43,14 @@ export default function Primitive({
             )}
         </div>
     )
+}
+
+function getAccessorType(
+    parser: TgdParserGLTransfertFormatBinary,
+    accessorIndex: number
+): React.ReactNode {
+    const accessor = parser.gltf.accessors?.[accessorIndex]
+    if (!accessor) return null
+
+    return accessor.type
 }
