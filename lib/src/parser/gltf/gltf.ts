@@ -3,8 +3,10 @@ import { parseGLB } from "./parser"
 import {
     TgdFormatGltf,
     TgdFormatGltfAccessor,
+    TgdFormatGltfMaterial,
     TgdFormatGltfMesh,
-} from "../../types/gltf"
+} from "@tgd/types/gltf"
+import { TgdTexture2DOptions } from "@tgd/types"
 
 export class TgdParserGLTransfertFormatBinary {
     public readonly gltf: Readonly<TgdFormatGltf>
@@ -20,10 +22,6 @@ export class TgdParserGLTransfertFormatBinary {
     constructor(content: ArrayBuffer) {
         try {
             const data = parseGLB(content)
-            console.log("🚀 [gltf] data.gltf = ", data.gltf) // @FIXME: Remove this line written on 2024-03-01 at 14:21
-            for (const chunk of data.chunks) {
-                console.log("ArrayBuffer:", chunk.byteLength)
-            }
             this.gltf = data.gltf
             this.chunks = data.chunks
         } catch (ex) {
@@ -40,6 +38,15 @@ export class TgdParserGLTransfertFormatBinary {
         }
 
         return accessor
+    }
+
+    getMaterial(materialIndex: number): TgdFormatGltfMaterial {
+        const material = this.gltf.materials?.[materialIndex]
+        if (!material) {
+            throw Error(`Asset has no material with index #${materialIndex}!`)
+        }
+
+        return material
     }
 
     getMesh(meshIndex = 0): TgdFormatGltfMesh {
@@ -75,6 +82,21 @@ export class TgdParserGLTransfertFormatBinary {
             elemData: buffer,
             elemCount: accessor.count,
         }
+    }
+
+    getTexture2DOptions(textureIndex: number): TgdTexture2DOptions {
+        const texture = this.gltf.textures?.[textureIndex]
+        if (!texture) {
+            throw Error(`Asset has no texture with index #${textureIndex}!`)
+        }
+
+        const source =
+            texture.source ?? texture.extensions?.EXT_texture_webp?.source ?? 0
+        const url = this.getImageURL(source)
+        const options: TgdTexture2DOptions = {
+            image: url,
+        }
+        return options
     }
 
     async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {

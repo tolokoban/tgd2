@@ -1,6 +1,6 @@
 // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.pdf
 
-import { assertType } from "@tgd/types/guards"
+import { TypeDef, assertType } from "@tgd/types/guards"
 
 export interface TgdFormatGltfAccessor {
     bufferView?: number
@@ -12,29 +12,131 @@ export interface TgdFormatGltfAccessor {
     name?: string
 }
 
+export interface TgdFormatGltfMaterialPbrMetallicRoughness {
+    /**
+     * The factors for the base color of the material.
+     *
+     * Default to [1,1,1,1].
+     */
+    baseColorFactor?: [number, number, number, number]
+    /**
+     * The base color texture.
+     */
+    baseColorTexture?: TextureInfo
+    /**
+     * The factor for the metalness of the material.
+     *
+     * Default to 1.
+     */
+    metallicFactor?: number
+    /**
+     * The factor for the roughness of the material.
+     *
+     * Default to 1.
+     */
+    roughnessFactor?: number
+    /**
+     * The metallic-roughness texture.
+     */
+    metalicRoughnessTexture?: TextureInfo
+}
+
+interface TextureInfo {
+    index: number
+    /**
+     * The set index of texture’s TEXCOORD attribute
+     * used for texture coordinate mapping.
+     *
+     * Default to 0.
+     */
+    texCoord?: number
+}
+
+export interface TgdFormatGltfMaterial {
+    name?: string
+    pbrMetallicRoughness?: TgdFormatGltfMaterialPbrMetallicRoughness
+    normalTexture?: {
+        /** The index of the texture */
+        index: number
+        /**
+         * The set index of texture’s TEXCOORD attribute
+         * used for texture coordinate mapping.
+         *
+         * Default to 0.
+         */
+        texCoord?: number
+        /**
+         * The scalar parameter applied to each normal
+         * vector of the normal texture.
+         *
+         * Default to 1.
+         */
+        scale?: number
+    }
+    occlusionTexture?: {
+        /** The index of the texture */
+        index: number
+        /**
+         * The set index of texture’s TEXCOORD attribute
+         * used for texture coordinate mapping.
+         *
+         * Default to 0.
+         */
+        texCoord?: number
+        /**
+         * A scalar multiplier controlling the amount
+         * of occlusion applied.
+         *
+         * Default to 1.
+         */
+        stength?: number
+    }
+    emissiveTexture?: TextureInfo
+    alphaMode?: "OPAQUE" | "MASK" | "BLEND"
+    /** Default to 0.5 */
+    alphaCutoff?: number
+    doubleSided?: boolean
+}
+
 export interface TgdFormatGltfMesh {
     name: string
     primitives: Array<{
         attributes: Record<string, number>
         indices?: number
         mode?: number
+        material?: number
     }>
 }
 
 export interface TgdFormatGltf {
     accessors?: TgdFormatGltfAccessor[]
-    meshes?: TgdFormatGltfMesh[]
-    images?: Array<{
-        bufferView: number
-        mimeType: string
-        name: string
-    }>
     bufferViews?: Array<{
         buffer: number
         byteLength: number
         byteOffset: number
         byteStride?: number
         target?: number
+    }>
+    images?: Array<{
+        bufferView: number
+        mimeType: string
+        name: string
+    }>
+    materials?: TgdFormatGltfMaterial[]
+    meshes?: TgdFormatGltfMesh[]
+    samplers?: Array<{
+        minFilter: number
+        magFilter: number
+    }>
+    textures?: Array<{
+        sampler: number
+        source?: number
+        name?: string
+        extensions?: {
+            EXT_texture_webp?: {
+                source: number
+            }
+        }
     }>
 }
 
@@ -66,6 +168,7 @@ export function assertTgdFormatGltf(
                             attributes: ["map", "number"],
                             indices: ["?", "number"],
                             mode: ["?", "number"],
+                            material: ["?", "number"],
                         },
                     ],
                 },
@@ -88,6 +191,56 @@ export function assertTgdFormatGltf(
                     target: ["?", "number"],
                 },
             ],
+            materials: ["array", typeMaterial],
+            samplers: [
+                "array",
+                {
+                    minFilter: "number",
+                    magFilter: "number",
+                },
+            ],
+            textures: [
+                "array",
+                {
+                    sampler: "number",
+                },
+            ],
         },
     ])
 }
+
+const typeTextureInfo: TypeDef = {
+    index: "number",
+    texCoord: ["?", "number"],
+}
+
+const typePbrMetallicRoughness: TypeDef = [
+    "partial",
+    {
+        baseColorFactor: ["array(4)", "number"],
+        baseColorTexture: typeTextureInfo,
+        metallicFactor: "number",
+        roughnessFactor: "number",
+        metalicRoughnessTexture: typeTextureInfo,
+    },
+]
+
+const typeMaterial: TypeDef = [
+    "partial",
+    {
+        name: "string",
+        pbrMetallicRoughness: typePbrMetallicRoughness,
+        normalTexture: {
+            ...typeTextureInfo,
+            scale: ["?", "number"],
+        },
+        occlusionTexture: {
+            ...typeTextureInfo,
+            strength: ["?", "number"],
+        },
+        emissiveTexture: typeTextureInfo,
+        alphaMode: ["literal", "OPAQUE", "MASK", "BLEND"],
+        alphaCutoff: "number",
+        doubleSided: "boolean",
+    },
+]

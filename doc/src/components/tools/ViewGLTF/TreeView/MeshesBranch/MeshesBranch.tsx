@@ -17,7 +17,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
     return (
         <details>
             <summary>Meshes</summary>
-            {meshes.map(mesh => (
+            {meshes.map((mesh, meshIndex) => (
                 <details key={mesh.name}>
                     <summary>{mesh.name}</summary>
                     {mesh.primitives.length > 1 ? (
@@ -26,6 +26,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                                 <summary>Primitive #{primitiveIndex}</summary>
                                 <Primitive
                                     parser={parser}
+                                    meshIndex={meshIndex}
                                     attributes={primitive.attributes}
                                     indices={primitive.indices}
                                     onClick={onClick}
@@ -35,6 +36,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                     ) : (
                         <Primitive
                             parser={parser}
+                            meshIndex={meshIndex}
                             attributes={mesh.primitives[0].attributes}
                             indices={mesh.primitives[0].indices}
                             onClick={onClick}

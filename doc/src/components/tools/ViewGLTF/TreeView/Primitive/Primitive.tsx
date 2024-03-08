@@ -1,5 +1,5 @@
 import React from "react"
-import { Theme } from "@tolokoban/ui"
+import { IconShow, Theme, ViewButton } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
 import Style from "./Primitive.module.css"
@@ -11,6 +11,7 @@ const $ = Theme.classNames
 export interface PrimitiveProps {
     className?: string
     parser: TgdParserGLTransfertFormatBinary
+    meshIndex: number
     attributes: { [key: string]: number }
     indices?: number
     onClick(section: MainSection): void
@@ -19,6 +20,7 @@ export interface PrimitiveProps {
 export default function Primitive({
     className,
     parser,
+    meshIndex,
     attributes,
     indices,
     onClick,
@@ -26,6 +28,17 @@ export default function Primitive({
     const names: string[] = Object.keys(attributes)
     return (
         <div className={$.join(className, Style.Primitive)}>
+            <ViewButton
+                icon={IconShow}
+                onClick={() =>
+                    onClick({
+                        type: "MSH",
+                        id: meshIndex,
+                    })
+                }
+            >
+                Preview mesh
+            </ViewButton>
             {names.map(name => (
                 <Link
                     key={name}

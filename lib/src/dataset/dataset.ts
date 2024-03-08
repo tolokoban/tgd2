@@ -214,17 +214,19 @@ export class TgdDataset<
         const { definitions } = this
         for (const name of Object.keys(definitions)) {
             const def = definitions[name]
-            const att = prg.getAttribLocation(name)
-            gl.enableVertexAttribArray(att)
-            gl.vertexAttribPointer(
-                att,
-                def.dimension,
-                gl.FLOAT,
-                false,
-                this.stride,
-                offsetDestination
-            )
-            gl.vertexAttribDivisor(att, def.divisor)
+            if (prg.hasAttribute(name)) {
+                const att = prg.getAttribLocation(name)
+                gl.enableVertexAttribArray(att)
+                gl.vertexAttribPointer(
+                    att,
+                    def.dimension,
+                    gl.FLOAT,
+                    false,
+                    this.stride,
+                    offsetDestination
+                )
+                gl.vertexAttribDivisor(att, def.divisor)
+            }
             const bytes = def.dimension * def.bytesPerElement
             offsetDestination += bytes
         }

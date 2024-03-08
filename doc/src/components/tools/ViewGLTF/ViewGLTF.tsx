@@ -7,12 +7,14 @@ import React from "react"
 
 import Spinner from "../../Spinner"
 import ImageDetail from "./details/ImageDetail"
+import MeshPreview from "./details/MeshPreview"
 import TreeView from "./TreeView"
 import { MainSection } from "./TreeView/TreeView"
 
-import DefaultModelURL from "./apple.2k.glb"
+// import DefaultModelURL from "./danatia.glb"
+// import DefaultModelURL from "./apple.2k.glb"
+import DefaultModelURL from "./spray.1k.glb"
 import Style from "./ViewGLTF.module.css"
-import MeshPreview from "./details/MeshPreview"
 
 const $ = Theme.classNames
 
@@ -22,7 +24,10 @@ export interface ViewGLTFProps {
 
 export default function ViewGLTF({ className }: ViewGLTFProps) {
     const parser = useParser()
-    const [section, setSection] = React.useState<MainSection | null>(null)
+    const [section, setSection] = React.useState<MainSection | null>({
+        type: "MSH",
+        id: 0,
+    })
 
     return (
         <div className={$.join(className, Style.ViewGLTF)}>
@@ -37,11 +42,13 @@ export default function ViewGLTF({ className }: ViewGLTFProps) {
                         {section && section.type === "IMG" && (
                             <ImageDetail id={section.id} parser={parser} />
                         )}
-                        <MeshPreview
-                            asset={parser}
-                            meshIndex={0}
-                            primitiveIndex={0}
-                        />
+                        {section && section.type === "MSH" && (
+                            <MeshPreview
+                                asset={parser}
+                                meshIndex={section.id}
+                                primitiveIndex={0}
+                            />
+                        )}
                     </main>
                 </>
             ) : (
