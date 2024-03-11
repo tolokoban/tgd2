@@ -113,23 +113,31 @@ export interface TgdFormatGltf {
     bufferViews?: Array<{
         buffer: number
         byteLength: number
-        byteOffset: number
+        byteOffset?: number
         byteStride?: number
         target?: number
     }>
-    images?: Array<{
-        bufferView: number
-        mimeType: string
-        name: string
-    }>
+    images?: Array<
+        Partial<{
+            bufferView: number
+            mimeType: string
+            name: string
+            uri: string
+        }>
+    >
     materials?: TgdFormatGltfMaterial[]
     meshes?: TgdFormatGltfMesh[]
-    samplers?: Array<{
-        minFilter: number
-        magFilter: number
-    }>
+    samplers?: Array<
+        Partial<{
+            minFilter: number
+            magFilter: number
+            wrapS: number
+            wrapT: number
+            name: string
+        }>
+    >
     textures?: Array<{
-        sampler: number
+        sampler?: number
         source?: number
         name?: string
         extensions?: {
@@ -175,18 +183,22 @@ export function assertTgdFormatGltf(
             ],
             images: [
                 "array",
-                {
-                    bufferView: "number",
-                    mimeType: "string",
-                    name: "string",
-                },
+                [
+                    "partial",
+                    {
+                        bufferView: "number",
+                        mimeType: "string",
+                        name: "string",
+                        uri: "string",
+                    },
+                ],
             ],
             bufferViews: [
                 "array",
                 {
                     buffer: "number",
                     byteLength: "number",
-                    byteOffset: "number",
+                    byteOffset: ["?", "number"],
                     byteStride: ["?", "number"],
                     target: ["?", "number"],
                 },
@@ -194,16 +206,27 @@ export function assertTgdFormatGltf(
             materials: ["array", typeMaterial],
             samplers: [
                 "array",
-                {
-                    minFilter: "number",
-                    magFilter: "number",
-                },
+                [
+                    "partial",
+                    {
+                        minFilter: "number",
+                        magFilter: "number",
+                        wrapS: "number",
+                        wrapT: "number",
+                        name: "string",
+                    },
+                ],
             ],
             textures: [
                 "array",
-                {
-                    sampler: "number",
-                },
+                [
+                    "partial",
+                    {
+                        sampler: "number",
+                        source: "number",
+                        name: "string",
+                    },
+                ],
             ],
         },
     ])

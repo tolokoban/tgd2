@@ -104,18 +104,25 @@ export class TgdParserGLTransfertFormatBinary {
         if (fromCache) return fromCache
 
         const url = this.getImageURL(imageIndex)
+        console.log("🚀 [gltf] url = ", url) // @FIXME: Remove this line written on 2024-03-09 at 14:53
         if (!url) return
 
-        const promise = new Promise<HTMLImageElement | undefined>(resolve => {
-            const img = new Image()
-            img.src = url
-            img.onload = () => {
-                resolve(img)
+        const promise = new Promise<HTMLImageElement | undefined>(
+            (resolve, reject) => {
+                const img = new Image()
+                img.src = url
+                img.onload = () => {
+                    resolve(img)
+                }
+                img.onerror = () => {
+                    console.error(
+                        `Unable to load image #${imageIndex}!`,
+                        this.gltf.images?.[imageIndex]
+                    )
+                    reject()
+                }
             }
-            img.onerror = () => {
-                resolve(undefined)
-            }
-        })
+        )
         this.cacheImages.set(imageIndex, promise)
         return promise
     }
@@ -128,6 +135,9 @@ export class TgdParserGLTransfertFormatBinary {
         const image = gltf.images?.[imageIndex]
         if (!image) return
 
+        if (image.uri) return image.uri
+
+        if (typeof image.bufferView !== "number") return
         const buffer = this.getBufferViewData(image.bufferView)
         if (!buffer) return
 
@@ -145,13 +155,19 @@ export class TgdParserGLTransfertFormatBinary {
 
         const { gltf } = this
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
+        console.log(
+            "🚀 [gltf] bufferViewIndex, bufferView = ",
+            bufferViewIndex,
+            bufferView
+        ) // @FIXME: Remove this line written on 2024-03-09 at 14:57
         if (!bufferView)
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
 
         const buffer = this.chunks[bufferView.buffer]
+        const byteOffset = bufferView.byteOffset ?? 0
         const data = buffer.slice(
-            bufferView.byteOffset,
-            bufferView.byteOffset + bufferView.byteLength
+            byteOffset,
+            byteOffset + bufferView.byteLength
         )
         this.cacheBufferViewDatas.set(bufferViewIndex, data)
         return data

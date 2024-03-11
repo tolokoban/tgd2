@@ -78,6 +78,7 @@ function useTgdContext(
         context.camera.spaceHeightAtTarget = diag
         context.camera.near = diag * 1e-3
         context.camera.far = diag * 10
+        context.camera.setOrientation(0, 0, 0, 1)
         context.add(clear, depth, mesh)
         context.paint()
         const controller = new TgdControllerCameraOrbit(context, {

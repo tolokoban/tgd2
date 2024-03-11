@@ -3,15 +3,9 @@ import App from "./app"
 import { createRoot } from "react-dom/client"
 import { Theme } from "@tolokoban/ui"
 import "./index.css"
-import { TgdCameraPerspective, TgdContext } from "../../lib/dist"
 
 function start() {
-    const canvas = document.createElement("canvas")
-    const camera = new TgdCameraPerspective()
-    // const context = new TgdContext(canvas)
-
-    const theme = new Theme()
-    theme.apply()
+    new Theme({}).apply()
     const container = document.getElementById("app")
     if (!container) throw Error(`No element with id "app"!`)
 

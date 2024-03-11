@@ -2,8 +2,10 @@ import React from "react"
 import { Theme } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
-import Style from "./ImageDetail.module.css"
 import Spinner from "@/components/Spinner"
+import Error from "@/components/Error"
+
+import Style from "./ImageDetail.module.css"
 
 const $ = Theme.classNames
 
@@ -18,12 +20,19 @@ export default function ImageDetail({
     parser,
     id,
 }: ImageDetailProps) {
+    const [error, setError] = React.useState(false)
     const [img, setImg] = React.useState<HTMLImageElement | undefined>(
         undefined
     )
     React.useEffect(() => {
+        setError(false)
         setImg(undefined)
-        parser.loadImage(id).then(setImg).catch(console.error)
+        parser
+            .loadImage(id)
+            .then(setImg)
+            .catch(() => {
+                setError(true)
+            })
     }, [id, parser])
     if (!img) return <Spinner />
 
@@ -32,7 +41,11 @@ export default function ImageDetail({
             <p>
                 <b>{parser.gltf.images?.[id].name}</b>: {img.width}×{img.height}
             </p>
-            <img src={img.src} />
+            {error ? (
+                <Error>Unable to load this image!</Error>
+            ) : (
+                <img src={img.src} />
+            )}
         </div>
     )
 }

@@ -23,7 +23,8 @@ export default function ImagesBranch({ parser, onClick }: ImagesBranchProps) {
                     type="IMG"
                     onClick={onClick}
                 >
-                    {image.name}
+                    {image.name || `Image_${imageIndex}`}
+                    <em>{image.mimeType}</em>
                 </Link>
             ))}
         </details>

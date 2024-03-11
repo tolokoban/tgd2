@@ -12,9 +12,9 @@ import TreeView from "./TreeView"
 import { MainSection } from "./TreeView/TreeView"
 
 // import DefaultModelURL from "./danatia.glb"
-// import DefaultModelURL from "./apple.2k.glb"
-import DefaultModelURL from "./spray.1k.glb"
+import DefaultModelURL from "./apple.2k.glb"
 import Style from "./ViewGLTF.module.css"
+import InputFile from "@/components/InputFile"
 
 const $ = Theme.classNames
 
@@ -23,17 +23,33 @@ export interface ViewGLTFProps {
 }
 
 export default function ViewGLTF({ className }: ViewGLTFProps) {
-    const parser = useParser()
+    const [parser, setParser] = useParser()
     const [section, setSection] = React.useState<MainSection | null>({
         type: "MSH",
         id: 0,
     })
+
+    function handleLoad(file: {
+        name: string
+        size: number
+        type: string
+        data: string | ArrayBuffer
+    }): void {
+        console.log("🚀 [ViewGLTF] file = ", file) // @FIXME: Remove this line written on 2024-03-09 at 14:29
+        const { data } = file
+        if (typeof data === "string") return
+
+        setParser(new TgdParserGLTransfertFormatBinary(data))
+    }
 
     return (
         <div className={$.join(className, Style.ViewGLTF)}>
             {parser ? (
                 <>
                     <aside>
+                        <InputFile accept=".glb" onLoad={handleLoad}>
+                            Load a GLB file...
+                        </InputFile>
                         <div>
                             <TreeView parser={parser} onClick={setSection} />
                         </div>
@@ -58,7 +74,12 @@ export default function ViewGLTF({ className }: ViewGLTFProps) {
     )
 }
 
-function useParser() {
+function useParser(): [
+    TgdParserGLTransfertFormatBinary | null,
+    React.Dispatch<
+        React.SetStateAction<TgdParserGLTransfertFormatBinary | null>
+    >
+] {
     const [parser, setParser] =
         React.useState<TgdParserGLTransfertFormatBinary | null>(null)
     React.useEffect(() => {
@@ -69,5 +90,5 @@ function useParser() {
             })
             .catch(console.error)
     }, [])
-    return parser
+    return [parser, setParser]
 }
