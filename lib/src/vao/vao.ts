@@ -11,7 +11,7 @@ export class TgdVertexArray {
     constructor(
         public readonly gl: WebGL2RenderingContext,
         program?: TgdProgram,
-        private readonly datasets?: TgdDataset[],
+        private readonly datasets?: Readonly<TgdDataset>[],
         private readonly elements?:
             | ArrayBuffer
             | Uint8Array

@@ -11,7 +11,7 @@ interface CameraTarget {
     shift: TgdVec3
 }
 
-export function tgdAnimCreateCameraInterpolation(
+export function tgdActionCreateCameraInterpolation(
     camera: TgdCamera,
     destination: Partial<CameraTarget>
 ) {

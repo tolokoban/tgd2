@@ -1,3 +1,4 @@
+import { Functions } from "./../../dist/shader/code.d"
 import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
@@ -10,8 +11,12 @@ export type TgdMaterialDiffuseOptions = Partial<{
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.8, 0.8, 1)
 
 export class TgdMaterialDiffuse extends TgdMaterial {
+    public frontLightIntensity = 2
+
     public readonly varyings: { [name: string]: string }
-    public readonly uniforms: { [name: string]: string } = {}
+    public readonly uniforms: { [name: string]: string } = {
+        uniIntensity: "float",
+    }
     public readonly fragmentShaderCode: CodeBloc
     public readonly vertexShaderCode: CodeBloc
 
@@ -23,7 +28,8 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         if (color instanceof TgdVec4) {
             this.texture = null
             this.fragmentShaderCode = [
-                `float light = varNormal.z;`,
+                `float light = varNormal.z * uniIntensity;`,
+                `if (light < 0.0) return vec4(1, 0, 0, 1);`,
                 `vec4 color = vec4(${color.join(", ")});`,
                 `color = vec4(color.rgb * light, 1.0);`,
                 `return color;`,
@@ -37,7 +43,8 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         } else {
             this.texture = color
             this.fragmentShaderCode = [
-                `float light = varNormal.z;`,
+                `float light = varNormal.z * uniIntensity;`,
+                `if (light < 0.0) return vec4(1, 0, 0, 1);`,
                 `vec4 color = texture(texDiffuse, varUV);`,
                 `color = vec4(color.rgb * light, 1.0);`,
                 `return color;`,
@@ -51,15 +58,16 @@ export class TgdMaterialDiffuse extends TgdMaterial {
                 varUV: "vec2",
             }
             this.uniforms = {
+                ...this.uniforms,
                 texDiffuse: "sampler2D",
             }
         }
     }
 
     setUniforms(program: TgdProgram): void {
-        const { texture } = this
-        if (!texture) return
+        program.uniform1f("uniIntensity", this.frontLightIntensity)
 
-        texture.activate(program, "texDiffuse")
+        const { texture } = this
+        if (texture) texture.activate(program, "texDiffuse")
     }
 }

@@ -1,4 +1,4 @@
-export * from "./animation"
+export * from "./action"
 export * from "./canvas"
 export * from "./ease-func"
 export * from "./fetch"

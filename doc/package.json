@@ -53,7 +53,7 @@
             "last 3 safari version"
         ]
     },
-    "port": 7134,
+    "port": 7133,
     "name": "@tolokoban/tgd",
     "description": "ToloGameDev library for WebGL2"
 }

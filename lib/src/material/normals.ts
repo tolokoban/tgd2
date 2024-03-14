@@ -12,7 +12,7 @@ export class TgdMaterialNormals extends TgdMaterial {
     constructor(options: TgdMaterialNormalsOptions = {}) {
         super()
         this.fragmentShaderCode = [
-            `vec3 color = vec3(1.0) + varNormal;`,
+            `vec3 color = vec3(1.0) + normalize(varNormal);`,
             `color *= 0.5;`,
             `return vec4(color, 1.0);`,
         ]

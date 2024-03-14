@@ -1,17 +1,23 @@
 import React from "react"
 import { Theme } from "@tolokoban/ui"
 import {
-    TgdCameraOrthographic,
+    TgdCanvasGizmo,
     TgdContext,
     TgdControllerCameraOrbit,
+    TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterDepth,
+    TgdPainterMesh,
     TgdPainterMeshGltf,
+    TgdGeometryBox,
     TgdParserGLTransfertFormatBinary,
+    TgdQuat,
     TgdVec3,
+    TgdVec4,
+    tgdActionCreateCameraInterpolation,
+    tgdEasingFunctionOutBack,
+    TgdMaterialNormals,
 } from "@tolokoban/tgd"
-
-import Tgd from "@/components/demo/Tgd"
 
 import Style from "./MeshPreview.module.css"
 
@@ -30,20 +36,47 @@ export default function MeshPreview({
     meshIndex,
     primitiveIndex,
 }: MeshPreviewProps) {
+    const refGizmo = React.useRef(new TgdCanvasGizmo())
     const [context, setContext] = React.useState<TgdContext | null>(null)
-    console.log("🚀 [MeshPreview] context = ", context) // @FIXME: Remove this line written on 2024-03-08 at 16:10
-    const handleMountCanvas = (canvas: HTMLCanvasElement | null) => {
+    const refCenter = React.useRef(new TgdVec3(0, 0, 0))
+    refCenter.current = useTgdContext(context, asset, meshIndex, primitiveIndex)
+    const handleMountCanvasScene = (canvas: HTMLCanvasElement | null) => {
         if (!canvas || canvas === context?.canvas) return
 
-        console.log("🚀 [MeshPreview] canvas = ", canvas) // @FIXME: Remove this line written on 2024-03-08 at 16:09
-        setContext(new TgdContext(canvas))
+        const ctx = new TgdContext(canvas)
+        setContext(ctx)
+        refGizmo.current.attachCamera(ctx.camera)
+        const resetCamera = (evt: { from: TgdQuat; to: TgdQuat }) => {
+            const center = refCenter.current
+            ctx.animSchedule({
+                duration: 300,
+                action: tgdActionCreateCameraInterpolation(ctx.camera, {
+                    target: center,
+                    orientation: evt.to,
+                    zoom: 1,
+                }),
+                easingFunction: tgdEasingFunctionOutBack,
+            })
+        }
+        refGizmo.current.eventTipClick.addListener(resetCamera)
+        return () => refGizmo.current.eventTipClick.removeListener(resetCamera)
     }
-    useTgdContext(context, asset, meshIndex, primitiveIndex)
+    const handleMountCanvasGizmo = (canvas: HTMLCanvasElement | null) => {
+        if (!canvas) return
+
+        refGizmo.current.canvas = canvas
+    }
     return (
-        <canvas
-            ref={handleMountCanvas}
-            className={$.join(className, Style.MeshPreview)}
-        ></canvas>
+        <div className={$.join(className, Style.MeshPreview)}>
+            <canvas
+                className={Style.scene}
+                ref={handleMountCanvasScene}
+            ></canvas>
+            <canvas
+                className={Style.gizmo}
+                ref={handleMountCanvasGizmo}
+            ></canvas>
+        </div>
     )
 }
 
@@ -53,6 +86,7 @@ function useTgdContext(
     meshIndex: number,
     primitiveIndex: number
 ) {
+    const [center, setCenter] = React.useState(new TgdVec3(0, 0, 0))
     React.useEffect(() => {
         if (!context) return
 
@@ -63,11 +97,18 @@ function useTgdContext(
             depth: 1,
         })
         const depth = new TgdPainterDepth(context, { enabled: true })
-        const mesh = new TgdPainterMeshGltf(context, {
+        const mesh1 = new TgdPainterMeshGltf(context, {
             asset,
             meshIndex,
             primitiveIndex,
         })
+        const mesh2 = new TgdPainterMesh(context, {
+            geometry: new TgdGeometryBox(),
+            material: new TgdMaterialDiffuse({
+                color: new TgdVec4(1, 0.667, 0, 1),
+            }),
+        })
+        const mesh = mesh2
         const bbox = mesh.computeBoundingBox()
         console.log("🚀 [MeshPreview] bbox = ", bbox) // @FIXME: Remove this line written on 2024-03-08 at 16:36
         const diag = TgdVec3.distance(bbox.min, bbox.max)
@@ -84,8 +125,11 @@ function useTgdContext(
         const controller = new TgdControllerCameraOrbit(context, {
             inertiaOrbit: 500,
         })
+        setCenter(new TgdVec3(center))
+        center.debug("setCenter")
         return () => {
             controller.detach()
         }
     }, [context, asset, meshIndex, primitiveIndex])
+    return center
 }

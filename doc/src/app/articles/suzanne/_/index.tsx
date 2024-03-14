@@ -1,17 +1,14 @@
 import {
-    TgdTexture2DOptions,
+    TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdPainterClear,
-    TgdPainterSkybox,
     TgdPainterDepth,
-    TgdCameraOrthographic,
-    TgdCameraPerspective,
-    tgdAnimCreateCameraInterpolation,
+    TgdPainterSkybox,
     TgdQuat,
-    tgdEasingFunctionOutElastic,
-    tgdEasingFunctionInOutBounce,
+    TgdTexture2DOptions,
     TgdVec3,
+    tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
 } from "@tolokoban/tgd"
 
@@ -90,7 +87,7 @@ function init(context: TgdContext) {
     context.paint()
     let anim = {
         duration: 1000,
-        action: tgdAnimCreateCameraInterpolation(context.camera, {
+        action: tgdActionCreateCameraInterpolation(context.camera, {
             zoom: 1,
             orientation: new TgdQuat(0, 0, 0, 1),
         }),
@@ -103,7 +100,7 @@ function init(context: TgdContext) {
         context.animCancel(anim)
         anim = {
             duration: 1000,
-            action: tgdAnimCreateCameraInterpolation(context.camera, {
+            action: tgdActionCreateCameraInterpolation(context.camera, {
                 zoom: 1,
                 target: new TgdVec3(0, 0, 0),
                 orientation: new TgdQuat(0, 0, 0, 1),
