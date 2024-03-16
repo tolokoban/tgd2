@@ -3,6 +3,7 @@ import { TgdFormatGltf, assertTgdFormatGltf } from "../../types/gltf"
 /**
  * @see https://www.khronos.org/files/gltf20-reference-guide.pdf
  */
+// eslint-disable-next-line max-statements
 export function parseGLB(data: ArrayBuffer): {
     gltf: TgdFormatGltf
     chunks: ArrayBuffer[]
@@ -33,9 +34,10 @@ export function parseGLB(data: ArrayBuffer): {
             // This is the JSON part.
             const json = new TextDecoder().decode(chunkData)
             try {
-                gltf = JSON.parse(json)
-                console.log(gltf)
-                assertTgdFormatGltf(gltf)
+                const obj: unknown = JSON.parse(json)
+                console.log(obj)
+                assertTgdFormatGltf(obj)
+                gltf = obj
             } catch (ex) {
                 console.error("Unable to parse this JSON file:", json)
                 console.error(ex)

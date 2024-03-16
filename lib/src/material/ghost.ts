@@ -38,5 +38,5 @@ export class TgdMaterialGhost extends TgdMaterial {
         }
     }
 
-    setUniforms(program: TgdProgram): void {}
+    setUniforms(_program: TgdProgram): void {}
 }

@@ -1,13 +1,13 @@
-import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
-import { TgdPainter } from "@tgd/painter/painter"
+import { TgdGeometry } from "@tgd/geometry"
+import { TgdMaterial } from "@tgd/material"
+import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdVec3 } from "@tgd/math"
-import { TgdMaterial } from "@tgd/material"
+import { TgdPainter } from "../../painter"
 
-import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
+import { TgdShaderVertex } from "@tgd/shader/vertex"
 
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
@@ -17,13 +17,15 @@ export interface TgdPainterMeshOptions {
 /**
  */
 export class TgdPainterMesh extends TgdPainter {
+    public matrixTransfo = new TgdMat4()
+
     private readonly prg: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly elementsType: number
     private readonly count: number
     private readonly material: TgdMaterial
     private readonly geometry: TgdGeometry
-    private drawMode = 0
+    private readonly drawMode: number = 0
     private bboxMin: TgdVec3 | null = null
     private bboxMax: TgdVec3 | null = null
 
@@ -41,6 +43,7 @@ export class TgdPainterMesh extends TgdPainter {
                 : context.gl[geometry.drawMode]
         const vert = new TgdShaderVertex({
             uniforms: {
+                uniTransfoMatrix: "mat4",
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
                 ...material.uniforms,
@@ -55,7 +58,7 @@ export class TgdPainterMesh extends TgdPainter {
                 "void applyMaterial()": material.vertexShaderCode,
             },
             mainCode: [
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * POSITION;",
+                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * POSITION;",
                 "applyMaterial();",
             ],
         }).code
@@ -114,12 +117,21 @@ export class TgdPainterMesh extends TgdPainter {
     }
 
     public readonly paint = () => {
-        const { context, prg, geometry, material, drawMode, count } = this
+        const {
+            context,
+            prg,
+            geometry,
+            material,
+            drawMode,
+            count,
+            matrixTransfo,
+        } = this
         const { gl, camera } = context
         gl.enable(gl.CULL_FACE)
         gl.cullFace(gl.BACK)
         prg.use()
         material.setUniforms(prg)
+        prg.uniformMatrix4fv("uniTransfoMatrix", matrixTransfo)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         this.vao.bind()

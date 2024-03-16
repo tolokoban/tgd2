@@ -35,14 +35,11 @@ export function vars(
     ]
 }
 
-export function funcs(
-    def: Functions,
-    comment = "----------------------------------------"
-): CodeBloc[] {
+export function funcs(def: Functions, comment = "Util functions"): CodeBloc[] {
     const names = Object.keys(def)
     if (names.length === 0) return []
 
-    const result: CodeBloc[] = [`// Util functions`]
+    const result: CodeBloc[] = [`// ${comment}`]
     names.forEach(name => {
         result.push(`${name} {`, def[name], "}", "")
     })

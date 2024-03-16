@@ -16,7 +16,6 @@ import {
     TgdVec4,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
-    TgdMaterialNormals,
 } from "@tolokoban/tgd"
 
 import Style from "./MeshPreview.module.css"
@@ -108,9 +107,8 @@ function useTgdContext(
                 color: new TgdVec4(1, 0.667, 0, 1),
             }),
         })
-        const mesh = mesh2
+        const mesh = mesh1
         const bbox = mesh.computeBoundingBox()
-        console.log("🚀 [MeshPreview] bbox = ", bbox) // @FIXME: Remove this line written on 2024-03-08 at 16:36
         const diag = TgdVec3.distance(bbox.min, bbox.max)
         const center = TgdVec3.newFromMix(bbox.min, bbox.max)
         // context.camera = new TgdCameraOrthographic()
@@ -126,7 +124,6 @@ function useTgdContext(
             inertiaOrbit: 500,
         })
         setCenter(new TgdVec3(center))
-        center.debug("setCenter")
         return () => {
             controller.detach()
         }

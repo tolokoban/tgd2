@@ -1,4 +1,3 @@
-import { Functions } from "./../../dist/shader/code.d"
 import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"

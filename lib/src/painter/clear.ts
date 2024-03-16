@@ -1,5 +1,5 @@
 import { TgdVec4 } from "@tgd/math"
-import { TgdPainter } from "@tgd/painter/painter"
+import { TgdPainter } from "./painter"
 import { TgdContextInterface } from "@tgd/types"
 
 export interface TgdPainterClearOptions {

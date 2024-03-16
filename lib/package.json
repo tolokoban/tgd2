@@ -7,12 +7,14 @@
     "type": "module",
     "scripts": {
         "doc": "typedoc --watch",
-        "build": "webpack --mode=production",
+        "build": "build-typescript-library .",
         "lint": "eslint -c .eslintrc.yml 'src/**/*.ts'",
-        "start": "webpack --watch --mode=development",
+        "lint:fix": "eslint -c .eslintrc.yml --fix 'src/**/*.ts'",
+        "start": "build-typescript-library --watch .",
+        "webpack": "webpack --mode=production",
+        "webpack:dev": "webpack --watch --mode=development",
         "test": "jest",
-        "test:watch": "jest --watch",
-        "x": "tsc -b --clean && ls ./dist/"
+        "test:watch": "jest --watch"
     },
     "repository": {
         "type": "git",
@@ -32,14 +34,23 @@
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
         "@types/jest": "^29.5.12",
+        "@typescript-eslint/eslint-plugin": "^7.2.0",
+        "build-typescript-library": "^0.3.0",
         "circular-dependency-plugin": "^5.2.2",
+        "eslint": "^8.57.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-jsdoc": "^48.2.1",
+        "eslint-plugin-no-null": "^1.0.2",
+        "eslint-plugin-prefer-arrow": "^1.2.3",
+        "eslint-plugin-unicorn": "^51.0.1",
+        "madge": "^6.1.0",
         "ts-jest": "^29.1.2",
         "ts-loader": "^9.5.1",
         "ts-patch": "^3.1.2",
-        "typedoc": "^0.25.8",
-        "typescript": "^5.3.3",
-        "typescript-transform-paths": "^3.4.6",
-        "webpack": "^5.90.1",
+        "typedoc": "^0.25.12",
+        "typescript": "^5.4.2",
+        "typescript-transform-paths": "^3.4.7",
+        "webpack": "^5.90.3",
         "webpack-cli": "^5.1.4"
     },
     "browserslist": {
@@ -53,5 +64,8 @@
             "last 3 firefox version",
             "last 3 safari version"
         ]
+    },
+    "dependencies": {
+        "tslib": "^2.6.2"
     }
 }
