@@ -1,7 +1,7 @@
 import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdMaterial } from "@tgd/material"
-import { TgdMat4, TgdQuat, TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../../painter"
@@ -12,9 +12,6 @@ import { TgdShaderVertex } from "@tgd/shader/vertex"
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
     material: TgdMaterial
-    position?: [number, number, number] | TgdVec3 | TgdVec4
-    scale?: [number, number, number] | TgdVec3 | TgdVec4
-    orientation?: [number, number, number, number] | TgdQuat
 }
 
 /**
@@ -37,19 +34,7 @@ export class TgdPainterMesh extends TgdPainter {
         options: TgdPainterMeshOptions
     ) {
         super()
-        const { material, geometry, position, scale, orientation } = options
-        if (position) {
-            const [x, y, z] = position
-            this.transfo.setPosition(x, y, z)
-        }
-        if (scale) {
-            const [x, y, z] = scale
-            this.transfo.setScale(x, y, z)
-        }
-        if (orientation) {
-            const [x, y, z, w] = orientation
-            this.transfo.setOrientation(x, y, z, w)
-        }
+        const { material, geometry } = options
         this.geometry = geometry
         this.material = material
         this.drawMode =
