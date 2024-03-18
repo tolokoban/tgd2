@@ -94,7 +94,6 @@ export class TgdCanvasGizmo {
         const { origin, direction } = camera.castRay(evt.x, evt.y)
         const maxDist = 1
         let bestDist = maxDist
-        // let bestTip = TIPS[0][0]
         let bestName: TgdQuatFace = "+X+Y+Z"
         for (const [tip, name] of TIPS) {
             const dist = tip.distanceToLineSquared(origin, direction)
