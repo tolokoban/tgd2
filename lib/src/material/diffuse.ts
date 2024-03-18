@@ -28,7 +28,6 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             this.texture = null
             this.fragmentShaderCode = [
                 `float light = varNormal.z * uniIntensity;`,
-                `if (light < 0.0) return vec4(1, 0, 0, 1);`,
                 `vec4 color = vec4(${color.join(", ")});`,
                 `color = vec4(color.rgb * light, 1.0);`,
                 `return color;`,
@@ -43,7 +42,6 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             this.texture = color
             this.fragmentShaderCode = [
                 `float light = varNormal.z * uniIntensity;`,
-                `if (light < 0.0) return vec4(1, 0, 0, 1);`,
                 `vec4 color = texture(texDiffuse, varUV);`,
                 `color = vec4(color.rgb * light, 1.0);`,
                 `return color;`,

@@ -11,8 +11,8 @@ import MeshPreview from "./details/MeshPreview"
 import TreeView from "./TreeView"
 import { MainSection } from "./TreeView/TreeView"
 
-// import DefaultModelURL from "./danatia.glb"
-import DefaultModelURL from "./apple.2k.glb"
+import DefaultModelURL from "./danatia.glb"
+// import DefaultModelURL from "./apple.2k.glb"
 import Style from "./ViewGLTF.module.css"
 import InputFile from "@/components/InputFile"
 

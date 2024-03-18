@@ -1,4 +1,5 @@
 export * from "./mat4"
 export * from "./quat"
+export * from "./transfo"
 export * from "./vec3"
 export * from "./vec4"
