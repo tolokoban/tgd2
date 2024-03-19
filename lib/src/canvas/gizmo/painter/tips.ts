@@ -1,7 +1,5 @@
-import { TgdCameraPerspective } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
-import { TgdVec3 } from "@tgd/math"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
@@ -11,13 +9,6 @@ import FRAG from "./shader.frag"
 import VERT from "./shader.vert"
 
 export class TipsPainter extends TgdPainter {
-    public readonly camera = new TgdCameraPerspective({
-        distance: 4,
-        target: new TgdVec3(0, 0, 0),
-        fovy: Math.PI / 4,
-        near: 1e-6,
-        far: 8,
-    })
     private readonly texture: TgdTexture2D
     private readonly prg: TgdProgram
     private readonly vao: TgdVertexArray
@@ -64,11 +55,8 @@ export class TipsPainter extends TgdPainter {
     }
 
     paint(): void {
-        const { camera, context, prg, vao } = this
-        const { gl } = context
-        camera.orientation = context.camera.orientation
-        camera.screenWidth = context.width
-        camera.screenHeight = context.height
+        const { context, prg, vao } = this
+        const { gl, camera } = context
         prg.use()
         this.texture.activate(prg, "uniTexture")
         prg.uniform1f("uniScreenHeight", context.height)

@@ -5,16 +5,16 @@ import {
 import { Theme } from "@tolokoban/ui"
 import React from "react"
 
+import InputFile from "@/components/InputFile"
 import Spinner from "../../Spinner"
 import ImageDetail from "./details/ImageDetail"
 import MeshPreview from "./details/MeshPreview"
 import TreeView from "./TreeView"
-import { MainSection } from "./TreeView/TreeView"
+import { MainSection } from "./TreeView/types"
 
 import DefaultModelURL from "./danatia.glb"
 // import DefaultModelURL from "./apple.2k.glb"
 import Style from "./ViewGLTF.module.css"
-import InputFile from "@/components/InputFile"
 
 const $ = Theme.classNames
 
@@ -25,8 +25,9 @@ export interface ViewGLTFProps {
 export default function ViewGLTF({ className }: ViewGLTFProps) {
     const [parser, setParser] = useParser()
     const [section, setSection] = React.useState<MainSection | null>({
-        type: "MSH",
+        type: "msh",
         id: 0,
+        primitiveId: 0,
     })
 
     function handleLoad(file: {
@@ -55,14 +56,14 @@ export default function ViewGLTF({ className }: ViewGLTFProps) {
                         </div>
                     </aside>{" "}
                     <main>
-                        {section && section.type === "IMG" && (
+                        {section && section.type === "img" && (
                             <ImageDetail id={section.id} parser={parser} />
                         )}
-                        {section && section.type === "MSH" && (
+                        {section && section.type === "msh" && (
                             <MeshPreview
                                 asset={parser}
                                 meshIndex={section.id}
-                                primitiveIndex={0}
+                                primitiveIndex={section.primitiveId}
                             />
                         )}
                     </main>

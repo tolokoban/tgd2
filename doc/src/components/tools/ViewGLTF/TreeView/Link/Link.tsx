@@ -1,30 +1,30 @@
-import React from "react"
 import { Theme } from "@tolokoban/ui"
+import React from "react"
+
+import { MainSection } from "../types"
+
 import Style from "./Link.module.css"
-import { MainSection } from "../TreeView"
 
 const $ = Theme.classNames
 
 export interface LinkProps {
     className?: string
-    type: string
-    id: number
+    section: MainSection
     onClick(section: MainSection): void
     children: React.ReactNode
 }
 
 export default function Link({
     className,
-    type,
-    id,
+    section,
     onClick,
     children,
 }: LinkProps) {
     return (
         <button
-            className={$.join(className, Style.Link, Style[type])}
-            key={`${type}#${id}`}
-            onClick={() => onClick({ type, id })}
+            className={$.join(className, Style.Link, Style[section.type])}
+            key={JSON.stringify(section)}
+            onClick={() => onClick(section)}
         >
             <div>{children}</div>
         </button>

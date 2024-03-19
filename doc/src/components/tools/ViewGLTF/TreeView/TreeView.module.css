@@ -1,13 +1,2 @@
-.TreeView details {
-    padding: 0;
-    padding-left: 1em;
-}
-
-.TreeView details > summary {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.TreeView details > summary:hover {
-    background-color: #fff3;
+.TreeView {
 }

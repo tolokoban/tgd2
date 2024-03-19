@@ -1,0 +1,40 @@
+.Branch {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.Branch > summary {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.Branch > summary:hover {
+    background-color: #fff2;
+}
+
+.Branch > summary > * {
+    flex: 0 0 auto;
+}
+
+.Branch > div {
+    margin-left: 0.5em;
+    padding-left: 0.5em;
+    border-left: 1px solid currentColor;
+}
+
+.icon {
+    flex: 0 0 auto;
+    transition: all 0.3s;
+    transform: rotate(-90deg);
+}
+
+.Branch[open] .icon {
+    transform: rotate(0);
+}
+
+.Branch > summary > .label {
+    flex: 1 1 auto;
+}

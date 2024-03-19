@@ -1,8 +1,8 @@
-import React from "react"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
+import Branch from "../Branch"
 import Primitive from "../Primitive"
-import { MainSection } from "../TreeView"
+import { MainSection } from "../types"
 
 export interface MeshesBranchProps {
     className?: string
@@ -15,15 +15,32 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
     if (!meshes) return null
 
     return (
-        <details>
-            <summary>Meshes</summary>
+        <Branch label={<b>Meshes</b>}>
             {meshes.map((mesh, meshIndex) => (
-                <details key={mesh.name}>
-                    <summary>{mesh.name}</summary>
+                <Branch
+                    key={mesh.name}
+                    label={mesh.name}
+                    onClick={() =>
+                        onClick({
+                            type: "msh",
+                            id: meshIndex,
+                            primitiveId: 0,
+                        })
+                    }
+                >
                     {mesh.primitives.length > 1 ? (
                         mesh.primitives.map((primitive, primitiveIndex) => (
-                            <details key={primitiveIndex}>
-                                <summary>Primitive #{primitiveIndex}</summary>
+                            <Branch
+                                key={primitiveIndex}
+                                label={`Primitive #${primitiveIndex}`}
+                                onClick={() =>
+                                    onClick({
+                                        type: "msh",
+                                        id: meshIndex,
+                                        primitiveId: primitiveIndex,
+                                    })
+                                }
+                            >
                                 <Primitive
                                     parser={parser}
                                     meshIndex={meshIndex}
@@ -31,7 +48,7 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                                     indices={primitive.indices}
                                     onClick={onClick}
                                 />
-                            </details>
+                            </Branch>
                         ))
                     ) : (
                         <Primitive
@@ -42,8 +59,8 @@ export default function MeshesBranch({ parser, onClick }: MeshesBranchProps) {
                             onClick={onClick}
                         />
                     )}
-                </details>
+                </Branch>
             ))}
-        </details>
+        </Branch>
     )
 }

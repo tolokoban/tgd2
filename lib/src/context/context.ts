@@ -297,7 +297,6 @@ export class TgdContext implements TgdContextInterface {
             return
         }
 
-        // console.log(`Painting on ${this.name} with ${this.camera.name}`)
         const delay = time - this.lastTime
         this.lastTime = time
         this._camera.screenWidth = gl.drawingBufferWidth

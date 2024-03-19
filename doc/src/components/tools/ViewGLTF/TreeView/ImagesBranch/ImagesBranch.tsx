@@ -1,8 +1,9 @@
 import React from "react"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
-import { MainSection } from "../TreeView"
+import { MainSection } from "../types"
 import Link from "../Link"
+import Branch from "../Branch"
 
 export interface ImagesBranchProps {
     parser: TgdParserGLTransfertFormatBinary
@@ -14,19 +15,17 @@ export default function ImagesBranch({ parser, onClick }: ImagesBranchProps) {
     if (!images) return null
 
     return (
-        <details>
-            <summary>Images</summary>
+        <Branch label={<b>Images</b>}>
             {images.map((image, imageIndex) => (
                 <Link
                     key={`IMG#${imageIndex}`}
-                    id={imageIndex}
-                    type="IMG"
+                    section={{ type: "img", id: imageIndex }}
                     onClick={onClick}
                 >
                     {image.name || `Image_${imageIndex}`}
                     <em>{image.mimeType}</em>
                 </Link>
             ))}
-        </details>
+        </Branch>
     )
 }

@@ -6,13 +6,10 @@ import Style from "./TreeView.module.css"
 import Primitive from "./Primitive"
 import MeshesBranch from "./MeshesBranch"
 import ImagesBranch from "./ImagesBranch"
+import { MainSection } from "./types"
+import ScenesBranch from "./ScenesBranch"
 
 const $ = Theme.classNames
-
-export interface MainSection {
-    type: string
-    id: number
-}
 
 export interface TreeViewProps {
     className?: string
@@ -27,6 +24,7 @@ export default function TreeView({
 }: TreeViewProps) {
     return (
         <div className={$.join(className, Style.TreeView)}>
+            <ScenesBranch parser={parser} onClick={onClick} />
             <MeshesBranch parser={parser} onClick={onClick} />
             <ImagesBranch parser={parser} onClick={onClick} />
         </div>

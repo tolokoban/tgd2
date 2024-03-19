@@ -5,6 +5,8 @@ import {
     TgdFormatGltfAccessor,
     TgdFormatGltfMaterial,
     TgdFormatGltfMesh,
+    TgdFormatGltfNode,
+    TgdFormatGltfScene,
 } from "@tgd/types/gltf"
 import { TgdTexture2DOptions } from "@tgd/types"
 
@@ -29,6 +31,28 @@ export class TgdParserGLTransfertFormatBinary {
                 ex instanceof Error ? ex.message : JSON.stringify(ex)
             throw Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
         }
+    }
+
+    getScenes(): TgdFormatGltfScene[] {
+        return this.gltf.scenes ?? []
+    }
+
+    getScene(sceneIndex: number): TgdFormatGltfScene {
+        const scene = this.gltf.scenes?.[sceneIndex]
+        if (!scene) {
+            throw Error(`Asset has no scene with index #${sceneIndex}!`)
+        }
+
+        return scene
+    }
+
+    getNode(nodeIndex: number): TgdFormatGltfNode {
+        const node = this.gltf.nodes?.[nodeIndex]
+        if (!node) {
+            throw Error(`Asset has no node with index #${nodeIndex}!`)
+        }
+
+        return node
     }
 
     getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {

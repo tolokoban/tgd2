@@ -49,9 +49,6 @@ export class TgdPainterBackground extends TgdPainter {
             vert: VERT,
             frag: FRAG,
         })
-        console.log("")
-        console.log("#########################################################")
-        console.log("")
         const dataset = new TgdDataset({
             attPoint: "vec2",
             attUV: "vec2",
@@ -60,9 +57,7 @@ export class TgdPainterBackground extends TgdPainter {
             "attPoint",
             new Float32Array([-1, -1, +1, -1, -1, +1, +1, +1])
         )
-        console.log(new Float32Array(dataset.data))
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-        console.log(new Float32Array(dataset.data))
         this.vao = context.createVAO(this.program, [dataset])
     }
 

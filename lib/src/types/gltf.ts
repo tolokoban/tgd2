@@ -108,6 +108,41 @@ export interface TgdFormatGltfMesh {
     }>
 }
 
+export interface TgdFormatGltfScene {
+    name?: string
+    nodes?: number[]
+}
+
+export interface TgdFormatGltfNode {
+    /** Index of the camera referenced by this node. */
+    camera?: number
+    /**
+     * Indices of the children nodes.
+     */
+    children?: number[]
+    /** Index of the skin referenced by this node. */
+    skin?: number
+    /** 4x4 transformation matrix. */
+    matrix?: Array16
+    /** Index of the mesh referenced by this node. */
+    mesh?: number
+    /** Quaternion (x, y, z, w) of the current orientation. */
+    rotation?: Array4
+    scale?: Array3
+    translation?: Array3
+    /**
+     * The weights of the instantiated morph target.
+     * The number of array elements MUST match the
+     * number of morph targets of the referenced mesh.
+     * When defined, mesh MUST also be defined.
+     */
+    weights?: number[]
+    name?: string
+}
+
+/**
+ * @see https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+ */
 export interface TgdFormatGltf {
     accessors?: TgdFormatGltfAccessor[]
     bufferViews?: Array<{
@@ -127,6 +162,7 @@ export interface TgdFormatGltf {
     >
     materials?: TgdFormatGltfMaterial[]
     meshes?: TgdFormatGltfMesh[]
+    nodes?: TgdFormatGltfNode[]
     samplers?: Array<
         Partial<{
             minFilter: number
@@ -136,6 +172,7 @@ export interface TgdFormatGltf {
             name: string
         }>
     >
+    scenes?: TgdFormatGltfScene[]
     textures?: Array<{
         sampler?: number
         source?: number
@@ -267,3 +304,15 @@ const typeMaterial: TypeDef = [
         doubleSided: "boolean",
     },
 ]
+
+// prettier-ignore
+type Array16 = [
+    number, number, number, number,
+    number, number, number, number,
+    number, number, number, number,
+    number, number, number, number,
+]
+
+type Array3 = [number, number, number]
+
+type Array4 = [number, number, number, number]
