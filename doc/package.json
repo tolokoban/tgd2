@@ -14,7 +14,7 @@
         "@tolokoban/react-state": "^0.1.0",
         "@tolokoban/tgd": "file:..",
         "@tolokoban/type-guards": "^0.5.0",
-        "@tolokoban/ui": "^0.12.5",
+        "@tolokoban/ui": "^0.15.0",
         "colord": "^2.9.3",
         "prismjs": "^1.29.0",
         "react": "18.2.0",
@@ -24,8 +24,8 @@
         "@mdx-js/loader": "^3.0.1",
         "@types/mdx": "^2.0.11",
         "@types/prismjs": "^1.26.3",
-        "@types/react": "^18.2.64",
-        "@types/react-dom": "^18.2.21",
+        "@types/react": "^18.2.67",
+        "@types/react-dom": "^18.2.22",
         "babel-loader": "^9.1.3",
         "build-react-routes": "^0.7.7",
         "clean-webpack-plugin": "^4.0.0",
@@ -38,7 +38,7 @@
         "typescript": "5.4.2",
         "webpack": "^5.90.3",
         "webpack-cli": "^5.1.4",
-        "webpack-dev-server": "^5.0.2",
+        "webpack-dev-server": "^5.0.4",
         "workbox-webpack-plugin": "^7.0.0"
     },
     "browserslist": {

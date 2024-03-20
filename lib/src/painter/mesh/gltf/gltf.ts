@@ -62,11 +62,6 @@ function figureColor(
         const textureIndex =
             asset.getMaterial(materialIndex).pbrMetallicRoughness
                 ?.baseColorTexture?.index
-        console.log(
-            "🚀 [gltf] materialIndex, asset.getMaterial(materialIndex) = ",
-            materialIndex,
-            asset.getMaterial(materialIndex)
-        ) // @FIXME: Remove this line written on 2024-03-08 at 23:28
         const textureOptions = asset.getTexture2DOptions(textureIndex ?? 0)
         const color = context.textures2D.create(textureOptions)
         return color

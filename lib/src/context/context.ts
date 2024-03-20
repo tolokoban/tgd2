@@ -32,9 +32,6 @@ export type TgdContextOptions = WebGLContextAttributes & {
      * gl.canvas.height = height
      * gl.viewport(0, 0, width, height)
      * ```
-     * @param gl WebGL2 context.
-     * @param width New width of the viewport.
-     * @param height New height of the viewport.
      */
     onResize?(
         this: void,

@@ -1,6 +1,7 @@
 import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace } from "@tgd/math"
 import { TgdMat3 } from "@tgd/math/mat3"
 import { TgdEvent } from "../event"
+import { ArrayNumber3 } from ".."
 
 export interface TgdCameraOptions {
     near?: number
@@ -241,7 +242,7 @@ export abstract class TgdCamera {
     get target(): Readonly<TgdVec3> {
         return this._target
     }
-    set target(v: TgdVec3) {
+    set target(v: Readonly<TgdVec3 | ArrayNumber3>) {
         this._target.from(v)
         this.dirtyModelView = true
     }

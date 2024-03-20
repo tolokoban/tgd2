@@ -1,6 +1,7 @@
 // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.pdf
 
 import { TypeDef, assertType } from "@tgd/types/guards"
+import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "./arrays"
 
 export interface TgdFormatGltfAccessor {
     bufferView?: number
@@ -123,13 +124,13 @@ export interface TgdFormatGltfNode {
     /** Index of the skin referenced by this node. */
     skin?: number
     /** 4x4 transformation matrix. */
-    matrix?: Array16
+    matrix?: ArrayNumber16
     /** Index of the mesh referenced by this node. */
     mesh?: number
     /** Quaternion (x, y, z, w) of the current orientation. */
-    rotation?: Array4
-    scale?: Array3
-    translation?: Array3
+    rotation?: ArrayNumber4
+    scale?: ArrayNumber3
+    translation?: ArrayNumber3
     /**
      * The weights of the instantiated morph target.
      * The number of array elements MUST match the
@@ -139,6 +140,33 @@ export interface TgdFormatGltfNode {
     weights?: number[]
     name?: string
 }
+
+export type TgdFormatGltfCamera =
+    | {
+          type: "perspective"
+          name?: string
+          perspective: {
+              aspectRatio?: number
+              /**
+               * The floating-point vertical field of view in radians.
+               * This value SHOULD be less than π. */
+              yfov: number
+              zfar?: number
+              znear: number
+          }
+      }
+    | {
+          type: "orthographic"
+          name?: string
+          orthographic: {
+              /** The floating-point horizontal magnification of the view. */
+              xmag: number
+              /** The floating-point vertical magnification of the view. */
+              ymag: number
+              zfar: number
+              znear: number
+          }
+      }
 
 /**
  * @see https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
@@ -152,6 +180,7 @@ export interface TgdFormatGltf {
         byteStride?: number
         target?: number
     }>
+    cameras?: TgdFormatGltfCamera[]
     images?: Array<
         Partial<{
             bufferView: number
@@ -304,15 +333,3 @@ const typeMaterial: TypeDef = [
         doubleSided: "boolean",
     },
 ]
-
-// prettier-ignore
-type Array16 = [
-    number, number, number, number,
-    number, number, number, number,
-    number, number, number, number,
-    number, number, number, number,
-]
-
-type Array3 = [number, number, number]
-
-type Array4 = [number, number, number, number]

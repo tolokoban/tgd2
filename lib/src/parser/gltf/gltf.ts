@@ -128,7 +128,6 @@ export class TgdParserGLTransfertFormatBinary {
         if (fromCache) return fromCache
 
         const url = this.getImageURL(imageIndex)
-        console.log("🚀 [gltf] url = ", url) // @FIXME: Remove this line written on 2024-03-09 at 14:53
         if (!url) return
 
         const promise = new Promise<HTMLImageElement | undefined>(
@@ -179,11 +178,6 @@ export class TgdParserGLTransfertFormatBinary {
 
         const { gltf } = this
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
-        console.log(
-            "🚀 [gltf] bufferViewIndex, bufferView = ",
-            bufferViewIndex,
-            bufferView
-        ) // @FIXME: Remove this line written on 2024-03-09 at 14:57
         if (!bufferView)
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
 

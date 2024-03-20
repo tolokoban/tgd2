@@ -5,6 +5,6 @@ export type MainSection =
           primitiveId: number
       }
     | {
-          type: "img" | "att" | "idx"
+          type: "img" | "att" | "idx" | "nod" | "scn"
           id: number
       }

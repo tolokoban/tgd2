@@ -1,5 +1,6 @@
 import { TgdMat4 } from "@tgd/math"
-import { TgdPainter, TgdTransfo } from ".."
+import { TgdPainter } from "./painter"
+import { TgdTransfo } from "../math/transfo"
 
 export interface TgdPainterNodeChild {
     paint(time: number, delay: number): void

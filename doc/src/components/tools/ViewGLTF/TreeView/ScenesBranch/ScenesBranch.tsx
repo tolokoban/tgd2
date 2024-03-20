@@ -51,7 +51,16 @@ interface NodeBranchProps extends ScenesBranchProps {
 function NodeBranch({ className, parser, onClick, nodeId }: NodeBranchProps) {
     const node = parser.getNode(nodeId)
     return (
-        <Branch label={node.name ?? `Node #${nodeId}`}>
+        <Branch
+            className={className}
+            label={node.name ?? `Node #${nodeId}`}
+            onClick={() =>
+                onClick({
+                    type: "nod",
+                    id: nodeId,
+                })
+            }
+        >
             <pre>{JSON.stringify(node, null, "  ")}</pre>
             {(node.children ?? []).map(childIndex => (
                 <NodeBranch

@@ -12,7 +12,7 @@
         "extendedDiagnostics": false,
         "incremental": false,
         "jsx": "react-jsx",
-        "lib": ["dom", "dom.iterable", "ES6"],
+        "lib": ["dom", "dom.iterable"],
         "module": "esnext",
         "moduleResolution": "node",
         "noImplicitAny": true,
