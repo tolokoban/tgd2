@@ -3,7 +3,7 @@
     "private": true,
     "homepage": "https://tolokoban.github.io/tgd2",
     "scripts": {
-        "prebuild": "npm run demos && build-react-routes --watch ./src/app/",
+        "prebuild": "npm run demos && build-react-routes ./src/app/",
         "build": "webpack --mode=production",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d ./build",
