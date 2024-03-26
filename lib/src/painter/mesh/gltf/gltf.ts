@@ -1,4 +1,4 @@
-import { TgdGeometry } from "./../../../geometry/geometry"
+import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
@@ -22,26 +22,45 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
         const material = new TgdMaterialDiffuse({
             color,
         })
-        const dataset = new TgdDataset({
-            POSITION: "vec3",
-            NORMAL: "vec3",
-            TEXCOORD_0: "vec2",
-        })
-        asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
-        asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
-        asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
-        const { elemType, elemData } = asset.getMeshPrimitiveIndices(
-            meshIndex,
-            primitiveIndex
-        )
-        super(context, {
-            geometry: new TgdGeometry({
-                dataset,
-                elements: makeElementsArray(elemType, elemData),
-                drawMode: "TRIANGLES",
-            }),
-            material,
-        })
+        if (color instanceof TgdVec4) {
+            const dataset = new TgdDataset({
+                POSITION: "vec3",
+                NORMAL: "vec3",
+            })
+            asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
+            asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
+            super(context, {
+                geometry: new TgdGeometry({
+                    dataset,
+                    elements: asset.getMeshPrimitiveIndices(
+                        meshIndex,
+                        primitiveIndex
+                    ),
+                    drawMode: "TRIANGLES",
+                }),
+                material,
+            })
+        } else {
+            const dataset = new TgdDataset({
+                POSITION: "vec3",
+                NORMAL: "vec3",
+                TEXCOORD_0: "vec2",
+            })
+            asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
+            asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
+            asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
+            super(context, {
+                geometry: new TgdGeometry({
+                    dataset,
+                    elements: asset.getMeshPrimitiveIndices(
+                        meshIndex,
+                        primitiveIndex
+                    ),
+                    drawMode: "TRIANGLES",
+                }),
+                material,
+            })
+        }
     }
 }
 
@@ -54,7 +73,9 @@ function figureColor(
     context: TgdContext
 ) {
     const primitive = asset.getMeshPrimitive(meshIndex, primitiveIndex)
-    const materialIndex = primitive.material ?? 0
+    const materialIndex = primitive.material ?? -1
+    if (materialIndex === -1) return DEFAULT_COLOR
+
     const pbr = asset.getMaterial(materialIndex).pbrMetallicRoughness
     if (!pbr) return DEFAULT_COLOR
 
@@ -70,18 +91,4 @@ function figureColor(
         return new TgdVec4(...pbr.baseColorFactor)
     }
     return DEFAULT_COLOR
-}
-
-function makeElementsArray(
-    elemType: number,
-    elemData: ArrayBuffer
-): Uint8Array | Uint16Array | Uint32Array {
-    switch (elemType) {
-        case WebGL2RenderingContext.UNSIGNED_BYTE:
-            return new Uint8Array(elemData)
-        case WebGL2RenderingContext.UNSIGNED_SHORT:
-            return new Uint16Array(elemData)
-        default:
-            return new Uint32Array(elemData)
-    }
 }

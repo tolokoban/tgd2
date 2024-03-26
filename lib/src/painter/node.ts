@@ -8,6 +8,10 @@ export interface TgdPainterNodeChild {
     matrixTransfo: TgdMat4
 }
 
+export interface TgdPainterNodeOptions {
+    children: Array<TgdPainterNode | TgdPainterNodeChild>
+}
+
 export class TgdPainterNode extends TgdPainter {
     public parentTransfo: TgdTransfo = new TgdTransfo()
     public readonly transfo = new TgdTransfo()
@@ -17,6 +21,12 @@ export class TgdPainterNode extends TgdPainter {
     private updateCount = 0
     private readonly childrenNodes: TgdPainterNode[] = []
     private readonly children: TgdPainterNodeChild[] = []
+
+    constructor(options: Partial<TgdPainterNodeOptions> = {}) {
+        super()
+        const { children = [] } = options
+        children.forEach(child => this.add(child))
+    }
 
     delete(): void {
         for (const child of this.children) {

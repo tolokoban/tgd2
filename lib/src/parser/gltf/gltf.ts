@@ -97,13 +97,13 @@ export class TgdParserGLTransfertFormatBinary {
     getMeshPrimitiveIndices(
         meshIndex = 0,
         primitiveIndex = 0
-    ): { elemType: number; elemData: ArrayBuffer; elemCount: number } {
+    ): { type: number; buff: BufferSource; elemCount: number } {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         const accessor = this.getAccessor(primitive.indices ?? 0)
         const buffer = this.getBufferViewData(accessor.bufferView ?? 0)
         return {
-            elemType: accessor.componentType,
-            elemData: buffer,
+            type: accessor.componentType,
+            buff: buffer,
             elemCount: accessor.count,
         }
     }
@@ -194,7 +194,7 @@ export class TgdParserGLTransfertFormatBinary {
     setAttrib(
         dataset: TgdDataset,
         attribName: string,
-        meshIndex: number,
+        meshIndex = 0,
         primitiveIndex = 0,
         primitiveAttribName?: string
     ) {

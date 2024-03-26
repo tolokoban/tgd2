@@ -1,6 +1,4 @@
 import {
-    TgdTexture2DOptions,
-    TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdPainterAxis,
@@ -14,7 +12,6 @@ import {
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
-import Painter from "./painter"
 
 import PosX from "@/gfx/cubemap/test/1.webp"
 import PosY from "@/gfx/cubemap/test/2.webp"
