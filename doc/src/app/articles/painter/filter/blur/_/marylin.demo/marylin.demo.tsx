@@ -15,7 +15,7 @@ function init(context: TgdContext) {
         width: 512,
         height: 512,
     })
-    const size = 16
+    const size = 32
     const horizontalBlurFilter = new TgdFilterBlur({
         size,
         direction: new TgdVec2(1, 0),
