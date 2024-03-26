@@ -3,6 +3,7 @@ import Style from "./layout.module.css"
 const PAINTERS = [
     "Background",
     "Clear",
+    "Filter",
     // "Isometric",
     "Logic",
     // "Primitive",

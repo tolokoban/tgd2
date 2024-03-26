@@ -52,6 +52,8 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             internalFormat = "RGBA",
             data,
         } = this.options
+        this._width = width
+        this._height = height
         const format = this.options.format ?? internalFormat
         gl.bindTexture(gl.TEXTURE_2D, texture)
         gl.texImage2D(
