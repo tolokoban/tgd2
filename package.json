@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "ToloGameDev library for WebGL2",
     "homepage": "https://tolokoban.github.io/tgd2",
     "main": "./lib/dist/index.js",
@@ -13,7 +13,7 @@
         "ci": "cd lib && npm install && npm run build",
         "doc": "cd lib && npm run doc && cd ../doc && npm run deploy",
         "test": "cd lib && npm test",
-        "predeploy": "node scripts/copy-pkg-info.js . ./lib ./doc",
+        "predeploy": "npm run ci",
         "deploy": "npm run ci && npm publish --access=public",
         "minor": "npm version minor && cd lib && npm version minor && cd ../doc && npm version minor",
         "patch": "npm version patch && cd lib && npm version patch && cd ../doc && npm version patch"

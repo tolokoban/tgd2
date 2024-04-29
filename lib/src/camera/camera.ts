@@ -1,13 +1,13 @@
 import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace } from "@tgd/math"
 import { TgdMat3 } from "@tgd/math/mat3"
 import { TgdEvent } from "../event"
-import { ArrayNumber3 } from ".."
+import { ArrayNumber3, ArrayNumber4 } from ".."
 
 export interface TgdCameraOptions {
     near?: number
     far?: number
-    target?: [number, number, number] | TgdVec3
-    orientation?: [number, number, number, number] | TgdQuat
+    target?: ArrayNumber3 | TgdVec3
+    orientation?: ArrayNumber4 | TgdQuat
     distance?: number
     name?: string
     zoom?: number

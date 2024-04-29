@@ -110,7 +110,7 @@ function useTgdContext(
         const mesh = mesh1
         const bbox = mesh.computeBoundingBox()
         const diag = TgdVec3.distance(bbox.min, bbox.max)
-        const center = TgdVec3.fromMix(bbox.min, bbox.max)
+        const center = TgdVec3.newFromMix(bbox.min, bbox.max)
         // context.camera = new TgdCameraOrthographic()
         context.camera.target = center
         context.camera.distance = diag

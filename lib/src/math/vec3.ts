@@ -5,7 +5,7 @@ import { TgdMat4 } from "./mat4"
 import { TgdVec4 } from "./vec4"
 
 export class TgdVec3 extends Float32Array {
-    static fromMix(
+    static newFromMix(
         v1: TgdVec3 | TgdVec4,
         v2: TgdVec3 | TgdVec4,
         a = 0.5

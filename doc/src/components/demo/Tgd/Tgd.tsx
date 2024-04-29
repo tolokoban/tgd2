@@ -4,14 +4,12 @@ import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
 
 import Style from "./tgd.module.css"
 
-type SizeUnit = `${number}${"px" | "vw" | "vh" | "vmin" | "vmax" | "%"}`
-
 interface TgdProps {
     className?: string
     options?: WebGLContextAttributes
     onReady?(scene: TgdContext): void
-    width?: SizeUnit
-    height?: SizeUnit
+    width?: string
+    height?: string
     noBorder?: boolean
 }
 export default function Tgd({

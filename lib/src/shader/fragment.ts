@@ -1,4 +1,4 @@
-import { WebglAttributeType, WebglUniformType } from "@tgd/types"
+import { WebglAttributeType, WebglUniformType } from ".."
 import {
     CodeBloc,
     Functions,

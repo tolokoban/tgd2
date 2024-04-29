@@ -72,6 +72,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             width: Math.max(width, 1),
             height: Math.max(height, 1),
             internalFormat: "RGB",
+            generateMipMap: true,
         })
         this._framebuffer = context.createFramebuffer()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
