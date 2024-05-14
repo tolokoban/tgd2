@@ -1,5 +1,6 @@
 import { TgdDataset } from "@tgd/dataset"
 import { WebglDrawMode } from "@tgd/types"
+import { TgdVec3 } from "@tgd/math"
 
 export interface TgdGeometryOptions {
     dataset: TgdDataset
@@ -15,6 +16,11 @@ export interface TgdGeometryOptions {
     attPosition?: string
     attNormal?: string
     attUV?: string
+    /**
+     * Compute normals with a smooth shading if
+     * none has been provided.
+     */
+    computeNormalsIfMissing?: boolean
 }
 
 /**
@@ -33,6 +39,8 @@ export class TgdGeometry {
     protected _elementsBuff?: BufferSource
     protected _elementsType: number
 
+    private readonly _elementsView: DataView
+
     constructor(options: TgdGeometryOptions) {
         const {
             dataset,
@@ -50,6 +58,29 @@ export class TgdGeometry {
         this.attNormal = attNormal
         this.attUV = attUV
         this.count = elements?.count ?? dataset.count
+        if (!this._elementsBuff) {
+            this._elementsView = new DataView(new ArrayBuffer(16))
+        } else if (this._elementsBuff instanceof DataView) {
+            this._elementsView = this._elementsBuff
+        } else if (this._elementsBuff instanceof ArrayBuffer) {
+            this._elementsView = new DataView(this._elementsBuff)
+        } else {
+            this._elementsView = new DataView(this._elementsBuff.buffer)
+        }
+        if (this._elementsType === WebGL2RenderingContext.UNSIGNED_BYTE) {
+            this.getElement = this.getElementFrom8
+        } else if (
+            this._elementsType === WebGL2RenderingContext.UNSIGNED_SHORT
+        ) {
+            this.getElement = this.getElementFrom16
+        } else if (this._elementsType === WebGL2RenderingContext.UNSIGNED_INT) {
+            this.getElement = this.getElementFrom32
+        } else {
+            this.getElement = this.getElementFromNothing
+        }
+        if (options.computeNormalsIfMissing) {
+            this.computeNormals()
+        }
     }
 
     get dataset(): Readonly<TgdDataset> {
@@ -66,6 +97,100 @@ export class TgdGeometry {
 
     get elementsType() {
         return this._elementsType
+    }
+
+    public readonly getElement: (index: number) => number
+
+    public computeNormals() {
+        let normals: TgdVec3[] = []
+        if (
+            this.drawMode === WebGL2RenderingContext.TRIANGLES ||
+            this.drawMode === "TRIANGLES"
+        ) {
+            normals = this.computeNormalsForTrianglesDrawMode()
+        } else {
+            console.error(
+                "We don't know how to compute normals for this draw mode:",
+                this.drawMode
+            )
+            return
+        }
+        this.dataset.addAttributes({
+            NORMAL: "vec3",
+        })
+        const values: number[] = []
+        for (let idx = 0; idx < normals.length; idx++) {
+            const [nx, ny, nz] = normals[idx]
+            values.push(nx, ny, nz)
+        }
+        this.dataset.set("NORMAL", new Float32Array(values))
+    }
+
+    // eslint-disable-next-line max-statements
+    private computeNormalsForTrianglesDrawMode() {
+        const ds = this.dataset
+        const normalsAccumulator = new Map<number, TgdVec3>()
+        const addNormal = (idx: number, A: TgdVec3, B: TgdVec3, C: TgdVec3) => {
+            const norm = computeNormal(A, B, C)
+            const item = normalsAccumulator.get(idx)
+            if (item) {
+                item.add(norm)
+            } else {
+                normalsAccumulator.set(idx, new TgdVec3(norm.x, norm.y, norm.z))
+            }
+        }
+        const { get } = ds.getAttribAccessor(this.attPosition)
+        const indexes = new Set<number>()
+        let idxMax = 0
+        for (let elem = 0; elem < this.count; elem += 3) {
+            const idx0 = this.getElement(elem + 0)
+            indexes.add(idx0)
+            idxMax = Math.max(idxMax, idx0)
+            const idx1 = this.getElement(elem + 1)
+            indexes.add(idx1)
+            idxMax = Math.max(idxMax, idx1)
+            const idx2 = this.getElement(elem + 2)
+            indexes.add(idx2)
+            idxMax = Math.max(idxMax, idx2)
+            const A = new TgdVec3(get(idx0, 0), get(idx0, 1), get(idx0, 2))
+            const B = new TgdVec3(get(idx1, 0), get(idx1, 1), get(idx1, 2))
+            const C = new TgdVec3(get(idx2, 0), get(idx2, 1), get(idx2, 2))
+            addNormal(idx0, A, B, C)
+            addNormal(idx1, B, C, A)
+            addNormal(idx2, C, A, B)
+            if (elem < 100) console.log(idx0, idx1, idx2)
+        }
+        console.log(
+            "indexes:",
+            Array.from(indexes).sort((a, b) => a - b)
+        )
+        const normals: TgdVec3[] = []
+        for (let idx = 0; idx <= idxMax; idx++) {
+            const item = normalsAccumulator.get(idx)
+            if (!item) {
+                normals.push(new TgdVec3())
+            } else {
+                item.normalize()
+                normals.push(item)
+            }
+        }
+        return normals
+    }
+
+    private readonly getElementFrom8 = (index: number): number => {
+        return this._elementsView.getUint8(index)
+    }
+
+    private readonly getElementFrom16 = (index: number): number => {
+        return this._elementsView.getUint16(index << 1, true)
+    }
+
+    private readonly getElementFrom32 = (index: number): number => {
+        return this._elementsView.getUint32(index << 2, true)
+    }
+
+    private readonly getElementFromNothing = (): number => {
+        return 0
     }
 }
 
@@ -115,4 +240,10 @@ function convertElements(
         ...elements,
         count,
     }
+}
+
+function computeNormal(A: TgdVec3, B: TgdVec3, C: TgdVec3) {
+    const AB = new TgdVec3(B).subtract(A)
+    const AC = new TgdVec3(C).subtract(A)
+    return AB.cross(AC).normalize()
 }

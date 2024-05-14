@@ -20,6 +20,9 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/background": ["/articles/painter/background"],
     "/articles/painter/background/2": ["/articles/painter/background/2"],
     "/articles/painter/clear": ["/articles/painter/clear"],
+    "/articles/painter/filter": ["/articles/painter/filter"],
+    "/articles/painter/filter/blur": ["/articles/painter/filter/blur"],
+    "/articles/painter/filter/hue": ["/articles/painter/filter/hue"],
     "/articles/painter/logic": ["/articles/painter/logic"],
     "/articles/suzanne": ["/articles/suzanne"],
     "/articles/test": ["/articles/test"],
@@ -121,11 +124,16 @@ function hydrateRoute(route: RoutePath, params: (string | number)[]) {
 class RouteContext {
     private readonly listeners = new Set<(context: RouteMatch | null) => void>()
     private _value: RouteMatch | null = null
-    private _hash = ""
 
-    constructor() {
-        this.setHash(this.extractHash(window.location.href))
-        window.addEventListener("hashchange", this.handleHashChange)
+    constructor(
+        private readonly security: [
+            RoutePath,
+            (path: RoutePath) => Promise<RoutePath | undefined>
+        ][]
+    ) {
+        this.setHash(this.extractHash(window.location.href)).then(() =>
+            window.addEventListener("hashchange", this.handleHashChange)
+        )
     }
 
     addListener(listener: (value: RouteMatch | null) => void) {
@@ -140,11 +148,22 @@ class RouteContext {
         return this._value
     }
 
-    private setHash(hash: string) {
-        if (this._hash === hash) return
+    private async setHash(targetHash: string) {
+        let hash = targetHash
+        let value = findRouteForPath(hash)
+        if (value) {
+            for (const [route, access] of this.security) {
+                if (!value.route.startsWith(route)) continue
 
-        this._hash = hash
-        const value = findRouteForPath(hash)
+                const authorizedRoute = await access(value.route)
+                if (authorizedRoute && authorizedRoute !== value.route) {
+                    value = findRouteForPath(authorizedRoute)
+                    if (!value) break
+                }
+            }
+        }
+        if (this._value?.route === value?.route) return
+
         this._value = value
         this.listeners.forEach(listener => listener(value))
     }
@@ -189,8 +208,6 @@ class RouteContext {
     }
 }
 
-const currentRouteContext = new RouteContext()
-
 export function useRouteContext(): RouteMatch | null {
     const [params, setParams] = React.useState(currentRouteContext.value)
     React.useEffect(() => {
@@ -202,3 +219,7 @@ export function useRouteContext(): RouteMatch | null {
     }, [])
     return params
 }
+
+const currentRouteContext = new RouteContext([
+
+])

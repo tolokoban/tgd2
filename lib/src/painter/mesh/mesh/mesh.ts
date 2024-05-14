@@ -18,12 +18,12 @@ export interface TgdPainterMeshOptions {
  */
 export class TgdPainterMesh extends TgdPainter {
     public matrixTransfo = new TgdMat4()
+    public readonly material: TgdMaterial
 
     private readonly prg: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly elementsType: number
     private readonly count: number
-    private readonly material: TgdMaterial
     private readonly geometry: TgdGeometry
     private readonly drawMode: number = 0
     private bboxMin: TgdVec3 | null = null

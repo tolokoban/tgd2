@@ -146,12 +146,7 @@ export class TgdPainterSegments extends TgdPainter {
     }
 }
 
-type InstanceDataset = TgdDataset<{
-    attAxyzr: "vec4"
-    attAuv: "vec2"
-    attBxyzr: "vec4"
-    attBuv: "vec2"
-}>
+type InstanceDataset = TgdDataset
 
 export class TgdPainterSegmentsData {
     private _count = 0
@@ -215,9 +210,7 @@ export class TgdPainterSegmentsData {
     }
 }
 
-type CapsuleDataset = TgdDataset<{
-    attOffset: "vec3"
-}>
+type CapsuleDataset = TgdDataset
 
 /**
  * The capsule is a 2D shape (x,y) that will be uses
