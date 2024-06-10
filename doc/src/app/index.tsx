@@ -16,11 +16,13 @@ import React from "react"
 import { matchRoute, useRouteContext, ROUTES } from "./routes"
 import { RouteMatch, RoutePath } from "./types"
 
-import Layout1 from "./articles/layout"
-import Layout2 from "./articles/painter/layout"
+import Layout0 from "./layout"
+import Layout2 from "./articles/layout"
+import Layout3 from "./articles/painter/layout"
 import Loading0 from "./loading"
-import Template1 from "./articles/template"
+import Template2 from "./articles/template"
 const Page0 = React.lazy(() => import("./page"))
+<<<<<<< HEAD
 const Page2 = React.lazy(() => import("./articles/painter/page.mdx"))
 const Page3 = React.lazy(() => import("./articles/painter/background/page.mdx"))
 const Page4 = React.lazy(() => import("./articles/painter/background/2/page.mdx"))
@@ -34,16 +36,33 @@ const Page11 = React.lazy(() => import("./articles/test/page.mdx"))
 const Page12 = React.lazy(() => import("./articles/texture/page.mdx"))
 const Page13 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
 const Page15 = React.lazy(() => import("./tools/gltf/page"))
+=======
+const Page1 = React.lazy(() => import("./api/page"))
+const Page3 = React.lazy(() => import("./articles/painter/page.mdx"))
+const Page4 = React.lazy(() => import("./articles/painter/background/page.mdx"))
+const Page5 = React.lazy(() => import("./articles/painter/background/2/page.mdx"))
+const Page6 = React.lazy(() => import("./articles/painter/clear/page.mdx"))
+const Page7 = React.lazy(() => import("./articles/painter/filter/page.mdx"))
+const Page8 = React.lazy(() => import("./articles/painter/filter/blur/page.mdx"))
+const Page9 = React.lazy(() => import("./articles/painter/filter/hue/page.mdx"))
+const Page10 = React.lazy(() => import("./articles/painter/logic/page.mdx"))
+const Page11 = React.lazy(() => import("./articles/suzanne/page.mdx"))
+const Page12 = React.lazy(() => import("./articles/test/page.mdx"))
+const Page13 = React.lazy(() => import("./articles/texture/page.mdx"))
+const Page14 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
+const Page17 = React.lazy(() => import("./tools/gltf/page"))
+>>>>>>> aa7ed80 (Fix missing exports)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
     const context = useRouteContext()
     const fb0 = <Loading0/>
+    const ly0 = Layout0
     const pg0 = Page0
-    const ly1 = Layout1
-    const tp1 = Template1
+    const pg1 = Page1
     const ly2 = Layout2
-    const pg2 = Page2
+    const tp2 = Template2
+    const ly3 = Layout3
     const pg3 = Page3
     const pg4 = Page4
     const pg5 = Page5
@@ -55,6 +74,7 @@ export default function App({ lang }: { lang?: string }) {
     const pg11 = Page11
     const pg12 = Page12
     const pg13 = Page13
+<<<<<<< HEAD
     const pg15 = Page15
     return (
         <Route path="/" Page={pg0} fallback={fb0} context={context}>
@@ -78,6 +98,34 @@ export default function App({ lang }: { lang?: string }) {
             </Route>
             <Route path="/tools" fallback={fb0} context={context}>
                 <Route path="/tools/gltf" Page={pg15} fallback={fb0} context={context}/>
+=======
+    const pg14 = Page14
+    const pg17 = Page17
+    return (
+        <Route path="/" Page={pg0} Layout={ly0} fallback={fb0}>
+            <Route path="/api" Page={pg1} fallback={fb0} />
+            <Route path="/articles" Layout={ly2} Template={tp2} fallback={fb0}>
+                <Route path="/articles/painter" Page={pg3} Layout={ly3} Template={tp2} fallback={fb0}>
+                    <Route path="/articles/painter/background" Page={pg4} Template={tp2} fallback={fb0}>
+                        <Route path="/articles/painter/background/2" Page={pg5} Template={tp2} fallback={fb0} />
+                    </Route>
+                    <Route path="/articles/painter/clear" Page={pg6} Template={tp2} fallback={fb0} />
+                    <Route path="/articles/painter/filter" Page={pg7} Template={tp2} fallback={fb0}>
+                        <Route path="/articles/painter/filter/blur" Page={pg8} Template={tp2} fallback={fb0} />
+                        <Route path="/articles/painter/filter/hue" Page={pg9} Template={tp2} fallback={fb0} />
+                    </Route>
+                    <Route path="/articles/painter/logic" Page={pg10} Template={tp2} fallback={fb0} />
+                </Route>
+                <Route path="/articles/suzanne" Page={pg11} Template={tp2} fallback={fb0} />
+                <Route path="/articles/test" Page={pg12} Template={tp2} fallback={fb0} />
+                <Route path="/articles/texture" Page={pg13} Template={tp2} fallback={fb0}>
+                    <Route path="/articles/texture/cube" Page={pg14} Template={tp2} fallback={fb0} />
+                </Route>
+            </Route>
+            <Route path="/tools" fallback={fb0}>
+                <Route path="/tools/consts" fallback={fb0} />
+                <Route path="/tools/gltf" Page={pg17} fallback={fb0} />
+>>>>>>> aa7ed80 (Fix missing exports)
             </Route>
         </Route>
     )

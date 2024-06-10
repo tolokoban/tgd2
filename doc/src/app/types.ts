@@ -9,6 +9,7 @@
  */
 export type RoutePath =
     | "/"
+    | "/api"
     | "/articles"
     | "/articles/painter"
     | "/articles/painter/background"

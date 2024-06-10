@@ -4,6 +4,7 @@ export interface TgdLightOptions {
     color: TgdVec4
     direction: TgdVec3
 }
+
 export class TgdLight {
     /**
      * The alpha channel is the intensity of the light.

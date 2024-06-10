@@ -9,13 +9,14 @@ import InputFile from "@/components/InputFile"
 import Spinner from "../../Spinner"
 import ImageDetail from "./details/ImageDetail"
 import MeshPreview from "./details/MeshPreview"
+import NodePreview from "./details/NodePreview"
 import TreeView from "./TreeView"
 import { MainSection } from "./TreeView/types"
 
 import DefaultModelURL from "./danatia.glb"
 // import DefaultModelURL from "./apple.2k.glb"
+
 import Style from "./ViewGLTF.module.css"
-import NodePreview from "./details/NodePreview"
 
 const $ = Theme.classNames
 

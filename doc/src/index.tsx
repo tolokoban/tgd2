@@ -5,7 +5,11 @@ import { Theme } from "@tolokoban/ui"
 import "./index.css"
 
 function start() {
-    new Theme({}).apply()
+    new Theme({
+        colors: {
+            neutral: ["#111", "#999"],
+        },
+    }).apply()
     const container = document.getElementById("app")
     if (!container) throw Error(`No element with id "app"!`)
 
