@@ -40,6 +40,10 @@ export class TgdVertexArray {
         gl.bindVertexArray(null)
     }
 
+    getBuffer(index: number): TgdBuffer | undefined {
+        return this.drawBuffers[index]
+    }
+
     toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
         const lines: string[] = [
             "function createVAO(",
