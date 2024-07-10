@@ -43,8 +43,9 @@ export class TgdManagerAnimation {
             }
             const t = Math.min(1, anim.inverseDuration * (time - anim.start))
             anim.action(t)
-            if (time > anim.start + anim.duration) {
+            while (time > anim.start + anim.duration) {
                 anim.loop++
+                anim.start += anim.duration
             }
             if (anim.loop > anim.repeat) {
                 anim.cancel()

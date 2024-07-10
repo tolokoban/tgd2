@@ -171,7 +171,15 @@ export class TgdDataset {
      */
     set(
         attribName: string,
-        value: ArrayBuffer | Float32Array | { buffer: ArrayBuffer },
+        value:
+            | ArrayBuffer
+            | Int8Array
+            | Uint8Array
+            | Int16Array
+            | Uint16Array
+            | Uint32Array
+            | Float32Array
+            | { buffer: ArrayBuffer },
         {
             byteOffset = 0,
             byteStride,

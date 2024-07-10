@@ -45,6 +45,110 @@ export type WebglDepthFunc =
     /** always pass */
     | "ALWAYS"
 
+export type WebglBlendEquation =
+    /**  source + destination (default value) */
+    | "FUNC_ADD"
+    /**  source - destination */
+    | "FUNC_SUBTRACT"
+    /**  destination - source */
+    | "FUNC_REVERSE_SUBTRACT"
+    /**  Minimum of source and destination */
+    | "MIN"
+    /**  Maximum of source and destination */
+    | "MAX"
+
+export type WebglBlendFunc =
+    /**
+     * 0,0,0,0
+     *
+     * Multiplies all colors by 0.
+     */
+    | "ZERO"
+    /**
+     * 1,1,1,1
+     *
+     * Multiplies all colors by 1.
+     */
+    | "ONE"
+    /**
+     * RS, GS, BS, AS
+     *
+     * Multiplies all colors by the source colors.
+     */
+    | "SRC_COLOR"
+    /**
+     * 1-RS, 1-GS, 1-BS, 1-AS
+     *
+     * Multiplies all colors by 1 minus each source color.
+     */
+    | "ONE_MINUS_SRC_COLOR"
+    /**
+     * RD, GD, BD, AD
+     *
+     * Multiplies all colors by the destination color.
+     */
+    | "DST_COLOR"
+    /**
+     * 1-RD, 1-GD, 1-BD, 1-AD
+     *
+     * Multiplies all colors by 1 minus each destination color.
+     */
+    | "ONE_MINUS_DST_COLOR"
+    /**
+     * AS, AS, AS, AS
+     *
+     * Multiplies all colors by the source alpha value.
+     */
+    | "SRC_ALPHA"
+    /**
+     * 1-AS, 1-AS, 1-AS, 1-AS
+     *
+     * Multiplies all colors by 1 minus the source alpha value.
+     */
+    | "ONE_MINUS_SRC_ALPHA"
+    /**
+     * AD, AD, AD, AD
+     *
+     * Multiplies all colors by the destination alpha value.
+     */
+    | "DST_ALPHA"
+    /**
+     * 1-AD, 1-AD, 1-AD, 1-AD
+     *
+     * Multiplies all colors by 1 minus the destination alpha value.
+     */
+    | "ONE_MINUS_DST_ALPHA"
+    /**
+     * RC, GC, BC, AC
+     *
+     * Multiplies all colors by a constant color.
+     */
+    | "CONSTANT_COLOR"
+    /**
+     * 1-RC, 1-GC, 1-BC, 1-AC
+     *
+     * Multiplies all colors by 1 minus a constant color.
+     */
+    | "ONE_MINUS_CONSTANT_COLOR"
+    /**
+     * AC, AC, AC, AC
+     *
+     * Multiplies all colors by a constant alpha value.
+     */
+    | "CONSTANT_ALPHA"
+    /**
+     * 1-AC, 1-AC, 1-AC, 1-AC
+     *
+     * Multiplies all colors by 1 minus a constant alpha value.
+     */
+    | "ONE_MINUS_CONSTANT_ALPHA"
+    /**
+     * min(AS, 1 - AD), min(AS, 1 - AD), min(AS, 1 - AD), 1
+     *
+     * Multiplies the RGB colors by the smaller of either the source alpha value or the value of 1 minus the destination alpha value. The alpha value is multiplied by 1.
+     */
+    | "SRC_ALPHA_SATURATE"
+
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
  */

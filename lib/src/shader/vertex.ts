@@ -9,6 +9,12 @@ import {
 } from "./code"
 
 /**
+ * Helper to create a Vertex Shader.
+ *
+ * Sometime you need to add some code to a shader depending on
+ * what you want to display. This can be the case when you use
+ * different materials. All the 3D transformations are common,
+ * but you may need more or less varyings and uniforms.
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderVertex {

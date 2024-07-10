@@ -12,6 +12,8 @@ export interface TgdPainterBackgroundOptions {
     x: number
     y: number
     z: number
+    scaleX: number
+    scaleY: number
 }
 
 export class TgdPainterBackground extends TgdPainter {
@@ -35,8 +37,10 @@ export class TgdPainterBackground extends TgdPainter {
         {
             x = 0,
             y = 0,
-            z = 1,
+            z = 0.999999,
             zoom = 1,
+            scaleX = 1,
+            scaleY = 1,
         }: Partial<TgdPainterBackgroundOptions> = {}
     ) {
         super()
@@ -55,7 +59,16 @@ export class TgdPainterBackground extends TgdPainter {
         })
         dataset.set(
             "attPoint",
-            new Float32Array([-1, -1, +1, -1, -1, +1, +1, +1])
+            new Float32Array([
+                -1 * scaleX,
+                +1 * scaleY,
+                +1 * scaleX,
+                +1 * scaleY,
+                -1 * scaleX,
+                -1 * scaleY,
+                +1 * scaleX,
+                -1 * scaleY,
+            ])
         )
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
         this.vao = context.createVAO(this.program, [dataset])
@@ -83,6 +96,7 @@ export class TgdPainterBackground extends TgdPainter {
         program.uniform1f("uniZoom", 1 / zoom)
         program.uniform1f("uniZ", z)
         texture.activate(program, "uniTexture")
+        gl.disable(gl.CULL_FACE)
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }

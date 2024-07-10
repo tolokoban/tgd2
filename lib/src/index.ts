@@ -16,6 +16,7 @@ export * from "./painter"
 export * from "./painter/painter"
 export * from "./parser"
 export * from "./resource"
+export * from "./shader"
 export * from "./utils"
 export * from "./vao"
 

@@ -19,7 +19,15 @@ export class TgdParserGLTransfertFormatBinary {
         Promise<HTMLImageElement | undefined>
     >()
     private readonly cacheImageURLs = new Map<number, string>()
-    private readonly cacheBufferViewDatas = new Map<number, ArrayBuffer>()
+    private readonly cacheBufferViewDatas = new Map<
+        number,
+        | Int8Array
+        | Uint8Array
+        | Int16Array
+        | Uint16Array
+        | Uint32Array
+        | Float32Array
+    >()
 
     constructor(content: ArrayBuffer) {
         try {
@@ -172,11 +180,23 @@ export class TgdParserGLTransfertFormatBinary {
         return url
     }
 
-    getBufferViewData(bufferViewIndex: number): ArrayBuffer {
-        const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
+    getBufferViewData(
+        accessorIndex: number
+    ):
+        | Int8Array
+        | Uint8Array
+        | Int16Array
+        | Uint16Array
+        | Uint32Array
+        | Float32Array {
+        const fromCache = this.cacheBufferViewDatas.get(accessorIndex)
         if (fromCache) return fromCache
 
         const { gltf } = this
+        const accessor = gltf.accessors?.[accessorIndex]
+        if (!accessor) throw Error(`No accessor with index #${accessorIndex}!`)
+
+        const bufferViewIndex = accessor.bufferView ?? accessorIndex
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
         if (!bufferView)
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
@@ -187,8 +207,9 @@ export class TgdParserGLTransfertFormatBinary {
             byteOffset,
             byteOffset + bufferView.byteLength
         )
-        this.cacheBufferViewDatas.set(bufferViewIndex, data)
-        return data
+        const view = figureOutView(data, accessor.componentType)
+        this.cacheBufferViewDatas.set(accessorIndex, view)
+        return view
     }
 
     setAttrib(
@@ -217,11 +238,28 @@ export class TgdParserGLTransfertFormatBinary {
         if (!bufferView) {
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
         }
-        const buffer = this.getBufferViewData(bufferViewIndex)
-        dataset.set(attribName, buffer, {
+        const view = this.getBufferViewData(bufferViewIndex)
+        dataset.set(attribName, view, {
             byteStride: bufferView.byteStride,
             byteOffset: accessor.byteOffset,
             count: accessor.count,
         })
+    }
+}
+
+function figureOutView(data: ArrayBuffer, componentType: number) {
+    switch (componentType) {
+        case 5120:
+            return new Int8Array(data)
+        case 5121:
+            return new Uint8Array(data)
+        case 5122:
+            return new Int16Array(data)
+        case 5123:
+            return new Uint16Array(data)
+        case 5125:
+            return new Uint32Array(data)
+        default:
+            return new Float32Array(data)
     }
 }
