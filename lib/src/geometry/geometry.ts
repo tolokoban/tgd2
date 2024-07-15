@@ -78,7 +78,10 @@ export class TgdGeometry {
         } else {
             this.getElement = this.getElementFromNothing
         }
-        if (options.computeNormalsIfMissing) {
+        if (
+            options.computeNormalsIfMissing &&
+            !dataset.attributesNames.includes("NORMAL")
+        ) {
             this.computeNormals()
         }
     }
@@ -102,6 +105,7 @@ export class TgdGeometry {
     public readonly getElement: (index: number) => number
 
     public computeNormals() {
+        console.log("computeNormals()")
         let normals: TgdVec3[] = []
         if (
             this.drawMode === WebGL2RenderingContext.TRIANGLES ||
@@ -158,7 +162,6 @@ export class TgdGeometry {
             addNormal(idx0, A, B, C)
             addNormal(idx1, B, C, A)
             addNormal(idx2, C, A, B)
-            if (elem < 100) console.log(idx0, idx1, idx2)
         }
         console.log(
             "indexes:",

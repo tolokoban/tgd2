@@ -46,7 +46,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
  */
 export function goto(route: RoutePath, ...params: (string | number)[]) {
     const path = hydrateRoute(route, params)
-    if (path === currentRouteContext.value?.path) return false
+    if (path === getRouteContext().value?.path) return false
 
     window.location.hash = path
     return true
@@ -60,7 +60,7 @@ export function makeGoto(route: RoutePath, ...params: (string | number)[]) {
 }
 
 export function isRouteEqualTo(route: RoutePath, ...params: (string | number)[]) {
-    return currentRouteContext.value?.path === hydrateRoute(route, params)
+    return getRouteContext().value?.path === hydrateRoute(route, params)
 }
 
 export function findRouteForPath(path: string): RouteMatch | null {
@@ -129,12 +129,15 @@ class RouteContext {
     constructor(
         private readonly security: [
             RoutePath,
-            (path: RoutePath) => Promise<RoutePath | undefined>
+            (path: RoutePath, hash: string) => Promise<RoutePath | undefined>
         ][]
     ) {
-        this.setHash(this.extractHash(window.location.href)).then(() =>
+        const hash = this.extractHash(window.location.href)
+        this.setHash(hash).then(() =>
             window.addEventListener("hashchange", this.handleHashChange)
-        )
+        ).catch(ex => {
+            console.error(`Unable to set hash to "${hash}":`, ex)
+        })
     }
 
     addListener(listener: (value: RouteMatch | null) => void) {
@@ -149,17 +152,20 @@ class RouteContext {
         return this._value
     }
 
-    private async setHash(targetHash: string) {
-        let hash = targetHash
+    private async setHash(hash: string) {
         let value = findRouteForPath(hash)
         if (value) {
             for (const [route, access] of this.security) {
                 if (!value.route.startsWith(route)) continue
 
-                const authorizedRoute = await access(value.route)
+                const authorizedRoute = await access(value.route, hash)
                 if (authorizedRoute && authorizedRoute !== value.route) {
                     value = findRouteForPath(authorizedRoute)
                     if (!value) break
+
+                    this._value = null
+                    goto(value.path as RoutePath)
+                    return
                 }
             }
         }
@@ -169,14 +175,14 @@ class RouteContext {
         this.listeners.forEach(listener => listener(value))
     }
 
-    private handleHashChange = (event: HashChangeEvent) => {
+    private readonly handleHashChange = (event: HashChangeEvent) => {
         const oldHash = this.extractHash(event.oldURL)
         const newHash = this.extractHash(event.newURL)
         const absHash = this.ensureAbsoluteHash(newHash, oldHash)
         if (absHash !== newHash) {
             history.replaceState({}, "", `#${absHash}`)
         }
-        this.setHash(absHash)
+        void this.setHash(absHash)
     }
 
     private extractHash(url: string) {
@@ -210,17 +216,63 @@ class RouteContext {
 }
 
 export function useRouteContext(): RouteMatch | null {
-    const [params, setParams] = React.useState(currentRouteContext.value)
+    const [params, setParams] = React.useState(getRouteContext().value)
     React.useEffect(() => {
         const update = (value: RouteMatch | null) => {
             setParams(value)
         }
-        currentRouteContext.addListener(update)
-        return () => currentRouteContext.removeListener(update)
+        getRouteContext().addListener(update)
+        return () => getRouteContext().removeListener(update)
     }, [])
     return params
 }
 
-const currentRouteContext = new RouteContext([
+export function useRouteParams<T extends string>(
+    ...names: T[]
+): Partial<Record<T, string>> {
+    const context = useRouteContext()
+    const params: Partial<Record<T, string>> = {}
+    if (context) {
+        for (const name of names) {
+            const value = context.params[name]
+            if (typeof value === "string") params[name] = value
+        }
+    }
+    return params
+}
 
-])
+const isNumber = (data: unknown): data is number => typeof data === "number"
+
+export function useRouteParamAsInt(name: string, defaultValue = 0): number {
+    return Math.round(useRouteParam(name, defaultValue, isNumber))
+}
+
+export function useRouteParamAsFloat(name: string, defaultValue = 0): number {
+    return useRouteParam(name, defaultValue, isNumber)
+}
+
+export function useRouteParam<T>(
+    name: string,
+    defaultValue: T,
+    typeGuard: (data: unknown) => data is T
+): T {
+    const params = useRouteParams(name)
+    try {
+        const text = decodeURIComponent(params[name] ?? "")
+        const value: unknown = JSON.parse(text)
+        return typeGuard(value) ? value : defaultValue
+    } catch (ex) {
+        return defaultValue
+    }
+}
+
+// Initialize RouteContext with potential access files
+const SECURITY: [RoutePath, (path: RoutePath, hash: string) => Promise<RoutePath | undefined>][] = [
+
+]
+let currentRouteContext: null | RouteContext = null
+
+function getRouteContext() {
+    if (!currentRouteContext) currentRouteContext = new RouteContext(SECURITY)
+    return currentRouteContext
+}

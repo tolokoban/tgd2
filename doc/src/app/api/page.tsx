@@ -1,7 +1,7 @@
 export default function Page() {
     return (
         <iframe
-            src="/docs/index/html"
+            src="/docs/index.html"
             style={{
                 position: "absolute",
                 left: 0,
@@ -10,6 +10,7 @@ export default function Page() {
                 bottom: 0,
                 width: "100%",
                 height: "100%",
+                border: "none",
             }}
         ></iframe>
     )

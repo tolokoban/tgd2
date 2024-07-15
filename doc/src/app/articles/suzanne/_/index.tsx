@@ -5,6 +5,7 @@ import {
     TgdPainterClear,
     TgdPainterDepth,
     TgdPainterSkybox,
+    TgdPainterState,
     TgdQuat,
     TgdTexture2DOptions,
     TgdVec3,
@@ -65,8 +66,15 @@ function init(context: TgdContext) {
         depth: 1,
     })
     context.add(clear)
-    const depth = new TgdPainterDepth(context)
-    context.add(depth)
+    // const depth = new TgdPainterDepth(context)
+    // context.add(depth)
+    const state = new TgdPainterState(context, {
+        depth: {
+            func: "LESS",
+            mask: true,
+            range: [0, 1],
+        },
+    })
     const skybox = new TgdPainterSkybox(context, {
         imagePosX: PosX,
         imagePosY: PosY,
@@ -83,7 +91,8 @@ function init(context: TgdContext) {
     }
     const texture = context.textures2D.create(options)
     const painter = new Painter(context, MonkeyOBJ, texture)
-    context.add(painter)
+    state.add(painter)
+    context.add(state)
     context.paint()
     let anim = {
         duration: 1000,

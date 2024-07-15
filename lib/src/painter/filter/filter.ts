@@ -54,7 +54,7 @@ export class TgdPainterFilter extends TgdPainter {
                     "varUV = attUV;",
                     "gl_Position = vec4(",
                     ["attPoint,", "uniZ,", "1.0"],
-                    ")",
+                    ");",
                 ],
             }).code
             const frag = new TgdShaderFragment({

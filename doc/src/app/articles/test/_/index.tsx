@@ -1,26 +1,21 @@
 import {
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdPainterAxis,
     TgdPainterClear,
-    TgdPainterSkybox,
-    TgdPainterDepth,
-    TgdCameraOrthographic,
-    TgdPainterSegments,
-    TgdPainterSegmentsData,
-    TgdVec3,
+    TgdCameraPerspective,
+    TgdPainterState,
+    TgdLoaderGlb,
+    TgdPainterMesh,
+    TgdMaterialDiffuse,
+    TgdGeometry,
+    TgdVec4,
+    TgdDataset,
+    TgdPainterFramebuffer,
+    TgdPainterFilter,
+    TgdFilterHueRotation,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
-
-import PosX from "@/gfx/cubemap/test/1.webp"
-import PosY from "@/gfx/cubemap/test/2.webp"
-import PosZ from "@/gfx/cubemap/test/3.webp"
-import NegX from "@/gfx/cubemap/test/4.webp"
-import NegY from "@/gfx/cubemap/test/5.webp"
-import NegZ from "@/gfx/cubemap/test/6.webp"
-
-import PaletteURL from "./palette.jpg"
 
 export default function DemoContainer() {
     return <View onReady={init} />
@@ -39,81 +34,73 @@ function init(context: TgdContext) {
         }
         context.paint()
     })
-    const camera = new TgdCameraOrthographic()
+    const camera = new TgdCameraPerspective({
+        distance: 3,
+        far: 100,
+        near: 0.1,
+        fovy: Math.PI / 2,
+        zoom: 1,
+    })
     context.camera = camera
-    camera.distance = 100
-    camera.spaceHeight = 100
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
     })
     const clear = new TgdPainterClear(context, {
-        color: [0, 0, 0, 1],
+        color: [1, 0.5, 0.5, 1],
         depth: 1,
     })
     context.add(clear)
-    const depth = new TgdPainterDepth(context)
-    context.add(depth)
-    const skybox = new TgdPainterSkybox(context, {
-        imagePosX: PosX,
-        imagePosY: PosY,
-        imagePosZ: PosZ,
-        imageNegX: NegX,
-        imageNegY: NegY,
-        imageNegZ: NegZ,
+    const state = new TgdPainterState(context, {
+        depth: {
+            func: "LESS",
+            mask: true,
+            range: [0, 1],
+        },
     })
-    context.add(skybox)
-    const axis = new TgdPainterAxis(context, {
-        x: camera.x,
-        y: camera.y,
-        z: camera.z,
-        scale: 1,
+    const fb = new TgdPainterFramebuffer(context, {
+        depthBuffer: true,
+        viewportMatchingScale: 0.5,
     })
-    context.add(axis)
-    addSegments(context)
+    fb.add(
+        new TgdPainterClear(context, {
+            color: [0, 0, 0, 1],
+        }),
+        state
+    )
+    context.add(fb)
+    context.add(
+        new TgdPainterFilter(context, {
+            filters: [new TgdFilterHueRotation()],
+            texture: fb.texture,
+        })
+    )
     context.paint()
+    const action = async () => {
+        const asset = await TgdLoaderGlb.glb("mesh/suzanne.glb")
+        if (!asset) return
 
-    // fetch("mesh/axis.obj")
-    //     .then(resp => {
-    //         if (!resp.ok) {
-    //             throw Error(`Error #${resp.status}: ${resp.statusText}!`)
-    //         }
-    //         return resp.text()
-    //     })
-    //     .then(content => {
-    // const options: Partial<TgdTexture2DOptions> = {
-    //     image: PaletteURL,
-    //     magFilter: "NEAREST",
-    //     minFilter: "NEAREST",
-    // }
-    // const texture = context.textures2D.create(options)
-    //         const painter = new Painter(context, content, texture)
-    //         context.add(painter)
-    //         context.paint()
-    //     })
-}
-
-function addSegments(context: TgdContext) {
-    const data = new TgdPainterSegmentsData()
-    for (let i = 0; i < 10; i++) {
-        data.add([0, 0, 0, 1], vec4(rndVec3(rnd(40, 60)), 0.75), [0, 0], [0, 0])
+        context.paint()
+        const dataset = new TgdDataset({
+            POSITION: "vec3",
+            NORMAL: "vec3",
+        })
+        asset.setAttrib(dataset, "POSITION", 0, 0)
+        asset.setAttrib(dataset, "NORMAL", 0, 0)
+        const mesh = new TgdPainterMesh(context, {
+            geometry: new TgdGeometry({
+                dataset,
+                elements: asset.getMeshPrimitiveIndices(0, 0),
+                drawMode: "TRIANGLES",
+                computeNormalsIfMissing: true,
+            }),
+            material: new TgdMaterialDiffuse({
+                color: new TgdVec4(1, 0.666, 0, 1),
+            }),
+        })
+        state.add(mesh)
+        clear.red = 0.5
+        context.paint()
     }
-    const segments = new TgdPainterSegments(context, data, {
-        roundness: 3,
-        minRadius: 1,
-    })
-    context.add(segments)
-}
-
-function rnd(min: number, max: number) {
-    return min + (max - min) * Math.random()
-}
-
-function rndVec3(scale: number): TgdVec3 {
-    const vec = new TgdVec3()
-    return vec.random().normalize().scale(scale)
-}
-
-function vec4(v: TgdVec3, w: number): [number, number, number, number] {
-    return [...v, w] as [number, number, number, number]
+    void action()
 }

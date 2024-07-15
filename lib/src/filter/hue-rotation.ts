@@ -4,7 +4,9 @@ import { TgdFilter } from "./filter"
 export class TgdFilterHueRotation extends TgdFilter {
     private hueShift = 0
 
-    constructor() {
+    constructor({
+        hueShiftInDegrees = 0,
+    }: Partial<{ hueShiftInDegrees: number }> = {}) {
         super({
             fragmentShaderCode: [
                 "vec4 color = texture(texSource, varUV);",
@@ -24,6 +26,7 @@ export class TgdFilterHueRotation extends TgdFilter {
                 uniHueShift: "float",
             },
         })
+        this.hueShiftInDegrees = hueShiftInDegrees
     }
 
     get hueShiftInRadians() {

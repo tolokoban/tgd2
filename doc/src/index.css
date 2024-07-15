@@ -42,3 +42,15 @@ a:active {
 #splash-screen.vanish {
     opacity: 0;
 }
+
+hr {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(
+        to left,
+        transparent,
+        currentColor,
+        transparent
+    );
+    border: none;
+}

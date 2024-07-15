@@ -149,15 +149,3 @@ export class TgdPainterMesh extends TgdPainter {
         this.vao.delete()
     }
 }
-
-function getElementType(
-    elements: Uint8Array | Uint16Array | Uint32Array | undefined
-): number {
-    if (!elements) return 0
-
-    if (elements instanceof Uint8Array)
-        return WebGL2RenderingContext.UNSIGNED_BYTE
-    if (elements instanceof Uint16Array)
-        return WebGL2RenderingContext.UNSIGNED_SHORT
-    return WebGL2RenderingContext.UNSIGNED_INT
-}

@@ -1,7 +1,7 @@
 import { TgdContext } from "@tgd/context"
 import { TgdPainterGroup } from "./group"
 import { TgdPainter } from "./painter"
-import { WebglBlendEquation, WebglBlendFunc } from "@tgd/types"
+import { WebglBlendEquation, WebglBlendFunc, WebglDepthFunc } from "@tgd/types"
 
 export type TgdPainterStateBlendPreset = "sprite"
 
@@ -28,13 +28,34 @@ type Blend =
           functionAlphaDst: number
       }
 
+export type TgdPainterStateDepthPreset = "default"
+
+type DepthOptions =
+    | false
+    | {
+          func: WebglDepthFunc
+          mask: boolean
+          range: [min: number, max: number]
+      }
+
+type Depth =
+    | false
+    | {
+          func: number
+          mask: boolean
+          rangeMin: number
+          rangeMax: number
+      }
+
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
     blend: BlendOptions
+    depth: DepthOptions
 }
 
 export class TgdPainterState extends TgdPainterGroup {
     private blend: Blend = false
+    private depth: Depth = false
 
     constructor(
         context: TgdContext,
@@ -43,6 +64,7 @@ export class TgdPainterState extends TgdPainterGroup {
         const { children = [] } = options
         const { gl } = context
         const blend = toBlend(gl, options.blend)
+        const depth = toDepth(gl, options.depth)
         const onEnter: Array<() => void> = []
         const onExit: Array<() => void> = []
         if (typeof blend !== "undefined") {
@@ -52,6 +74,15 @@ export class TgdPainterState extends TgdPainterGroup {
             })
             onExit.push(() => {
                 setBlend(gl, this.blend)
+            })
+        }
+        if (typeof depth !== "undefined") {
+            onEnter.push(() => {
+                this.depth = getDepth(gl)
+                setDepth(gl, depth)
+            })
+            onExit.push(() => {
+                setDepth(gl, this.depth)
             })
         }
         super(children, {
@@ -119,5 +150,54 @@ function getBlend(gl: WebGL2RenderingContext): Blend {
         functionAlphaSrc: gl.getParameter(gl.BLEND_SRC_ALPHA) as number,
         functionColorDst: gl.getParameter(gl.BLEND_DST_RGB) as number,
         functionColorSrc: gl.getParameter(gl.BLEND_SRC_ALPHA) as number,
+    }
+}
+
+const PRESET_DEPTH: Record<TgdPainterStateDepthPreset, Depth> = {
+    default: {
+        func: WebGL2RenderingContext.LESS,
+        mask: true,
+        rangeMin: 0,
+        rangeMax: 1,
+    },
+}
+
+function toDepth(
+    gl: WebGL2RenderingContext,
+    depth?: DepthOptions
+): Depth | undefined {
+    if (typeof depth === "string") return PRESET_DEPTH[depth]
+
+    if (!depth) return depth
+
+    const [rangeMin, rangeMax] = depth.range
+    return {
+        func: gl[depth.func],
+        mask: depth.mask,
+        rangeMin,
+        rangeMax,
+    }
+}
+
+function setDepth(gl: WebGL2RenderingContext, depth: Depth) {
+    if (depth === false) {
+        gl.disable(gl.DEPTH_TEST)
+    } else {
+        gl.enable(gl.DEPTH_TEST)
+        gl.depthFunc(depth.func)
+        gl.depthMask(depth.mask)
+        gl.depthRange(depth.rangeMin, depth.rangeMax)
+    }
+}
+
+function getDepth(gl: WebGL2RenderingContext): Depth {
+    if (!gl.getParameter(gl.DEPTH_TEST)) return false
+
+    const [rangeMin, rangeMax] = gl.getParameter(gl.DEPTH_RANGE) as Float32Array
+    return {
+        func: Number(gl.getParameter(gl.DEPTH_FUNC)),
+        mask: Boolean(gl.getParameter(gl.DEPTH_WRITEMASK)),
+        rangeMin,
+        rangeMax,
     }
 }
