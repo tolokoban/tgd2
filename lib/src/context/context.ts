@@ -109,7 +109,8 @@ export class TgdContext implements TgdContextInterface {
         this.inputs = new TgdInputs(canvas)
         this._camera = new TgdCameraPerspective()
         this.painters = new TgdPainterGroup()
-        this.name = options.name ?? `TgdContext#${TgdContext.incrementalId++}`
+        this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
+        this.painters.name = this.name
         // Prevent system gestures.
         canvas.style.touchAction = "none"
     }
@@ -241,6 +242,13 @@ export class TgdContext implements TgdContextInterface {
         if (!fb) throw Error("Unable to create a WebGL2 Framebuffer!")
 
         return fb
+    }
+
+    createRenderbuffer(): WebGLRenderbuffer {
+        const rb = this.gl.createRenderbuffer()
+        if (!rb) throw Error("Unable to create a WebGL2 Renderbuffer!")
+
+        return rb
     }
 
     createVAO(

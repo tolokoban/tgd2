@@ -9,6 +9,7 @@ import {
 } from "./webgl"
 
 export interface TgdTexture2DOptions {
+    name?: string
     wrapS?: WebglWrap
     wrapT?: WebglWrap
     wrapR?: WebglWrap
@@ -24,6 +25,7 @@ export interface TgdTexture2DOptions {
 }
 
 export interface TgdTexture2D {
+    readonly name: string
     readonly glTexture: WebGLTexture
     readonly id: string
     readonly width: number
@@ -36,4 +38,5 @@ export interface TgdTexture2D {
     fillHorizontalGradient(size: number, ...colors: string[]): void
     fillverticalGradient(size: number, ...colors: string[]): void
     getParameter(param: WebglTexParameter): number | boolean | null
+    resize(width: number, height: number): void
 }

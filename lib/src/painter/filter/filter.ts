@@ -12,6 +12,7 @@ export interface TgdPainterFilterOptions {
     filters: TgdFilter[]
     texture: TgdTexture2D
     z?: number
+    name?: string
 }
 
 export class TgdPainterFilter extends TgdPainter {
@@ -89,6 +90,7 @@ export class TgdPainterFilter extends TgdPainter {
         if (!framebuffer) throw Error("Unable to create a WebGL Framebuffer!")
 
         this.framebuffer = framebuffer
+        this.name = options.name ?? `Filter/${this.name}`
     }
 
     delete(): void {

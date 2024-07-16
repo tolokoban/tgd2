@@ -5,6 +5,7 @@ import { TgdContextInterface } from "@tgd/types"
 export interface TgdPainterClearOptions {
     color: [red: number, green: number, blue: number, alpha: number] | TgdVec4
     depth: number
+    name: string
 }
 
 /**
@@ -24,6 +25,7 @@ export class TgdPainterClear extends TgdPainter {
         private readonly options: Partial<TgdPainterClearOptions> = {}
     ) {
         super()
+        this.name = options.name ?? `Clear/${this.name}`
         const { gl } = context
         const color = options.color ?? [0, 0, 0, 1]
         const depth = options.depth ?? 1

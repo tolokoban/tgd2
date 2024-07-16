@@ -51,6 +51,7 @@ export interface TgdPainterStateOptions {
     children: TgdPainter[]
     blend: BlendOptions
     depth: DepthOptions
+    name: string
 }
 
 export class TgdPainterState extends TgdPainterGroup {
@@ -93,6 +94,7 @@ export class TgdPainterState extends TgdPainterGroup {
                 onExit.forEach(f => f())
             },
         })
+        this.name = options.name ?? `State/${this.name}`
     }
 }
 

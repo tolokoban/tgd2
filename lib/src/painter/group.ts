@@ -4,6 +4,7 @@ import { TgdPainter } from "./painter"
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
     onExit?(time: number, delay: number): void
+    name?: string
 }
 
 /**
@@ -17,12 +18,13 @@ export class TgdPainterGroup extends TgdPainter {
 
     constructor(
         painters: TgdPainter[] = [],
-        { onEnter, onExit }: TgdPainterGroupOptions = {}
+        { onEnter, onExit, name }: TgdPainterGroupOptions = {}
     ) {
         super()
         this.onEnter = onEnter
         this.onExit = onExit
         this.painters = [...painters]
+        this.name = name ?? `Group/${this.name}`
     }
 
     forEachChild(callback: (child: TgdPainter, index: number) => void) {
@@ -68,7 +70,9 @@ export class TgdPainterGroup extends TgdPainter {
 
         this.onEnter?.(time, delay)
         for (const painter of this.painters) {
-            if (painter.active) painter.paint(time, delay)
+            if (painter.active) {
+                painter.paint(time, delay)
+            }
         }
         this.onExit?.(time, delay)
     }

@@ -11,6 +11,7 @@ import {
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
 
 export class TgdTexture2DImpl implements TgdTexture2D {
+    public readonly name: string
     public readonly glTexture: WebGLTexture
     public readonly eventImageUpdate = new TgdEvent<TgdTexture2D>()
 
@@ -18,6 +19,8 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     private _width = 0
     private _height = 0
     private _image: null | WebglImage = null
+
+    private static counter = 0
 
     constructor(
         public readonly context: TgdContextInterface,
@@ -39,6 +42,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         const texture = gl.createTexture()
         if (!texture) throw Error("Unable to create a WebGLTexture!")
 
+        this.name = options.name ?? `Texture2D/${TgdTexture2DImpl.counter++}`
         this.glTexture = texture
         const {
             wrapS = "CLAMP_TO_EDGE",
@@ -52,6 +56,8 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             internalFormat = "RGBA",
             data,
         } = this.options
+        this._width = width
+        this._height = height
         const format = this.options.format ?? internalFormat
         gl.bindTexture(gl.TEXTURE_2D, texture)
         gl.texImage2D(
@@ -72,6 +78,10 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
         if (options.image) this.loadImage(options.image)
         else if (generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
+    }
+
+    resize(width: number, height: number): void {
+        console.log(`Need to resize ${this.name} to:`, width, height)
     }
 
     getParameter(param: WebglTexParameter): number | boolean | null {

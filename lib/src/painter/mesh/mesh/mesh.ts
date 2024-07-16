@@ -12,6 +12,7 @@ import { TgdShaderVertex } from "@tgd/shader/vertex"
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
     material: TgdMaterial
+    name?: string
 }
 
 /**
@@ -71,8 +72,6 @@ export class TgdPainterMesh extends TgdPainter {
             },
             mainCode: [`FragColor = applyMaterial();`],
         }).code
-        console.log("🚀 [mesh] vert = ", vert) // @FIXME: Remove this line written on 2024-03-08 at 22:04
-        console.log("🚀 [mesh] frag = ", frag) // @FIXME: Remove this line written on 2024-03-08 at 22:04
         const prg = context.programs.create({
             vert,
             frag,
@@ -85,6 +84,7 @@ export class TgdPainterMesh extends TgdPainter {
         )
         this.elementsType = geometry.elementsType
         this.count = geometry.count
+        this.name = options.name ?? `Mesh/${this.name}`
     }
 
     computeBoundingBox(): {

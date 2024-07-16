@@ -1,18 +1,16 @@
 import {
+    TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdPainterClear,
-    TgdCameraPerspective,
-    TgdPainterState,
-    TgdLoaderGlb,
-    TgdPainterMesh,
-    TgdMaterialDiffuse,
-    TgdGeometry,
-    TgdVec4,
-    TgdDataset,
-    TgdPainterFramebuffer,
-    TgdPainterFilter,
     TgdFilterHueRotation,
+    TgdLoaderGlb,
+    TgdPainterClear,
+    TgdPainterFilter,
+    TgdPainterFramebuffer,
+    TgdPainterGroup,
+    TgdPainterLogic,
+    TgdPainterMeshGltf,
+    TgdPainterState,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -46,11 +44,6 @@ function init(context: TgdContext) {
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
     })
-    const clear = new TgdPainterClear(context, {
-        color: [1, 0.5, 0.5, 1],
-        depth: 1,
-    })
-    context.add(clear)
     const state = new TgdPainterState(context, {
         depth: {
             func: "LESS",
@@ -58,49 +51,43 @@ function init(context: TgdContext) {
             range: [0, 1],
         },
     })
+    const group = new TgdPainterGroup([
+        new TgdPainterClear(context, {
+            color: [0, 0, 0, 1],
+        }),
+        state,
+    ])
     const fb = new TgdPainterFramebuffer(context, {
         depthBuffer: true,
         viewportMatchingScale: 0.5,
     })
+    // fb.add(group)
     fb.add(
         new TgdPainterClear(context, {
-            color: [0, 0, 0, 1],
-        }),
-        state
-    )
-    context.add(fb)
-    context.add(
-        new TgdPainterFilter(context, {
-            filters: [new TgdFilterHueRotation()],
-            texture: fb.texture,
+            color: [0, 1, 0, 1],
         })
+    )
+    const hue = new TgdFilterHueRotation()
+    context.add(
+        fb,
+        new TgdPainterFilter(context, {
+            filters: [hue],
+            texture: fb.texture,
+        }),
+        new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
     )
     context.paint()
     const action = async () => {
         const asset = await TgdLoaderGlb.glb("mesh/suzanne.glb")
         if (!asset) return
 
-        context.paint()
-        const dataset = new TgdDataset({
-            POSITION: "vec3",
-            NORMAL: "vec3",
+        console.log("Suzanne has been loaded!")
+        const mesh = new TgdPainterMeshGltf(context, {
+            asset,
         })
-        asset.setAttrib(dataset, "POSITION", 0, 0)
-        asset.setAttrib(dataset, "NORMAL", 0, 0)
-        const mesh = new TgdPainterMesh(context, {
-            geometry: new TgdGeometry({
-                dataset,
-                elements: asset.getMeshPrimitiveIndices(0, 0),
-                drawMode: "TRIANGLES",
-                computeNormalsIfMissing: true,
-            }),
-            material: new TgdMaterialDiffuse({
-                color: new TgdVec4(1, 0.666, 0, 1),
-            }),
-        })
-        state.add(mesh)
-        clear.red = 0.5
-        context.paint()
+        fb.add(mesh)
+        // state.add(mesh)
+        context.play()
     }
     void action()
 }

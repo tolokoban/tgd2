@@ -10,15 +10,16 @@ import { TgdPainterMesh } from "../mesh"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdParserGLTransfertFormatBinary
-    meshIndex: number
+    meshIndex?: number
     primitiveIndex?: number
+    name?: string
 }
 
 /**
  */
 export class TgdPainterMeshGltf extends TgdPainterMesh {
     constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
-        const { asset, meshIndex, primitiveIndex = 0 } = options
+        const { asset, meshIndex = 0, primitiveIndex = 0 } = options
         const color = figureColor(asset, meshIndex, primitiveIndex, context)
         const material = new TgdMaterialDiffuse({
             color,
@@ -80,6 +81,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 material,
             })
         }
+        this.name = options.name ?? `Gltf/${this.name}`
     }
 }
 
