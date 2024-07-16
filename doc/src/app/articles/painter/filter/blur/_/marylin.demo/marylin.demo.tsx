@@ -15,14 +15,14 @@ function init(context: TgdContext) {
         width: 512,
         height: 512,
     })
-    const size = 32
+    const size = 8
     const horizontalBlurFilter = new TgdFilterBlur({
         size,
-        direction: new TgdVec2(1, 0),
+        direction: 0,
     })
     const verticalBlurFilter = new TgdFilterBlur({
         size,
-        direction: new TgdVec2(0, 1),
+        direction: 90,
     })
     const filter = new TgdPainterFilter(context, {
         texture,

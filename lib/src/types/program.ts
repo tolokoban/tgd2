@@ -8,6 +8,8 @@ export interface TgdProgramOptions {
 }
 
 export interface TgdProgram {
+    readonly gl: WebGL2RenderingContext
+
     toCode(options?: Partial<{ indent: string }>): void
 
     /**

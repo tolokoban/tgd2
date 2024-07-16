@@ -25,8 +25,8 @@ export default function Demo() {
         <canvas
             ref={handleMount}
             style={{
-                width: "100%",
-                height: "128px",
+                width: "320px",
+                height: "240px",
                 background: "#000",
             }}
         ></canvas>

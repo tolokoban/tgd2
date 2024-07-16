@@ -1,6 +1,5 @@
 import React from "react"
 import { ViewPanel } from "@tolokoban/ui"
-import Column from "@/components/demo/Column"
 import CodeViewer from "@/components/demo/CodeViewer"
 import Demo from "./background2.demo"
 
@@ -10,8 +9,8 @@ const FULL = "import {\n    TgdContext,\n    TgdPainterBackground,\n    TgdPaint
 export default function DemoContainer() {
     const [full, setFull] = React.useState(false)
     return <>
-        <Column align="halfLeft"><Demo /></Column>
-        <Column align="halfRight">
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
             <button
                 style={{ all: "inherit", display: "contents" }}
                 onClick={() => setFull(!full)}
@@ -24,6 +23,6 @@ export default function DemoContainer() {
                 </ViewPanel>
             </button>
             <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
-        </Column>
+        </div>
     </>
 }

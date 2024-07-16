@@ -9,7 +9,7 @@ export class TgdFilterHueRotation extends TgdFilter {
     }: Partial<{ hueShiftInDegrees: number }> = {}) {
         super({
             fragmentShaderCode: [
-                "vec4 color = texture(texSource, varUV);",
+                "vec4 color = texture(uniTexture, varUV);",
                 "vec3 rgb = color.rgb;",
                 "const vec3 k = vec3(0.5773502691896258);",
                 "float cosAngle = cos(uniHueShift);",

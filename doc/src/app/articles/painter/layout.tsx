@@ -1,17 +1,11 @@
 import Style from "./layout.module.css"
 
-const PAINTERS = [
-    "Background",
-    "Clear",
-    // "Isometric",
-    "Logic",
-    // "Primitive",
-].sort()
+const PAINTERS = ["Background", "Clear", "Logic", "Filter"].sort()
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <div className={Style.Layout}>
-            <div>
+        <>
+            <div className="margin-left">
                 <ul>
                     {PAINTERS.map(name => (
                         <li key={name}>
@@ -24,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     ))}
                 </ul>
             </div>
-            <div>{children}</div>
-        </div>
+            {children}
+        </>
     )
 }

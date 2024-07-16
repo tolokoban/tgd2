@@ -26,7 +26,7 @@ export class TgdFilter {
      * Must return a `vec4` color.
      */
     public readonly fragmentShaderCode: CodeBloc = [
-        "vec4 color = texture(texSource, varUV);",
+        "vec4 color = texture(uniTexture, varUV);",
         "return color;",
     ]
 

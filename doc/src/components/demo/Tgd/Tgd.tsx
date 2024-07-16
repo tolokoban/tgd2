@@ -23,6 +23,12 @@ export default function Tgd({
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
     const refCanvas = React.useRef<HTMLCanvasElement | null>(null)
+    let aspectRatio = "auto"
+    if (width.endsWith("px") && height.endsWith("px")) {
+        aspectRatio = `${width.substring(
+            width.length - 2
+        )} / ${height.substring(height.length - 2)}`
+    }
     const mountCanvas = (canvas: HTMLCanvasElement) => {
         if (!canvas) return
 
@@ -59,7 +65,13 @@ export default function Tgd({
         return (
             <canvas
                 className={className}
-                style={{ width, height }}
+                style={{
+                    width,
+                    height,
+                    aspectRatio,
+                    maxWidth: "95%",
+                    maxHeight: "95%",
+                }}
                 ref={mountCanvas}
             ></canvas>
         )

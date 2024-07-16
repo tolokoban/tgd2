@@ -4,20 +4,16 @@ import Path, { dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const ROOT = Path.resolve(__dirname, "../../doc/src/app")
+const ROOT = Path.resolve(__dirname, "../../")
 
-/**
- * @param {string} path
- * @returns {number}
- */
-function mtime(path) {
+function mtime(path: string): number {
     if (!existsSync(path)) return 0
 
     const stat = statSync(path)
     return stat.mtime.getTime()
 }
 
-async function processDemo(relPath) {
+async function processDemo(relPath: string) {
     const file = Path.resolve(ROOT, relPath)
     // The filename must match the folder name.
     const filename = Path.basename(file)
@@ -40,7 +36,6 @@ async function processDemo(relPath) {
         codeLinesToString([
             `import React from "react"`,
             `import { ViewPanel } from "@tolokoban/ui"`,
-            `import Column from "@/components/demo/Column"`,
             `import CodeViewer from "@/components/demo/CodeViewer"`,
             `import Demo from "./${filename.substring(
                 0,
@@ -55,8 +50,8 @@ async function processDemo(relPath) {
                 "const [full, setFull] = React.useState(false)",
                 "return <>",
                 [
-                    `<Column align="halfLeft"><Demo /></Column>`,
-                    `<Column align="halfRight">`,
+                    `<div className="half-left"><Demo /></div>`,
+                    `<div className="half-right">`,
                     [
                         "<button",
                         [
@@ -77,7 +72,7 @@ async function processDemo(relPath) {
                         `</button>`,
                         `<CodeViewer language="tsx" value={full ? FULL : FOCUS} />`,
                     ],
-                    "</Column>",
+                    "</div>",
                 ],
                 "</>",
             ],
@@ -86,16 +81,10 @@ async function processDemo(relPath) {
     )
 }
 
-/**
- * @param {string} code
- * @returns {[full: string, focused: string]}
- */
-function parseCode(code) {
+function parseCode(code: string): string[] {
     const lines = code.split("\n")
-    /** @type {string[]} */
-    const full = []
-    /** @type {string[]} */
-    const focused = []
+    const full: string[] = []
+    const focused: string[] = []
     let active = false
     for (const line of lines) {
         const short = line.trim()
@@ -113,22 +102,11 @@ function parseCode(code) {
     return [full.join("\n"), focused.join("\n")]
 }
 
-/**
- *
- * @param {string} path
- * @param {string} content
- * @returns {Promise<void>}
- */
-async function saveText(path, content) {
+async function saveText(path: string, content: string) {
     return await FS.writeFile(path, content, { encoding: "utf-8" })
 }
 
-/**
- *
- * @param {string} path
- * @returns {Promise<string>}
- */
-async function loadText(path) {
+async function loadText(path: string): Promise<string> {
     if (!existsSync(path)) {
         console.warn("This file does not exist:", path)
         return ""
@@ -138,13 +116,9 @@ async function loadText(path) {
     return content.toString()
 }
 
-/**
- *
- * @param {string|boolean|any[]} code
- * @param {string} indent
- * @returns {string}
- */
-function codeToString(code, indent = "") {
+type Code = string | boolean | Code[]
+
+function codeToString(code: Code, indent = "") {
     if (typeof code === "boolean") return ""
     if (typeof code === "string") return `${indent}${code}`
 
@@ -152,22 +126,14 @@ function codeToString(code, indent = "") {
     return code.map(section => codeToString(section, subIndent)).join("\n")
 }
 
-/**
- * @param {Array<string|boolean|any[]>} lines
- * @returns {string}
- */
-function codeLinesToString(lines) {
+function codeLinesToString(lines: Code[]) {
     return lines
         .filter(line => typeof line !== "boolean")
         .map(line => codeToString(line))
         .join("\n")
 }
 
-/**
- * @param {string} path
- * @param {string[]} acceptedExtensions
- */
-async function findFiles(path, acceptedExtensions) {
+async function findFiles(path: string, acceptedExtensions: string[]) {
     const jsFilter = info =>
         !info.isDirectory() && matchAnyExtension(info.name, acceptedExtensions)
     const dirFilter = info => !info.name.startsWith(".") && info.isDirectory()
@@ -197,7 +163,10 @@ function matchAnyExtension(name, acceptedExtensions) {
  * @param filters {Array<(info: Dirent) => boolean>}
  * @return {Promise<string[]>}
  */
-async function readDir(root, ...filters) {
+async function readDir(
+    root: string,
+    ...filters: Array<(info: Dirent) => boolean>
+) {
     if (!existsSync(root)) throw Error(`[readDir] Path not found: "${root}"!`)
 
     const folders = []
@@ -223,10 +192,20 @@ async function readDir(root, ...filters) {
 }
 
 async function start() {
-    const demos = await findFiles(ROOT, [".demo.tsx"])
-    for (const file of demos) {
-        await processDemo(file)
+    try {
+        const demos = await findFiles(ROOT, [".demo.tsx"])
+        console.log("Number of demos to inspect:", demos.length)
+        for (const file of demos) {
+            await processDemo(file)
+        }
+    } catch (ex) {
+        if (ex instanceof Error) {
+            console.error(ex.message)
+        } else {
+            console.error(ex)
+        }
     }
 }
 
+console.log('Looking for demos: files ending with ".demo.tsx".')
 void start()
