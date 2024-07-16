@@ -28,14 +28,15 @@ const Page5 = React.lazy(() => import("./articles/painter/background/2/page.mdx"
 const Page6 = React.lazy(() => import("./articles/painter/clear/page.mdx"))
 const Page7 = React.lazy(() => import("./articles/painter/filter/page.mdx"))
 const Page8 = React.lazy(() => import("./articles/painter/filter/blur/page.mdx"))
-const Page9 = React.lazy(() => import("./articles/painter/filter/custom/page.mdx"))
-const Page10 = React.lazy(() => import("./articles/painter/filter/hue/page.mdx"))
-const Page11 = React.lazy(() => import("./articles/painter/logic/page.mdx"))
-const Page12 = React.lazy(() => import("./articles/suzanne/page.mdx"))
-const Page13 = React.lazy(() => import("./articles/test/page.mdx"))
-const Page14 = React.lazy(() => import("./articles/texture/page.mdx"))
-const Page15 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
-const Page17 = React.lazy(() => import("./tools/gltf/page"))
+const Page9 = React.lazy(() => import("./articles/painter/filter/chromatic-aberration/page.mdx"))
+const Page10 = React.lazy(() => import("./articles/painter/filter/custom/page.mdx"))
+const Page11 = React.lazy(() => import("./articles/painter/filter/hue/page.mdx"))
+const Page12 = React.lazy(() => import("./articles/painter/logic/page.mdx"))
+const Page13 = React.lazy(() => import("./articles/suzanne/page.mdx"))
+const Page14 = React.lazy(() => import("./articles/test/page.mdx"))
+const Page15 = React.lazy(() => import("./articles/texture/page.mdx"))
+const Page16 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
+const Page18 = React.lazy(() => import("./tools/gltf/page"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -59,7 +60,8 @@ export default function App({ lang }: { lang?: string }) {
     const pg13 = Page13
     const pg14 = Page14
     const pg15 = Page15
-    const pg17 = Page17
+    const pg16 = Page16
+    const pg18 = Page18
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -71,19 +73,20 @@ export default function App({ lang }: { lang?: string }) {
                     <Route path="/articles/painter/clear" Page={pg6} fallback={fb0} context={context}/>
                     <Route path="/articles/painter/filter" Page={pg7} fallback={fb0} context={context}>
                         <Route path="/articles/painter/filter/blur" Page={pg8} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/filter/custom" Page={pg9} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/filter/hue" Page={pg10} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/chromatic-aberration" Page={pg9} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/custom" Page={pg10} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/hue" Page={pg11} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/painter/logic" Page={pg11} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/logic" Page={pg12} fallback={fb0} context={context}/>
                 </Route>
-                <Route path="/articles/suzanne" Page={pg12} fallback={fb0} context={context}/>
-                <Route path="/articles/test" Page={pg13} fallback={fb0} context={context}/>
-                <Route path="/articles/texture" Page={pg14} fallback={fb0} context={context}>
-                    <Route path="/articles/texture/cube" Page={pg15} fallback={fb0} context={context}/>
+                <Route path="/articles/suzanne" Page={pg13} fallback={fb0} context={context}/>
+                <Route path="/articles/test" Page={pg14} fallback={fb0} context={context}/>
+                <Route path="/articles/texture" Page={pg15} fallback={fb0} context={context}>
+                    <Route path="/articles/texture/cube" Page={pg16} fallback={fb0} context={context}/>
                 </Route>
             </Route>
             <Route path="/tools" fallback={fb0} context={context}>
-                <Route path="/tools/gltf" Page={pg17} fallback={fb0} context={context}/>
+                <Route path="/tools/gltf" Page={pg18} fallback={fb0} context={context}/>
             </Route>
         </Route>
     )

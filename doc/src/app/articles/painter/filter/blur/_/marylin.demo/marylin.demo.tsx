@@ -1,9 +1,4 @@
-import {
-    TgdContext,
-    TgdFilterBlur,
-    TgdPainterFilter,
-    TgdVec2,
-} from "@tolokoban/tgd"
+import { TgdContext, TgdFilterBlur, TgdPainterFilter } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
 import BackgroundURL from "../../../marylin.webp"

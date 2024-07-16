@@ -17,16 +17,23 @@ function init(context: TgdContext) {
         height: 512,
     })
     const filter = new TgdFilter({
+        uniforms: {
+            uniThreshold: "float",
+        },
+        setUniforms(program, time) {
+            const threshold = 2 * Math.abs(Math.sin(time * 1e-4))
+            program.uniform1f("uniThreshold", threshold)
+        },
         fragmentShaderCode: [
-            "float threshold = 0.9;",
+            "float threshold = uniThreshold;",
             "vec4 pixel = texture(uniTexture, varUV);",
             "float value = pixel.r + pixel.g + pixel.b;",
             "if (value > threshold) {",
-            ["FragColor = vec4(0, 0.1, 0.2, 1.0);"],
+            ["FragColor = vec4(0, 0.2, 0.4, 1.0);"],
             "} else {",
             [
                 "float strength = (threshold - value) / threshold;",
-                "FragColor = vec4(threshold, threshold * .667, 0, 1);",
+                "FragColor = vec4(threshold, threshold * .667, threshold * 0.1, 1);",
             ],
             "}",
         ],
@@ -37,7 +44,7 @@ function init(context: TgdContext) {
             filters: [filter],
         })
     )
-    context.paint()
+    context.play()
     // #end
 }
 
