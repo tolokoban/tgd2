@@ -47,16 +47,22 @@ type Depth =
           rangeMax: number
       }
 
+type CullOptions = false | "FRONT_AND_BACK" | "FRONT" | "BACK"
+
+type Cull = false | number
+
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
     blend: BlendOptions
     depth: DepthOptions
+    cull: CullOptions
     name: string
 }
 
 export class TgdPainterState extends TgdPainterGroup {
     private blend: Blend = false
     private depth: Depth = false
+    private cull: Cull = false
 
     constructor(
         context: TgdContext,
@@ -66,6 +72,7 @@ export class TgdPainterState extends TgdPainterGroup {
         const { gl } = context
         const blend = toBlend(gl, options.blend)
         const depth = toDepth(gl, options.depth)
+        const cull = toCull(gl, options.cull)
         const onEnter: Array<() => void> = []
         const onExit: Array<() => void> = []
         if (typeof blend !== "undefined") {
@@ -84,6 +91,15 @@ export class TgdPainterState extends TgdPainterGroup {
             })
             onExit.push(() => {
                 setDepth(gl, this.depth)
+            })
+        }
+        if (typeof cull !== "undefined") {
+            onEnter.push(() => {
+                this.cull = getCull(gl)
+                setCull(gl, cull)
+            })
+            onExit.push(() => {
+                setCull(gl, this.cull)
             })
         }
         super(children, {
@@ -202,4 +218,28 @@ function getDepth(gl: WebGL2RenderingContext): Depth {
         rangeMin,
         rangeMax,
     }
+}
+
+function toCull(
+    gl: WebGL2RenderingContext,
+    cull?: CullOptions
+): Cull | undefined {
+    if (typeof cull === "undefined" || cull === false) return cull
+
+    return gl[cull] as number
+}
+
+function setCull(gl: WebGL2RenderingContext, cull: Cull) {
+    if (cull === false) {
+        gl.disable(gl.CULL_FACE)
+    } else {
+        gl.enable(gl.CULL_FACE)
+        gl.cullFace(cull)
+    }
+}
+
+function getCull(gl: WebGL2RenderingContext): Cull {
+    if (!gl.getParameter(gl.CULL_FACE)) return false
+
+    return gl.getParameter(gl.CULL_FACE_MODE) as number
 }

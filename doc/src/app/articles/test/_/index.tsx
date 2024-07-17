@@ -13,6 +13,7 @@ import {
     TgdPainterState,
 } from "@tolokoban/tgd"
 
+import TestPainter from "./painter"
 import View from "@/components/demo/Tgd"
 
 export default function DemoContainer() {
@@ -44,50 +45,48 @@ function init(context: TgdContext) {
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
     })
-    const state = new TgdPainterState(context, {
-        depth: {
-            func: "LESS",
-            mask: true,
-            range: [0, 1],
-        },
-    })
-    const group = new TgdPainterGroup([
-        new TgdPainterClear(context, {
-            color: [0, 0, 0, 1],
-        }),
-        state,
-    ])
-    const fb = new TgdPainterFramebuffer(context, {
-        depthBuffer: true,
-        viewportMatchingScale: 0.5,
-    })
-    // fb.add(group)
-    fb.add(
-        new TgdPainterClear(context, {
-            color: [0, 1, 0, 1],
-        })
-    )
-    const hue = new TgdFilterHueRotation()
-    context.add(
-        fb,
-        new TgdPainterFilter(context, {
-            filters: [hue],
-            texture: fb.texture,
-        }),
-        new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
-    )
     context.paint()
     const action = async () => {
         const asset = await TgdLoaderGlb.glb("mesh/suzanne.glb")
         if (!asset) return
 
         console.log("Suzanne has been loaded!")
+        const state = new TgdPainterState(context, {
+            depth: {
+                func: "LESS",
+                mask: true,
+                range: [0, 1],
+            },
+            children: [
+                new TgdPainterClear(context, {
+                    color: [0, 0.3, 0, 1],
+                    depth: 1,
+                }),
+            ],
+        })
+        const fb = new TgdPainterFramebuffer(context, {
+            depthBuffer: true,
+            viewportMatchingScale: 1,
+        })
+        fb.add(state)
         const mesh = new TgdPainterMeshGltf(context, {
             asset,
         })
-        fb.add(mesh)
-        // state.add(mesh)
-        context.play()
+        // state.add(new TestPainter(context))
+        state.add(mesh)
+        const hue = new TgdFilterHueRotation()
+        context.add(
+            fb,
+            new TgdPainterFilter(context, {
+                filters: [hue],
+                texture: fb.texture,
+            }),
+            new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
+        )
+        // context.add(group)
+        context.paint()
+        console.log("========================================")
+        console.log(context.debugHierarchy())
     }
     void action()
 }

@@ -1,3 +1,5 @@
+export type WebglType = "UNSIGNED_BYTE" | "UNSIGNED_INT"
+
 export type WebglWrap = "REPEAT" | "CLAMP_TO_EDGE" | "MIRRORED_REPEAT"
 
 export type WebglMinFilter =
@@ -158,6 +160,10 @@ export type WebglPixelStoreFormat =
     | "LUMINANCE_ALPHA"
     | "ALPHA"
     | "LUMINANCE"
+    | "DEPTH_COMPONENT"
+    | "DEPTH_COMPONENT16"
+    | "DEPTH_COMPONENT24"
+    | "DEPTH_COMPONENT32F"
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getTexParameter

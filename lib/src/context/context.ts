@@ -15,6 +15,7 @@ import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
+import { TgdLogger } from "../log"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -113,6 +114,10 @@ export class TgdContext implements TgdContextInterface {
         this.painters.name = this.name
         // Prevent system gestures.
         canvas.style.touchAction = "none"
+    }
+
+    debugHierarchy() {
+        return this.painters.debugHierarchy()
     }
 
     get camera() {

@@ -1,5 +1,5 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
-import { TgdPainter } from "./painter"
+import { TgdDebugPainterhierarchy, TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
@@ -75,5 +75,12 @@ export class TgdPainterGroup extends TgdPainter {
             }
         }
         this.onExit?.(time, delay)
+    }
+
+    debugHierarchy(): TgdDebugPainterhierarchy {
+        return {
+            [this.active ? this.name : `${this.name} (Inactive)`]:
+                this.painters.map(painter => painter.debugHierarchy()),
+        }
     }
 }

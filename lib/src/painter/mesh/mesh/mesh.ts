@@ -129,8 +129,6 @@ export class TgdPainterMesh extends TgdPainter {
             matrixTransfo,
         } = this
         const { gl, camera } = context
-        gl.enable(gl.CULL_FACE)
-        gl.cullFace(gl.BACK)
         prg.use()
         material.setUniforms(prg)
         prg.uniformMatrix4fv("uniTransfoMatrix", matrixTransfo)

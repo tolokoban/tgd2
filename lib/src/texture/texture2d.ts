@@ -9,6 +9,7 @@ import {
     WebglTexParameter,
 } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
+import { TgdPainter } from "@tgd/painter/painter"
 
 export class TgdTexture2DImpl implements TgdTexture2D {
     public readonly name: string
@@ -55,6 +56,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             height = 1,
             internalFormat = "RGBA",
             data,
+            type = "UNSIGNED_BYTE",
         } = this.options
         this._width = width
         this._height = height
@@ -68,7 +70,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             height,
             0,
             gl[format],
-            gl.UNSIGNED_BYTE,
+            gl[type],
             data ?? null
         )
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
@@ -81,7 +83,23 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     }
 
     resize(width: number, height: number): void {
-        console.log(`Need to resize ${this.name} to:`, width, height)
+        console.log("Resize texture:", width, height)
+        const { context, glTexture, options } = this
+        const { gl } = context
+        gl.bindTexture(gl.TEXTURE_2D, glTexture)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl[options.internalFormat ?? "RGBA"],
+            width,
+            height,
+            0,
+            gl[options.format ?? "RGBA"],
+            gl.UNSIGNED_BYTE,
+            options.data ?? null
+        )
+        if (options.image) this.loadImage(options.image)
+        else if (options.generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
     }
 
     getParameter(param: WebglTexParameter): number | boolean | null {

@@ -106,10 +106,10 @@ export class TgdPainterFilter extends TgdPainter {
 
     paint(time: number): void {
         const { vaos, texture, z } = this
+        const { gl } = this.program
         let input = texture.glTexture
         if (vaos.length > 0) {
             const { programs, filters, framebuffer } = this
-            const { gl } = this.program
             const currentFramebuffer = gl.getParameter(
                 gl.FRAMEBUFFER_BINDING
             ) as null | WebGLFramebuffer
@@ -133,6 +133,7 @@ export class TgdPainterFilter extends TgdPainter {
             gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         }
         paintOneFilter(time, this.vao, this.program, this.filter, input, z)
+        gl.bindVertexArray(null)
     }
 
     private getTextures(

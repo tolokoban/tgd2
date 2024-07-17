@@ -5,6 +5,7 @@ import {
     WebglMinFilter,
     WebglPixelStoreFormat,
     WebglTexParameter,
+    WebglType,
     WebglWrap,
 } from "./webgl"
 
@@ -22,6 +23,7 @@ export interface TgdTexture2DOptions {
     height?: number
     internalFormat?: WebglPixelStoreFormat
     format?: WebglPixelStoreFormat
+    type?: WebglType
 }
 
 export interface TgdTexture2D {

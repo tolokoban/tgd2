@@ -31,7 +31,7 @@ export class TgdPainterClear extends TgdPainter {
         const depth = options.depth ?? 1
         this.clearMask = 0
         let hasAnyOption = false
-        if (options.color) {
+        if (typeof options.color !== "undefined") {
             this.clearMask |= gl.COLOR_BUFFER_BIT
             hasAnyOption = true
         }
@@ -57,7 +57,9 @@ export class TgdPainterClear extends TgdPainter {
             this
         const { gl } = context
         if (options.color) gl.clearColor(red, green, blue, alpha)
-        if (typeof options.depth === "number") gl.clearDepth(depth)
+        if (typeof options.depth === "number") {
+            gl.clearDepth(depth)
+        }
         gl.clear(clearMask)
     }
 }
