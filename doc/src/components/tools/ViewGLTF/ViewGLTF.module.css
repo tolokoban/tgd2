@@ -9,12 +9,14 @@
 }
 
 .ViewGLTF > aside {
+    display: block;
     position: absolute;
     left: 0;
     top: 0;
     width: var(--size);
     height: 100%;
     overflow: auto;
+    writing-mode: horizontal-tb;
 }
 
 .ViewGLTF > main {

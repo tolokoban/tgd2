@@ -24,8 +24,11 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
         const material = new TgdMaterialDiffuse({
             color,
             light: new TgdLight({
-                color: new TgdVec4(1, 1, 1, 1),
+                color: new TgdVec4(2, 2, 2, 1),
                 direction: new TgdVec3(1, 0, 0),
+            }),
+            ambient: new TgdLight({
+                color: new TgdVec4(0.75, 0.75, 0.75, 1),
             }),
         })
         if (color instanceof TgdVec4) {
@@ -97,13 +100,12 @@ function figureColor(
     const materialIndex = primitive.material ?? -1
     if (materialIndex === -1) return DEFAULT_COLOR
 
-    const pbr = asset.getMaterial(materialIndex).pbrMetallicRoughness
+    const material = asset.getMaterial(materialIndex)
+    const pbr = material.pbrMetallicRoughness
     if (!pbr) return DEFAULT_COLOR
 
     if (pbr.baseColorTexture) {
-        const textureIndex =
-            asset.getMaterial(materialIndex).pbrMetallicRoughness
-                ?.baseColorTexture?.index
+        const textureIndex = pbr.baseColorTexture?.index
         const textureOptions = asset.getTexture2DOptions(textureIndex ?? 0)
         const color = context.textures2D.create(textureOptions)
         return color

@@ -108,7 +108,10 @@ export class TgdParserGLTransfertFormatBinary {
     ): { type: number; buff: BufferSource; elemCount: number } {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         const accessor = this.getAccessor(primitive.indices ?? 0)
-        const buffer = this.getBufferViewData(accessor.bufferView ?? 0)
+        const buffer = this.getBufferViewData(
+            accessor.bufferView ?? 0,
+            accessor.componentType
+        )
         return {
             type: accessor.componentType,
             buff: buffer,
@@ -169,7 +172,7 @@ export class TgdParserGLTransfertFormatBinary {
         if (image.uri) return image.uri
 
         if (typeof image.bufferView !== "number") return
-        const buffer = this.getBufferViewData(image.bufferView)
+        const buffer = this.getBufferViewData(image.bufferView, "Uint8")
         if (!buffer) return
 
         const blob = new Blob([buffer], {
@@ -181,7 +184,15 @@ export class TgdParserGLTransfertFormatBinary {
     }
 
     getBufferViewData(
-        accessorIndex: number
+        bufferViewIndex: number,
+        type:
+            | number
+            | "Int8"
+            | "Uint8"
+            | "Int16"
+            | "Uint16"
+            | "Uint32"
+            | "Float32"
     ):
         | Int8Array
         | Uint8Array
@@ -189,14 +200,10 @@ export class TgdParserGLTransfertFormatBinary {
         | Uint16Array
         | Uint32Array
         | Float32Array {
-        const fromCache = this.cacheBufferViewDatas.get(accessorIndex)
+        const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
         if (fromCache) return fromCache
 
         const { gltf } = this
-        const accessor = gltf.accessors?.[accessorIndex]
-        if (!accessor) throw Error(`No accessor with index #${accessorIndex}!`)
-
-        const bufferViewIndex = accessor.bufferView ?? accessorIndex
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
         if (!bufferView)
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
@@ -207,8 +214,8 @@ export class TgdParserGLTransfertFormatBinary {
             byteOffset,
             byteOffset + bufferView.byteLength
         )
-        const view = figureOutView(data, accessor.componentType)
-        this.cacheBufferViewDatas.set(accessorIndex, view)
+        const view = figureOutView(data, convertTypeToNumber(type))
+        this.cacheBufferViewDatas.set(bufferViewIndex, view)
         return view
     }
 
@@ -238,7 +245,10 @@ export class TgdParserGLTransfertFormatBinary {
         if (!bufferView) {
             throw Error(`No bufferView with index #${bufferViewIndex}!`)
         }
-        const view = this.getBufferViewData(bufferViewIndex)
+        const view = this.getBufferViewData(
+            bufferViewIndex,
+            accessor.componentType
+        )
         dataset.set(attribName, view, {
             byteStride: bufferView.byteStride,
             byteOffset: accessor.byteOffset,
@@ -262,4 +272,24 @@ function figureOutView(data: ArrayBuffer, componentType: number) {
         default:
             return new Float32Array(data)
     }
+}
+
+function convertTypeToNumber(type: string | number): number {
+    if (typeof type === "number") return type
+
+    switch (type) {
+        case "Int8":
+            return 5120
+        case "Uint8":
+            return 5121
+        case "Int16":
+            return 5122
+        case "Uint16":
+            return 5123
+        case "Uint32":
+            return 5125
+        default:
+            return WebGL2RenderingContext.FLOAT
+    }
+    throw new Error("Function not implemented.")
 }

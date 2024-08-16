@@ -1,5 +1,5 @@
 {
-    "version": "2.0.6",
+    "version": "2.0.7",
     "private": true,
     "homepage": "https://tolokoban.github.io/tgd2",
     "scripts": {
@@ -14,8 +14,8 @@
     "dependencies": {
         "@tolokoban/react-state": "^0.3.0",
         "@tolokoban/tgd": "file:..",
-        "@tolokoban/type-guards": "^0.5.0",
-        "@tolokoban/ui": "^0.17.10",
+        "@tolokoban/type-guards": "^0.6.0",
+        "@tolokoban/ui": "^0.19.2",
         "colord": "^2.9.3",
         "prismjs": "^1.29.0",
         "react": "18.3.1",
@@ -24,7 +24,7 @@
     "devDependencies": {
         "@mdx-js/loader": "^3.0.1",
         "@types/mdx": "^2.0.13",
-        "@types/node": "^20.14.10",
+        "@types/node": "^22.3.0",
         "@types/prismjs": "^1.26.4",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
@@ -37,9 +37,9 @@
         "html-webpack-plugin": "^5.6.0",
         "style-loader": "^3.3.4",
         "ts-loader": "^9.5.1",
-        "tsx": "^4.16.2",
-        "typescript": "5.5.3",
-        "webpack": "^5.91.0",
+        "tsx": "^4.17.0",
+        "typescript": "5.5.4",
+        "webpack": "^5.93.0",
         "webpack-cli": "^5.1.4",
         "webpack-dev-server": "^5.0.4",
         "workbox-webpack-plugin": "^7.1.0"
