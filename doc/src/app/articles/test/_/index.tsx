@@ -7,6 +7,7 @@ import {
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
+    TgdPainterFramebufferOld,
     TgdPainterGroup,
     TgdPainterLogic,
     TgdPainterMeshGltf,
@@ -37,7 +38,7 @@ function init(context: TgdContext) {
         distance: 3,
         far: 100,
         near: 0.1,
-        fovy: Math.PI / 2,
+        fovy: Math.PI / 4,
         zoom: 1,
     })
     context.camera = camera
@@ -62,28 +63,27 @@ function init(context: TgdContext) {
                     color: [0, 0.3, 0, 1],
                     depth: 1,
                 }),
+                new TgdPainterMeshGltf(context, {
+                    asset,
+                }),
             ],
         })
-        const fb = new TgdPainterFramebuffer(context, {
+        const fb = new TgdPainterFramebufferOld(context, {
             depthBuffer: true,
             viewportMatchingScale: 1,
         })
         fb.add(state)
-        const mesh = new TgdPainterMeshGltf(context, {
-            asset,
-        })
-        // state.add(new TestPainter(context))
-        state.add(mesh)
         const hue = new TgdFilterHueRotation()
         context.add(
             fb,
             new TgdPainterFilter(context, {
                 filters: [hue],
                 texture: fb.texture,
+                flipY: true,
             }),
             new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
         )
-        // context.add(group)
+        // context.add(state)
         context.paint()
         console.log("========================================")
         console.log(context.debugHierarchy())

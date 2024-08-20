@@ -9,14 +9,16 @@ import {
     WebglTexParameter,
 } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
-import { TgdPainter } from "@tgd/painter/painter"
 
 export class TgdTexture2DImpl implements TgdTexture2D {
     public readonly name: string
-    public readonly glTexture: WebGLTexture
     public readonly eventImageUpdate = new TgdEvent<TgdTexture2D>()
+    public readonly glTexture: WebGLTexture
 
-    private readonly options: TgdTexture2DOptions
+    private readonly options: TgdTexture2DOptions & {
+        width: number
+        height: number
+    }
     private _width = 0
     private _height = 0
     private _image: null | WebglImage = null
@@ -40,70 +42,68 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             internalFormat: "RGBA",
             ...options,
         }
+        this.name = options.name ?? `Texture2D/${TgdTexture2DImpl.counter++}`
+        this._width = this.options.width
+        this._height = this.options.height
         const texture = gl.createTexture()
         if (!texture) throw Error("Unable to create a WebGLTexture!")
-
-        this.name = options.name ?? `Texture2D/${TgdTexture2DImpl.counter++}`
         this.glTexture = texture
-        const {
-            wrapS = "CLAMP_TO_EDGE",
-            wrapT = "CLAMP_TO_EDGE",
-            wrapR = "CLAMP_TO_EDGE",
-            minFilter = "LINEAR",
-            magFilter = "LINEAR",
-            generateMipMap = false,
-            width = 1,
-            height = 1,
-            internalFormat = "RGBA",
-            data,
-            type = "UNSIGNED_BYTE",
-        } = this.options
-        this._width = width
-        this._height = height
-        const format = this.options.format ?? internalFormat
-        gl.bindTexture(gl.TEXTURE_2D, texture)
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl[internalFormat],
-            width,
-            height,
-            0,
-            gl[format],
-            gl[type],
-            data ?? null
-        )
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[wrapT])
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl[wrapR])
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[minFilter])
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
-        if (options.image) this.loadImage(options.image)
-        else if (generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
+        this.updateTexture = (): WebGLTexture => {
+            const {
+                wrapS = "CLAMP_TO_EDGE",
+                wrapT = "CLAMP_TO_EDGE",
+                wrapR = "CLAMP_TO_EDGE",
+                minFilter = "LINEAR",
+                magFilter = "LINEAR",
+                generateMipMap = false,
+                width = 1,
+                height = 1,
+                internalFormat = "RGBA",
+                data,
+                type = "UNSIGNED_BYTE",
+            } = this.options
+            const format = this.options.format ?? internalFormat
+            gl.bindTexture(gl.TEXTURE_2D, texture)
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl[internalFormat],
+                width,
+                height,
+                0,
+                gl[format],
+                gl[type],
+                data ?? null
+            )
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[wrapT])
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl[wrapR])
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MIN_FILTER,
+                gl[minFilter]
+            )
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_MAG_FILTER,
+                gl[magFilter]
+            )
+            if (options.image) this.loadImage(options.image)
+            else if (generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
+            return texture
+        }
+        this.updateTexture()
     }
 
     resize(width: number, height: number): void {
         console.log("Resize texture:", width, height)
-        const { context, glTexture, options } = this
-        const { gl } = context
-        gl.bindTexture(gl.TEXTURE_2D, glTexture)
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl[options.internalFormat ?? "RGBA"],
-            width,
-            height,
-            0,
-            gl[options.format ?? "RGBA"],
-            gl.UNSIGNED_BYTE,
-            options.data ?? null
-        )
-        if (options.image) this.loadImage(options.image)
-        else if (options.generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
+        this._width = Math.max(Math.round(width), 1)
+        this._height = Math.max(Math.round(height), 1)
+        this.updateTexture()
     }
 
     getParameter(param: WebglTexParameter): number | boolean | null {
-        const { context, glTexture } = this
+        const { context, glTexture: glTexture } = this
         const { gl } = context
         gl.bindTexture(gl.TEXTURE_2D, glTexture)
         const value = gl.getTexParameter(gl.TEXTURE_2D, gl[param]) as
@@ -135,30 +135,6 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         this.fillGradient(1, size, 0, 1, ...colors)
     }
 
-    private fillGradient(
-        width: number,
-        height: number,
-        dirX: number,
-        dirY: number,
-        ...colors: string[]
-    ) {
-        const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-        const gradient = ctx.createLinearGradient(
-            0,
-            0,
-            width * dirX,
-            height * dirY
-        )
-        for (let i = 0; i < colors.length; i++) {
-            gradient.addColorStop(i / (colors.length - 1), colors[i])
-        }
-        ctx.fillStyle = gradient
-        ctx.fillRect(0, 0, width, height)
-        this.loadImage(canvas)
-
-        canvas.style.position = "fixed"
-    }
-
     delete() {
         this.context.gl.deleteTexture(this.glTexture)
     }
@@ -181,7 +157,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     }
 
     activate(program: TgdProgram, uniformName: string, slot = 0) {
-        const { context, glTexture } = this
+        const { context, glTexture: glTexture } = this
         const { gl } = context
         gl.activeTexture(gl.TEXTURE0 + slot)
         gl.bindTexture(gl.TEXTURE_2D, glTexture)
@@ -231,4 +207,30 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         this._image = image
         this.eventImageUpdate.dispatch(this)
     }
+
+    private fillGradient(
+        width: number,
+        height: number,
+        dirX: number,
+        dirY: number,
+        ...colors: string[]
+    ) {
+        const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
+        const gradient = ctx.createLinearGradient(
+            0,
+            0,
+            width * dirX,
+            height * dirY
+        )
+        for (let i = 0; i < colors.length; i++) {
+            gradient.addColorStop(i / (colors.length - 1), colors[i])
+        }
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, 0, width, height)
+        this.loadImage(canvas)
+
+        canvas.style.position = "fixed"
+    }
+
+    private readonly updateTexture: () => WebGLTexture
 }

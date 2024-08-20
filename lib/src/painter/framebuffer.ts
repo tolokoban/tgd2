@@ -19,11 +19,13 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
     name: string
 }
 
+const DEFAULT_TEXTURE_SIZE = 256
+
 export class TgdPainterFramebuffer extends TgdPainterGroup {
     public readonly texture: TgdTexture2D
     public readonly textureDepth: TgdTexture2D
-    private readonly framebuffer: WebGLFramebuffer
-    private readonly depthbuffer: WebGLRenderbuffer | null = null
+    private framebuffer: WebGLFramebuffer | null = null
+    private depthbuffer: WebGLRenderbuffer | null = null
     private dirty = false
     private _width = 0
     private _height = 0
@@ -33,30 +35,24 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         private readonly options: Partial<TgdPainterFramebufferOptions>
     ) {
         super()
-        this._width = options.width ?? 640
-        this._height = options.height ?? 480
+        this._width = options.width ?? DEFAULT_TEXTURE_SIZE
+        this._height = options.height ?? DEFAULT_TEXTURE_SIZE
         this.name = options.name ?? `Framebuffer/${this.name}`
         this.texture = context.textures2D.create({
-            width: this._width,
-            height: this._height,
+            width: Math.max(this.width, 1),
+            height: Math.max(this.height, 1),
+            internalFormat: "RGB",
             generateMipMap: true,
         })
         this.textureDepth = context.textures2D.create({
-            width: this._width,
-            height: this._height,
+            width: options.depthBuffer ? this._width : 1,
+            height: options.depthBuffer ? this._height : 1,
             generateMipMap: false,
             internalFormat: "DEPTH_COMPONENT24",
             format: "DEPTH_COMPONENT",
             type: "UNSIGNED_INT",
         })
-        const { gl } = context
-        this.framebuffer = context.createFramebuffer()
-        if (options.depthBuffer === true) {
-            // Create a Depth Buffer, because the default
-            // framebuffer has none.
-            createDepthBuffer(gl, this.width, this.height)
-            // const depthBuffer = context.createRenderbuffer()
-        }
+        this.dirty = true
     }
 
     get width(): number {
@@ -80,8 +76,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     }
 
     paint(time: number, delay: number): void {
-        const { context, texture, textureDepth, options, dirty, depthbuffer } =
-            this
+        const { context, texture, options } = this
         const { gl } = context
         const { viewportMatchingScale } = options
         if (typeof viewportMatchingScale === "number") {
@@ -94,25 +89,11 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
                 Math.round(context.height * viewportMatchingScale)
             )
         }
-        if (dirty) {
-            texture.resize(this.width, this.height)
-            // if (depthbuffer) {
-            //     textureDepth.resize(this.width, this.height)
-            //     gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer)
-            //     gl.framebufferTexture2D(
-            //         gl.FRAMEBUFFER,
-            //         gl.DEPTH_ATTACHMENT,
-            //         gl.TEXTURE_2D,
-            //         this.textureDepth.glTexture,
-            //         0
-            //     )
-            // }
-            this.dirty = false
-        }
-
         const currentFramebuffer = gl.getParameter(
             gl.FRAMEBUFFER_BINDING
         ) as null | WebGLFramebuffer
+        const [x, y, w, h] = gl.getParameter(gl.VIEWPORT) as Int32Array
+        this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
@@ -121,32 +102,52 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             texture.glTexture,
             0
         )
-        const [x, y, w, h] = gl.getParameter(gl.VIEWPORT) as Int32Array
         gl.viewport(0, 0, this.width, this.height)
+        console.log("🚀 [framebuffer] w, h = ", w, h) // @FIXME: Remove this line written on 2024-08-20 at 16:42
+        console.log(
+            "🚀 [framebuffer] this.width, this.height = ",
+            this.width,
+            this.height
+        ) // @FIXME: Remove this line written on 2024-08-20 at 16:42
         super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         gl.viewport(x, y, w, h)
     }
 
     delete() {
-        const {
-            context,
-            texture,
-            textureDepth,
-            framebuffer,
-            depthbuffer: depthBuffer,
-        } = this
+        const { context, texture, textureDepth, framebuffer, depthbuffer } =
+            this
         const { gl } = context
         context.textures2D.delete(texture)
         context.textures2D.delete(textureDepth)
-        gl.deleteFramebuffer(framebuffer)
-        if (depthBuffer) {
-            gl.deleteRenderbuffer(depthBuffer)
+        if (framebuffer) gl.deleteFramebuffer(framebuffer)
+        if (depthbuffer) gl.deleteRenderbuffer(depthbuffer)
+    }
+
+    private createFramebufferIfNeeded() {
+        if (!this.dirty) return
+
+        const { context, width, height } = this
+        if (this.framebuffer) {
+            console.log("Delete framebuffer!")
+            context.gl.deleteFramebuffer(this.framebuffer)
         }
+        console.log("Create framebuffer!")
+        this.framebuffer = context.createFramebuffer()
+        this.texture.resize(width, height)
+        // @TODO: Generate depth buffer.
+        // if (this.options.depthBuffer === true) {
+        //     // Create a Depth Buffer, because the default
+        //     // framebuffer has none.
+        //     const { gl } = context
+        //     this.depthbuffer = createDepthTexture(gl, this.width, this.height)
+        //     this.textureDepth.resize(width, height)
+        // }
+        this.dirty = false
     }
 }
 
-function createDepthBuffer(
+function createDepthTexture(
     gl: WebGL2RenderingContext,
     width: number,
     height: number

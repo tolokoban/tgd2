@@ -30,4 +30,5 @@ export type TgdContextInterface = {
     paint: () => void
     onEnter: TgdPainterFunction | undefined
     onExit: TgdPainterFunction | undefined
+    debugHierarchy(): void
 }

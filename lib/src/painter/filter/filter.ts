@@ -13,6 +13,7 @@ export interface TgdPainterFilterOptions {
     texture: TgdTexture2D
     z?: number
     name?: string
+    flipY?: boolean
 }
 
 export class TgdPainterFilter extends TgdPainter {
@@ -77,7 +78,9 @@ export class TgdPainterFilter extends TgdPainter {
             }).code
             return context.programs.create({ vert, frag })
         })
-        const vaos = programs.map(program => createVAO(context, program))
+        const vaos = programs.map(program =>
+            createVAO(context, program, options.flipY ? -1 : +1)
+        )
         this.program = programs.pop() as TgdProgram
         this.programs = programs
         this.filter = filters.pop() as TgdFilter
@@ -85,7 +88,9 @@ export class TgdPainterFilter extends TgdPainter {
         const vao = vaos.pop() as TgdVertexArray
         this.vaos = vaos
         this.vao =
-            vaos.length % 2 === 0 ? vao : createVAO(context, this.program, -1)
+            vaos.length % 2 === 0
+                ? vao
+                : createVAO(context, this.program, options.flipY ? +1 : -1)
         const framebuffer = context.gl.createFramebuffer()
         if (!framebuffer) throw Error("Unable to create a WebGL Framebuffer!")
 

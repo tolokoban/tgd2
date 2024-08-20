@@ -15,7 +15,6 @@ import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
-import { TgdLogger } from "../log"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
