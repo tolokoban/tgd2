@@ -2,7 +2,7 @@ import { TgdContext } from "../context"
 import { TgdTexture2D, TgdTexture2DOptions } from "../types"
 import { TgdPainterGroup } from "./group"
 
-export interface TgdPainterFramebufferOldOptions extends TgdTexture2DOptions {
+export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
     /**
      * Do we need a depth buffer?
      */
@@ -18,7 +18,7 @@ export interface TgdPainterFramebufferOldOptions extends TgdTexture2DOptions {
     viewportMatchingScale?: number
 }
 
-export class TgdPainterFramebufferOld extends TgdPainterGroup {
+export class TgdPainterFramebuffer extends TgdPainterGroup {
     private dirty = true
     private _width = 0
     private _height = 0
@@ -28,7 +28,7 @@ export class TgdPainterFramebufferOld extends TgdPainterGroup {
 
     constructor(
         private readonly context: TgdContext,
-        private readonly options: Partial<TgdPainterFramebufferOldOptions>
+        private readonly options: Partial<TgdPainterFramebufferOptions>
     ) {
         super()
         this._width = options.width ?? 0
