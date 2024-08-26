@@ -16,6 +16,7 @@ import {
     TgdVec4,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
+    TgdPainterState,
 } from "@tolokoban/tgd"
 
 import Style from "./MeshPreview.module.css"
@@ -95,19 +96,19 @@ function useTgdContext(
             color: [0.2, 0.2, 0.2, 1],
             depth: 1,
         })
-        const depth = new TgdPainterDepth(context, { enabled: true })
-        const mesh1 = new TgdPainterMeshGltf(context, {
+        const mesh = new TgdPainterMeshGltf(context, {
             asset,
             meshIndex,
             primitiveIndex,
         })
-        const mesh2 = new TgdPainterMesh(context, {
-            geometry: new TgdGeometryBox(),
-            material: new TgdMaterialDiffuse({
-                color: new TgdVec4(1, 0.667, 0, 1),
-            }),
+        const state = new TgdPainterState(context, {
+            depth: {
+                func: "LESS",
+                mask: true,
+                range: [0, 1],
+            },
+            children: [mesh],
         })
-        const mesh = mesh1
         const bbox = mesh.computeBoundingBox()
         const diag = TgdVec3.distance(bbox.min, bbox.max)
         const center = TgdVec3.newFromMix(bbox.min, bbox.max)
@@ -118,7 +119,7 @@ function useTgdContext(
         context.camera.near = diag * 1e-3
         context.camera.far = diag * 10
         context.camera.setOrientation(0, 0, 0, 1)
-        context.add(clear, depth, mesh)
+        context.add(clear, state)
         context.paint()
         const controller = new TgdControllerCameraOrbit(context, {
             inertiaOrbit: 500,
