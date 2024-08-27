@@ -20,3 +20,44 @@ export function webglElementTypeFromTypedArray(typedArray: {
         "[webglElementTypeFromDataView] drawElements() and drawElementsInstanced() can only be fed with Uint8Array, Uint16Array or Uint32Array!"
     )
 }
+
+export function webglTypedArrayFromBufferSource(
+    bufferSource: BufferSource,
+    type: number
+) {
+    const buffer =
+        bufferSource instanceof ArrayBuffer ? bufferSource : bufferSource.buffer
+    switch (type) {
+        case 5120: // BYTE
+            return new Int8Array(buffer)
+        case 5121: // UNSIGNED_BYTE
+            return new Uint8Array(buffer)
+        case 5122: // SHORT
+            return new Int16Array(buffer)
+        case 5123: // UNSIGNED_SHORT
+            return new Uint16Array(buffer)
+        case 5125: // UNSIGNED_INT
+            return new Uint32Array(buffer)
+        case 5126: // FLOAT
+            return new Float32Array(buffer)
+        default:
+            throw Error(
+                `Don't know how to create a TypedArray for type "${webglLookup(
+                    type
+                )}"!`
+            )
+    }
+}
+
+export function webglLookup(type: number) {
+    if (gl) {
+        for (const key in gl) {
+            const val = gl[key as keyof WebGL2RenderingContext]
+            if (val === type) return key
+        }
+    }
+    return `${type}`
+}
+
+const canvas = document.createElement("canvas")
+const gl = canvas.getContext("webgl2")

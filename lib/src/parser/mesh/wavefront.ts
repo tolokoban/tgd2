@@ -73,7 +73,7 @@ export class TgdParserMeshWavefront {
      */
     private uvs: number[][] = []
 
-    parse(
+    parseAsMeshData(
         content: string,
         { computeNormals }: { computeNormals?: boolean } = {}
     ): TgdMeshData {

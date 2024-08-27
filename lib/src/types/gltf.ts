@@ -99,14 +99,16 @@ export interface TgdFormatGltfMaterial {
     doubleSided?: boolean
 }
 
+export interface TgdFormatGltfMeshPrimitive {
+    attributes: Record<string, number>
+    indices?: number
+    mode?: number
+    material?: number
+}
+
 export interface TgdFormatGltfMesh {
     name: string
-    primitives: Array<{
-        attributes: Record<string, number>
-        indices?: number
-        mode?: number
-        material?: number
-    }>
+    primitives: TgdFormatGltfMeshPrimitive[]
 }
 
 export interface TgdFormatGltfScene {
