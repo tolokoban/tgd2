@@ -110,20 +110,17 @@ export class TgdParserMeshWavefront {
         if (elementIndex <= 256) {
             return {
                 ...result,
-                type: "UNSIGNED_BYTE",
                 elements: new Uint8Array(elements),
             }
         }
         if (elementIndex <= 0x10000) {
             return {
                 ...result,
-                type: "UNSIGNED_SHORT",
                 elements: new Uint16Array(elements),
             }
         }
         return {
             ...result,
-            type: "UNSIGNED_INT",
             elements: new Uint32Array(elements),
         }
     }

@@ -1,5 +1,6 @@
 export * from "./arrays"
 export * from "./context"
+export * from "./elements"
 export * from "./input-keyboard"
 export * from "./input-pointer"
 export * from "./mesh"

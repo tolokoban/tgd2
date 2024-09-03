@@ -70,9 +70,7 @@ export class TgdMesh {
     }
 }
 
-function createBestElementArray(
-    elements: number[]
-): Uint8Array | Uint16Array | Uint32Array {
+function createBestElementArray(elements: number[]): TgdTypeArrayForElements {
     const max = elements.reduce((prv, cur) => Math.max(prv, cur), 0)
     if (max < 256) return new Uint8Array(elements)
     if (max < 256 * 256) return new Uint16Array(elements)

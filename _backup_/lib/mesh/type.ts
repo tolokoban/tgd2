@@ -21,5 +21,5 @@ export interface TgdTypeMeshData {
         normal: Float32Array
         uv?: Float32Array
     }
-    elements: Uint8Array | Uint16Array | Uint32Array
+    elements: TgdTypeArrayForElements
 }

@@ -7,7 +7,11 @@ import {
     TgdResourceTexture2D,
     TgdResourceTextureCube,
 } from "@tgd/resource"
-import { TgdContextInterface, TgdProgram } from "@tgd/types"
+import {
+    TgdContextInterface,
+    TgdProgram,
+    TgdTypeArrayForElements,
+} from "@tgd/types"
 import { TgdPainterFunction as TgdPainterFunctionType } from "@tgd/types/painter"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterGroup } from "../painter/group"
@@ -258,7 +262,7 @@ export class TgdContext implements TgdContextInterface {
     createVAO(
         program?: TgdProgram,
         datasets?: Readonly<TgdDataset>[],
-        elements?: Uint8Array | Uint16Array | Uint32Array | BufferSource
+        elements?: TgdTypeArrayForElements
     ): TgdVertexArray {
         return new TgdVertexArray(this.gl, program, datasets, elements)
     }

@@ -1,6 +1,6 @@
 import { TgdBuffer } from "@tgd/buffer"
 import { TgdDataset } from "@tgd/dataset"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram, TgdTypeArrayForElements } from "@tgd/types"
 
 export class TgdVertexArray {
     public readonly vao: WebGLVertexArrayObject
@@ -12,7 +12,7 @@ export class TgdVertexArray {
         public readonly gl: WebGL2RenderingContext,
         program?: TgdProgram,
         private readonly datasets?: Readonly<TgdDataset>[],
-        elements?: BufferSource | Uint8Array | Uint16Array | Uint32Array
+        elements?: TgdTypeArrayForElements
     ) {
         const vao = gl.createVertexArray()
         if (!vao) throw Error("Unable to create VertexArrayObject!")

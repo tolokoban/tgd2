@@ -1,11 +1,13 @@
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
-import { TgdMeshData, TgdProgram } from "@tgd/types"
+import { TgdProgram } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 
 import FRAG from "./shader.frag"
 import VERT from "./shader.vert"
+import { webglElementTypeFromTypedArray } from "@tgd/utils"
+import { TgdGeometry } from "@tgd/geometry"
 
 /**
  * Render a totaly opaque black and white mesh
@@ -17,9 +19,9 @@ export class TgdPainterMeshNormals extends TgdPainter {
     private readonly elementsType: number
     private readonly elementsCount: number
 
-    constructor(private readonly context: TgdContext, mesh: TgdMeshData) {
+    constructor(private readonly context: TgdContext, geometry: TgdGeometry) {
         super()
-        const { attPosition, attNormal, elements, count, type } = mesh
+        const { dataset, count, attPosition, attNormal, elements } = geometry
         if (!attNormal) {
             throw Error("This mesh has no normal!")
         }
@@ -28,15 +30,11 @@ export class TgdPainterMeshNormals extends TgdPainter {
             vert: VERT,
             frag: FRAG,
         })
-        const dataset = new TgdDataset({
-            attPosition: "vec3",
-            attNormal: "vec3",
-        })
-        dataset.set("attPosition", attPosition)
-        dataset.set("attNormal", attNormal)
         this.prg = prg
         this.vao = context.createVAO(prg, [dataset], elements)
-        this.elementsType = context.gl[type]
+        this.elementsType = elements
+            ? webglElementTypeFromTypedArray(elements)
+            : -1
         this.elementsCount = count
     }
 

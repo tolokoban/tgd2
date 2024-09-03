@@ -1,4 +1,4 @@
-import { TgdDataset } from "@tgd/dataset"
+import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { parseGLB } from "./parser"
 import {
     TgdFormatGltf,
@@ -9,8 +9,12 @@ import {
     TgdFormatGltfNode,
     TgdFormatGltfScene,
 } from "@tgd/types/gltf"
-import { TgdMeshData, TgdTexture2DOptions } from "@tgd/types"
-import { webglLookup, webglTypedArrayFromBufferSource } from "@tgd/utils"
+import {
+    assertTgdTypeArrayForElements,
+    TgdTexture2DOptions,
+    TgdTypeArrayForElements,
+} from "@tgd/types"
+import { TgdGeometry } from "@tgd/geometry"
 
 export class TgdParserGLTransfertFormatBinary {
     public readonly gltf: Readonly<TgdFormatGltf>
@@ -115,18 +119,15 @@ export class TgdParserGLTransfertFormatBinary {
     getMeshPrimitiveIndices(
         meshIndex = 0,
         primitiveIndex = 0
-    ): { type: number; buff: BufferSource; elemCount: number } {
+    ): TgdTypeArrayForElements {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         const accessor = this.getAccessor(primitive.indices ?? 0)
-        const buffer = this.getBufferViewData(
+        const elements = this.getBufferViewData(
             accessor.bufferView ?? 0,
             accessor.componentType
         )
-        return {
-            type: accessor.componentType,
-            buff: buffer,
-            elemCount: accessor.count,
-        }
+        assertTgdTypeArrayForElements(elements)
+        return elements
     }
 
     getAccessorByAttributeName(
@@ -326,7 +327,7 @@ export class TgdParserGLTransfertFormatBinary {
         })
     }
 
-    parseAsMeshData({
+    makeGeometry({
         computeNormals,
         meshIndex = 0,
         primitiveIndex = 0,
@@ -340,68 +341,70 @@ export class TgdParserGLTransfertFormatBinary {
         attPositionName?: string
         attNormalName?: string
         attTextureCoordsName?: string
-    } = {}): TgdMeshData {
-        const mesh = this.getMesh(meshIndex)
+    } = {}): TgdGeometry {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         try {
             const { attributes } = primitive
             if (!attributes) throw Error("No attributes found!")
-            const indices = this.getMeshPrimitiveIndices(
+            const elements = this.getMeshPrimitiveIndices(
                 meshIndex,
                 primitiveIndex
             )
-            const elements = webglTypedArrayFromBufferSource(
-                indices.buff,
-                indices.type
-            )
-            if (
-                !(
-                    elements instanceof Uint8Array ||
-                    elements instanceof Uint16Array ||
-                    elements instanceof Uint32Array
-                )
-            ) {
-                throw Error(
-                    `Unable to deal with the type of the indices: ${webglLookup(
-                        indices.type
-                    )}`
-                )
+            const def: TgdDatasetTypeRecord = {
+                [attPositionName]: "vec3",
             }
-            const data: TgdMeshData = {
-                name: mesh.name,
-                count: indices.elemCount,
-                elements,
-                attPosition: returnFloat32Array(
+            if (typeof attributes[attNormalName] === "string") {
+                def[attNormalName] = "vec3"
+            }
+            if (typeof attributes[attTextureCoordsName] === "string") {
+                def[attTextureCoordsName] = "vec2"
+            }
+            const dataset = new TgdDataset(def)
+            dataset.set(
+                attPositionName,
+                returnFloat32Array(
                     this.getBufferViewData(
                         this.getAccessorByAttributeName(
                             primitive,
                             attPositionName
                         )
                     )
-                ),
-            }
-            if (typeof attributes[attNormalName] === "number") {
-                data.attNormal = returnFloat32Array(
-                    this.getBufferViewData(
-                        this.getAccessorByAttributeName(
-                            primitive,
-                            attNormalName
+                )
+            )
+            if (typeof attributes[attNormalName] === "string") {
+                dataset.set(
+                    attNormalName,
+                    returnFloat32Array(
+                        this.getBufferViewData(
+                            this.getAccessorByAttributeName(
+                                primitive,
+                                attNormalName
+                            )
                         )
                     )
                 )
             }
-            if (typeof attributes[attTextureCoordsName] === "number") {
-                data.attNormal = returnFloat32Array(
-                    this.getBufferViewData(
-                        this.getAccessorByAttributeName(
-                            primitive,
-                            attTextureCoordsName
+            if (typeof attributes[attTextureCoordsName] === "string") {
+                dataset.set(
+                    attTextureCoordsName,
+                    returnFloat32Array(
+                        this.getBufferViewData(
+                            this.getAccessorByAttributeName(
+                                primitive,
+                                attTextureCoordsName
+                            )
                         )
                     )
                 )
             }
-            // @TODO: compute normals if asked.
-            return data
+            return new TgdGeometry({
+                computeNormalsIfMissing: computeNormals,
+                dataset,
+                elements,
+                attPosition: attPositionName,
+                attNormal: attNormalName,
+                attUV: attTextureCoordsName,
+            })
         } catch (ex) {
             const msg = ex instanceof Error ? ex.message : JSON.stringify(ex)
             throw Error(

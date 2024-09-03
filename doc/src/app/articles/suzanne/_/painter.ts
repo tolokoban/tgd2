@@ -19,7 +19,7 @@ export default class Painter extends TgdPainter {
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly count: number
-    private readonly type: "UNSIGNED_BYTE" | "UNSIGNED_SHORT" | "UNSIGNED_INT"
+    private readonly type: number
 
     constructor(
         private readonly context: TgdContext,
@@ -54,6 +54,6 @@ export default class Painter extends TgdPainter {
         gl.disable(gl.CULL_FACE)
         // gl.cullFace(gl.BACK)
         vao.bind()
-        gl.drawElements(gl.TRIANGLES, count, gl[type], 0)
+        gl.drawElements(gl.TRIANGLES, count, type, 0)
     }
 }

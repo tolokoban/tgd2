@@ -6,7 +6,7 @@ import {
     TgdResourceTextureCube,
     TgdResourceProgram,
 } from "@tgd/resource"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram, TgdTypeArrayForElements } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterFunction } from "./painter"
 import { TgdAnimation } from "./animation"
@@ -24,7 +24,7 @@ export type TgdContextInterface = {
     createVAO(
         program?: TgdProgram,
         datasets?: TgdDataset[],
-        elements?: Uint8Array | Uint16Array | Uint32Array
+        elements?: TgdTypeArrayForElements
     ): TgdVertexArray
     takeSnapshot(target: HTMLCanvasElement): void
     paint: () => void

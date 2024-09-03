@@ -77,11 +77,7 @@ export class TgdPainterMesh extends TgdPainter {
             frag,
         })
         this.prg = prg
-        this.vao = context.createVAO(
-            prg,
-            [geometry.dataset],
-            geometry.elementsBuff
-        )
+        this.vao = context.createVAO(prg, [geometry.dataset], geometry.elements)
         this.elementsType = geometry.elementsType
         this.count = geometry.count
         this.name = options.name ?? `Mesh/${this.name}`
@@ -135,7 +131,7 @@ export class TgdPainterMesh extends TgdPainter {
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         this.vao.bind()
-        if (geometry.elementsBuff) {
+        if (geometry.elements) {
             gl.drawElements(drawMode, count, this.elementsType, 0)
         } else {
             gl.drawArrays(drawMode, 0, count)

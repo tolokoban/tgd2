@@ -1,26 +1,43 @@
-import { TgdDataset } from "@tgd/dataset"
-import { WebglDrawMode } from "@tgd/types"
+import { TgdDataset, TgdDatasetType, TgdDatasetTypeRecord } from "@tgd/dataset"
+import { TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
 import { TgdVec3 } from "@tgd/math"
+import { webglElementTypeFromTypedArray } from "@tgd/utils"
 
-export interface TgdGeometryOptions {
-    dataset: TgdDataset
-    drawMode: WebglDrawMode | number
-    elements?:
-        | {
-              buff: BufferSource
-              type: number
-          }
-        | Uint8Array
-        | Uint16Array
-        | Uint32Array
-    attPosition?: string
-    attNormal?: string
-    attUV?: string
+interface TgdGeometryOptionsCommon {
+    /**
+     * Default mode is TRIANGLES.
+     */
+    drawMode?: WebglDrawMode | number
+    /**
+     * If the count is not defined, we will figure it out from
+     * the `elements` typed array or from the POSITION attribute.
+     */
+    count?: number
+    elements?: TgdTypeArrayForElements
     /**
      * Compute normals with a smooth shading if
      * none has been provided.
      */
     computeNormalsIfMissing?: boolean
+}
+
+export interface TgdGeometryOptions1 extends TgdGeometryOptionsCommon {
+    dataset: TgdDataset
+    attPosition?: string
+    attNormal?: string
+    attUV?: string
+}
+
+export interface TgdGeometryOptions2 extends TgdGeometryOptionsCommon {
+    attPosition: Float32Attribute
+    attNormal?: Float32Attribute
+    attUV?: Float32Attribute
+}
+
+interface Float32Attribute {
+    name: string
+    data: Float32Array
+    type?: TgdDatasetType
 }
 
 /**
@@ -29,60 +46,69 @@ export interface TgdGeometryOptions {
  * for the vertices.
  */
 export class TgdGeometry {
+    /** Name of the POSITION attribute in the shader. */
     public readonly attPosition: string
+    /** Name of the NORMAL attribute in the shader. */
     public readonly attNormal: string
+    /** Name of the UV attribute in the shader. */
     public readonly attUV: string
     public readonly count: number
+    public readonly elements?: Readonly<TgdTypeArrayForElements>
+    public readonly drawMode: WebglDrawMode | number
 
     protected _dataset: TgdDataset
-    protected _drawMode: WebglDrawMode | number
-    protected _elementsBuff?: BufferSource
     protected _elementsType: number
 
-    private readonly _elementsView: DataView
+    public static make(options: TgdGeometryOptions2) {
+        const def: TgdDatasetTypeRecord = {}
+        const { count, drawMode, elements, attPosition, attNormal, attUV } =
+            options
+        def[attPosition.name] = attPosition.type ?? "vec3"
+        if (attNormal) def[attNormal.name] = attNormal.type ?? "vec3"
+        if (attUV) def[attUV.name] = attUV.type ?? "vec2"
+        const dataset = new TgdDataset(def)
+        dataset.set(attPosition.name, attPosition.data)
+        if (attNormal) dataset.set(attNormal.name, attNormal.data)
+        if (attUV) dataset.set(attUV.name, attUV.data)
+        return new TgdGeometry({
+            dataset,
+            count,
+            drawMode,
+            elements,
+        })
+    }
 
-    constructor(options: TgdGeometryOptions) {
+    constructor(options: TgdGeometryOptions1) {
         const {
             dataset,
-            drawMode,
+            drawMode = "TRIANGLES",
             attPosition = "POSITION",
             attNormal = "NORMAL",
             attUV = "TEXCOORD_0",
         } = options
         this._dataset = dataset
-        this._drawMode = drawMode
-        const elements = convertElements(options.elements)
-        this._elementsBuff = elements?.buff ?? undefined
-        this._elementsType = elements?.type ?? 0
+        this.drawMode = drawMode
+        const { elements } = options
+        this.elements = elements
+        this._elementsType = elements
+            ? webglElementTypeFromTypedArray(elements)
+            : 0
         this.attPosition = attPosition
         this.attNormal = attNormal
         this.attUV = attUV
-        this.count = elements?.count ?? dataset.count
-        if (!this._elementsBuff) {
-            this._elementsView = new DataView(new ArrayBuffer(16))
-        } else if (this._elementsBuff instanceof DataView) {
-            this._elementsView = this._elementsBuff
-        } else if (this._elementsBuff instanceof ArrayBuffer) {
-            this._elementsView = new DataView(this._elementsBuff)
-        } else {
-            this._elementsView = new DataView(this._elementsBuff.buffer)
+        this.count = elements?.length ?? dataset.count
+        if (!dataset.attributesNames.includes(attPosition)) {
+            throw Error(
+                `Dataset is missing attribute "${attPosition}" for Position!`
+            )
         }
-        if (this._elementsType === WebGL2RenderingContext.UNSIGNED_BYTE) {
-            this.getElement = this.getElementFrom8
-        } else if (
-            this._elementsType === WebGL2RenderingContext.UNSIGNED_SHORT
-        ) {
-            this.getElement = this.getElementFrom16
-        } else if (this._elementsType === WebGL2RenderingContext.UNSIGNED_INT) {
-            this.getElement = this.getElementFrom32
-        } else {
-            this.getElement = this.getElementFromNothing
+        if (attNormal && !dataset.attributesNames.includes(attNormal)) {
+            throw Error(
+                `Dataset is missing attribute "${attNormal}" for Normal!`
+            )
         }
-        if (
-            options.computeNormalsIfMissing &&
-            !dataset.attributesNames.includes("NORMAL")
-        ) {
-            this.computeNormals()
+        if (attUV && !dataset.attributesNames.includes(attUV)) {
+            throw Error(`Dataset is missing attribute "${attUV}" for UV!`)
         }
     }
 
@@ -90,19 +116,13 @@ export class TgdGeometry {
         return this._dataset
     }
 
-    get drawMode() {
-        return this._drawMode
-    }
-
-    get elementsBuff() {
-        return this._elementsBuff
-    }
-
     get elementsType() {
         return this._elementsType
     }
 
-    public readonly getElement: (index: number) => number
+    public getElement(index: number): number {
+        return this.elements?.[index] ?? -1
+    }
 
     public computeNormals() {
         console.log("computeNormals()")
@@ -178,70 +198,6 @@ export class TgdGeometry {
             }
         }
         return normals
-    }
-
-    private readonly getElementFrom8 = (index: number): number => {
-        return this._elementsView.getUint8(index)
-    }
-
-    private readonly getElementFrom16 = (index: number): number => {
-        return this._elementsView.getUint16(index << 1, true)
-    }
-
-    private readonly getElementFrom32 = (index: number): number => {
-        return this._elementsView.getUint32(index << 2, true)
-    }
-
-    private readonly getElementFromNothing = (): number => {
-        return 0
-    }
-}
-
-function convertElements(
-    elements?:
-        | {
-              buff: BufferSource
-              type: number
-          }
-        | Uint8Array
-        | Uint16Array
-        | Uint32Array
-):
-    | {
-          buff: BufferSource
-          type: number
-          count: number
-      }
-    | undefined {
-    if (!elements) return elements
-
-    if (elements instanceof Uint16Array)
-        return {
-            buff: new DataView(elements.buffer),
-            type: WebGL2RenderingContext.UNSIGNED_SHORT,
-            count: elements.length,
-        }
-    if (elements instanceof Uint8Array)
-        return {
-            buff: new DataView(elements.buffer),
-            type: WebGL2RenderingContext.UNSIGNED_BYTE,
-            count: elements.length,
-        }
-    if (elements instanceof Uint32Array)
-        return {
-            buff: new DataView(elements.buffer),
-            type: WebGL2RenderingContext.UNSIGNED_INT,
-            count: elements.length,
-        }
-    let count = elements.buff.byteLength
-    if (elements.type === WebGL2RenderingContext.UNSIGNED_SHORT) {
-        count >>= 1
-    } else if (elements.type === WebGL2RenderingContext.UNSIGNED_INT) {
-        count >>= 2
-    }
-    return {
-        ...elements,
-        count,
     }
 }
 
