@@ -326,24 +326,21 @@ export class TgdParserGLTransfertFormatBinary {
         })
     }
 
-    parseAsMeshData(
-        content: string,
-        {
-            computeNormals,
-            meshIndex = 0,
-            primitiveIndex = 0,
-            attPositionName = "POSITION",
-            attNormalName = "NORMAL",
-            attTextureCoordsName = "TEXCOORD_0",
-        }: {
-            computeNormals?: boolean
-            meshIndex?: number
-            primitiveIndex?: number
-            attPositionName?: string
-            attNormalName?: string
-            attTextureCoordsName?: string
-        } = {}
-    ): TgdMeshData {
+    parseAsMeshData({
+        computeNormals,
+        meshIndex = 0,
+        primitiveIndex = 0,
+        attPositionName = "POSITION",
+        attNormalName = "NORMAL",
+        attTextureCoordsName = "TEXCOORD_0",
+    }: {
+        computeNormals?: boolean
+        meshIndex?: number
+        primitiveIndex?: number
+        attPositionName?: string
+        attNormalName?: string
+        attTextureCoordsName?: string
+    } = {}): TgdMeshData {
         const mesh = this.getMesh(meshIndex)
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         try {
