@@ -1,13 +1,14 @@
 import {
     TgdContext,
+    TgdGeometry,
     TgdPainter,
+    TgdParserMeshWavefront,
     TgdProgram,
     TgdTexture2D,
     TgdVec3,
     TgdVertexArray,
+    webglElementTypeFromTypedArray,
 } from "@tolokoban/tgd"
-
-import { parse } from "./parser"
 
 import FRAG from "./test.frag"
 import VERT from "./test.vert"
@@ -32,10 +33,15 @@ export default class Painter extends TgdPainter {
             vert: VERT,
             frag: FRAG,
         })
-        const { dataset, elements, type } = parse(meshContent)
-        this.type = type
+        const geometry: TgdGeometry = new TgdParserMeshWavefront(
+            meshContent
+        ).makeGeometry({ computeNormals: true })
+        const { dataset, elements } = geometry
+        if (!elements) throw Error("Missing elements!")
+
+        this.type = webglElementTypeFromTypedArray(elements)
         this.vao = context.createVAO(this.program, [dataset], elements)
-        this.count = elements.length
+        this.count = dataset.count
     }
 
     delete(): void {

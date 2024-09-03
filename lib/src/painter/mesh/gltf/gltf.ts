@@ -56,6 +56,10 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 }),
                 material,
             })
+            console.log(
+                "🚀 [gltf] dataset.attributeNames = ",
+                dataset.attributesNames
+            ) // @FIXME: Remove this line written on 2024-09-03 at 18:01
         } else {
             const dataset = new TgdDataset({
                 POSITION: "vec3",
@@ -83,6 +87,10 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 }),
                 material,
             })
+            console.log(
+                "🚀 [gltf] dataset.attributeNames = ",
+                dataset.attributesNames
+            ) // @FIXME: Remove this line written on 2024-09-03 at 18:01
         }
         this.name = options.name ?? `Gltf/${this.name}`
     }

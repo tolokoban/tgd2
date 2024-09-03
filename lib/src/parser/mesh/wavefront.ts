@@ -1,6 +1,6 @@
-import { TgdMeshData } from "@tgd/types"
 import { forEachLine } from "../for-each-line"
 import { TgdVec3 } from "@tgd/math"
+import { TgdGeometry, TgdGeometryOptions2 } from "@tgd/geometry"
 
 export interface TgdParserMeshWavefrontAttributes {
     vertex: number
@@ -73,56 +73,44 @@ export class TgdParserMeshWavefront {
      */
     private uvs: number[][] = []
 
-    parseAsMeshData(
-        content: string,
-        { computeNormals }: { computeNormals?: boolean } = {}
-    ): TgdMeshData {
+    constructor(content: string) {
         this.reset()
-        const {
-            onVertex,
-            onNormal,
-            onTexture,
-            onFace,
-            onObject,
-            name,
-            elements,
-        } = this
+        const { onVertex, onNormal, onTexture, onFace, onObject } = this
         parse(content, { onVertex, onNormal, onTexture, onFace, onObject })
-        if (computeNormals) this.computeNormals()
-        const result: {
-            name: string
-            count: number
-            attPosition: Float32Array
-            attNormal?: Float32Array
-            attUV?: Float32Array
-        } = {
-            name,
-            count: elements.length,
-            attPosition: new Float32Array(this.attPosition),
+    }
+
+    makeGeometry({
+        computeNormals,
+    }: { computeNormals?: boolean } = {}): TgdGeometry {
+        const options: TgdGeometryOptions2 = {
+            attPosition: {
+                name: "POSITION",
+                data: new Float32Array(this.attPosition),
+            },
+            computeNormalsIfMissing: computeNormals,
         }
         if (this.attNormal.length > 0) {
-            result.attNormal = new Float32Array(this.attNormal)
+            options.attNormal = {
+                name: "NORMAL",
+                data: new Float32Array(this.attNormal),
+            }
         }
         if (this.attUV.length > 0) {
-            result.attUV = new Float32Array(this.attUV)
+            options.attUV = {
+                name: "TEXTCOORDS_0",
+                data: new Float32Array(this.attUV),
+            }
         }
-        const { elementIndex } = this
+        const { elements, elementIndex } = this
         if (elementIndex <= 256) {
-            return {
-                ...result,
-                elements: new Uint8Array(elements),
-            }
+            options.elements = new Uint8Array(elements)
+        } else if (elementIndex <= 0x10000) {
+            options.elements = new Uint16Array(elements)
+        } else {
+            options.elements = new Uint32Array(elements)
         }
-        if (elementIndex <= 0x10000) {
-            return {
-                ...result,
-                elements: new Uint16Array(elements),
-            }
-        }
-        return {
-            ...result,
-            elements: new Uint32Array(elements),
-        }
+
+        return TgdGeometry.make(options)
     }
 
     private computeNormals() {

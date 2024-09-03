@@ -97,19 +97,6 @@ export class TgdGeometry {
         this.attNormal = attNormal
         this.attUV = attUV
         this.count = elements?.length ?? dataset.count
-        if (!dataset.attributesNames.includes(attPosition)) {
-            throw Error(
-                `Dataset is missing attribute "${attPosition}" for Position!`
-            )
-        }
-        if (attNormal && !dataset.attributesNames.includes(attNormal)) {
-            throw Error(
-                `Dataset is missing attribute "${attNormal}" for Normal!`
-            )
-        }
-        if (attUV && !dataset.attributesNames.includes(attUV)) {
-            throw Error(`Dataset is missing attribute "${attUV}" for UV!`)
-        }
     }
 
     get dataset(): Readonly<TgdDataset> {
