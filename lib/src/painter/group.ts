@@ -41,6 +41,13 @@ export class TgdPainterGroup extends TgdPainter {
         }
     }
 
+    addFirst(...painters: TgdPainter[]) {
+        for (let i = painters.length - 1; i >= 0; i--) {
+            const painter = painters[i]
+            this.painters.unshift(painter)
+        }
+    }
+
     remove(...painters: TgdPainter[]) {
         for (const painter of painters) {
             const index = this.painters.indexOf(painter)

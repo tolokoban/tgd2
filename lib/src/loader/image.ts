@@ -15,6 +15,14 @@ export class TgdLoaderImage {
         })
     }
 
+    static async images(
+        urls: string[]
+    ): Promise<Array<HTMLImageElement | null>> {
+        return Promise.all<HTMLImageElement | null>(
+            urls.map(url => TgdLoaderImage.image(url))
+        )
+    }
+
     static async canvas(url: string): Promise<HTMLCanvasElement | null> {
         const img = await TgdLoaderImage.image(url)
         if (!img) return null

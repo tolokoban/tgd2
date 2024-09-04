@@ -104,20 +104,21 @@ function figureColor(
     if (materialIndex === -1) return DEFAULT_COLOR
 
     const material = asset.getMaterial(materialIndex)
+    const id = `glb/${meshIndex}/${primitiveIndex}`
     const pbr = material.pbrMetallicRoughness
     if (!pbr) {
         const emissive = material.emissiveTexture
         if (!emissive) return DEFAULT_COLOR
 
         const textureOptions = asset.getTexture2DOptions(emissive.index ?? 0)
-        const color = context.textures2D.create(textureOptions)
+        const color = context.textures2D.create(textureOptions, id)
         return color
     }
 
     if (pbr.baseColorTexture) {
         const textureIndex = pbr.baseColorTexture?.index
         const textureOptions = asset.getTexture2DOptions(textureIndex ?? 0)
-        const color = context.textures2D.create(textureOptions)
+        const color = context.textures2D.create(textureOptions, id)
         return color
     }
     if (pbr.baseColorFactor) {

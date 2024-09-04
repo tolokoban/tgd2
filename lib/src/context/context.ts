@@ -228,6 +228,13 @@ export class TgdContext implements TgdContextInterface {
     }
 
     /**
+     * Add one or more painters at the beginning of the list.
+     */
+    addFirst(...painters: TgdPainter[]) {
+        this.painters.addFirst(...painters)
+    }
+
+    /**
      * Remove one or more painters.
      * */
     remove(...painters: TgdPainter[]) {

@@ -159,8 +159,8 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     activate(program: TgdProgram, uniformName: string, slot = 0) {
         const { context, glTexture: glTexture } = this
         const { gl } = context
-        gl.activeTexture(gl.TEXTURE0 + slot)
         gl.bindTexture(gl.TEXTURE_2D, glTexture)
+        gl.activeTexture(gl.TEXTURE0 + slot)
         program.uniform1i(uniformName, slot)
     }
 
