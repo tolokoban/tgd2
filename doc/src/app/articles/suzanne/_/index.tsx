@@ -3,7 +3,6 @@ import {
     TgdContext,
     TgdControllerCameraOrbit,
     TgdPainterClear,
-    TgdPainterDepth,
     TgdPainterSkybox,
     TgdPainterState,
     TgdQuat,

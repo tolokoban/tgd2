@@ -31,6 +31,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 color: new TgdVec4(0.75, 0.75, 0.75, 1),
             }),
         })
+        let computeNormals = false
         if (color instanceof TgdVec4) {
             const dataset = new TgdDataset({
                 POSITION: "vec3",
@@ -43,6 +44,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 // It seems to be impossible to retrieve normals.
                 // We will compute them with a smooth shading.
                 console.warn("No normals found! We will apply smooth shading.")
+                computeNormals = true
             }
             super(context, {
                 geometry: new TgdGeometry({
@@ -52,14 +54,10 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                         primitiveIndex
                     ),
                     drawMode: "TRIANGLES",
-                    computeNormalsIfMissing: true,
+                    computeNormalsIfMissing: computeNormals,
                 }),
                 material,
             })
-            console.log(
-                "🚀 [gltf] dataset.attributeNames = ",
-                dataset.attributesNames
-            ) // @FIXME: Remove this line written on 2024-09-03 at 18:01
         } else {
             const dataset = new TgdDataset({
                 POSITION: "vec3",
@@ -73,6 +71,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                 // It seems to be impossible to retrieve normals.
                 // We will compute them with a smooth shading.
                 console.warn("No normals found! We will apply smooth shading.")
+                computeNormals = true
             }
             asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
             super(context, {
@@ -83,14 +82,10 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
                         primitiveIndex
                     ),
                     drawMode: "TRIANGLES",
-                    computeNormalsIfMissing: true,
+                    computeNormalsIfMissing: computeNormals,
                 }),
                 material,
             })
-            console.log(
-                "🚀 [gltf] dataset.attributeNames = ",
-                dataset.attributesNames
-            ) // @FIXME: Remove this line written on 2024-09-03 at 18:01
         }
         this.name = options.name ?? `Gltf/${this.name}`
     }
@@ -110,7 +105,14 @@ function figureColor(
 
     const material = asset.getMaterial(materialIndex)
     const pbr = material.pbrMetallicRoughness
-    if (!pbr) return DEFAULT_COLOR
+    if (!pbr) {
+        const emissive = material.emissiveTexture
+        if (!emissive) return DEFAULT_COLOR
+
+        const textureOptions = asset.getTexture2DOptions(emissive.index ?? 0)
+        const color = context.textures2D.create(textureOptions)
+        return color
+    }
 
     if (pbr.baseColorTexture) {
         const textureIndex = pbr.baseColorTexture?.index

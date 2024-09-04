@@ -97,6 +97,7 @@ export class TgdGeometry {
         this.attNormal = attNormal
         this.attUV = attUV
         this.count = elements?.length ?? dataset.count
+        if (options.computeNormalsIfMissing) this.computeNormals()
     }
 
     get dataset(): Readonly<TgdDataset> {
@@ -112,7 +113,6 @@ export class TgdGeometry {
     }
 
     public computeNormals() {
-        console.log("computeNormals()")
         let normals: TgdVec3[] = []
         if (
             this.drawMode === WebGL2RenderingContext.TRIANGLES ||
@@ -126,15 +126,16 @@ export class TgdGeometry {
             )
             return
         }
+        const attNormalName = this.attNormal
         this.dataset.addAttributes({
-            NORMAL: "vec3",
+            [attNormalName]: "vec3",
         })
         const values: number[] = []
         for (let idx = 0; idx < normals.length; idx++) {
             const [nx, ny, nz] = normals[idx]
             values.push(nx, ny, nz)
         }
-        this.dataset.set("NORMAL", new Float32Array(values))
+        this.dataset.set(attNormalName, new Float32Array(values))
     }
 
     // eslint-disable-next-line max-statements

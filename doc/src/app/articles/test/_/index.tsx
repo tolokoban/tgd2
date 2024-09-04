@@ -83,7 +83,6 @@ function init(context: TgdContext) {
             }),
             new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
         )
-        // context.add(state)
         context.paint()
         console.log("========================================")
         console.log(context.debugHierarchy())

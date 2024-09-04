@@ -33,6 +33,10 @@ export class TgdDataset {
         attributesDefinition: TgdDatasetTypeRecord,
         options: Partial<TgdDatasetOptions> = {}
     ) {
+        for (const name of Object.keys(attributesDefinition)) {
+            const def = attributesDefinition[name]
+            this.attributesDefinition[name] = def
+        }
         const divisor = options.divisor ?? 0
         let stride = 0
         const data: { [key: string]: ArrayBuffer } = {}
@@ -59,6 +63,7 @@ export class TgdDataset {
         }
         this.definitions = definitions
         this.stride = stride
+        this._data = resize(this._data, this.count * this.stride)
     }
 
     addAttributes(attributesDefinition: TgdDatasetTypeRecord) {
@@ -83,19 +88,30 @@ export class TgdDataset {
         const newDataset = this
         newDataset.count = oldDataset.count
         for (const attribName of oldDataset.attributesNames) {
-            const { get } = oldDataset.getAttribAccessor(attribName)
-            const { set } = newDataset.getAttribAccessor(attribName)
-            for (let idx = 0; idx < oldDataset.count; idx++) {
-                const def = this.getDef(attribName)
-                for (let dim = 0; dim < def.dimension; dim++) {
-                    set(get(idx, dim), idx, dim)
+            try {
+                const { get } = oldDataset.getAttribAccessor(attribName)
+                const { set } = newDataset.getAttribAccessor(attribName)
+                for (let idx = 0; idx < oldDataset.count; idx++) {
+                    const def = this.getDef(attribName)
+                    for (let dim = 0; dim < def.dimension; dim++) {
+                        set(get(idx, dim), idx, dim)
+                    }
                 }
+            } catch (ex) {
+                const msg =
+                    ex instanceof Error ? ex.message : JSON.stringify(ex)
+                throw new Error(
+                    `Unable to clone attribute "${attribName}"!\n${msg}`
+                )
             }
         }
     }
 
     clone(): TgdDataset {
-        const ds = new TgdDataset(this.attributesDefinition, this.options)
+        const ds = new TgdDataset(
+            structuredClone(this.attributesDefinition),
+            this.options
+        )
         ds.count = this.count
         const src = new DataView(this._data)
         const dst = new DataView(ds._data)
@@ -314,6 +330,32 @@ export class TgdDataset {
             offsetDestination += bytes
         }
         return lines.map(line => `${indent}${line}`).join("\n")
+    }
+
+    debug(caption = "Dataset") {
+        console.log(caption)
+        const rows: [name: string, type: string, offset: string][] = [
+            ["Name", "type", "offset"],
+        ]
+        for (const attName of Object.keys(this.definitions)) {
+            const def = this.definitions[attName]
+            rows.push([
+                attName,
+                this.attributesDefinition[attName],
+                `${def.byteOffset}`,
+            ])
+        }
+        const sizes: number[] = [0, 1, 2].map(i =>
+            rows.reduce((prev, curr) => Math.max(prev, curr[i].length), 0)
+        )
+        rows.forEach(([name, type, offset]) =>
+            console.log(
+                `%c${name.padEnd(sizes[0] + 2)}${type.padStart(
+                    sizes[1] + 2
+                )}${offset.padStart(sizes[2] + 2)}`,
+                "font-family:monospace"
+            )
+        )
     }
 }
 
