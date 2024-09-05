@@ -105,6 +105,10 @@ export class TgdQuat extends TgdVec4 {
         return this.normalize()
     }
 
+    static rotateAroundX(angleInRadians: number): TgdQuat {
+        return new TgdQuat().rotateAroundX(angleInRadians)
+    }
+
     rotateAroundX(angleInRadians: number): this {
         const rad = angleInRadians * 0.5
 
@@ -122,6 +126,10 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
+    static rotateAroundY(angleInRadians: number): TgdQuat {
+        return new TgdQuat().rotateAroundY(angleInRadians)
+    }
+
     rotateAroundY(angleInRadians: number): this {
         const rad = angleInRadians * 0.5
 
@@ -137,6 +145,10 @@ export class TgdQuat extends TgdVec4 {
         this[2] = az * bw + ax * by
         this[3] = aw * bw - ay * by
         return this
+    }
+
+    static rotateAroundZ(angleInRadians: number): TgdQuat {
+        return new TgdQuat().rotateAroundZ(angleInRadians)
     }
 
     rotateAroundZ(angleInRadians: number): this {

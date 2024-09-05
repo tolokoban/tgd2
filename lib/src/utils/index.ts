@@ -1,4 +1,5 @@
 export * from "./action"
+export * from "./assert"
 export * from "./canvas"
 export * from "./ease-func"
 export * from "./fetch"

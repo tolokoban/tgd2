@@ -1,3 +1,7 @@
+/**
+ * GLTF specs can be found here:
+ * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+ */
 import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { parseGLB } from "./parser"
 import {
@@ -232,7 +236,7 @@ export class TgdParserGLTransfertFormatBinary {
         | Float32Array
     getBufferViewData(
         bufferViewIndex: number,
-        type:
+        type?:
             | number
             | "Int8"
             | "Uint8"
@@ -285,9 +289,25 @@ export class TgdParserGLTransfertFormatBinary {
             byteOffset,
             byteOffset + bufferView.byteLength
         )
-        const view = figureOutView(data, convertTypeToNumber(type))
+        const view = figureOutView(
+            data,
+            convertTypeToNumber(
+                type ??
+                    this.findAccessorForBufferView(bufferViewIndex)
+                        ?.componentType ??
+                    "Float32"
+            )
+        )
         this.cacheBufferViewDatas.set(bufferViewIndex, view)
         return view
+    }
+
+    findAccessorForBufferView(
+        bufferViewIndex: number
+    ): TgdFormatGltfAccessor | undefined {
+        return (this.gltf.accessors ?? []).find(
+            accessor => accessor.bufferView === bufferViewIndex
+        )
     }
 
     setAttrib(
