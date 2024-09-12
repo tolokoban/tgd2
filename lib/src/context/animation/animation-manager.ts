@@ -8,6 +8,7 @@ interface Animation {
     loop: number
     repeat: number
     cancel(this: void): void
+    onEnd?(this: void): void
 }
 
 export class TgdManagerAnimation {
@@ -25,6 +26,7 @@ export class TgdManagerAnimation {
             loop: 1,
             repeat: repeat ?? 1,
             cancel: () => this.cancel(animation),
+            onEnd: animation.onEnd,
         })
         return animation
     }
@@ -44,6 +46,12 @@ export class TgdManagerAnimation {
             const t = Math.min(1, anim.inverseDuration * (time - anim.start))
             anim.action(t)
             while (time > anim.start + anim.duration) {
+                try {
+                    anim.onEnd?.()
+                } catch (ex) {
+                    console.error("Animation.onEnd() failed for", anim)
+                    console.error(ex)
+                }
                 anim.loop++
                 anim.start += anim.duration
             }

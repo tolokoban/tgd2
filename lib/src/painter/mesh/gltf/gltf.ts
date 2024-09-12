@@ -24,8 +24,8 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
         const material = new TgdMaterialDiffuse({
             color,
             light: new TgdLight({
-                color: new TgdVec4(2, 2, 2, 1),
-                direction: new TgdVec3(1, 0, 0),
+                color: new TgdVec4(1, 1, 1, 1),
+                direction: new TgdVec3(1, 0.2, 0),
             }),
             ambient: new TgdLight({
                 color: new TgdVec4(0.75, 0.75, 0.75, 1),

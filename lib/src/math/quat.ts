@@ -1,7 +1,12 @@
+import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 
 export type TgdQuatFace = keyof typeof FACES
+
+const tmpAxisX = new TgdVec3()
+const tmpAxisY = new TgdVec3()
+const tmpAxisZ = new TgdVec3()
 
 export class TgdQuat extends TgdVec4 {
     constructor()
@@ -105,6 +110,29 @@ export class TgdQuat extends TgdVec4 {
         return this.normalize()
     }
 
+    fromMat4(mat: TgdMat4) {
+        tmpAxisX.x = mat.m00
+        tmpAxisX.y = mat.m01
+        tmpAxisX.z = mat.m02
+        tmpAxisY.x = mat.m10
+        tmpAxisY.y = mat.m11
+        tmpAxisY.z = mat.m12
+        tmpAxisZ.x = mat.m20
+        tmpAxisZ.y = mat.m21
+        tmpAxisZ.z = mat.m22
+        return this.fromAxis(tmpAxisX, tmpAxisY, tmpAxisZ)
+    }
+
+    rotateAround(axis: TgdVec3, angleInRadians: number): this {
+        this.toAxisX(tmpAxisX)
+        this.toAxisY(tmpAxisY)
+        this.toAxisZ(tmpAxisZ)
+        tmpAxisX.rotateAround(axis, angleInRadians)
+        tmpAxisY.rotateAround(axis, angleInRadians)
+        tmpAxisZ.rotateAround(axis, angleInRadians)
+        return this.fromAxis(tmpAxisX, tmpAxisY, tmpAxisZ)
+    }
+
     static rotateAroundX(angleInRadians: number): TgdQuat {
         return new TgdQuat().rotateAroundX(angleInRadians)
     }
@@ -168,6 +196,44 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
+    toAxisX(vec: TgdVec3 | TgdVec4): typeof vec {
+        const [x, y, z, w] = this
+        const x2 = x + x
+        const y2 = y + y
+        const z2 = z + z
+
+        const yx = y * x2
+        const yy = y * y2
+        const zx = z * x2
+        const zz = z * z2
+        const wy = w * y2
+        const wz = w * z2
+
+        vec.x = 1 - yy - zz
+        vec.y = yx - wz
+        vec.z = zx + wy
+        return vec
+    }
+
+    toAxisY(vec: TgdVec3 | TgdVec4): typeof vec {
+        const [x, y, z, w] = this
+        const x2 = x + x
+        const y2 = y + y
+        const z2 = z + z
+
+        const xx = x * x2
+        const yx = y * x2
+        const zy = z * y2
+        const zz = z * z2
+        const wx = w * x2
+        const wz = w * z2
+
+        vec.x = yx + wz
+        vec.y = 1 - xx - zz
+        vec.z = zy - wx
+        return vec
+    }
+
     toAxisZ(vec: TgdVec3 | TgdVec4): typeof vec {
         const { x, y, z, w } = this
         const x2 = x + x
@@ -179,10 +245,11 @@ export class TgdQuat extends TgdVec4 {
         const wx = w * x2
         const wy = w * y2
 
-        vec.x = zx + wy
-        vec.y = zy - wx
+        // vec.x = zx + wy
+        // vec.y = zy - wx
+        vec.x = zx - wy
+        vec.y = zy + wx
         vec.z = 1 - xx - yy
-
         return vec
     }
 

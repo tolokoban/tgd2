@@ -16,4 +16,8 @@ export interface TgdAnimation {
      * Default to linear.
      */
     easingFunction?(this: void, x: number): number
+    /**
+     * Function to call when the animation is over.
+     */
+    onEnd?(this: void): void
 }

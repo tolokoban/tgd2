@@ -44,6 +44,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
         height: number
     ): void
     name?: string
+    camera?: TgdCamera
 }
 
 /**
@@ -111,7 +112,7 @@ export class TgdContext implements TgdContextInterface {
         })
         this.observer.observe(canvas)
         this.inputs = new TgdInputs(canvas)
-        this._camera = new TgdCameraPerspective()
+        this._camera = options.camera ?? new TgdCameraPerspective()
         this.painters = new TgdPainterGroup()
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
         this.painters.name = this.name

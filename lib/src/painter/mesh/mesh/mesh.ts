@@ -76,6 +76,7 @@ export class TgdPainterMesh extends TgdPainter {
             vert,
             frag,
         })
+        console.log(prg.toCode())
         this.prg = prg
         this.vao = context.createVAO(prg, [geometry.dataset], geometry.elements)
         this.elementsType = geometry.elementsType

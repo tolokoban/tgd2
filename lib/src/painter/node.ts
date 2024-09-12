@@ -12,6 +12,12 @@ export interface TgdPainterNodeOptions {
     children: Array<TgdPainterNode | TgdPainterNodeChild>
 }
 
+/**
+ * A Node can hold others Nodes or any object providing the
+ * TgdPainterNodeChild interface.
+ *
+ * Each Node is a local space for its children.
+ */
 export class TgdPainterNode extends TgdPainter {
     public parentTransfo: TgdTransfo = new TgdTransfo()
     public readonly transfo = new TgdTransfo()

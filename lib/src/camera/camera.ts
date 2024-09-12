@@ -43,7 +43,7 @@ export abstract class TgdCamera {
     private readonly _matrixModelView = new TgdMat4()
     private readonly _matrixModelViewInverse = new TgdMat4()
     private readonly _matrixProjectionInverse = new TgdMat4()
-    private readonly _orientation = new TgdQuat(0, 0, 0, 1)
+    private readonly _orientation = new TgdQuat(0, 0, 0, 1).face("+X+Z-Y")
     private readonly _shift = new TgdVec3(0, 0, 0)
     private readonly _target = new TgdVec3(0, 0, 0)
     private readonly _position = new TgdVec3(0, 0, 0)
@@ -149,6 +149,17 @@ export abstract class TgdCamera {
         this.dirtyModelView = true
         this.dirtyAxis = true
         this.copyProjectionFrom(camera)
+        return this
+    }
+
+    fromTransfo(transfo: TgdMat4): this {
+        const x = transfo.m30
+        const y = transfo.m31
+        const z = transfo.m32
+        this.setTarget(x, y, z)
+        this._orientation.fromMat4(transfo)
+        this.dirtyModelView = true
+        this.dirtyAxis = true
         return this
     }
 

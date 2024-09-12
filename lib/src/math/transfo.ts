@@ -1,4 +1,5 @@
 import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "../types"
+import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
@@ -15,6 +16,9 @@ export class TgdTransfo {
     private readonly _position = new TgdVec3(0, 0, 0)
     private readonly _orientation = new TgdQuat(0, 0, 0, 1)
     private readonly _scale = new TgdVec3(1, 1, 1)
+
+    private readonly tmpMat3 = new TgdMat3()
+    private readonly tmpVec3 = new TgdVec3()
 
     private dirty = false
     private _updateCount = 0
@@ -91,6 +95,30 @@ export class TgdTransfo {
     setOrientation(x: number, y: number, z: number, w: number) {
         this.setDirty()
         this._orientation.reset(x, y, z, w)
+    }
+
+    orbitAroundX(angleInRadians: number): this {
+        this.tmpMat3.fromQuat(this._orientation)
+        this.tmpMat3.toAxisX(this.tmpVec3)
+        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this.setDirty()
+        return this
+    }
+
+    orbitAroundY(angleInRadians: number): this {
+        this.tmpMat3.fromQuat(this._orientation)
+        this.tmpMat3.toAxisY(this.tmpVec3)
+        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this.setDirty()
+        return this
+    }
+
+    orbitAroundZ(angleInRadians: number): this {
+        this.tmpMat3.fromQuat(this._orientation)
+        this.tmpMat3.toAxisZ(this.tmpVec3)
+        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this.setDirty()
+        return this
     }
 
     private setDirty() {
