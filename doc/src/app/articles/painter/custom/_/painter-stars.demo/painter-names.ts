@@ -24,7 +24,7 @@ export class PainterNames extends TgdPainter {
         near: 0.1,
         far: 2.0,
         target: [0, 0, 0],
-        fovy: Math.PI / 2.5,
+        fovy: Math.PI / 3,
     })
 
     constructor(private readonly context: TgdContext) {
