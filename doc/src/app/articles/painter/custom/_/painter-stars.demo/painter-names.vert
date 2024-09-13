@@ -26,9 +26,9 @@ void main() {
     float y = sin(longitude) * r;
     gl_Position = uniProjectionMatrix * uniModelViewMatrix * vec4(x, y, z, 1.0);
     vec2 point = gl_Position.xy / max(1.0, gl_Position.w);
-    float size = pow(dot(point, point), 1.0);
+    float size = pow(dot(point, point), 1.5);
     varAlpha = size;
-    size *= max(uniAspect, uniAspectInverse) * 4.0;
+    size *= max(uniAspect, uniAspectInverse) * 5.0;
     gl_Position.xy += (attCorner * size * vec2(attUV.z, H) * gl_Position.w) * vec2(uniAspectInverse, -1.0);
     gl_Position.z = gl_Position.w;
 }
