@@ -1,0 +1,352 @@
+   358	Alpheratz	Sirrah
+   432	Caph
+   886	Algenib
+  2261	Ankaa
+  3360	Fulu
+  3712	Schedar
+  4128	Diphda
+  4614	Achird
+  5395	Castula
+  6860	MIRACH
+  6882	Wurren
+  7344	Revati
+  8207	Adhil
+  8538	Ruchbah
+  8890	Lodestar	Polaris	North Star
+  9270	Alpherg
+  9826	Titawin
+  9927	Nembus
+ 10144	Achernar
+ 10761	Torcular
+ 11353	Baten Kaitos
+ 11415	Segin
+ 11443	Mothallah
+ 11636	Sheratan
+ 12533	Almach
+ 12929	Hamal
+ 14386	Mira	Mira A
+ 15089	iot Cas AB
+ 16970	Kaffaljidhma
+ 17361	Lilii Borea
+ 17506	Miram
+ 17573	Bharani
+ 17824	Angetenar
+ 18322	Azha
+ 18411	Gorgonea Secunda
+ 18884	Menkar
+ 19058	Gorgonea Tertia
+ 19356	Algol	Algol B	Algol C	Algol A
+ 19476	Misam
+ 19656	Gorgonea Quarta
+ 19787	Botein
+ 20010	Dalim
+ 20320	Zibal
+ 20902	Mirfak
+ 22049	Ran
+ 23180	Atik
+ 23249	Rana
+ 23288	Celaeno	Celeno
+ 23302	Electra
+ 23338	Taygeta	Taygete
+ 23408	Maia
+ 23432	Asterope
+ 23480	Merope
+ 23523	MOAI 1
+ 23630	Alcyone
+ 23850	Atlas
+ 23862	Pleione
+ 24912	Menkhib	Menkib
+ 25025	Zaurak
+ 26574	Beid
+ 26965	Keid
+ 27371	Prima Hyadum
+ 27697	Secunda Hyadum
+ 28028	Beemim
+ 28305	Ain
+ 28319	Chamukuy
+ 29139	Aldebaran
+ 29291	Theemin
+ 29503	Sceptrum
+ 30652	Tabit
+ 31398	Hassaleh
+ 31964	Almaaz
+ 32068	Saclateni
+ 32518	Mago
+ 32630	Haedus
+ 33111	Cursa
+ 34029	Capella
+ 34085	Rigel
+ 35468	Bellatrix
+ 35497	Elnath
+ 36079	Nihal
+ 36486	Mintaka
+ 36673	Arneb
+ 36822	lambda Ori X-5
+ 36861	lambda Ori X-3
+ 37043	Hatysa
+ 37128	Alnilam
+ 37202	Tianguan
+ 37795	Phact
+ 38771	Saiph
+ 39425	Wazn
+ 39801	Betelgeuse
+ 39816	Gore's Nova
+ 40183	Menkalinan
+ 40312	Mahasim
+ 42167	Elkurud
+ 42995	Propus
+ 44402	Furud
+ 44478	Tejat
+ 44743	Mirzam
+ 45348	Canopus
+ 46588	23 H. Cam
+ 47105	Alhena
+ 47129	Plaskett's star	Plaskett star
+ 48329	Mebsuta
+ 48737	Alzirr
+ 48915	Dog Star	Sirius	Sirius A
+ 50310	Altaleban	Taleban
+ 51802	51 H. Cep
+ 52089	Adhara
+ 52265	Citala
+ 52877	Unurgunite
+ 52973	Mekbuda
+ 53244	Muliphein
+ 54605	Wezen
+ 56855	Ahadi
+ 56986	Wasat
+ 58350	Aludra
+ 58715	Gomeisa
+ 59717	Hadir
+ 60178	Castor B
+ 60179	Castor A
+ 61110	Jishui
+ 61421	Procyon	Procyon A
+ 62509	Pollux
+ 63700	Azmidi	Asmidiske	Azmidiske
+ 66811	Naos
+ 67523	Tureis
+ 68273	Regor
+ 69267	Tarf	Altarf
+ 70011	Piautos
+ 70272	Alsciaukat
+ 71369	Muscida
+ 73471	Minchir
+ 73731	Meleph
+ 74198	Asellus Borealis
+ 74442	Asellus Australis
+ 74874	Ashlesha
+ 74956	Alsephina
+ 75732	Copernicus
+ 76644	Talitha
+ 76756	Acubens
+ 77327	Alkaphrah
+ 78515	Nahn
+ 78647	Suhail
+ 80007	Miaplacidus
+ 80404	Aspidiske
+ 80951	HD 80951AB
+ 81688	Intercrus
+ 81797	Alphard
+ 82308	Alterf
+ 83618	Ukdah
+ 83808	Subra
+ 85444	Zhang
+ 85503	Rasalas
+ 85951	Felis
+ 87901	Regulus
+ 89025	Adhafera
+ 89021	Tania Borealis
+ 89758	Tania Australis
+ 94264	Praecipua
+ 95128	Chalawan
+ 95272	Alkes
+ 95418	Merak
+ 95689	Dubhe
+ 97603	Zosma
+ 97633	Chertan
+ 98262	Alula Borealis
+100029	Giausar
+100655	Formosa
+102224	Taiyangshou	Alkafzah
+102647	Denebola
+102870	Zavijava
+103287	Phecda
+104985	Tonatiuh
+105452	Alchiba
+105707	Minkar
+106490	Imai
+106591	Megrez
+106625	Gienah
+107259	Zaniah
+107446	Ginan
+108662	** STFA 21
+108767	Algorab
+108903	Gacrux
+109358	Chara
+109379	Kraz
+110379	Porrima
+110914	La Superba
+111123	Mimosa
+111335	Tianyi
+112185	Alioth
+112300	Minelauva
+112413	Cor Caroli
+112429	Taiyi
+113226	Vindemiatrix
+116656	Mizar A
+116657	Mizar B
+116658	Spica
+116842	Alcor
+118098	Heze
+119361	HD 119361AB
+120315	Alkaid	Alcaid
+121370	Muphrid
+122451	Agena	Hadar
+123139	Menkent
+123299	Thuban
+124294	Kang
+124850	Syrma
+124897	Arcturus
+125162	Xuange
+125337	Khambalia
+126868	Elgafar
+127762	Seginus
+128620	Rigel Kentaurus	Rigil Kentaurus
+128621	Toliman
+129989	Izar
+130841	Zubenelgenubi
+130945	Merga
+131873	Kochab
+133208	Nekkar
+133216	Brachium
+133640	I Boo*
+135742	Zubeneschamali
+136726	Pherkad Minor
+137391	Alkalurops
+137422	Pherkad
+137759	Edasich
+137909	Nusakan
+138905	Zubenelhakrabi
+139006	Alphecca
+140573	Unukalhai
+141003	Chow
+141477	Gudja
+142669	Iklil
+143018	Fang
+143275	Dschubba
+145502	Jabbah
+146051	Yed Prior
+146791	Yed Posterior
+147165	Alniyat
+148112	Cujam
+148387	Athebyne
+148478	Antares
+148856	Kornephoros
+148857	Marfik
+149438	Paikauhale
+150798	Atria
+151680	Larawag
+151890	Xamidimura
+151985	Pipirima
+152667	OAO 1653-40
+155125	Sabik
+155763	Aldhibah
+155826	LSF 1
+156164	Sarin
+158408	Lesath
+158899	Maasym
+158926	Shaula
+159181	Rastaban
+159532	Sargas
+159561	Rasalhague
+160691	Cervantes
+161096	Cebalrai
+161693	Alruba
+161892	Fuyue
+162003	Dziban
+163588	Grumium
+164058	Eltanin
+165135	Alnasl
+166205	Yildun
+166937	Polis
+168454	Kaus Media
+169022	Kaus Australis
+169702	Alathfar
+169916	Kaus Borealis
+170693	Fafnir
+172167	Vega
+173416	Xihe
+174638	Sheliak
+174974	Ainalrami
+175191	Nunki
+176437	Sulafat
+176687	Ascella
+177482	Polaris Australis
+177724	Okab
+178253	Meridiana
+178524	Albaldah
+179949	Gumala
+180163	Aladfar
+180711	Altais
+181454	Arkab Prior
+181623	Arkab Posterior
+181869	Rukbat
+183439	Anser
+185144	Alsafi
+185758	Sham
+186791	Tarazed
+186882	Fawaris
+187642	Altair
+188119	Tyl
+188310	Libertas
+188376	Terebellum
+188512	Alshain
+192876	Prima Giedi
+192947	Algedi	Giedi
+193432	Alshat
+193452	Dabih Minor
+193495	Dabih	Dabih Major
+193924	Peacock
+194093	SADR
+195810	Aldulfin
+196524	Rotanev
+196867	Sualocin	Svalocin
+197345	Deneb
+197989	Aljanah
+198001	Albali
+199665	Musica
+202214	PN Ou 4
+202447	Kitalpha
+203280	Alderamin
+204867	Sadalsuud
+205021	Alfirk
+205767	Bunda
+206088	Nashira
+206672	Azelfafage
+206778	Enif
+206936	Herschel's Garnet Star	Erakis
+207098	Deneb Algedi
+207971	Aldhanab
+209750	Sadalmelik
+209952	Alnair
+210418	Biham
+211391	Ancha
+212061	Sadachbia
+214376	Situla
+214923	Homam
+214952	Tiaki
+215182	Matar
+216131	Sadalbari
+216385	sig Peg A
+216627	Skat
+216803	Fomalhaut B
+216956	Fomalhaut
+217014	Helvetios
+217891	Fumalsamakah
+217906	Scheat
+218045	Markab
+220061	Salm
+220657	Alkarab
+221345	Veritate
+222404	Errai
