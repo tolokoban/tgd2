@@ -2,7 +2,9 @@ import * as React from "react"
 import App from "./app"
 import { createRoot } from "react-dom/client"
 import { Theme } from "@tolokoban/ui"
+
 import "./index.css"
+import "./highlight.css"
 
 function start() {
     new Theme({

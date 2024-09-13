@@ -1,4 +1,4 @@
-import { TgdLoaderImage } from "@tgd/loader"
+import { tgdLoadImage } from "@tgd/loader"
 import {
     TgdProgram,
     TgdTextureCube,
@@ -64,7 +64,7 @@ export class TgdTextureCubeImpl implements TgdTextureCube {
 
     private loadImage(target: number, image: string | WebglImage) {
         if (typeof image === "string") {
-            TgdLoaderImage.image(image)
+            tgdLoadImage(image)
                 .then(img => {
                     if (img) {
                         this.loadImage(target, img)

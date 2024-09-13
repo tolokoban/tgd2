@@ -1,4 +1,4 @@
-import { TgdMat4, TgdVec3, TgdVec4 } from ".."
+import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from ".."
 
 export interface TgdProgramOptions {
     /** Code of the vertex shader */
@@ -54,6 +54,8 @@ export interface TgdProgram {
     uniform3ui(name: string, x: number, y: number, z: number): void
 
     uniform4ui(name: string, x: number, y: number, z: number, w: number): void
+
+    uniformMatrix3fv(name: string, mat3: TgdMat3): void
 
     uniformMatrix4fv(name: string, mat4: TgdMat4): void
 

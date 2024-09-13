@@ -23,6 +23,7 @@ const lines = nodeFS.readFileSync(inputFilename).toString().trim().split("\n")
 console.log()
 console.log("This catalog provides", lines.length, "stars.")
 
+const RAD_PER_DEG = Math.PI / 180
 const stars = []
 let count = 0
 let minTemp = Number.POSITIVE_INFINITY
@@ -39,14 +40,15 @@ for (const line of lines) {
     if (magnitude > 10) continue
 
     const name = line.substring(0, 14)
-    const longitude = parseFloat(line.substring(90, 96))
-    const latitude = parseFloat(line.substring(96, 102))
+    const longitude = parseFloat(line.substring(90, 96)) * RAD_PER_DEG
+    const latitude = parseFloat(line.substring(96, 102)) * RAD_PER_DEG
     minMagnitude = Math.min(minMagnitude, magnitude)
     maxMagnitude = Math.max(maxMagnitude, magnitude)
     const brigthness = Math.sqrt(1e16 * Math.pow(2.512, -magnitude)) * 1e-8
     minBrightness = Math.min(minBrightness, brigthness)
     maxBrightness = Math.max(maxBrightness, brigthness)
-    const temp = 4600 * (1 / (0.92 * bv + 1.7) + 1 / (0.92 * bv + 0.62))
+    let temp = 4600 * (1 / (0.92 * bv + 1.7) + 1 / (0.92 * bv + 0.62))
+    temp /= 16000
     minTemp = Math.min(minTemp, temp)
     maxTemp = Math.max(maxTemp, temp)
     // console.log(
@@ -58,7 +60,7 @@ for (const line of lines) {
     //     `${magnitude}`.padStart(10),
     //     `${brigthness}`.padStart(10)
     // )
-    stars.push(latitude, longitude, temp, brigthness)
+    stars.push(latitude, longitude, brigthness, temp)
     count++
 }
 

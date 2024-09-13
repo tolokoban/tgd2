@@ -41,6 +41,11 @@ declare module "*.bin" {
     export = value
 }
 
+declare module "*.dat" {
+    const value: string
+    export = value
+}
+
 declare module "*.glb" {
     const value: any
     export = value

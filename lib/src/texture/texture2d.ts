@@ -1,5 +1,5 @@
-import { TgdLoaderImage } from "@tgd/loader"
 import { TgdEvent } from "@tgd/event/event"
+import { tgdLoadImage } from "@tgd/loader"
 import {
     TgdProgram,
     TgdTexture2D,
@@ -174,7 +174,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             | ImageBitmap
     ) {
         if (typeof image === "string") {
-            TgdLoaderImage.image(image)
+            tgdLoadImage(image)
                 .then(img => {
                     if (img) {
                         this.loadImage(img)

@@ -15,6 +15,7 @@ export type RoutePath =
     | "/articles/painter/background"
     | "/articles/painter/background/2"
     | "/articles/painter/clear"
+    | "/articles/painter/custom"
     | "/articles/painter/filter"
     | "/articles/painter/filter/blur"
     | "/articles/painter/filter/chromatic-aberration"
@@ -29,7 +30,7 @@ export type RoutePath =
     | "/tools/gltf"
 
 export function isRoutePath(path: string): path is RoutePath {
-    return ["/","/api","/articles","/articles/painter","/articles/painter/background","/articles/painter/background/2","/articles/painter/clear","/articles/painter/filter","/articles/painter/filter/blur","/articles/painter/filter/chromatic-aberration","/articles/painter/filter/custom","/articles/painter/filter/hue","/articles/painter/logic","/articles/suzanne","/articles/test","/articles/texture","/articles/texture/cube","/tools","/tools/gltf"].includes(path)
+    return ["/","/api","/articles","/articles/painter","/articles/painter/background","/articles/painter/background/2","/articles/painter/clear","/articles/painter/custom","/articles/painter/filter","/articles/painter/filter/blur","/articles/painter/filter/chromatic-aberration","/articles/painter/filter/custom","/articles/painter/filter/hue","/articles/painter/logic","/articles/suzanne","/articles/test","/articles/texture","/articles/texture/cube","/tools","/tools/gltf"].includes(path)
 }
 
 export interface RouteMatch {

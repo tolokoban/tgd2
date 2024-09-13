@@ -408,7 +408,12 @@ export abstract class TgdCamera {
     }
 
     debug(caption?: string) {
-        this._orientation.debug(`${caption ?? this.name} quaternion:`)
+        const name = caption ?? this.name
+        this._orientation.debug(`${name} orientation`)
+        this._target.debug(`${name} target`)
+        this._position.debug(`${name} position`)
+        this.matrixModelView.debug(`${name} matrixModelView`)
+        this.matrixProjection.debug(`${name} matrixProjection`)
     }
 
     protected abstract getSpaceHeightAtTarget(): number

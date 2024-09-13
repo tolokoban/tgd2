@@ -1,2 +1,2 @@
-export * from "./glb"
+export * from "./binary"
 export * from "./image"

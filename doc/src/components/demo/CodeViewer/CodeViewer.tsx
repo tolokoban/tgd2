@@ -1,7 +1,7 @@
 import * as React from "react"
 import Prism from "prismjs"
 import { getGrammarForLanguage } from "./grammar"
-import "prismjs/themes/prism-coy.css"
+// import "prismjs/themes/prism-coy.css"
 import Style from "./CodeViewer.module.css"
 
 export interface CodeViewerViewProps {

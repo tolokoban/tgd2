@@ -1,14 +1,12 @@
 import {
+    tgdLoadGlb,
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdFilterHueRotation,
-    TgdLoaderGlb,
     TgdPainterClear,
     TgdPainterFilter,
-    TgdPainterFramebuffer,
     TgdPainterFramebufferOld,
-    TgdPainterGroup,
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
@@ -48,7 +46,7 @@ function init(context: TgdContext) {
     })
     context.paint()
     const action = async () => {
-        const asset = await TgdLoaderGlb.glb("mesh/suzanne.glb")
+        const asset = await tgdLoadGlb("mesh/suzanne.glb")
         if (!asset) return
 
         console.log("Suzanne has been loaded!")

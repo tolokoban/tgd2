@@ -1,13 +1,21 @@
-const Package = require("./package.json")
-const Path = require("path")
-const FS = require("fs")
-const HtmlWebpackPlugin = require("html-webpack-plugin")
-const CopyPlugin = require("copy-webpack-plugin")
-const { CleanWebpackPlugin } = require("clean-webpack-plugin")
-// const { WebpackManifestPlugin } = require("webpack-manifest-plugin")
-const Webpack = require("webpack")
+import Package from "./package.json" with { "type": "json" }
+import Path from "path"
+import FS from "fs"
+import HtmlWebpackPlugin from "html-webpack-plugin"
+import CopyPlugin from "copy-webpack-plugin"
+import { CleanWebpackPlugin } from "clean-webpack-plugin"
+import remarkImages from "remark-images"
+import remarkEmoji from "remark-emoji"
+import remarkGfm from "remark-gfm"
+import rehypeHighlight from "rehype-highlight"
+import rehypeHighlightCodeLines from "rehype-highlight-code-lines"
+import highlightJs from "highlight.js"
+import Webpack from "webpack"
+import path from "path"
 
-module.exports = env => {
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+
+export default env => {
     if (typeof Package.port !== "number") {
         // Define a random port number for dev server.
         Package.port = 1204 + Math.floor(Math.random() * (0xffff - 1024))
@@ -161,7 +169,7 @@ module.exports = env => {
                     },
                 },
                 {
-                    test: /\.(bin|glb)$/i,
+                    test: /\.(bin|glb|dat)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset",
                     generator: {
@@ -217,7 +225,14 @@ module.exports = env => {
                             loader: "@mdx-js/loader",
                             /** @type {import('@mdx-js/loader').Options} */
                             options: {
-                                /* jsxImportSource: …, otherOptions… */
+                                rehypePlugins: [[rehypeHighlight, {
+                                    languages: {
+                                        ts: ()=>highlightJs.getLanguage("ts"),
+                                        glsl: ()=>highlightJs.getLanguage("glsl"),
+                                    }
+                                }], rehypeHighlightCodeLines],
+                                remarkPlugins: [remarkImages, remarkEmoji, remarkGfm],
+                                providerImportSource: "@mdx-js/react",
                             },
                         },
                     ],
