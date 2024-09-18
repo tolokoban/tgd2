@@ -3,7 +3,7 @@ import { TgdMat3 } from "./mat3"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
-import { ArrayNumber16 } from ".."
+import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from ".."
 /**
  * Column-first 4x4 matrix.
  *
@@ -170,10 +170,29 @@ export class TgdMat4 extends Float32Array {
         const { m30, m31, m32 } = this
         return new TgdVec3(m30, m31, m32)
     }
-    set translation(vec: TgdVec3 | TgdVec4) {
-        this.m30 = vec.x
-        this.m31 = vec.y
-        this.m32 = vec.z
+    set translation(vec: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4) {
+        const [x, y, z] = vec
+        this.m30 = x
+        this.m31 = y
+        this.m32 = z
+    }
+
+    toTanslation(target: TgdVec3 | TgdVec4): this {
+        target.x = this.m30
+        target.y = this.m31
+        target.z = this.m32
+        return this
+    }
+
+    /**
+     * Add `delta` to the current translation.
+     */
+    translate(delta: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4): this {
+        const [x, y, z] = delta
+        this.m30 += x
+        this.m31 += y
+        this.m32 += z
+        return this
     }
 
     from(mat: TgdMat4 | ArrayNumber16): this {

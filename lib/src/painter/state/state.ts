@@ -1,59 +1,71 @@
 import { TgdContext } from "@tgd/context"
 import { TgdPainterGroup } from "../group"
 import { TgdPainter } from "../painter"
-import { Blend, BlendOptions, getBlend, setBlend, toBlend } from "./blend"
-import { Cull, CullOptions, getCull, setCull, toCull } from "./cull"
-import { Depth, DepthOptions, getDepth, setDepth, toDepth } from "./depth"
+import {
+    webglBlendGet,
+    WebglBlendOptions,
+    webglBlendSet,
+    webglDepthGet,
+    WebglDepthOptions,
+    webglDepthSet,
+} from "@tgd/utils/state"
+import {
+    webglCullGet,
+    WebglCullOptions,
+    webglCullSet,
+} from "@tgd/utils/state/cull"
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
-    blend: BlendOptions
-    depth: DepthOptions
-    cull: CullOptions
+    blend: WebglBlendOptions
+    depth: WebglDepthOptions
+    cull: WebglCullOptions
     name: string
 }
 
 export class TgdPainterState extends TgdPainterGroup {
-    private blend: Blend = false
-    private depth: Depth = false
-    private cull: Cull = false
+    private _blend?: WebglBlendOptions
+    private _depth?: WebglDepthOptions
+    private _cull?: WebglCullOptions
 
     constructor(
         context: TgdContext,
-        options: Partial<TgdPainterStateOptions> = {}
+        {
+            blend,
+            depth,
+            cull,
+            name,
+            children = [],
+        }: Partial<TgdPainterStateOptions> = {}
     ) {
-        const { children = [] } = options
         const { gl } = context
-        const blend = toBlend(gl, options.blend)
-        const depth = toDepth(gl, options.depth)
-        const cull = toCull(gl, options.cull)
         const onEnter: Array<() => void> = []
         const onExit: Array<() => void> = []
-        if (typeof blend !== "undefined") {
+        if (blend) {
             onEnter.push(() => {
-                this.blend = getBlend(gl)
-                setBlend(gl, blend)
+                this._blend = webglBlendGet(gl)
+                webglBlendSet(gl, blend)
             })
             onExit.push(() => {
-                setBlend(gl, this.blend)
+                if (this._blend) webglBlendSet(gl, this._blend)
             })
         }
-        if (typeof depth !== "undefined") {
+        if (depth) {
             onEnter.push(() => {
-                this.depth = getDepth(gl)
-                setDepth(gl, depth)
+                this._depth = webglDepthGet(gl)
+                webglDepthSet(gl, depth)
             })
             onExit.push(() => {
-                setDepth(gl, this.depth)
+                if (this._depth) webglDepthSet(gl, this._depth)
             })
         }
-        if (typeof cull !== "undefined") {
+        if (cull) {
             onEnter.push(() => {
-                this.cull = getCull(gl)
-                setCull(gl, cull)
+                this._cull = webglCullGet(gl)
+                webglCullSet(gl, cull)
             })
             onExit.push(() => {
-                setCull(gl, this.cull)
+                if (this._cull) webglCullSet(gl, this._cull)
             })
         }
         super(children, {
@@ -64,6 +76,6 @@ export class TgdPainterState extends TgdPainterGroup {
                 onExit.forEach(f => f())
             },
         })
-        this.name = options.name ?? `State/${this.name}`
+        this.name = name ?? `State/${this.name}`
     }
 }

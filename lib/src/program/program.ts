@@ -191,6 +191,13 @@ export class TgdProgramImpl implements TgdProgram {
         gl.deleteProgram(this.program)
     }
 
+    debug(caption = "TgdProgram") {
+        console.log(caption)
+        const { code } = this
+        logCode("Vertex Shader", code.vert)
+        logCode("Fragment Shader", code.frag)
+    }
+
     private createShader(type: ShaderType, code: string): WebGLShader {
         const { gl } = this
         const shader = gl.createShader(gl[type])
@@ -261,26 +268,30 @@ function getErrorLines(message: string): {
 function style(background: string, bold = false) {
     return `color:#fff;background:${background};font-family:monospace;font-size:80%;font-weight:${
         bold ? "bolder" : "100"
-    }`
+    };margin:0;color:${bold ? "#777" : "#fff"}`
 }
 
 function logCode(
     title: string,
     code: string,
-    errors: { lines: number[]; messages: string[] }
+    errors: { lines: number[]; messages: string[] } = {
+        lines: [],
+        messages: [],
+    }
 ) {
-    console.log(`%c${title}`, "font-weight:bolder;font-size:120%")
+    const lines: string[] = [`%c${title}`]
+    const styles: string[] = ["font-weight:bolder;font-size:120%"]
     code.split("\n").forEach((line, index) => {
         const num = index + 1
-        const prefix = (num * 1e-4).toFixed(4).substring(2)
+        const prefix = `${num}`.padStart(5, " ")
         const background = errors.lines.includes(num) ? "#f00" : "#000"
-        console.log(
-            `%c${prefix}  %c${line}`,
-            style(background),
-            style(background, true)
-        )
+        lines.push(`%c${prefix}  %c${line}`)
+        styles.push(style(background, true), style(background, false))
         if (errors.lines.includes(num)) {
-            console.error(errors.messages[errors.lines.indexOf(num)])
+            lines.push(`%c${errors.messages[errors.lines.indexOf(num)]}`)
+            styles.push("color:#f33;background:#333;font-weight:bold")
+            console.error()
         }
     })
+    console.log(lines.join("\n"), ...styles)
 }

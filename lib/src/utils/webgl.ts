@@ -51,14 +51,14 @@ export function webglTypedArrayFromBufferSource(
     }
 }
 
-export function webglLookup(type: number) {
+export function webglLookup(type: number): keyof WebGL2RenderingContext {
     if (gl) {
         for (const key in gl) {
             const val = gl[key as keyof WebGL2RenderingContext]
-            if (val === type) return key
+            if (val === type) return key as keyof WebGL2RenderingContext
         }
     }
-    return `${type}`
+    return `${type}` as keyof WebGL2RenderingContext
 }
 
 const canvas = document.createElement("canvas")

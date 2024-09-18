@@ -1,5 +1,6 @@
 import { TgdDataset } from "@tgd/dataset"
 import { TgdGeometry } from "./geometry"
+import { ArrayNumber3 } from "@tgd/types"
 
 export interface TgdGeometryBoxOptions {
     sizeX?: number
@@ -8,6 +9,19 @@ export interface TgdGeometryBoxOptions {
 }
 
 export class TgdGeometryBox extends TgdGeometry {
+    static fromBoundingBox(
+        min: ArrayNumber3,
+        max: ArrayNumber3
+    ): TgdGeometryBox {
+        const [minX, minY, minZ] = min
+        const [maxX, maxY, maxZ] = max
+        const sizeX = maxX - minX
+        const sizeY = maxY - minY
+        const sizeZ = maxZ - minZ
+        const geometry = new TgdGeometryBox({ sizeX, sizeY, sizeZ })
+        return geometry
+    }
+
     constructor({
         sizeX = 1,
         sizeY = 1,

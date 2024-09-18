@@ -10,9 +10,9 @@ export class TgdVertexArray {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        program?: TgdProgram,
+        private readonly program?: TgdProgram,
         private readonly datasets?: Readonly<TgdDataset>[],
-        elements?: TgdTypeArrayForElements
+        private readonly elements?: TgdTypeArrayForElements
     ) {
         const vao = gl.createVertexArray()
         if (!vao) throw Error("Unable to create VertexArrayObject!")
@@ -65,6 +65,17 @@ export class TgdVertexArray {
         })
         lines.push("  return vao", "}")
         return lines.map(line => `${indent}${line}`).join("\n")
+    }
+
+    debug(caption = "TgdVertexArray") {
+        console.log(caption)
+        if (this.program) this.program.debug()
+        if (this.datasets) {
+            this.datasets.forEach((dataset, index) =>
+                dataset.debug(`   Dataset #${index}`)
+            )
+        }
+        if (this.elements) console.log("Elements:", this.elements)
     }
 
     bind() {

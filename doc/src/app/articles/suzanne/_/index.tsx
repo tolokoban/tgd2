@@ -10,6 +10,7 @@ import {
     TgdVec3,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
+    webglPresetDepth,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -68,11 +69,7 @@ function init(context: TgdContext) {
     // const depth = new TgdPainterDepth(context)
     // context.add(depth)
     const state = new TgdPainterState(context, {
-        depth: {
-            func: "LESS",
-            mask: true,
-            range: [0, 1],
-        },
+        depth: webglPresetDepth.less,
     })
     const skybox = new TgdPainterSkybox(context, {
         imagePosX: PosX,

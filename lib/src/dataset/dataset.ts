@@ -66,6 +66,31 @@ export class TgdDataset {
         this._data = resize(this._data, this.count * this.stride)
     }
 
+    /**
+     * Throw an exception if the attribute `attribName` does not exist,
+     * or if it is not of any of the `types`.
+     * @param attribName
+     * @param types
+     */
+    assertAttribType(attribName: string, ...types: string[]): this {
+        const type = this.attributesDefinition[attribName]
+        if (!type)
+            throw Error(
+                `Attribute "${attribName}" does not exist! Available names are: ${Object.keys(
+                    this.attributesDefinition
+                ).join(", ")}.`
+            )
+
+        if (!types.includes(type)) {
+            throw Error(
+                `Attribute "${attribName}" is of type "${type}", which is not ${types.join(
+                    " nor "
+                )}!`
+            )
+        }
+        return this
+    }
+
     addAttributes(attributesDefinition: TgdDatasetTypeRecord) {
         const oldDataset = this.clone()
         for (const key of Object.keys(attributesDefinition)) {
@@ -333,7 +358,15 @@ export class TgdDataset {
     }
 
     debug(caption = "Dataset") {
-        console.log(caption)
+        console.log(
+            caption,
+            "   count:",
+            this.count,
+            "   target:",
+            this.target,
+            "   usage:",
+            this.usage
+        )
         const rows: [name: string, type: string, offset: string][] = [
             ["Name", "type", "offset"],
         ]
@@ -356,6 +389,21 @@ export class TgdDataset {
                 "font-family:monospace"
             )
         )
+        for (const attName of Object.keys(this.definitions)) {
+            const def = this.definitions[attName]
+            if (!def) continue
+
+            const { get } = this.getAttribAccessor(attName)
+            const data: number[][] = []
+            for (let idx = 0; idx < this.count; idx++) {
+                const items: number[] = []
+                for (let dim = 0; dim < def.dimension; dim++) {
+                    items.push(get(idx, dim))
+                }
+                data.push(items)
+            }
+            console.log(`Attribute "${attName}":`, data)
+        }
     }
 }
 

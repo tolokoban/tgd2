@@ -1,19 +1,27 @@
-import { ArrayNumber3 } from ".."
+import { ArrayNumber3, ArrayNumber4 } from ".."
 import { mix } from "../utils/math"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec4 } from "./vec4"
 
 export class TgdVec3 extends Float32Array {
+    static newFrom([x, y, z]:
+        | TgdVec3
+        | TgdVec4
+        | ArrayNumber3
+        | ArrayNumber4): TgdVec3 {
+        return new TgdVec3(x, y, z)
+    }
+
     static newFromMix(
-        v1: TgdVec3 | TgdVec4,
-        v2: TgdVec3 | TgdVec4,
+        [x1, y1, z1]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
+        [x2, y2, z2]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         a = 0.5
     ): TgdVec3 {
         const b = 1 - a
-        const x = b * v1.x + a * v2.x
-        const y = b * v1.y + a * v2.y
-        const z = b * v1.z + a * v2.z
+        const x = b * x1 + a * x2
+        const y = b * y1 + a * y2
+        const z = b * z1 + a * z2
         return new TgdVec3(x, y, z)
     }
 

@@ -17,6 +17,7 @@ import {
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
     TgdPainterState,
+    webglPresetDepth,
 } from "@tolokoban/tgd"
 
 import Style from "./MeshPreview.module.css"
@@ -102,11 +103,7 @@ function useTgdContext(
             primitiveIndex,
         })
         const state = new TgdPainterState(context, {
-            depth: {
-                func: "LESS",
-                mask: true,
-                range: [0, 1],
-            },
+            depth: webglPresetDepth.less,
             children: [mesh],
         })
         const bbox = mesh.computeBoundingBox()

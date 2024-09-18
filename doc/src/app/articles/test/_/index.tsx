@@ -10,6 +10,7 @@ import {
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
+    webglPresetDepth,
 } from "@tolokoban/tgd"
 
 import TestPainter from "./painter"
@@ -51,11 +52,7 @@ function init(context: TgdContext) {
 
         console.log("Suzanne has been loaded!")
         const state = new TgdPainterState(context, {
-            depth: {
-                func: "LESS",
-                mask: true,
-                range: [0, 1],
-            },
+            depth: webglPresetDepth.less,
             children: [
                 new TgdPainterClear(context, {
                     color: [0, 0.3, 0, 1],

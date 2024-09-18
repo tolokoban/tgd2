@@ -12,6 +12,8 @@ export interface TgdProgram {
 
     toCode(options?: Partial<{ indent: string }>): void
 
+    debug(caption?: string): void
+
     /**
      * Check if an attribute exist and is active.
      */

@@ -9,6 +9,7 @@ import {
     TgdControllerCameraOrbit,
     TgdCameraPerspective,
     TgdPainterState,
+    webglPresetBlend,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -32,7 +33,7 @@ function init(ctx: TgdContext): TgdContext {
         const painter = new PainterStars(ctx, data)
         ctx.add(
             new TgdPainterState(ctx, {
-                blend: "sprite",
+                blend: webglPresetBlend.alpha,
                 children: [new PainterNames(ctx), painter],
             })
         )
