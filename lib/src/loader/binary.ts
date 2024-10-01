@@ -5,6 +5,11 @@ export async function tgdLoadGlb(
 ): Promise<TgdParserGLTransfertFormatBinary | null> {
     try {
         const resp = await fetch(url)
+        if (!resp.ok) {
+            throw Error(
+                `Unable to load GLB from url "${url}"!\nError #${resp.status}: ${resp.statusText}`
+            )
+        }
         const data = await resp.arrayBuffer()
         const parser = new TgdParserGLTransfertFormatBinary(data)
         return parser

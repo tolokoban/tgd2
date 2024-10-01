@@ -171,10 +171,6 @@ export class TgdGeometry {
             addNormal(idx1, B, C, A)
             addNormal(idx2, C, A, B)
         }
-        console.log(
-            "indexes:",
-            Array.from(indexes).sort((a, b) => a - b)
-        )
         const normals: TgdVec3[] = []
         for (let idx = 0; idx <= idxMax; idx++) {
             const item = normalsAccumulator.get(idx)
