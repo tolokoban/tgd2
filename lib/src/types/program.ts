@@ -35,7 +35,7 @@ export interface TgdProgram {
 
     uniform3f(name: string, x: number, y: number, z: number): void
 
-    uniform3fv(name: string, vec3: TgdVec3): void
+    uniform3fv(name: string, vec3: TgdVec3 | TgdVec4): void
 
     uniform4f(name: string, x: number, y: number, z: number, w: number): void
 

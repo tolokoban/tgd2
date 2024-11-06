@@ -57,15 +57,15 @@ declare module "*.yaml" {
 }
 
 declare module "*.module.css" {
-    const content: { [key: string]: string }
-    export default content
+    const classes: readonly { [key: string]: string }
+    export = classes
 }
 
-declare module "*.css" {
-    // Loaded as URL.
-    const content: string
-    export default content
-}
+// declare module "*.css" {
+//     // Loaded as URL.
+//     const content: string
+//     export default content
+// }
 
 declare module "*.md" {
     const value: string

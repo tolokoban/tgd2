@@ -1,19 +1,10 @@
-import { TgdCamera } from "@tgd/camera"
+import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdQuat, TgdVec3 } from "@tgd/math"
 import { mix } from "../math"
 
-interface CameraTarget {
-    spaceHeightAtTarget: number
-    distance: number
-    zoom: number
-    orientation: TgdQuat
-    target: TgdVec3
-    shift: TgdVec3
-}
-
 export function tgdActionCreateCameraInterpolation(
     camera: TgdCamera,
-    destination: Partial<CameraTarget>
+    destination: Partial<TgdCameraState>
 ) {
     const beginSpaceHeightAtTarget = camera.spaceHeightAtTarget
     const beginDistance = camera.distance

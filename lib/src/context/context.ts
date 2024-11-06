@@ -85,6 +85,8 @@ export class TgdContext implements TgdContextInterface {
     private requestAnimationFrame = -1
     // Last time the context has been painted.
     private lastTime = -1
+    // Difference between `Data.now()` and the time in `requestAnimationFrame()`.
+    private timeShift = 0
     private readonly animationManager = new TgdManagerAnimation()
 
     /**
@@ -118,6 +120,10 @@ export class TgdContext implements TgdContextInterface {
         this.painters.name = this.name
         // Prevent system gestures.
         canvas.style.touchAction = "none"
+    }
+
+    get time() {
+        return Date.now() + this.timeShift
     }
 
     debugHierarchy() {
@@ -310,6 +316,7 @@ export class TgdContext implements TgdContextInterface {
     }
 
     private readonly actualPaint = (time: number) => {
+        this.timeShift = time - Date.now()
         const { lastTime, gl } = this
         if (lastTime < 0) {
             this.lastTime = time

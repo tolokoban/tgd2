@@ -2,9 +2,11 @@ import { Theme, ViewStrip, ViewPanel, ModalProvider } from "@tolokoban/ui"
 
 import { version } from "../../../package.json"
 import { isRouteEqualTo, makeGoto } from "./routes"
+import { RoutePath } from "./types"
 
 import Style from "./layout.module.css"
-import { RoutePath } from "./types"
+
+console.log("🚀 [layout] Style = ", Style) // @FIXME: Remove this line written on 2024-10-01 at 22:27
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -29,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         type="button"
                         onClick={makeGoto("/articles")}
                     >
-                        Articles
+                        Examples
                     </button>
                     <button
                         className={classFor("/tools")}
@@ -43,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         type="button"
                         onClick={makeGoto("/api")}
                     >
-                        API
+                        Reference
                     </button>
                     <div>
                         @tolokoban/tgd v<b>{version}</b>

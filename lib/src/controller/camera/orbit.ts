@@ -1,5 +1,8 @@
 import { TgdAnimation } from "@tgd/types/animation"
-import { tgdEasingFunctionOutQuad } from "@tgd/utils"
+import {
+    tgdActionCreateCameraInterpolation,
+    tgdEasingFunctionOutQuad,
+} from "@tgd/utils"
 import { clamp } from "@tgd/utils/math"
 import {
     TgdContextInterface,
@@ -8,7 +11,7 @@ import {
     TgdInputPointerEventZoom,
 } from "@tgd/types"
 import { TgdEvent } from "@tgd/event"
-import { TgdCamera } from "@tgd/camera"
+import { TgdCamera, TgdCameraState } from "@tgd/camera"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -65,10 +68,6 @@ export class TgdControllerCameraOrbit {
     public readonly eventChange = new TgdEvent<TgdCamera>()
     public minZoom = 1e-3
     public maxZoom = Infinity
-    /**
-     * The camera will only move if `enabled === true`.
-     */
-    public enabled = true
     public speedZoom = 1
     public speedOrbit = 1
     public speedPanning = 1
@@ -95,7 +94,17 @@ export class TgdControllerCameraOrbit {
         evt: TgdControllerCameraOrbitZoomRequest
     ) => boolean
 
+    /**
+     * The camera will only move if `enabled === true`.
+     */
+    public _enabled = true
     private animOrbit: TgdAnimation | null = null
+    /**
+     * It can be usefull to disable to orbit controller for some time
+     * because an animation is going on on the camera, for instance.
+     */
+    private disabledUntil = 0
+    private readonly cameraInitialState: TgdCameraState
 
     constructor(
         private readonly context: TgdContextInterface,
@@ -112,6 +121,7 @@ export class TgdControllerCameraOrbit {
             onZoomRequest = alwaysTrue,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
+        this.cameraInitialState = context.camera.getCurrentState()
         const { inputs } = context
         inputs.pointer.eventMoveStart.addListener(this.handleMoveStart)
         inputs.pointer.eventMoveEnd.addListener(this.handleMoveEnd)
@@ -127,6 +137,33 @@ export class TgdControllerCameraOrbit {
         this.minZoom = minZoom
         this.maxZoom = maxZoom
         this.onZoomRequest = onZoomRequest
+    }
+
+    get enabled() {
+        return this.context.time > this.disabledUntil && this._enabled
+    }
+    set enabled(value: boolean) {
+        this._enabled = value
+    }
+
+    reset(animDuration: number, easingFunction?: (x: number) => number) {
+        const { context } = this
+        this.disableForSomeTime(animDuration)
+        context.animSchedule({
+            action: tgdActionCreateCameraInterpolation(
+                context.camera,
+                this.cameraInitialState
+            ),
+            duration: animDuration,
+            easingFunction,
+        })
+    }
+
+    disableForSomeTime(delayInMsec: number) {
+        this.disabledUntil = Math.max(
+            this.disabledUntil,
+            this.context.time + delayInMsec
+        )
     }
 
     detach() {

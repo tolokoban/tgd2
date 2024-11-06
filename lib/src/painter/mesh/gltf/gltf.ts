@@ -1,9 +1,10 @@
+import { TgdTexture2D } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
-import { TgdMaterialDiffuse } from "@tgd/material"
+import { TgdMaterial, TgdMaterialDiffuse } from "@tgd/material"
 import { TgdLight } from "@tgd/light"
 
 import { TgdPainterMesh } from "../mesh"
@@ -13,24 +14,24 @@ export interface TgdPainterMeshGltfOptions {
     meshIndex?: number
     primitiveIndex?: number
     name?: string
+    materialFactory?(
+        this: void,
+        options: { color?: TgdVec4 | TgdTexture2D }
+    ): TgdMaterial
 }
 
 /**
  */
 export class TgdPainterMeshGltf extends TgdPainterMesh {
     constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
-        const { asset, meshIndex = 0, primitiveIndex = 0 } = options
+        const {
+            asset,
+            meshIndex = 0,
+            primitiveIndex = 0,
+            materialFactory = makeMaterial,
+        } = options
         const color = figureColor(asset, meshIndex, primitiveIndex, context)
-        const material = new TgdMaterialDiffuse({
-            color,
-            light: new TgdLight({
-                color: new TgdVec4(1, 1, 1, 1),
-                direction: new TgdVec3(1, 0.2, 0),
-            }),
-            ambient: new TgdLight({
-                color: new TgdVec4(0.75, 0.75, 0.75, 1),
-            }),
-        })
+        const material = materialFactory({ color })
         let computeNormals = false
         if (color instanceof TgdVec4) {
             const dataset = new TgdDataset({
@@ -125,4 +126,18 @@ function figureColor(
         return new TgdVec4(...pbr.baseColorFactor)
     }
     return DEFAULT_COLOR
+}
+
+function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
+    const material = new TgdMaterialDiffuse({
+        color,
+        light: new TgdLight({
+            color: new TgdVec4(1, 1, 1, 1),
+            direction: new TgdVec3(1, 0.2, 0),
+        }),
+        ambient: new TgdLight({
+            color: new TgdVec4(0.75, 0.75, 0.75, 1),
+        }),
+    })
+    return material
 }

@@ -13,6 +13,15 @@ export interface TgdCameraOptions {
     zoom?: number
 }
 
+export interface TgdCameraState {
+    spaceHeightAtTarget: number
+    distance: number
+    zoom: number
+    orientation: TgdQuat
+    target: TgdVec3
+    shift: TgdVec3
+}
+
 export abstract class TgdCamera {
     private static incrementalId = 1
 
@@ -63,6 +72,17 @@ export abstract class TgdCamera {
         this.target.reset(tx, ty, tz)
         const [qx, qy, qz, qw] = options.orientation ?? [0, 0, 0, 1]
         this.orientation.reset(qx, qy, qz, qw)
+    }
+
+    getCurrentState(): Readonly<TgdCameraState> {
+        return {
+            distance: this.distance,
+            orientation: this.orientation.clone(),
+            shift: this.shift.clone(),
+            spaceHeightAtTarget: this.spaceHeightAtTarget,
+            target: this.target.clone(),
+            zoom: this.zoom,
+        }
     }
 
     get near() {

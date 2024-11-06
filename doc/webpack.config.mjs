@@ -208,6 +208,7 @@ export default env => {
                             options: {
                                 modules: {
                                     auto: true,
+                                    namedExport: false,
                                     localIdentName: isProdMode
                                         ? "[hash:base64]"
                                         : "[path][name]_[local]_[hash:base64:6]",

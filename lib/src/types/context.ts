@@ -18,6 +18,7 @@ export type TgdContextInterface = {
     readonly programs: TgdResourceProgram
     readonly textures2D: TgdResourceTexture2D
     readonly texturesCube: TgdResourceTextureCube
+    readonly time: number
     camera: TgdCamera
     animSchedule(animation: TgdAnimation): TgdAnimation
     animCancel(animation: TgdAnimation): void

@@ -50,7 +50,6 @@
     "exclude": [
         "_backup_/",
         "node_modules/",
-        "doc/",
         "**/*.spec.*",
         "**/*.test.*",
         "**/*.SKIP.*"

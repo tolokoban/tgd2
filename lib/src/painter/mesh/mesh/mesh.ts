@@ -31,7 +31,7 @@ export class TgdPainterMesh extends TgdPainter {
     private bboxMax: TgdVec3 | null = null
 
     constructor(
-        private readonly context: TgdContext,
+        protected readonly context: TgdContext,
         options: TgdPainterMeshOptions
     ) {
         super()
@@ -76,6 +76,7 @@ export class TgdPainterMesh extends TgdPainter {
             vert,
             frag,
         })
+        prg.debug()
         this.prg = prg
         this.vao = context.createVAO(prg, [geometry.dataset], geometry.elements)
         this.elementsType = geometry.elementsType
