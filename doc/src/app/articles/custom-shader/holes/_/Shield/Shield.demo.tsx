@@ -102,7 +102,7 @@ async function init(context: TgdContext) {
 }
 // #endregion
 
-// //#region MaterialHole
+// #region Class MaterialHole
 interface MaterialHoleOptions {
     abedo: TgdTexture2D
     holes: TgdTexture2D
