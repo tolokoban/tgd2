@@ -1,4 +1,5 @@
 import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
+import { stringifyCode } from "@tgd/shader/code"
 import { TgdProgram, TgdProgramOptions } from "@tgd/types"
 
 /**
@@ -20,17 +21,19 @@ export class TgdProgramImpl implements TgdProgram {
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create WebGLProgram!")
 
-        const vertShader = this.createShader("VERTEX_SHADER", code.vert)
+        const vert = stringifyCode(code.vert)
+        const vertShader = this.createShader("VERTEX_SHADER", vert)
         gl.attachShader(prg, vertShader)
-        const fragShader = this.createShader("FRAGMENT_SHADER", code.frag)
+        const frag = stringifyCode(code.frag)
+        const fragShader = this.createShader("FRAGMENT_SHADER", frag)
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
             const info = gl.getProgramInfoLog(prg) ?? ""
             console.warn(info)
             const errorLines = getErrorLines(info)
-            logCode("Vertex Shader", code.vert, errorLines)
-            logCode("Fragment Shader", code.frag, errorLines)
+            logCode("Vertex Shader", vert, errorLines)
+            logCode("Fragment Shader", frag, errorLines)
             throw new Error("Could NOT link WebGL2 program!\n" + info)
         }
         this.program = prg
@@ -47,10 +50,14 @@ export class TgdProgramImpl implements TgdProgram {
             `function createProgram(gl: WebGL2RenderingContext) {`,
             `  const prg = gl.createProgram()`,
             `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
-            `  gl.shaderSource(vertexShader, \`${this.code.vert}\`)`,
+            `  gl.shaderSource(vertexShader, \`${stringifyCode(
+                this.code.vert
+            )}\`)`,
             `  gl.compileShader(vertexShader)`,
             `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
-            `  gl.shaderSource(fragmentShader, \`${this.code.frag}\`)`,
+            `  gl.shaderSource(fragmentShader, \`${stringifyCode(
+                this.code.frag
+            )}\`)`,
             `  gl.compileShader(fragmentShader)`,
             `  gl.attachShader(prg, vertexShader)`,
             `  gl.attachShader(prg, fragmentShader)`,
@@ -194,8 +201,8 @@ export class TgdProgramImpl implements TgdProgram {
     debug(caption = "TgdProgram") {
         console.log(caption)
         const { code } = this
-        logCode("Vertex Shader", code.vert)
-        logCode("Fragment Shader", code.frag)
+        logCode("Vertex Shader", stringifyCode(code.vert))
+        logCode("Fragment Shader", stringifyCode(code.frag))
     }
 
     private createShader(type: ShaderType, code: string): WebGLShader {

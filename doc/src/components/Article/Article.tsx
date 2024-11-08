@@ -15,7 +15,7 @@ export default function Article({ className, children }: ArticleProps) {
         <ViewPanel
             className={$.join(className, Style.article)}
             display="grid"
-            gridTemplateColumns="1fr min(49vw, 400px) min(49vw, 400px) 1fr"
+            gridTemplateColumns="1fr min(48vw, 400px) min(48vw, 400px) 1fr"
             gap="0"
         >
             {children}

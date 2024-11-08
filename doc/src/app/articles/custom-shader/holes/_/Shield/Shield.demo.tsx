@@ -4,12 +4,9 @@ import {
     tgdCanvasCreateWithContext2D,
     TgdContext,
     TgdControllerCameraOrbit,
-    tgdEasingFunctionInBounce,
-    tgdLoadArrayBuffer,
     tgdLoadGlb,
     tgdLoadImage,
     TgdMaterial,
-    TgdMaterialNormals,
     TgdPainterBackground,
     TgdPainterClear,
     TgdPainterMeshGltf,
@@ -24,30 +21,16 @@ import {
     WebglUniformType,
 } from "@tolokoban/tgd"
 
-import SceneView from "@/components/demo/Scene"
+import View from "@/components/demo/Tgd"
 import AssetGlb from "../assets/shield.glb"
-import AssetAbedo from "../assets/shield.png"
 import AssetBackground from "../assets/background.png"
 
-import Styles from "./Shield.module.css"
-
-const $ = Theme.classNames
-
-export type ViewShieldProps = CommonProps & {}
-
-export function ViewShield(props: ViewShieldProps): JSX.Element {
-    const style: React.CSSProperties = {
-        ...styleCommon(props),
-    }
-
-    return (
-        <div className={$.join(props.className, Styles.shield)} style={style}>
-            <SceneView onReady={handleInit} />
-        </div>
-    )
+export default function ViewShield(): JSX.Element {
+    return <View onReady={init} />
 }
 
-async function handleInit(context: TgdContext) {
+// #region Initialising WebGL
+async function init(context: TgdContext) {
     const asset = await tgdLoadGlb(AssetGlb)
     if (!asset) throw Error(`Unable to load GLB file: ${AssetGlb}`)
 
@@ -117,14 +100,15 @@ async function handleInit(context: TgdContext) {
         orbiter.reset(300)
     })
 }
+// #endregion
 
+// //#region MaterialHole
 interface MaterialHoleOptions {
     abedo: TgdTexture2D
     holes: TgdTexture2D
 }
 
 class MaterialHole implements TgdMaterial {
-    private readonly lightColor = new TgdVec4(1, 1, 1, 1)
     private readonly lightDirection = new TgdVec3(0.1, 0.2, 1)
 
     public readonly varyings: { [name: string]: WebglAttributeType } = {
@@ -162,3 +146,4 @@ class MaterialHole implements TgdMaterial {
         this.options.holes.activate(program, "texHoles", 1)
     }
 }
+//#endregion

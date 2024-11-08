@@ -43,7 +43,7 @@
     grid-column: 1/-1;
 }
 
-@media (width < 480px) {
+@media (width < 1360px) {
     .Layout > :global(*.half-left),
     .Layout > :global(*.half-right),
     .Layout > :global(*.margin-left),

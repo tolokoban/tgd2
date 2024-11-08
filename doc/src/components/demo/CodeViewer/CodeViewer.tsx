@@ -6,11 +6,31 @@ import Style from "./CodeViewer.module.css"
 
 export interface CodeViewerViewProps {
     className?: string
-    value: string
+    value: string | Record<string, string>
     language: string
 }
 
 export default function CodeViewerView(props: CodeViewerViewProps) {
+    const { value } = props
+    if (typeof value === "string") {
+        const singleProps: SingleCodeViewerViewProps = {
+            ...props,
+            value,
+        }
+        return <SingleCodeViewerView {...singleProps} />
+    }
+    const multiProps: MultiCodeViewerViewProps = {
+        ...props,
+        value,
+    }
+    return <MultiCodeViewerView {...multiProps} />
+}
+
+export interface SingleCodeViewerViewProps extends CodeViewerViewProps {
+    value: string
+}
+
+function SingleCodeViewerView(props: SingleCodeViewerViewProps) {
     const refTimeout = React.useRef(0)
     const [popup, setPopup] = React.useState(false)
     const refCode = React.useRef<null | HTMLElement>(null)
@@ -63,4 +83,26 @@ function getClassNames(props: CodeViewerViewProps): string {
     }
 
     return classNames.join(" ")
+}
+
+export interface MultiCodeViewerViewProps extends CodeViewerViewProps {
+    value: Record<string, string>
+}
+
+function MultiCodeViewerView(props: MultiCodeViewerViewProps) {
+    console.log("🚀 [CodeViewer] props.value = ", props.value) // @FIXME: Remove this line written on 2024-11-08 at 11:01
+    const captions = Object.keys(props.value)
+    return (
+        <>
+            {captions.map((caption, index) => (
+                <details key={caption} open={index === 0}>
+                    <summary>{caption}</summary>
+                    <SingleCodeViewerView
+                        value={props.value[caption]}
+                        language={props.language}
+                    />
+                </details>
+            ))}
+        </>
+    )
 }

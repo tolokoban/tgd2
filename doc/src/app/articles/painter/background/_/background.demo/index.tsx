@@ -1,3 +1,6 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
 import React from "react"
 import { ViewPanel } from "@tolokoban/ui"
 import CodeViewer from "@/components/demo/CodeViewer"

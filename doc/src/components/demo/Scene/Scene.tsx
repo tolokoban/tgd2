@@ -58,7 +58,7 @@ export default function SceneView({
         <div className={Theme.classNames.join(className, Style.Scene)}>
             <ViewPanel display="flex" justifyContent="flex-end">
                 <ViewButton variant="text" onClick={handleFullscreen}>
-                    Afficher en plein écran
+                    Show fullscreen
                 </ViewButton>
             </ViewPanel>
             <canvas style={{ width, height }} ref={mountCanvas}></canvas>

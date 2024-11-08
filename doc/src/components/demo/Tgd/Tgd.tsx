@@ -32,6 +32,8 @@ export default function Tgd({
     const mountCanvas = (canvas: HTMLCanvasElement) => {
         if (!canvas) return
 
+        if (refContext.current) return
+
         refCanvas.current = canvas
         const context = new TgdContext(canvas, options)
         refContext.current = context
@@ -80,8 +82,8 @@ export default function Tgd({
         <div className={Theme.classNames.join(className, Style.Tgd)}>
             <ViewPanel display="flex" justifyContent="flex-end">
                 {fullscreenAvailable && (
-                    <ViewButton variant="text" onClick={handleFullscreen}>
-                        Afficher en plein écran
+                    <ViewButton variant="elevated" onClick={handleFullscreen}>
+                        Show fullscreen
                     </ViewButton>
                 )}
             </ViewPanel>

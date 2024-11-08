@@ -1,4 +1,19 @@
-export type WebglType = "UNSIGNED_BYTE" | "UNSIGNED_INT"
+export type WebglType =
+    | "BYTE"
+    | "UNSIGNED_BYTE"
+    | "SHORT"
+    | "UNSIGNED_SHORT"
+    | "UNSIGNED_SHORT_5_6_5"
+    | "UNSIGNED_SHORT_5_5_5_1"
+    | "UNSIGNED_SHORT_4_4_4_4"
+    | "INT"
+    | "UNSIGNED_INT"
+    | "UNSIGNED_INT_5_9_9_9_REV"
+    | "UNSIGNED_INT_2_10_10_10_REV"
+    | "UNSIGNED_INT_10F_11F_11F_REV"
+    | "UNSIGNED_INT_24_8"
+    | "HALF_FLOAT"
+    | "FLOAT"
 
 export type WebglWrap = "REPEAT" | "CLAMP_TO_EDGE" | "MIRRORED_REPEAT"
 

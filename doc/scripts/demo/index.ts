@@ -4,6 +4,21 @@ import Path, { dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+const [_node, _script, arg] = process.argv
+if (!arg) {
+    console.error("")
+    console.error("This script expect one and only one argument:")
+    console.error("the path of the folder to parse.")
+    console.error("")
+    console.error('It will search for any file ending with ".demo.tsx".')
+    console.error("This file must default export a React component.")
+    console.error(
+        'Then the script will generate a file "index.tsx" with a component'
+    )
+    console.error("that will demonstate it, along with the highlighted code.")
+    console.error("")
+    process.exit(1)
+}
 const ROOT = Path.resolve(__dirname, "../../")
 
 function mtime(path: string): number {
@@ -14,95 +29,117 @@ function mtime(path: string): number {
 }
 
 async function processDemo(relPath: string) {
-    const file = Path.resolve(ROOT, relPath)
-    // The filename must match the folder name.
-    const filename = Path.basename(file)
-    const foldername = `${Path.basename(Path.dirname(file))}.tsx`
-    if (filename !== foldername) {
-        return
-    }
+    try {
+        const file = Path.resolve(ROOT, relPath)
+        const filename = Path.basename(file)
 
-    const path = Path.resolve(Path.dirname(file), "index.tsx")
-    if (mtime(path) >= mtime(file)) {
-        return
-    }
+        const path = Path.resolve(Path.dirname(file), "index.tsx")
+        if (mtime(path) >= mtime(file)) {
+            return
+        }
 
-    console.log("[Demo]", file.substring(ROOT.length))
-    const code = await loadText(file)
-    const [fullCode, focusedCode] = parseCode(code)
+        console.log("[Demo]", file.substring(ROOT.length))
+        const code = await loadText(file)
+        const [fullCode, focusedCode] = parseCode(code)
 
-    await saveText(
-        path,
-        codeLinesToString([
-            `/**`,
-            ` * Warning! This code has been generated automatically.`,
-            ` */`,
-            `import React from "react"`,
-            `import { ViewPanel } from "@tolokoban/ui"`,
-            `import CodeViewer from "@/components/demo/CodeViewer"`,
-            `import Demo from "./${filename.substring(
-                0,
-                filename.length - ".tsx".length
-            )}"`,
-            "",
-            `const FOCUS = ${JSON.stringify(focusedCode)}`,
-            `const FULL = ${JSON.stringify(fullCode)}`,
-            "",
-            "export default function DemoContainer() {",
-            [
-                "const [full, setFull] = React.useState(false)",
-                "return <>",
+        await saveText(
+            path,
+            codeLinesToString([
+                `/**`,
+                ` * Warning! This code has been generated automatically.`,
+                ` */`,
+                `import React from "react"`,
+                `import { ViewButton } from "@tolokoban/ui"`,
+                `import CodeViewer from "@/components/demo/CodeViewer"`,
+                `import Demo from "./${filename.substring(
+                    0,
+                    filename.length - ".tsx".length
+                )}"`,
+                "",
+                `const FOCUS = ${JSON.stringify(focusedCode)}`,
+                `const FULL = ${JSON.stringify(fullCode)}`,
+                "",
+                "export default function DemoContainer() {",
                 [
-                    `<div className="half-left"><Demo /></div>`,
-                    `<div className="half-right">`,
+                    "const [full, setFull] = React.useState(false)",
+                    "return <>",
                     [
-                        "<button",
+                        `<div className="half-left"><Demo /></div>`,
+                        `<div className="half-right">`,
                         [
-                            `style={{ all: "inherit", display: "contents" }}`,
-                            `onClick={() => setFull(!full)}`,
-                        ],
-                        ">",
-                        [
-                            `<ViewPanel display="flex" gap={".5em"}>`,
+                            "<div>",
                             [
-                                `<input type="checkbox" checked={full} onChange={() => setFull(!full)}/>`,
-                                `<label style={{ cursor: "pointer" }}>`,
-                                [`Afficher le code complet`],
-                                `</label>`,
+                                `<ViewButton variant="elevated" onClick={() => setFull(!full)}>`,
+                                [
+                                    `{full ? "Show code details" : "Show full code"}`,
+                                ],
+                                `</ViewButton>`,
                             ],
-                            `</ViewPanel>`,
+                            "</div>",
+                            `<CodeViewer language="tsx" value={full ? FULL : FOCUS} />`,
                         ],
-                        `</button>`,
-                        `<CodeViewer language="tsx" value={full ? FULL : FOCUS} />`,
+                        "</div>",
                     ],
-                    "</div>",
+                    "</>",
                 ],
-                "</>",
-            ],
-            "}",
-        ])
-    )
+                "}",
+            ])
+        )
+    } catch (ex) {
+        const msg = ex instanceof Error ? ex.message : JSON.stringify(ex)
+        throw Error(`Unable to process demo file "${relPath}":\n${msg}`)
+    }
 }
 
-function parseCode(code: string): string[] {
+const RX_BEGIN = /^\/\/[ \t]*#(begin|region)[ \t]*([^\n\r]*)$/g
+const RX_END = /^\/\/[ \t]*#(end|endregion)[ \t]*$/g
+
+class Matcher {
+    private countForAnonymousRegions = 1
+
+    matchBegin(line: string): null | string {
+        RX_BEGIN.lastIndex = -1
+        const match = RX_BEGIN.exec(line)
+        if (!match) return null
+
+        return match[2]?.trim() || `Detail #${this.countForAnonymousRegions++}`
+    }
+
+    matchEnd(line: string): boolean {
+        RX_END.lastIndex = -1
+        return RX_END.test(line)
+    }
+}
+
+function parseCode(code: string): [string, Record<string, string>] {
+    const matcher = new Matcher()
     const lines = code.split("\n")
     const full: string[] = []
-    const focused: string[] = []
-    let active = false
+    const focused: Record<string, string> = {}
+    let activeRegion: string | null = null
+    let currentRegion: string[] = []
     for (const line of lines) {
         const short = line.trim()
-        if (short === "//#begin" || short === "// #begin") {
-            active = true
+        const begin = matcher.matchBegin(short)
+        if (begin) {
+            activeRegion = begin
+            currentRegion = []
             continue
         }
-        if (short === "//#end" || short === "// #end") {
-            active = false
+        if (activeRegion && matcher.matchEnd(short)) {
+            if (focused[activeRegion]) {
+                throw Error(
+                    `The code region "${activeRegion}" has been defined twice in the same demo file!`
+                )
+            }
+            focused[activeRegion] = currentRegion.join("\n")
+            activeRegion = null
             continue
         }
         full.push(line)
-        if (active) focused.push(line)
+        if (activeRegion) currentRegion.push(line)
     }
-    return [full.join("\n"), focused.join("\n")]
+    return [full.join("\n"), focused]
 }
 
 async function saveText(path: string, content: string) {

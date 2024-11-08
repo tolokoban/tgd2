@@ -4,7 +4,7 @@ import {
     Functions,
     Variables,
     funcs,
-    stringifyCode,
+    stringifyCode as tgdCodeToString,
     vars,
 } from "./code"
 
@@ -49,7 +49,7 @@ export class TgdShaderVertex {
     }
 
     get code() {
-        return stringifyCode([
+        return tgdCodeToString([
             `#version 300 es`,
             `precision ${this.precision} float;`,
             ...vars(this.uniforms, "uniform"),

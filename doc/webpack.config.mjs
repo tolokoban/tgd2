@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight"
 import rehypeHighlightCodeLines from "rehype-highlight-code-lines"
 import highlightJs from "highlight.js"
+import WebpackShellPluginNext from "webpack-shell-plugin-next"
 import Webpack from "webpack"
 import path from "path"
 
@@ -78,6 +79,13 @@ export default env => {
         },
         plugins: [
             new Webpack.ProgressPlugin(),
+            new WebpackShellPluginNext({
+                onBuildStart:{
+                  scripts: ['npm run generate'],
+                  blocking: true,
+                  parallel: false
+                },
+              }),
             // // List of the needed files for later caching.
             // new WebpackManifestPlugin({
             //     filter: (file) => {
