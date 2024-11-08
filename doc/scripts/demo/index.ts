@@ -40,7 +40,10 @@ async function processDemo(relPath: string) {
 
         console.log("[Demo]", file.substring(ROOT.length))
         const code = await loadText(file)
-        const [fullCode, focusedCode] = parseCode(code)
+        const [fullCode, focusedCode] = await parseCode(
+            code,
+            Path.dirname(file)
+        )
 
         await saveText(
             path,
@@ -111,7 +114,34 @@ class Matcher {
     }
 }
 
-function parseCode(code: string): [string, Record<string, string>] {
+const RX_IMPORT =
+    /^[ \t]*import[ \t]*[a-zA-Z0-9_]+[ \t]*from[ \t]*["'](\.[a-zA-Z0-9_\.\/\-\$\@]+\.(vert|frag))["']$/g
+
+async function findShaderCodes(
+    code: string,
+    focused: Record<string, string>,
+    folder: string
+) {
+    const lines = code.split("\n")
+    for (const line of lines) {
+        RX_IMPORT.lastIndex = -1
+        const match = RX_IMPORT.exec(line)
+        if (!match) continue
+
+        const [, filename] = match
+        const content = await loadText(Path.resolve(folder, filename))
+        focused[
+            `${
+                filename.endsWith(".vert") ? "Vertex" : "Fragment"
+            } shader "${filename}"`
+        ] = content
+    }
+}
+
+async function parseCode(
+    code: string,
+    folder: string
+): Promise<[string, Record<string, string>]> {
     const matcher = new Matcher()
     const lines = code.split("\n")
     const full: string[] = []
@@ -139,6 +169,7 @@ function parseCode(code: string): [string, Record<string, string>] {
         full.push(line)
         if (activeRegion) currentRegion.push(line)
     }
+    await findShaderCodes(code, focused, folder)
     return [full.join("\n"), focused]
 }
 

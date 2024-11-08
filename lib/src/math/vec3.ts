@@ -58,6 +58,13 @@ export class TgdVec3 extends Float32Array {
         return new TgdVec3(this)
     }
 
+    mix(vec: Readonly<TgdVec3>, alpha = 0.5): this {
+        this.x = (1 - alpha) * this.x + alpha * vec.x
+        this.y = (1 - alpha) * this.y + alpha * vec.y
+        this.z = (1 - alpha) * this.z + alpha * vec.z
+        return this
+    }
+
     isEqual(vec: Readonly<TgdVec3 | ArrayNumber3>) {
         const [x, y, z] = vec
         if (x !== this.x) return false

@@ -2,7 +2,7 @@ import { TgdContext } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
 function init(ctx: TgdContext) {
-    // #begin
+    // #begin Initializing WebGL
     ctx.paint()
     // #end
 }

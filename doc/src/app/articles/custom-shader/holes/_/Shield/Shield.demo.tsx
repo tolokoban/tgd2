@@ -21,22 +21,30 @@ import {
     WebglUniformType,
 } from "@tolokoban/tgd"
 
-import View from "@/components/demo/Tgd"
+import View, { Assets } from "@/components/demo/Tgd"
 import AssetGlb from "../assets/shield.glb"
 import AssetBackground from "../assets/background.png"
 
 export default function ViewShield(): JSX.Element {
-    return <View onReady={init} />
+    return (
+        <View
+            onReady={init}
+            assets={{
+                image: {
+                    background: AssetBackground,
+                },
+                glb: {
+                    shield: AssetGlb,
+                },
+            }}
+        />
+    )
 }
 
 // #region Initialising WebGL
-async function init(context: TgdContext) {
-    const asset = await tgdLoadGlb(AssetGlb)
-    if (!asset) throw Error(`Unable to load GLB file: ${AssetGlb}`)
-
-    const background = await tgdLoadImage(AssetBackground)
-    if (!background)
-        throw Error(`Unable to load image file: ${AssetBackground}`)
+function init(context: TgdContext, assets: Assets) {
+    const asset = assets.glb.shield
+    const background = assets.image.background
 
     const w = 4096
     const h = w

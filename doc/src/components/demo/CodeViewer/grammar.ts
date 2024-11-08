@@ -7,15 +7,10 @@ import "prismjs/components/prism-c"
 import "prismjs/components/prism-glsl"
 
 export function getGrammarForLanguage(language: string): Prism.Grammar {
-    console.log("🚀 [grammar] language = ", language) // @FIXME: Remove this line written on 2024-11-08 at 10:37
     switch (language) {
         case "ts":
             return Prism.languages.typescript
         case "tsx":
-            console.log(
-                "🚀 [grammar] Prism.languages.tsx = ",
-                Prism.languages.tsx
-            ) // @FIXME: Remove this line written on 2024-11-08 at 10:37
             return Prism.languages.tsx
         case "frag":
         case "vert":

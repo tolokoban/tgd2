@@ -80,7 +80,7 @@ export default env => {
         plugins: [
             new Webpack.ProgressPlugin(),
             new WebpackShellPluginNext({
-                onBuildStart:{
+                onBeforeCompile:{
                   scripts: ['npm run generate'],
                   blocking: true,
                   parallel: false

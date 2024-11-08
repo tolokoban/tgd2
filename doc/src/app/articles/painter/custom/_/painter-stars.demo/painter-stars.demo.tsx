@@ -47,6 +47,7 @@ export default function Demo() {
     return <View onReady={init} />
 }
 
+// #begin Class PainterStars
 export class PainterStars extends TgdPainter {
     // Number of stars
     private readonly count: number
@@ -105,3 +106,4 @@ export class PainterStars extends TgdPainter {
         this.vao.delete()
     }
 }
+// #end
