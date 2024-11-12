@@ -169,7 +169,7 @@ export default env => {
                     exclude: /node_modules/,
                 },
                 {
-                    test: /\.(png|jpe?g|gif|webp|svg)$/i,
+                    test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset",
                     generator: {
