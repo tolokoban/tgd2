@@ -14,7 +14,10 @@ export class FilterManager {
     private readonly texture: TgdTexture2D
     private filter: TgdPainterFilter | null = null
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(
+        canvas: HTMLCanvasElement,
+        private readonly onError: (error: string | null) => void
+    ) {
         const context = new TgdContext(canvas)
         this.context = context
         const texture = context.textures2D.create({
@@ -29,7 +32,7 @@ export class FilterManager {
         }
     }
 
-    set code(code: string) {
+    setCode(code: string, functions = "") {
         try {
             const { context, texture } = this
             const filter = new TgdPainterFilter(context, {

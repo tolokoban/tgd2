@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Theme, CommonProps, ViewTabs, ViewTab } from "@tolokoban/ui"
+import { Theme, CommonProps } from "@tolokoban/ui"
 
 import CodeEditor from "@/components/code-editor"
 
@@ -16,17 +16,11 @@ export function ViewVertexShaderCodeEditor(
     props: ViewVertexShaderCodeEditorProps
 ): JSX.Element {
     return (
-        <ViewTabs
+        <CodeEditor
             className={$.join(props.className, Styles.vertexshadercodeeditor)}
-            {...props}
-        >
-            <ViewTab label="Fragment Shader" key="shader">
-                <CodeEditor
-                    language="glsl"
-                    value={props.code}
-                    onChange={props.onChange}
-                />
-            </ViewTab>
-        </ViewTabs>
+            language="glsl"
+            value={props.code}
+            onChange={props.onChange}
+        />
     )
 }

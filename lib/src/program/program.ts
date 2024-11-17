@@ -1,5 +1,5 @@
 import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
-import { stringifyCode } from "@tgd/shader/code"
+import { tgdCodeStringify } from "@tgd/shader/code"
 import { TgdProgram, TgdProgramOptions } from "@tgd/types"
 
 /**
@@ -21,10 +21,10 @@ export class TgdProgramImpl implements TgdProgram {
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create WebGLProgram!")
 
-        const vert = stringifyCode(code.vert)
+        const vert = tgdCodeStringify(code.vert)
         const vertShader = this.createShader("VERTEX_SHADER", vert)
         gl.attachShader(prg, vertShader)
-        const frag = stringifyCode(code.frag)
+        const frag = tgdCodeStringify(code.frag)
         const fragShader = this.createShader("FRAGMENT_SHADER", frag)
         gl.attachShader(prg, fragShader)
         gl.linkProgram(prg)
@@ -50,12 +50,12 @@ export class TgdProgramImpl implements TgdProgram {
             `function createProgram(gl: WebGL2RenderingContext) {`,
             `  const prg = gl.createProgram()`,
             `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
-            `  gl.shaderSource(vertexShader, \`${stringifyCode(
+            `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(
                 this.code.vert
             )}\`)`,
             `  gl.compileShader(vertexShader)`,
             `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
-            `  gl.shaderSource(fragmentShader, \`${stringifyCode(
+            `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(
                 this.code.frag
             )}\`)`,
             `  gl.compileShader(fragmentShader)`,
@@ -201,8 +201,8 @@ export class TgdProgramImpl implements TgdProgram {
     debug(caption = "TgdProgram") {
         console.log(caption)
         const { code } = this
-        logCode("Vertex Shader", stringifyCode(code.vert))
-        logCode("Fragment Shader", stringifyCode(code.frag))
+        logCode("Vertex Shader", tgdCodeStringify(code.vert))
+        logCode("Fragment Shader", tgdCodeStringify(code.frag))
     }
 
     private createShader(type: ShaderType, code: string): WebGLShader {

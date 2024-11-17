@@ -10,7 +10,7 @@ export interface Functions {
 
 export type CodeBloc = string | null | CodeBloc[]
 
-export function stringifyCode(code: CodeBloc, indent = ""): string {
+export function tgdCodeStringify(code: CodeBloc, indent = ""): string {
     if (typeof code === "string") return `${indent}${code}`
 
     if (!code) return ""
@@ -19,7 +19,7 @@ export function stringifyCode(code: CodeBloc, indent = ""): string {
     return code
         .filter(item => item !== null)
         .filter(item => !Array.isArray(item) || item.length > 0)
-        .map(line => stringifyCode(line, subIndent))
+        .map(line => tgdCodeStringify(line, subIndent))
         .join("\n")
 }
 

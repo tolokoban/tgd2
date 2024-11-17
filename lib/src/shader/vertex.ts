@@ -4,7 +4,7 @@ import {
     Functions,
     Variables,
     funcs,
-    stringifyCode as tgdCodeToString,
+    tgdCodeStringify as tgdCodeToString,
     vars,
 } from "./code"
 

@@ -11,6 +11,7 @@ const $ = Theme.classNames
 export type ViewFilterResultProps = CommonProps & {
     className?: string
     fragmentShader: string
+    functions: string
 }
 
 export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
@@ -20,16 +21,16 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
         if (!canvas) return
 
         if (!refManager.current) {
-            refManager.current = new FilterManager(canvas)
+            refManager.current = new FilterManager(canvas, setError)
         }
-        refManager.current.code = props.fragmentShader
+        refManager.current.setCode(props.fragmentShader, props.functions)
     }
     React.useEffect(() => {
         const manager = refManager.current
         if (!manager) return
 
-        manager.code = props.fragmentShader
-    }, [props.fragmentShader])
+        manager.setCode(props.fragmentShader, props.functions)
+    }, [props.fragmentShader, props.functions])
     React.useEffect(() => {
         return () => {
             refManager.current?.destroy()
