@@ -10,6 +10,17 @@ export interface Functions {
 
 export type CodeBloc = string | null | CodeBloc[]
 
+export function isCodeBloc(v: unknown): v is CodeBloc {
+    if (typeof v === "string") return true
+
+    if (!Array.isArray(v)) return false
+
+    for (const item of v) {
+        if (!isCodeBloc(item)) return false
+    }
+    return true
+}
+
 export function tgdCodeStringify(code: CodeBloc, indent = ""): string {
     if (typeof code === "string") return `${indent}${code}`
 
@@ -37,7 +48,12 @@ export function vars<Type extends WebglAttributeType | WebglUniformType>(
     ]
 }
 
-export function funcs(def: Functions, comment = "Util functions"): CodeBloc[] {
+export function funcs(
+    def: Functions | CodeBloc,
+    comment = "Util functions"
+): CodeBloc[] {
+    if (isCodeBloc(def)) return [def]
+
     const names = Object.keys(def)
     if (names.length === 0) return []
 

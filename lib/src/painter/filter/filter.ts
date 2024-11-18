@@ -75,6 +75,7 @@ export class TgdPainterFilter extends TgdPainter {
                     varUV: "vec2",
                 },
                 mainCode: filter.fragmentShaderCode,
+                functions: filter.extraFunctions,
             }).code
             return context.programs.create({ vert, frag })
         })

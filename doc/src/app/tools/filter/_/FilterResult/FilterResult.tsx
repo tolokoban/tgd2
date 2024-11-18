@@ -1,6 +1,12 @@
 import * as React from "react"
 
-import { Theme, CommonProps, ViewStrip, ViewPanel } from "@tolokoban/ui"
+import {
+    Theme,
+    CommonProps,
+    ViewStrip,
+    ViewPanel,
+    ViewSlider,
+} from "@tolokoban/ui"
 
 import { FilterManager } from "./manager"
 
@@ -17,6 +23,7 @@ export type ViewFilterResultProps = CommonProps & {
 export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
     const [error, setError] = React.useState<string | null>(null)
     const refManager = React.useRef<FilterManager | null>(null)
+    const [uniEffectStrength, setUniEffectStrength] = React.useState(0)
     const handleMount = (canvas: HTMLCanvasElement | null) => {
         if (!canvas) return
 
@@ -32,6 +39,12 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
         manager.setCode(props.fragmentShader, props.functions)
     }, [props.fragmentShader, props.functions])
     React.useEffect(() => {
+        const manager = refManager.current
+        if (!manager) return
+
+        manager.uniEffectStrength = uniEffectStrength
+    }, [uniEffectStrength])
+    React.useEffect(() => {
         return () => {
             refManager.current?.destroy()
         }
@@ -40,7 +53,7 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
     return (
         <ViewStrip
             className={$.join(props.className, Styles.filterresult)}
-            template="*1"
+            template="*1*"
             orientation="column"
             {...props}
         >
@@ -54,7 +67,28 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
             >
                 Filter output
             </ViewPanel>
-            {!error && <canvas ref={handleMount}></canvas>}
+            <canvas ref={handleMount}></canvas>
+            {error && (
+                <pre>
+                    {error.split("\n").map(line => {
+                        if (line.startsWith("#####"))
+                            return (
+                                <span className={Styles.error}>
+                                    {line}
+                                    {"\n"}
+                                </span>
+                            )
+                        return `${line}\n`
+                    })}
+                </pre>
+            )}
+            <ViewSlider
+                min={0}
+                max={1}
+                step={0.01}
+                value={uniEffectStrength}
+                onChange={setUniEffectStrength}
+            />
         </ViewStrip>
     )
 }

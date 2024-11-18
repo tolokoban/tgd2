@@ -1,4 +1,4 @@
-import { CodeBloc } from "@tgd/shader/code"
+import { CodeBloc, Functions } from "@tgd/shader/code"
 import { TgdProgram, WebglUniformType } from "@tgd/types"
 
 /**
@@ -30,6 +30,8 @@ export class TgdFilter {
         "return color;",
     ]
 
+    public readonly extraFunctions: Functions | CodeBloc = {}
+
     public readonly setUniforms = (
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         program: TgdProgram,
@@ -38,9 +40,11 @@ export class TgdFilter {
     ): void => {}
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
-        const { uniforms, fragmentShaderCode, setUniforms } = options
+        const { uniforms, fragmentShaderCode, extraFunctions, setUniforms } =
+            options
         if (uniforms) this.uniforms = uniforms
         if (fragmentShaderCode) this.fragmentShaderCode = fragmentShaderCode
+        if (extraFunctions) this.extraFunctions = extraFunctions
         if (setUniforms) this.setUniforms = setUniforms
     }
 }
@@ -48,5 +52,6 @@ export class TgdFilter {
 export interface TgdFilterOptions {
     uniforms: { [name: string]: WebglUniformType }
     fragmentShaderCode: CodeBloc
+    extraFunctions: Functions | CodeBloc
     setUniforms(program: TgdProgram, time: number): void
 }

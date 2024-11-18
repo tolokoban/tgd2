@@ -9,6 +9,7 @@ import BackgroundURL from "./background.avif"
 
 export class FilterManager {
     public readonly destroy: () => void
+    public uniEffectStrength = 0
 
     private readonly context: TgdContext
     private readonly texture: TgdTexture2D
@@ -40,11 +41,27 @@ export class FilterManager {
                 filters: [
                     new TgdFilter({
                         fragmentShaderCode: code,
+                        extraFunctions: functions,
                         uniforms: {
                             uniTime: "float",
+                            uniEffectStrength: "float",
+                            uniAspectRatio: "float",
+                            uniAspectRatioInverse: "float",
                         },
-                        setUniforms(program, time) {
+                        setUniforms: (program, time) => {
                             program.uniform1f("uniTime", time)
+                            program.uniform1f(
+                                "uniEffectStrength",
+                                this.uniEffectStrength
+                            )
+                            program.uniform1f(
+                                "uniAspectRatio",
+                                context.width / context.height
+                            )
+                            program.uniform1f(
+                                "uniAspectRatioInverse",
+                                context.height / context.width
+                            )
                         },
                     }),
                 ],
@@ -55,8 +72,10 @@ export class FilterManager {
             this.filter = filter
             context.add(filter)
             context.play()
+            this.onError(null)
         } catch (ex) {
             console.log("🚀 [manager] ex = ", ex) // @FIXME: Remove this line written on 2024-11-12 at 15:15
+            this.onError(ex instanceof Error ? ex.message : JSON.stringify(ex))
         }
     }
 }

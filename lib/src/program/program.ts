@@ -32,9 +32,11 @@ export class TgdProgramImpl implements TgdProgram {
             const info = gl.getProgramInfoLog(prg) ?? ""
             console.warn(info)
             const errorLines = getErrorLines(info)
-            logCode("Vertex Shader", vert, errorLines)
-            logCode("Fragment Shader", frag, errorLines)
-            throw new Error("Could NOT link WebGL2 program!\n" + info)
+            const cause = [
+                logCode("Vertex Shader", vert, errorLines),
+                logCode("Fragment Shader", frag, errorLines),
+            ].join("\n")
+            throw new Error(cause)
         }
         this.program = prg
         this.shaders = [vertShader, fragShader]
@@ -217,8 +219,7 @@ export class TgdProgramImpl implements TgdProgram {
         if (info) {
             console.error(`Error in ${type} code:`, info)
             const errorLines = getErrorLines(info)
-            logCode(type, code, errorLines)
-            throw Error(`Unable to compile ${type}!`)
+            throw Error(logCode(type, code, errorLines))
         }
         return shader
     }
@@ -286,19 +287,25 @@ function logCode(
         messages: [],
     }
 ) {
+    const output: string[] = [title]
     const lines: string[] = [`%c${title}`]
     const styles: string[] = ["font-weight:bolder;font-size:120%"]
+    let hasError = false
     code.split("\n").forEach((line, index) => {
         const num = index + 1
         const prefix = `${num}`.padStart(5, " ")
         const background = errors.lines.includes(num) ? "#f00" : "#000"
         lines.push(`%c${prefix}  %c${line}`)
+        output.push(`${prefix}  ${line}`)
         styles.push(style(background, true), style(background, false))
         if (errors.lines.includes(num)) {
+            hasError = true
             lines.push(`%c${errors.messages[errors.lines.indexOf(num)]}`)
+            output.push(`##### ${errors.messages[errors.lines.indexOf(num)]}`)
             styles.push("color:#f33;background:#333;font-weight:bold")
             console.error()
         }
     })
     console.log(lines.join("\n"), ...styles)
+    return hasError ? output.join("\n") : ""
 }

@@ -9,6 +9,7 @@ import {
 } from "./code"
 
 /**
+ * Helper to wirte the code of a fragment Shader.
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderFragment {
@@ -16,7 +17,14 @@ export class TgdShaderFragment {
     public uniforms: Variables<WebglUniformType>
     public varying: Variables<WebglAttributeType>
     public outputs: Variables<WebglAttributeType>
-    public functions: Functions
+    /**
+     * The key should be the signatureof a function
+     * (like `vec2 scale(vec2 v, float s)`)
+     * and the value to code of this function (like `return v * s;`).
+     *
+     * But if the key starts with a `_`, then the content of the value is uses verbatim.
+     */
+    public functions: Functions | CodeBloc
     public mainCode: CodeBloc
 
     constructor({
@@ -33,7 +41,7 @@ export class TgdShaderFragment {
         uniforms: Variables<WebglUniformType>
         outputs: Variables<WebglAttributeType>
         varying: Variables<WebglAttributeType>
-        functions: Functions
+        functions: Functions | CodeBloc
         mainCode: CodeBloc
     }> = {}) {
         this.precision = precision
