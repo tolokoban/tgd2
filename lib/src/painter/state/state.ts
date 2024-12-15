@@ -8,18 +8,20 @@ import {
     webglDepthGet,
     WebglDepthOptions,
     webglDepthSet,
-} from "@tgd/utils/state"
-import {
     webglCullGet,
     WebglCullOptions,
     webglCullSet,
-} from "@tgd/utils/state/cull"
+    WebglStencilOptions,
+    webglStencilGet,
+    webglStencilSet,
+} from "@tgd/utils/state"
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
     blend: WebglBlendOptions
     depth: WebglDepthOptions
     cull: WebglCullOptions
+    stencil: WebglStencilOptions
     name: string
 }
 
@@ -27,6 +29,7 @@ export class TgdPainterState extends TgdPainterGroup {
     private _blend?: WebglBlendOptions
     private _depth?: WebglDepthOptions
     private _cull?: WebglCullOptions
+    private _stencil?: WebglStencilOptions
 
     constructor(
         context: TgdContext,
@@ -34,6 +37,7 @@ export class TgdPainterState extends TgdPainterGroup {
             blend,
             depth,
             cull,
+            stencil,
             name,
             children = [],
         }: Partial<TgdPainterStateOptions> = {}
@@ -66,6 +70,15 @@ export class TgdPainterState extends TgdPainterGroup {
             })
             onExit.push(() => {
                 if (this._cull) webglCullSet(gl, this._cull)
+            })
+        }
+        if (stencil) {
+            onEnter.push(() => {
+                this._stencil = webglStencilGet(gl)
+                webglStencilSet(gl, stencil)
+            })
+            onExit.push(() => {
+                if (this._stencil) webglStencilSet(gl, this._stencil)
             })
         }
         super(children, {

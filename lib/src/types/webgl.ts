@@ -291,6 +291,44 @@ export enum WebglEnumBlendFunc {
     SRC_ALPHA_SATURATE = WebGL2RenderingContext.SRC_ALPHA_SATURATE,
 }
 
+export enum WebglEnumStencilFunction {
+    /** Never pass. */
+    NEVER = WebGL2RenderingContext.NEVER,
+    /** Pass if (ref & mask) < (stencil & mask). */
+    LESS = WebGL2RenderingContext.LESS,
+    /** Pass if (ref & mask) = (stencil & mask). */
+    EQUAL = WebGL2RenderingContext.EQUAL,
+    /** Pass if (ref & mask) <= (stencil & mask). */
+    LEQUAL = WebGL2RenderingContext.LEQUAL,
+    /** Pass if (ref & mask) > (stencil & mask). */
+    GREATER = WebGL2RenderingContext.GREATER,
+    /** Pass if (ref & mask) !== (stencil & mask). */
+    NOTEQUAL = WebGL2RenderingContext.NOTEQUAL,
+    /** Pass if (ref & mask) >= (stencil & mask). */
+    GEQUAL = WebGL2RenderingContext.GEQUAL,
+    /** Always pass. */
+    ALWAYS = WebGL2RenderingContext.ALWAYS,
+}
+
+export enum WebglEnumStencilOperation {
+    /** Keeps the current value. */
+    KEEP = WebGL2RenderingContext.KEEP,
+    /** Sets the stencil buffer value to 0. */
+    ZERO = WebGL2RenderingContext.ZERO,
+    /** Sets the stencil buffer value to the reference value as specified by WebGLRenderingContext.stencilFunc(). */
+    REPLACE = WebGL2RenderingContext.REPLACE,
+    /** Increments the current stencil buffer value. Clamps to the maximum representable unsigned value. */
+    INCR = WebGL2RenderingContext.INCR,
+    /** Increments the current stencil buffer value. Wraps stencil buffer value to zero when incrementing the maximum representable unsigned value. */
+    INCR_WRAP = WebGL2RenderingContext.INCR_WRAP,
+    /** Decrements the current stencil buffer value. Clamps to 0. */
+    DECR = WebGL2RenderingContext.DECR,
+    /** Decrements the current stencil buffer value. Wraps stencil buffer value to the maximum representable unsigned value when decrementing a stencil buffer value of 0. */
+    DECR_WRAP = WebGL2RenderingContext.DECR_WRAP,
+    /** Inverts the current stencil buffer value bitwise. */
+    INVERT = WebGL2RenderingContext.INVERT,
+}
+
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
  */

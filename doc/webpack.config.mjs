@@ -156,18 +156,26 @@ export default env => {
         },
         module: {
             rules: [
+                // {
+                //     test: /\.tsx?$/,
+                //     use: [
+                //         {
+                //             loader: "ts-loader",
+                //             options: {
+                //                 transpileOnly: false,
+                //             },
+                //         },
+                //     ],
+                //     exclude: /node_modules/,
+                // },
                 {
                     test: /\.tsx?$/,
-                    use: [
-                        {
-                            loader: "ts-loader",
-                            options: {
-                                transpileOnly: false,
-                            },
-                        },
-                    ],
-                    exclude: /node_modules/,
-                },
+                    loader: "esbuild-loader",
+                    options: {
+                      loader: "tsx", // Or 'ts' if you don't need tsx
+                      target: "es2015",
+                    },
+                  },          
                 {
                     test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/

@@ -4,10 +4,10 @@ import { TgdMaterial } from "@tgd/material"
 import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdPainter } from "../../painter"
-
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
+import { TgdInterfaceTransformable } from "@tgd/interface"
+import { TgdPainter } from "../../painter"
 
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
@@ -17,8 +17,11 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh extends TgdPainter {
-    public matrixTransfo = new TgdMat4()
+export class TgdPainterMesh
+    extends TgdPainter
+    implements TgdInterfaceTransformable
+{
+    public matrixTransfoGlobal = new TgdMat4()
     public readonly material: TgdMaterial
 
     private readonly prg: TgdProgram
@@ -123,7 +126,7 @@ export class TgdPainterMesh extends TgdPainter {
             material,
             drawMode,
             count,
-            matrixTransfo,
+            matrixTransfoGlobal: matrixTransfo,
         } = this
         const { gl, camera } = context
         prg.use()

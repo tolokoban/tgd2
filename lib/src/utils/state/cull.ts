@@ -6,10 +6,21 @@ export interface WebglCullOptions {
     cullFace: WebglEnumCullFace
 }
 
-export const webglPresetCull: Record<"back", WebglCullOptions> = {
+export const webglPresetCull: Record<
+    "off" | "back" | "front",
+    WebglCullOptions
+> = {
+    off: {
+        enabled: false,
+        cullFace: WebglEnumCullFace.BACK,
+    },
     back: {
         enabled: true,
         cullFace: WebglEnumCullFace.BACK,
+    },
+    front: {
+        enabled: true,
+        cullFace: WebglEnumCullFace.FRONT,
     },
 }
 
@@ -45,7 +56,7 @@ export function webglCullExec(
 
 export function webglDebugCull(
     gl: WebGL2RenderingContext,
-    caption = "Cull enabled:"
+    caption = "Cull test:"
 ) {
     console.log(caption)
     const cull = webglCullGet(gl)

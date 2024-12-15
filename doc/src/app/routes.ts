@@ -33,6 +33,8 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/filter/custom": ["/articles/painter/filter/custom"],
     "/articles/painter/filter/hue": ["/articles/painter/filter/hue"],
     "/articles/painter/logic": ["/articles/painter/logic"],
+    "/articles/state": ["/articles/state"],
+    "/articles/state/stencil": ["/articles/state/stencil"],
     "/articles/suzanne": ["/articles/suzanne"],
     "/articles/test": ["/articles/test"],
     "/articles/texture": ["/articles/texture"],

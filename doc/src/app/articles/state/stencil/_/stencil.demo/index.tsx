@@ -1,0 +1,25 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./stencil.demo"
+
+const FOCUS = {"Detail #1":"    const camera = new TgdCameraPerspective({\n        distance: 3,\n        far: 100,\n        near: 0.01,\n        fovy: Math.PI / 4,\n        zoom: 1,\n    })\n    ctx.camera = camera\n    const controller = new TgdControllerCameraOrbit(ctx, {\n        speedPanning: 0,\n        inertiaOrbit: 1000,\n    })\n    const clear = new TgdPainterClear(ctx, {\n        depth: 1,\n        stencil: 0,\n    })\n    const texture = ctx.textures2D.create({\n        image: BackgroundURL,\n    })\n    const background = new TgdPainterBackground(ctx, texture)\n    const statePaint = new TgdPainterState(ctx, {\n        depth: webglPresetDepth.less,\n        // stencil: webglPresetStencil.paintIf0,\n    })\n    ctx.add(clear, background, statePaint)\n    ctx.paint()\n\n    tgdLoadAssets({\n        glb: {\n            suzanne: \"/mesh/suzanne.glb\",\n            ring: \"/mesh/ring.glb\",\n        },\n    })\n        .then(({ glb }) => {\n            const { ring, suzanne } = glb\n\n            if (ring) {\n                const ringPainter = new TgdPainterMeshGltf(ctx, {\n                    asset: ring,\n                })\n                statePaint.add(ringPainter)\n            }\n            if (suzanne) {\n                const suzannePainter = new TgdPainterMeshGltf(ctx, {\n                    asset: suzanne,\n                })\n                statePaint.add(suzannePainter)\n            }\n            ctx.paint()\n        })\n        .catch(console.error)"}
+const FULL = "import {\n    TgdCameraPerspective,\n    TgdContext,\n    TgdControllerCameraOrbit,\n    tgdLoadAssets,\n    tgdLoadGlb,\n    TgdPainterBackground,\n    TgdPainterClear,\n    TgdPainterMeshGltf,\n    TgdPainterState,\n    webglPresetDepth,\n    webglPresetStencil,\n} from \"@tolokoban/tgd\"\nimport View from \"@/components/demo/Tgd\"\n\nimport BackgroundURL from \"@/gfx/image/dino.webp\"\n\nfunction init(ctx: TgdContext) {\n    const camera = new TgdCameraPerspective({\n        distance: 3,\n        far: 100,\n        near: 0.01,\n        fovy: Math.PI / 4,\n        zoom: 1,\n    })\n    ctx.camera = camera\n    const controller = new TgdControllerCameraOrbit(ctx, {\n        speedPanning: 0,\n        inertiaOrbit: 1000,\n    })\n    const clear = new TgdPainterClear(ctx, {\n        depth: 1,\n        stencil: 0,\n    })\n    const texture = ctx.textures2D.create({\n        image: BackgroundURL,\n    })\n    const background = new TgdPainterBackground(ctx, texture)\n    const statePaint = new TgdPainterState(ctx, {\n        depth: webglPresetDepth.less,\n        // stencil: webglPresetStencil.paintIf0,\n    })\n    ctx.add(clear, background, statePaint)\n    ctx.paint()\n\n    tgdLoadAssets({\n        glb: {\n            suzanne: \"/mesh/suzanne.glb\",\n            ring: \"/mesh/ring.glb\",\n        },\n    })\n        .then(({ glb }) => {\n            const { ring, suzanne } = glb\n\n            if (ring) {\n                const ringPainter = new TgdPainterMeshGltf(ctx, {\n                    asset: ring,\n                })\n                statePaint.add(ringPainter)\n            }\n            if (suzanne) {\n                const suzannePainter = new TgdPainterMeshGltf(ctx, {\n                    asset: suzanne,\n                })\n                statePaint.add(suzannePainter)\n            }\n            ctx.paint()\n        })\n        .catch(console.error)\n}\n\nexport default function Demo() {\n    return (\n        <View\n            onReady={init}\n            options={{\n                depth: true,\n                stencil: true,\n                antialias: true,\n            }}\n        />\n    )\n}\n"
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
+}
