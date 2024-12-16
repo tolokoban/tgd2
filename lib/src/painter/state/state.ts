@@ -18,6 +18,7 @@ import {
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
+    color: boolean | [boolean, boolean, boolean, boolean]
     blend: WebglBlendOptions
     depth: WebglDepthOptions
     cull: WebglCullOptions
@@ -26,6 +27,7 @@ export interface TgdPainterStateOptions {
 }
 
 export class TgdPainterState extends TgdPainterGroup {
+    private _color?: [boolean, boolean, boolean, boolean]
     private _blend?: WebglBlendOptions
     private _depth?: WebglDepthOptions
     private _cull?: WebglCullOptions
@@ -34,6 +36,7 @@ export class TgdPainterState extends TgdPainterGroup {
     constructor(
         context: TgdContext,
         {
+            color,
             blend,
             depth,
             cull,
@@ -45,6 +48,22 @@ export class TgdPainterState extends TgdPainterGroup {
         const { gl } = context
         const onEnter: Array<() => void> = []
         const onExit: Array<() => void> = []
+        const colorMask: undefined | [boolean, boolean, boolean, boolean] =
+            figureOutColorMask(color)
+        if (Array.isArray(colorMask)) {
+            onEnter.push(() => {
+                this._color = gl.getParameter(gl.COLOR_WRITEMASK) as [
+                    boolean,
+                    boolean,
+                    boolean,
+                    boolean
+                ]
+                gl.colorMask(...colorMask)
+            })
+            onExit.push(() => {
+                gl.colorMask(...(this._color ?? [true, true, true, true]))
+            })
+        }
         if (blend) {
             onEnter.push(() => {
                 this._blend = webglBlendGet(gl)
@@ -91,4 +110,12 @@ export class TgdPainterState extends TgdPainterGroup {
         })
         this.name = name ?? `State/${this.name}`
     }
+}
+
+function figureOutColorMask(
+    color: boolean | [boolean, boolean, boolean, boolean] | undefined
+): [boolean, boolean, boolean, boolean] | undefined {
+    if (color === true) return [true, true, true, true]
+    if (color === false) return [false, false, false, false]
+    return color
 }

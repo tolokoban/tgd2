@@ -3,6 +3,8 @@ import { WebglEnumStencilFunction, WebglEnumStencilOperation } from "@tgd/types"
 
 export interface WebglStencilOptions {
     enabled: boolean
+    maskBack: number
+    maskFront: number
     functionBack: WebglEnumStencilFunction
     functionBackMask: number
     functionBackRef: number
@@ -22,6 +24,8 @@ export const webglPresetStencil: Readonly<
 > = {
     off: {
         enabled: false,
+        maskBack: 0,
+        maskFront: 0,
         functionBack: WebglEnumStencilFunction.ALWAYS,
         functionBackMask: 0,
         functionBackRef: 0,
@@ -38,12 +42,14 @@ export const webglPresetStencil: Readonly<
     /** Set the stencil to 1 behinf each fragment. */
     write1: {
         enabled: true,
+        maskBack: 0x01,
+        maskFront: 0x01,
         functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackMask: 0xff,
         functionBackRef: 1,
+        functionBackMask: 0x01,
         functionFront: WebglEnumStencilFunction.ALWAYS,
-        functionFrontMask: 0xff,
         functionFrontRef: 1,
+        functionFrontMask: 0x01,
         operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
         operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
         operationBack3Pass: WebglEnumStencilOperation.KEEP,
@@ -51,15 +57,17 @@ export const webglPresetStencil: Readonly<
         operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
         operationFront3Pass: WebglEnumStencilOperation.REPLACE,
     },
-    /** Paint only if the stencil is equal to 1 */
-    paintIf1: {
+    /** Paint only if the stencil is equal to 0 */
+    paintIf0: {
         enabled: true,
+        maskBack: 0x00,
+        maskFront: 0x00,
         functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackMask: 0,
         functionBackRef: 0,
+        functionBackMask: 0x01,
         functionFront: WebglEnumStencilFunction.EQUAL,
+        functionFrontRef: 0,
         functionFrontMask: 0x01,
-        functionFrontRef: 1,
         operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
         operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
         operationBack3Pass: WebglEnumStencilOperation.KEEP,
@@ -67,15 +75,17 @@ export const webglPresetStencil: Readonly<
         operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
         operationFront3Pass: WebglEnumStencilOperation.KEEP,
     },
-    /** Paint only if the stencil is equal to 0 */
-    paintIf0: {
+    /** Paint only if the stencil is equal to 1 */
+    paintIf1: {
+        maskBack: 0x00,
+        maskFront: 0x00,
         enabled: true,
         functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackMask: 0,
-        functionBackRef: 0,
+        functionBackRef: 1,
+        functionBackMask: 0x01,
         functionFront: WebglEnumStencilFunction.EQUAL,
+        functionFrontRef: 1,
         functionFrontMask: 0x01,
-        functionFrontRef: 0,
         operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
         operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
         operationBack3Pass: WebglEnumStencilOperation.KEEP,
@@ -117,6 +127,8 @@ export function webglStencilSet(
             stencil.operationBack2FailDepth,
             stencil.operationBack3Pass
         )
+        gl.stencilMaskSeparate(gl.FRONT, stencil.maskFront)
+        gl.stencilMaskSeparate(gl.BACK, stencil.maskBack)
     }
 }
 
@@ -128,6 +140,8 @@ export function webglStencilGet(
 
     return {
         enabled,
+        maskBack: gl.getParameter(gl.STENCIL_BACK_WRITEMASK) as number,
+        maskFront: gl.getParameter(gl.STENCIL_WRITEMASK) as number,
         functionFront: gl.getParameter(
             gl.STENCIL_FUNC
         ) as WebglEnumStencilFunction,
@@ -177,28 +191,32 @@ export function webglDebugStencil(
     gl: WebGL2RenderingContext,
     caption = "Stencil test:"
 ) {
-    console.log(caption)
     const stencil = webglStencilGet(gl)
-    debug([caption, stencil.enabled])
+    debug([`Stencil ${caption}: `, stencil.enabled])
+    console.log(stencil)
     if (!stencil.enabled) {
         debug([{ cls: "code" }, [`gl.disable(`, highlightEnum("STENCIL_TEST")]])
     } else {
         debug([
             { cls: "code" },
-            [`gl.enable(`, highlightEnum("STENCIL_TEST")],
+            [`gl.enable(`, highlightEnum("STENCIL_TEST"), ")\n"],
             [
                 "gl.stencilFuncSeparate(",
                 highlightEnum("FRONT"),
                 ", ",
                 highlightEnum(stencil.functionFront),
-                `, ${stencil.functionFrontRef}, ${stencil.functionFrontMask})`,
+                `, ${
+                    stencil.functionFrontRef
+                }, 0b${stencil.functionFrontMask.toString(2)})\n`,
             ],
             [
                 "gl.stencilFuncSeparate(",
                 highlightEnum("BACK"),
                 ", ",
                 highlightEnum(stencil.functionBack),
-                `, ${stencil.functionBackRef}, ${stencil.functionBackMask})`,
+                `, ${
+                    stencil.functionBackRef
+                }, 0b${stencil.functionBackMask.toString(2)})\n`,
             ],
             [
                 "gl.stencilOpSeparate(",
@@ -209,7 +227,7 @@ export function webglDebugStencil(
                 highlightEnum(stencil.operationFront2FailDepth),
                 ", ",
                 highlightEnum(stencil.operationFront3Pass),
-                ")",
+                ")\n",
             ],
             [
                 "gl.stencilOpSeparate(",
@@ -220,7 +238,17 @@ export function webglDebugStencil(
                 highlightEnum(stencil.operationBack2FailDepth),
                 ", ",
                 highlightEnum(stencil.operationBack3Pass),
-                ")",
+                ")\n",
+            ],
+            [
+                "gl.stencilMaskSeparate(",
+                highlightEnum("FRONT"),
+                `, 0b${stencil.maskFront.toString(2)})\n`,
+            ],
+            [
+                "gl.stencilMaskSeparate(",
+                highlightEnum("BACK"),
+                `, 0b${stencil.maskBack.toString(2)})\n`,
             ],
         ])
     }

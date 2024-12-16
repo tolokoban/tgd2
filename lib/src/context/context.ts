@@ -97,6 +97,7 @@ export class TgdContext implements TgdContextInterface {
         public readonly canvas: HTMLCanvasElement,
         private readonly options: TgdContextOptions = {}
     ) {
+        console.log("🚀 [context] options = ", options) // @FIXME: Remove this line written on 2024-12-16 at 12:48
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw Error("Unable to create a WebGL2 context!")
 

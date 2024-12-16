@@ -174,6 +174,5 @@ async function loadAssets({
         })
     }
     await Promise.all(loaders.map(loader => loader()))
-    console.log("🚀 [Tgd] assets = ", assets) // @FIXME: Remove this line written on 2024-11-08 at 14:35
     return assets
 }

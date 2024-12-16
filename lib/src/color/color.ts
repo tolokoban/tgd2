@@ -50,7 +50,7 @@ export class TgdColor {
         return `#${hex(R)}${hex(G)}${hex(B)}${hex(A)}`
     }
 
-    public rgb2hsl() {
+    public rgb2hsl(): this {
         const R = this.R
         const G = this.G
         const B = this.B
@@ -77,9 +77,10 @@ export class TgdColor {
                 this.H = INV_6 * (VAL_4 + (R - G) / delta)
             }
         }
+        return this
     }
 
-    public hsl2rgb() {
+    public hsl2rgb(): this {
         const H = VAL_6 * this.H
         const S = this.S
         const L = this.L
@@ -89,6 +90,7 @@ export class TgdColor {
         this.R = R + shift
         this.G = G + shift
         this.B = B + shift
+        return this
     }
 }
 

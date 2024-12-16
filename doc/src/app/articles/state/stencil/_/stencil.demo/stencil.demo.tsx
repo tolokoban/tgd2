@@ -4,18 +4,27 @@ import {
     TgdControllerCameraOrbit,
     tgdLoadAssets,
     tgdLoadGlb,
+    TgdMaterialDiffuse,
+    TgdMaterialGhost,
+    TgdMaterialSolid,
     TgdPainterBackground,
     TgdPainterClear,
+    TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdParserGLTransfertFormatBinary,
+    TgdVec4,
+    webglDebugStencil,
+    WebglEnumCullFace,
+    webglPresetCull,
     webglPresetDepth,
     webglPresetStencil,
 } from "@tolokoban/tgd"
-import View from "@/components/demo/Tgd"
+import View, { Assets } from "@/components/demo/Tgd"
 
 import BackgroundURL from "@/gfx/image/dino.webp"
 
-function init(ctx: TgdContext) {
+function init(ctx: TgdContext, assets: Assets) {
     // #begin
     const camera = new TgdCameraPerspective({
         distance: 3,
@@ -25,49 +34,45 @@ function init(ctx: TgdContext) {
         zoom: 1,
     })
     ctx.camera = camera
-    const controller = new TgdControllerCameraOrbit(ctx, {
+    new TgdControllerCameraOrbit(ctx, {
         speedPanning: 0,
         inertiaOrbit: 1000,
     })
-    const clear = new TgdPainterClear(ctx, {
-        depth: 1,
-        stencil: 0,
-    })
-    const texture = ctx.textures2D.create({
-        image: BackgroundURL,
-    })
-    const background = new TgdPainterBackground(ctx, texture)
-    const statePaint = new TgdPainterState(ctx, {
-        depth: webglPresetDepth.less,
-        // stencil: webglPresetStencil.paintIf0,
-    })
-    ctx.add(clear, background, statePaint)
-    ctx.paint()
-
-    tgdLoadAssets({
-        glb: {
-            suzanne: "/mesh/suzanne.glb",
-            ring: "/mesh/ring.glb",
-        },
-    })
-        .then(({ glb }) => {
-            const { ring, suzanne } = glb
-
-            if (ring) {
-                const ringPainter = new TgdPainterMeshGltf(ctx, {
-                    asset: ring,
-                })
-                statePaint.add(ringPainter)
-            }
-            if (suzanne) {
-                const suzannePainter = new TgdPainterMeshGltf(ctx, {
-                    asset: suzanne,
-                })
-                statePaint.add(suzannePainter)
-            }
-            ctx.paint()
+    ctx.add(
+        new TgdPainterClear(ctx, {
+            depth: 1,
+            stencil: 0,
+        }),
+        new TgdPainterBackground(
+            ctx,
+            ctx.textures2D.create({
+                image: BackgroundURL,
+            })
+        ),
+        new TgdPainterState(ctx, {
+            color: false,
+            depth: webglPresetDepth.off,
+            cull: webglPresetCull.back,
+            stencil: webglPresetStencil.write1,
+            children: [
+                new TgdPainterMeshGltf(ctx, {
+                    asset: assets.glb.ring,
+                    materialFactory: () => new TgdMaterialSolid(),
+                }),
+            ],
+        }),
+        new TgdPainterState(ctx, {
+            depth: webglPresetDepth.less,
+            cull: webglPresetCull.back,
+            stencil: webglPresetStencil.paintIf0,
+            children: [
+                new TgdPainterMeshGltf(ctx, {
+                    asset: assets.glb.suzanne,
+                }),
+            ],
         })
-        .catch(console.error)
+    )
+    ctx.paint()
     // #end
 }
 
@@ -79,6 +84,12 @@ export default function Demo() {
                 depth: true,
                 stencil: true,
                 antialias: true,
+            }}
+            assets={{
+                glb: {
+                    suzanne: "/mesh/suzanne.glb",
+                    ring: "/mesh/ring.glb",
+                },
             }}
         />
     )
