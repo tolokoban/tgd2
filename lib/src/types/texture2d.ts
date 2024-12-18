@@ -1,5 +1,6 @@
 import { TgdProgram } from "./program"
 import {
+    WebglEnumTex2DInternalFormat,
     WebglImage,
     WebglMagFilter,
     WebglMinFilter,
@@ -34,6 +35,15 @@ export interface TgdTexture2D {
     readonly height: number
     readonly image: null | WebglImage
     bind(): void
+    copyTexImage2D(
+        level?: number,
+        internalFormat?: WebglEnumTex2DInternalFormat,
+        x?: number,
+        y?: number,
+        width?: number,
+        height?: number,
+        border?: number
+    ): void
     activate(program: TgdProgram, uniformName: string, slot?: number): void
     loadImage(image: string | WebglImage): void
     makePalette(colors: string[], columns?: number): void

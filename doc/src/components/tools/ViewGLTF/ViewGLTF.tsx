@@ -1,5 +1,5 @@
 import {
-    tgdFetchArrayBuffer,
+    tgdLoadArrayBuffer,
     TgdParserGLTransfertFormatBinary,
 } from "@tolokoban/tgd"
 import { Theme } from "@tolokoban/ui"
@@ -92,7 +92,7 @@ function useParser(): [
     const [parser, setParser] =
         React.useState<TgdParserGLTransfertFormatBinary | null>(null)
     React.useEffect(() => {
-        tgdFetchArrayBuffer(DefaultModelURL)
+        tgdLoadArrayBuffer(DefaultModelURL)
             .then(content => {
                 const parser = new TgdParserGLTransfertFormatBinary(content)
                 setParser(parser)

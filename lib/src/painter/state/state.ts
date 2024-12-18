@@ -15,6 +15,7 @@ import {
     webglStencilGet,
     webglStencilSet,
 } from "@tgd/utils/state"
+import { TgdPainterFunction } from "@tgd/types/painter"
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
@@ -24,6 +25,14 @@ export interface TgdPainterStateOptions {
     cull: WebglCullOptions
     stencil: WebglStencilOptions
     name: string
+    /**
+     * Function to execute before painting.
+     */
+    onEnter?: TgdPainterFunction
+    /**
+     * Function to execute after painting.
+     */
+    onExit?: TgdPainterFunction
 }
 
 export class TgdPainterState extends TgdPainterGroup {
@@ -43,15 +52,17 @@ export class TgdPainterState extends TgdPainterGroup {
             stencil,
             name,
             children = [],
+            onEnter,
+            onExit,
         }: Partial<TgdPainterStateOptions> = {}
     ) {
         const { gl } = context
-        const onEnter: Array<() => void> = []
-        const onExit: Array<() => void> = []
+        const onEnterActions: Array<() => void> = []
+        const onExitActions: Array<() => void> = []
         const colorMask: undefined | [boolean, boolean, boolean, boolean] =
             figureOutColorMask(color)
         if (Array.isArray(colorMask)) {
-            onEnter.push(() => {
+            onEnterActions.push(() => {
                 this._color = gl.getParameter(gl.COLOR_WRITEMASK) as [
                     boolean,
                     boolean,
@@ -60,52 +71,54 @@ export class TgdPainterState extends TgdPainterGroup {
                 ]
                 gl.colorMask(...colorMask)
             })
-            onExit.push(() => {
+            onExitActions.push(() => {
                 gl.colorMask(...(this._color ?? [true, true, true, true]))
             })
         }
         if (blend) {
-            onEnter.push(() => {
+            onEnterActions.push(() => {
                 this._blend = webglBlendGet(gl)
                 webglBlendSet(gl, blend)
             })
-            onExit.push(() => {
+            onExitActions.push(() => {
                 if (this._blend) webglBlendSet(gl, this._blend)
             })
         }
         if (depth) {
-            onEnter.push(() => {
+            onEnterActions.push(() => {
                 this._depth = webglDepthGet(gl)
                 webglDepthSet(gl, depth)
             })
-            onExit.push(() => {
+            onExitActions.push(() => {
                 if (this._depth) webglDepthSet(gl, this._depth)
             })
         }
         if (cull) {
-            onEnter.push(() => {
+            onEnterActions.push(() => {
                 this._cull = webglCullGet(gl)
                 webglCullSet(gl, cull)
             })
-            onExit.push(() => {
+            onExitActions.push(() => {
                 if (this._cull) webglCullSet(gl, this._cull)
             })
         }
         if (stencil) {
-            onEnter.push(() => {
+            onEnterActions.push(() => {
                 this._stencil = webglStencilGet(gl)
                 webglStencilSet(gl, stencil)
             })
-            onExit.push(() => {
+            onExitActions.push(() => {
                 if (this._stencil) webglStencilSet(gl, this._stencil)
             })
         }
         super(children, {
-            onEnter(_time, _delay) {
-                onEnter.forEach(f => f())
+            onEnter(time, delay) {
+                onEnter?.(time, delay)
+                onEnterActions.forEach(f => f())
             },
-            onExit(_time, _delay) {
-                onExit.forEach(f => f())
+            onExit(time, delay) {
+                onExitActions.forEach(f => f())
+                onExit?.(time, delay)
             },
         })
         this.name = name ?? `State/${this.name}`

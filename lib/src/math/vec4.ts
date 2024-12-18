@@ -1,17 +1,18 @@
-import { ArrayNumber4 } from ".."
+import { ArrayNumber3, ArrayNumber4 } from "../types"
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 
 export class TgdVec4 extends Float32Array {
     constructor()
-    constructor(vec4: TgdVec4)
-    constructor(vec3: TgdVec3, w: number)
+    constructor(vec4: TgdVec4 | ArrayNumber4)
+    constructor(vec3: TgdVec3 | ArrayNumber3, w: number)
     constructor(x: number)
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
+    // eslint-disable-next-line max-statements
     constructor(
-        x: number | TgdVec4 | TgdVec3 = 0,
+        x: number | TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3 = 0,
         y: number = 0,
         z: number = 0,
         w: number = 1
@@ -30,6 +31,23 @@ export class TgdVec4 extends Float32Array {
             this.z = x.z
             this.w = w
             return
+        }
+        if (Array.isArray(x)) {
+            if (typeof y === "number") {
+                const [xx, yy, zz] = x
+                this.x = xx ?? 0
+                this.y = yy ?? 0
+                this.z = zz ?? 0
+                this.w = y
+                return
+            } else {
+                const [xx, yy, zz, ww] = x
+                this.x = xx ?? 0
+                this.y = yy ?? 0
+                this.z = zz ?? 0
+                this.w = ww ?? 1
+                return
+            }
         }
         this.x = x
         this.y = y

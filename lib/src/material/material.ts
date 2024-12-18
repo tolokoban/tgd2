@@ -1,4 +1,4 @@
-import { CodeBloc } from "@tgd/shader/code"
+import { TgdCodeBloc } from "@tgd/shader/code"
 import { TgdProgram, WebglAttributeType, WebglUniformType } from ".."
 
 export abstract class TgdMaterial {
@@ -18,12 +18,21 @@ export abstract class TgdMaterial {
     /**
      * The code of a `vec4 applyMaterial()` function.
      */
-    abstract readonly fragmentShaderCode: CodeBloc
+    abstract readonly fragmentShaderCode: TgdCodeBloc
 
     /**
      * The code of a `void applyMaterial()` function.
      */
-    abstract readonly vertexShaderCode: CodeBloc
+    abstract readonly vertexShaderCode: TgdCodeBloc
 
-    abstract setUniforms(program: TgdProgram): void
+    /**
+     * Body of the function `vec4 getPosition(vec4 pos)` of the vertex shader.
+     *
+     * By default, this body is `return pos;`.
+     * Yo can use this code to apply any transformation on the vertex position
+     * before convertion to screen space.
+     */
+    vertexShaderCodeForGetPosition?: TgdCodeBloc
+
+    abstract setUniforms(program: TgdProgram, time: number, delay: number): void
 }

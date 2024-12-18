@@ -1,11 +1,11 @@
-import { CodeBloc } from "@tgd/shader/code"
-import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from ".."
+import { TgdCodeBloc } from "@tgd/shader/code"
+import { ArrayNumber4, TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from ".."
 
 export interface TgdProgramOptions {
     /** Code of the vertex shader */
-    vert: CodeBloc
+    vert: TgdCodeBloc
     /** Code of the fragment shader */
-    frag: CodeBloc
+    frag: TgdCodeBloc
 }
 
 export interface TgdProgram {

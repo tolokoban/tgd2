@@ -1,8 +1,8 @@
 import { WebglAttributeType, WebglUniformType } from ".."
 import {
-    CodeBloc,
-    Functions,
-    Variables,
+    TgdCodeBloc,
+    TgdCodeFunctions,
+    TgdCodeVariables,
     funcs,
     tgdCodeStringify,
     vars,
@@ -14,9 +14,9 @@ import {
  */
 export class TgdShaderFragment {
     public precision: "lowp" | "mediump" | "highp" = "mediump"
-    public uniforms: Variables<WebglUniformType>
-    public varying: Variables<WebglAttributeType>
-    public outputs: Variables<WebglAttributeType>
+    public uniforms: TgdCodeVariables<WebglUniformType>
+    public varying: TgdCodeVariables<WebglAttributeType>
+    public outputs: TgdCodeVariables<WebglAttributeType>
     /**
      * The key should be the signatureof a function
      * (like `vec2 scale(vec2 v, float s)`)
@@ -24,8 +24,8 @@ export class TgdShaderFragment {
      *
      * But if the key starts with a `_`, then the content of the value is uses verbatim.
      */
-    public functions: Functions | CodeBloc
-    public mainCode: CodeBloc
+    public functions: TgdCodeFunctions | TgdCodeBloc
+    public mainCode: TgdCodeBloc
 
     constructor({
         precision = "mediump",
@@ -38,11 +38,11 @@ export class TgdShaderFragment {
         mainCode = ["FragColor = vec4(1, 0.667, 0, 1);"],
     }: Partial<{
         precision: "lowp" | "mediump" | "highp"
-        uniforms: Variables<WebglUniformType>
-        outputs: Variables<WebglAttributeType>
-        varying: Variables<WebglAttributeType>
-        functions: Functions | CodeBloc
-        mainCode: CodeBloc
+        uniforms: TgdCodeVariables<WebglUniformType>
+        outputs: TgdCodeVariables<WebglAttributeType>
+        varying: TgdCodeVariables<WebglAttributeType>
+        functions: TgdCodeFunctions | TgdCodeBloc
+        mainCode: TgdCodeBloc
     }> = {}) {
         this.precision = precision
         this.uniforms = uniforms

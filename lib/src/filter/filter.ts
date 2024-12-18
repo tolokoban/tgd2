@@ -1,4 +1,5 @@
-import { CodeBloc, Functions } from "@tgd/shader/code"
+import { TgdContext } from "@tgd/context"
+import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import { TgdProgram, WebglUniformType } from "@tgd/types"
 
 /**
@@ -25,18 +26,20 @@ export class TgdFilter {
      * The code of a `vec4 applyColor()` function.
      * Must return a `vec4` color.
      */
-    public readonly fragmentShaderCode: CodeBloc = [
+    public readonly fragmentShaderCode: TgdCodeBloc = [
         "vec4 color = texture(uniTexture, varUV);",
         "return color;",
     ]
 
-    public readonly extraFunctions: Functions | CodeBloc = {}
+    public readonly extraFunctions: TgdCodeFunctions | TgdCodeBloc = {}
 
     public readonly setUniforms = (
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         program: TgdProgram,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        time: number
+        time: number,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        context: TgdContext
     ): void => {}
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
@@ -51,7 +54,7 @@ export class TgdFilter {
 
 export interface TgdFilterOptions {
     uniforms: { [name: string]: WebglUniformType }
-    fragmentShaderCode: CodeBloc
-    extraFunctions: Functions | CodeBloc
-    setUniforms(program: TgdProgram, time: number): void
+    fragmentShaderCode: TgdCodeBloc
+    extraFunctions: TgdCodeFunctions | TgdCodeBloc
+    setUniforms(program: TgdProgram, time: number, context: TgdContext): void
 }

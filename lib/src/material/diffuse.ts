@@ -6,13 +6,15 @@ import {
 } from "@tgd/types"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
-import { CodeBloc } from "@tgd/shader/code"
+import { TgdCodeBloc } from "@tgd/shader/code"
 import { TgdLight } from "@tgd/light"
 
 export type TgdMaterialDiffuseOptions = Partial<{
     color: TgdVec4 | TgdTexture2D
     light: TgdLight
     ambient: TgdLight
+    specularExponent: number
+    specularIntensity: number
 }>
 
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.8, 0.8, 1)
@@ -20,15 +22,19 @@ const DEFAULT_COLOR = new TgdVec4(0.8, 0.8, 0.8, 1)
 export class TgdMaterialDiffuse extends TgdMaterial {
     public light = new TgdLight()
     public ambient = new TgdLight({ color: new TgdVec4(0.8, 0.8, 0.8, 0) })
+    public specularExponent = 20
+    public specularIntensity = 1
 
     public readonly varyings: { [name: string]: WebglAttributeType }
     public readonly uniforms: { [name: string]: WebglUniformType } = {
         uniLight: "vec3",
         uniLightDir: "vec3",
         uniAmbient: "vec3",
+        uniSpecularExponent: "float",
+        uniSpecularIntensity: "float",
     }
-    public readonly fragmentShaderCode: CodeBloc
-    public readonly vertexShaderCode: CodeBloc
+    public readonly fragmentShaderCode: TgdCodeBloc
+    public readonly vertexShaderCode: TgdCodeBloc
 
     private readonly texture: TgdTexture2D | null
     private readonly lightColor = new TgdVec3()
@@ -43,6 +49,12 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         if (options.ambient) {
             this.ambient = options.ambient
         }
+        if (typeof options.specularExponent === "number") {
+            this.specularExponent = options.specularExponent
+        }
+        if (typeof options.specularIntensity === "number") {
+            this.specularIntensity = options.specularIntensity
+        }
         const hasTexture = !(color instanceof TgdVec4)
         this.texture = hasTexture ? color : null
         this.fragmentShaderCode = [
@@ -52,10 +64,9 @@ export class TgdMaterialDiffuse extends TgdMaterial {
                 ? `vec4 color = texture(texDiffuse, varUV);`
                 : `vec4 color = vec4(${color.join(", ")});`,
             `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
-            `spec = pow(spec, 20.0);`,
+            `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
             `color = vec4(`,
             `  color.rgb * (`,
-            // `    mix(uniAmbient, uniLight, light)`,
             `    uniAmbient + uniLight * light`,
             `  ) + vec3(spec),`,
             `  1.0`,
@@ -81,6 +92,8 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         program.uniform3fv("uniLight", this.lightColor)
         this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
         program.uniform3fv("uniAmbient", this.ambientColor)
+        program.uniform1f("uniSpecularExponent", this.specularExponent)
+        program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
         const { texture } = this
         if (texture) texture.activate(program, "texDiffuse")

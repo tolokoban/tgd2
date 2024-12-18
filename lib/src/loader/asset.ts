@@ -1,36 +1,53 @@
 import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
 import { tgdLoadGlb } from "./binary"
+import { tgdLoadImage } from "./image"
 
-export async function tgdLoadAssets<GLB extends string>(urls: {
-    glb?: Record<GLB, string>
-}): Promise<{
+export async function tgdLoadAssets<GLB extends string, IMG extends string>(
+    urls: Partial<{
+        glb: Record<GLB, string>
+        img: Record<IMG, string>
+    }>
+): Promise<{
     glb: Record<GLB, TgdParserGLTransfertFormatBinary>
+    img: Record<IMG, HTMLImageElement>
 }> {
-    const result = {
-        glb: {},
-    } as {
-        glb: Record<GLB, TgdParserGLTransfertFormatBinary>
-    }
-    const glbNames = (urls.glb ? Object.keys(urls.glb) : []) as GLB[]
+    const glb = {} as Record<GLB, TgdParserGLTransfertFormatBinary>
+    const img = {} as Record<IMG, HTMLImageElement>
     const tasks: Promise<void>[] = [
-        ...glbNames.map(
-            name =>
-                new Promise<void>(resolve => {
-                    const url = urls.glb?.[name]
-                    if (!url) {
-                        resolve()
-                        return
-                    }
-
-                    tgdLoadGlb(url)
-                        .then(glb => {
-                            if (glb) result.glb[name] = glb
-                            resolve()
-                        })
-                        .catch(resolve)
-                })
-        ),
+        ...getPromisedLoaders(tgdLoadGlb, urls.glb, glb),
+        ...getPromisedLoaders(tgdLoadImage, urls.img, img),
     ]
     await Promise.all(tasks)
-    return result
+    return { glb, img }
+}
+
+function getPromisedLoaders<N extends string, V>(
+    loader: (url: string) => Promise<V | null>,
+    urls: Record<N, string> | undefined,
+    target: Record<N, V>
+) {
+    return Object.keys(urls ?? {}).map(
+        name =>
+            new Promise<void>(resolve => {
+                if (!urls) {
+                    resolve()
+                    return
+                }
+                const url = urls[name as N]
+                if (!url) {
+                    resolve()
+                    return
+                }
+
+                loader(url)
+                    .then(value => {
+                        if (value) target[name as N] = value
+                        resolve()
+                    })
+                    .catch(() => {
+                        console.error("Unable to load URL ", url)
+                        resolve()
+                    })
+            })
+    )
 }

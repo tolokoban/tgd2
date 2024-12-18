@@ -420,3 +420,16 @@ export enum WebglEnumCullFace {
     BACK = WebGL2RenderingContext.BACK,
     FRONT_AND_BACK = WebGL2RenderingContext.FRONT_AND_BACK,
 }
+
+export enum WebglEnumTex2DInternalFormat {
+    /** : Discards the red, green and blue components and reads the alpha component. */
+    ALPHA = WebGL2RenderingContext.ALPHA,
+    /** : Discards the alpha components and reads the red, green and blue components. */
+    RGB = WebGL2RenderingContext.RGB,
+    /** : Red, green, blue and alpha components are read from the color buffer. */
+    RGBA = WebGL2RenderingContext.RGBA,
+    /** : Each color component is a luminance component, alpha is 1.0. */
+    LUMINANCE = WebGL2RenderingContext.LUMINANCE,
+    /** : Each component is a luminance/alpha component. */
+    LUMINANCE_ALPHA = WebGL2RenderingContext.LUMINANCE_ALPHA,
+}

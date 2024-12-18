@@ -1,8 +1,8 @@
 import { WebglAttributeType, WebglUniformType } from ".."
 import {
-    CodeBloc,
-    Functions,
-    Variables,
+    TgdCodeBloc,
+    TgdCodeFunctions,
+    TgdCodeVariables,
     funcs,
     tgdCodeStringify as tgdCodeToString,
     vars,
@@ -19,11 +19,11 @@ import {
  */
 export class TgdShaderVertex {
     public precision: "lowp" | "mediump" | "highp" = "mediump"
-    public uniforms: Variables<WebglUniformType>
-    public attributes: Variables<WebglAttributeType>
-    public varying: Variables<WebglAttributeType>
-    public functions: Functions
-    public mainCode: CodeBloc
+    public uniforms: TgdCodeVariables<WebglUniformType>
+    public attributes: TgdCodeVariables<WebglAttributeType>
+    public varying: TgdCodeVariables<WebglAttributeType>
+    public functions: TgdCodeFunctions
+    public mainCode: TgdCodeBloc
 
     constructor({
         precision = "mediump",
@@ -34,11 +34,11 @@ export class TgdShaderVertex {
         mainCode = [],
     }: Partial<{
         precision: "lowp" | "mediump" | "highp"
-        uniforms: Variables<WebglUniformType>
-        attributes: Variables<WebglAttributeType>
-        varying: Variables<WebglAttributeType>
-        functions: Functions
-        mainCode: CodeBloc
+        uniforms: TgdCodeVariables<WebglUniformType>
+        attributes: TgdCodeVariables<WebglAttributeType>
+        varying: TgdCodeVariables<WebglAttributeType>
+        functions: TgdCodeFunctions
+        mainCode: TgdCodeBloc
     }> = {}) {
         this.precision = precision
         this.uniforms = uniforms

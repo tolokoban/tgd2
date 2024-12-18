@@ -1,16 +1,18 @@
 import { WebglAttributeType, WebglUniformType } from ".."
 
-export interface Variables<Type extends WebglAttributeType | WebglUniformType> {
+export interface TgdCodeVariables<
+    Type extends WebglAttributeType | WebglUniformType
+> {
     [name: string]: Type
 }
 
-export interface Functions {
-    [name: string]: CodeBloc
+export interface TgdCodeFunctions {
+    [name: string]: TgdCodeBloc
 }
 
-export type CodeBloc = string | null | CodeBloc[]
+export type TgdCodeBloc = string | null | TgdCodeBloc[]
 
-export function isCodeBloc(v: unknown): v is CodeBloc {
+export function isCodeBloc(v: unknown): v is TgdCodeBloc {
     if (typeof v === "string") return true
 
     if (!Array.isArray(v)) return false
@@ -21,7 +23,7 @@ export function isCodeBloc(v: unknown): v is CodeBloc {
     return true
 }
 
-export function tgdCodeStringify(code: CodeBloc, indent = ""): string {
+export function tgdCodeStringify(code: TgdCodeBloc, indent = ""): string {
     if (typeof code === "string") return `${indent}${code}`
 
     if (!code) return ""
@@ -35,10 +37,10 @@ export function tgdCodeStringify(code: CodeBloc, indent = ""): string {
 }
 
 export function vars<Type extends WebglAttributeType | WebglUniformType>(
-    def: Variables<Type>,
+    def: TgdCodeVariables<Type>,
     prefix: string,
     comment = "----------------------------------------"
-): CodeBloc[] {
+): TgdCodeBloc[] {
     const names = Object.keys(def)
     if (names.length === 0) return []
 
@@ -49,15 +51,15 @@ export function vars<Type extends WebglAttributeType | WebglUniformType>(
 }
 
 export function funcs(
-    def: Functions | CodeBloc,
+    def: TgdCodeFunctions | TgdCodeBloc,
     comment = "Util functions"
-): CodeBloc[] {
+): TgdCodeBloc[] {
     if (isCodeBloc(def)) return [def]
 
     const names = Object.keys(def)
     if (names.length === 0) return []
 
-    const result: CodeBloc[] = [`// ${comment}`]
+    const result: TgdCodeBloc[] = [`// ${comment}`]
     names.forEach(name => {
         result.push(`${name} {`, def[name], "}", "")
     })

@@ -1,7 +1,7 @@
 import { TgdTexture2D } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
-import { TgdDataset } from "@tgd/dataset"
+import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial, TgdMaterialDiffuse } from "@tgd/material"
@@ -33,61 +33,38 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
         const color = figureColor(asset, meshIndex, primitiveIndex, context)
         const material = materialFactory({ color })
         let computeNormals = false
-        if (color instanceof TgdVec4) {
-            const dataset = new TgdDataset({
-                POSITION: "vec3",
-                NORMAL: "vec3",
-            })
-            asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
-            try {
-                asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
-            } catch (ex) {
-                // It seems to be impossible to retrieve normals.
-                // We will compute them with a smooth shading.
-                console.warn("No normals found! We will apply smooth shading.")
-                computeNormals = true
-            }
-            super(context, {
-                geometry: new TgdGeometry({
-                    dataset,
-                    elements: asset.getMeshPrimitiveIndices(
-                        meshIndex,
-                        primitiveIndex
-                    ),
-                    drawMode: "TRIANGLES",
-                    computeNormalsIfMissing: computeNormals,
-                }),
-                material,
-            })
-        } else {
-            const dataset = new TgdDataset({
-                POSITION: "vec3",
-                NORMAL: "vec3",
-                TEXCOORD_0: "vec2",
-            })
-            asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
-            try {
-                asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
-            } catch (ex) {
-                // It seems to be impossible to retrieve normals.
-                // We will compute them with a smooth shading.
-                console.warn("No normals found! We will apply smooth shading.")
-                computeNormals = true
-            }
-            asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
-            super(context, {
-                geometry: new TgdGeometry({
-                    dataset,
-                    elements: asset.getMeshPrimitiveIndices(
-                        meshIndex,
-                        primitiveIndex
-                    ),
-                    drawMode: "TRIANGLES",
-                    computeNormalsIfMissing: computeNormals,
-                }),
-                material,
-            })
+        const attributes: TgdDatasetTypeRecord = {
+            POSITION: "vec3",
+            NORMAL: "vec3",
         }
+        if (asset.getMeshPrimitive().attributes.TEXCOORD_0) {
+            attributes.TEXCOORD_0 = "vec2"
+        }
+        const dataset = new TgdDataset(attributes)
+        asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
+        if (asset.getMeshPrimitive().attributes.NORMAL) {
+            asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
+        } else {
+            // It seems to be impossible to retrieve normals.
+            // We will compute them with a smooth shading.
+            console.warn("No normals found! We will apply smooth shading.")
+            computeNormals = true
+        }
+        if (asset.getMeshPrimitive().attributes.TEXCOORD_0) {
+            asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
+        }
+        super(context, {
+            geometry: new TgdGeometry({
+                dataset,
+                elements: asset.getMeshPrimitiveIndices(
+                    meshIndex,
+                    primitiveIndex
+                ),
+                drawMode: "TRIANGLES",
+                computeNormalsIfMissing: computeNormals,
+            }),
+            material,
+        })
         this.name = options.name ?? `Gltf/${this.name}`
     }
 }

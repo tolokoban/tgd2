@@ -1,0 +1,19 @@
+import Demo from "./_/cull.demo"
+
+# Cull
+
+We can paint FRONT, BACK or BOTH faces. MOst of the time you will only want to
+display FRONT faces because BACK faces should be invisible. But in this demo, we
+use the back faces to create an effect of outilining of a mesh.
+
+This render has three passes:
+
+1. Paint the background
+2. Paint FRONT faces of the mesh
+3. Paint BACK faces of an expanded (a little bit only) mesh
+
+<Demo />
+
+---
+
+[Back](#/articles/state)

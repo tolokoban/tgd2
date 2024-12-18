@@ -1,7 +1,7 @@
 import { TgdProgram, WebglAttributeType } from "@tgd/types"
 import { TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
-import { CodeBloc } from "@tgd/shader/code"
+import { TgdCodeBloc } from "@tgd/shader/code"
 
 export type TgdMaterialGhostOptions = Partial<{
     color: TgdVec4
@@ -13,8 +13,8 @@ const DEFAULT_COLOR = new TgdVec4(0.6, 1, 0.9, 1)
 
 export class TgdMaterialGhost extends TgdMaterial {
     public readonly varyings: { [name: string]: WebglAttributeType }
-    public readonly fragmentShaderCode: CodeBloc
-    public readonly vertexShaderCode: CodeBloc
+    public readonly fragmentShaderCode: TgdCodeBloc
+    public readonly vertexShaderCode: TgdCodeBloc
 
     constructor({
         color = DEFAULT_COLOR,

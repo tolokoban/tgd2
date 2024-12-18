@@ -7,6 +7,7 @@ import {
     TgdContextInterface,
     WebglImage,
     WebglTexParameter,
+    WebglEnumTex2DInternalFormat,
 } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
 
@@ -93,6 +94,29 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             return texture
         }
         this.updateTexture()
+    }
+
+    copyTexImage2D(
+        level = 1,
+        internalFormat: WebglEnumTex2DInternalFormat = WebglEnumTex2DInternalFormat.RGBA,
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        border = 0
+    ) {
+        const { gl } = this.context
+        this.bind()
+        gl.copyTexImage2D(
+            gl.TEXTURE_2D,
+            level,
+            internalFormat,
+            x,
+            y,
+            width > 0 ? width : gl.drawingBufferWidth,
+            height > 0 ? height : gl.drawingBufferHeight,
+            border
+        )
     }
 
     resize(width: number, height: number): void {

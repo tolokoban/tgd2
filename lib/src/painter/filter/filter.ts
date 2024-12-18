@@ -88,10 +88,8 @@ export class TgdPainterFilter extends TgdPainter {
         this.filters = filters
         const vao = vaos.pop() as TgdVertexArray
         this.vaos = vaos
-        this.vao =
-            vaos.length % 2 === 0
-                ? vao
-                : createVAO(context, this.program, options.flipY ? +1 : -1)
+        const count = vaos.length + (options.flipY ? 1 : 0)
+        this.vao = count % 2 === 0 ? vao : createVAO(context, this.program, -1)
         const framebuffer = context.gl.createFramebuffer()
         if (!framebuffer) throw Error("Unable to create a WebGL Framebuffer!")
 
@@ -111,7 +109,7 @@ export class TgdPainterFilter extends TgdPainter {
     }
 
     paint(time: number): void {
-        const { vaos, texture, z } = this
+        const { vaos, texture, z, context } = this
         const { gl } = this.program
         let input = texture.glTexture
         if (vaos.length > 0) {
@@ -131,14 +129,30 @@ export class TgdPainterFilter extends TgdPainter {
                     output,
                     0
                 )
-                paintOneFilter(time, vaos[i], programs[i], filters[i], input, z)
+                paintOneFilter(
+                    time,
+                    vaos[i],
+                    programs[i],
+                    filters[i],
+                    input,
+                    z,
+                    context
+                )
                 texIndex = 1 - texIndex
                 input = output
                 output = textures[texIndex]
             }
             gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         }
-        paintOneFilter(time, this.vao, this.program, this.filter, input, z)
+        paintOneFilter(
+            time,
+            this.vao,
+            this.program,
+            this.filter,
+            input,
+            z,
+            context
+        )
         gl.bindVertexArray(null)
     }
 
@@ -189,12 +203,13 @@ function paintOneFilter(
     program: TgdProgram,
     filter: TgdFilter,
     texture: WebGLTexture,
-    z: number
+    z: number,
+    context: TgdContext
 ) {
     const { gl } = program
     program.use()
     program.uniform1f("uniZ", z)
-    filter.setUniforms(program, time)
+    filter.setUniforms(program, time, context)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     program.uniform1i("uniTexture", 0)

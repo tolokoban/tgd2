@@ -8,6 +8,7 @@ import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdPainter } from "../../painter"
+import { tgdCodeStringify } from "@tgd/shader"
 
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
@@ -59,10 +60,14 @@ export class TgdPainterMesh
             },
             varying: material.varyings,
             functions: {
-                "void applyMaterial()": material.vertexShaderCode,
+                "void applyMaterial()": tgdCodeStringify(
+                    material.vertexShaderCode
+                ),
+                "vec4 getPosition(vec4 pos)":
+                    material.vertexShaderCodeForGetPosition ?? "return pos;",
             },
             mainCode: [
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * POSITION;",
+                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * getPosition(POSITION);",
                 "applyMaterial();",
             ],
         }).code
@@ -71,7 +76,9 @@ export class TgdPainterMesh
             outputs: { FragColor: "vec4" },
             varying: material.varyings,
             functions: {
-                "vec4 applyMaterial()": material.fragmentShaderCode,
+                "vec4 applyMaterial()": tgdCodeStringify(
+                    material.fragmentShaderCode
+                ),
             },
             mainCode: [`FragColor = applyMaterial();`],
         }).code
@@ -118,7 +125,7 @@ export class TgdPainterMesh
         return { min, max }
     }
 
-    public readonly paint = () => {
+    public readonly paint = (time: number, delay: number) => {
         const {
             context,
             prg,
@@ -130,7 +137,7 @@ export class TgdPainterMesh
         } = this
         const { gl, camera } = context
         prg.use()
-        material.setUniforms(prg)
+        material.setUniforms(prg, time, delay)
         prg.uniformMatrix4fv("uniTransfoMatrix", matrixTransfo)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
