@@ -1,14 +1,10 @@
 import {
     TgdCameraPerspective,
     TgdContext,
-    TgdControllerCameraOrbit,
     TgdFilterHueRotation,
     TgdFilterZoom,
     TgdLight,
     TgdMaterialDiffuse,
-    TgdMaterialGhost,
-    TgdMaterialNormals,
-    TgdPainterBackground,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
@@ -22,7 +18,8 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import BackgroundURL from "@/gfx/image/dino.webp"
+import SuzanneURL from "@/assets/mesh/suzanne.glb"
+import BackgroundURL from "@/assets/image/dino.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
@@ -118,8 +115,7 @@ export default function Demo() {
             onReady={init}
             assets={{
                 glb: {
-                    // mesh: "/mesh/yin-yang.glb",
-                    mesh: "/mesh/suzanne.glb",
+                    mesh: SuzanneURL,
                 },
                 image: {
                     background: BackgroundURL,

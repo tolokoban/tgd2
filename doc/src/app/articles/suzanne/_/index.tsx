@@ -16,12 +16,12 @@ import {
 import View from "@/components/demo/Tgd"
 import Painter from "./painter"
 
-import PosX from "@/gfx/cubemap/test/1.webp"
-import PosY from "@/gfx/cubemap/test/2.webp"
-import PosZ from "@/gfx/cubemap/test/3.webp"
-import NegX from "@/gfx/cubemap/test/4.webp"
-import NegY from "@/gfx/cubemap/test/5.webp"
-import NegZ from "@/gfx/cubemap/test/6.webp"
+import PosX from "@/assets/cubemap/test/1.webp"
+import PosY from "@/assets/cubemap/test/2.webp"
+import PosZ from "@/assets/cubemap/test/3.webp"
+import NegX from "@/assets/cubemap/test/4.webp"
+import NegY from "@/assets/cubemap/test/5.webp"
+import NegZ from "@/assets/cubemap/test/6.webp"
 
 import FaceWEBP from "./face.webp"
 import MonkeyOBJ from "./monkey.obj"

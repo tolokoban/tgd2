@@ -2,30 +2,22 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdFilterBlur,
-    TgdFilterChromaticAberration,
     TgdFilterHueRotation,
     TgdFilterZoom,
-    TgdLight,
-    TgdMaterialDiffuse,
-    TgdMaterialGhost,
-    TgdMaterialNormals,
-    TgdPainterBackground,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
-    TgdVec3,
     TgdVec4,
-    webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
-
-import BackgroundURL from "@/gfx/image/dino.webp"
 import { Material } from "./material"
+
+import CubeURL from "@/assets/mesh/cube.glb"
+import BackgroundURL from "@/assets/image/dino.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
@@ -104,8 +96,7 @@ export default function Demo() {
             onReady={init}
             assets={{
                 glb: {
-                    // mesh: "/mesh/yin-yang.glb",
-                    mesh: "/mesh/cube.glb",
+                    mesh: CubeURL,
                 },
                 image: {
                     background: BackgroundURL,

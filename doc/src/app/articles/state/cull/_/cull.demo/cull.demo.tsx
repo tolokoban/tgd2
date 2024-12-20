@@ -3,18 +3,17 @@ import {
     TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterialHull,
-    TgdMaterialSolid,
     TgdPainterBackground,
     TgdPainterClear,
     TgdPainterMeshGltf,
     TgdPainterState,
     webglPresetCull,
     webglPresetDepth,
-    webglPresetStencil,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import BackgroundURL from "@/gfx/image/dino.webp"
+import BackgroundURL from "@/assets/image/dino.webp"
+import SuzanneURL from "@/assets/mesh/suzanne.glb"
 
 function init(ctx: TgdContext, assets: Assets) {
     // #begin
@@ -79,7 +78,7 @@ export default function Demo() {
             }}
             assets={{
                 glb: {
-                    suzanne: "/mesh/suzanne.glb",
+                    suzanne: SuzanneURL,
                 },
             }}
         />

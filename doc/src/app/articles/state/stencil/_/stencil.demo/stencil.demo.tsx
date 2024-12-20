@@ -13,7 +13,9 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import BackgroundURL from "@/gfx/image/dino.webp"
+import BackgroundURL from "@/assets/image/dino.webp"
+import RingURL from "@/assets/mesh/ring.glb"
+import SuzanneURL from "@/assets/mesh/suzanne.glb"
 
 function init(ctx: TgdContext, assets: Assets) {
     // #begin
@@ -78,8 +80,8 @@ export default function Demo() {
             }}
             assets={{
                 glb: {
-                    suzanne: "/mesh/suzanne.glb",
-                    ring: "/mesh/ring.glb",
+                    suzanne: SuzanneURL,
+                    ring: RingURL,
                 },
             }}
         />
