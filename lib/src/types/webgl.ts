@@ -343,6 +343,31 @@ export type WebglPixelStoreFormat =
     | "DEPTH_COMPONENT24"
     | "DEPTH_COMPONENT32F"
 
+export type WebglPixelStorage2DArrayFormat =
+    | "R8"
+    | "R16F"
+    | "R32F"
+    | "R8UI"
+    | "RG8"
+    | "RG16F"
+    | "RG32F"
+    | "RG8UI"
+    | "RGB8"
+    | "SRGB8"
+    | "RGB565"
+    | "R11F_G11F_B10F"
+    | "RGB9_E5"
+    | "RGB16F"
+    | "RGB32F"
+    | "RGB8UI"
+    | "RGBA8"
+    | "SRGB8_ALPHA8"
+    | "RGB5_A1"
+    | "RGBA4"
+    | "RGBA16F"
+    | "RGBA32F"
+    | "RGBA8UI"
+
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getTexParameter
  */

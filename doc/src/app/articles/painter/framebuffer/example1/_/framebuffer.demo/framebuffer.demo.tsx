@@ -18,7 +18,7 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import SuzanneURL from "@/assets/mesh/suzanne.glb"
+import SuzanneURL from "@/assets/mesh/logo.glb"
 import BackgroundURL from "@/assets/image/dino.webp"
 
 function init(context: TgdContext, assets: Assets) {
@@ -54,14 +54,14 @@ function init(context: TgdContext, assets: Assets) {
                 materialFactory: () =>
                     new TgdMaterialDiffuse({
                         color: new TgdVec4(1, 0.666, 0),
-                        specularExponent: 25,
-                        specularIntensity: 1.5,
+                        specularExponent: 5,
+                        specularIntensity: 2.5,
                         light: new TgdLight({
                             color: new TgdVec4(1, 1, 1, 1),
                             direction: new TgdVec3(1, 0, 0),
                         }),
                         ambient: new TgdLight({
-                            color: new TgdVec4(0.111, 0.333, 0.999, 2),
+                            color: new TgdVec4(0.111, 0.333, 0.999, 4),
                         }),
                     }),
                 // new TgdMaterialNormals(),
@@ -70,9 +70,10 @@ function init(context: TgdContext, assets: Assets) {
     })
     framebuffer1.add(painter)
     const filter1 = new TgdFilterHueRotation({ hueShiftInDegrees: 2 })
+    const zoom = new TgdFilterZoom({ zoom: 1.007 })
     const filters = new TgdPainterFilter(context, {
         texture: framebuffer1.texture,
-        filters: [filter1, new TgdFilterZoom({ zoom: 1.005 })],
+        filters: [filter1, zoom],
         flipY: true,
     })
     framebuffer2.add(filters)
@@ -96,13 +97,15 @@ function init(context: TgdContext, assets: Assets) {
         screen,
         new TgdPainterLogic(time => {
             const { camera } = context
-            camera.orbitAroundX(Math.sin(time * 0.005045) * 0.05)
+            camera.orbitAroundX(Math.sin(time * 0.005045) * 0.03)
             camera.orbitAroundY(Math.sin(time * 0.001751) * 0.02)
             camera.setShift(
                 Math.sin(time * 0.001414),
-                0,
-                Math.sin(time * 0.0020478) * 1.2
+                Math.sin(time * 0.003414) * 0.1,
+                Math.sin(time * 0.002049) * 1.2
             )
+            zoom.translation.x = 0.005 * Math.sin(time * 0.0024581)
+            zoom.translation.y = 0.005 * Math.sin(time * 0.0037151)
         })
     )
     context.play()

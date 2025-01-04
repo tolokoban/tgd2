@@ -175,7 +175,7 @@ export default env => {
                       loader: "tsx", // Or 'ts' if you don't need tsx
                       target: "es2015",
                     },
-                  },          
+                },          
                 {
                     test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/

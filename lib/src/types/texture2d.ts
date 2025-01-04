@@ -4,11 +4,27 @@ import {
     WebglImage,
     WebglMagFilter,
     WebglMinFilter,
+    WebglPixelStorage2DArrayFormat,
     WebglPixelStoreFormat,
     WebglTexParameter,
     WebglType,
     WebglWrap,
 } from "./webgl"
+
+export interface TgdTexture2DArrayOptions {
+    width: number
+    height: number
+    depth: number
+    mipmapLevels?: number
+    name?: string
+    wrapS?: WebglWrap
+    wrapT?: WebglWrap
+    wrapR?: WebglWrap
+    minFilter?: WebglMinFilter
+    magFilter?: WebglMagFilter
+    generateMipMap?: boolean
+    internalFormat?: WebglPixelStorage2DArrayFormat
+}
 
 export interface TgdTexture2DOptions {
     name?: string

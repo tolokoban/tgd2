@@ -96,6 +96,33 @@ export class TgdTexture2DImpl implements TgdTexture2D {
         this.updateTexture()
     }
 
+    set textureBaseLevel(value: number) {
+        const { gl } = this.context
+        this.bind()
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, value)
+    }
+
+    get textureBaseLevel(): number {
+        const { gl } = this.context
+        this.bind()
+        return gl.getTexParameter(
+            gl.TEXTURE_2D,
+            gl.TEXTURE_BASE_LEVEL
+        ) as number
+    }
+
+    set textureMaxLevel(value: number) {
+        const { gl } = this.context
+        this.bind()
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, value)
+    }
+
+    get textureMaxLevel(): number {
+        const { gl } = this.context
+        this.bind()
+        return gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL) as number
+    }
+
     copyTexImage2D(
         level = 1,
         internalFormat: WebglEnumTex2DInternalFormat = WebglEnumTex2DInternalFormat.RGBA,
