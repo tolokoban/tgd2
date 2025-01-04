@@ -2,6 +2,7 @@ import { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdContext } from "../context"
 import { TgdTexture2D, TgdTexture2DOptions } from "../types"
 import { TgdPainterGroup } from "./group"
+import { webglLookup } from "@tgd/utils"
 
 export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
     /**
@@ -123,7 +124,12 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
                 depthBuffer
             )
         }
-        // const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            console.error(
+                `Your Framebuffer is incomplete: ${webglLookup(status)}!`
+            )
+        }
         // console.log("Framebuffer status:", context.lookupWebglConstant(status))
         this.dirty = false
     }

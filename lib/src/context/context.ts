@@ -45,6 +45,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
     ): void
     name?: string
     camera?: TgdCamera
+    enableTextureFloatStorage?: boolean
 }
 
 /**
@@ -76,6 +77,8 @@ export class TgdContext implements TgdContextInterface {
      */
     public readonly programs: TgdResourceProgram
     public readonly textures2D: TgdResourceTexture2D
+    public readonly implementationColorReadFormat: number
+    public readonly implementationColorReadType: number
 
     private _texturesCube: TgdResourceTextureCube | null = null
     private _camera: TgdCamera
@@ -101,6 +104,15 @@ export class TgdContext implements TgdContextInterface {
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw Error("Unable to create a WebGL2 context!")
 
+        if (options.enableTextureFloatStorage) {
+            gl.getExtension("EXT_color_buffer_float")
+        }
+        this.implementationColorReadFormat = gl.getParameter(
+            gl.IMPLEMENTATION_COLOR_READ_FORMAT
+        ) as number
+        this.implementationColorReadType = gl.getParameter(
+            gl.IMPLEMENTATION_COLOR_READ_TYPE
+        ) as number
         this.gl = gl
         this.programs = new TgdResourceProgram(gl)
         this.textures2D = new TgdResourceTexture2D(this)

@@ -52,39 +52,6 @@ export class TgdTexture2DArray {
             this.options.height,
             this.options.depth
         )
-        this.updateTexture = (): WebGLTexture => {
-            const {
-                wrapS = "CLAMP_TO_EDGE",
-                wrapT = "CLAMP_TO_EDGE",
-                wrapR = "CLAMP_TO_EDGE",
-                minFilter = "LINEAR",
-                magFilter = "LINEAR",
-                generateMipMap = false,
-                width = 1,
-                height = 1,
-                internalFormat = "RGBA",
-                data,
-                type = "UNSIGNED_BYTE",
-            } = this.options
-            const format = this.options.format ?? internalFormat
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[wrapT])
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl[wrapR])
-            gl.texParameteri(
-                gl.TEXTURE_2D,
-                gl.TEXTURE_MIN_FILTER,
-                gl[minFilter]
-            )
-            gl.texParameteri(
-                gl.TEXTURE_2D,
-                gl.TEXTURE_MAG_FILTER,
-                gl[magFilter]
-            )
-            if (options.image) this.loadImage(options.image)
-            else if (generateMipMap) gl.generateMipmap(gl.TEXTURE_2D)
-            return texture
-        }
-        this.updateTexture()
     }
 
     /**
