@@ -33,7 +33,7 @@ function init(context: TgdContext, assets: Assets) {
     const orbit = new TgdControllerCameraOrbit(context, {
         speedPanning: 0,
         inertiaOrbit: 1000,
-        latlng: {
+        geo: {
             lat: Math.PI * 0.1,
             minLat: Math.PI * 0.1,
         },

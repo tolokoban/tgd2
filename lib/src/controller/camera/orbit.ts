@@ -67,7 +67,7 @@ export interface TgdControllerCameraOrbitOptions {
      * If this attribute is defined, the orbit will follow latitude/longitude.
      * You can also add limits.
      */
-    latlng: Partial<{
+    geo: Partial<{
         lat: number
         lng: number
         minLat: number
@@ -122,7 +122,7 @@ export class TgdControllerCameraOrbit {
      */
     private disabledUntil = 0
     private readonly cameraInitialState: TgdCameraState
-    private readonly latlng?: {
+    private readonly geo?: {
         lat: number
         lng: number
         minLat: number
@@ -134,7 +134,7 @@ export class TgdControllerCameraOrbit {
     constructor(
         private readonly context: TgdContextInterface,
         {
-            latlng,
+            geo,
             minZoom = 1e-3,
             maxZoom = Infinity,
             speedZoom = 1,
@@ -147,16 +147,16 @@ export class TgdControllerCameraOrbit {
             onZoomRequest = alwaysTrue,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
-        this.latlng = undefined
-        if (latlng) {
-            this.latlng = {
+        this.geo = undefined
+        if (geo) {
+            this.geo = {
                 lat: 0,
                 lng: 0,
                 minLat: -Math.PI / 2,
                 maxLat: +Math.PI / 2,
                 minLng: -Number.MAX_VALUE,
                 maxLng: +Number.MAX_VALUE,
-                ...latlng,
+                ...geo,
             }
         }
         this.cameraInitialState = context.camera.getCurrentState()
@@ -175,7 +175,7 @@ export class TgdControllerCameraOrbit {
         this.minZoom = minZoom
         this.maxZoom = maxZoom
         this.onZoomRequest = onZoomRequest
-        if (this.latlng) this.orbitLatLng(this.latlng.lat, this.latlng.lng)
+        if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
     }
 
     get enabled() {
@@ -222,7 +222,7 @@ export class TgdControllerCameraOrbit {
         if (evt.altKey || evt.current.fingersCount === 2)
             return this.handlePan(evt)
 
-        if (this.latlng) {
+        if (this.geo) {
             const speed = keyboard.isDown("Shift") ? 0.2 : 2
             const lngDelta = keyboard.isDown("x")
                 ? 0
@@ -230,9 +230,9 @@ export class TgdControllerCameraOrbit {
             const latDelta = keyboard.isDown("y")
                 ? 0
                 : speed * (evt.previous.y - evt.current.y)
-            const lng = this.latlng.lng + lngDelta
-            const lat = this.latlng.lat + latDelta
-            this.orbitLatLng(lat, lng)
+            const lng = this.geo.lng + lngDelta
+            const lat = this.geo.lat + latDelta
+            this.orbitGeo(lat, lng)
             return
         }
 
@@ -262,8 +262,8 @@ export class TgdControllerCameraOrbit {
      * @param lat Expressed in radians
      * @param lng Expressed in radians
      */
-    public orbitLatLng(lat: number, lng: number) {
-        const { latlng } = this
+    public orbitGeo(lat: number, lng: number) {
+        const { geo: latlng } = this
         if (!latlng) return
 
         console.log(this.id)
@@ -307,7 +307,7 @@ export class TgdControllerCameraOrbit {
                 action: alpha => {
                     const t = alpha - previousAlpha
                     previousAlpha = alpha
-                    if (this.latlng) {
+                    if (this.geo) {
                         // this.orbitLatLng(lat, lng)
                     } else {
                         this.orbit(dx * t, dy * t, slowDown)
