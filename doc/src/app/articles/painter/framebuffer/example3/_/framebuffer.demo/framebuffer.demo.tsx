@@ -4,6 +4,7 @@ import {
     TgdControllerCameraOrbit,
     TgdFilterHueRotation,
     TgdFilterZoom,
+    TgdPainterAxis,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
@@ -16,22 +17,26 @@ import {
 import View, { Assets } from "@/components/demo/Tgd"
 import { Material } from "./material"
 
-import VideoURL from "./fabien.mp4"
-import BackgroundURL from "@/assets/image/dino.webp"
+// import WorldURL from "./world.glb"
+import WorldURL from "@/assets/mesh/suzanne.glb"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
 
     context.camera = new TgdCameraPerspective({
-        distance: 0,
+        distance: 4,
         far: 100,
         near: 0.01,
         fovy: Math.PI * 0.25,
-        zoom: 0.333,
+        zoom: 1,
     })
-    new TgdControllerCameraOrbit(context, {
+    const orbit = new TgdControllerCameraOrbit(context, {
         speedPanning: 0,
         inertiaOrbit: 1000,
+        latlng: {
+            lat: Math.PI * 0.1,
+            minLat: Math.PI * 0.1,
+        },
     })
     const framebufferRender = new TgdPainterFramebuffer(context)
     const framebufferCopy = new TgdPainterFramebuffer(context)
@@ -44,49 +49,23 @@ function init(context: TgdContext, assets: Assets) {
         // cull: webglPresetCull.front,
         children: [
             new TgdPainterClear(context, {
-                color: new TgdVec4(),
+                color: new TgdVec4(0, 0.1, 0.3),
                 depth: 1,
             }),
             new TgdPainterMeshGltf(context, {
-                asset: assets.glb.mesh,
-                materialFactory: () => material,
+                asset: assets.glb.world,
             }),
+            new TgdPainterAxis(context, { scale: 2 }),
         ],
     })
-    framebufferRender.add(painter)
-    const copy = new TgdPainterFilter(context, {
-        filters: [
-            new TgdFilterHueRotation({
-                hueShiftInDegrees: 90,
-            }),
-        ],
-        texture: framebufferRender.texture,
-    })
-    framebufferCopy.add(copy)
-    const screen = new TgdPainterFilter(context, {
-        texture: framebufferRender.texture,
-        filters: [new TgdFilterZoom({ zoom: 1.1 })],
-        flipY: true,
-    })
-    framebufferRender.onExit = () => {
-        copy.texture = framebufferRender.texture
-    }
-    framebufferCopy.onExit = () => {
-        material.texture = framebufferCopy.texture
-        screen.texture = framebufferCopy.texture
-    }
     context.add(
-        framebufferRender,
-        framebufferCopy,
-        screen,
+        painter,
         new TgdPainterLogic((time, delay) => {
-            const { camera } = context
-            camera.orbitAroundY(delay * 0.0001047)
-            // camera.orbitAroundX(delay * 0.00007154)
-            // camera.orbitAroundZ(delay * 0.0003051)
-            // camera.zoom = 0.333 + 0.3 * Math.abs(Math.sin(time * 0.001457))
+            // console.log("logic...")
+            // orbit.orbitLatLng(0.75 * Math.PI * Math.sin(time * 0.001), 0)
         })
     )
+    // orbit.orbitLatLng(Math.PI, 0)
     context.paint()
     // #end
 }
@@ -97,11 +76,11 @@ export default function Demo() {
             onReady={init}
             assets={{
                 glb: {
-                    mesh: CubeURL,
+                    world: WorldURL,
                 },
-                image: {
-                    background: BackgroundURL,
-                },
+                // image: {
+                //     background: BackgroundURL,
+                // },
             }}
         />
     )

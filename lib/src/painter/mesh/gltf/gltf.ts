@@ -69,7 +69,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
     }
 }
 
-const DEFAULT_COLOR = new TgdVec4(0.9, 0.7, 0.3, 1)
+const DEFAULT_COLOR = new TgdVec4(0.9, 0.5, 0.1, 1)
 
 function figureColor(
     asset: TgdParserGLTransfertFormatBinary,

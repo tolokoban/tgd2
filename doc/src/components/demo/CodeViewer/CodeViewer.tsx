@@ -90,7 +90,6 @@ export interface MultiCodeViewerViewProps extends CodeViewerViewProps {
 }
 
 function MultiCodeViewerView(props: MultiCodeViewerViewProps) {
-    console.log("🚀 [CodeViewer] props.value = ", props.value) // @FIXME: Remove this line written on 2024-11-08 at 11:01
     const captions = Object.keys(props.value)
     return (
         <>

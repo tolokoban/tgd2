@@ -147,4 +147,6 @@ function makeAccessor<D extends Record<string, TgdUniformBufferObjectItem>>(
                 })
             }
     }
+
+    return offset
 }

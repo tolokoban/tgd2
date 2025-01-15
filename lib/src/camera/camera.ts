@@ -177,7 +177,7 @@ export abstract class TgdCamera {
         const y = transfo.m31
         const z = transfo.m32
         this.setTarget(x, y, z)
-        this._orientation.fromMat4(transfo)
+        this._orientation.fromMatrix(transfo)
         this.dirtyModelView = true
         this.dirtyAxis = true
         return this

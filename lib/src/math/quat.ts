@@ -1,3 +1,4 @@
+import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
@@ -9,6 +10,12 @@ const tmpAxisY = new TgdVec3()
 const tmpAxisZ = new TgdVec3()
 
 export class TgdQuat extends TgdVec4 {
+    static fromMatrix(mat: TgdMat3): TgdQuat {
+        const quat = new TgdQuat()
+        quat.fromMatrix(mat)
+        return quat
+    }
+
     constructor()
     constructor(source: TgdQuat)
     constructor(source: TgdVec4)
@@ -110,7 +117,7 @@ export class TgdQuat extends TgdVec4 {
         return this.normalize()
     }
 
-    fromMat4(mat: TgdMat4) {
+    fromMatrix(mat: TgdMat3 | TgdMat4) {
         tmpAxisX.x = mat.m00
         tmpAxisX.y = mat.m01
         tmpAxisX.z = mat.m02
@@ -245,12 +252,29 @@ export class TgdQuat extends TgdVec4 {
         const wx = w * x2
         const wy = w * y2
 
-        // vec.x = zx + wy
-        // vec.y = zy - wx
         vec.x = zx - wy
         vec.y = zy + wx
         vec.z = 1 - xx - yy
         return vec
+    }
+
+    toMatrix(mat: TgdMat3 | TgdMat4): typeof mat {
+        const axisX = new TgdVec3()
+        const axisY = new TgdVec3()
+        const axisZ = new TgdVec3()
+        this.toAxisX(axisX)
+        this.toAxisY(axisY)
+        this.toAxisZ(axisZ)
+        mat.m00 = axisX.x
+        mat.m10 = axisX.y
+        mat.m20 = axisX.z
+        mat.m01 = axisY.x
+        mat.m11 = axisY.y
+        mat.m21 = axisY.z
+        mat.m02 = axisZ.x
+        mat.m12 = axisZ.y
+        mat.m22 = axisZ.z
+        return mat
     }
 
     face(face: TgdQuatFace = "+X+Y+Z"): this {

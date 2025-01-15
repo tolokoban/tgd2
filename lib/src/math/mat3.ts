@@ -1,5 +1,7 @@
 import { padColOfNumbers } from "@tgd/debug"
-import { TgdQuat, TgdVec3 } from "."
+import { TgdQuat } from "./quat"
+import { TgdVec3 } from "./vec3"
+import { TgdVec4 } from "./vec4"
 
 /**
  * Column-first 4x4 matrix.
@@ -7,11 +9,16 @@ import { TgdQuat, TgdVec3 } from "."
  * `m23` means column 2 and row 3.
  *
  * This is not the same as what mathematicians are used to,
- * but its how WebGL will store matrices in memory.
+ * but it is how WebGL will store matrices in memory.
  */
 export class TgdMat3 extends Float32Array {
     constructor()
     constructor(mat: TgdMat3)
+    constructor(
+        column1: TgdVec3 | TgdVec4,
+        column2: TgdVec3 | TgdVec4,
+        column3: TgdVec3 | TgdVec4
+    )
     constructor(
         m00: number,
         m01: number,
@@ -24,9 +31,9 @@ export class TgdMat3 extends Float32Array {
         m22: number
     )
     constructor(
-        m00: number | TgdMat3 = 1,
-        m01: number = 0,
-        m02: number = 0,
+        m00: number | TgdVec3 | TgdVec4 | TgdMat3 = 1,
+        m01: number | TgdVec3 | TgdVec4 = 0,
+        m02: number | TgdVec3 | TgdVec4 = 0,
         m10: number = 0,
         m11: number = 1,
         m12: number = 0,
@@ -34,11 +41,59 @@ export class TgdMat3 extends Float32Array {
         m21: number = 0,
         m22: number = 1
     ) {
-        if (typeof m00 === "number") {
+        if (
+            typeof m00 === "number" &&
+            typeof m01 === "number" &&
+            typeof m02 === "number"
+        ) {
             super([m00, m01, m02, m10, m11, m12, m20, m21, m22])
-        } else {
+        } else if (
+            (m00 instanceof TgdVec3 || m00 instanceof TgdVec4) &&
+            (m01 instanceof TgdVec3 || m01 instanceof TgdVec4) &&
+            (m02 instanceof TgdVec3 || m02 instanceof TgdVec4)
+        ) {
+            const col1 = m00
+            const col2 = m01
+            const col3 = m02
+            // prettier-ignore
+            super([
+                col1.x, col1.y, col1.z,
+                col2.x, col2.y, col2.z,
+                col3.x, col3.y, col3.z
+            ])
+        } else if (m00 instanceof TgdMat3) {
             super(m00)
+        } else {
+            console.error("[TgdMat3] m00, m01, m02 = ", m00, m01, m02)
+            console.error("[TgdMat3] m10, m11, m12 = ", m10, m11, m12)
+            console.error("[TgdMat3] m20, m21, m22 = ", m20, m21, m22)
+            throw Error(`Invalid TgdMat3 initialization!`)
         }
+    }
+
+    multiply(mat3: TgdMat3): this {
+        // prettier-ignore
+        const [
+            a00, a01, a02,
+            a10, a11, a12,
+            a20, a21, a22,
+        ] = this
+        // prettier-ignore
+        const [
+            b00, b01, b02,
+            b10, b11, b12,
+            b20, b21, b22,
+        ] = mat3
+        this.m00 = a00 * b00 + a10 * b01 + a20 * b02
+        this.m10 = a00 * b10 + a10 * b11 + a20 * b12
+        this.m20 = a00 * b20 + a10 * b21 + a20 * b22
+        this.m01 = a01 * b00 + a11 * b01 + a21 * b02
+        this.m11 = a01 * b10 + a11 * b11 + a21 * b12
+        this.m21 = a01 * b20 + a11 * b21 + a21 * b22
+        this.m02 = a02 * b00 + a12 * b01 + a22 * b02
+        this.m12 = a02 * b10 + a12 * b11 + a22 * b12
+        this.m22 = a02 * b20 + a12 * b21 + a22 * b22
+        return this
     }
 
     transpose(): TgdMat3 {

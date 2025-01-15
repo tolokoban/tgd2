@@ -60,6 +60,7 @@ export default function Tgd({
         setLoading(true)
         loadAssets(assets)
             .then((loadedAssets: Assets) => {
+                console.log("Ready!")
                 onReady(context, loadedAssets)
                 context.paint()
                 setLoading(false)

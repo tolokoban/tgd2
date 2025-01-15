@@ -30,6 +30,7 @@
     "homepage": "https://tolokoban.github.io/tgd2",
     "devDependencies": {
         "@types/jest": "^29.5.14",
+        "@types/node": "^22.10.5",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "build-typescript-library": "^0.7.4",
         "eslint": "^8.57.1",

@@ -12,6 +12,7 @@ import {
 } from "@tgd/types"
 import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
+import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -62,9 +63,24 @@ export interface TgdControllerCameraOrbitOptions {
      * the event is not dispatched.
      */
     onZoomRequest(this: void, evt: TgdControllerCameraOrbitZoomRequest): boolean
+    /**
+     * If this attribute is defined, the orbit will follow latitude/longitude.
+     * You can also add limits.
+     */
+    latlng: Partial<{
+        lat: number
+        lng: number
+        minLat: number
+        maxLat: number
+        maxLng: number
+        minLng: number
+    }>
 }
 
 export class TgdControllerCameraOrbit {
+    private static counter = 0
+
+    public readonly id = `Orbit-${TgdControllerCameraOrbit.counter++}`
     public readonly eventChange = new TgdEvent<TgdCamera>()
     public minZoom = 1e-3
     public maxZoom = Infinity
@@ -98,6 +114,7 @@ export class TgdControllerCameraOrbit {
      * The camera will only move if `enabled === true`.
      */
     public _enabled = true
+
     private animOrbit: TgdAnimation | null = null
     /**
      * It can be usefull to disable to orbit controller for some time
@@ -105,10 +122,19 @@ export class TgdControllerCameraOrbit {
      */
     private disabledUntil = 0
     private readonly cameraInitialState: TgdCameraState
+    private readonly latlng?: {
+        lat: number
+        lng: number
+        minLat: number
+        maxLat: number
+        maxLng: number
+        minLng: number
+    }
 
     constructor(
         private readonly context: TgdContextInterface,
         {
+            latlng,
             minZoom = 1e-3,
             maxZoom = Infinity,
             speedZoom = 1,
@@ -121,6 +147,18 @@ export class TgdControllerCameraOrbit {
             onZoomRequest = alwaysTrue,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
+        this.latlng = undefined
+        if (latlng) {
+            this.latlng = {
+                lat: 0,
+                lng: 0,
+                minLat: -Math.PI / 2,
+                maxLat: +Math.PI / 2,
+                minLng: -Number.MAX_VALUE,
+                maxLng: +Number.MAX_VALUE,
+                ...latlng,
+            }
+        }
         this.cameraInitialState = context.camera.getCurrentState()
         const { inputs } = context
         inputs.pointer.eventMoveStart.addListener(this.handleMoveStart)
@@ -137,6 +175,7 @@ export class TgdControllerCameraOrbit {
         this.minZoom = minZoom
         this.maxZoom = maxZoom
         this.onZoomRequest = onZoomRequest
+        if (this.latlng) this.orbitLatLng(this.latlng.lat, this.latlng.lng)
     }
 
     get enabled() {
@@ -183,6 +222,20 @@ export class TgdControllerCameraOrbit {
         if (evt.altKey || evt.current.fingersCount === 2)
             return this.handlePan(evt)
 
+        if (this.latlng) {
+            const speed = keyboard.isDown("Shift") ? 0.2 : 2
+            const lngDelta = keyboard.isDown("x")
+                ? 0
+                : speed * (evt.previous.x - evt.current.x)
+            const latDelta = keyboard.isDown("y")
+                ? 0
+                : speed * (evt.previous.y - evt.current.y)
+            const lng = this.latlng.lng + lngDelta
+            const lat = this.latlng.lat + latDelta
+            this.orbitLatLng(lat, lng)
+            return
+        }
+
         if (keyboard.isDown("z")) return this.handleRotateAroundZ(evt)
 
         this.orbit(
@@ -202,6 +255,33 @@ export class TgdControllerCameraOrbit {
         if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
         if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
         this.fireOrbitChange()
+    }
+
+    /**
+     * Set the camera orientation from latitude/longitude
+     * @param lat Expressed in radians
+     * @param lng Expressed in radians
+     */
+    public orbitLatLng(lat: number, lng: number) {
+        const { latlng } = this
+        if (!latlng) return
+
+        console.log(this.id)
+        lat = clamp(lat, latlng.minLat, latlng.maxLat)
+        latlng.lat = lat
+        lng = clamp(lng, latlng.minLng, latlng.maxLng)
+        latlng.lng = lng
+        console.log("🚀 [orbit] lat, lng = ", lat, lng) // @FIXME: Remove this line written on 2025-01-15 at 08:20
+        const { orientation } = this.cameraInitialState
+        const vecZ = makeGeoVec3(lat, lng)
+        const vecY = makeGeoVec3(lat + Math.PI / 2, lng)
+        const vecX = new TgdVec3(vecY).cross(vecZ)
+        const mat = new TgdMat3()
+        orientation.toMatrix(mat)
+        const final = new TgdMat3(vecX, vecY, vecZ)
+        final.multiply(mat)
+        final.debug("Final")
+        this.context.camera.orientation = TgdQuat.fromMatrix(final)
     }
 
     private readonly handleMoveStart = () => {
@@ -227,7 +307,11 @@ export class TgdControllerCameraOrbit {
                 action: alpha => {
                     const t = alpha - previousAlpha
                     previousAlpha = alpha
-                    this.orbit(dx * t, dy * t, slowDown)
+                    if (this.latlng) {
+                        // this.orbitLatLng(lat, lng)
+                    } else {
+                        this.orbit(dx * t, dy * t, slowDown)
+                    }
                 },
                 easingFunction: tgdEasingFunctionOutQuad,
             }
@@ -314,3 +398,11 @@ export class TgdControllerCameraOrbit {
  * Default function for `onZoomRequest`.
  */
 const alwaysTrue = () => true
+
+function makeGeoVec3(lat: number, lng: number): TgdVec3 {
+    const radius = Math.cos(lat)
+    const y = Math.sin(lat)
+    const z = radius * Math.cos(lng)
+    const x = radius * Math.sin(lng)
+    return new TgdVec3(x, y, z)
+}
