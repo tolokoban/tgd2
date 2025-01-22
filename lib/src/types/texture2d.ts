@@ -28,6 +28,8 @@ export interface TgdTexture2DArrayOptions {
 
 export interface TgdTexture2DOptions {
     name?: string
+    // Mipmap levels
+    levels?: number
     wrapS?: WebglWrap
     wrapT?: WebglWrap
     wrapR?: WebglWrap
@@ -38,7 +40,14 @@ export interface TgdTexture2DOptions {
     image?: string | WebglImage
     width?: number
     height?: number
-    internalFormat?: WebglPixelStoreFormat
+    internalFormat?:
+        | WebglPixelStoreFormat
+        | "RGB8"
+        | "RGBA8"
+        | "R16F"
+        | "RG16F"
+        | "RGB16F"
+        | "RGBA16F"
     format?: WebglPixelStoreFormat
     type?: WebglType
 }

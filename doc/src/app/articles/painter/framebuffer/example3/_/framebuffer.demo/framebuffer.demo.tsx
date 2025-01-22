@@ -17,8 +17,8 @@ import {
 import View, { Assets } from "@/components/demo/Tgd"
 import { Material } from "./material"
 
-// import WorldURL from "./world.glb"
-import WorldURL from "@/assets/mesh/suzanne.glb"
+import WorldURL from "./world.glb"
+// import WorldURL from "@/assets/mesh/suzanne.glb"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin

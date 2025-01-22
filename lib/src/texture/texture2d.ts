@@ -41,6 +41,7 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             width: 1,
             height: 1,
             internalFormat: "RGBA",
+            levels: 1,
             ...options,
         }
         this.name = options.name ?? `Texture2D/${TgdTexture2DImpl.counter++}`
@@ -65,17 +66,28 @@ export class TgdTexture2DImpl implements TgdTexture2D {
             } = this.options
             const format = this.options.format ?? internalFormat
             gl.bindTexture(gl.TEXTURE_2D, texture)
-            gl.texImage2D(
-                gl.TEXTURE_2D,
-                0,
-                gl[internalFormat],
-                width,
-                height,
-                0,
-                gl[format],
-                gl[type],
-                data ?? null
-            )
+            const levels = options.levels ?? 1
+            if (data) {
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    levels,
+                    gl[internalFormat],
+                    width,
+                    height,
+                    0,
+                    gl[format],
+                    gl[type],
+                    data
+                )
+            } else {
+                gl.texStorage2D(
+                    gl.TEXTURE_2D,
+                    levels,
+                    gl[internalFormat],
+                    width,
+                    height
+                )
+            }
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[wrapT])
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl[wrapR])

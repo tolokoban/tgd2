@@ -30,14 +30,10 @@ function init(context: TgdContext, assets: Assets) {
         fovy: Math.PI / 4,
         zoom: 1,
     })
-    // new TgdControllerCameraOrbit(context, {
-    //     speedPanning: 0,
-    //     inertiaOrbit: 1000,
-    // })
     const framebuffer1 = new TgdPainterFramebuffer(context)
     const framebuffer2 = new TgdPainterFramebuffer(context)
     const background = new TgdPainterFilter(context, {
-        texture: framebuffer2.texture,
+        texture: framebuffer2.textureColor0,
         filters: [new TgdFilterZoom()],
         flipY: true,
     })
@@ -69,16 +65,16 @@ function init(context: TgdContext, assets: Assets) {
         ],
     })
     framebuffer1.add(painter)
-    const filter1 = new TgdFilterHueRotation({ hueShiftInDegrees: 2 })
-    const zoom = new TgdFilterZoom({ zoom: 1.007 })
+    const filterHue = new TgdFilterHueRotation({ hueShiftInDegrees: 2 })
+    const filterZoom = new TgdFilterZoom({ zoom: 1.007 })
     const filters = new TgdPainterFilter(context, {
-        texture: framebuffer1.texture,
-        filters: [filter1, zoom],
+        texture: framebuffer1.textureColor0,
+        filters: [filterHue, filterZoom],
         flipY: true,
     })
     framebuffer2.add(filters)
     const screen = new TgdPainterFilter(context, {
-        texture: framebuffer1.texture,
+        texture: framebuffer1.textureColor0,
         filters: [new TgdFilterZoom()],
         flipY: true,
     })
@@ -86,10 +82,12 @@ function init(context: TgdContext, assets: Assets) {
      * This is important because the texture of a framebuffer is recreated
      * any time the screen size changes.
      */
-    framebuffer1.onExit = () => (filters.texture = framebuffer1.texture)
+    framebuffer1.onExit = () => {
+        filters.texture = framebuffer1.textureColor0
+    }
     framebuffer2.onExit = () => {
-        background.texture = framebuffer2.texture
-        screen.texture = framebuffer2.texture
+        background.texture = framebuffer2.textureColor0
+        screen.texture = framebuffer2.textureColor0
     }
     context.add(
         framebuffer1,
@@ -104,8 +102,8 @@ function init(context: TgdContext, assets: Assets) {
                 Math.sin(time * 0.003414) * 0.1,
                 Math.sin(time * 0.002049) * 1.2
             )
-            zoom.translation.x = 0.005 * Math.sin(time * 0.0024581)
-            zoom.translation.y = 0.005 * Math.sin(time * 0.0037151)
+            filterZoom.translation.x = 0.005 * Math.sin(time * 0.0024581)
+            filterZoom.translation.y = 0.005 * Math.sin(time * 0.0037151)
         })
     )
     context.play()

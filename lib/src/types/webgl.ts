@@ -335,6 +335,10 @@ export enum WebglEnumStencilOperation {
 export type WebglPixelStoreFormat =
     | "RGB"
     | "RGBA"
+    | "R16F"
+    | "RG16F"
+    | "RGB16F"
+    | "RGBA16F"
     | "LUMINANCE_ALPHA"
     | "ALPHA"
     | "LUMINANCE"

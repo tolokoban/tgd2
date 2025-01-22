@@ -271,7 +271,6 @@ export class TgdControllerCameraOrbit {
         latlng.lat = lat
         lng = clamp(lng, latlng.minLng, latlng.maxLng)
         latlng.lng = lng
-        console.log("🚀 [orbit] lat, lng = ", lat, lng) // @FIXME: Remove this line written on 2025-01-15 at 08:20
         const { orientation } = this.cameraInitialState
         const vecZ = makeGeoVec3(lat, lng)
         const vecY = makeGeoVec3(lat + Math.PI / 2, lng)

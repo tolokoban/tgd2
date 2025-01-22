@@ -4,6 +4,19 @@ import { TgdTexture2D, TgdTexture2DOptions } from "../types"
 import { TgdPainterGroup } from "./group"
 import { webglLookup } from "@tgd/utils"
 
+type TextureInternalFormat =
+    | "RGB8"
+    | "RGBA8"
+    | "R16F"
+    | "RG16F"
+    | "RGB16F"
+    | "RGBA16F"
+
+type DepthInternalFormat =
+    | "DEPTH_COMPONENT16"
+    | "DEPTH_COMPONENT24"
+    | "DEPTH_COMPONENT32F"
+
 export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
     /**
      * Do we need a depth buffer?
@@ -21,6 +34,11 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
      * Default to `1`.
      */
     viewportMatchingScale?: number
+    textureFormatColor0?: TextureInternalFormat
+    textureFormatColor1?: TextureInternalFormat
+    textureFormatColor2?: TextureInternalFormat
+    textureFormatColor3?: TextureInternalFormat
+    textureFormatDepth?: DepthInternalFormat
     /**
      * Function to execute before painting.
      */
@@ -35,9 +53,21 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private dirty = true
     private _width = 0
     private _height = 0
-    private _texture: TgdTexture2D | null = null
+    private _textureColor0: TgdTexture2D | null = null
+    private _textureColor1: TgdTexture2D | null = null
+    private _textureColor2: TgdTexture2D | null = null
+    private _textureColor3: TgdTexture2D | null = null
+    private _textureDepth: TgdTexture2D | null = null
+    private readonly textureFormatColor0: TextureInternalFormat
+    private readonly textureFormatColor1?: TextureInternalFormat
+    private readonly textureFormatColor2?: TextureInternalFormat
+    private readonly textureFormatColor3?: TextureInternalFormat
+    private readonly textureFormatDepth?: DepthInternalFormat
     private _framebuffer: WebGLFramebuffer | null = null
     private _depthBuffer: WebGLRenderbuffer | null = null
+    private readonly drawBuffers: number[] = [
+        WebGL2RenderingContext.COLOR_ATTACHMENT0,
+    ]
 
     constructor(
         private readonly context: TgdContext,
@@ -48,13 +78,53 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this._height = options.height ?? 0
         this.onEnter = options.onEnter
         this.onExit = options.onExit
+        this.textureFormatColor0 = options.textureFormatColor0 ?? "RGBA8"
+        this.textureFormatColor1 = options.textureFormatColor1
+        this.textureFormatColor2 = options.textureFormatColor2
+        this.textureFormatColor3 = options.textureFormatColor3
+        this.textureFormatDepth = options.textureFormatDepth
+        const { gl } = this.context
+        if (this.textureFormatColor1)
+            this.drawBuffers.push(gl.COLOR_ATTACHMENT1)
+        if (this.textureFormatColor2)
+            this.drawBuffers.push(gl.COLOR_ATTACHMENT2)
+        if (this.textureFormatColor3)
+            this.drawBuffers.push(gl.COLOR_ATTACHMENT3)
     }
 
-    get texture(): TgdTexture2D {
-        if (!this._texture) {
-            this._texture = this.context.textures2D.getDefaultEmpty()
+    get textureColor0(): TgdTexture2D {
+        if (!this._textureColor0) {
+            this._textureColor0 = this.context.textures2D.getDefaultEmpty()
         }
-        return this._texture
+        return this._textureColor0
+    }
+
+    get textureColor1(): TgdTexture2D {
+        if (!this._textureColor1) {
+            this._textureColor1 = this.context.textures2D.getDefaultEmpty()
+        }
+        return this._textureColor1
+    }
+
+    get textureColor2(): TgdTexture2D {
+        if (!this._textureColor2) {
+            this._textureColor2 = this.context.textures2D.getDefaultEmpty()
+        }
+        return this._textureColor2
+    }
+
+    get textureColor3(): TgdTexture2D {
+        if (!this._textureColor3) {
+            this._textureColor3 = this.context.textures2D.getDefaultEmpty()
+        }
+        return this._textureColor3
+    }
+
+    get textureDepth(): TgdTexture2D {
+        if (!this._textureDepth) {
+            this._textureDepth = this.context.textures2D.getDefaultEmpty()
+        }
+        return this._textureDepth
     }
 
     get width(): number {
@@ -77,16 +147,14 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = true
     }
 
-    private createFramebufferIfNeeded() {
-        if (!this.dirty) return
-
+    private createTextureForColor0() {
         const { context, width, height } = this
         const { gl } = context
-        this.delete()
-        this._texture = context.textures2D.create({
+        gl.activeTexture(gl.TEXTURE0)
+        this._textureColor0 = context.textures2D.create({
             width: Math.max(width, 1),
             height: Math.max(height, 1),
-            internalFormat: "RGB",
+            internalFormat: this.textureFormatColor0,
             generateMipMap: true,
             magFilter: "LINEAR",
             minFilter: "LINEAR_MIPMAP_LINEAR",
@@ -94,16 +162,138 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             wrapS: "MIRRORED_REPEAT",
             wrapT: "MIRRORED_REPEAT",
         })
-        this._framebuffer = context.createFramebuffer()
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
             gl.COLOR_ATTACHMENT0,
             gl.TEXTURE_2D,
-            this._texture.glTexture,
+            this._textureColor0.glTexture,
             0
         )
+        console.log(
+            "🚀 [framebuffer] this.textureFormatColor0 = ",
+            this.textureFormatColor0
+        ) // @FIXME: Remove this line written on 2025-01-22 at 15:47
+    }
+
+    private createTextureForColor1() {
+        if (this.textureFormatColor1) {
+            const { context, width, height } = this
+            const { gl } = context
+            this._textureColor1 = context.textures2D.create({
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+                internalFormat: this.textureFormatColor1,
+                generateMipMap: true,
+                magFilter: "LINEAR",
+                minFilter: "LINEAR_MIPMAP_LINEAR",
+                wrapR: "MIRRORED_REPEAT",
+                wrapS: "MIRRORED_REPEAT",
+                wrapT: "MIRRORED_REPEAT",
+                levels: 1,
+            })
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.COLOR_ATTACHMENT1,
+                gl.TEXTURE_2D,
+                this._textureColor1.glTexture,
+                0
+            )
+        }
+    }
+
+    private createTextureForColor2() {
+        if (this.textureFormatColor2) {
+            const { context, width, height } = this
+            const { gl } = context
+            this._textureColor2 = context.textures2D.create({
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+                internalFormat: this.textureFormatColor2,
+                generateMipMap: true,
+                magFilter: "LINEAR",
+                minFilter: "LINEAR_MIPMAP_LINEAR",
+                wrapR: "MIRRORED_REPEAT",
+                wrapS: "MIRRORED_REPEAT",
+                wrapT: "MIRRORED_REPEAT",
+                levels: 1,
+            })
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.COLOR_ATTACHMENT2,
+                gl.TEXTURE_2D,
+                this._textureColor2.glTexture,
+                0
+            )
+        }
+    }
+
+    private createTextureForColor3() {
+        if (this.textureFormatColor3) {
+            const { context, width, height } = this
+            const { gl } = context
+            this._textureColor3 = context.textures2D.create({
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+                internalFormat: this.textureFormatColor3,
+                generateMipMap: true,
+                magFilter: "LINEAR",
+                minFilter: "LINEAR_MIPMAP_LINEAR",
+                wrapR: "MIRRORED_REPEAT",
+                wrapS: "MIRRORED_REPEAT",
+                wrapT: "MIRRORED_REPEAT",
+                levels: 1,
+            })
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.COLOR_ATTACHMENT3,
+                gl.TEXTURE_2D,
+                this._textureColor3.glTexture,
+                0
+            )
+        }
+    }
+
+    private createTextureForDepth() {
+        if (this.textureFormatDepth) {
+            const { context, width, height } = this
+            const { gl } = context
+            this._textureDepth = context.textures2D.create({
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+                internalFormat: this.textureFormatDepth,
+                generateMipMap: true,
+                magFilter: "LINEAR",
+                minFilter: "LINEAR_MIPMAP_LINEAR",
+                wrapR: "MIRRORED_REPEAT",
+                wrapS: "MIRRORED_REPEAT",
+                wrapT: "MIRRORED_REPEAT",
+                levels: 1,
+            })
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.DEPTH_ATTACHMENT,
+                gl.TEXTURE_2D,
+                this._textureDepth.glTexture,
+                0
+            )
+        }
+    }
+
+    private createFramebufferIfNeeded() {
+        if (!this.dirty) return
+
+        const { context } = this
+        const { gl } = context
+        this.delete()
+        this._framebuffer = context.createFramebuffer()
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+        this.createTextureForColor0()
+        this.createTextureForColor1()
+        this.createTextureForColor2()
+        this.createTextureForColor3()
+        this.createTextureForDepth()
         if (this.options.depthBuffer !== false) {
+            const { width, height } = this
             // Create a Depth Buffer, because the default
             // framebuffer has none.
             const depthBuffer = gl.createRenderbuffer()
@@ -130,7 +320,6 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
                 `Your Framebuffer is incomplete: ${webglLookup(status)}!`
             )
         }
-        // console.log("Framebuffer status:", context.lookupWebglConstant(status))
         this.dirty = false
     }
 
@@ -141,17 +330,34 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.width = Math.round(context.width * viewportMatchingScale)
         this.height = Math.round(context.height * viewportMatchingScale)
         this.createFramebufferIfNeeded()
+        gl.drawBuffers(this.drawBuffers)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
 
     delete() {
-        const { context, _texture, _framebuffer, _depthBuffer } = this
+        const { context, _framebuffer, _depthBuffer } = this
         const { gl } = context
-        if (_texture) {
-            gl.deleteTexture(_texture.glTexture)
-            this._texture = null
+        if (this._textureColor0) {
+            gl.deleteTexture(this._textureColor0.glTexture)
+            this._textureColor0 = null
+        }
+        if (this._textureColor1) {
+            gl.deleteTexture(this._textureColor1.glTexture)
+            this._textureColor1 = null
+        }
+        if (this._textureColor2) {
+            gl.deleteTexture(this._textureColor2.glTexture)
+            this._textureColor2 = null
+        }
+        if (this._textureColor3) {
+            gl.deleteTexture(this._textureColor3.glTexture)
+            this._textureColor3 = null
+        }
+        if (this._textureDepth) {
+            gl.deleteTexture(this._textureDepth.glTexture)
+            this._textureDepth = null
         }
         if (_framebuffer) {
             gl.deleteFramebuffer(_framebuffer)
