@@ -73,15 +73,15 @@ function init(context: TgdContext, assets: Assets) {
             children: [
                 clear,
                 new TgdPainterState(context, {
-                    stencil: webglPresetStencil.write(2),
-                    children: [sea],
-                }),
-                new TgdPainterState(context, {
-                    // stencil: webglPresetStencil.paintIfEqual(1),
                     stencil: webglPresetStencil.write(1),
                     children: [mesh],
                 }),
-                new TgdPainterDebugStencil(context),
+                new TgdPainterState(context, {
+                    stencil: webglPresetStencil.paintIfEqual(1),
+                    // stencil: webglPresetStencil.write(2),
+                    children: [sea],
+                }),
+                // new TgdPainterDebugStencil(context),
             ],
         })
         // new TgdPainterState(context, {
