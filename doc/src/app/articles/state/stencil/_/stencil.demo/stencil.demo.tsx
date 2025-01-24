@@ -5,6 +5,7 @@ import {
     TgdMaterialSolid,
     TgdPainterBackground,
     TgdPainterClear,
+    TgdPainterDebugStencil,
     TgdPainterMeshGltf,
     TgdPainterState,
     webglPresetCull,
@@ -46,7 +47,7 @@ function init(ctx: TgdContext, assets: Assets) {
             color: false,
             depth: webglPresetDepth.off,
             cull: webglPresetCull.back,
-            stencil: webglPresetStencil.write1,
+            stencil: webglPresetStencil.write(1),
             children: [
                 new TgdPainterMeshGltf(ctx, {
                     asset: assets.glb.ring,
@@ -57,7 +58,7 @@ function init(ctx: TgdContext, assets: Assets) {
         new TgdPainterState(ctx, {
             depth: webglPresetDepth.less,
             cull: webglPresetCull.back,
-            stencil: webglPresetStencil.paintIf0,
+            stencil: webglPresetStencil.paintIfEqual(0),
             children: [
                 new TgdPainterMeshGltf(ctx, {
                     asset: assets.glb.suzanne,

@@ -59,20 +59,20 @@ function init(context: TgdContext, assets: Assets) {
                 hueShiftInDegrees: 90,
             }),
         ],
-        texture: framebufferRender.texture,
+        texture: framebufferRender.textureColor0,
     })
     framebufferCopy.add(copy)
     const screen = new TgdPainterFilter(context, {
-        texture: framebufferRender.texture,
+        texture: framebufferRender.textureColor0,
         filters: [new TgdFilterZoom({ zoom: 1.1 })],
         flipY: true,
     })
     framebufferRender.onExit = () => {
-        copy.texture = framebufferRender.texture
+        copy.texture = framebufferRender.textureColor0
     }
     framebufferCopy.onExit = () => {
-        material.texture = framebufferCopy.texture
-        screen.texture = framebufferCopy.texture
+        material.texture = framebufferCopy.textureColor0
+        screen.texture = framebufferCopy.textureColor0
     }
     context.add(
         framebufferRender,

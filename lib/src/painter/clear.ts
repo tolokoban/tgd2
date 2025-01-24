@@ -78,6 +78,7 @@ export class TgdPainterClear extends TgdPainter {
             gl.clearDepth(depth)
         }
         if (typeof options.stencil === "number") {
+            gl.stencilMask(0xff)
             gl.clearStencil(stencil)
         }
         gl.clear(clearMask)

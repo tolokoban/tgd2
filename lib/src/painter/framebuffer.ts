@@ -169,10 +169,6 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             this._textureColor0.glTexture,
             0
         )
-        console.log(
-            "🚀 [framebuffer] this.textureFormatColor0 = ",
-            this.textureFormatColor0
-        ) // @FIXME: Remove this line written on 2025-01-22 at 15:47
     }
 
     private createTextureForColor1() {

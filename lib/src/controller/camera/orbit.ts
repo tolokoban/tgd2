@@ -266,7 +266,6 @@ export class TgdControllerCameraOrbit {
         const { geo: latlng } = this
         if (!latlng) return
 
-        console.log(this.id)
         lat = clamp(lat, latlng.minLat, latlng.maxLat)
         latlng.lat = lat
         lng = clamp(lng, latlng.minLng, latlng.maxLng)
@@ -279,7 +278,6 @@ export class TgdControllerCameraOrbit {
         orientation.toMatrix(mat)
         const final = new TgdMat3(vecX, vecY, vecZ)
         final.multiply(mat)
-        final.debug("Final")
         this.context.camera.orientation = TgdQuat.fromMatrix(final)
     }
 

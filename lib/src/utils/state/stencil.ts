@@ -19,9 +19,7 @@ export interface WebglStencilOptions {
     operationFront3Pass: WebglEnumStencilOperation
 }
 
-export const webglPresetStencil: Readonly<
-    Record<"off" | "write1" | "paintIf0" | "paintIf1", WebglStencilOptions>
-> = {
+export const webglPresetStencil = {
     off: {
         enabled: false,
         maskBack: 0,
@@ -39,60 +37,42 @@ export const webglPresetStencil: Readonly<
         operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
         operationFront3Pass: WebglEnumStencilOperation.KEEP,
     },
-    /** Set the stencil to 1 behinf each fragment. */
-    write1: {
+    /** Set the stencil to `value` for each fragment. */
+    write: (value: number) => ({
         enabled: true,
-        maskBack: 0x01,
-        maskFront: 0x01,
+        maskBack: 0xff,
+        maskFront: 0xff,
         functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackRef: 1,
-        functionBackMask: 0x01,
+        functionBackRef: value,
+        functionBackMask: 0xff,
         functionFront: WebglEnumStencilFunction.ALWAYS,
-        functionFrontRef: 1,
-        functionFrontMask: 0x01,
+        functionFrontRef: value,
+        functionFrontMask: 0xff,
         operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
         operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
         operationBack3Pass: WebglEnumStencilOperation.KEEP,
         operationFront1FailStencil: WebglEnumStencilOperation.KEEP,
         operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
         operationFront3Pass: WebglEnumStencilOperation.REPLACE,
-    },
-    /** Paint only if the stencil is equal to 0 */
-    paintIf0: {
+    }),
+    /** Paint only if the stencil is equal to `value` */
+    paintIfEqual: (value: number) => ({
         enabled: true,
         maskBack: 0x00,
         maskFront: 0x00,
         functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackRef: 0,
-        functionBackMask: 0x01,
+        functionBackRef: value,
+        functionBackMask: 0xff,
         functionFront: WebglEnumStencilFunction.EQUAL,
-        functionFrontRef: 0,
-        functionFrontMask: 0x01,
+        functionFrontRef: value,
+        functionFrontMask: 0xff,
         operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
         operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
         operationBack3Pass: WebglEnumStencilOperation.KEEP,
         operationFront1FailStencil: WebglEnumStencilOperation.KEEP,
         operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
         operationFront3Pass: WebglEnumStencilOperation.KEEP,
-    },
-    /** Paint only if the stencil is equal to 1 */
-    paintIf1: {
-        maskBack: 0x00,
-        maskFront: 0x00,
-        enabled: true,
-        functionBack: WebglEnumStencilFunction.ALWAYS,
-        functionBackRef: 1,
-        functionBackMask: 0x01,
-        functionFront: WebglEnumStencilFunction.EQUAL,
-        functionFrontRef: 1,
-        functionFrontMask: 0x01,
-        operationBack1FailStencil: WebglEnumStencilOperation.KEEP,
-        operationBack2FailDepth: WebglEnumStencilOperation.KEEP,
-        operationBack3Pass: WebglEnumStencilOperation.KEEP,
-        operationFront1FailStencil: WebglEnumStencilOperation.KEEP,
-        operationFront2FailDepth: WebglEnumStencilOperation.KEEP,
-        operationFront3Pass: WebglEnumStencilOperation.KEEP,
-    },
+    }),
 }
 
 export function webglStencilSet(

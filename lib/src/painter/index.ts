@@ -1,6 +1,7 @@
 export * from "./axis"
 export * from "./background"
 export * from "./clear"
+export * from "./debug"
 export * from "./depth"
 export * from "./filter"
 export * from "./framebuffer"
