@@ -3,6 +3,7 @@ import {
     TgdContext,
     TgdControllerCameraOrbit,
     TgdFilterVerbatim,
+    TgdFilterZoom,
     TgdGeometryPlane,
     TgdMaterialSolid,
     TgdMath,
@@ -10,6 +11,7 @@ import {
     TgdPainterDebugStencil,
     TgdPainterFilter,
     TgdPainterFramebuffer,
+    TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterMeshGltf,
     TgdPainterState,
@@ -34,7 +36,7 @@ function init(context: TgdContext, assets: Assets) {
         fovy: TgdMath.degreesToRadians(35),
         zoom: 1,
     })
-    const orbit = new TgdControllerCameraOrbit(context, {
+    new TgdControllerCameraOrbit(context, {
         speedPanning: 0,
         inertiaOrbit: 1000,
         geo: {
@@ -55,39 +57,42 @@ function init(context: TgdContext, assets: Assets) {
         geometry: new TgdGeometryPlane({ sizeX: 1, sizeY: 1 }),
         material: new TgdMaterialSolid({ color: [0, 0, 0.8, 1] }),
     })
-    // const framebufferRender = new TgdPainterFramebuffer(context, {
-    //     depthBuffer: true,
-    // })
-    // framebufferRender.add(clear, mesh, sea)
-    // const filter = new TgdPainterFilter(context, {
-    //     flipY: true,
-    //     filters: [new TgdFilterVerbatim()],
-    //     texture: framebufferRender.textureColor0,
-    // })
-    // framebufferRender.onExit = () =>
-    //     (filter.texture = framebufferRender.textureColor0)
+    const scene = new TgdPainterState(context, {
+        depth: webglPresetDepth.less,
+        children: [
+            new TgdPainterState(context, {
+                cull: webglPresetCull.back,
+                children: [mesh],
+            }),
+            new TgdPainterState(context, {
+                color: false,
+                stencil: webglPresetStencil.write(1),
+                children: [sea],
+            }),
+        ],
+    })
+
+    const framebuffer = new TgdPainterFramebuffer(context, {
+        children: [clear, scene],
+    })
+    const filter = new TgdPainterFilter(context, {
+        flipY: true,
+        filters: [new TgdFilterVerbatim()],
+        texture: framebuffer.textureColor0,
+    })
+    framebuffer.onExit = () => (filter.texture = framebuffer.textureColor0)
+    // context.add(clear, scene)
     context.add(
+        framebuffer,
+        new TgdPainterClear(context, { color: [0, 1, 0, 1] }),
+        new TgdPainterLogic(() => {
+            framebuffer.blitStencilBuffer()
+        }),
         new TgdPainterState(context, {
-            depth: webglPresetDepth.less,
-            cull: webglPresetCull.off,
-            children: [
-                clear,
-                new TgdPainterState(context, {
-                    stencil: webglPresetStencil.write(1),
-                    children: [mesh],
-                }),
-                new TgdPainterState(context, {
-                    stencil: webglPresetStencil.paintIfEqual(1),
-                    // stencil: webglPresetStencil.write(2),
-                    children: [sea],
-                }),
-                // new TgdPainterDebugStencil(context),
-            ],
-        })
-        // new TgdPainterState(context, {
-        //     stencil: webglPresetStencil.paintIf0,
-        //     children: [filter],
-        // })
+            stencil: webglPresetStencil.paintIfEqual(0),
+            children: [filter],
+        }),
+        new TgdPainterDebugStencil(context)
     )
     context.paint()
     // #end

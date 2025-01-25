@@ -3,6 +3,7 @@ import { TgdContext } from "../context"
 import { TgdTexture2D, TgdTexture2DOptions } from "../types"
 import { TgdPainterGroup } from "./group"
 import { webglLookup } from "@tgd/utils"
+import { TgdPainter } from "./painter"
 
 type TextureInternalFormat =
     | "RGB8"
@@ -23,6 +24,11 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
      * Default to `true`.
      */
     depthBuffer: boolean
+    /**
+     * Do we need a stencil buffer?
+     * Default to `true`.
+     */
+    stencilBuffer: boolean
     /**
      * If defined, the framebuffer will automatically match the
      * current viewport size multiplied by `viewportMatchingScale`.
@@ -47,6 +53,7 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
      * Function to execute after painting.
      */
     onExit?: TgdPainterFunction
+    children?: TgdPainter[]
 }
 
 export class TgdPainterFramebuffer extends TgdPainterGroup {
@@ -65,6 +72,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private readonly textureFormatDepth?: DepthInternalFormat
     private _framebuffer: WebGLFramebuffer | null = null
     private _depthBuffer: WebGLRenderbuffer | null = null
+    private _stencilBuffer: WebGLRenderbuffer | null = null
     private readonly drawBuffers: number[] = [
         WebGL2RenderingContext.COLOR_ATTACHMENT0,
     ]
@@ -73,7 +81,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         private readonly context: TgdContext,
         private readonly options: Partial<TgdPainterFramebufferOptions> = {}
     ) {
-        super()
+        super(options.children)
         this._width = options.width ?? 0
         this._height = options.height ?? 0
         this.onEnter = options.onEnter
@@ -145,6 +153,24 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
 
         this._height = v
         this.dirty = true
+    }
+
+    blitStencilBuffer() {
+        const { gl, width, height } = this.context
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this._framebuffer)
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null)
+        gl.blitFramebuffer(
+            0,
+            0,
+            width,
+            height,
+            0,
+            0,
+            gl.drawingBufferWidth,
+            gl.drawingBufferHeight,
+            gl.STENCIL_BUFFER_BIT,
+            gl.NEAREST
+        )
     }
 
     private createTextureForColor0() {
@@ -275,25 +301,14 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         }
     }
 
-    private createFramebufferIfNeeded() {
-        if (!this.dirty) return
-
-        const { context } = this
-        const { gl } = context
-        this.delete()
-        this._framebuffer = context.createFramebuffer()
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        this.createTextureForColor0()
-        this.createTextureForColor1()
-        this.createTextureForColor2()
-        this.createTextureForColor3()
-        this.createTextureForDepth()
+    private createDepthBuffer(gl: WebGL2RenderingContext) {
         if (this.options.depthBuffer !== false) {
             const { width, height } = this
             // Create a Depth Buffer, because the default
             // framebuffer has none.
             const depthBuffer = gl.createRenderbuffer()
-            if (!depthBuffer) throw Error("Unable to create WebGLRenderBuffer!")
+            if (!depthBuffer)
+                throw Error("Unable to create WebGLRenderBuffer for depth!")
 
             this._depthBuffer = depthBuffer
             gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
@@ -310,6 +325,47 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
                 depthBuffer
             )
         }
+    }
+
+    private createStencilBuffer(gl: WebGL2RenderingContext) {
+        if (this.options.stencilBuffer !== false) {
+            const { width, height } = this
+            const stencilBuffer = gl.createRenderbuffer()
+            if (!stencilBuffer)
+                throw Error("Unable to create WebGLRenderBuffer for stencil!")
+
+            this._stencilBuffer = stencilBuffer
+            gl.bindRenderbuffer(gl.RENDERBUFFER, stencilBuffer)
+            gl.renderbufferStorage(
+                gl.RENDERBUFFER,
+                gl.DEPTH_STENCIL,
+                width,
+                height
+            )
+            gl.framebufferRenderbuffer(
+                gl.FRAMEBUFFER,
+                gl.DEPTH_STENCIL_ATTACHMENT,
+                gl.RENDERBUFFER,
+                stencilBuffer
+            )
+        }
+    }
+
+    private createFramebufferIfNeeded() {
+        if (!this.dirty) return
+
+        const { context } = this
+        const { gl } = context
+        this.delete()
+        this._framebuffer = context.createFramebuffer()
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+        this.createTextureForColor0()
+        this.createTextureForColor1()
+        this.createTextureForColor2()
+        this.createTextureForColor3()
+        this.createTextureForDepth()
+        this.createDepthBuffer(gl)
+        this.createStencilBuffer(gl)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
             console.error(
@@ -326,14 +382,14 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.width = Math.round(context.width * viewportMatchingScale)
         this.height = Math.round(context.height * viewportMatchingScale)
         this.createFramebufferIfNeeded()
-        gl.drawBuffers(this.drawBuffers)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+        gl.drawBuffers(this.drawBuffers)
         super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
 
     delete() {
-        const { context, _framebuffer, _depthBuffer } = this
+        const { context, _framebuffer, _depthBuffer, _stencilBuffer } = this
         const { gl } = context
         if (this._textureColor0) {
             gl.deleteTexture(this._textureColor0.glTexture)
@@ -362,6 +418,10 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         if (_depthBuffer) {
             gl.deleteRenderbuffer(_depthBuffer)
             this._depthBuffer = null
+        }
+        if (_stencilBuffer) {
+            gl.deleteRenderbuffer(_stencilBuffer)
+            this._stencilBuffer = null
         }
     }
 }
