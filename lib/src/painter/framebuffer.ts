@@ -155,6 +155,10 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = true
     }
 
+    /**
+     * @experimental
+     *
+     */
     blitStencilBuffer() {
         const { gl, width, height } = this.context
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this._framebuffer)
