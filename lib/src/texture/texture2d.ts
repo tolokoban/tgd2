@@ -79,7 +79,8 @@ export class TgdTexture2DImpl implements TgdTexture2D {
                     gl[type],
                     data
                 )
-            } else {
+            } else if (!options.image) {
+                console.log("🚀 [texture2d] internalFormat = ", internalFormat) // @FIXME: Remove this line written on 2025-01-26 at 11:53
                 gl.texStorage2D(
                     gl.TEXTURE_2D,
                     levels,
@@ -296,4 +297,29 @@ export class TgdTexture2DImpl implements TgdTexture2D {
     }
 
     private readonly updateTexture: () => WebGLTexture
+}
+
+export interface WebglTexture2DCreateFromUint8ArrayOptions {
+    width: number
+    height: number
+    unit?: number
+}
+
+export function webglTexture2DCreate(gl: WebGL2RenderingContext): WebGLTexture {
+    const tex = gl.createTexture()
+    if (!tex) throw Error("Unable to create a WebGL Texture!")
+
+    return tex
+}
+
+export function webglTexture2DCreateFromUint8Array(
+    gl: WebGL2RenderingContext,
+    data: Uint8Array | Uint8ClampedArray,
+    options: WebglTexture2DCreateFromUint8ArrayOptions
+) {
+    const texture = webglTexture2DCreate(gl)
+    gl.activeTexture(gl.TEXTURE0 + (options.unit ?? 0))
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+
+    return texture
 }

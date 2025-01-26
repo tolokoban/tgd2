@@ -86,7 +86,7 @@ function init(context: TgdContext, assets: Assets) {
         framebuffer,
         new TgdPainterClear(context, { color: [0, 1, 0, 1] }),
         new TgdPainterLogic(() => {
-            framebuffer.blitStencilBuffer()
+            // framebuffer.blitStencilBuffer()
         }),
         new TgdPainterState(context, {
             stencil: webglPresetStencil.paintIfEqual(0),
