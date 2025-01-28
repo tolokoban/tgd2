@@ -1,4 +1,3 @@
-import { TgdProgram } from "./program"
 import type { WebglImage } from "./webgl"
 
 export interface TgdTextureCubeOptions {
@@ -8,49 +7,40 @@ export interface TgdTextureCubeOptions {
      * - Right points toward `-Z`
      * - Top points toward `-Y`
      */
-    imagePosX: string | WebglImage
+    imagePosX: WebglImage
     /**
      * When you look at this image the
      *
      * - Right points toward `+Z`
      * - Top points toward `-Y`
      */
-    imageNegX: string | WebglImage
+    imageNegX: WebglImage
     /**
      * When you look at this image the
      *
      * - Right points toward `+X`
      * - Top points toward `+Z`
      */
-    imagePosY: string | WebglImage
+    imagePosY: WebglImage
     /**
      * When you look at this image the
      *
      * - Right points toward `+X`
      * - Top points toward `-Z`
      */
-    imageNegY: string | WebglImage
+    imageNegY: WebglImage
     /**
      * When you look at this image the
      *
      * - Right points toward `+X`
      * - Top points toward `-Y`
      */
-    imagePosZ: string | WebglImage
+    imagePosZ: WebglImage
     /**
      * When you look at this image the
      *
      * - Right points toward `-X`
      * - Top points toward `-Y`
      */
-    imageNegZ: string | WebglImage
-}
-
-export interface TgdTextureCube {
-    /**
-     * TextureCube is ready only when the 6 images hve been loaded.
-     */
-    readonly ready: boolean
-    bind(): void
-    activate(program: TgdProgram, uniformName: string, slot?: number): void
+    imageNegZ: WebglImage
 }

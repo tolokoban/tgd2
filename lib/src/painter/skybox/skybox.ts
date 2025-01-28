@@ -1,4 +1,4 @@
-import { TgdProgram, TgdTextureCube, TgdTextureCubeOptions } from "@tgd/types"
+import { TgdTextureCubeOptions } from "@tgd/types"
 import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
@@ -8,6 +8,8 @@ import { TgdMat4 } from "@tgd/math"
 
 import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
+import { TgdProgram } from "@tgd/program"
+import { TgdTextureCubeImpl } from "@tgd/texture"
 
 export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
     camera?: TgdCameraPerspective
@@ -16,7 +18,7 @@ export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
 export class TgdPainterSkybox extends TgdPainter {
     public camera: TgdCameraPerspective
 
-    private readonly texture: TgdTextureCube
+    private readonly texture: TgdTextureCubeImpl
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly matrix = new TgdMat4()
@@ -28,8 +30,8 @@ export class TgdPainterSkybox extends TgdPainter {
     ) {
         super()
         this.camera = options.camera ?? new TgdCameraPerspective()
-        this.texture = context.texturesCube.create(options)
-        this.program = context.programs.create({
+        this.texture = new TgdTextureCubeImpl(context, options)
+        this.program = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })
@@ -54,7 +56,7 @@ export class TgdPainterSkybox extends TgdPainter {
 
         program.use()
         program.uniformMatrix4fv("uniMatrix", this.matrix)
-        texture.activate(program, "uniTexture")
+        texture.activate(0, program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 

@@ -1,4 +1,4 @@
-import { TgdContextInterface, WebglDepthFunc } from ".."
+import { WebglDepthFunc } from ".."
 import { TgdPainter } from "./painter"
 
 export type TgdPainterDepthOptions = {
@@ -16,8 +16,10 @@ export class TgdPainterDepth extends TgdPainter {
     public rangeMin: number
     public rangeMax: number
 
+    private readonly gl: WebGL2RenderingContext
+
     constructor(
-        private readonly context: TgdContextInterface,
+        { gl }: { gl: WebGL2RenderingContext },
         {
             enabled = true,
             func = "LESS",
@@ -27,6 +29,7 @@ export class TgdPainterDepth extends TgdPainter {
         }: Partial<TgdPainterDepthOptions> = {}
     ) {
         super()
+        this.gl = gl
         this.enabled = enabled
         this.func = func
         this.mask = mask
@@ -37,7 +40,7 @@ export class TgdPainterDepth extends TgdPainter {
     delete(): void {}
 
     paint(): void {
-        const { gl } = this.context
+        const { gl } = this
         const { enabled } = this
         if (!enabled) {
             gl.disable(gl.DEPTH_TEST)

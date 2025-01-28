@@ -1,24 +1,11 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdContext } from "../context"
-import { TgdTexture2D, TgdTexture2DOptions } from "../types"
 import { TgdPainterGroup } from "./group"
 import { webglLookup } from "@tgd/utils"
 import { TgdPainter } from "./painter"
+import { TgdTexture2D } from "@tgd/texture"
 
-type TextureInternalFormat =
-    | "RGB8"
-    | "RGBA8"
-    | "R16F"
-    | "RG16F"
-    | "RGB16F"
-    | "RGBA16F"
-
-type DepthInternalFormat =
-    | "DEPTH_COMPONENT16"
-    | "DEPTH_COMPONENT24"
-    | "DEPTH_COMPONENT32F"
-
-export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
+export interface TgdPainterFramebufferOptions {
     /**
      * Do we need a depth buffer?
      * Default to `true`.
@@ -40,11 +27,11 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
      * Default to `1`.
      */
     viewportMatchingScale?: number
-    textureFormatColor0?: TextureInternalFormat
-    textureFormatColor1?: TextureInternalFormat
-    textureFormatColor2?: TextureInternalFormat
-    textureFormatColor3?: TextureInternalFormat
-    textureFormatDepth?: DepthInternalFormat
+    textureColor0?: TgdTexture2D
+    textureColor1?: TgdTexture2D
+    textureColor2?: TgdTexture2D
+    textureColor3?: TgdTexture2D
+    textureDepth?: TgdTexture2D
     /**
      * Function to execute before painting.
      */
@@ -57,82 +44,39 @@ export interface TgdPainterFramebufferOptions extends TgdTexture2DOptions {
 }
 
 export class TgdPainterFramebuffer extends TgdPainterGroup {
+    public readonly textureColor0: TgdTexture2D | undefined
+    public readonly textureColor1: TgdTexture2D | undefined
+    public readonly textureColor2: TgdTexture2D | undefined
+    public readonly textureColor3: TgdTexture2D | undefined
+    public readonly textureDepth: TgdTexture2D | undefined
+
     private dirty = true
     private _width = 0
     private _height = 0
-    private _textureColor0: TgdTexture2D | null = null
-    private _textureColor1: TgdTexture2D | null = null
-    private _textureColor2: TgdTexture2D | null = null
-    private _textureColor3: TgdTexture2D | null = null
-    private _textureDepth: TgdTexture2D | null = null
-    private readonly textureFormatColor0: TextureInternalFormat
-    private readonly textureFormatColor1?: TextureInternalFormat
-    private readonly textureFormatColor2?: TextureInternalFormat
-    private readonly textureFormatColor3?: TextureInternalFormat
-    private readonly textureFormatDepth?: DepthInternalFormat
     private _framebuffer: WebGLFramebuffer | null = null
     private _depthBuffer: WebGLRenderbuffer | null = null
     private _stencilBuffer: WebGLRenderbuffer | null = null
-    private readonly drawBuffers: number[] = [
-        WebGL2RenderingContext.COLOR_ATTACHMENT0,
-    ]
+    private readonly drawBuffers: number[]
 
     constructor(
         private readonly context: TgdContext,
         private readonly options: Partial<TgdPainterFramebufferOptions> = {}
     ) {
         super(options.children)
-        this._width = options.width ?? 0
-        this._height = options.height ?? 0
+        this.textureColor0 = options.textureColor0
+        this.textureColor1 = options.textureColor1
+        this.textureColor2 = options.textureColor2
+        this.textureColor3 = options.textureColor3
+        this.textureDepth = options.textureDepth
         this.onEnter = options.onEnter
         this.onExit = options.onExit
-        this.textureFormatColor0 = options.textureFormatColor0 ?? "RGBA8"
-        this.textureFormatColor1 = options.textureFormatColor1
-        this.textureFormatColor2 = options.textureFormatColor2
-        this.textureFormatColor3 = options.textureFormatColor3
-        this.textureFormatDepth = options.textureFormatDepth
         const { gl } = this.context
-        if (this.textureFormatColor1)
-            this.drawBuffers.push(gl.COLOR_ATTACHMENT1)
-        if (this.textureFormatColor2)
-            this.drawBuffers.push(gl.COLOR_ATTACHMENT2)
-        if (this.textureFormatColor3)
-            this.drawBuffers.push(gl.COLOR_ATTACHMENT3)
-    }
-
-    get textureColor0(): TgdTexture2D {
-        if (!this._textureColor0) {
-            this._textureColor0 = this.context.textures2D.getDefaultEmpty()
-        }
-        return this._textureColor0
-    }
-
-    get textureColor1(): TgdTexture2D {
-        if (!this._textureColor1) {
-            this._textureColor1 = this.context.textures2D.getDefaultEmpty()
-        }
-        return this._textureColor1
-    }
-
-    get textureColor2(): TgdTexture2D {
-        if (!this._textureColor2) {
-            this._textureColor2 = this.context.textures2D.getDefaultEmpty()
-        }
-        return this._textureColor2
-    }
-
-    get textureColor3(): TgdTexture2D {
-        if (!this._textureColor3) {
-            this._textureColor3 = this.context.textures2D.getDefaultEmpty()
-        }
-        return this._textureColor3
-    }
-
-    get textureDepth(): TgdTexture2D {
-        if (!this._textureDepth) {
-            this._textureDepth = this.context.textures2D.getDefaultEmpty()
-        }
-        return this._textureDepth
+        this.drawBuffers = [
+            this.textureColor0 ? gl.COLOR_ATTACHMENT0 : gl.NONE,
+            this.textureColor1 ? gl.COLOR_ATTACHMENT1 : gl.NONE,
+            this.textureColor2 ? gl.COLOR_ATTACHMENT2 : gl.NONE,
+            this.textureColor3 ? gl.COLOR_ATTACHMENT3 : gl.NONE,
+        ]
     }
 
     get width(): number {
@@ -155,154 +99,38 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = true
     }
 
-    /**
-     * @experimental
-     *
-     */
-    blitStencilBuffer() {
-        const { gl, width, height } = this.context
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this._framebuffer)
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null)
-        gl.blitFramebuffer(
-            0,
-            0,
-            width,
-            height,
-            0,
-            0,
-            gl.drawingBufferWidth,
-            gl.drawingBufferHeight,
-            gl.STENCIL_BUFFER_BIT,
-            gl.NEAREST
-        )
-    }
+    private updateTextureForColor(
+        texture: TgdTexture2D | undefined,
+        attachment: number
+    ) {
+        if (!texture) return
 
-    private createTextureForColor0() {
         const { context, width, height } = this
         const { gl } = context
-        gl.activeTexture(gl.TEXTURE0)
-        this._textureColor0 = context.textures2D.create({
-            width: Math.max(width, 1),
-            height: Math.max(height, 1),
-            internalFormat: this.textureFormatColor0,
-            generateMipMap: true,
-            magFilter: "LINEAR",
-            minFilter: "LINEAR_MIPMAP_LINEAR",
-            wrapR: "MIRRORED_REPEAT",
-            wrapS: "MIRRORED_REPEAT",
-            wrapT: "MIRRORED_REPEAT",
-        })
+        texture.resize(width, height)
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
-            gl.COLOR_ATTACHMENT0,
+            gl.COLOR_ATTACHMENT0 + attachment,
             gl.TEXTURE_2D,
-            this._textureColor0.glTexture,
+            texture,
             0
         )
     }
 
-    private createTextureForColor1() {
-        if (this.textureFormatColor1) {
-            const { context, width, height } = this
-            const { gl } = context
-            this._textureColor1 = context.textures2D.create({
-                width: Math.max(width, 1),
-                height: Math.max(height, 1),
-                internalFormat: this.textureFormatColor1,
-                generateMipMap: true,
-                magFilter: "LINEAR",
-                minFilter: "LINEAR_MIPMAP_LINEAR",
-                wrapR: "MIRRORED_REPEAT",
-                wrapS: "MIRRORED_REPEAT",
-                wrapT: "MIRRORED_REPEAT",
-                levels: 1,
-            })
-            gl.framebufferTexture2D(
-                gl.FRAMEBUFFER,
-                gl.COLOR_ATTACHMENT1,
-                gl.TEXTURE_2D,
-                this._textureColor1.glTexture,
-                0
-            )
-        }
-    }
-
-    private createTextureForColor2() {
-        if (this.textureFormatColor2) {
-            const { context, width, height } = this
-            const { gl } = context
-            this._textureColor2 = context.textures2D.create({
-                width: Math.max(width, 1),
-                height: Math.max(height, 1),
-                internalFormat: this.textureFormatColor2,
-                generateMipMap: true,
-                magFilter: "LINEAR",
-                minFilter: "LINEAR_MIPMAP_LINEAR",
-                wrapR: "MIRRORED_REPEAT",
-                wrapS: "MIRRORED_REPEAT",
-                wrapT: "MIRRORED_REPEAT",
-                levels: 1,
-            })
-            gl.framebufferTexture2D(
-                gl.FRAMEBUFFER,
-                gl.COLOR_ATTACHMENT2,
-                gl.TEXTURE_2D,
-                this._textureColor2.glTexture,
-                0
-            )
-        }
-    }
-
-    private createTextureForColor3() {
-        if (this.textureFormatColor3) {
-            const { context, width, height } = this
-            const { gl } = context
-            this._textureColor3 = context.textures2D.create({
-                width: Math.max(width, 1),
-                height: Math.max(height, 1),
-                internalFormat: this.textureFormatColor3,
-                generateMipMap: true,
-                magFilter: "LINEAR",
-                minFilter: "LINEAR_MIPMAP_LINEAR",
-                wrapR: "MIRRORED_REPEAT",
-                wrapS: "MIRRORED_REPEAT",
-                wrapT: "MIRRORED_REPEAT",
-                levels: 1,
-            })
-            gl.framebufferTexture2D(
-                gl.FRAMEBUFFER,
-                gl.COLOR_ATTACHMENT3,
-                gl.TEXTURE_2D,
-                this._textureColor3.glTexture,
-                0
-            )
-        }
-    }
-
     private createTextureForDepth() {
-        if (this.textureFormatDepth) {
-            const { context, width, height } = this
-            const { gl } = context
-            this._textureDepth = context.textures2D.create({
-                width: Math.max(width, 1),
-                height: Math.max(height, 1),
-                internalFormat: this.textureFormatDepth,
-                generateMipMap: true,
-                magFilter: "LINEAR",
-                minFilter: "LINEAR_MIPMAP_LINEAR",
-                wrapR: "MIRRORED_REPEAT",
-                wrapS: "MIRRORED_REPEAT",
-                wrapT: "MIRRORED_REPEAT",
-                levels: 1,
-            })
-            gl.framebufferTexture2D(
-                gl.FRAMEBUFFER,
-                gl.DEPTH_ATTACHMENT,
-                gl.TEXTURE_2D,
-                this._textureDepth.glTexture,
-                0
-            )
-        }
+        const texture = this.textureDepth
+        if (!texture) return
+
+        const { context, width, height } = this
+        const { gl } = context
+        texture.resize(width, height)
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.DEPTH_ATTACHMENT,
+            gl.TEXTURE_2D,
+            texture,
+            0
+        )
     }
 
     private createDepthBuffer(gl: WebGL2RenderingContext) {
@@ -363,10 +191,10 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.delete()
         this._framebuffer = context.createFramebuffer()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        this.createTextureForColor0()
-        this.createTextureForColor1()
-        this.createTextureForColor2()
-        this.createTextureForColor3()
+        this.updateTextureForColor(this.textureColor0, 0)
+        this.updateTextureForColor(this.textureColor1, 1)
+        this.updateTextureForColor(this.textureColor2, 2)
+        this.updateTextureForColor(this.textureColor3, 3)
         this.createTextureForDepth()
         this.createDepthBuffer(gl)
         this.createStencilBuffer(gl)
@@ -395,26 +223,6 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     delete() {
         const { context, _framebuffer, _depthBuffer, _stencilBuffer } = this
         const { gl } = context
-        if (this._textureColor0) {
-            gl.deleteTexture(this._textureColor0.glTexture)
-            this._textureColor0 = null
-        }
-        if (this._textureColor1) {
-            gl.deleteTexture(this._textureColor1.glTexture)
-            this._textureColor1 = null
-        }
-        if (this._textureColor2) {
-            gl.deleteTexture(this._textureColor2.glTexture)
-            this._textureColor2 = null
-        }
-        if (this._textureColor3) {
-            gl.deleteTexture(this._textureColor3.glTexture)
-            this._textureColor3 = null
-        }
-        if (this._textureDepth) {
-            gl.deleteTexture(this._textureDepth.glTexture)
-            this._textureDepth = null
-        }
         if (_framebuffer) {
             gl.deleteFramebuffer(_framebuffer)
             this._framebuffer = null

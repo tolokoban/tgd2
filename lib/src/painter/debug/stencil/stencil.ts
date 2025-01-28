@@ -1,7 +1,7 @@
 import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "../../painter"
 import { webglStencilGet, webglStencilSet } from "@tgd/utils"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdDataset } from "@tgd/dataset"
 
@@ -15,7 +15,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
     constructor(private readonly context: TgdContext) {
         super()
 
-        this.program = context.programs.create({
+        this.program = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })

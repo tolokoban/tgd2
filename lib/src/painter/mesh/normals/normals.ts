@@ -1,7 +1,7 @@
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
 
 import FRAG from "./shader.frag"
@@ -26,7 +26,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
             throw Error("This mesh has no normal!")
         }
 
-        const prg = context.programs.create({
+        const prg = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })

@@ -1,6 +1,5 @@
 import { TgdVec4 } from "@tgd/math"
 import { TgdPainter } from "./painter"
-import { TgdContextInterface } from "@tgd/types"
 
 export interface TgdPainterClearOptions {
     color: [red: number, green: number, blue: number, alpha: number] | TgdVec4
@@ -14,6 +13,7 @@ export interface TgdPainterClearOptions {
  */
 export class TgdPainterClear extends TgdPainter {
     private readonly clearMask
+    private readonly gl: WebGL2RenderingContext
 
     public red = 1
     public green = 0.7
@@ -23,12 +23,12 @@ export class TgdPainterClear extends TgdPainter {
     public stencil = 0
 
     constructor(
-        public readonly context: TgdContextInterface,
+        { gl }: { gl: WebGL2RenderingContext },
         private readonly options: Partial<TgdPainterClearOptions> = {}
     ) {
         super()
         this.name = options.name ?? `Clear/${this.name}`
-        const { gl } = context
+        this.gl = gl
         const color = options.color ?? [0, 0, 0, 1]
         const depth = options.depth ?? 1
         const stencil = options.stencil ?? 0
@@ -63,7 +63,7 @@ export class TgdPainterClear extends TgdPainter {
     paint(): void {
         const {
             clearMask,
-            context,
+            gl,
             red,
             green,
             blue,
@@ -72,7 +72,6 @@ export class TgdPainterClear extends TgdPainter {
             stencil,
             options,
         } = this
-        const { gl } = context
         if (options.color) gl.clearColor(red, green, blue, alpha)
         if (typeof options.depth === "number") {
             gl.clearDepth(depth)

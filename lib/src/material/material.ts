@@ -1,5 +1,6 @@
 import { TgdCodeBloc } from "@tgd/shader/code"
-import { TgdProgram, WebglAttributeType, WebglUniformType } from ".."
+import { WebglAttributeType, WebglUniformType } from ".."
+import { TgdProgram } from "@tgd/program"
 
 export abstract class TgdMaterial {
     /**

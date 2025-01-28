@@ -5,7 +5,6 @@ import {
 } from "@tgd/utils"
 import { clamp } from "@tgd/utils/math"
 import {
-    TgdContextInterface,
     TgdInputPointerEventMove,
     TgdInputPointerModifierKeys,
     TgdInputPointerEventZoom,
@@ -13,6 +12,7 @@ import {
 import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -132,7 +132,7 @@ export class TgdControllerCameraOrbit {
     }
 
     constructor(
-        private readonly context: TgdContextInterface,
+        private readonly context: TgdContext,
         {
             geo,
             minZoom = 1e-3,

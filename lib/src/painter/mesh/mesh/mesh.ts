@@ -2,7 +2,7 @@ import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdMaterial } from "@tgd/material"
 import { TgdMat4, TgdVec3 } from "@tgd/math"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
@@ -82,7 +82,7 @@ export class TgdPainterMesh
             },
             mainCode: [`FragColor = applyMaterial();`],
         }).code
-        const prg = context.programs.create({
+        const prg = new TgdProgram(context, {
             vert,
             frag,
         })

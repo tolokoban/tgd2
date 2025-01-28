@@ -1,13 +1,7 @@
-import { tgdLoadImage } from "@tgd/loader"
-import {
-    TgdProgram,
-    TgdTextureCube,
-    TgdTextureCubeOptions,
-    WebglImage,
-    TgdContextInterface,
-} from "@tgd/types"
+import { TgdProgram } from "@tgd/program"
+import { TgdTextureCubeOptions, WebglImage } from "@tgd/types"
 
-export class TgdTextureCubeImpl implements TgdTextureCube {
+export class TgdTextureCubeImpl {
     public readonly texture: WebGLTexture
 
     private _width = 0
@@ -15,7 +9,10 @@ export class TgdTextureCubeImpl implements TgdTextureCube {
     private numberOfImagesToLoad = 6
 
     constructor(
-        public readonly context: TgdContextInterface,
+        public readonly context: {
+            gl: WebGL2RenderingContext
+            paint: () => void
+        },
         options: TgdTextureCubeOptions
     ) {
         const { gl } = context
@@ -52,38 +49,17 @@ export class TgdTextureCubeImpl implements TgdTextureCube {
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture)
     }
 
-    activate(program: TgdProgram, uniformName: string, slot = 0) {
+    activate(unit: number, program: TgdProgram, uniformName: string) {
         if (!this.ready) return
 
         const { context, texture } = this
         const { gl } = context
-        gl.activeTexture(gl.TEXTURE0 + slot)
+        gl.activeTexture(gl.TEXTURE0 + unit)
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
-        program.uniform1i(uniformName, slot)
+        program.uniform1i(uniformName, unit)
     }
 
-    private loadImage(target: number, image: string | WebglImage) {
-        if (typeof image === "string") {
-            tgdLoadImage(image)
-                .then(img => {
-                    if (img) {
-                        this.loadImage(target, img)
-                    } else {
-                        console.error(
-                            `[TgdTextureCube] Unable to load image "${image}":`,
-                            image
-                        )
-                    }
-                })
-                .catch(ex => {
-                    console.error(
-                        `[TgdTextureCube] Unable to load image "${image}":`,
-                        ex
-                    )
-                })
-            return
-        }
-
+    private loadImage(target: number, image: WebglImage) {
         const { width, height } = image
         if (width !== height) {
             throw Error(

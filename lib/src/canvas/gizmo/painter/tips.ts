@@ -1,9 +1,10 @@
 import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
-import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdProgram } from "@tgd/program"
 
 import FRAG from "./shader.frag"
 import VERT from "./shader.vert"
@@ -15,11 +16,13 @@ export class TipsPainter extends TgdPainter {
 
     constructor(private readonly context: TgdContext) {
         super()
-        this.texture = context.textures2D.create({
-            minFilter: "LINEAR",
-            magFilter: "LINEAR",
-        })
-        this.setTips()
+        this.texture = new TgdTexture2D(context)
+            .loadBitmap(createTipsCanvas())
+            .setParams({
+                minFilter: "LINEAR",
+                magFilter: "LINEAR",
+            })
+            .generateMipmap()
         const data = new TgdDataset({
             attPos: "vec3",
             attUV: "vec2",
@@ -44,7 +47,7 @@ export class TipsPainter extends TgdPainter {
               X, Y,
             2*X, Y,
         ]))
-        const prg = context.programs.create({ vert: VERT, frag: FRAG })
+        const prg = new TgdProgram(context, { vert: VERT, frag: FRAG })
         const vao = context.createVAO(prg, [data])
         this.prg = prg
         this.vao = vao
@@ -58,25 +61,26 @@ export class TipsPainter extends TgdPainter {
         const { context, prg, vao } = this
         const { gl, camera } = context
         prg.use()
-        this.texture.activate(prg, "uniTexture")
+        this.texture.activate(0)
+        prg.uniform1i("uniTexture", 0)
         prg.uniform1f("uniScreenHeight", context.height)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
         gl.drawArrays(gl.POINTS, 0, 6)
     }
+}
 
-    setTips() {
-        const SIZE = 256
-        const { canvas, ctx } = tgdCanvasCreateWithContext2D(SIZE * 3, SIZE * 2)
-        paintDisk(ctx, 0, 0, SIZE, "X", "#f00", "#fff")
-        paintDisk(ctx, 1, 0, SIZE, "Y", "#0f0", "#000")
-        paintDisk(ctx, 2, 0, SIZE, "Z", "#00f", "#fff")
-        paintDisk(ctx, 0, 1, SIZE, "", "#f00", "#500")
-        paintDisk(ctx, 1, 1, SIZE, "", "#0f0", "#050")
-        paintDisk(ctx, 2, 1, SIZE, "", "#00f", "#005")
-        this.texture.loadImage(canvas)
-    }
+function createTipsCanvas() {
+    const SIZE = 256
+    const { canvas, ctx } = tgdCanvasCreateWithContext2D(SIZE * 3, SIZE * 2)
+    paintDisk(ctx, 0, 0, SIZE, "X", "#f00", "#fff")
+    paintDisk(ctx, 1, 0, SIZE, "Y", "#0f0", "#000")
+    paintDisk(ctx, 2, 0, SIZE, "Z", "#00f", "#fff")
+    paintDisk(ctx, 0, 1, SIZE, "", "#f00", "#500")
+    paintDisk(ctx, 1, 1, SIZE, "", "#0f0", "#050")
+    paintDisk(ctx, 2, 1, SIZE, "", "#00f", "#005")
+    return canvas
 }
 
 function paintDisk(

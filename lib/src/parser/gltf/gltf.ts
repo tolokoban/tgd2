@@ -15,10 +15,10 @@ import {
 } from "@tgd/types/gltf"
 import {
     assertTgdTypeArrayForElements,
-    TgdTexture2DOptions,
     TgdTypeArrayForElements,
 } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
+import { TgdTexture2D } from "@tgd/texture"
 
 export class TgdParserGLTransfertFormatBinary {
     public readonly gltf: Readonly<TgdFormatGltf>
@@ -161,19 +161,30 @@ export class TgdParserGLTransfertFormatBinary {
         }
     }
 
-    getTexture2DOptions(textureIndex: number): TgdTexture2DOptions {
-        const texture = this.gltf.textures?.[textureIndex]
-        if (!texture) {
+    createTexture2D(
+        context: { gl: WebGL2RenderingContext },
+        textureIndex: number
+    ): TgdTexture2D {
+        const gltfTex = this.gltf.textures?.[textureIndex]
+        if (!gltfTex) {
             throw Error(`Asset has no texture with index #${textureIndex}!`)
         }
 
         const source =
-            texture.source ?? texture.extensions?.EXT_texture_webp?.source ?? 0
+            gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source ?? 0
         const url = this.getImageURL(source)
-        const options: TgdTexture2DOptions = {
-            image: url,
+        const texture = new TgdTexture2D(context)
+        if (url) {
+            loadImage(url)
+                .then(bmp => {
+                    if (bmp) texture.loadBitmap(bmp)
+                    else console.error("Unable to load this file:", url)
+                })
+                .catch(console.error)
+        } else {
+            console.error(`[GLTF] texture index #${textureIndex} is empty!`)
         }
-        return options
+        return texture
     }
 
     async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
@@ -475,4 +486,13 @@ function returnFloat32Array(data: unknown): Float32Array {
     if (data instanceof Float32Array) return data
 
     throw new Error("We were expecting a Float32Array!")
+}
+
+function loadImage(url: string): Promise<HTMLImageElement | null> {
+    return new Promise(resolve => {
+        const img = new Image()
+        img.src = url
+        img.onload = () => resolve(img)
+        img.onerror = () => resolve(null)
+    })
 }

@@ -1,6 +1,7 @@
 import { TgdContext } from "@tgd/context"
+import { TgdProgram } from "@tgd/program"
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
-import { TgdProgram, WebglUniformType } from "@tgd/types"
+import { WebglUniformType } from "@tgd/types"
 
 /**
  * Define the shader to be used in a filter.

@@ -1,16 +1,14 @@
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
-import {
-    ArrayNumber2,
-    ArrayNumber4,
-    TgdContextInterface,
-    TgdProgram,
-    TgdTexture2D,
-} from "@tgd/types"
+import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 
 import FRAG from "./segments.frag"
 import VERT from "./segments.vert"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdProgram } from "@tgd/program"
+import { tgdCanvasCreatePalette } from "@tgd/utils"
+import { TgdCamera } from "@tgd/camera"
 
 export type TgdPainterSegmentsOptions = {
     /**
@@ -67,7 +65,10 @@ export class TgdPainterSegments extends TgdPainter {
     private readonly instanceCount: number
 
     constructor(
-        protected readonly context: TgdContextInterface,
+        protected readonly context: {
+            gl: WebGL2RenderingContext
+            camera: TgdCamera
+        },
         factory: { makeDataset: () => InstanceDataset; readonly count: number },
         {
             roundness = 3,
@@ -82,23 +83,28 @@ export class TgdPainterSegments extends TgdPainter {
         if (roundness < 0) {
             throw Error("[TgdPainterSegments] Min roundness is 0!")
         }
-        const tex = context.textures2D.create({
-            magFilter: "NEAREST",
-            minFilter: "NEAREST",
-            wrapR: "CLAMP_TO_EDGE",
-            wrapS: "CLAMP_TO_EDGE",
-            wrapT: "CLAMP_TO_EDGE",
-        })
-        tex.makePalette(["#f00", "#0f0", "#00f"])
-        this.colorTexture = tex
-        const prg = context.programs.create({
+        this.colorTexture = new TgdTexture2D(context)
+            .setParams({
+                magFilter: "NEAREST",
+                minFilter: "NEAREST",
+                wrapR: "CLAMP_TO_EDGE",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+            })
+            .loadBitmap(tgdCanvasCreatePalette(["#f00", "#0f0", "#00f"]))
+        const prg = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })
         this.prg = prg
         const { capsule, elements } = makeCapsule(roundness)
         const instance = factory.makeDataset()
-        this.vao = context.createVAO(prg, [capsule, instance], elements)
+        this.vao = new TgdVertexArray(
+            context.gl,
+            prg,
+            [capsule, instance],
+            elements
+        )
         this.vertexCount = elements.length
         this.instanceCount = instance.count
     }
@@ -132,7 +138,7 @@ export class TgdPainterSegments extends TgdPainter {
         prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         prg.uniform1f("uniRadiusConstant", radiusConstant)
         prg.uniform1f("uniRadiusSwitch", radiusSwitch)
-        colorTexture.activate(prg, "uniTexture")
+        colorTexture.activate(0, prg, "uniTexture")
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()

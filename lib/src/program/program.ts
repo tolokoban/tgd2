@@ -1,23 +1,25 @@
 import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
 import { tgdCodeStringify } from "@tgd/shader/code"
-import { TgdProgram, TgdProgramOptions } from "@tgd/types"
+import { TgdProgramOptions } from "@tgd/types"
 
 /**
  * This class helps to manage a WebGLProgram.
  * It will report meaninfull errors and help you with
  * the uniforms.
  */
-export class TgdProgramImpl implements TgdProgram {
+export class TgdProgram {
     /** Access to the real WebGLProgram object. */
     public readonly program: WebGLProgram
+    public readonly gl: WebGL2RenderingContext
 
     private readonly shaders: WebGLShader[]
     private readonly uniformsLocations: { [name: string]: WebGLUniformLocation }
 
     constructor(
-        public readonly gl: WebGL2RenderingContext,
+        { gl }: { gl: WebGL2RenderingContext },
         private readonly code: TgdProgramOptions
     ) {
+        this.gl = gl
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create WebGLProgram!")
 

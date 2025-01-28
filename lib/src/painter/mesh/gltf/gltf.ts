@@ -1,4 +1,3 @@
-import { TgdTexture2D } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
@@ -8,6 +7,7 @@ import { TgdMaterial, TgdMaterialDiffuse } from "@tgd/material"
 import { TgdLight } from "@tgd/light"
 
 import { TgdPainterMesh } from "../mesh"
+import { TgdTexture2D } from "@tgd/texture"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdParserGLTransfertFormatBinary
@@ -82,21 +82,18 @@ function figureColor(
     if (materialIndex === -1) return DEFAULT_COLOR
 
     const material = asset.getMaterial(materialIndex)
-    const id = `glb/${meshIndex}/${primitiveIndex}`
     const pbr = material.pbrMetallicRoughness
     if (!pbr) {
         const emissive = material.emissiveTexture
         if (!emissive) return DEFAULT_COLOR
 
-        const textureOptions = asset.getTexture2DOptions(emissive.index ?? 0)
-        const color = context.textures2D.create(textureOptions, id)
+        const color = asset.createTexture2D(context, emissive.index ?? 0)
         return color
     }
 
     if (pbr.baseColorTexture) {
         const textureIndex = pbr.baseColorTexture?.index
-        const textureOptions = asset.getTexture2DOptions(textureIndex ?? 0)
-        const color = context.textures2D.create(textureOptions, id)
+        const color = asset.createTexture2D(context, textureIndex ?? 0)
         return color
     }
     if (pbr.baseColorFactor) {

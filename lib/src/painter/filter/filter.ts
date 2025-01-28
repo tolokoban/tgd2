@@ -1,4 +1,3 @@
-import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
@@ -7,6 +6,8 @@ import { TgdVertexArray } from "@tgd/vao"
 import { TgdFilter } from "@tgd/filter"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdProgram } from "@tgd/program"
 
 export interface TgdPainterFilterOptions {
     filters: TgdFilter[]
@@ -77,7 +78,7 @@ export class TgdPainterFilter extends TgdPainter {
                 mainCode: filter.fragmentShaderCode,
                 functions: filter.extraFunctions,
             }).code
-            return context.programs.create({ vert, frag })
+            return new TgdProgram(context, { vert, frag })
         })
         const vaos = programs.map(program =>
             createVAO(context, program, options.flipY ? -1 : +1)

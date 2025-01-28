@@ -1,5 +1,5 @@
 import { TgdContext } from "@tgd/context"
-import { TgdProgram } from "@tgd/types"
+import { TgdProgram } from "@tgd/program"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdVertexArray } from "@tgd/vao"
@@ -25,7 +25,7 @@ export class TgdPainterAxis extends TgdPainter {
         { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxisOptions> = {}
     ) {
         super()
-        const prg = context.programs.create({
+        const prg = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })

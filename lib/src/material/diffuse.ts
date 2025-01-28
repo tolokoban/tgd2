@@ -1,13 +1,10 @@
-import {
-    TgdProgram,
-    TgdTexture2D,
-    WebglAttributeType,
-    WebglUniformType,
-} from "@tgd/types"
+import { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
 import { TgdCodeBloc } from "@tgd/shader/code"
 import { TgdLight } from "@tgd/light"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdProgram } from "@tgd/program"
 
 export type TgdMaterialDiffuseOptions = Partial<{
     color: TgdVec4 | TgdTexture2D
@@ -96,6 +93,6 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
         const { texture } = this
-        if (texture) texture.activate(program, "texDiffuse")
+        if (texture) texture.activate(0, program, "texDiffuse")
     }
 }

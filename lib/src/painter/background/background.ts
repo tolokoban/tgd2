@@ -1,4 +1,3 @@
-import { TgdProgram, TgdTexture2D } from "@tgd/types"
 import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "../painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
@@ -6,6 +5,8 @@ import { TgdVertexArray } from "@tgd/vao"
 
 import VERT from "./background.vert"
 import FRAG from "./background.frag"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdProgram } from "@tgd/program"
 
 export interface TgdPainterBackgroundOptions {
     zoom: number
@@ -49,7 +50,7 @@ export class TgdPainterBackground extends TgdPainter {
         this.z = z
         this.zoom = zoom
         this.texture = texture
-        this.program = context.programs.create({
+        this.program = new TgdProgram(context, {
             vert: VERT,
             frag: FRAG,
         })
@@ -95,7 +96,7 @@ export class TgdPainterBackground extends TgdPainter {
         program.uniform2f("uniScroll", x, y)
         program.uniform1f("uniZoom", 1 / zoom)
         program.uniform1f("uniZ", z)
-        texture.activate(program, "uniTexture")
+        texture.activate(0, program, "uniTexture")
         gl.disable(gl.CULL_FACE)
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)

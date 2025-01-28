@@ -1,68 +1,69 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+    <head>
+        <title>Code coverage report for src/dataset/dataset.ts</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="../../prettify.css" />
+        <link rel="stylesheet" href="../../base.css" />
+        <link
+            rel="shortcut icon"
+            type="image/x-icon"
+            href="../../favicon.png"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style type="text/css">
+            .coverage-summary .sorter {
+                background-image: url(../../sort-arrow-sprite.png);
+            }
+        </style>
+    </head>
 
-<head>
-    <title>Code coverage report for src/dataset/dataset.ts</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../../prettify.css" />
-    <link rel="stylesheet" href="../../base.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style type='text/css'>
-        .coverage-summary .sorter {
-            background-image: url(../../sort-arrow-sprite.png);
-        }
-    </style>
-</head>
-    
-<body>
-<div class='wrapper'>
-    <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/dataset</a> dataset.ts</h1>
-        <div class='clearfix'>
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">48.52% </span>
-                <span class="quiet">Statements</span>
-                <span class='fraction'>66/136</span>
+    <body>
+        <div class="wrapper">
+            <div class="pad1">
+                <h1>
+                    <a href="../../index.html">All files</a> /
+                    <a href="index.html">src/dataset</a> dataset.ts
+                </h1>
+                <div class="clearfix">
+                    <div class="fl pad1y space-right2">
+                        <span class="strong">48.52% </span>
+                        <span class="quiet">Statements</span>
+                        <span class="fraction">66/136</span>
+                    </div>
+
+                    <div class="fl pad1y space-right2">
+                        <span class="strong">53.48% </span>
+                        <span class="quiet">Branches</span>
+                        <span class="fraction">23/43</span>
+                    </div>
+
+                    <div class="fl pad1y space-right2">
+                        <span class="strong">44% </span>
+                        <span class="quiet">Functions</span>
+                        <span class="fraction">11/25</span>
+                    </div>
+
+                    <div class="fl pad1y space-right2">
+                        <span class="strong">51.16% </span>
+                        <span class="quiet">Lines</span>
+                        <span class="fraction">66/129</span>
+                    </div>
+                </div>
+                <p class="quiet">
+                    Press <em>n</em> or <em>j</em> to go to the next uncovered
+                    block, <em>b</em>, <em>p</em> or <em>k</em> for the previous
+                    block.
+                </p>
+                <template id="filterTemplate">
+                    <div class="quiet">
+                        Filter:
+                        <input type="search" id="fileSearch" />
+                    </div>
+                </template>
             </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">53.48% </span>
-                <span class="quiet">Branches</span>
-                <span class='fraction'>23/43</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">44% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>11/25</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">51.16% </span>
-                <span class="quiet">Lines</span>
-                <span class='fraction'>66/129</span>
-            </div>
-        
-            
-        </div>
-        <p class="quiet">
-            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
-        </p>
-        <template id="filterTemplate">
-            <div class="quiet">
-                Filter:
-                <input type="search" id="fileSearch">
-            </div>
-        </template>
-    </div>
-    <div class='status-line low'></div>
-    <pre><table class="coverage">
+            <div class="status-line low"></div>
+            <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
 <a name='L3'></a><a href='#L3'>3</a>
@@ -845,7 +846,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { TgdProgram } from "@tgd/types"
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { TgdProgram } from "@tgd/program"
 import { TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
 &nbsp;
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
@@ -1238,21 +1239,27 @@ const resize =
         : resizeSlow
 &nbsp;</pre></td></tr></table></pre>
 
-                <div class='push'></div><!-- for sticky footer -->
-            </div><!-- /wrapper -->
-            <div class='footer quiet pad2 space-top1 center small'>
-                Code coverage generated by
-                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-09-17T13:10:08.835Z
-            </div>
+            <div class="push"></div>
+            <!-- for sticky footer -->
+        </div>
+        <!-- /wrapper -->
+        <div class="footer quiet pad2 space-top1 center small">
+            Code coverage generated by
+            <a
+                href="https://istanbul.js.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >istanbul</a
+            >
+            at 2024-09-17T13:10:08.835Z
+        </div>
         <script src="../../prettify.js"></script>
         <script>
             window.onload = function () {
-                prettyPrint();
-            };
+                prettyPrint()
+            }
         </script>
         <script src="../../sorter.js"></script>
         <script src="../../block-navigation.js"></script>
     </body>
 </html>
-    

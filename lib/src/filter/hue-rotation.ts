@@ -1,4 +1,4 @@
-import { TgdProgram } from ".."
+import { TgdProgram } from "@tgd/program"
 import { TgdFilter } from "./filter"
 
 export class TgdFilterHueRotation extends TgdFilter {

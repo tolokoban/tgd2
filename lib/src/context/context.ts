@@ -2,16 +2,7 @@ import { TgdBuffer, TgdBufferOptions } from "@tgd/buffer"
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdInputs } from "@tgd/input"
-import {
-    TgdResourceProgram,
-    TgdResourceTexture2D,
-    TgdResourceTextureCube,
-} from "@tgd/resource"
-import {
-    TgdContextInterface,
-    TgdProgram,
-    TgdTypeArrayForElements,
-} from "@tgd/types"
+import { TgdTypeArrayForElements } from "@tgd/types"
 import { TgdPainterFunction as TgdPainterFunctionType } from "@tgd/types/painter"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterGroup } from "../painter/group"
@@ -19,6 +10,7 @@ import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
+import { TgdProgram } from "@tgd/program"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -39,7 +31,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
      */
     onResize?(
         this: void,
-        context: TgdContextInterface,
+        context: TgdContext,
         width: number,
         height: number
     ): void
@@ -66,21 +58,15 @@ export type TgdContextOptions = WebGLContextAttributes & {
  * }
  * ```
  */
-export class TgdContext implements TgdContextInterface {
+export class TgdContext {
     private static incrementalId = 1
 
     public readonly name: string
     public readonly gl: WebGL2RenderingContext
     public readonly inputs: TgdInputs
-    /**
-     * Resource manager for WebGLProgram.
-     */
-    public readonly programs: TgdResourceProgram
-    public readonly textures2D: TgdResourceTexture2D
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
 
-    private _texturesCube: TgdResourceTextureCube | null = null
     private _camera: TgdCamera
     private readonly observer: ResizeObserver
     private readonly painters: TgdPainterGroup
@@ -114,8 +100,6 @@ export class TgdContext implements TgdContextInterface {
             gl.IMPLEMENTATION_COLOR_READ_TYPE
         ) as number
         this.gl = gl
-        this.programs = new TgdResourceProgram(gl)
-        this.textures2D = new TgdResourceTexture2D(this)
         this.observer = new ResizeObserver(() => {
             const width = canvas.clientWidth
             const height = canvas.clientHeight
@@ -154,13 +138,6 @@ export class TgdContext implements TgdContextInterface {
         camera.eventTransformChange.addListener(this.paint)
         this._camera = camera
         this.paint()
-    }
-
-    get texturesCube(): TgdResourceTextureCube {
-        if (!this._texturesCube) {
-            this._texturesCube = new TgdResourceTextureCube(this)
-        }
-        return this._texturesCube
     }
 
     animSchedule(animation: TgdAnimation): TgdAnimation {

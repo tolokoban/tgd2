@@ -46,10 +46,12 @@ const Page25 = React.lazy(() => import("./articles/state/stencil/page.mdx"))
 const Page26 = React.lazy(() => import("./articles/suzanne/page.mdx"))
 const Page27 = React.lazy(() => import("./articles/test/page.mdx"))
 const Page28 = React.lazy(() => import("./articles/texture/page.mdx"))
-const Page29 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
-const Page30 = React.lazy(() => import("./tools/page.mdx"))
-const Page31 = React.lazy(() => import("./tools/filter/page"))
-const Page32 = React.lazy(() => import("./tools/gltf/page"))
+const Page30 = React.lazy(() => import("./articles/texture/2d/bitmap/page.mdx"))
+const Page31 = React.lazy(() => import("./articles/texture/2d/data/page.mdx"))
+const Page32 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
+const Page33 = React.lazy(() => import("./tools/page.mdx"))
+const Page34 = React.lazy(() => import("./tools/filter/page"))
+const Page35 = React.lazy(() => import("./tools/gltf/page"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -84,10 +86,12 @@ export default function App({ lang }: { lang?: string }) {
     const pg26 = Page26
     const pg27 = Page27
     const pg28 = Page28
-    const pg29 = Page29
     const pg30 = Page30
     const pg31 = Page31
     const pg32 = Page32
+    const pg33 = Page33
+    const pg34 = Page34
+    const pg35 = Page35
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -126,12 +130,16 @@ export default function App({ lang }: { lang?: string }) {
                 <Route path="/articles/suzanne" Page={pg26} fallback={fb0} context={context}/>
                 <Route path="/articles/test" Page={pg27} fallback={fb0} context={context}/>
                 <Route path="/articles/texture" Page={pg28} fallback={fb0} context={context}>
-                    <Route path="/articles/texture/cube" Page={pg29} fallback={fb0} context={context}/>
+                    <Route path="/articles/texture/2d" fallback={fb0} context={context}>
+                        <Route path="/articles/texture/2d/bitmap" Page={pg30} fallback={fb0} context={context}/>
+                        <Route path="/articles/texture/2d/data" Page={pg31} fallback={fb0} context={context}/>
+                    </Route>
+                    <Route path="/articles/texture/cube" Page={pg32} fallback={fb0} context={context}/>
                 </Route>
             </Route>
-            <Route path="/tools" Page={pg30} fallback={fb0} context={context}>
-                <Route path="/tools/filter" Page={pg31} fallback={fb0} context={context}/>
-                <Route path="/tools/gltf" Page={pg32} fallback={fb0} context={context}/>
+            <Route path="/tools" Page={pg33} fallback={fb0} context={context}>
+                <Route path="/tools/filter" Page={pg34} fallback={fb0} context={context}/>
+                <Route path="/tools/gltf" Page={pg35} fallback={fb0} context={context}/>
             </Route>
         </Route>
     )

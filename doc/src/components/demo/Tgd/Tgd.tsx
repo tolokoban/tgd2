@@ -29,6 +29,7 @@ interface TgdProps {
     height?: string
     noBorder?: boolean
     assets?: Partial<AssetsToLoad>
+    children?: React.ReactNode
 }
 export default function Tgd({
     className,
@@ -38,6 +39,7 @@ export default function Tgd({
     height = "480px",
     noBorder = false,
     assets,
+    children,
 }: TgdProps) {
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
@@ -114,7 +116,7 @@ export default function Tgd({
                         onClick={handleFullscreen}
                         enabled={!loading}
                     >
-                        Show fullscreen
+                        Fullscreen
                     </ViewButton>
                 )}
             </ViewPanel>
@@ -128,6 +130,7 @@ export default function Tgd({
                 >
                     <Spinner />
                 </div>
+                {children}
             </div>
         </div>
     )
