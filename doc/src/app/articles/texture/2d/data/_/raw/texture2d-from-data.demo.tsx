@@ -12,12 +12,13 @@ function init(ctx: TgdContext) {
     const B = 0x00
     // prettier-ignore
     const data = new Uint8Array([
-        r,g,b, r,g,b, r,g,b, r,g,b, r,g,b, 0,
-        r,g,b, R,G,B, R,G,B, R,G,B, r,g,b, 0,
-        r,g,b, r,g,b, R,G,B, r,g,b, r,g,b, 0,
-        r,g,b, r,g,b, R,G,B, r,g,b, r,g,b, 0,
-        r,g,b, r,g,b, r,g,b, r,g,b, r,g,b, 0,
+        r,g,b, r,g,b, r,g,b, r,g,b, r,g,b, /* padding -> */ 0,
+        r,g,b, R,G,B, R,G,B, R,G,B, r,g,b, /* padding -> */ 0,
+        r,g,b, r,g,b, R,G,B, r,g,b, r,g,b, /* padding -> */ 0,
+        r,g,b, r,g,b, R,G,B, r,g,b, r,g,b, /* padding -> */ 0,
+        r,g,b, r,g,b, r,g,b, r,g,b, r,g,b, /* padding -> */ 0,
     ])
+    console.log("🚀 [RAW] data = ", data) // @FIXME: Remove this line written on 2025-02-04 at 16:49
     const texture = new TgdTexture2D(ctx, { flipY: true })
         .setParams({
             magFilter: "NEAREST",

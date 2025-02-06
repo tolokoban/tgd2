@@ -48,7 +48,7 @@ export class TipsPainter extends TgdPainter {
             2*X, Y,
         ]))
         const prg = new TgdProgram(context, { vert: VERT, frag: FRAG })
-        const vao = context.createVAO(prg, [data])
+        const vao = new TgdVertexArray(context.gl, prg, [data])
         this.prg = prg
         this.vao = vao
     }

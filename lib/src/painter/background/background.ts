@@ -72,7 +72,7 @@ export class TgdPainterBackground extends TgdPainter {
             ])
         )
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-        this.vao = context.createVAO(this.program, [dataset])
+        this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 
     delete(): void {

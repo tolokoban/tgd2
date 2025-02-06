@@ -20,6 +20,7 @@ export type TgdBufferOptionUsage =
     | "STREAM_COPY"
 
 export interface TgdBufferOptions {
+    data: BufferSource
     target: TgdBufferOptionTarget
     usage: TgdBufferOptionUsage
 }
@@ -32,8 +33,7 @@ export class TgdBuffer {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        data?: BufferSource,
-        options?: Partial<TgdBufferOptions>
+        options: Partial<TgdBufferOptions> = {}
     ) {
         const buffer = gl.createBuffer()
         if (!buffer) throw Error("Unable to create WebGLBuffer!")
@@ -41,8 +41,9 @@ export class TgdBuffer {
         this._target = options?.target ?? "ARRAY_BUFFER"
         this._usage = options?.usage ?? "STATIC_DRAW"
         this.buffer = buffer
+        const { data } = options
         if (data) {
-            this.bufferData(data, options)
+            this.bufferData({ ...options, data })
         }
     }
 
@@ -56,11 +57,12 @@ export class TgdBuffer {
         gl.bindBuffer(gl[this._target], buffer)
     }
 
-    bufferData(data: BufferSource, options: Partial<TgdBufferOptions> = {}) {
+    bufferData(options: Partial<TgdBufferOptions> & { data: BufferSource }) {
         const { gl } = this
-        this.bind(options.target)
         this._usage = options.usage ?? this._usage
-        gl.bufferData(gl[this._target], data, gl[this._usage])
+        this._target = options.target ?? this._target
+        this.bind(options.target)
+        gl.bufferData(gl[this._target], options.data, gl[this._usage])
     }
 
     delete() {

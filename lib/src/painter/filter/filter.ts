@@ -234,7 +234,7 @@ function createVAO(context: TgdContext, program: TgdProgram, flipY = +1) {
         ])
     )
     dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
-    const vao = context.createVAO(program, [dataset])
+    const vao = new TgdVertexArray(context.gl, program, [dataset])
     if (!vao) throw Error("Unable to create WebGL VAO!")
     return vao
 }

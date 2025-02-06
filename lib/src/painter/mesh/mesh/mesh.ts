@@ -88,7 +88,12 @@ export class TgdPainterMesh
         })
         prg.debug()
         this.prg = prg
-        this.vao = context.createVAO(prg, [geometry.dataset], geometry.elements)
+        this.vao = new TgdVertexArray(
+            context.gl,
+            prg,
+            [geometry.dataset],
+            geometry.elements
+        )
         this.elementsType = geometry.elementsType
         this.count = geometry.count
         this.name = options.name ?? `Mesh/${this.name}`

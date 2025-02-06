@@ -54,7 +54,7 @@ export class TgdPainterAxis extends TgdPainter {
             0, b, 0, 1, 0, b, 0, 1,
             0, 0, b, 1, 0, 0, b, 1,
         ]))
-        this.vao = context.createVAO(prg, [dataset])
+        this.vao = new TgdVertexArray(context.gl, prg, [dataset])
         this.translateAndScale = new TgdVec4(x, y, z, scale)
     }
 

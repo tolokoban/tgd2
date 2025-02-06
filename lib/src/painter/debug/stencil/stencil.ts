@@ -26,7 +26,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
             "attPoint",
             new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
         )
-        this.vao = context.createVAO(this.program, [dataset])
+        this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 
     paint(_time: number, _delay: number): void {

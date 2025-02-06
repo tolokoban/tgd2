@@ -5,9 +5,9 @@ export class TgdTable {
         dimensions: number,
         bytesPerElement: number
     ) {
-        const bytesPerRow = cols * dimensions * bytesPerElement
-        while ((bytesPerElement & 3) !== 0) {
-            bytesPerElement++
+        let bytesPerRow = cols * dimensions * bytesPerElement
+        while ((bytesPerRow & 3) !== 0) {
+            bytesPerRow++
         }
         return rows * bytesPerRow
     }
@@ -39,13 +39,14 @@ Please use TgdTable.computeByteLength() to get the correct length (with all need
         }
         const bytesPerVector = dimensions * bytesPerElement
         this.bytesPerVector = bytesPerVector
-        const bytesPerRow = cols * bytesPerElement
+        let bytesPerRow = cols * bytesPerVector
         let bytePadding = 0
         while ((bytesPerRow & 3) !== 0) {
             bytePadding++
+            bytesPerRow++
         }
         this.bytePadding = bytePadding
-        this.bytesPerRow = bytesPerRow + bytePadding
+        this.bytesPerRow = bytesPerRow
         this.bytesPerElement = bytesPerElement
         this.view = new DataView(buffer)
     }
@@ -66,6 +67,59 @@ Please use TgdTable.computeByteLength() to get the correct length (with all need
     getFloat32(col: number, row: number, dimension: number) {
         const byteOffset = this.offset(col, row, dimension)
         return this.view.getFloat32(byteOffset)
+    }
+
+    setUint8(value: number, col: number, row: number, dimension: number) {
+        const byteOffset = this.offset(col, row, dimension)
+        this.view.setUint8(byteOffset, value)
+    }
+
+    getUint8(col: number, row: number, dimension: number) {
+        const byteOffset = this.offset(col, row, dimension)
+        return this.view.getUint8(byteOffset)
+    }
+}
+
+export class TgdTableUint8 {
+    private readonly table: TgdTable
+
+    constructor(
+        public readonly cols: number,
+        public readonly rows: number,
+        public readonly dimensions: number
+    ) {
+        const byteLength = TgdTable.computeByteLength(
+            cols,
+            rows,
+            dimensions,
+            Uint8Array.BYTES_PER_ELEMENT
+        )
+        const buffer = new ArrayBuffer(byteLength)
+        this.table = new TgdTable(
+            buffer,
+            cols,
+            rows,
+            dimensions,
+            Uint8Array.BYTES_PER_ELEMENT
+        )
+    }
+
+    get buffer() {
+        return this.table.buffer
+    }
+
+    set(value: number, col: number, row: number, dimension: number) {
+        this.table.setUint8(value, col, row, dimension)
+    }
+
+    setVec(values: number[], col: number, row: number) {
+        values.forEach((value, dimension) =>
+            this.table.setUint8(value, col, row, dimension)
+        )
+    }
+
+    get(col: number, row: number, dimension: number) {
+        return this.table.getUint8(col, row, dimension)
     }
 }
 
@@ -99,6 +153,12 @@ export class TgdTableFloat32 {
 
     set(value: number, col: number, row: number, dimension: number) {
         this.table.setFloat32(value, col, row, dimension)
+    }
+
+    setVec(values: number[], col: number, row: number) {
+        values.forEach((value, dimension) =>
+            this.table.setFloat32(value, col, row, dimension)
+        )
     }
 
     get(col: number, row: number, dimension: number) {

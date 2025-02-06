@@ -23,7 +23,8 @@ export class TgdVertexArray {
 
         gl.bindVertexArray(vao)
         this.drawBuffers = datasets.map(dataset => {
-            const buffer = new TgdBuffer(gl, dataset.data, {
+            const buffer = new TgdBuffer(gl, {
+                data: dataset.data,
                 target: dataset.target,
                 usage: dataset.usage,
             })
@@ -32,7 +33,8 @@ export class TgdVertexArray {
             return buffer
         })
         if (elements) {
-            const buffer = new TgdBuffer(gl, elements, {
+            const buffer = new TgdBuffer(gl, {
+                data: elements,
                 target: "ELEMENT_ARRAY_BUFFER",
             })
             buffer.bind()

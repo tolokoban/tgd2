@@ -1,7 +1,7 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdContext } from "../context"
 import { TgdPainterGroup } from "./group"
-import { webglLookup } from "@tgd/utils"
+import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
 import { TgdPainter } from "./painter"
 import { TgdTexture2D } from "@tgd/texture"
 
@@ -189,7 +189,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         const { context } = this
         const { gl } = context
         this.delete()
-        this._framebuffer = context.createFramebuffer()
+        this._framebuffer = webglCreateFramebuffer(gl)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         this.updateTextureForColor(this.textureColor0, 0)
         this.updateTextureForColor(this.textureColor1, 1)

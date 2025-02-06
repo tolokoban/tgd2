@@ -31,7 +31,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
             frag: FRAG,
         })
         this.prg = prg
-        this.vao = context.createVAO(prg, [dataset], elements)
+        this.vao = new TgdVertexArray(context.gl, prg, [dataset], elements)
         this.elementsType = elements
             ? webglElementTypeFromTypedArray(elements)
             : -1

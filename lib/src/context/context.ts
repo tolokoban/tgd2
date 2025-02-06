@@ -1,16 +1,11 @@
-import { TgdBuffer, TgdBufferOptions } from "@tgd/buffer"
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
-import { TgdDataset } from "@tgd/dataset"
 import { TgdInputs } from "@tgd/input"
-import { TgdTypeArrayForElements } from "@tgd/types"
 import { TgdPainterFunction as TgdPainterFunctionType } from "@tgd/types/painter"
-import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterGroup } from "../painter/group"
 import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
-import { TgdProgram } from "@tgd/program"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -240,35 +235,6 @@ export class TgdContext {
 
     removeAll() {
         this.painters.removeAll()
-    }
-
-    createBuffer(
-        data?: BufferSource,
-        options?: Partial<TgdBufferOptions>
-    ): TgdBuffer {
-        return new TgdBuffer(this.gl, data, options)
-    }
-
-    createFramebuffer(): WebGLFramebuffer {
-        const fb = this.gl.createFramebuffer()
-        if (!fb) throw Error("Unable to create a WebGL2 Framebuffer!")
-
-        return fb
-    }
-
-    createRenderbuffer(): WebGLRenderbuffer {
-        const rb = this.gl.createRenderbuffer()
-        if (!rb) throw Error("Unable to create a WebGL2 Renderbuffer!")
-
-        return rb
-    }
-
-    createVAO(
-        program?: TgdProgram,
-        datasets?: Readonly<TgdDataset>[],
-        elements?: TgdTypeArrayForElements
-    ): TgdVertexArray {
-        return new TgdVertexArray(this.gl, program, datasets, elements)
     }
 
     takeSnapshot(target: HTMLCanvasElement) {

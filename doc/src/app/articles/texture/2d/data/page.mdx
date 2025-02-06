@@ -1,4 +1,5 @@
-import Demo from "./_"
+import DemoRaw from "./_/raw"
+import DemoTable from "./_/table"
 
 # Texture2D from data
 
@@ -16,4 +17,8 @@ end of the row to have 16 bytes.
 If the width you want is 3, for example, then you will need a padding of 3
 bytes.
 
-<Demo />
+<DemoRaw />
+
+This padding can be error prone. To help you, you can use `TgdTable*` classes:
+
+<DemoTable />
