@@ -78,7 +78,7 @@ export class TgdPainterFilter extends TgdPainter {
                 mainCode: filter.fragmentShaderCode,
                 functions: filter.extraFunctions,
             }).code
-            return new TgdProgram(context, { vert, frag })
+            return new TgdProgram(context.gl, { vert, frag })
         })
         const vaos = programs.map(program =>
             createVAO(context, program, options.flipY ? -1 : +1)

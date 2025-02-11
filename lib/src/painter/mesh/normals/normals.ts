@@ -26,7 +26,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
             throw Error("This mesh has no normal!")
         }
 
-        const prg = new TgdProgram(context, {
+        const prg = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })

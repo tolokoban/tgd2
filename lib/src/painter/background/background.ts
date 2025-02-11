@@ -1,12 +1,12 @@
-import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "../painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
 import { TgdVertexArray } from "@tgd/vao"
 
-import VERT from "./background.vert"
-import FRAG from "./background.frag"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
+
+import VERT from "./background.vert"
+import FRAG from "./background.frag"
 
 export interface TgdPainterBackgroundOptions {
     zoom: number
@@ -33,7 +33,7 @@ export class TgdPainterBackground extends TgdPainter {
     public z = 1
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: { gl: WebGL2RenderingContext },
         texture: TgdTexture2D,
         {
             x = 0,
@@ -50,7 +50,7 @@ export class TgdPainterBackground extends TgdPainter {
         this.z = z
         this.zoom = zoom
         this.texture = texture
-        this.program = new TgdProgram(context, {
+        this.program = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })
@@ -84,7 +84,7 @@ export class TgdPainterBackground extends TgdPainter {
         const { gl } = this.context
         const { vao, program, texture, zoom, x, y, z } = this
         program.use()
-        const { width, height } = this.context
+        const { drawingBufferWidth: width, drawingBufferHeight: height } = gl
         const horizontal = texture.width * height > texture.height * width
         const scaleX = horizontal
             ? (texture.width * height) / (width * texture.height)

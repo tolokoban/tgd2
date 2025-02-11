@@ -82,7 +82,7 @@ export class TgdPainterMesh
             },
             mainCode: [`FragColor = applyMaterial();`],
         }).code
-        const prg = new TgdProgram(context, {
+        const prg = new TgdProgram(context.gl, {
             vert,
             frag,
         })

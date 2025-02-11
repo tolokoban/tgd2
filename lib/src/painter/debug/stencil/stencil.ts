@@ -15,7 +15,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
     constructor(private readonly context: TgdContext) {
         super()
 
-        this.program = new TgdProgram(context, {
+        this.program = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })

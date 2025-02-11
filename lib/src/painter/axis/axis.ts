@@ -25,7 +25,7 @@ export class TgdPainterAxis extends TgdPainter {
         { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxisOptions> = {}
     ) {
         super()
-        const prg = new TgdProgram(context, {
+        const prg = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })

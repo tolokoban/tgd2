@@ -92,7 +92,7 @@ export class TgdPainterSegments extends TgdPainter {
                 wrapT: "CLAMP_TO_EDGE",
             })
             .loadBitmap(tgdCanvasCreatePalette(["#f00", "#0f0", "#00f"]))
-        const prg = new TgdProgram(context, {
+        const prg = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })

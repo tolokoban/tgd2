@@ -10,16 +10,14 @@ import { TgdProgramOptions } from "@tgd/types"
 export class TgdProgram {
     /** Access to the real WebGLProgram object. */
     public readonly program: WebGLProgram
-    public readonly gl: WebGL2RenderingContext
 
     private readonly shaders: WebGLShader[]
     private readonly uniformsLocations: { [name: string]: WebGLUniformLocation }
 
     constructor(
-        { gl }: { gl: WebGL2RenderingContext },
+        public readonly gl: WebGL2RenderingContext,
         private readonly code: TgdProgramOptions
     ) {
-        this.gl = gl
         const prg = gl.createProgram()
         if (!prg) throw Error("Unable to create WebGLProgram!")
 

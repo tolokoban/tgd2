@@ -31,7 +31,7 @@ export class TgdPainterSkybox extends TgdPainter {
         super()
         this.camera = options.camera ?? new TgdCameraPerspective()
         this.texture = new TgdTextureCubeImpl(context, options)
-        this.program = new TgdProgram(context, {
+        this.program = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })

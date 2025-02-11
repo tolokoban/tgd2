@@ -1,3 +1,4 @@
+import { TgdEvent } from "@tgd/event"
 import { TgdProgram } from "@tgd/program"
 import { WebglImage, WebglTexParameter } from "@tgd/types"
 import {
@@ -50,6 +51,7 @@ interface TgdTexture2DStorage {
 export class TgdTexture2D {
     public readonly name: string
     public readonly gl: WebGL2RenderingContext
+    public readonly eventChange = new TgdEvent<TgdTexture2D>()
 
     private readonly _texture: WebGLTexture | null = null
     private _width = 0
@@ -155,6 +157,7 @@ export class TgdTexture2D {
             gl.UNSIGNED_BYTE,
             bmp
         )
+        this.eventChange.dispatch(this)
         return this
     }
 
@@ -181,9 +184,9 @@ export class TgdTexture2D {
             level = 0,
             width,
             height,
-            internalFormat,
-            format,
-            offset = 0,
+            // internalFormat,
+            // format,
+            // offset = 0,
         } = options
         const { gl } = this
         this.bind()
@@ -199,6 +202,7 @@ export class TgdTexture2D {
             data
             // offset
         )
+        this.eventChange.dispatch(this)
         return this
     }
 
