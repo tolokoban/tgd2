@@ -1,5 +1,5 @@
 import { ArrayNumber2 } from ".."
-import { mix } from "../utils/math"
+import { tgdCalcMix } from "../utils/math"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 
@@ -80,7 +80,7 @@ export class TgdVec2 extends Float32Array {
     ): this {
         const [ax, ay] = a
         const [bx, by] = b
-        return this.reset(mix(ax, bx, t), mix(ay, by, t))
+        return this.reset(tgdCalcMix(ax, bx, t), tgdCalcMix(ay, by, t))
     }
 
     reset(x: number, y: number): this {

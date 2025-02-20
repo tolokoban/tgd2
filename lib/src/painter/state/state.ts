@@ -36,92 +36,41 @@ export interface TgdPainterStateOptions {
 }
 
 export class TgdPainterState extends TgdPainterGroup {
-    private _color?: [boolean, boolean, boolean, boolean]
-    private _blend?: WebglBlendOptions
-    private _depth?: WebglDepthOptions
-    private _cull?: WebglCullOptions
-    private _stencil?: WebglStencilOptions
+    public static do(
+        options: Omit<
+            Partial<TgdPainterStateOptions>,
+            "children" | "onEnter" | "onExit"
+        > & {
+            gl: WebGL2RenderingContext
+        },
+        action: () => void
+    ) {
+        const { onEnterActions, onExitActions } = prepareActions(
+            options.gl,
+            options
+        )
+        onEnterActions.forEach(action => action())
+        action()
+        onExitActions.forEach(action => action())
+    }
 
     constructor(
         context: TgdContext,
-        {
-            color,
-            blend,
-            depth,
-            cull,
-            stencil,
-            name,
-            children = [],
-            onEnter,
-            onExit,
-        }: Partial<TgdPainterStateOptions> = {}
+        options: Partial<TgdPainterStateOptions> = {}
     ) {
         const { gl } = context
-        const onEnterActions: Array<() => void> = []
-        const onExitActions: Array<() => void> = []
-        const colorMask: undefined | [boolean, boolean, boolean, boolean] =
-            figureOutColorMask(color)
-        if (Array.isArray(colorMask)) {
-            onEnterActions.push(() => {
-                this._color = gl.getParameter(gl.COLOR_WRITEMASK) as [
-                    boolean,
-                    boolean,
-                    boolean,
-                    boolean
-                ]
-                gl.colorMask(...colorMask)
-            })
-            onExitActions.push(() => {
-                gl.colorMask(...(this._color ?? [true, true, true, true]))
-            })
-        }
-        if (blend) {
-            onEnterActions.push(() => {
-                this._blend = webglBlendGet(gl)
-                webglBlendSet(gl, blend)
-            })
-            onExitActions.push(() => {
-                if (this._blend) webglBlendSet(gl, this._blend)
-            })
-        }
-        if (depth) {
-            onEnterActions.push(() => {
-                this._depth = webglDepthGet(gl)
-                webglDepthSet(gl, depth)
-            })
-            onExitActions.push(() => {
-                if (this._depth) webglDepthSet(gl, this._depth)
-            })
-        }
-        if (cull) {
-            onEnterActions.push(() => {
-                this._cull = webglCullGet(gl)
-                webglCullSet(gl, cull)
-            })
-            onExitActions.push(() => {
-                if (this._cull) webglCullSet(gl, this._cull)
-            })
-        }
-        if (stencil) {
-            onEnterActions.push(() => {
-                this._stencil = webglStencilGet(gl)
-                webglStencilSet(gl, stencil)
-            })
-            onExitActions.push(() => {
-                if (this._stencil) webglStencilSet(gl, this._stencil)
-            })
-        }
-        super(children, {
+        const { onEnterActions, onExitActions } = prepareActions(gl, options)
+        super(options.children, {
             onEnter(time, delay) {
-                onEnter?.(time, delay)
+                options.onEnter?.(time, delay)
                 onEnterActions.forEach(f => f())
             },
             onExit(time, delay) {
                 onExitActions.forEach(f => f())
-                onExit?.(time, delay)
+                options.onExit?.(time, delay)
             },
         })
-        this.name = name ?? `State/${this.name}`
+        this.name = options.name ?? `State/${this.name}`
     }
 }
 
@@ -131,4 +80,74 @@ function figureOutColorMask(
     if (color === true) return [true, true, true, true]
     if (color === false) return [false, false, false, false]
     return color
+}
+
+function prepareActions(
+    gl: WebGL2RenderingContext,
+    options: Partial<TgdPainterStateOptions>
+) {
+    const { color, blend, depth, cull, stencil } = options
+    const onEnterActions: Array<() => void> = []
+    const onExitActions: Array<() => void> = []
+    const colorMask: undefined | [boolean, boolean, boolean, boolean] =
+        figureOutColorMask(color)
+    if (Array.isArray(colorMask)) {
+        let savedColorMask:
+            | [boolean, boolean, boolean, boolean]
+            | null
+            | undefined
+        onEnterActions.push(() => {
+            savedColorMask = gl.getParameter(gl.COLOR_WRITEMASK) as [
+                boolean,
+                boolean,
+                boolean,
+                boolean
+            ]
+            gl.colorMask(...colorMask)
+        })
+        onExitActions.push(() => {
+            gl.colorMask(...(savedColorMask ?? [true, true, true, true]))
+        })
+    }
+    if (blend) {
+        let savedBlend: WebglBlendOptions
+        onEnterActions.push(() => {
+            savedBlend = webglBlendGet(gl)
+            webglBlendSet(gl, blend)
+        })
+        onExitActions.push(() => {
+            if (savedBlend) webglBlendSet(gl, savedBlend)
+        })
+    }
+    if (depth) {
+        let savedDepth: WebglDepthOptions
+        onEnterActions.push(() => {
+            savedDepth = webglDepthGet(gl)
+            webglDepthSet(gl, depth)
+        })
+        onExitActions.push(() => {
+            if (savedDepth) webglDepthSet(gl, savedDepth)
+        })
+    }
+    if (cull) {
+        let savedCull: WebglCullOptions
+        onEnterActions.push(() => {
+            savedCull = webglCullGet(gl)
+            webglCullSet(gl, cull)
+        })
+        onExitActions.push(() => {
+            if (savedCull) webglCullSet(gl, savedCull)
+        })
+    }
+    if (stencil) {
+        let savedStencil: WebglStencilOptions
+        onEnterActions.push(() => {
+            savedStencil = webglStencilGet(gl)
+            webglStencilSet(gl, stencil)
+        })
+        onExitActions.push(() => {
+            if (savedStencil) webglStencilSet(gl, savedStencil)
+        })
+    }
+    return { onEnterActions, onExitActions }
 }

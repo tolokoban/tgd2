@@ -3,7 +3,7 @@ import {
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutQuad,
 } from "@tgd/utils"
-import { clamp } from "@tgd/utils/math"
+import { tgdCalcClamp } from "@tgd/utils/math"
 import {
     TgdInputPointerEventMove,
     TgdInputPointerModifierKeys,
@@ -266,9 +266,9 @@ export class TgdControllerCameraOrbit {
         const { geo: latlng } = this
         if (!latlng) return
 
-        lat = clamp(lat, latlng.minLat, latlng.maxLat)
+        lat = tgdCalcClamp(lat, latlng.minLat, latlng.maxLat)
         latlng.lat = lat
-        lng = clamp(lng, latlng.minLng, latlng.maxLng)
+        lng = tgdCalcClamp(lng, latlng.minLng, latlng.maxLng)
         latlng.lng = lng
         const { orientation } = this.cameraInitialState
         const vecZ = makeGeoVec3(lat, lng)
@@ -381,7 +381,11 @@ export class TgdControllerCameraOrbit {
         let speed = 0.1 * this.speedZoom
         if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
         const dz = -evt.direction * speed
-        camera.zoom = clamp(camera.zoom * (1 + dz), this.minZoom, this.maxZoom)
+        camera.zoom = tgdCalcClamp(
+            camera.zoom * (1 + dz),
+            this.minZoom,
+            this.maxZoom
+        )
         evt.preventDefault()
         this.fireZoomChange()
     }

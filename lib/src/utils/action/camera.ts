@@ -1,6 +1,6 @@
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdQuat, TgdVec3 } from "@tgd/math"
-import { mix } from "../math"
+import { tgdCalcMix } from "../math"
 
 export function tgdActionCreateCameraInterpolation(
     camera: TgdCamera,
@@ -25,13 +25,13 @@ export function tgdActionCreateCameraInterpolation(
     const target = new TgdVec3()
     const shift = new TgdVec3()
     return (t: number) => {
-        camera.spaceHeightAtTarget = mix(
+        camera.spaceHeightAtTarget = tgdCalcMix(
             beginSpaceHeightAtTarget,
             endSpaceHeightAtTarget,
             t
         )
-        camera.distance = mix(beginDistance, endDistance, t)
-        camera.zoom = mix(beginZoom, endZoom, t)
+        camera.distance = tgdCalcMix(beginDistance, endDistance, t)
+        camera.zoom = tgdCalcMix(beginZoom, endZoom, t)
         camera.orientation = orientation
             .fromSlerp(beginOrientation, endOrientation, t)
             .normalize()

@@ -1,6 +1,6 @@
 import { TgdVec2, TgdVec3, TgdVec4 } from "../../math"
 import { ArrayNumber2, ArrayNumber3, ArrayNumber4 } from "../../types"
-import { mix } from "../math"
+import { tgdCalcMix } from "../math"
 
 /**
  * Create an action that will interpolate from one vector to another.
@@ -18,8 +18,8 @@ export function tgdActionCreateVec2Interpolation({
     const [toX, toY] = to
     const vec: ArrayNumber2 = [0, 0]
     return (alpha: number) => {
-        vec[0] = mix(fromX, toX, alpha)
-        vec[1] = mix(fromY, toY, alpha)
+        vec[0] = tgdCalcMix(fromX, toX, alpha)
+        vec[1] = tgdCalcMix(fromY, toY, alpha)
         action(vec)
     }
 }
@@ -40,9 +40,9 @@ export function tgdActionCreateVec3Interpolation({
     const [toX, toY, toZ] = to
     const vec: ArrayNumber3 = [0, 0, 0]
     return (alpha: number) => {
-        vec[0] = mix(fromX, toX, alpha)
-        vec[1] = mix(fromY, toY, alpha)
-        vec[2] = mix(fromZ, toZ, alpha)
+        vec[0] = tgdCalcMix(fromX, toX, alpha)
+        vec[1] = tgdCalcMix(fromY, toY, alpha)
+        vec[2] = tgdCalcMix(fromZ, toZ, alpha)
         action(vec)
     }
 }
@@ -63,10 +63,10 @@ export function tgdActionCreateVec4Interpolation({
     const [toX, toY, toZ, toW] = to
     const vec: ArrayNumber4 = [0, 0, 0, 0]
     return (alpha: number) => {
-        vec[0] = mix(fromX, toX, alpha)
-        vec[1] = mix(fromY, toY, alpha)
-        vec[2] = mix(fromZ, toZ, alpha)
-        vec[3] = mix(fromW, toW, alpha)
+        vec[0] = tgdCalcMix(fromX, toX, alpha)
+        vec[1] = tgdCalcMix(fromY, toY, alpha)
+        vec[2] = tgdCalcMix(fromZ, toZ, alpha)
+        vec[3] = tgdCalcMix(fromW, toW, alpha)
         action(vec)
     }
 }
