@@ -1,16 +1,20 @@
-import { TgdContext, TgdFilterBlur, TgdPainterFilter } from "@tolokoban/tgd"
+import {
+    TgdContext,
+    TgdFilterBlur,
+    tgdLoadImage,
+    TgdPainterFilter,
+    TgdTexture2D,
+} from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
 import BackgroundURL from "../../../marylin.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = context.textures2D.create({
-        image: BackgroundURL,
-        width: 512,
-        height: 512,
-    })
-    const size = 8
+    const texture = new TgdTexture2D(context).loadBitmap(
+        tgdLoadImage(BackgroundURL)
+    )
+    const size = 16
     const horizontalBlurFilter = new TgdFilterBlur({
         size,
         direction: 0,

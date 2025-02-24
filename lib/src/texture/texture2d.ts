@@ -95,6 +95,10 @@ export class TgdTexture2D {
         }
     }
 
+    delete() {
+        this.gl.deleteTexture(this.glTexture)
+    }
+
     get width() {
         return this._width
     }
@@ -143,14 +147,14 @@ export class TgdTexture2D {
         options: {
             level?: number
         } = {}
-    ) {
-        if (!bmp) return
+    ): this {
+        if (!bmp) return this
 
         if (!isWebglImage(bmp)) {
             bmp.then(data => this.loadBitmap(data)).catch(err =>
                 console.error("Unable to load texture BMP:", err)
             )
-            return
+            return this
         }
 
         const { storage, gl } = this

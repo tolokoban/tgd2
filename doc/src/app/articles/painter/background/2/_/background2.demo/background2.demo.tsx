@@ -1,7 +1,9 @@
 import {
     TgdContext,
+    tgdLoadImage,
     TgdPainterBackground,
     TgdPainterLogic,
+    TgdTexture2D,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
@@ -9,9 +11,8 @@ import BackgroundURL from "./locomotive.webp"
 
 function init(ctx: TgdContext) {
     // #begin
-    const texture = ctx.textures2D.create({
-        image: BackgroundURL,
-    })
+    const texture = new TgdTexture2D(ctx)
+    texture.loadBitmap(tgdLoadImage(BackgroundURL))
     const background = new TgdPainterBackground(ctx, texture)
     const logic = new TgdPainterLogic(time => {
         background.x = Math.cos(time * 0.000251)

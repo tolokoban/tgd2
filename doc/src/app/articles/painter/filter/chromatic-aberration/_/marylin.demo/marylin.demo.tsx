@@ -2,8 +2,10 @@ import {
     TgdContext,
     TgdFilterBlur,
     TgdFilterChromaticAberration,
+    tgdLoadImage,
     TgdPainterFilter,
     TgdPainterLogic,
+    TgdTexture2D,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
@@ -11,11 +13,9 @@ import BackgroundURL from "./tgd.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = context.textures2D.create({
-        image: BackgroundURL,
-        width: 512,
-        height: 512,
-    })
+    const texture = new TgdTexture2D(context).loadBitmap(
+        tgdLoadImage(BackgroundURL)
+    )
     const filter = new TgdFilterChromaticAberration({
         strength: 1,
     })

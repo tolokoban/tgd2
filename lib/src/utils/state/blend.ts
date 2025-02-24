@@ -38,6 +38,7 @@ export function webglBlendSet(
     gl: WebGL2RenderingContext,
     blend: WebglBlendOptions
 ) {
+    console.log("🚀 [blend] blend = ", blend) // @FIXME: Remove this line written on 2025-02-24 at 19:18
     if (blend.enabled) gl.enable(gl.BLEND)
     else gl.disable(gl.BLEND)
     gl.blendEquationSeparate(blend.equationColor, blend.equationAlpha)

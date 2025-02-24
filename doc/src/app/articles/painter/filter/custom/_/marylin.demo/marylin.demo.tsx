@@ -1,9 +1,9 @@
 import {
     TgdContext,
     TgdFilter,
-    TgdFilterBlur,
+    tgdLoadImage,
     TgdPainterFilter,
-    TgdVec2,
+    TgdTexture2D,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
@@ -11,11 +11,9 @@ import BackgroundURL from "../../../marylin.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = context.textures2D.create({
-        image: BackgroundURL,
-        width: 512,
-        height: 512,
-    })
+    const texture = new TgdTexture2D(context).loadBitmap(
+        tgdLoadImage(BackgroundURL)
+    )
     const filter = new TgdFilter({
         uniforms: {
             uniThreshold: "float",

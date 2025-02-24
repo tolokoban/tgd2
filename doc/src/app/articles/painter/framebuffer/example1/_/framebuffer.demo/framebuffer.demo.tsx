@@ -11,6 +11,7 @@ import {
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdTexture2D,
     TgdVec3,
     TgdVec4,
     webglPresetCull,
@@ -23,6 +24,7 @@ import BackgroundURL from "@/assets/image/dino.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
+    const defaultTexture = new TgdTexture2D(context)
     context.camera = new TgdCameraPerspective({
         distance: 6,
         far: 100,
@@ -33,7 +35,7 @@ function init(context: TgdContext, assets: Assets) {
     const framebuffer1 = new TgdPainterFramebuffer(context)
     const framebuffer2 = new TgdPainterFramebuffer(context)
     const background = new TgdPainterFilter(context, {
-        texture: framebuffer2.textureColor0,
+        texture: framebuffer2.textureColor0 ?? defaultTexture,
         filters: [new TgdFilterZoom()],
         flipY: true,
     })
@@ -68,13 +70,13 @@ function init(context: TgdContext, assets: Assets) {
     const filterHue = new TgdFilterHueRotation({ hueShiftInDegrees: 2 })
     const filterZoom = new TgdFilterZoom({ zoom: 1.007 })
     const filters = new TgdPainterFilter(context, {
-        texture: framebuffer1.textureColor0,
+        texture: framebuffer1.textureColor0 ?? defaultTexture,
         filters: [filterHue, filterZoom],
         flipY: true,
     })
     framebuffer2.add(filters)
     const screen = new TgdPainterFilter(context, {
-        texture: framebuffer1.textureColor0,
+        texture: framebuffer1.textureColor0 ?? defaultTexture,
         filters: [new TgdFilterZoom()],
         flipY: true,
     })
@@ -83,11 +85,11 @@ function init(context: TgdContext, assets: Assets) {
      * any time the screen size changes.
      */
     framebuffer1.onExit = () => {
-        filters.texture = framebuffer1.textureColor0
+        filters.texture = framebuffer1.textureColor0 ?? defaultTexture
     }
     framebuffer2.onExit = () => {
-        background.texture = framebuffer2.textureColor0
-        screen.texture = framebuffer2.textureColor0
+        background.texture = framebuffer2.textureColor0 ?? defaultTexture
+        screen.texture = framebuffer2.textureColor0 ?? defaultTexture
     }
     context.add(
         framebuffer1,

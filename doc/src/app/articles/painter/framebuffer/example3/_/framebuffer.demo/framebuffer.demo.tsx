@@ -15,6 +15,7 @@ import {
     TgdPainterMesh,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdTexture2D,
     TgdVec4,
     webglPresetCull,
     webglPresetDepth,
@@ -28,7 +29,7 @@ import GridURL from "@/assets/mesh/grid-10x10.glb"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
-
+    const defaultTexture = new TgdTexture2D(context)
     context.camera = new TgdCameraPerspective({
         distance: 2,
         far: 100,
@@ -78,9 +79,10 @@ function init(context: TgdContext, assets: Assets) {
     const filter = new TgdPainterFilter(context, {
         flipY: true,
         filters: [new TgdFilterVerbatim()],
-        texture: framebuffer.textureColor0,
+        texture: framebuffer.textureColor0 ?? defaultTexture,
     })
-    framebuffer.onExit = () => (filter.texture = framebuffer.textureColor0)
+    framebuffer.onExit = () =>
+        (filter.texture = framebuffer.textureColor0 ?? defaultTexture)
     // context.add(clear, scene)
     context.add(
         framebuffer,
