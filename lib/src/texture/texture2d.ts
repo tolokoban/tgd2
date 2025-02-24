@@ -1,6 +1,6 @@
 import { TgdEvent } from "@tgd/event"
 import { TgdProgram } from "@tgd/program"
-import { WebglImage, WebglTexParameter } from "@tgd/types"
+import { isWebglImage, WebglImage, WebglTexParameter } from "@tgd/types"
 import {
     WebglTextureInternalFormat,
     WebglTextureParameters,
@@ -139,11 +139,20 @@ export class TgdTexture2D {
     }
 
     loadBitmap(
-        bmp: WebglImage,
+        bmp: WebglImage | null | Promise<WebglImage | null>,
         options: {
             level?: number
         } = {}
     ) {
+        if (!bmp) return
+
+        if (!isWebglImage(bmp)) {
+            bmp.then(data => this.loadBitmap(data)).catch(err =>
+                console.error("Unable to load texture BMP:", err)
+            )
+            return
+        }
+
         const { storage, gl } = this
         const { level = 0 } = options
         this._width = bmp.width

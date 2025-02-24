@@ -44,6 +44,16 @@ export type WebglImage =
     | HTMLVideoElement
     | ImageBitmap
 
+export function isWebglImage(data: unknown): data is WebglImage {
+    return (
+        data instanceof ImageData ||
+        data instanceof HTMLImageElement ||
+        data instanceof HTMLCanvasElement ||
+        data instanceof HTMLVideoElement ||
+        data instanceof ImageBitmap
+    )
+}
+
 export type WebglDepthFunc =
     /** never pass */
     | "NEVER"
