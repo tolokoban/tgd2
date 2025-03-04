@@ -15,9 +15,9 @@ function init(ctx: TgdContext) {
     texture.loadBitmap(tgdLoadImage(BackgroundURL))
     const background = new TgdPainterBackground(ctx, texture)
     const logic = new TgdPainterLogic(time => {
-        background.x = Math.cos(time * 0.000251)
-        background.y = Math.cos(time * 0.000745)
-        background.zoom = Math.sin(time * 0.0001) * 3
+        background.x = Math.cos(time * 0.251)
+        background.y = Math.cos(time * 0.745)
+        background.zoom = Math.sin(time * 0.1) * 3
     })
     ctx.add(background, logic)
     ctx.play()

@@ -1,6 +1,7 @@
 export * from "./buffer"
 export * from "./camera"
 export * from "./canvas"
+export * from "./code"
 export * from "./color"
 export * from "./context"
 export * from "./controller"

@@ -75,6 +75,43 @@ export class TgdMat4 extends Float32Array {
         }
     }
 
+    reset(
+        m00: number = 1,
+        m01: number = 0,
+        m02: number = 0,
+        m03: number = 0,
+        m10: number = 0,
+        m11: number = 1,
+        m12: number = 0,
+        m13: number = 0,
+        m20: number = 0,
+        m21: number = 0,
+        m22: number = 1,
+        m23: number = 0,
+        m30: number = 0,
+        m31: number = 0,
+        m32: number = 0,
+        m33: number = 1
+    ): this {
+        this.m00 = m00
+        this.m01 = m01
+        this.m02 = m02
+        this.m03 = m03
+        this.m10 = m10
+        this.m11 = m11
+        this.m12 = m12
+        this.m13 = m13
+        this.m20 = m20
+        this.m21 = m21
+        this.m22 = m22
+        this.m23 = m23
+        this.m30 = m30
+        this.m31 = m31
+        this.m32 = m32
+        this.m33 = m33
+        return this
+    }
+
     multiply(mat4: TgdMat4): this {
         // prettier-ignore
         const [
@@ -243,26 +280,26 @@ export class TgdMat4 extends Float32Array {
 
     toAxisX(axisX: TgdVec3): this {
         axisX.x = this.m00
-        axisX.y = this.m01
-        axisX.z = this.m02
+        axisX.y = this.m10
+        axisX.z = this.m20
         return this
     }
 
     toAxisY(axisY: TgdVec3): this {
-        axisY.x = this.m10
+        axisY.x = this.m01
         axisY.y = this.m11
-        axisY.z = this.m12
+        axisY.z = this.m21
         return this
     }
 
     toAxisZ(axisZ: TgdVec3): this {
-        axisZ.x = this.m20
-        axisZ.y = this.m21
+        axisZ.x = this.m02
+        axisZ.y = this.m12
         axisZ.z = this.m22
         return this
     }
 
-    fromQuat({ x, y, z, w }: TgdQuat): this {
+    fromQuat({ x, y, z, w }: Readonly<TgdQuat>): this {
         const x2 = x + x
         const y2 = y + y
         const z2 = z + z

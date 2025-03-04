@@ -1,14 +1,13 @@
 import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdMaterial } from "@tgd/material"
-import { TgdMat4, TgdVec3 } from "@tgd/math"
+import { TgdTransfo, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdPainter } from "../../painter"
-import { tgdCodeStringify } from "@tgd/shader"
 
 export interface TgdPainterMeshOptions {
     geometry: TgdGeometry
@@ -18,11 +17,8 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
-    public matrixTransfoGlobal = new TgdMat4()
+export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
+    public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
     private readonly prg: TgdProgram
@@ -60,11 +56,16 @@ export class TgdPainterMesh
             },
             varying: material.varyings,
             functions: {
-                "void applyMaterial()": tgdCodeStringify(
-                    material.vertexShaderCode
-                ),
-                "vec4 getPosition(vec4 pos)":
-                    material.vertexShaderCodeForGetPosition ?? "return pos;",
+                applyMaterial: [
+                    "void applyMaterial() {",
+                    [material.vertexShaderCode],
+                    "}",
+                ],
+                getPosition: [
+                    "vec4 getPosition(vec4 pos) {",
+                    [material.vertexShaderCodeForGetPosition ?? "return pos;"],
+                    "}",
+                ],
             },
             mainCode: [
                 "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * getPosition(POSITION);",
@@ -76,9 +77,11 @@ export class TgdPainterMesh
             outputs: { FragColor: "vec4" },
             varying: material.varyings,
             functions: {
-                "vec4 applyMaterial()": tgdCodeStringify(
-                    material.fragmentShaderCode
-                ),
+                applyMaterial: [
+                    "vec4 applyMaterial() {",
+                    [material.fragmentShaderCode],
+                    "}",
+                ],
             },
             mainCode: [`FragColor = applyMaterial();`],
         }).code
@@ -131,19 +134,12 @@ export class TgdPainterMesh
     }
 
     public readonly paint = (time: number, delay: number) => {
-        const {
-            context,
-            prg,
-            geometry,
-            material,
-            drawMode,
-            count,
-            matrixTransfoGlobal: matrixTransfo,
-        } = this
+        const { context, prg, geometry, material, drawMode, count, transfo } =
+            this
         const { gl, camera } = context
         prg.use()
         material.setUniforms(prg, time, delay)
-        prg.uniformMatrix4fv("uniTransfoMatrix", matrixTransfo)
+        prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         this.vao.bind()

@@ -63,6 +63,8 @@ export class TgdContext {
     public readonly implementationColorReadType: number
 
     private _camera: TgdCamera
+    private _aspectRatio = 1
+    private _aspectRatioInverse = 1
     private readonly observer: ResizeObserver
     private readonly painters: TgdPainterGroup
     private isPlaying = false
@@ -164,6 +166,14 @@ export class TgdContext {
 
     get height() {
         return this.gl.drawingBufferHeight
+    }
+
+    get aspectRatio() {
+        return this._aspectRatio
+    }
+
+    get aspectRatioInverse() {
+        return this._aspectRatioInverse
     }
 
     /**
@@ -284,8 +294,14 @@ export class TgdContext {
         this.lastTime = time
         this._camera.screenWidth = gl.drawingBufferWidth
         this._camera.screenHeight = gl.drawingBufferHeight
-        this.painters.paint(time, delay)
-        if (this.animationManager.paint(time) || this.isPlaying) this.paint()
+        this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
+        this._aspectRatioInverse = 1 / this._aspectRatio
+
+        const timeInSec = time * 1e-3
+        const delayInSec = delay * 1e-3
+        this.painters.paint(timeInSec, delayInSec)
+        if (this.animationManager.paint(timeInSec) || this.isPlaying)
+            this.paint()
     }
 
     destroy() {

@@ -27,7 +27,7 @@ function init(context: TgdContext) {
     context.add(
         filters,
         new TgdPainterLogic(
-            time => (filter.strength = 5 * Math.abs(Math.sin(time * 1e-3)))
+            time => (filter.strength = 5 * Math.abs(Math.sin(time)))
         )
     )
     context.play()

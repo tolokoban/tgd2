@@ -86,7 +86,11 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
-    fromAxis(X: TgdVec3, Y: TgdVec3, Z: TgdVec3): this {
+    fromAxis(
+        X: Readonly<TgdVec3>,
+        Y: Readonly<TgdVec3>,
+        Z: Readonly<TgdVec3>
+    ): this {
         // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
         // article "Quaternion Calculus and Fast Animation".
         const fTrace = X.x + Y.y + Z.z
@@ -95,9 +99,9 @@ export class TgdQuat extends TgdVec4 {
             const fRoot = Math.sqrt(fTrace + 1.0) // 2w
             this.w = 0.5 * fRoot
             const halfRoot = 0.5 / fRoot // 1/(4w)
-            this.x = (Y.z - Z.y) * halfRoot
-            this.y = (Z.x - X.z) * halfRoot
-            this.z = (X.y - Y.x) * halfRoot
+            this.x = (Z.y - Y.z) * halfRoot
+            this.y = (X.z - Z.x) * halfRoot
+            this.z = (Y.x - X.y) * halfRoot
         } else {
             // |w| <= 1/2
             const axis = [X, Y, Z]

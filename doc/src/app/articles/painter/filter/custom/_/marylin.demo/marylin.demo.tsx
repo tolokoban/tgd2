@@ -1,4 +1,6 @@
 import {
+    tgdCodeFunc_polar2uv,
+    tgdCodeFunc_uv2polar,
     TgdContext,
     TgdFilter,
     tgdLoadImage,
@@ -16,24 +18,28 @@ function init(context: TgdContext) {
     )
     const filter = new TgdFilter({
         uniforms: {
-            uniThreshold: "float",
+            uniTime: "float",
+            uniAspectRatio: "float",
+            uniAspectRatioInverse: "float",
         },
         setUniforms(program, time) {
-            const threshold = 2 * Math.abs(Math.sin(time * 1e-4))
-            program.uniform1f("uniThreshold", threshold)
+            program.uniform1f("uniTime", time)
+            program.uniform1f("uniAspectRatio", context.aspectRatio)
+            program.uniform1f(
+                "uniAspectRatioInverse",
+                context.aspectRatioInverse
+            )
+        },
+        extraFunctions: {
+            ...tgdCodeFunc_uv2polar(),
+            ...tgdCodeFunc_polar2uv(),
         },
         fragmentShaderCode: [
-            "float threshold = uniThreshold;",
-            "vec4 pixel = texture(uniTexture, varUV);",
-            "float value = pixel.r + pixel.g + pixel.b;",
-            "if (value > threshold) {",
-            ["FragColor = vec4(0, 0.2, 0.4, 1.0);"],
-            "} else {",
-            [
-                "float strength = (threshold - value) / threshold;",
-                "FragColor = vec4(threshold, threshold * .667, threshold * 0.1, 1);",
-            ],
-            "}",
+            "vec2 polar = uv2polar(varUV);",
+            "float strength = sin(uniTime);",
+            "polar.y += strength * polar.x;",
+            "vec2 uv = polar2uv(polar);",
+            "FragColor = texture(uniTexture, uv);",
         ],
     })
     context.add(

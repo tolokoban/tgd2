@@ -59,6 +59,12 @@ export class TgdTransfo {
         this.dirty = false
     }
 
+    reset(): this {
+        this._matrix.reset()
+        this.dirty = false
+        return this
+    }
+
     get position(): Readonly<TgdVec3> {
         return this._position
     }
@@ -92,9 +98,10 @@ export class TgdTransfo {
         this.setDirty()
         this._orientation.from(quat)
     }
-    setOrientation(x: number, y: number, z: number, w: number) {
+    setOrientation(x: number, y: number, z: number, w: number): this {
         this.setDirty()
         this._orientation.reset(x, y, z, w)
+        return this
     }
 
     orbitAroundX(angleInRadians: number): this {

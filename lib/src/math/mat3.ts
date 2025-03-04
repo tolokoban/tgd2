@@ -109,7 +109,7 @@ export class TgdMat3 extends Float32Array {
         return this
     }
 
-    fromQuat({ x, y, z, w }: TgdQuat): TgdMat3 {
+    fromQuat({ x, y, z, w }: Readonly<TgdQuat>): TgdMat3 {
         const x2 = x + x
         const y2 = y + y
         const z2 = z + z

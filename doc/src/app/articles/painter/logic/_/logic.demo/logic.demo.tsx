@@ -5,7 +5,7 @@ function init(ctx: TgdContext) {
     // #begin
     const clear = new TgdPainterClear(ctx, { color: [0, 0, 0, 1] })
     const logic = new TgdPainterLogic(time => {
-        const a = Math.abs(Math.sin(time * 0.001))
+        const a = Math.abs(Math.sin(time))
         clear.red = a
         clear.green = a * 0.677
     })

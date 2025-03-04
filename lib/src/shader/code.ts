@@ -52,16 +52,16 @@ export function vars<Type extends WebglAttributeType | WebglUniformType>(
 
 export function funcs(
     def: TgdCodeFunctions | TgdCodeBloc,
-    comment = "Util functions"
+    comment?: string
 ): TgdCodeBloc[] {
     if (isCodeBloc(def)) return [def]
 
     const names = Object.keys(def)
     if (names.length === 0) return []
 
-    const result: TgdCodeBloc[] = [`// ${comment}`]
+    const result: TgdCodeBloc[] = comment ? [`// ${comment}`] : []
     names.forEach(name => {
-        result.push(`${name} {`, def[name], "}", "")
+        result.push(def[name], "")
     })
     return result
 }

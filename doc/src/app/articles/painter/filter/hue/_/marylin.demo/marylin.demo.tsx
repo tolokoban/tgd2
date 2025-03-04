@@ -22,7 +22,7 @@ function init(context: TgdContext) {
     })
     context.add(
         filter,
-        new TgdPainterLogic(time => (hueFilter.hueShiftInDegrees = time * 0.1))
+        new TgdPainterLogic(time => (hueFilter.hueShiftInDegrees = time * 64))
     )
     context.play()
     // #end
