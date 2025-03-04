@@ -8,3 +8,4 @@ dist
 lib/test_coverage/
 .vscode/
 **/public/docs/
+test_coverage/
