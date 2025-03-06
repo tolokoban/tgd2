@@ -4,16 +4,12 @@ import {
     TgdCanvasGizmo,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterDepth,
-    TgdPainterMesh,
     TgdPainterMeshGltf,
-    TgdGeometryBox,
     TgdParserGLTransfertFormatBinary,
     TgdQuat,
     TgdVec3,
-    TgdVec4,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
     TgdPainterNode,
@@ -146,8 +142,8 @@ function createNodePainter(
         painter.add(mesh)
     }
     const children = node.children ?? []
-    children.forEach(child =>
+    for (const child of children) {
         painter.add(createNodePainter(context, child, asset))
-    )
+    }
     return painter
 }

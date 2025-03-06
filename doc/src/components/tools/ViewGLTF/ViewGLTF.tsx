@@ -94,6 +94,8 @@ function useParser(): [
     React.useEffect(() => {
         tgdLoadArrayBuffer(DefaultModelURL)
             .then(content => {
+                if (!content) return
+                
                 const parser = new TgdParserGLTransfertFormatBinary(content)
                 setParser(parser)
             })

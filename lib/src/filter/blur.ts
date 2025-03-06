@@ -17,10 +17,10 @@ export class TgdFilterBlur extends TgdFilter {
     constructor(options: Partial<TgdFilterBlurOptions> = {}) {
         const { size = 4 } = options
         const direction: TgdVec2 = figureOutDirection(options.direction)
-        const len = direction.size
-        const invLen = len > 0 ? 1 / len : 1
-        const sx = direction.x * invLen
-        const sy = direction.y * invLen
+        const length = direction.size
+        const invLength = length > 0 ? 1 / length : 1
+        const sx = direction.x * invLength
+        const sy = direction.y * invLength
         const lines: string[] = ["vec2 s;", "float f;"]
         let total = 0
         for (let s = 0; s < size - 1; s += 2) {
@@ -79,7 +79,7 @@ export class TgdFilterBlur extends TgdFilter {
 function figureOutDirection(
     direction: number | Readonly<TgdVec2> | undefined
 ): TgdVec2 {
-    if (typeof direction === "undefined") return DEFAULT_DIRECTION
+    if (direction === undefined) return DEFAULT_DIRECTION
 
     if (typeof direction === "number") {
         const ang = TgdMath.degreesToRadians(direction)

@@ -39,7 +39,7 @@ export interface WebglTexture2DCreateFromArrayOptions
 
 export function webglTextureCreate(gl: WebGL2RenderingContext): WebGLTexture {
     const tex = gl.createTexture()
-    if (!tex) throw Error("Unable to create a WebGL Texture!")
+    if (!tex) throw new Error("Unable to create a WebGL Texture!")
 
     return tex
 }

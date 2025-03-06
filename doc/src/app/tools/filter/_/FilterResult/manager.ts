@@ -21,14 +21,10 @@ export class FilterManager {
     ) {
         const context = new TgdContext(canvas)
         this.context = context
-        const texture = context.textures2D.create({
-            image: BackgroundURL,
-            width: 1920,
-            height: 1080,
-        })
+        const texture = new TgdTexture2D(context).loadBitmap(BackgroundURL)
         this.texture = texture
         this.destroy = () => {
-            context.textures2D.delete(texture)
+            texture.delete()
             context.destroy()
         }
     }

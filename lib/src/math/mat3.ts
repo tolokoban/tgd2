@@ -64,10 +64,10 @@ export class TgdMat3 extends Float32Array {
         } else if (m00 instanceof TgdMat3) {
             super(m00)
         } else {
-            console.error("[TgdMat3] m00, m01, m02 = ", m00, m01, m02)
-            console.error("[TgdMat3] m10, m11, m12 = ", m10, m11, m12)
-            console.error("[TgdMat3] m20, m21, m22 = ", m20, m21, m22)
-            throw Error(`Invalid TgdMat3 initialization!`)
+            console.error("[TgdMat3] m00, m01, m02 =", m00, m01, m02)
+            console.error("[TgdMat3] m10, m11, m12 =", m10, m11, m12)
+            console.error("[TgdMat3] m20, m21, m22 =", m20, m21, m22)
+            throw new Error(`Invalid TgdMat3 initialization!`)
         }
     }
 
@@ -97,15 +97,15 @@ export class TgdMat3 extends Float32Array {
     }
 
     transpose(): TgdMat3 {
-        let tmp = this.m10
+        let temporary = this.m10
         this.m10 = this.m01
-        this.m01 = tmp
-        tmp = this.m20
+        this.m01 = temporary
+        temporary = this.m20
         this.m20 = this.m02
-        this.m02 = tmp
-        tmp = this.m21
+        this.m02 = temporary
+        temporary = this.m21
         this.m21 = this.m12
-        this.m12 = tmp
+        this.m12 = temporary
         return this
     }
 

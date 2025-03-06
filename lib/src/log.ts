@@ -9,25 +9,25 @@ export class TgdLogger {
         if (lookupTable.size === 0) {
             // initialize lookup table.
             for (const key in gl) {
-                const val: unknown = gl[key as keyof WebGL2RenderingContext]
-                if (typeof val === "number") {
-                    lookupTable.set(val, `gl.${key}`)
+                const value_: unknown = gl[key as keyof WebGL2RenderingContext]
+                if (typeof value_ === "number") {
+                    lookupTable.set(value_, `gl.${key}`)
                 }
             }
         }
         return lookupTable.get(value) ?? `gl[${value}]`
     }
 
-    call<T>(name: string, func: () => T): T {
+    call<T>(name: string, function_: () => T): T {
         const indent = "  ".repeat(this.level)
         console.log(`${indent}>>>`, name)
         this.level++
         const time = Date.now()
         try {
-            return func()
-        } catch (ex) {
-            console.error(ex)
-            throw ex
+            return function_()
+        } catch (error) {
+            console.error(error)
+            throw error
         } finally {
             this.level--
             console.log(`${indent}<<<`, name, `(${Date.now() - time} ms)`)
@@ -37,9 +37,7 @@ export class TgdLogger {
     stateDepth(gl: WebGL2RenderingContext) {
         console.log("// [State] Depth")
         const enabled = gl.getParameter(gl.DEPTH_TEST) as boolean
-        if (!enabled) {
-            console.log("gl.disable( gl.DEPTH_TEST )")
-        } else {
+        if (enabled) {
             console.log("gl.enable( gl.DEPTH_TEST )")
             console.log(
                 "gl.depthFunc(",
@@ -55,6 +53,8 @@ export class TgdLogger {
                 gl.DEPTH_RANGE
             ) as Float32Array
             console.log("gl.depthRange(", rangeMin, ",", rangeMax, ")")
+        } else {
+            console.log("gl.disable( gl.DEPTH_TEST )")
         }
     }
 }

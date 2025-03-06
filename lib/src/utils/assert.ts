@@ -5,5 +5,7 @@ export function assertElementsTypedArray(
     if (data instanceof Uint16Array) return
     if (data instanceof Uint32Array) return
 
-    throw Error("Elements can only be Uint8Array, Uint16Array or Uint32Array!")
+    throw new Error(
+        "Elements can only be Uint8Array, Uint16Array or Uint32Array!"
+    )
 }

@@ -49,9 +49,9 @@ export class TgdPainterState extends TgdPainterGroup {
             options.gl,
             options
         )
-        onEnterActions.forEach(action => action())
+        for (const action of onEnterActions) action()
         action()
-        onExitActions.forEach(action => action())
+        for (const action of onExitActions) action()
     }
 
     constructor(
@@ -63,10 +63,10 @@ export class TgdPainterState extends TgdPainterGroup {
         super(options.children, {
             onEnter(time, delay) {
                 options.onEnter?.(time, delay)
-                onEnterActions.forEach(f => f())
+                for (const f of onEnterActions) f()
             },
             onExit(time, delay) {
-                onExitActions.forEach(f => f())
+                for (const f of onExitActions) f()
                 options.onExit?.(time, delay)
             },
         })

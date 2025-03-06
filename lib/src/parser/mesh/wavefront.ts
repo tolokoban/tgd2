@@ -117,19 +117,26 @@ export class TgdParserMeshWavefront {
         const A = new TgdVec3()
         const B = new TgdVec3()
         const C = new TgdVec3()
-        this.normalPerTriangle.forEach((normal: TgdVec3, triIdx: number) => {
-            const [v0, v1, v2] = this.verticesPerTriangle[triIdx]
+        for (const [
+            triangleIndex,
+            normal,
+        ] of this.normalPerTriangle.entries()) {
+            const [v0, v1, v2] = this.verticesPerTriangle[triangleIndex]
             this.readVertexInto(v0, A)
             this.readVertexInto(v1, B).subtract(A)
             this.readVertexInto(v2, C).subtract(A)
             normal.from(B.cross(C).normalize())
-        })
+        }
         this.attNormal = []
-        for (let e = 0; e < this.elementIndex; e++) {
+        for (
+            let elementIndex = 0;
+            elementIndex < this.elementIndex;
+            elementIndex++
+        ) {
             const normal = new TgdVec3(0, 0, 0)
-            this.trianglesPerVertex[e].forEach(triIndex =>
+            for (const triIndex of this.trianglesPerVertex[elementIndex])
                 normal.add(this.normalPerTriangle[triIndex])
-            )
+
             const [nx, ny, nz] = normal.normalize()
             this.attNormal.push(nx, ny, nz)
         }
@@ -172,17 +179,17 @@ export class TgdParserMeshWavefront {
         vertices: TgdParserMeshWavefrontAttributes[]
     ) => {
         if (vertices.length !== 3)
-            throw Error("We can only deal with triangles!")
+            throw new Error("We can only deal with triangles!")
 
-        const triangle = vertices.map(this.getElem)
+        const triangle = vertices.map(vertex => this.getElem(vertex))
         this.elements.push(...triangle)
         this.normalPerTriangle.push(new TgdVec3(0, 0, 0))
         this.verticesPerTriangle.push(triangle)
         const triangleIndex = this.normalPerTriangle.length - 1
-        triangle.forEach(vertexIndex => {
+        for (const vertexIndex of triangle) {
             this.trianglesPerVertex[vertexIndex] ??= []
             this.trianglesPerVertex[vertexIndex].push(triangleIndex)
-        })
+        }
     }
 
     /**
@@ -245,15 +252,12 @@ function parse(
     for (const fullLine of forEachLine(content)) {
         const line = fullLine.trimStart()
         if (onVertex && line.startsWith("v ")) {
-            const vertex = line
-                .substring("v ".length)
-                .split(" ")
-                .map(v => Number(v))
+            const vertex = line.slice("v ".length).split(" ").map(Number)
             if (isVector3(vertex)) onVertex(...vertex)
         } else if (onFace && line.startsWith("f ")) {
             onFace(
                 line
-                    .substring("f ".length)
+                    .slice("f ".length)
                     .split(" ")
                     // Warning! We need to remove 1 to the index.
                     .map(face => {
@@ -266,19 +270,13 @@ function parse(
                     })
             )
         } else if (onNormal && line.startsWith("vn ")) {
-            const normal = line
-                .substring("vn ".length)
-                .split(" ")
-                .map(n => Number(n))
+            const normal = line.slice("vn ".length).split(" ").map(Number)
             if (isVector3(normal)) onNormal(...normal)
         } else if (onTexture && line.startsWith("vt ")) {
-            const [u, v, w] = line
-                .substring("vt ".length)
-                .split(" ")
-                .map(n => Number(n))
+            const [u, v, w] = line.slice("vt ".length).split(" ").map(Number)
             onTexture(u, v, w)
         } else if (onObject && line.startsWith("o ")) {
-            const name = line.substring("o ".length)
+            const name = line.slice("o ".length)
             onObject(name)
         }
     }

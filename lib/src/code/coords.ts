@@ -4,7 +4,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
  * Convert uv coords ([0.0, +1.0]) into xy coords ([-1.0, +1.0]).
  * Requires uniform `uniAspectRatio`.
  */
-export function tgdCodeFunc_uv2xy(
+export function tgdCodeFunction_uv2xy(
     options: Partial<{ name: string; uniAspectRatio: string }> = {}
 ): TgdCodeFunctions {
     const { name = "uv2xy", uniAspectRatio = "uniAspectRatio" } = options
@@ -20,7 +20,7 @@ export function tgdCodeFunc_uv2xy(
  * Convert xy coords ([-1.0, +1.0]) into uv coords ([0.0, +1.0]) .
  * Requires uniform `uniAspectRatioInverse`.
  */
-export function tgdCodeFunc_xy2uv(
+export function tgdCodeFunction_xy2uv(
     options: Partial<{ name: string; uniAspectRatioInverse: string }> = {}
 ): TgdCodeFunctions {
     const { name = "xy2uv", uniAspectRatioInverse = "uniAspectRatioInverse" } =
@@ -38,7 +38,7 @@ export function tgdCodeFunc_xy2uv(
  * The function will return a vec2 with the length as first component,
  * and the angle as second.
  */
-export function tgdCodeFunc_xy2polar(options: {
+export function tgdCodeFunction_xy2polar(options: {
     name: string
 }): TgdCodeFunctions {
     const { name = "xy2polar" } = options
@@ -55,9 +55,9 @@ export function tgdCodeFunc_xy2polar(options: {
 
 /**
  * Reverse function of `xy2polar`.
- * @see tgdCodeFunc_xy2polar
+ * @see tgdCodeFunction_xy2polar
  */
-export function tgdCodeFunc_polar2xy(options: {
+export function tgdCodeFunction_polar2xy(options: {
     name: string
 }): TgdCodeFunctions {
     const { name = "polar2uv" } = options
@@ -77,9 +77,9 @@ export function tgdCodeFunc_polar2xy(options: {
 /**
  * Reverse function of `xy2polar`.
  * Requires uniform `uniAspectRatioInverse`.
- * @see tgdCodeFunc_xy2polar
+ * @see tgdCodeFunction_xy2polar
  */
-export function tgdCodeFunc_polar2uv(
+export function tgdCodeFunction_polar2uv(
     options: Partial<{ name: string; uniAspectRatioInverse: string }> = {}
 ): TgdCodeFunctions {
     const {
@@ -100,7 +100,7 @@ export function tgdCodeFunc_polar2uv(
     }
 }
 
-export function tgdCodeFunc_uv2polar(
+export function tgdCodeFunction_uv2polar(
     options: Partial<{ name: string; uniAspectRatio: string }> = {}
 ): TgdCodeFunctions {
     const { name = "uv2polar", uniAspectRatio = "uniAspectRatio" } = options

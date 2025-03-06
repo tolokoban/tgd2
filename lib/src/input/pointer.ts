@@ -69,32 +69,31 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         canvas.removeEventListener("pointerup", this.handlePointerUp)
     }
 
-    private readonly handleContextMenu = (evt: {
+    private readonly handleContextMenu = (event: {
         preventDefault: () => void
     }) => {
-        evt.preventDefault()
+        event.preventDefault()
     }
 
-    private readonly handleCanvasWheel = (evt: WheelEvent) => {
-        let delta = evt.deltaX + evt.deltaY + evt.deltaZ
-        if (delta > 0) delta = 1
-        else delta = -1
+    private readonly handleCanvasWheel = (event: WheelEvent) => {
+        let delta = event.deltaX + event.deltaY + event.deltaZ
+        delta = delta > 0 ? 1 : -1;
         this.eventZoom.dispatch({
-            current: this.getPoint(evt),
+            current: this.getPoint(event),
             direction: delta,
-            preventDefault: () => evt.preventDefault(),
+            preventDefault: () => event.preventDefault(),
             ...this.controlKeys,
         })
     }
 
-    private readonly handlePointerDown = (evt: PointerEvent) => {
-        if (!evt.isPrimary) return
+    private readonly handlePointerDown = (event: PointerEvent) => {
+        if (!event.isPrimary) return
 
-        this.canvas.setPointerCapture(evt.pointerId)
-        evt.preventDefault()
-        evt.stopPropagation()
-        this.pointerEvent = evt
-        const point = this.getPoint(evt)
+        this.canvas.setPointerCapture(event.pointerId)
+        event.preventDefault()
+        event.stopPropagation()
+        this.pointerEvent = event
+        const point = this.getPoint(event)
         this.start = this.current = this.previous = point
         this.eventMoveStart.dispatch({
             start: point,
@@ -104,11 +103,11 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         })
     }
 
-    private readonly handlePointerMove = (evt: PointerEvent) => {
-        if (!evt.isPrimary || !this.pointerEvent || !this.canvas) return
+    private readonly handlePointerMove = (event: PointerEvent) => {
+        if (!event.isPrimary || !this.pointerEvent || !this.canvas) return
 
         this.previous = this.current
-        this.current = this.getPoint(evt)
+        this.current = this.getPoint(event)
         this.eventMove.dispatch({
             start: this.start,
             current: this.current,
@@ -117,11 +116,11 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         })
     }
 
-    private readonly handlePointerUp = (evt: PointerEvent) => {
-        if (!evt.isPrimary || !this.pointerEvent) return
+    private readonly handlePointerUp = (event: PointerEvent) => {
+        if (!event.isPrimary || !this.pointerEvent) return
 
-        evt.preventDefault()
-        this.current = this.getPoint(evt)
+        event.preventDefault()
+        this.current = this.getPoint(event)
         this.eventMoveEnd.dispatch({
             start: this.start,
             current: this.current,
@@ -130,7 +129,7 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         })
         this.pointerEvent = null
         // Tap event.
-        if (evt.timeStamp - this.start.t < this.tapDelay) {
+        if (event.timeStamp - this.start.t < this.tapDelay) {
             this.eventTap.dispatch({
                 ...this.start,
                 ...this.controlKeys,
@@ -139,17 +138,17 @@ export class TgdInputPointerImpl implements TgdInputPointer {
     }
 
     private getPoint(
-        evt: PointerEvent | WheelEvent
+        event: PointerEvent | WheelEvent
     ): TgdInputPointerEventFinger {
         this.controlKeys = {
-            altKey: evt.altKey || evt.buttons === MOUSE_BUTTON_RIGHT,
-            ctrlKey: evt.ctrlKey,
-            metaKey: evt.metaKey,
-            shiftKey: evt.shiftKey,
+            altKey: event.altKey || event.buttons === MOUSE_BUTTON_RIGHT,
+            ctrlKey: event.ctrlKey,
+            metaKey: event.metaKey,
+            shiftKey: event.shiftKey,
         }
         const { left, top, width, height } = this.canvas.getBoundingClientRect()
-        const x = 2 * ((evt.clientX - left) / width - 0.5)
-        const y = -2 * ((evt.clientY - top) / height - 0.5)
-        return { x, y, t: evt.timeStamp, fingersCount: 1 }
+        const x = 2 * ((event.clientX - left) / width - 0.5)
+        const y = -2 * ((event.clientY - top) / height - 0.5)
+        return { x, y, t: event.timeStamp, fingersCount: 1 }
     }
 }

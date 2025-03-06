@@ -1,5 +1,4 @@
 import { TgdContext } from "@tgd/context"
-import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
@@ -21,9 +20,9 @@ export class TgdPainterMeshNormals extends TgdPainter {
 
     constructor(private readonly context: TgdContext, geometry: TgdGeometry) {
         super()
-        const { dataset, count, attPosition, attNormal, elements } = geometry
+        const { dataset, count, attNormal, elements } = geometry
         if (!attNormal) {
-            throw Error("This mesh has no normal!")
+            throw new Error("This mesh has no normal!")
         }
 
         const prg = new TgdProgram(context.gl, {

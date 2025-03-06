@@ -23,7 +23,6 @@ export function isArrayBuffer(data: unknown): data is ArrayBuffer {
 
 export function isStringArray(data: unknown): data is string[] {
     if (!Array.isArray(data)) return false
-    // eslint-disable-next-line no-restricted-syntax
     for (const item of data) {
         if (!isString(item)) return false
     }
@@ -35,7 +34,7 @@ export function assertNumber(
     name = "data"
 ): asserts data is number {
     if (!isNumber(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be a number but we got ${typeof data}!`
         )
     }
@@ -46,7 +45,7 @@ export function assertString(
     name = "data"
 ): asserts data is string {
     if (!isString(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be a string but we got ${typeof data}!`
         )
     }
@@ -57,7 +56,7 @@ export function assertOptionalString(
     name = "data"
 ): asserts data is string | undefined {
     if (data && !isString(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be a string but we got ${typeof data}!`
         )
     }
@@ -68,7 +67,7 @@ export function assertBoolean(
     name = "data"
 ): asserts data is boolean {
     if (!isBoolean(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be a boolean but we got ${typeof data}!`
         )
     }
@@ -79,7 +78,7 @@ export function assertObject(
     name = "data"
 ): asserts data is Record<string, unknown> {
     if (!isObject(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be an object but we got ${typeof data}!`
         )
     }
@@ -90,7 +89,7 @@ export function assertArray(
     name = "data"
 ): asserts data is unknown[] {
     if (!Array.isArray(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be an Array but we got ${typeof data}!`
         )
     }
@@ -101,7 +100,7 @@ export function assertArrayBuffer(
     name = "data"
 ): asserts data is ArrayBuffer {
     if (!isArrayBuffer(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be an ArrayBuffer but we got ${typeof data}!`
         )
     }
@@ -112,12 +111,13 @@ export function assertOptionalArrayBuffer(
     name = "data"
 ): asserts data is ArrayBuffer | undefined {
     if (data && !isArrayBuffer(data)) {
-        throw Error(
+        throw new TypeError(
             `${name} was expected to be an ArrayBuffer but we got ${typeof data}!`
         )
     }
 }
 
+// eslint-disable-next-line unicorn/prevent-abbreviations
 export type TypeDef =
     | "boolean"
     | "null"
@@ -141,7 +141,7 @@ export function isType<T>(data: unknown, type: TypeDef): data is T {
     try {
         assertType<T>(data, type)
         return true
-    } catch (ex) {
+    } catch {
         return false
     }
 }
@@ -155,7 +155,7 @@ export function assertType<T>(
 
     if (type === "null") {
         if (data !== null) {
-            throw Error(
+            throw new TypeError(
                 `Expected ${prefix} to be null and not a ${typeof data}!`
             )
         }
@@ -163,7 +163,7 @@ export function assertType<T>(
     }
     if (typeof type === "string") {
         if (typeof data !== type) {
-            throw Error(
+            throw new TypeError(
                 `Expected ${prefix} to be a ${type} and not a ${typeof data}!`
             )
         }
@@ -195,8 +195,8 @@ export function assertType<T>(
                 return
             default:
                 if (kind.startsWith("array(")) {
-                    const size = parseInt(
-                        kind.substring("array(".length, kind.length - 1),
+                    const size = Number.parseInt(
+                        kind.slice("array(".length, -1),
                         10
                     )
                     assertTypeArrayWithDimension(
@@ -207,7 +207,7 @@ export function assertType<T>(
                     )
                     return
                 }
-                throw Error(
+                throw new TypeError(
                     `Don't know how to create a type guard for this kind of type: ${JSON.stringify(
                         type
                     )}`
@@ -216,15 +216,15 @@ export function assertType<T>(
     }
 
     if (typeof data !== "object")
-        throw Error(
+        throw new TypeError(
             `Expected ${prefix} to be an object and not a ${typeof data}!`
         )
 
-    const obj = data as { [key: string]: unknown }
+    const object = data as { [key: string]: unknown }
     for (const name of Object.keys(type)) {
         if (typeof name !== "string") continue
 
-        assertType(obj[name], type[name], `${prefix}.${name}`)
+        assertType(object[name], type[name], `${prefix}.${name}`)
     }
 }
 
@@ -235,13 +235,13 @@ function assertTypeTuple(
 ) {
     assertArray(data)
     if (types.length !== data.length) {
-        throw Error(
+        throw new TypeError(
             `Expected ${prefix} to have ${types.length} elements, not ${data.length}!`
         )
     }
-    for (let i = 0; i < types.length; i++) {
-        const type: TypeDef = types[i] as TypeDef
-        assertType(data[i], type, `${prefix}[$i]`)
+    for (const [index, type_] of types.entries()) {
+        const type: TypeDef = type_ as TypeDef
+        assertType(data[index], type, `${prefix}[$i]`)
     }
 }
 
@@ -255,7 +255,7 @@ function assertTypePartial(
         if (typeof name !== "string") continue
 
         const attrib: unknown = data[name]
-        if (typeof attrib !== "undefined") {
+        if (attrib !== undefined) {
             assertType(attrib, type[name], `${prefix}.${name}`)
         }
     }
@@ -267,12 +267,12 @@ function assertTypeArray(
     type: ["array", TypeDef]
 ) {
     if (!Array.isArray(data))
-        throw Error(
+        throw new TypeError(
             `Expected ${prefix} to be an array and not a ${typeof data}!`
         )
     const [, subType] = type
-    for (let i = 0; i < data.length; i += 1) {
-        assertType(data[i], subType, `${prefix}[${i}]`)
+    for (const [index, datum] of data.entries()) {
+        assertType(datum, subType, `${prefix}[${index}]`)
     }
 }
 
@@ -283,22 +283,22 @@ function assertTypeArrayWithDimension(
     size: number
 ) {
     if (!Array.isArray(data))
-        throw Error(
+        throw new TypeError(
             `Expected ${prefix} to be an array and not a ${typeof data}!`
         )
     if (data.length !== size)
-        throw Error(
+        throw new TypeError(
             `${prefix} was expected to have a length of ${size}, but we got ${data.length}!`
         )
     const [, subType] = type
-    for (let i = 0; i < data.length; i += 1) {
-        assertType(data[i], subType, `${prefix}[${i}]`)
+    for (const [index, datum] of data.entries()) {
+        assertType(datum, subType, `${prefix}[${index}]`)
     }
 }
 
 function assertTypeMap(data: unknown, prefix: string, type: ["map", TypeDef]) {
     if (!isObject(data))
-        throw Error(
+        throw new TypeError(
             `Expected ${prefix} to be an object and not a ${typeof data}!`
         )
     const [, subType] = type
@@ -314,7 +314,7 @@ function assertTypeOptional(
     prefix: string,
     type: ["?", TypeDef]
 ) {
-    if (typeof data === "undefined") return
+    if (data === undefined) return
 
     const [, optionalType] = type
     assertType(data, optionalType, prefix)
@@ -326,7 +326,7 @@ function assertTypeAlternative(
     type: ["|", ...TypeDef[]]
 ) {
     const [, ...altTypes] = type
-    let lastException = Error(
+    let lastException = new Error(
         `No type has been defined for this alternative: ${JSON.stringify(
             type
         )}!`
@@ -335,8 +335,8 @@ function assertTypeAlternative(
         try {
             assertType(data, altType, prefix)
             return
-        } catch (ex) {
-            if (ex instanceof Error) lastException = ex
+        } catch (error) {
+            if (error instanceof Error) lastException = error
         }
     }
     throw lastException
@@ -351,7 +351,7 @@ function assertTypeLiteral(
     for (const literal of literals) {
         if (data === literal) return
     }
-    throw Error(
+    throw new TypeError(
         `Expected ${prefix} to be a literal (${literals
             .map(item => `"${item}"`)
             .join(" | ")})!`

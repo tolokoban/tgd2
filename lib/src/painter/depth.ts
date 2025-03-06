@@ -1,9 +1,9 @@
-import { WebglDepthFunc } from ".."
+import { WebglDepthFunction } from ".."
 import { TgdPainter } from "./painter"
 
 export type TgdPainterDepthOptions = {
     enabled: boolean
-    func: WebglDepthFunc
+    func: WebglDepthFunction
     mask: boolean
     rangeMin: number
     rangeMax: number
@@ -11,7 +11,7 @@ export type TgdPainterDepthOptions = {
 
 export class TgdPainterDepth extends TgdPainter {
     public enabled: boolean
-    public func: WebglDepthFunc
+    public func: WebglDepthFunction
     public mask: boolean
     public rangeMin: number
     public rangeMax: number
@@ -22,7 +22,7 @@ export class TgdPainterDepth extends TgdPainter {
         { gl }: { gl: WebGL2RenderingContext },
         {
             enabled = true,
-            func = "LESS",
+            func: function_ = "LESS",
             mask = true,
             rangeMin = 0,
             rangeMax = 1,
@@ -31,7 +31,7 @@ export class TgdPainterDepth extends TgdPainter {
         super()
         this.gl = gl
         this.enabled = enabled
-        this.func = func
+        this.func = function_
         this.mask = mask
         this.rangeMin = rangeMin
         this.rangeMax = rangeMax

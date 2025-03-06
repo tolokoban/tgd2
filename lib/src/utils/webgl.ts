@@ -18,7 +18,7 @@ export function webglElementTypeFromTypedArray(
     if (typedArray instanceof Uint32Array)
         return WebGL2RenderingContext.UNSIGNED_INT
 
-    throw Error(
+    throw new Error(
         "[webglElementTypeFromDataView] drawElements() and drawElementsInstanced() can only be fed with Uint8Array, Uint16Array or Uint32Array!"
     )
 }
@@ -43,7 +43,7 @@ export function webglTypedArrayFromBufferSource(
         case 5126: // FLOAT
             return new Float32Array(buffer)
         default:
-            throw Error(
+            throw new Error(
                 `Don't know how to create a TypedArray for type "${webglLookup(
                     type
                 )}"!`
@@ -54,8 +54,8 @@ export function webglTypedArrayFromBufferSource(
 export function webglLookup(type: number): keyof WebGL2RenderingContext {
     if (gl) {
         for (const key in gl) {
-            const val = gl[key as keyof WebGL2RenderingContext]
-            if (val === type) return key as keyof WebGL2RenderingContext
+            const value = gl[key as keyof WebGL2RenderingContext]
+            if (value === type) return key as keyof WebGL2RenderingContext
         }
     }
     return `${type}` as keyof WebGL2RenderingContext

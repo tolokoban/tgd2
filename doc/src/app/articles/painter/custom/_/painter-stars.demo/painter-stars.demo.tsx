@@ -69,18 +69,15 @@ export class PainterStars extends TgdPainter {
     constructor(private readonly context: TgdContext, data: Float32Array) {
         super()
         this.count = data.length >> 2
-        this.prg = context.programs.create(
-            {
-                vert,
-                frag,
-            },
-            "PainterStars"
-        )
+        this.prg = new TgdProgram(context.gl, {
+            vert,
+            frag,
+        })
         const dataset = new TgdDataset({
             attStar: "vec4",
         })
         dataset.set("attStar", data)
-        this.vao = context.createVAO(this.prg, [dataset])
+        this.vao = new TgdVertexArray(context.gl, this.prg, [dataset])
     }
 
     paint() {
@@ -102,7 +99,7 @@ export class PainterStars extends TgdPainter {
     }
 
     delete() {
-        this.context.programs.delete(this.prg)
+        this.prg.delete()
         this.vao.delete()
     }
 }

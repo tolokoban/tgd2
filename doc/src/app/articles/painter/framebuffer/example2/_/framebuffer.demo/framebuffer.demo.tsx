@@ -10,6 +10,7 @@ import {
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdTexture2D,
     TgdVec4,
     webglPresetDepth,
 } from "@tolokoban/tgd"
@@ -35,9 +36,9 @@ function init(context: TgdContext, assets: Assets) {
     const framebufferRender = new TgdPainterFramebuffer(context)
     const framebufferCopy = new TgdPainterFramebuffer(context)
     const material = new Material()
-    material.texture = context.textures2D.create({
-        image: assets.image.background,
-    })
+    material.texture = new TgdTexture2D(context).loadBitmap(
+        assets.image.background
+    )
     const painter = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
         // cull: webglPresetCull.front,

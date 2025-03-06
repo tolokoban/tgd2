@@ -2,8 +2,8 @@
  * A Reference Map counts how many time you want to insert the same key.
  * And it tells you when you delete it as many times.
  */
-export default class RefMap<KeyType, ValType> {
-    private readonly map = new Map<KeyType, ValType>()
+export default class ReferenceMap<KeyType, ValueType> {
+    private readonly map = new Map<KeyType, ValueType>()
     private readonly count = new Map<KeyType, number>()
 
     /**
@@ -11,19 +11,20 @@ export default class RefMap<KeyType, ValType> {
      * we add a reference to the mapped value and return it.
      * If not, we create the mapped value by calling `factory()`.
      */
-    add(key: KeyType, factory: () => ValType): ValType {
+    add(key: KeyType, factory: () => ValueType): ValueType {
         const { map, count } = this
         if (count.has(key)) {
             count.set(key, 1 + (count.get(key) ?? 0))
-            const curVal = map.get(key)
-            if (!curVal) throw Error("[CountMap] Map should not be empty!")
-            return curVal
+            const currentValue = map.get(key)
+            if (!currentValue)
+                throw new Error("[CountMap] Map should not be empty!")
+            return currentValue
         }
 
-        const newVal = factory()
-        map.set(key, newVal)
+        const newValue = factory()
+        map.set(key, newValue)
         count.set(key, 1)
-        return newVal
+        return newValue
     }
 
     /**
@@ -32,7 +33,7 @@ export default class RefMap<KeyType, ValType> {
      * then return the mapped value, otherwise
      * return `undefined`.
      */
-    delete(key: KeyType): ValType | undefined {
+    delete(key: KeyType): ValueType | undefined {
         const { map, count } = this
         if (!map.has(key)) return
 

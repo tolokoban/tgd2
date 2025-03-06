@@ -45,7 +45,7 @@ function getPromisedLoaders<N extends string, V>(
                         resolve()
                     })
                     .catch(() => {
-                        console.error("Unable to load URL ", url)
+                        console.error("Unable to load URL", url)
                         resolve()
                     })
             })

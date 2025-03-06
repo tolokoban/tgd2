@@ -29,7 +29,7 @@ export default class Painter extends TgdPainter {
     ) {
         super()
         this.texture = texture
-        this.program = context.programs.create({
+        this.program = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })
@@ -40,12 +40,17 @@ export default class Painter extends TgdPainter {
         if (!elements) throw Error("Missing elements!")
 
         this.type = webglElementTypeFromTypedArray(elements)
-        this.vao = context.createVAO(this.program, [dataset], elements)
+        this.vao = new TgdVertexArray(
+            context.gl,
+            this.program,
+            [dataset],
+            elements
+        )
         this.count = dataset.count
     }
 
     delete(): void {
-        this.context.programs.delete(this.program)
+        this.program.delete()
     }
 
     paint(time: number, delay: number): void {
@@ -53,7 +58,7 @@ export default class Painter extends TgdPainter {
         const { gl } = this.context
         const { camera } = context
         program.use()
-        texture.activate(program, "uniTexture")
+        texture.activate(0, program, "uniTexture")
         program.uniform3fv("uniAxisZ", axisZ)
         program.uniformMatrix4fv("uniCameraModelView", camera.matrixModelView)
         program.uniformMatrix4fv("uniCameraProjection", camera.matrixProjection)

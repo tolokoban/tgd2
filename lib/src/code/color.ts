@@ -4,7 +4,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
  * Fast hue shifting for colors.
  * Hue shift is expressed in __radians__.
  */
-export function tgdCodeFunc_shiftHue({
+export function tgdCodeFunction_shiftHue({
     name = "shiftHue",
 }: {
     name: string
@@ -23,7 +23,7 @@ export function tgdCodeFunc_shiftHue({
     }
 }
 
-export function tgdCodeFunc_luminance({
+export function tgdCodeFunction_luminance({
     name = "luminance",
 }: {
     name: string

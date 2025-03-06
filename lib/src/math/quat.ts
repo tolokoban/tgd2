@@ -5,9 +5,9 @@ import { TgdVec4 } from "./vec4"
 
 export type TgdQuatFace = keyof typeof FACES
 
-const tmpAxisX = new TgdVec3()
-const tmpAxisY = new TgdVec3()
-const tmpAxisZ = new TgdVec3()
+const temporaryAxisX = new TgdVec3()
+const temporaryAxisY = new TgdVec3()
+const temporaryAxisZ = new TgdVec3()
 
 export class TgdQuat extends TgdVec4 {
     static fromMatrix(mat: TgdMat3): TgdQuat {
@@ -57,7 +57,7 @@ export class TgdQuat extends TgdVec4 {
         // calc cosine
         let cosom = ax * bx + ay * by + az * bz + aw * bw
         // adjust signs (if necessary)
-        if (cosom < 0.0) {
+        if (cosom < 0) {
             cosom = -cosom
             bx = -bx
             by = -by
@@ -65,17 +65,17 @@ export class TgdQuat extends TgdVec4 {
             bw = -bw
         }
         // calculate coefficients
-        if (1.0 - cosom > EPSILON) {
+        if (1 - cosom > EPSILON) {
             // standard case (slerp)
             const omega = Math.acos(cosom)
             const sinom = Math.sin(omega)
             const inverseSinom = 1 / sinom
-            scale0 = Math.sin((1.0 - t) * omega) * inverseSinom
+            scale0 = Math.sin((1 - t) * omega) * inverseSinom
             scale1 = Math.sin(t * omega) * inverseSinom
         } else {
             // "from" and "to" quaternions are very close
             //  ... so we can do a linear interpolation
-            scale0 = 1.0 - t
+            scale0 = 1 - t
             scale1 = t
         }
         // calculate final values
@@ -94,9 +94,9 @@ export class TgdQuat extends TgdVec4 {
         // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
         // article "Quaternion Calculus and Fast Animation".
         const fTrace = X.x + Y.y + Z.z
-        if (fTrace > 0.0) {
+        if (fTrace > 0) {
             // |w| > 1/2, may as well choose w > 1/2
-            const fRoot = Math.sqrt(fTrace + 1.0) // 2w
+            const fRoot = Math.sqrt(fTrace + 1) // 2w
             this.w = 0.5 * fRoot
             const halfRoot = 0.5 / fRoot // 1/(4w)
             this.x = (Z.y - Y.z) * halfRoot
@@ -105,43 +105,43 @@ export class TgdQuat extends TgdVec4 {
         } else {
             // |w| <= 1/2
             const axis = [X, Y, Z]
-            let i = 0
-            if (Y.y > X.x) i = 1
-            if (Z.z > axis[i][i]) i = 2
-            const j = (i + 1) % 3
-            const k = (i + 2) % 3
+            let index = 0
+            if (Y.y > X.x) index = 1
+            if (Z.z > axis[index][index]) index = 2
+            const index_ = (index + 1) % 3
+            const k = (index + 2) % 3
 
-            let fRoot = Math.sqrt(axis[i][i] - axis[j][j] - axis[k][k] + 1.0)
-            this[i] = 0.5 * fRoot
+            let fRoot = Math.sqrt(axis[index][index] - axis[index_][index_] - axis[k][k] + 1)
+            this[index] = 0.5 * fRoot
             fRoot = 0.5 / fRoot
-            this[3] = (axis[j][k] - axis[k][j]) * fRoot
-            this[j] = (axis[j][i] + axis[i][j]) * fRoot
-            this[k] = (axis[k][i] + axis[i][k]) * fRoot
+            this[3] = (axis[index_][k] - axis[k][index_]) * fRoot
+            this[index_] = (axis[index_][index] + axis[index][index_]) * fRoot
+            this[k] = (axis[k][index] + axis[index][k]) * fRoot
         }
         return this.normalize()
     }
 
     fromMatrix(mat: TgdMat3 | TgdMat4) {
-        tmpAxisX.x = mat.m00
-        tmpAxisX.y = mat.m01
-        tmpAxisX.z = mat.m02
-        tmpAxisY.x = mat.m10
-        tmpAxisY.y = mat.m11
-        tmpAxisY.z = mat.m12
-        tmpAxisZ.x = mat.m20
-        tmpAxisZ.y = mat.m21
-        tmpAxisZ.z = mat.m22
-        return this.fromAxis(tmpAxisX, tmpAxisY, tmpAxisZ)
+        temporaryAxisX.x = mat.m00
+        temporaryAxisX.y = mat.m01
+        temporaryAxisX.z = mat.m02
+        temporaryAxisY.x = mat.m10
+        temporaryAxisY.y = mat.m11
+        temporaryAxisY.z = mat.m12
+        temporaryAxisZ.x = mat.m20
+        temporaryAxisZ.y = mat.m21
+        temporaryAxisZ.z = mat.m22
+        return this.fromAxis(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
     }
 
     rotateAround(axis: TgdVec3, angleInRadians: number): this {
-        this.toAxisX(tmpAxisX)
-        this.toAxisY(tmpAxisY)
-        this.toAxisZ(tmpAxisZ)
-        tmpAxisX.rotateAround(axis, angleInRadians)
-        tmpAxisY.rotateAround(axis, angleInRadians)
-        tmpAxisZ.rotateAround(axis, angleInRadians)
-        return this.fromAxis(tmpAxisX, tmpAxisY, tmpAxisZ)
+        this.toAxisX(temporaryAxisX)
+        this.toAxisY(temporaryAxisY)
+        this.toAxisZ(temporaryAxisZ)
+        temporaryAxisX.rotateAround(axis, angleInRadians)
+        temporaryAxisY.rotateAround(axis, angleInRadians)
+        temporaryAxisZ.rotateAround(axis, angleInRadians)
+        return this.fromAxis(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
     }
 
     static rotateAroundX(angleInRadians: number): TgdQuat {

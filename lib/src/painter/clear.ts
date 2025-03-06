@@ -34,7 +34,7 @@ export class TgdPainterClear extends TgdPainter {
         const stencil = options.stencil ?? 0
         this.clearMask = 0
         let hasAnyOption = false
-        if (typeof options.color !== "undefined") {
+        if (options.color !== undefined) {
             this.clearMask |= gl.COLOR_BUFFER_BIT
             hasAnyOption = true
         }
@@ -47,11 +47,11 @@ export class TgdPainterClear extends TgdPainter {
             hasAnyOption = true
         }
         if (!hasAnyOption) {
-            throw Error(
+            throw new Error(
                 "[TgdPainterClear] You must give at least a color or a depth in the constructor!"
             )
         }
-        // eslint-disable-next-line no-extra-semi
+         
         ;[this.red, this.green, this.blue, this.alpha] = color
         this.depth = depth
         this.stencil = stencil

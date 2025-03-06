@@ -60,13 +60,13 @@ export class TgdGeometry {
     protected _elementsType: number
 
     public static make(options: TgdGeometryOptions2) {
-        const def: TgdDatasetTypeRecord = {}
+        const definition: TgdDatasetTypeRecord = {}
         const { count, drawMode, elements, attPosition, attNormal, attUV } =
             options
-        def[attPosition.name] = attPosition.type ?? "vec3"
-        if (attNormal) def[attNormal.name] = attNormal.type ?? "vec3"
-        if (attUV) def[attUV.name] = attUV.type ?? "vec2"
-        const dataset = new TgdDataset(def)
+        definition[attPosition.name] = attPosition.type ?? "vec3"
+        if (attNormal) definition[attNormal.name] = attNormal.type ?? "vec3"
+        if (attUV) definition[attUV.name] = attUV.type ?? "vec2"
+        const dataset = new TgdDataset(definition)
         dataset.set(attPosition.name, attPosition.data)
         if (attNormal) dataset.set(attNormal.name, attNormal.data)
         if (attUV) dataset.set(attUV.name, attUV.data)
@@ -131,54 +131,72 @@ export class TgdGeometry {
             [attNormalName]: "vec3",
         })
         const values: number[] = []
-        for (let idx = 0; idx < normals.length; idx++) {
-            const [nx, ny, nz] = normals[idx]
+        for (const [nx, ny, nz] of normals) {
             values.push(nx, ny, nz)
         }
         this.dataset.set(attNormalName, new Float32Array(values))
     }
 
-    // eslint-disable-next-line max-statements
     private computeNormalsForTrianglesDrawMode() {
         const ds = this.dataset
         const normalsAccumulator = new Map<number, TgdVec3>()
-        const addNormal = (idx: number, A: TgdVec3, B: TgdVec3, C: TgdVec3) => {
+        const addNormal = (
+            index: number,
+            A: TgdVec3,
+            B: TgdVec3,
+            C: TgdVec3
+        ) => {
             const norm = computeNormal(A, B, C)
-            const item = normalsAccumulator.get(idx)
+            const item = normalsAccumulator.get(index)
             if (item) {
                 item.add(norm)
             } else {
-                normalsAccumulator.set(idx, new TgdVec3(norm.x, norm.y, norm.z))
+                normalsAccumulator.set(
+                    index,
+                    new TgdVec3(norm.x, norm.y, norm.z)
+                )
             }
         }
         const { get } = ds.getAttribAccessor(this.attPosition)
         const indexes = new Set<number>()
-        let idxMax = 0
-        for (let elem = 0; elem < this.count; elem += 3) {
-            const idx0 = this.getElement(elem + 0)
-            indexes.add(idx0)
-            idxMax = Math.max(idxMax, idx0)
-            const idx1 = this.getElement(elem + 1)
-            indexes.add(idx1)
-            idxMax = Math.max(idxMax, idx1)
-            const idx2 = this.getElement(elem + 2)
-            indexes.add(idx2)
-            idxMax = Math.max(idxMax, idx2)
-            const A = new TgdVec3(get(idx0, 0), get(idx0, 1), get(idx0, 2))
-            const B = new TgdVec3(get(idx1, 0), get(idx1, 1), get(idx1, 2))
-            const C = new TgdVec3(get(idx2, 0), get(idx2, 1), get(idx2, 2))
-            addNormal(idx0, A, B, C)
-            addNormal(idx1, B, C, A)
-            addNormal(idx2, C, A, B)
+        let indexMax = 0
+        for (let element = 0; element < this.count; element += 3) {
+            const index0 = this.getElement(element + 0)
+            indexes.add(index0)
+            indexMax = Math.max(indexMax, index0)
+            const index1 = this.getElement(element + 1)
+            indexes.add(index1)
+            indexMax = Math.max(indexMax, index1)
+            const index2 = this.getElement(element + 2)
+            indexes.add(index2)
+            indexMax = Math.max(indexMax, index2)
+            const A = new TgdVec3(
+                get(index0, 0),
+                get(index0, 1),
+                get(index0, 2)
+            )
+            const B = new TgdVec3(
+                get(index1, 0),
+                get(index1, 1),
+                get(index1, 2)
+            )
+            const C = new TgdVec3(
+                get(index2, 0),
+                get(index2, 1),
+                get(index2, 2)
+            )
+            addNormal(index0, A, B, C)
+            addNormal(index1, B, C, A)
+            addNormal(index2, C, A, B)
         }
         const normals: TgdVec3[] = []
-        for (let idx = 0; idx <= idxMax; idx++) {
-            const item = normalsAccumulator.get(idx)
-            if (!item) {
-                normals.push(new TgdVec3())
-            } else {
+        for (let index = 0; index <= indexMax; index++) {
+            const item = normalsAccumulator.get(index)
+            if (item) {
                 item.normalize()
                 normals.push(item)
+            } else {
+                normals.push(new TgdVec3())
             }
         }
         return normals

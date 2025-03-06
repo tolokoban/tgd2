@@ -16,9 +16,9 @@ export function debug(
 }
 
 export function highlightEnum(
-    val: keyof WebGL2RenderingContext | number
+    value: keyof WebGL2RenderingContext | number
 ): HighlightedCode {
-    const txt = typeof val === "number" ? webglLookup(val) : val
+    const txt = typeof value === "number" ? webglLookup(value) : value
     return ["gl.", { cls: "enum", txt }, { cls: "code" }]
 }
 

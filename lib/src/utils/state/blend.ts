@@ -1,36 +1,34 @@
 import { debug, highlightEnum } from "@tgd/debug/debug"
-import { WebglEnumBlendEquation, WebglEnumBlendFunc } from "@tgd/types"
+import { WebglEnumBlendEquation, WebglEnumBlendFunction } from "@tgd/types"
 
 export interface WebglBlendOptions {
     enabled: boolean
     equationColor: WebglEnumBlendEquation
     equationAlpha: WebglEnumBlendEquation
-    functionColorSrc: WebglEnumBlendFunc
-    functionColorDst: WebglEnumBlendFunc
-    functionAlphaSrc: WebglEnumBlendFunc
-    functionAlphaDst: WebglEnumBlendFunc
+    functionColorSrc: WebglEnumBlendFunction
+    functionColorDst: WebglEnumBlendFunction
+    functionAlphaSrc: WebglEnumBlendFunction
+    functionAlphaDst: WebglEnumBlendFunction
 }
 
-export const webglPresetBlend: Readonly<
-    Record<"off" | "alpha", WebglBlendOptions>
-> = {
+export const webglPresetBlend: Readonly<Record<"off" | "alpha", WebglBlendOptions>> = {
     off: {
         enabled: false,
         equationColor: WebglEnumBlendEquation.FUNC_ADD,
         equationAlpha: WebglEnumBlendEquation.FUNC_ADD,
-        functionColorSrc: WebglEnumBlendFunc.SRC_ALPHA,
-        functionColorDst: WebglEnumBlendFunc.ONE_MINUS_SRC_ALPHA,
-        functionAlphaSrc: WebglEnumBlendFunc.ONE,
-        functionAlphaDst: WebglEnumBlendFunc.ZERO,
+        functionColorSrc: WebglEnumBlendFunction.SRC_ALPHA,
+        functionColorDst: WebglEnumBlendFunction.ONE_MINUS_SRC_ALPHA,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ZERO,
     },
     alpha: {
         enabled: true,
         equationColor: WebglEnumBlendEquation.FUNC_ADD,
         equationAlpha: WebglEnumBlendEquation.FUNC_ADD,
-        functionColorSrc: WebglEnumBlendFunc.SRC_ALPHA,
-        functionColorDst: WebglEnumBlendFunc.ONE_MINUS_SRC_ALPHA,
-        functionAlphaSrc: WebglEnumBlendFunc.ONE,
-        functionAlphaDst: WebglEnumBlendFunc.ZERO,
+        functionColorSrc: WebglEnumBlendFunction.SRC_ALPHA,
+        functionColorDst: WebglEnumBlendFunction.ONE_MINUS_SRC_ALPHA,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ZERO,
     },
 }
 
@@ -38,7 +36,6 @@ export function webglBlendSet(
     gl: WebGL2RenderingContext,
     blend: WebglBlendOptions
 ) {
-    console.log("🚀 [blend] blend = ", blend) // @FIXME: Remove this line written on 2025-02-24 at 19:18
     if (blend.enabled) gl.enable(gl.BLEND)
     else gl.disable(gl.BLEND)
     gl.blendEquationSeparate(blend.equationColor, blend.equationAlpha)

@@ -84,7 +84,7 @@ export class TgdContext {
         private readonly options: TgdContextOptions = {}
     ) {
         const gl = canvas.getContext("webgl2", options)
-        if (!gl) throw Error("Unable to create a WebGL2 context!")
+        if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
         if (options.enableTextureFloatStorage) {
             gl.getExtension("EXT_color_buffer_float")
@@ -247,9 +247,9 @@ export class TgdContext {
     }
 
     takeSnapshot(target: HTMLCanvasElement) {
-        const ctx = target.getContext("2d")
-        if (!ctx)
-            throw Error(
+        const context_ = target.getContext("2d")
+        if (!context_)
+            throw new Error(
                 "[TgdContext.takeSnapshot] We cannot get a 2D context for the target canvas! Maybe it already has another type of context."
             )
 
@@ -259,7 +259,7 @@ export class TgdContext {
         this.painters.forEachChild(painter => context.add(painter))
         context.actualPaint(this.lastTime)
         context.gl.finish()
-        ctx.drawImage(canvas, 0, 0)
+        context_.drawImage(canvas, 0, 0)
     }
 
     lookupWebglConstant(value: number): string {
@@ -274,8 +274,8 @@ export class TgdContext {
      * Trigger the painters to render the scene.
      */
     readonly paint = () => {
-        window.cancelAnimationFrame(this.requestAnimationFrame)
-        this.requestAnimationFrame = window.requestAnimationFrame(
+        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+        this.requestAnimationFrame = globalThis.requestAnimationFrame(
             this.actualPaint
         )
     }
@@ -305,29 +305,29 @@ export class TgdContext {
     }
 
     destroy() {
-        window.cancelAnimationFrame(this.requestAnimationFrame)
+        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
         this.playing = false
         this.painters.delete()
         this.observer.unobserve(this.canvas)
     }
 
-    // eslint-disable-next-line max-statements
+     
     stateReset() {
         const { gl } = this
-        const numAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) as number
-        const tmp = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, tmp)
-        for (let ii = 0; ii < numAttribs; ++ii) {
+        const numberAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) as number
+        const temporary = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, temporary)
+        for (let ii = 0; ii < numberAttribs; ++ii) {
             gl.disableVertexAttribArray(ii)
             gl.vertexAttribPointer(ii, 4, gl.FLOAT, false, 0, 0)
             gl.vertexAttrib1f(ii, 0)
         }
-        gl.deleteBuffer(tmp)
+        gl.deleteBuffer(temporary)
 
-        const numTextureUnits: number = gl.getParameter(
+        const numberTextureUnits: number = gl.getParameter(
             gl.MAX_TEXTURE_IMAGE_UNITS
         ) as number
-        for (let ii = 0; ii < numTextureUnits; ++ii) {
+        for (let ii = 0; ii < numberTextureUnits; ++ii) {
             gl.activeTexture(gl.TEXTURE0 + ii)
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
             gl.bindTexture(gl.TEXTURE_2D, null)

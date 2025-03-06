@@ -6,15 +6,16 @@ import {
     TgdFilterHueRotation,
     TgdPainterClear,
     TgdPainterFilter,
-    TgdPainterFramebufferOld,
     TgdPainterLogic,
     TgdPainterMeshGltf,
     TgdPainterState,
     webglPresetDepth,
+    TgdPainterFramebuffer,
 } from "@tolokoban/tgd"
 
-import TestPainter from "./painter"
 import View from "@/components/demo/Tgd"
+
+import SuzaneURL from "@/assets/mesh/suzanne.glb"
 
 export default function DemoContainer() {
     return <View onReady={init} />
@@ -47,7 +48,7 @@ function init(context: TgdContext) {
     })
     context.paint()
     const action = async () => {
-        const asset = await tgdLoadGlb("mesh/suzanne.glb")
+        const asset = await tgdLoadGlb(SuzaneURL)
         if (!asset) return
 
         console.log("Suzanne has been loaded!")
@@ -63,17 +64,18 @@ function init(context: TgdContext) {
                 }),
             ],
         })
-        const fb = new TgdPainterFramebufferOld(context, {
+        const fb = new TgdPainterFramebuffer(context, {
             depthBuffer: true,
             viewportMatchingScale: 1,
         })
         fb.add(state)
         const hue = new TgdFilterHueRotation()
         context.add(
-            fb,
+            // fb,
+            state,
             new TgdPainterFilter(context, {
                 filters: [hue],
-                texture: fb.texture,
+                texture: fb.textureColor0,
                 flipY: true,
             }),
             new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))

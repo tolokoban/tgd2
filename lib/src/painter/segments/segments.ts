@@ -78,10 +78,10 @@ export class TgdPainterSegments extends TgdPainter {
         super()
         this.minRadius = minRadius
         if (roundness > 125) {
-            throw Error("[TgdPainterSegments] Max roundness is 125!")
+            throw new Error("[TgdPainterSegments] Max roundness is 125!")
         }
         if (roundness < 0) {
-            throw Error("[TgdPainterSegments] Min roundness is 0!")
+            throw new Error("[TgdPainterSegments] Min roundness is 0!")
         }
         this.colorTexture = new TgdTexture2D(context)
             .setParams({
@@ -250,21 +250,25 @@ function makeCapsule(roundness: number): {
     if (roundness > 0) {
         let oldIndexA = 1
         let oldIndexB = 4
-        let elemIndex = 6
-        for (let i = 0; i < roundness; i++) {
-            const ang = (Math.PI * (i + 1)) / (roundness + 1)
+        let elementIndex = 6
+        for (
+            let roundnessStep = 0;
+            roundnessStep < roundness;
+            roundnessStep++
+        ) {
+            const ang = (Math.PI * (roundnessStep + 1)) / (roundness + 1)
             const x = Math.cos(ang)
             const y = Math.sin(ang)
             // We set z to 0 because it's related to tip A.
             offset.push(x, y, 0)
-            elements.push(0, oldIndexA, elemIndex)
-            oldIndexA = elemIndex
-            elemIndex++
+            elements.push(0, oldIndexA, elementIndex)
+            oldIndexA = elementIndex
+            elementIndex++
             // We set z to 1 because it's related to tip B.
             offset.push(x, -y, 1)
-            elements.push(3, elemIndex, oldIndexB)
-            oldIndexB = elemIndex
-            elemIndex++
+            elements.push(3, elementIndex, oldIndexB)
+            oldIndexB = elementIndex
+            elementIndex++
         }
         elements.push(0, oldIndexA, 2)
         elements.push(3, 5, oldIndexB)

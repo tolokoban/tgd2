@@ -68,7 +68,7 @@ export class TgdTexture2D {
         this.gl = gl
         this.name = `Texture2D/${TgdTexture2D.counter++}`
         const texture = gl.createTexture()
-        if (!texture) throw Error("Unable to create a WebGLTexture!")
+        if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
         this._texture = texture
         this.setParams({
@@ -116,9 +116,9 @@ export class TgdTexture2D {
         const { internalFormat, levels } = this.storage
         if (internalFormat.startsWith("COMPRESSED_")) {
             // We need to load an extension for that.
-            const ext = gl.getExtension("WEBGL_compressed_texture_etc")
-            if (!ext)
-                throw Error(
+            const extension = gl.getExtension("WEBGL_compressed_texture_etc")
+            if (!extension)
+                throw new Error(
                     'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!'
                 )
         }
@@ -135,7 +135,7 @@ export class TgdTexture2D {
     get glTexture(): WebGLTexture {
         if (this._texture) return this._texture
 
-        throw Error(`Texture "${this.name}" has been deleted!`)
+        throw new Error(`Texture "${this.name}" has been deleted!`)
     }
 
     bind() {
@@ -151,8 +151,8 @@ export class TgdTexture2D {
         if (!bmp) return this
 
         if (!isWebglImage(bmp)) {
-            bmp.then(data => this.loadBitmap(data)).catch(err =>
-                console.error("Unable to load texture BMP:", err)
+            bmp.then(data => this.loadBitmap(data)).catch(error =>
+                console.error("Unable to load texture BMP:", error)
             )
             return this
         }
@@ -242,9 +242,9 @@ export class TgdTexture2D {
         return this
     }
 
-    setParams(params: WebglTextureParameters) {
+    setParams(parameters: WebglTextureParameters) {
         this.bind()
-        webglTextureParametersSet(this.gl, params)
+        webglTextureParametersSet(this.gl, parameters)
         return this
     }
 
@@ -275,10 +275,10 @@ export class TgdTexture2D {
         return gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL) as number
     }
 
-    getParameter(param: WebglTexParameter): number | boolean | null {
+    getParameter(parameter: WebglTexParameter): number | boolean | null {
         const { gl, glTexture } = this
         gl.bindTexture(gl.TEXTURE_2D, glTexture)
-        const value = gl.getTexParameter(gl.TEXTURE_2D, gl[param]) as
+        const value = gl.getTexParameter(gl.TEXTURE_2D, gl[parameter]) as
             | number
             | boolean
             | null
@@ -335,7 +335,7 @@ function figureOutCompatibleFormat(
     for (const [format, internalFormats] of COMPATIBLE_FORMATS) {
         if (internalFormats.has(internalFormat)) return format
     }
-    throw Error(
+    throw new Error(
         `There is no compatible format for internalFormat "${internalFormat}" and type "UNSIGNED_BYTE"!`
     )
 }

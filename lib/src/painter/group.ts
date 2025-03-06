@@ -28,7 +28,7 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     forEachChild(callback: (child: TgdPainter, index: number) => void) {
-        this.painters.forEach((child, index) => callback(child, index))
+        for (const [index, child] of this.painters.entries()) callback(child, index)
     }
 
     has(painter: TgdPainter): boolean {
@@ -42,8 +42,8 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     addFirst(...painters: TgdPainter[]) {
-        for (let i = painters.length - 1; i >= 0; i--) {
-            const painter = painters[i]
+        for (let index = painters.length - 1; index >= 0; index--) {
+            const painter = painters[index]
             this.painters.unshift(painter)
         }
     }
@@ -51,7 +51,7 @@ export class TgdPainterGroup extends TgdPainter {
     remove(...painters: TgdPainter[]) {
         for (const painter of painters) {
             const index = this.painters.indexOf(painter)
-            if (index < 0) continue
+            if (index === -1) continue
 
             this.painters.splice(index, 1)
             painter.delete()

@@ -1,4 +1,4 @@
-import { TgdMat4 } from "@tgd/math"
+import { TgdTransfo } from "@tgd/math"
 import { TgdPainterNodeChild } from "@tgd/painter"
 import { TgdCamera } from "./camera"
 
@@ -8,12 +8,12 @@ import { TgdCamera } from "./camera"
  * Once in such a node, a camera cannot be moved directly.
  */
 export class TgdCameraNode implements TgdPainterNodeChild {
-    public readonly matrixTransfo = new TgdMat4()
+    public readonly transfo = new TgdTransfo()
 
     constructor(public camera: TgdCamera) {}
 
     paint(_time: number, _delay: number): void {
-        this.camera.fromTransfo(this.matrixTransfo)
+        this.camera.fromTransfo(this.transfo.matrix)
     }
 
     delete(): void {}

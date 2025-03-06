@@ -11,14 +11,14 @@ import { TgdProgram } from "@tgd/program"
 
 export interface TgdPainterFilterOptions {
     filters: TgdFilter[]
-    texture: TgdTexture2D
+    texture?: TgdTexture2D
     z?: number
     name?: string
     flipY?: boolean
 }
 
 export class TgdPainterFilter extends TgdPainter {
-    public texture: TgdTexture2D
+    public texture?: TgdTexture2D
     public z = 0
 
     private readonly program: TgdProgram
@@ -40,8 +40,8 @@ export class TgdPainterFilter extends TgdPainter {
         this.z = options.z ?? 0.999999
         this.texture = options.texture
         const filters = options.filters
-        if (filters.length < 1) {
-            throw Error(
+        if (filters.length === 0) {
+            throw new Error(
                 `[TgdPainterFilter] filters is expected to have at least one element!`
             )
         }
@@ -92,7 +92,8 @@ export class TgdPainterFilter extends TgdPainter {
         const count = vaos.length + (options.flipY ? 1 : 0)
         this.vao = count % 2 === 0 ? vao : createVAO(context, this.program, -1)
         const framebuffer = context.gl.createFramebuffer()
-        if (!framebuffer) throw Error("Unable to create a WebGL Framebuffer!")
+        if (!framebuffer)
+            throw new Error("Unable to create a WebGL Framebuffer!")
 
         this.framebuffer = framebuffer
         this.name = options.name ?? `Filter/${this.name}`
@@ -101,18 +102,23 @@ export class TgdPainterFilter extends TgdPainter {
     delete(): void {
         const { context, textures, vaos, vao, framebuffer } = this
         const { gl } = context
-        vaos.forEach(vao => vao.delete())
+        for (const vao of vaos) vao.delete()
         vao.delete()
         gl.deleteFramebuffer(framebuffer)
         if (textures) {
-            textures.forEach(tex => gl.deleteTexture(tex))
+            for (const tex of textures) gl.deleteTexture(tex)
         }
     }
 
     paint(time: number): void {
         const { vaos, texture, z, context } = this
         const { gl } = this.program
-        let input = texture.glTexture
+        let inputTexture = texture?.glTexture
+        if (!inputTexture) {
+            console.warn("[TgdPainterFilter] Input texture is undefined!")
+            return
+        }
+
         if (vaos.length > 0) {
             const { programs, filters, framebuffer } = this
             const currentFramebuffer = gl.getParameter(
@@ -120,28 +126,28 @@ export class TgdPainterFilter extends TgdPainter {
             ) as null | WebGLFramebuffer
             const textures = this.getTextures(gl)
             let texIndex = 0
-            let output = textures[texIndex]
-            for (let i = 0; i < vaos.length; i++) {
+            let outputTexture = textures[texIndex]
+            for (const [index, vao] of vaos.entries()) {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
                 gl.framebufferTexture2D(
                     gl.FRAMEBUFFER,
                     gl.COLOR_ATTACHMENT0,
                     gl.TEXTURE_2D,
-                    output,
+                    outputTexture,
                     0
                 )
                 paintOneFilter(
                     time,
-                    vaos[i],
-                    programs[i],
-                    filters[i],
-                    input,
+                    vao,
+                    programs[index],
+                    filters[index],
+                    inputTexture,
                     z,
                     context
                 )
                 texIndex = 1 - texIndex
-                input = output
-                output = textures[texIndex]
+                inputTexture = outputTexture
+                outputTexture = textures[texIndex]
             }
             gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         }
@@ -150,7 +156,7 @@ export class TgdPainterFilter extends TgdPainter {
             this.vao,
             this.program,
             this.filter,
-            input,
+            inputTexture,
             z,
             context
         )
@@ -160,18 +166,20 @@ export class TgdPainterFilter extends TgdPainter {
     private getTextures(
         gl: WebGL2RenderingContext
     ): [WebGLTexture, WebGLTexture] {
-        const tex = this.texture
+        const { width, height } = this.texture ?? { width: 64, height: 64 }
         if (
             this.textures &&
-            this.texturesWith === tex.width &&
-            this.texturesHeight === tex.height
+            this.texturesWith === width &&
+            this.texturesHeight === height
         ) {
             return [...this.textures]
         }
 
-        if (this.textures) this.textures.forEach(tex => gl.deleteTexture(tex))
-        this.texturesWith = tex.width
-        this.texturesHeight = tex.height
+        if (this.textures) {
+            for (const tex of this.textures) gl.deleteTexture(tex)
+        }
+        this.texturesWith = width
+        this.texturesHeight = height
         this.textures = [0, 1].map(() => {
             const texture = gl.createTexture()
             gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -185,8 +193,8 @@ export class TgdPainterFilter extends TgdPainter {
                 gl.TEXTURE_2D,
                 0,
                 gl.RGBA,
-                tex.width,
-                tex.height,
+                width,
+                height,
                 0,
                 gl.RGBA,
                 gl.UNSIGNED_BYTE,
@@ -235,6 +243,6 @@ function createVAO(context: TgdContext, program: TgdProgram, flipY = +1) {
     )
     dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
     const vao = new TgdVertexArray(context.gl, program, [dataset])
-    if (!vao) throw Error("Unable to create WebGL VAO!")
+    if (!vao) throw new Error("Unable to create WebGL VAO!")
     return vao
 }

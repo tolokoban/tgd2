@@ -48,9 +48,9 @@ export class TgdManagerAnimation {
             while (time > anim.start + anim.duration) {
                 try {
                     anim.onEnd?.()
-                } catch (ex) {
+                } catch (error) {
                     console.error("Animation.onEnd() failed for", anim)
-                    console.error(ex)
+                    console.error(error)
                 }
                 anim.loop++
                 anim.start += anim.duration

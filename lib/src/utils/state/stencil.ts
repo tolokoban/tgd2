@@ -79,9 +79,7 @@ export function webglStencilSet(
     gl: WebGL2RenderingContext,
     stencil: WebglStencilOptions
 ) {
-    if (!stencil.enabled) {
-        gl.disable(gl.STENCIL_TEST)
-    } else {
+    if (stencil.enabled) {
         gl.enable(gl.STENCIL_TEST)
         gl.stencilFuncSeparate(
             gl.FRONT,
@@ -109,6 +107,8 @@ export function webglStencilSet(
         )
         gl.stencilMaskSeparate(gl.FRONT, stencil.maskFront)
         gl.stencilMaskSeparate(gl.BACK, stencil.maskBack)
+    } else {
+        gl.disable(gl.STENCIL_TEST)
     }
 }
 
@@ -174,9 +174,7 @@ export function webglDebugStencil(
     const stencil = webglStencilGet(gl)
     debug([`Stencil ${caption}: `, stencil.enabled])
     console.log(stencil)
-    if (!stencil.enabled) {
-        debug([{ cls: "code" }, [`gl.disable(`, highlightEnum("STENCIL_TEST")]])
-    } else {
+    if (stencil.enabled) {
         debug([
             { cls: "code" },
             [`gl.enable(`, highlightEnum("STENCIL_TEST"), ")\n"],
@@ -231,5 +229,7 @@ export function webglDebugStencil(
                 `, 0b${stencil.maskBack.toString(2)})\n`,
             ],
         ])
+    } else {
+        debug([{ cls: "code" }, [`gl.disable(`, highlightEnum("STENCIL_TEST")]])
     }
 }

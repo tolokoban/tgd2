@@ -41,14 +41,14 @@ export class TgdInputKeyboardImpl implements TgdInputKeyboard {
         return false
     }
 
-    private readonly handleKeyDown = (evt: KeyboardEvent) => {
-        this.keysDown.add(evt.key)
-        this.keysUp.delete(evt.key)
+    private readonly handleKeyDown = (event: KeyboardEvent) => {
+        this.keysDown.add(event.key)
+        this.keysUp.delete(event.key)
     }
 
-    private readonly handleKeyUp = (evt: KeyboardEvent) => {
-        this.keysDown.delete(evt.key)
-        this.keysUp.add(evt.key)
-        this.eventKeyPress.dispatch(evt)
+    private readonly handleKeyUp = (event: KeyboardEvent) => {
+        this.keysDown.delete(event.key)
+        this.keysUp.add(event.key)
+        this.eventKeyPress.dispatch(event)
     }
 }

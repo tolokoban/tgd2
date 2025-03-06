@@ -3,9 +3,9 @@ import {
     TgdCodeBloc,
     TgdCodeFunctions,
     TgdCodeVariables,
-    funcs,
+    expandFunctions,
     tgdCodeStringify,
-    vars,
+    expandVariables,
 } from "./code"
 
 /**
@@ -56,10 +56,10 @@ export class TgdShaderFragment {
         return tgdCodeStringify([
             `#version 300 es`,
             `precision ${this.precision} float;`,
-            ...vars(this.uniforms, "uniform"),
-            ...vars(this.varying, "in"),
-            ...vars(this.outputs, "out"),
-            ...funcs(this.functions),
+            ...expandVariables(this.uniforms, "uniform"),
+            ...expandVariables(this.varying, "in"),
+            ...expandVariables(this.outputs, "out"),
+            ...expandFunctions(this.functions),
             "",
             `void main() {`,
             this.mainCode,

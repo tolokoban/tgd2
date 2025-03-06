@@ -7,7 +7,7 @@ export function assertTgdTypeArrayForElements(
     if (data instanceof Uint16Array) return
     if (data instanceof Uint32Array) return
 
-    throw Error(
+    throw new Error(
         "Only Uint8Array, Uint16Array or Uint32Array are allowed for elements!"
     )
 }

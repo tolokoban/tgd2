@@ -8,10 +8,10 @@ export async function tgdLoadVideo(
     return new Promise(resolve => {
         const video = document.createElement("video")
         video.addEventListener("canplay", () => resolve(video))
-        video.onerror = () => {
-            console.error("Unable to load video: ", url)
+        video.addEventListener("error", () => {
+            console.error("Unable to load video:", url)
             resolve(null)
-        }
+        })
         video.src = url
         video.setAttribute("loop", "")
         video.setAttribute("muted", "")

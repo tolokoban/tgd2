@@ -3,7 +3,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
 /**
  * Rotate 2D coordinates.
  */
-export function tgdCodeFunc_rotate2D(options: {
+export function tgdCodeFunction_rotate2D(options: {
     name: string
 }): TgdCodeFunctions {
     const { name = "rotate2D" } = options

@@ -17,16 +17,21 @@ export class PainterTriangle extends TgdPainter {
 
     constructor(private readonly context: TgdContext) {
         super()
-        this.texture = context.textures2D.create({
+        this.texture = new TgdTexture2D(context, {
             width: 2048,
             height: 2048,
-            magFilter: "NEAREST",
-            minFilter: "LINEAR",
-            type: "UNSIGNED_BYTE",
-            format: "LUMINANCE",
-            internalFormat: "LUMINANCE",
-            data: this.data,
+            internalFormat: "R8",
         })
+            .setParams({
+                magFilter: "NEAREST",
+                minFilter: "LINEAR",
+            })
+            .loadData(this.data, {
+                width: 2048,
+                height: 2048,
+                format: "RED",
+                internalFormat: "R8",
+            })
         const x = 1 / (2 * Math.sqrt(3))
         const dataset = new TgdDataset({
             attPosition: "vec2",
@@ -44,7 +49,7 @@ export class PainterTriangle extends TgdPainter {
             1, 1,
             0, 1,
         ]))
-        this.prg = context.programs.create({
+        this.prg = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({
                 attributes: {
                     attPosition: "vec2",
@@ -68,18 +73,18 @@ export class PainterTriangle extends TgdPainter {
                 mainCode: ["FragColor = texture(uniTexture, varUV);"],
             }).code,
         })
-        this.vao = context.createVAO(this.prg, [dataset])
+        this.vao = new TgdVertexArray(context.gl, this.prg, [dataset])
     }
 
     delete(): void {
-        this.context.textures2D.delete(this.texture)
+        this.texture.delete()
         this.vao.delete()
     }
 
     paint(time: number, delay: number): void {
         const { context, prg, texture, vao } = this
         prg.use()
-        texture.activate(prg, "uniTexture")
+        texture.activate(0, prg, "uniTexture")
         vao.bind()
         context.gl.drawArrays(context.gl.TRIANGLES, 0, 3)
         vao.unbind()

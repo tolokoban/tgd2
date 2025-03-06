@@ -33,7 +33,7 @@ export class TgdTable {
         )
 
         if (buffer.byteLength < expectedByteLength) {
-            throw Error(`Your data is ${buffer.byteLength} bytes long.
+            throw new Error(`Your data is ${buffer.byteLength} bytes long.
 But for a ${cols}x${rows} table we need at least ${expectedByteLength} bytes!
 Please use TgdTable.computeByteLength() to get the correct length (with all needed paddings).`)
         }
@@ -113,9 +113,9 @@ export class TgdTableUint8 {
     }
 
     setVec(values: number[], col: number, row: number) {
-        values.forEach((value, dimension) =>
+        for (const [dimension, value] of values.entries()) {
             this.table.setUint8(value, col, row, dimension)
-        )
+        }
     }
 
     get(col: number, row: number, dimension: number) {
@@ -156,9 +156,8 @@ export class TgdTableFloat32 {
     }
 
     setVec(values: number[], col: number, row: number) {
-        values.forEach((value, dimension) =>
+        for (const [dimension, value] of values.entries())
             this.table.setFloat32(value, col, row, dimension)
-        )
     }
 
     get(col: number, row: number, dimension: number) {

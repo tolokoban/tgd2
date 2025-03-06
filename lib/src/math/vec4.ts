@@ -10,7 +10,7 @@ export class TgdVec4 extends Float32Array {
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
-    // eslint-disable-next-line max-statements
+     
     constructor(
         x: number | TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3 = 0,
         y: number = 0,
@@ -177,11 +177,11 @@ export class TgdVec4 extends Float32Array {
     }
 
     get size() {
-        return Math.sqrt(
-            this[0] * this[0] +
-                this[1] * this[1] +
-                this[2] * this[2] +
-                this[3] * this[3]
+        return Math.hypot(
+            this[0],
+                this[1],
+                this[2],
+                this[3]
         )
     }
 

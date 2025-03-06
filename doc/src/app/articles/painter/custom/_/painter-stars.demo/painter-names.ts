@@ -31,12 +31,13 @@ export class PainterNames extends TgdPainter {
         super()
         const { canvas, attLatLng, attUV } = makeCanvasForNames()
         this.count = attLatLng.length >> 1
-        this.texture = context.textures2D.create({
-            image: canvas,
-            generateMipMap: true,
-            magFilter: "LINEAR",
-            minFilter: "LINEAR_MIPMAP_LINEAR",
-        })
+        this.texture = new TgdTexture2D(context)
+            .setParams({
+                magFilter: "LINEAR",
+                minFilter: "LINEAR_MIPMAP_LINEAR",
+            })
+            .loadBitmap(canvas)
+            .generateMipmap()
         const dsObject = new TgdDataset({
             attCorner: "vec2",
         })
@@ -50,16 +51,16 @@ export class PainterNames extends TgdPainter {
         )
         dsInstance.set("attLatLng", new Float32Array(attLatLng))
         dsInstance.set("attUV", new Float32Array(attUV))
-        const prg = context.programs.create({ vert, frag })
-        const vao = context.createVAO(prg, [dsObject, dsInstance])
+        const prg = new TgdProgram(context.gl, { vert, frag })
+        const vao = new TgdVertexArray(context.gl, prg, [dsObject, dsInstance])
         this.prg = prg
         this.vao = vao
     }
 
     delete(): void {
         this.vao.delete()
-        this.context.programs.delete(this.prg)
-        this.context.textures2D.delete(this.texture)
+        this.prg.delete()
+        this.texture.delete()
     }
 
     paint(): void {
@@ -74,7 +75,7 @@ export class PainterNames extends TgdPainter {
             "uniProjectionMatrix",
             fixedCamera.matrixProjection
         )
-        texture.activate(prg, "uniTexture")
+        texture.activate(0, prg, "uniTexture")
         vao.bind()
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.count)
     }

@@ -2,27 +2,26 @@ import { TgdDataset } from "@tgd/dataset"
 import { tgdComputeBoundingBox3D } from "./bbox"
 import { ArrayNumber3 } from "@tgd/types"
 
+function makeDS(positions: [x: number, y: number, z: number][]): TgdDataset {
+    const ds = new TgdDataset({ POSITION: "vec3" })
+    const data = new Float32Array(3 * positions.length)
+    for (const [index, [x, y, z]] of positions.entries()) {
+        const ptr = index * 3
+        data[ptr + 0] = x
+        data[ptr + 1] = y
+        data[ptr + 2] = z
+    }
+    ds.set("POSITION", data)
+    return ds
+}
+
+function checkBBox(ds: TgdDataset, min: ArrayNumber3, max: ArrayNumber3) {
+    const bbox = tgdComputeBoundingBox3D(ds)
+    expect([...bbox.min]).toEqual([...min])
+    expect([...bbox.max]).toEqual([...max])
+}
+
 describe("utils/bbox.ts", () => {
-    function makeDS(
-        positions: [x: number, y: number, z: number][]
-    ): TgdDataset {
-        const ds = new TgdDataset({ POSITION: "vec3" })
-        const data = new Float32Array(3 * positions.length)
-        for (let i = 0; i < positions.length; i++) {
-            const ptr = i * 3
-            const [x, y, z] = positions[i]
-            data[ptr + 0] = x
-            data[ptr + 1] = y
-            data[ptr + 2] = z
-        }
-        ds.set("POSITION", data)
-        return ds
-    }
-    function checkBBox(ds: TgdDataset, min: ArrayNumber3, max: ArrayNumber3) {
-        const bbox = tgdComputeBoundingBox3D(ds)
-        expect([...bbox.min]).toEqual([...min])
-        expect([...bbox.max]).toEqual([...max])
-    }
     describe("tgdComputeBoundingBox3D()", () => {
         it("should work with only one position", () => {
             const ds = makeDS([[1, 2, 3]])

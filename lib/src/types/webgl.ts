@@ -54,7 +54,7 @@ export function isWebglImage(data: unknown): data is WebglImage {
     )
 }
 
-export type WebglDepthFunc =
+export type WebglDepthFunction =
     /** never pass */
     | "NEVER"
     /** pass if the incoming value is less than the depth buffer value */
@@ -72,7 +72,7 @@ export type WebglDepthFunc =
     /** always pass */
     | "ALWAYS"
 
-export enum WebglEnumDepthFunc {
+export enum WebglEnumDepthFunction {
     /** never pass */
     NEVER = WebGL2RenderingContext.NEVER,
     /** pass if the incoming value is less than the depth buffer value */
@@ -116,7 +116,7 @@ export enum WebglEnumBlendEquation {
     MAX = WebGL2RenderingContext.MAX,
 }
 
-export type WebglBlendFunc =
+export type WebglBlendFunction =
     /**
      * 0,0,0,0
      *
@@ -208,7 +208,7 @@ export type WebglBlendFunc =
      */
     | "SRC_ALPHA_SATURATE"
 
-export enum WebglEnumBlendFunc {
+export enum WebglEnumBlendFunction {
     /**
      * 0,0,0,0
      *

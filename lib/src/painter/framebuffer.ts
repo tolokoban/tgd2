@@ -140,7 +140,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             // framebuffer has none.
             const depthBuffer = gl.createRenderbuffer()
             if (!depthBuffer)
-                throw Error("Unable to create WebGLRenderBuffer for depth!")
+                throw new Error("Unable to create WebGLRenderBuffer for depth!")
 
             this._depthBuffer = depthBuffer
             gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
@@ -164,7 +164,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             const { width, height } = this
             const stencilBuffer = gl.createRenderbuffer()
             if (!stencilBuffer)
-                throw Error("Unable to create WebGLRenderBuffer for stencil!")
+                throw new Error("Unable to create WebGLRenderBuffer for stencil!")
 
             this._stencilBuffer = stencilBuffer
             gl.bindRenderbuffer(gl.RENDERBUFFER, stencilBuffer)

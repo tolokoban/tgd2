@@ -1,9 +1,9 @@
 import { debug, highlightEnum } from "@tgd/debug/debug"
-import { WebglEnumDepthFunc } from "@tgd/types/webgl"
+import { WebglEnumDepthFunction } from "@tgd/types/webgl"
 
 export interface WebglDepthOptions {
     enabled: boolean
-    func: WebglEnumDepthFunc
+    func: WebglEnumDepthFunction
     mask: boolean
     rangeMin: number
     rangeMax: number
@@ -14,21 +14,21 @@ export const webglPresetDepth: Readonly<
 > = {
     off: {
         enabled: false,
-        func: WebglEnumDepthFunc.LESS,
+        func: WebglEnumDepthFunction.LESS,
         mask: true,
         rangeMin: 0,
         rangeMax: 1,
     },
     less: {
         enabled: true,
-        func: WebglEnumDepthFunc.LESS,
+        func: WebglEnumDepthFunction.LESS,
         mask: true,
         rangeMin: 0,
         rangeMax: 1,
     },
     lessOrEqual: {
         enabled: true,
-        func: WebglEnumDepthFunc.LEQUAL,
+        func: WebglEnumDepthFunction.LEQUAL,
         mask: true,
         rangeMin: 0,
         rangeMax: 1,

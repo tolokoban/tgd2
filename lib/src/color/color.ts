@@ -32,11 +32,11 @@ export class TgdColor {
     }
 
     parse(color: string) {
-        const ctx = getContext()
-        ctx.clearRect(0, 0, 1, 1)
-        ctx.fillStyle = color
-        ctx.fillRect(0, 0, 1, 1)
-        const bitmap = ctx.getImageData(0, 0, 1, 1)
+        const context = getContext()
+        context.clearRect(0, 0, 1, 1)
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+        const bitmap = context.getImageData(0, 0, 1, 1)
         const [R, G, B, A] = bitmap.data
         const w = 1 / 255
         this.R = R * w
@@ -159,13 +159,13 @@ function getContext(): CanvasRenderingContext2D {
         const canvas: HTMLCanvasElement = document.createElement("canvas")
         canvas.width = 1
         canvas.height = 1
-        const ctx = canvas.getContext("2d", {
+        const context = canvas.getContext("2d", {
             alpha: true,
             willReadFrequently: true,
         })
-        if (!ctx) throw Error("Unable to create a 2D context!")
+        if (!context) throw new Error("Unable to create a 2D context!")
 
-        globalContext = ctx
+        globalContext = context
     }
     return globalContext
 }

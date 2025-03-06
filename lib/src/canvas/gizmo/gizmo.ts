@@ -129,22 +129,22 @@ export class TgdCanvasGizmo {
         context.paint()
     }
 
-    private readonly handleTap = (evt: TgdInputPointerEventTap) => {
+    private readonly handleTap = (event: TgdInputPointerEventTap) => {
         const camera = this.context?.camera
         if (!camera) return
 
-        const { origin, direction } = camera.castRay(evt.x, evt.y)
-        const maxDist = 1
-        let bestDist = maxDist
+        const { origin, direction } = camera.castRay(event.x, event.y)
+        const maxDistribution = 1
+        let bestDistribution = maxDistribution
         let bestTip = TIPS[0]
         for (const tip of TIPS) {
-            const dist = tip.distanceToLineSquared(origin, direction)
-            if (dist < bestDist) {
-                bestDist = dist
+            const distribution = tip.distanceToLineSquared(origin, direction)
+            if (distribution < bestDistribution) {
+                bestDistribution = distribution
                 bestTip = tip
             }
         }
-        if (bestDist < maxDist) {
+        if (bestDistribution < maxDistribution) {
             const axisX = new TgdVec3()
             const axisY = new TgdVec3()
             const axisZ = bestTip

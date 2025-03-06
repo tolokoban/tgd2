@@ -94,13 +94,13 @@ export class TgdCameraPerspective extends TgdCamera {
         out[12] = 0
         out[13] = 0
         out[15] = 0
-        if (far !== Infinity) {
+        if (far === Infinity) {
+            out[10] = -1
+            out[14] = -2 * near
+        } else {
             const nf = 1 / (near - far)
             out[10] = (far + near) * nf
             out[14] = 2 * far * near * nf
-        } else {
-            out[10] = -1
-            out[14] = -2 * near
         }
         this.dirtyProjection = true
     }

@@ -5,7 +5,7 @@ import { TgdTransfo } from "../../math/transfo"
 export interface TgdPainterNodeChild {
     paint(time: number, delay: number): void
     delete(): void
-    matrixTransfo: TgdMat4
+    transfo: TgdTransfo
 }
 
 export interface TgdPainterNodeOptions {
@@ -31,7 +31,7 @@ export class TgdPainterNode extends TgdPainter {
     constructor(options: Partial<TgdPainterNodeOptions> = {}) {
         super()
         const { children = [] } = options
-        children.forEach(child => this.add(child))
+        for (const child of children) this.add(child)
     }
 
     delete(): void {
@@ -56,11 +56,12 @@ export class TgdPainterNode extends TgdPainter {
     remove(...children: Array<TgdPainterNode | TgdPainterNodeChild>) {
         for (const child of children) {
             if (child instanceof TgdPainterNode) {
-                const idxNode = this.childrenNodes.indexOf(child)
-                if (idxNode > -1) this.childrenNodes.splice(idxNode, 1)
+                const nodePosition = this.childrenNodes.indexOf(child)
+                if (nodePosition !== -1)
+                    this.childrenNodes.splice(nodePosition, 1)
             } else {
-                const idx = this.children.indexOf(child)
-                if (idx > -1) this.children.splice(idx, 1)
+                const childPosition = this.children.indexOf(child)
+                if (childPosition !== -1) this.children.splice(childPosition, 1)
             }
         }
     }
@@ -84,7 +85,7 @@ export class TgdPainterNode extends TgdPainter {
             matrixTransfo.from(parentTransfo.matrix).multiply(transfo.matrix)
         }
         for (const child of children) {
-            child.matrixTransfo = matrixTransfo
+            child.transfo.matrix = matrixTransfo
             child.paint(time, delay)
         }
         for (const child of childrenNodes) {

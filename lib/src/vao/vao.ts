@@ -16,7 +16,7 @@ export class TgdVertexArray {
         private readonly elements?: TgdTypeArrayForElements
     ) {
         const vao = gl.createVertexArray()
-        if (!vao) throw Error("Unable to create VertexArrayObject!")
+        if (!vao) throw new Error("Unable to create VertexArrayObject!")
 
         this.vao = vao
         if (!program || !datasets) return
@@ -52,20 +52,21 @@ export class TgdVertexArray {
             "function createVAO(",
             `  gl: WebGL2RenderingContext,`,
             `  prg: WebGLProgram${this.datasets
-                ?.map((ds, index) => `, data${index}: ArrayBuffer`)
+                ?.map((_ds, index) => `, data${index}: ArrayBuffer`)
                 .join("")}`,
             ") {",
             "  const vao = gl.createVertexArray()",
             "  gl.bindVertexArray(vao)",
         ]
-        this.datasets?.forEach((dataset, index) => {
-            lines.push(
-                `  const buff${index} = gl.createBuffer()`,
-                `  gl.bindBuffer(gl.${dataset.target}, buff${index})`,
-                `  gl.bufferData(gl.${dataset.target}, data${index}, gl.${dataset.usage})`,
-                dataset.toCode({ indent: `${indent}  ` })
-            )
-        })
+        if (this.datasets)
+            for (const [index, dataset] of this.datasets.entries()) {
+                lines.push(
+                    `  const buff${index} = gl.createBuffer()`,
+                    `  gl.bindBuffer(gl.${dataset.target}, buff${index})`,
+                    `  gl.bufferData(gl.${dataset.target}, data${index}, gl.${dataset.usage})`,
+                    dataset.toCode({ indent: `${indent}  ` })
+                )
+            }
         lines.push("  return vao", "}")
         return lines.map(line => `${indent}${line}`).join("\n")
     }
@@ -74,9 +75,9 @@ export class TgdVertexArray {
         console.log(caption)
         if (this.program) this.program.debug()
         if (this.datasets) {
-            this.datasets.forEach((dataset, index) =>
+            for (const [index, dataset] of this.datasets.entries()) {
                 dataset.debug(`   Dataset #${index}`)
-            )
+            }
         }
         if (this.elements) console.log("Elements:", this.elements)
     }
@@ -92,7 +93,7 @@ export class TgdVertexArray {
     delete() {
         const { gl, vao, drawBuffers, elemBuffer } = this
         gl.deleteVertexArray(vao)
-        drawBuffers.forEach(buff => buff.delete())
+        for (const buff of drawBuffers) buff.delete()
         if (elemBuffer) elemBuffer.delete()
     }
 }

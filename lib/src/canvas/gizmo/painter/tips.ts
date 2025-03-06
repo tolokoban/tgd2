@@ -84,7 +84,7 @@ function createTipsCanvas() {
 }
 
 function paintDisk(
-    ctx: CanvasRenderingContext2D,
+    context: CanvasRenderingContext2D,
     col: number,
     row: number,
     size: number,
@@ -95,20 +95,20 @@ function paintDisk(
     const x = (col + 0.5) * size
     const y = (row + 0.5) * size
     const r = size * 0.45
-    ctx.fillStyle = colorBack
-    ctx.beginPath()
-    ctx.ellipse(x, y, r, r, 0, 0, 2 * Math.PI)
-    ctx.fill()
+    context.fillStyle = colorBack
+    context.beginPath()
+    context.ellipse(x, y, r, r, 0, 0, 2 * Math.PI)
+    context.fill()
     if (text) {
-        ctx.font = `bold ${size * 0.5}px sans-serif`
-        ctx.fillStyle = colorText
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
-        ctx.fillText(text, x, y)
+        context.font = `bold ${size * 0.5}px sans-serif`
+        context.fillStyle = colorText
+        context.textAlign = "center"
+        context.textBaseline = "middle"
+        context.fillText(text, x, y)
     } else {
-        ctx.fillStyle = colorText
-        ctx.beginPath()
-        ctx.ellipse(x, y, r * 0.8, r * 0.8, 0, 0, 2 * Math.PI)
-        ctx.fill()
+        context.fillStyle = colorText
+        context.beginPath()
+        context.ellipse(x, y, r * 0.8, r * 0.8, 0, 0, 2 * Math.PI)
+        context.fill()
     }
 }

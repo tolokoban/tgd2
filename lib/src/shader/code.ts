@@ -36,32 +36,34 @@ export function tgdCodeStringify(code: TgdCodeBloc, indent = ""): string {
         .join("\n")
 }
 
-export function vars<Type extends WebglAttributeType | WebglUniformType>(
-    def: TgdCodeVariables<Type>,
+export function expandVariables<
+    Type extends WebglAttributeType | WebglUniformType
+>(
+    definition: TgdCodeVariables<Type>,
     prefix: string,
     comment = "----------------------------------------"
 ): TgdCodeBloc[] {
-    const names = Object.keys(def)
+    const names = Object.keys(definition)
     if (names.length === 0) return []
 
     return [
         `// ${comment}`,
-        ...names.map(name => `${prefix} ${def[name]} ${name};`),
+        ...names.map(name => `${prefix} ${definition[name]} ${name};`),
     ]
 }
 
-export function funcs(
-    def: TgdCodeFunctions | TgdCodeBloc,
+export function expandFunctions(
+    definition: TgdCodeFunctions | TgdCodeBloc,
     comment?: string
 ): TgdCodeBloc[] {
-    if (isCodeBloc(def)) return [def]
+    if (isCodeBloc(definition)) return [definition]
 
-    const names = Object.keys(def)
+    const names = Object.keys(definition)
     if (names.length === 0) return []
 
     const result: TgdCodeBloc[] = comment ? [`// ${comment}`] : []
-    names.forEach(name => {
-        result.push(def[name], "")
-    })
+    for (const name of names) {
+        result.push(definition[name], "")
+    }
     return result
 }

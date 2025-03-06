@@ -21,7 +21,7 @@ export class TgdVec2 extends Float32Array {
     ): number {
         const x = to.x - from.x
         const y = to.y - from.y
-        return Math.sqrt(x * x + y * y)
+        return Math.hypot(x, y)
     }
 
     constructor()
@@ -134,7 +134,7 @@ export class TgdVec2 extends Float32Array {
     }
 
     get size() {
-        return Math.sqrt(this[0] * this[0] + this[1] * this[1])
+        return Math.hypot(this[0], this[1])
     }
 
     normalize(): this {
@@ -160,7 +160,7 @@ export class TgdVec2 extends Float32Array {
             `${caption}:   `,
             out.join(" | "),
             "   length:",
-            Math.sqrt(x * x + y * y)
+            Math.hypot(x, y)
         )
     }
 }

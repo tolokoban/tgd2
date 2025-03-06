@@ -4,7 +4,8 @@ import { TgdQuat, TgdVec3 } from "@tgd/math"
 
 function expectVector(actual: number[], expected: number[], precision = 5) {
     expect(actual.length).toBe(expected.length)
-    actual.forEach((x, i) => expect(x).toBeCloseTo(expected[i], precision))
+    for (const [index, x] of actual.entries())
+        expect(x).toBeCloseTo(expected[index], precision)
 }
 describe("math/quat.ts", () => {
     const cases: Array<
@@ -43,9 +44,9 @@ describe("math/quat.ts", () => {
     describe("TgdQuat.fromAxis()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
         for (const [X, Y, Z, Q] of cases) {
-            it(`should get ${str(Q)} from ${str(X)}, ${str(Y)} and ${str(
-                Z
-            )}`, () => {
+            it(`should get ${string_(Q)} from ${string_(X)}, ${string_(
+                Y
+            )} and ${string_(Z)}`, () => {
                 const axisX = new TgdVec3(...X)
                 const axisY = new TgdVec3(...Y)
                 const axisZ = new TgdVec3(...Z)
@@ -61,8 +62,8 @@ describe("math/quat.ts", () => {
     })
     describe("TgdQuat.toAxisX()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
-        for (const [X, Y, Z, Q] of cases) {
-            it(`should get ${str(X)} from ${str(Q)}`, () => {
+        for (const [X, _Y, _Z, Q] of cases) {
+            it(`should get ${string_(X)} from ${string_(Q)}`, () => {
                 quat.from(Q)
                 const axisX = new TgdVec3()
                 quat.toAxisX(axisX)
@@ -73,8 +74,8 @@ describe("math/quat.ts", () => {
     })
     describe("TgdQuat.toAxisY()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
-        for (const [X, Y, Z, Q] of cases) {
-            it(`should get ${str(Y)} from ${str(Q)}`, () => {
+        for (const [_X, Y, _Z, Q] of cases) {
+            it(`should get ${string_(Y)} from ${string_(Q)}`, () => {
                 quat.from(Q)
                 const axisY = new TgdVec3()
                 quat.toAxisY(axisY)
@@ -85,8 +86,8 @@ describe("math/quat.ts", () => {
     })
     describe("TgdQuat.toAxisZ()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
-        for (const [X, Y, Z, Q] of cases) {
-            it(`should get ${str(Z)} from ${str(Q)}`, () => {
+        for (const [_X, _Y, Z, Q] of cases) {
+            it(`should get ${string_(Z)} from ${string_(Q)}`, () => {
                 quat.from(Q)
                 const axisZ = new TgdVec3()
                 quat.toAxisZ(axisZ)
@@ -97,7 +98,7 @@ describe("math/quat.ts", () => {
     })
 })
 
-function str(input: Iterable<number>): string {
-    const arr = Array.from(input)
-    return `[${arr.map(n => `${n}`).join(", ")}]`
+function string_(input: Iterable<number>): string {
+    const array = [...input]
+    return `[${array.map(n => `${n}`).join(", ")}]`
 }

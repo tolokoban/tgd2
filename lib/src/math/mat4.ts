@@ -150,7 +150,7 @@ export class TgdMat4 extends Float32Array {
      * @param from This matrix will become the inversion of `from`.
      * If not defined, the matrix will invert itself.
      */
-    // eslint-disable-next-line max-statements
+     
     invert(from?: TgdMat4): this {
         // prettier-ignore
         const [
@@ -182,7 +182,7 @@ export class TgdMat4 extends Float32Array {
         if (!det) {
             return this
         }
-        const invDet = 1.0 / det
+        const invDet = 1 / det
 
         this[0] = (a11 * b11 - a12 * b10 + a13 * b09) * invDet
         this[1] = (a02 * b10 - a01 * b11 - a03 * b09) * invDet

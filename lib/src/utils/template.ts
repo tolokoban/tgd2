@@ -13,8 +13,8 @@ export function tgdTemplate(
 ): string {
     let out = content
     for (const key of Object.keys(substitutions)) {
-        const val = substitutions[key]
-        out = out.split(key).join(val)
+        const value = substitutions[key]
+        out = out.split(key).join(value)
     }
     return out
 }

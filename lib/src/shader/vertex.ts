@@ -3,9 +3,9 @@ import {
     TgdCodeBloc,
     TgdCodeFunctions,
     TgdCodeVariables,
-    funcs,
+    expandFunctions,
     tgdCodeStringify as tgdCodeToString,
-    vars,
+    expandVariables,
 } from "./code"
 
 /**
@@ -52,10 +52,10 @@ export class TgdShaderVertex {
         return tgdCodeToString([
             `#version 300 es`,
             `precision ${this.precision} float;`,
-            ...vars(this.uniforms, "uniform"),
-            ...vars(this.attributes, "in"),
-            ...vars(this.varying, "out"),
-            ...funcs(this.functions),
+            ...expandVariables(this.uniforms, "uniform"),
+            ...expandVariables(this.attributes, "in"),
+            ...expandVariables(this.varying, "out"),
+            ...expandFunctions(this.functions),
             "",
             `void main() {`,
             this.mainCode,

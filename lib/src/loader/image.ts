@@ -7,11 +7,11 @@ export async function tgdLoadImage(
 ): Promise<HTMLImageElement | null> {
     return new Promise(resolve => {
         const img = new Image()
-        img.onload = () => resolve(img)
-        img.onerror = () => {
-            console.error("Unable to load image: ", url)
+        img.addEventListener("load", () => resolve(img))
+        img.addEventListener("error", () => {
+            console.error("Unable to load image:", url)
             resolve(null)
-        }
+        })
         img.src = url
     })
 }
@@ -33,9 +33,9 @@ export async function tgdLoadCanvas(
     const canvas = document.createElement("canvas")
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
-    const ctx = canvas.getContext("2d")
-    if (!ctx) throw Error("Unable to get a 2D context!")
+    const context = canvas.getContext("2d")
+    if (!context) throw new Error("Unable to get a 2D context!")
 
-    ctx.drawImage(img, 0, 0)
+    context.drawImage(img, 0, 0)
     return canvas
 }

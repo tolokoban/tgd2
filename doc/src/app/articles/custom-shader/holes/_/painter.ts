@@ -1,13 +1,9 @@
 import {
     TgdContext,
-    TgdLight,
-    TgdMaterialDiffuse,
     TgdMaterialNormals,
     TgdPainterMesh,
     TgdParserGLTransfertFormatBinary,
     TgdTexture2D,
-    TgdVec3,
-    TgdVec4,
 } from "@tolokoban/tgd"
 
 export class ShieldPainter extends TgdPainterMesh {
@@ -18,9 +14,7 @@ export class ShieldPainter extends TgdPainterMesh {
         glb: TgdParserGLTransfertFormatBinary,
         abedo: HTMLImageElement
     ) {
-        const texAbedo = context.textures2D.create({
-            image: abedo,
-        })
+        const texAbedo = new TgdTexture2D(context).loadBitmap(abedo)
         // const material = new TgdMaterialDiffuse({
         //     color: texAbedo,
         //     light: new TgdLight({
@@ -40,6 +34,6 @@ export class ShieldPainter extends TgdPainterMesh {
     }
 
     delete(): void {
-        this.context.textures2D.delete(this.texAbedo)
+        this.texAbedo.delete()
     }
 }

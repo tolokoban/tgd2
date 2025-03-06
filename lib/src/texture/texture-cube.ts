@@ -17,7 +17,7 @@ export class TgdTextureCubeImpl {
     ) {
         const { gl } = context
         const texture = gl.createTexture()
-        if (!texture) throw Error("Unable to create a WebGLTexture!")
+        if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
         this.texture = texture
         this.loadImage(gl.TEXTURE_CUBE_MAP_POSITIVE_X, options.imagePosX)
@@ -62,7 +62,7 @@ export class TgdTextureCubeImpl {
     private loadImage(target: number, image: WebglImage) {
         const { width, height } = image
         if (width !== height) {
-            throw Error(
+            throw new Error(
                 `Images in a CubeMap must be squares, but we got ${width}×${height}!`
             )
         }
@@ -70,7 +70,7 @@ export class TgdTextureCubeImpl {
             this._width = width
             this._height = height
         } else if (this._width !== width || this._height !== height) {
-            throw Error(
+            throw new Error(
                 `Images in a CubeMap must all have the same size, but we got ${this._width}×${this._height} and ${width}×${height}!`
             )
         }

@@ -19,7 +19,7 @@ export class TgdProgram {
         private readonly code: TgdProgramOptions
     ) {
         const prg = gl.createProgram()
-        if (!prg) throw Error("Unable to create WebGLProgram!")
+        if (!prg) throw new Error("Unable to create WebGLProgram!")
 
         const vert = tgdCodeStringify(code.vert)
         const vertShader = this.createShader("VERTEX_SHADER", vert)
@@ -80,7 +80,7 @@ export class TgdProgram {
         const { gl, program } = this
         const loc = gl.getAttribLocation(program, name)
         if (loc < 0) {
-            throw Error(`Attribute "${name}" not found!`)
+            throw new Error(`Attribute "${name}" not found!`)
         }
         return loc
     }
@@ -196,7 +196,7 @@ export class TgdProgram {
 
     delete() {
         const { gl } = this
-        this.shaders.forEach(shader => gl.deleteShader(shader))
+        for (const shader of this.shaders) gl.deleteShader(shader)
         gl.deleteProgram(this.program)
     }
 
@@ -211,7 +211,7 @@ export class TgdProgram {
         const { gl } = this
         const shader = gl.createShader(gl[type])
         if (!shader)
-            throw Error(`Unable to create a WebGLShader of type "${type}"!`)
+            throw new Error(`Unable to create a WebGLShader of type "${type}"!`)
 
         gl.shaderSource(shader, code)
         gl.compileShader(shader)
@@ -219,7 +219,7 @@ export class TgdProgram {
         if (info) {
             console.error(`Error in ${type} code:`, info)
             const errorLines = getErrorLines(info)
-            throw Error(logCode(type, code, errorLines))
+            throw new Error(logCode(type, code, errorLines))
         }
         return shader
     }
@@ -231,7 +231,7 @@ export class TgdProgram {
             gl.ACTIVE_UNIFORMS
         )
         if (typeof count !== "number")
-            throw Error(
+            throw new Error(
                 "Unable to get the number of uniforms in a WebGLProgram!"
             )
 
@@ -242,7 +242,7 @@ export class TgdProgram {
 
             const location = gl.getUniformLocation(program, uniform.name)
             if (location === null)
-                throw Error(
+                throw new Error(
                     `Unable to get location for uniform "${uniform.name}"!`
                 )
 
@@ -266,8 +266,8 @@ function getErrorLines(message: string): {
         RX_ERROR_LINE.lastIndex = -1
         const match = RX_ERROR_LINE.exec(line)
         if (match) {
-            lines.push(parseInt(match[2], 10))
-            messages.push(line.substring(match[0].length).trim())
+            lines.push(Number.parseInt(match[2], 10))
+            messages.push(line.slice(match[0].length).trim())
         }
     }
     return { lines, messages }
@@ -282,30 +282,28 @@ function style(background: string, bold = false) {
 function logCode(
     title: string,
     code: string,
-    errors: { lines: number[]; messages: string[] } = {
-        lines: [],
-        messages: [],
-    }
+    options?: { lines: number[]; messages: string[] }
 ) {
+    const { lines = [], messages = [] } = options ?? {}
     const output: string[] = [title]
-    const lines: string[] = [`%c${title}`]
+    const codeLines: string[] = [`%c${title}`]
     const styles: string[] = ["font-weight:bolder;font-size:120%"]
     let hasError = false
-    code.split("\n").forEach((line, index) => {
-        const num = index + 1
-        const prefix = `${num}`.padStart(5, " ")
-        const background = errors.lines.includes(num) ? "#f00" : "#000"
-        lines.push(`%c${prefix}  %c${line}`)
+    for (const [index, line] of code.split("\n").entries()) {
+        const lineNumber = index + 1
+        const prefix = `${lineNumber}`.padStart(5, " ")
+        const background = lines.includes(lineNumber) ? "#f00" : "#000"
+        codeLines.push(`%c${prefix}  %c${line}`)
         output.push(`${prefix}  ${line}`)
         styles.push(style(background, true), style(background, false))
-        if (errors.lines.includes(num)) {
+        if (lines.includes(lineNumber)) {
             hasError = true
-            lines.push(`%c${errors.messages[errors.lines.indexOf(num)]}`)
-            output.push(`##### ${errors.messages[errors.lines.indexOf(num)]}`)
+            codeLines.push(`%c${messages[lines.indexOf(lineNumber)]}`)
+            output.push(`##### ${messages[lines.indexOf(lineNumber)]}`)
             styles.push("color:#f33;background:#333;font-weight:bold")
             console.error()
         }
-    })
-    console.log(lines.join("\n"), ...styles)
+    }
+    console.log(codeLines.join("\n"), ...styles)
     return hasError ? output.join("\n") : ""
 }

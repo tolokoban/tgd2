@@ -10,7 +10,7 @@ export class TgdEvent<T> {
     }
 
     dispatch(value: T) {
-        this.listeners.forEach(listener => listener(value))
+        for (const listener of this.listeners) listener(value)
     }
 }
 

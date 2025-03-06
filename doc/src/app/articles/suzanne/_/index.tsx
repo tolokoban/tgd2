@@ -6,7 +6,7 @@ import {
     TgdPainterSkybox,
     TgdPainterState,
     TgdQuat,
-    TgdTexture2DOptions,
+    TgdTexture2D,
     TgdVec3,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
@@ -80,12 +80,10 @@ function init(context: TgdContext) {
         imageNegZ: NegZ,
     })
     context.add(skybox)
-    const options: Partial<TgdTexture2DOptions> = {
-        image: FaceWEBP,
+    const texture = new TgdTexture2D(context).loadBitmap(FaceWEBP).setParams({
         magFilter: "LINEAR",
         minFilter: "LINEAR",
-    }
-    const texture = context.textures2D.create(options)
+    })
     const painter = new Painter(context, MonkeyOBJ, texture)
     state.add(painter)
     context.add(state)

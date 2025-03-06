@@ -41,7 +41,7 @@ export class Material extends TgdMaterial {
 
     setUniforms(program: TgdProgram, time: number): void {
         const { texture } = this
-        if (texture) texture.activate(program, "texDiffuse")
+        if (texture) texture.activate(0, program, "texDiffuse")
         program.uniform1f("uniTime", time * 1e-3)
     }
 }

@@ -68,9 +68,12 @@ const FACE_IJ = [
     [+1, -1], [-1, -1], [+1, +1],
 ]
 
-function coords(def: string, ...sizes: [number, number, number]): number[] {
-    function idx(k: number) {
-        const txt = def.charAt(k)
+function coords(
+    definition: string,
+    ...sizes: [number, number, number]
+): number[] {
+    function index(k: number) {
+        const txt = definition.charAt(k)
         switch (txt) {
             case "x":
                 return 0
@@ -79,34 +82,38 @@ function coords(def: string, ...sizes: [number, number, number]): number[] {
             case "z":
                 return 2
             default:
-                throw Error(`Invalid coordinate name at pos ${k}: "${txt}"!`)
+                throw new Error(
+                    `Invalid coordinate name at pos ${k}: "${txt}"!`
+                )
         }
     }
 
     function sgn(k: number) {
-        const txt = def.charAt(k)
+        const txt = definition.charAt(k)
         switch (txt) {
             case "+":
                 return +1
             case "-":
                 return -1
             default:
-                throw Error(`Invalid coordinate sign at pos ${k}: "${txt}"!`)
+                throw new Error(
+                    `Invalid coordinate sign at pos ${k}: "${txt}"!`
+                )
         }
     }
 
     const out: number[] = []
     const sgnC = sgn(0)
-    const idxC = idx(1)
+    const indexC = index(1)
     const sgnI = sgn(2)
-    const idxI = idx(3)
+    const indexI = index(3)
     const sgnJ = sgn(4)
-    const idxJ = idx(5)
-    for (const [i, j] of FACE_IJ) {
+    const indexJ = index(5)
+    for (const [index, index_] of FACE_IJ) {
         const row: number[] = []
-        row[idxC] = sizes[idxC] * sgnC
-        row[idxI] = sizes[idxI] * sgnI * i
-        row[idxJ] = sizes[idxJ] * sgnJ * j
+        row[indexC] = sizes[indexC] * sgnC
+        row[indexI] = sizes[indexI] * sgnI * index
+        row[indexJ] = sizes[indexJ] * sgnJ * index_
         out.push(...row)
     }
     return out
@@ -124,7 +131,9 @@ const H3x2 = 1 / 2
 function face3x2(col: 0 | 1 | 2, row: 0 | 1) {
     const x = W3x2 * col
     const y = H3x2 * row
-    return FACE_UV.map((v, i) => (i % 2 == 0 ? x + W3x2 * v : y + H3x2 * v))
+    return FACE_UV.map((v, index) =>
+        index % 2 == 0 ? x + W3x2 * v : y + H3x2 * v
+    )
 }
 
 function getUVs(uvs: TgdGeometryBoxOptions["uvs"]): number[] {

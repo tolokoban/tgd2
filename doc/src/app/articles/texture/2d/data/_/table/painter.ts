@@ -16,7 +16,7 @@ export class Painter extends TgdPainter {
         private readonly texture: TgdTexture2D
     ) {
         super()
-        this.prg = new TgdProgram(context, {
+        this.prg = new TgdProgram(context.gl, {
             vert: [
                 "#version 300 es",
                 "in vec2 attPoint;",

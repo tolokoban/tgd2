@@ -7,6 +7,7 @@ import {
     TgdPainterClear,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdTexture2D,
     webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd"
@@ -36,9 +37,7 @@ function init(ctx: TgdContext, assets: Assets) {
         }),
         new TgdPainterBackground(
             ctx,
-            ctx.textures2D.create({
-                image: BackgroundURL,
-            })
+            new TgdTexture2D(ctx).loadBitmap(BackgroundURL)
         ),
         new TgdPainterState(ctx, {
             depth: webglPresetDepth.less,

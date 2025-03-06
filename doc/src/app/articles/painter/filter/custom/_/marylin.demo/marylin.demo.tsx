@@ -1,6 +1,6 @@
 import {
-    tgdCodeFunc_polar2uv,
-    tgdCodeFunc_uv2polar,
+    tgdCodeFunction_polar2uv,
+    tgdCodeFunction_uv2polar,
     TgdContext,
     TgdFilter,
     tgdLoadImage,
@@ -31,8 +31,8 @@ function init(context: TgdContext) {
             )
         },
         extraFunctions: {
-            ...tgdCodeFunc_uv2polar(),
-            ...tgdCodeFunc_polar2uv(),
+            ...tgdCodeFunction_uv2polar(),
+            ...tgdCodeFunction_polar2uv(),
         },
         fragmentShaderCode: [
             "vec2 polar = uv2polar(varUV);",

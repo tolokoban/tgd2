@@ -1,11 +1,8 @@
 import * as React from "react"
-import { Theme, CommonProps, styleCommon } from "@tolokoban/ui"
 import {
     tgdCanvasCreateWithContext2D,
     TgdContext,
     TgdControllerCameraOrbit,
-    tgdLoadGlb,
-    tgdLoadImage,
     TgdMaterial,
     TgdPainterBackground,
     TgdPainterClear,
@@ -49,9 +46,7 @@ function init(context: TgdContext, assets: Assets) {
     const w = 4096
     const h = w
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(w, h)
-    const holes = context.textures2D.create({
-        image: canvas,
-    })
+    const holes = new TgdTexture2D(context).loadBitmap(canvas)
     ctx.clearRect(0, 0, w, h)
     let count = 0
     window.setInterval(() => {
@@ -69,7 +64,7 @@ function init(context: TgdContext, assets: Assets) {
         ctx.beginPath()
         ctx.ellipse(x, y, r, r, 0, 0, Math.PI * 2)
         ctx.fill()
-        holes.loadImage(canvas)
+        holes.loadBitmap(canvas)
         context.paint()
     }, 500)
     context.camera.distance = 2.5
@@ -95,15 +90,13 @@ function init(context: TgdContext, assets: Assets) {
                 }),
                 new TgdPainterBackground(
                     context,
-                    context.textures2D.create({
-                        image: background,
-                    })
+                    new TgdTexture2D(context).loadBitmap(background)
                 ),
                 painter,
             ],
         })
     )
-    painter.paint()
+    context.paint()
     context.canvas.addEventListener("dblclick", () => {
         orbiter.reset(300)
     })
@@ -150,8 +143,8 @@ class MaterialHole implements TgdMaterial {
     setUniforms(program: TgdProgram): void {
         program.uniform3fv("uniLightDir", this.lightDirection)
 
-        this.options.abedo.activate(program, "texAbedo", 0)
-        this.options.holes.activate(program, "texHoles", 1)
+        this.options.abedo.activate(0, program, "texAbedo")
+        this.options.holes.activate(1, program, "texHoles")
     }
 }
 //#endregion

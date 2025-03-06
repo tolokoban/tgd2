@@ -8,6 +8,7 @@ import {
     TgdPainterDebugStencil,
     TgdPainterMeshGltf,
     TgdPainterState,
+    TgdTexture2D,
     webglPresetCull,
     webglPresetDepth,
     webglPresetStencil,
@@ -39,9 +40,7 @@ function init(ctx: TgdContext, assets: Assets) {
         }),
         new TgdPainterBackground(
             ctx,
-            ctx.textures2D.create({
-                image: BackgroundURL,
-            })
+            new TgdTexture2D(ctx).loadBitmap(BackgroundURL)
         ),
         new TgdPainterState(ctx, {
             color: false,

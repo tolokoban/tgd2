@@ -23,10 +23,10 @@ export function tgdCanvasCreateWithContext2D(
     const canvas = document.createElement("canvas")
     canvas.width = width
     canvas.height = height
-    const ctx = canvas.getContext("2d", settings)
-    if (!ctx) throw Error("Unable to create 2D context!")
+    const context = canvas.getContext("2d", settings)
+    if (!context) throw new Error("Unable to create 2D context!")
 
-    return { canvas, ctx }
+    return { canvas, ctx: context }
 }
 
 /**
@@ -49,12 +49,12 @@ export function tgdCanvasCreatePalette(colors: string[], colums = 0, rows = 0) {
     const width = colums > 0 ? colums : colors.length
     const height = rows > 0 ? rows : Math.ceil(colors.length / width)
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-    let i = 0
+    let colorIndex = 0
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            ctx.fillStyle = colors[i % colors.length]
+            ctx.fillStyle = colors[colorIndex % colors.length]
             ctx.fillRect(x, y, 1, 1)
-            i++
+            colorIndex++
         }
     }
     return canvas
@@ -78,21 +78,29 @@ export function tgdCanvasCreateCreateGradientvertical(
  * Create a canvas with a linear gradient.
  * @param width Width of the resulting canvas.
  * @param height Height of the resulting canvas.
- * @param dirX X coord of the direction vector.
- * @param dirY Y coord of the direction vector.
+ * @param directionX X coord of the direction vector.
+ * @param directionY Y coord of the direction vector.
  * @param colors CSS colors of each step
  */
 export function tgdCanvasCreateGradient(
     width: number,
     height: number,
-    dirX: number,
-    dirY: number,
+    directionX: number,
+    directionY: number,
     colors: string[]
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-    const gradient = ctx.createLinearGradient(0, 0, width * dirX, height * dirY)
-    for (let i = 0; i < colors.length; i++) {
-        gradient.addColorStop(i / (colors.length - 1), colors[i])
+    const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        width * directionX,
+        height * directionY
+    )
+    for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+        gradient.addColorStop(
+            colorIndex / (colors.length - 1),
+            colors[colorIndex]
+        )
     }
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, width, height)

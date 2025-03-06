@@ -14,7 +14,7 @@ export default class Painter extends TgdPainter {
 
     constructor(private readonly context: TgdContext) {
         super()
-        this.program = context.programs.create({
+        this.program = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({
                 varying: {
                     varRadius: "float",
@@ -62,11 +62,11 @@ export default class Painter extends TgdPainter {
             .5, .5, .5, .5,
             1
         ]))
-        this.vao = context.createVAO(this.program, [dataset])
+        this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 
     delete(): void {
-        this.context.programs.delete(this.program)
+        this.program.delete()
         this.vao.delete()
     }
 

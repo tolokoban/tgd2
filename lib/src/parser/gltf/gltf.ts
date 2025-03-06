@@ -44,10 +44,10 @@ export class TgdParserGLTransfertFormatBinary {
             const data = parseGLB(content)
             this.gltf = data.gltf
             this.chunks = data.chunks
-        } catch (ex) {
+        } catch (error) {
             const message =
-                ex instanceof Error ? ex.message : JSON.stringify(ex)
-            throw Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
+                error instanceof Error ? error.message : JSON.stringify(error)
+            throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
         }
     }
 
@@ -58,7 +58,7 @@ export class TgdParserGLTransfertFormatBinary {
     getScene(sceneIndex: number): TgdFormatGltfScene {
         const scene = this.gltf.scenes?.[sceneIndex]
         if (!scene) {
-            throw Error(`Asset has no scene with index #${sceneIndex}!`)
+            throw new Error(`Asset has no scene with index #${sceneIndex}!`)
         }
 
         return scene
@@ -67,7 +67,7 @@ export class TgdParserGLTransfertFormatBinary {
     getNode(nodeIndex: number): TgdFormatGltfNode {
         const node = this.gltf.nodes?.[nodeIndex]
         if (!node) {
-            throw Error(`Asset has no node with index #${nodeIndex}!`)
+            throw new Error(`Asset has no node with index #${nodeIndex}!`)
         }
 
         return node
@@ -76,7 +76,9 @@ export class TgdParserGLTransfertFormatBinary {
     getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
         const accessor = this.gltf.accessors?.[accessorIndex]
         if (!accessor) {
-            throw Error(`Asset has no accessor with index #${accessorIndex}!`)
+            throw new Error(
+                `Asset has no accessor with index #${accessorIndex}!`
+            )
         }
 
         return accessor
@@ -85,7 +87,9 @@ export class TgdParserGLTransfertFormatBinary {
     getMaterial(materialIndex: number): TgdFormatGltfMaterial {
         const material = this.gltf.materials?.[materialIndex]
         if (!material) {
-            throw Error(`Asset has no material with index #${materialIndex}!`)
+            throw new Error(
+                `Asset has no material with index #${materialIndex}!`
+            )
         }
 
         return material
@@ -94,7 +98,7 @@ export class TgdParserGLTransfertFormatBinary {
     getMesh(meshIndex = 0): TgdFormatGltfMesh {
         const mesh = this.gltf.meshes?.[meshIndex]
         if (!mesh) {
-            throw Error(`Asset has no mesh with index #${meshIndex}!`)
+            throw new Error(`Asset has no mesh with index #${meshIndex}!`)
         }
 
         return mesh
@@ -112,7 +116,7 @@ export class TgdParserGLTransfertFormatBinary {
         const mesh = this.getMesh(meshIndex)
         const primitive = mesh.primitives[primitiveIndex]
         if (!primitive) {
-            throw Error(
+            throw new Error(
                 `Asset has no primitive #${primitiveIndex} in mesh #${meshIndex}!`
             )
         }
@@ -140,10 +144,10 @@ export class TgdParserGLTransfertFormatBinary {
     ): TgdFormatGltfAccessor {
         const { attributes } = primitive
         if (!attributes || Object.keys(attributes).length === 0)
-            throw Error("No attributes found!")
+            throw new Error("No attributes found!")
         const accessorIndex = attributes[attribName]
         if (typeof accessorIndex !== "number") {
-            throw Error(
+            throw new TypeError(
                 `No attribute with name "${attribName}"!\nAvailable names are: ${Object.keys(
                     attributes
                 )
@@ -153,10 +157,11 @@ export class TgdParserGLTransfertFormatBinary {
         }
         try {
             return this.getAccessor(accessorIndex)
-        } catch (ex) {
-            const msg = ex instanceof Error ? ex.message : JSON.stringify(ex)
-            throw Error(
-                `Attribute "${attribName}" pointed to an inexisting accessor!\n${msg}`
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : JSON.stringify(error)
+            throw new Error(
+                `Attribute "${attribName}" pointed to an inexisting accessor!\n${message}`
             )
         }
     }
@@ -167,7 +172,7 @@ export class TgdParserGLTransfertFormatBinary {
     ): TgdTexture2D {
         const gltfTex = this.gltf.textures?.[textureIndex]
         if (!gltfTex) {
-            throw Error(`Asset has no texture with index #${textureIndex}!`)
+            throw new Error(`Asset has no texture with index #${textureIndex}!`)
         }
 
         const source =
@@ -198,16 +203,16 @@ export class TgdParserGLTransfertFormatBinary {
             (resolve, reject) => {
                 const img = new Image()
                 img.src = url
-                img.onload = () => {
+                img.addEventListener("load", () => {
                     resolve(img)
-                }
-                img.onerror = () => {
+                })
+                img.addEventListener("error", () => {
                     console.error(
                         `Unable to load image #${imageIndex}!`,
                         this.gltf.images?.[imageIndex]
                     )
                     reject()
-                }
+                })
             }
         )
         this.cacheImages.set(imageIndex, promise)
@@ -263,7 +268,7 @@ export class TgdParserGLTransfertFormatBinary {
         | Uint32Array
         | Float32Array
     getBufferViewData(
-        arg: TgdFormatGltfAccessor | number,
+        accessor: TgdFormatGltfAccessor | number,
         type:
             | number
             | "Int8"
@@ -279,20 +284,20 @@ export class TgdParserGLTransfertFormatBinary {
         | Uint16Array
         | Uint32Array
         | Float32Array {
-        if (typeof arg !== "number") {
+        if (typeof accessor !== "number") {
             return this.getBufferViewData(
-                arg.bufferView ?? 0,
-                arg.componentType
+                accessor.bufferView ?? 0,
+                accessor.componentType
             )
         }
-        const bufferViewIndex = arg
+        const bufferViewIndex = accessor
         const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
         if (fromCache) return fromCache
 
         const { gltf } = this
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
         if (!bufferView)
-            throw Error(`No bufferView with index #${bufferViewIndex}!`)
+            throw new Error(`No bufferView with index #${bufferViewIndex}!`)
 
         const buffer = this.chunks[bufferView.buffer]
         const byteOffset = bufferView.byteOffset ?? 0
@@ -335,7 +340,7 @@ export class TgdParserGLTransfertFormatBinary {
             ] ?? -1
         const accessor = gltf.accessors?.[accessorIndex]
         if (!accessor) {
-            throw Error(
+            throw new Error(
                 `No attribute "${
                     primitiveAttribName ?? attribName
                 }" for primitive #${primitiveIndex} of mesh #${meshIndex}!`
@@ -345,7 +350,7 @@ export class TgdParserGLTransfertFormatBinary {
         const bufferViewIndex = accessor.bufferView ?? 0
         const bufferView = gltf.bufferViews?.[bufferViewIndex]
         if (!bufferView) {
-            throw Error(`No bufferView with index #${bufferViewIndex}!`)
+            throw new Error(`No bufferView with index #${bufferViewIndex}!`)
         }
         const view = this.getBufferViewData(
             bufferViewIndex,
@@ -376,21 +381,21 @@ export class TgdParserGLTransfertFormatBinary {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
         try {
             const { attributes } = primitive
-            if (!attributes) throw Error("No attributes found!")
+            if (!attributes) throw new Error("No attributes found!")
             const elements = this.getMeshPrimitiveIndices(
                 meshIndex,
                 primitiveIndex
             )
-            const def: TgdDatasetTypeRecord = {
+            const definition: TgdDatasetTypeRecord = {
                 [attPositionName]: "vec3",
             }
             if (typeof attributes[attNormalName] === "string") {
-                def[attNormalName] = "vec3"
+                definition[attNormalName] = "vec3"
             }
             if (typeof attributes[attTextureCoordsName] === "string") {
-                def[attTextureCoordsName] = "vec2"
+                definition[attTextureCoordsName] = "vec2"
             }
-            const dataset = new TgdDataset(def)
+            const dataset = new TgdDataset(definition)
             dataset.set(
                 attPositionName,
                 returnFloat32Array(
@@ -436,10 +441,11 @@ export class TgdParserGLTransfertFormatBinary {
                 attNormal: attNormalName,
                 attUV: attTextureCoordsName,
             })
-        } catch (ex) {
-            const msg = ex instanceof Error ? ex.message : JSON.stringify(ex)
-            throw Error(
-                `Error in primitive #${primitiveIndex} of mesh #${meshIndex}:\n${msg}`
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : JSON.stringify(error)
+            throw new Error(
+                `Error in primitive #${primitiveIndex} of mesh #${meshIndex}:\n${message}`
             )
         }
     }
@@ -492,7 +498,7 @@ function loadImage(url: string): Promise<HTMLImageElement | null> {
     return new Promise(resolve => {
         const img = new Image()
         img.src = url
-        img.onload = () => resolve(img)
-        img.onerror = () => resolve(null)
+        img.addEventListener("load", () => resolve(img))
+        img.addEventListener("error", () => resolve(null))
     })
 }

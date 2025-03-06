@@ -36,7 +36,7 @@ export class TgdBuffer {
         options: Partial<TgdBufferOptions> = {}
     ) {
         const buffer = gl.createBuffer()
-        if (!buffer) throw Error("Unable to create WebGLBuffer!")
+        if (!buffer) throw new Error("Unable to create WebGLBuffer!")
 
         this._target = options?.target ?? "ARRAY_BUFFER"
         this._usage = options?.usage ?? "STATIC_DRAW"

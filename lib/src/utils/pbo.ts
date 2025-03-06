@@ -15,7 +15,8 @@ export function tgdPixelBufferObjectCreate(
 ) {
     const { data, width: w, height: h } = getData(source, width, height)
     const buffer = gl.createBuffer()
-    if (!buffer) throw Error("Unable to create a WebGL2 pixel buffer buffer!")
+    if (!buffer)
+        throw new Error("Unable to create a WebGL2 pixel buffer buffer!")
 
     gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, buffer)
     gl.bufferData(gl.PIXEL_UNPACK_BUFFER, data, gl.STATIC_DRAW)
@@ -33,7 +34,7 @@ function getData(
         if (typeof width === "number" && typeof height === "number") {
             return { data: source, width, height }
         }
-        throw Error(
+        throw new Error(
             "If you give a Uint8Array to tgdPixelBufferObjectCreate(), you must specify both width and height arguments!"
         )
     }

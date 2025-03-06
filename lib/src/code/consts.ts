@@ -17,8 +17,8 @@ export function tgdCodeConstants(
     ...names: Array<keyof typeof CONSTS_FLOAT>
 ): TgdCodeFunctions {
     const code: TgdCodeFunctions = {}
-    names.forEach(name => {
+    for (const name of names) {
         code[name] = `const float ${name} = ${CONSTS_FLOAT[name]};`
-    })
+    }
     return code
 }

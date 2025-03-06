@@ -71,11 +71,9 @@ export function tgdEasingFunctionOutExpo(x: number): number {
 }
 
 export function tgdEasingFunctionInOutExpo(x: number): number {
-    return x === 0
-        ? 0
-        : x === 1
-        ? 1
-        : x < 0.5
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    return x < 0.5
         ? Math.pow(2, 20 * x - 10) / 2
         : (2 - Math.pow(2, -20 * x + 10)) / 2
 }
@@ -120,31 +118,25 @@ export function tgdEasingFunctionInOutBack(x: number): number {
 export function tgdEasingFunctionInElastic(x: number): number {
     const c4 = (2 * Math.PI) / 3
 
-    return x === 0
-        ? 0
-        : x === 1
-        ? 1
-        : -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * c4)
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    return -Math.pow(2, 10 * x - 10) * Math.sin((x * 10 - 10.75) * c4)
 }
 
 export function tgdEasingFunctionOutElastic(x: number): number {
     const c4 = (2 * Math.PI) / 3
 
-    return x === 0
-        ? 0
-        : x === 1
-        ? 1
-        : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    return Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1
 }
 
 export function tgdEasingFunctionInOutElastic(x: number): number {
     const c5 = (2 * Math.PI) / 4.5
 
-    return x === 0
-        ? 0
-        : x === 1
-        ? 1
-        : x < 0.5
+    if (x === 0) return 0
+    if (x === 1) return 1
+    return x < 0.5
         ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
         : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1
 }
