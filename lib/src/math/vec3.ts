@@ -59,9 +59,10 @@ export class TgdVec3 extends Float32Array {
     }
 
     mix(vec: Readonly<TgdVec3>, alpha = 0.5): this {
-        this.x = (1 - alpha) * this.x + alpha * vec.x
-        this.y = (1 - alpha) * this.y + alpha * vec.y
-        this.z = (1 - alpha) * this.z + alpha * vec.z
+        const beta = 1 - alpha
+        this.x = beta * this.x + alpha * vec.x
+        this.y = beta * this.y + alpha * vec.y
+        this.z = beta * this.z + alpha * vec.z
         return this
     }
 
@@ -81,11 +82,15 @@ export class TgdVec3 extends Float32Array {
         return true
     }
 
+    /**
+     * __Warning__, for performance reason, `axis` is supposed to be of length 1.
+     * Otherwise, the result will be a vector rotated then scaled by the length of `axis`.
+     */
     rotateAround(
         axis: Readonly<TgdVec3 | ArrayNumber3>,
         angleInRadians: number
-    ) {
-        // result := V.cos(a) + (KxV).sin(a) + K(K.V)(1 - cos(a))
+    ): this {
+        // result := V.cos(a) + (K×V).sin(a) + K(K.V)(1 - cos(a))
         const C = Math.cos(angleInRadians)
         const S = Math.sin(angleInRadians)
         const [Vx, Vy, Vz] = this

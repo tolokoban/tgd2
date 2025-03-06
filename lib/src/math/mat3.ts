@@ -1,15 +1,40 @@
+import from "gl-"
 import { padColOfNumbers } from "@tgd/debug"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
+import { TgdMat4 } from "./mat4"
 
 /**
  * Column-first 4x4 matrix.
  *
- * `m23` means column 2 and row 3.
+ * `m23` means row 2 and column 3.
  *
- * This is not the same as what mathematicians are used to,
- * but it is how WebGL will store matrices in memory.
+ * ```
+ * +-+-+-+
+ * | | | |
+ * +-+-+-+
+ * | | |#|
+ * +-+-+-+
+ * | | | |
+ * +-+-+-+
+ * ```
+ *
+ * This is how mathematicians use matrices.
+ *
+ * But, internally, for WebGL compliance, we store the data like this:
+ *
+ * ```
+ * +-+-+-+
+ * |0|3|6|
+ * +-+-+-+
+ * |1|4|7|
+ * +-+-+-+
+ * |2|5|8|
+ * +-+-+-+
+ * ```
+ *
+ * That's why is better to access members through the accessor `m00`, `m01`, etc.
  */
 export class TgdMat3 extends Float32Array {
     constructor()
@@ -21,40 +46,40 @@ export class TgdMat3 extends Float32Array {
     )
     constructor(
         m00: number,
-        m01: number,
-        m02: number,
         m10: number,
-        m11: number,
-        m12: number,
         m20: number,
+        m01: number,
+        m11: number,
         m21: number,
+        m02: number,
+        m12: number,
         m22: number
     )
     constructor(
-        m00: number | TgdVec3 | TgdVec4 | TgdMat3 = 1,
-        m01: number | TgdVec3 | TgdVec4 = 0,
-        m02: number | TgdVec3 | TgdVec4 = 0,
-        m10: number = 0,
+        m00: number | TgdVec3 | TgdVec4 | TgdMat3 | TgdMat4 = 1,
+        m10: number | TgdVec3 | TgdVec4 = 0,
+        m20: number | TgdVec3 | TgdVec4 = 0,
+        m01: number = 0,
         m11: number = 1,
-        m12: number = 0,
-        m20: number = 0,
         m21: number = 0,
+        m02: number = 0,
+        m12: number = 0,
         m22: number = 1
     ) {
         if (
             typeof m00 === "number" &&
-            typeof m01 === "number" &&
-            typeof m02 === "number"
+            typeof m10 === "number" &&
+            typeof m20 === "number"
         ) {
-            super([m00, m01, m02, m10, m11, m12, m20, m21, m22])
+            super([m00, m10, m20, m01, m11, m21, m02, m12, m22])
         } else if (
             (m00 instanceof TgdVec3 || m00 instanceof TgdVec4) &&
-            (m01 instanceof TgdVec3 || m01 instanceof TgdVec4) &&
-            (m02 instanceof TgdVec3 || m02 instanceof TgdVec4)
+            (m10 instanceof TgdVec3 || m10 instanceof TgdVec4) &&
+            (m20 instanceof TgdVec3 || m20 instanceof TgdVec4)
         ) {
             const col1 = m00
-            const col2 = m01
-            const col3 = m02
+            const col2 = m10
+            const col3 = m20
             // prettier-ignore
             super([
                 col1.x, col1.y, col1.z,
@@ -62,16 +87,40 @@ export class TgdMat3 extends Float32Array {
                 col3.x, col3.y, col3.z
             ])
         } else if (m00 instanceof TgdMat3) {
-            super(m00)
+            const mat3 = m00
+            super([
+                mat3.m00,
+                mat3.m10,
+                mat3.m20,
+                mat3.m01,
+                mat3.m11,
+                mat3.m21,
+                mat3.m02,
+                mat3.m12,
+                mat3.m22,
+            ])
+        } else if (m00 instanceof TgdMat4) {
+            const mat4 = m00
+            super([
+                mat4.m00,
+                mat4.m10,
+                mat4.m20,
+                mat4.m01,
+                mat4.m11,
+                mat4.m21,
+                mat4.m02,
+                mat4.m12,
+                mat4.m22,
+            ])
         } else {
-            console.error("[TgdMat3] m00, m01, m02 =", m00, m01, m02)
-            console.error("[TgdMat3] m10, m11, m12 =", m10, m11, m12)
-            console.error("[TgdMat3] m20, m21, m22 =", m20, m21, m22)
-            throw new Error(`Invalid TgdMat3 initialization!`)
+            // eslint-disable-next-line prefer-rest-params
+            console.error("[TgdMat3] ", arguments)
+            throw Error(`Invalid TgdMat3 initialization!`)
         }
     }
 
-    multiply(mat3: TgdMat3): this {
+    multiply(mat: TgdMat3): this {
+        mat3.
         // prettier-ignore
         const [
             a00, a01, a02,

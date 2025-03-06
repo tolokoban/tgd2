@@ -3,6 +3,19 @@ import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 
 export class TgdVec4 extends Float32Array {
+    static newFromMix(
+        [x1, y1, z1, w1 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
+        [x2, y2, z2, w2 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
+        a = 0.5
+    ): TgdVec4 {
+        const b = 1 - a
+        const x = b * x1 + a * x2
+        const y = b * y1 + a * y2
+        const z = b * z1 + a * z2
+        const w = b * w1 + a * w2
+        return new TgdVec4(x, y, z, w)
+    }
+
     constructor()
     constructor(vec4: TgdVec4 | ArrayNumber4)
     constructor(vec3: TgdVec3 | ArrayNumber3, w: number)
@@ -141,21 +154,23 @@ export class TgdVec4 extends Float32Array {
         this[3] = value
     }
 
-    add(...vectors: (TgdVec4 | TgdVec3)[]): TgdVec4 {
+    add(
+        ...vectors: (TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3)[]
+    ): TgdVec4 {
         for (const vec of vectors) {
             this[0] += vec[0]
             this[1] += vec[1]
             this[2] += vec[2]
-            if (vec.length > 3) this[3] += vec[3]
+            if (vec.length > 3) this[3] += (vec as ArrayNumber4)[3]
         }
         return this
     }
 
-    subtract(vec: TgdVec4 | TgdVec3): TgdVec4 {
+    subtract(vec: TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3): TgdVec4 {
         this[0] -= vec[0]
         this[1] -= vec[1]
         this[2] -= vec[2]
-        if (vec.length > 3) this[3] -= vec[3]
+        if (vec.length > 3) this[3] -= (vec as ArrayNumber4)[3]
         return this
     }
 
@@ -167,7 +182,7 @@ export class TgdVec4 extends Float32Array {
         return this
     }
 
-    dot(vec: TgdVec4): number {
+    dot(vec: TgdVec4 | ArrayNumber4): number {
         return (
             this[0] * vec[0] +
             this[1] * vec[1] +
