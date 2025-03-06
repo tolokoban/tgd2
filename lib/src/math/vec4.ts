@@ -3,6 +3,11 @@ import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 
 export class TgdVec4 extends Float32Array {
+    static X: Readonly<TgdVec4> = new TgdVec4(1, 0, 0, 0)
+    static Y: Readonly<TgdVec4> = new TgdVec4(0, 1, 0, 0)
+    static Z: Readonly<TgdVec4> = new TgdVec4(0, 0, 1, 0)
+    static W: Readonly<TgdVec4> = new TgdVec4(0, 0, 0, 1)
+
     static newFromMix(
         [x1, y1, z1, w1 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         [x2, y2, z2, w2 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
@@ -23,7 +28,7 @@ export class TgdVec4 extends Float32Array {
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
-     
+
     constructor(
         x: number | TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3 = 0,
         y: number = 0,
@@ -192,12 +197,7 @@ export class TgdVec4 extends Float32Array {
     }
 
     get size() {
-        return Math.hypot(
-            this[0],
-                this[1],
-                this[2],
-                this[3]
-        )
+        return Math.hypot(this[0], this[1], this[2], this[3])
     }
 
     normalize(): this {

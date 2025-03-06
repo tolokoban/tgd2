@@ -1,3 +1,4 @@
+import { quat } from "gl-matrix"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
@@ -8,6 +9,7 @@ export type TgdQuatFace = keyof typeof FACES
 const temporaryAxisX = new TgdVec3()
 const temporaryAxisY = new TgdVec3()
 const temporaryAxisZ = new TgdVec3()
+const temporaryMat3 = new TgdMat3()
 
 export class TgdQuat extends TgdVec4 {
     static fromMatrix(mat: TgdMat3): TgdQuat {
@@ -37,13 +39,8 @@ export class TgdQuat extends TgdVec4 {
         return new TgdQuat(this)
     }
 
-    multiply(quat: TgdQuat): TgdQuat {
-        const [qx, qy, qz, qw] = this
-        const [rx, ry, rz, rw] = quat
-        this[0] = rw * qx + rx * qw - ry * qz + rz * qy
-        this[1] = rw * qy + rx * qz + ry * qw - rz * qx
-        this[2] = rw * qz - rx * qy + ry * qx + rz * qw
-        this[3] = rw * qw - rx * qx - ry * qy - rz * qz
+    multiply(q: TgdQuat): TgdQuat {
+        quat.multiply(this, this, q)
         return this
     }
 
@@ -86,62 +83,58 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
-    fromAxis(
+    fromAxes(
         X: Readonly<TgdVec3>,
         Y: Readonly<TgdVec3>,
         Z: Readonly<TgdVec3>
     ): this {
-        // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
-        // article "Quaternion Calculus and Fast Animation".
-        const fTrace = X.x + Y.y + Z.z
-        if (fTrace > 0) {
-            // |w| > 1/2, may as well choose w > 1/2
-            const fRoot = Math.sqrt(fTrace + 1) // 2w
-            this.w = 0.5 * fRoot
-            const halfRoot = 0.5 / fRoot // 1/(4w)
-            this.x = (Z.y - Y.z) * halfRoot
-            this.y = (X.z - Z.x) * halfRoot
-            this.z = (Y.x - X.y) * halfRoot
-        } else {
-            // |w| <= 1/2
-            const axis = [X, Y, Z]
-            let index = 0
-            if (Y.y > X.x) index = 1
-            if (Z.z > axis[index][index]) index = 2
-            const index_ = (index + 1) % 3
-            const k = (index + 2) % 3
+        quat.setAxes(this, X, Y, Z)
+        return this
+        // // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
+        // // article "Quaternion Calculus and Fast Animation".
+        // const fTrace = X.x + Y.y + Z.z
+        // if (fTrace > 0) {
+        //     // |w| > 1/2, may as well choose w > 1/2
+        //     const fRoot = Math.sqrt(fTrace + 1) // 2w
+        //     this.w = 0.5 * fRoot
+        //     const halfRoot = 0.5 / fRoot // 1/(4w)
+        //     this.x = (Z.y - Y.z) * halfRoot
+        //     this.y = (X.z - Z.x) * halfRoot
+        //     this.z = (Y.x - X.y) * halfRoot
+        // } else {
+        //     // |w| <= 1/2
+        //     const axis = [X, Y, Z]
+        //     let index = 0
+        //     if (Y.y > X.x) index = 1
+        //     if (Z.z > axis[index][index]) index = 2
+        //     const index_ = (index + 1) % 3
+        //     const k = (index + 2) % 3
 
-            let fRoot = Math.sqrt(axis[index][index] - axis[index_][index_] - axis[k][k] + 1)
-            this[index] = 0.5 * fRoot
-            fRoot = 0.5 / fRoot
-            this[3] = (axis[index_][k] - axis[k][index_]) * fRoot
-            this[index_] = (axis[index_][index] + axis[index][index_]) * fRoot
-            this[k] = (axis[k][index] + axis[index][k]) * fRoot
-        }
-        return this.normalize()
+        //     let fRoot = Math.sqrt(
+        //         axis[index][index] - axis[index_][index_] - axis[k][k] + 1
+        //     )
+        //     this[index] = 0.5 * fRoot
+        //     fRoot = 0.5 / fRoot
+        //     this[3] = (axis[index_][k] - axis[k][index_]) * fRoot
+        //     this[index_] = (axis[index_][index] + axis[index][index_]) * fRoot
+        //     this[k] = (axis[k][index] + axis[index][k]) * fRoot
+        // }
+        // return this.normalize()
     }
 
     fromMatrix(mat: TgdMat3 | TgdMat4) {
-        temporaryAxisX.x = mat.m00
-        temporaryAxisX.y = mat.m01
-        temporaryAxisX.z = mat.m02
-        temporaryAxisY.x = mat.m10
-        temporaryAxisY.y = mat.m11
-        temporaryAxisY.z = mat.m12
-        temporaryAxisZ.x = mat.m20
-        temporaryAxisZ.y = mat.m21
-        temporaryAxisZ.z = mat.m22
-        return this.fromAxis(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
+        mat.toAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
+        return this.fromAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
     }
 
     rotateAround(axis: TgdVec3, angleInRadians: number): this {
-        this.toAxisX(temporaryAxisX)
-        this.toAxisY(temporaryAxisY)
-        this.toAxisZ(temporaryAxisZ)
+        temporaryMat3
+            .fromQuat(this)
+            .toAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
         temporaryAxisX.rotateAround(axis, angleInRadians)
         temporaryAxisY.rotateAround(axis, angleInRadians)
         temporaryAxisZ.rotateAround(axis, angleInRadians)
-        return this.fromAxis(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
+        return this.fromAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
     }
 
     static rotateAroundX(angleInRadians: number): TgdQuat {

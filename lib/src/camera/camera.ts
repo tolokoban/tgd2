@@ -173,9 +173,9 @@ export abstract class TgdCamera {
     }
 
     fromTransfo(transfo: TgdMat4): this {
-        const x = transfo.m30
-        const y = transfo.m31
-        const z = transfo.m32
+        const x = transfo.m03
+        const y = transfo.m13
+        const z = transfo.m23
         this.setTarget(x, y, z)
         this._orientation.fromMatrix(transfo)
         this.dirtyModelView = true
@@ -392,7 +392,7 @@ export abstract class TgdCamera {
         } = this
         axisY.rotateAround(axisX, angleInRadians)
         axisZ.rotateAround(axisX, angleInRadians)
-        orientation.fromAxis(axisX, axisY, axisZ)
+        orientation.fromAxes(axisX, axisY, axisZ)
         this.dirtyModelView = true
         return this
     }
@@ -407,7 +407,7 @@ export abstract class TgdCamera {
         } = this
         axisX.rotateAround(axisY, angleInRadians)
         axisZ.rotateAround(axisY, angleInRadians)
-        orientation.fromAxis(axisX, axisY, axisZ)
+        orientation.fromAxes(axisX, axisY, axisZ)
         this.dirtyModelView = true
         return this
     }
@@ -422,7 +422,7 @@ export abstract class TgdCamera {
         } = this
         axisX.rotateAround(axisZ, angleInRadians)
         axisY.rotateAround(axisZ, angleInRadians)
-        orientation.fromAxis(axisX, axisY, axisZ)
+        orientation.fromAxes(axisX, axisY, axisZ)
         this.dirtyModelView = true
         return this
     }
@@ -447,7 +447,7 @@ export abstract class TgdCamera {
     private updateAxis() {
         const { tmpMat3 } = this
         tmpMat3.fromQuat(this._orientation)
-        tmpMat3.toAxis(this._axisX, this._axisY, this._axisZ)
+        tmpMat3.toAxes(this._axisX, this._axisY, this._axisZ)
         this.dirtyAxis = false
     }
 
@@ -468,9 +468,9 @@ export abstract class TgdCamera {
         _position.addWithScale(this._axisY, sy)
         _position.addWithScale(this._axisZ, sz)
         tmpVec3.from(_position).applyMatrix(tmpMat3.transpose()).scale(-1)
-        mat.m30 = tmpVec3.x
-        mat.m31 = tmpVec3.y
-        mat.m32 = tmpVec3.z
+        mat.m03 = tmpVec3.x
+        mat.m13 = tmpVec3.y
+        mat.m23 = tmpVec3.z
         mat.fromMat3(tmpMat3)
         this.dirtyModelView = false
     }

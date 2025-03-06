@@ -4,70 +4,99 @@ import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from ".."
+import { mat4 } from "gl-matrix"
 /**
  * Column-first 4x4 matrix.
  *
- * `m23` means column 2 and row 3.
+ * - `m12` means row 2 and column 3 (__A__).
+ * - `m20` means row 3 and column 1 (__B__).
  *
- * This is not the same as what mathematicians are used to,
- * but its how WebGL will store matrices in memory.
+ * ```
+ * +-+-+-+-+
+ * | | | | |
+ * +-+-+-+-+
+ * | | |A| |
+ * +-+-+-+-+
+ * |B| | | |
+ * +-+-+-+-+
+ * | | | | |
+ * +-+-+-+-+
+ * ```
+ *
+ * This is how mathematicians use matrices.
+ *
+ * But, internally, for WebGL compliance, we store the data like this:
+ *
+ * ```
+ * +--+--+--+--+
+ * | 0| 4| 8|12|
+ * +--+--+--+--+
+ * | 1| 5| 9|13|
+ * +--+--+--+--+
+ * | 2| 6|10|14|
+ * +--+--+--+--+
+ * | 3| 7|11|15|
+ * +--+--+--+--+
+ * ```
+ *
+ * That's why is better to access members through the accessor `m00`, `m01`, etc.
  */
 export class TgdMat4 extends Float32Array {
     constructor()
     constructor(mat: TgdMat4)
     constructor(
         m00: number,
-        m01: number,
-        m02: number,
-        m03: number,
         m10: number,
-        m11: number,
-        m12: number,
-        m13: number,
         m20: number,
-        m21: number,
-        m22: number,
-        m23: number,
         m30: number,
+        m01: number,
+        m11: number,
+        m21: number,
         m31: number,
+        m02: number,
+        m12: number,
+        m22: number,
         m32: number,
+        m03: number,
+        m13: number,
+        m23: number,
         m33: number
     )
     constructor(
         m00: number | TgdMat4 = 1,
-        m01: number = 0,
-        m02: number = 0,
-        m03: number = 0,
         m10: number = 0,
-        m11: number = 1,
-        m12: number = 0,
-        m13: number = 0,
         m20: number = 0,
-        m21: number = 0,
-        m22: number = 1,
-        m23: number = 0,
         m30: number = 0,
+        m01: number = 0,
+        m11: number = 1,
+        m21: number = 0,
         m31: number = 0,
+        m02: number = 0,
+        m12: number = 0,
+        m22: number = 1,
         m32: number = 0,
+        m03: number = 0,
+        m13: number = 0,
+        m23: number = 0,
         m33: number = 1
     ) {
         if (typeof m00 === "number") {
             super([
                 m00,
-                m01,
-                m02,
-                m03,
                 m10,
-                m11,
-                m12,
-                m13,
                 m20,
-                m21,
-                m22,
-                m23,
                 m30,
+                m01,
+                m11,
+                m21,
                 m31,
+                m02,
+                m12,
+                m22,
                 m32,
+                m03,
+                m13,
+                m23,
                 m33,
             ])
         } else {
@@ -76,23 +105,15 @@ export class TgdMat4 extends Float32Array {
     }
 
     reset(
-        m00: number = 1,
-        m01: number = 0,
-        m02: number = 0,
-        m03: number = 0,
-        m10: number = 0,
-        m11: number = 1,
-        m12: number = 0,
-        m13: number = 0,
-        m20: number = 0,
-        m21: number = 0,
-        m22: number = 1,
-        m23: number = 0,
-        m30: number = 0,
-        m31: number = 0,
-        m32: number = 0,
-        m33: number = 1
+        row0: ArrayNumber4 | TgdVec4 = TgdVec4.X,
+        row1: ArrayNumber4 | TgdVec4 = TgdVec4.Y,
+        row2: ArrayNumber4 | TgdVec4 = TgdVec4.Z,
+        row3: ArrayNumber4 | TgdVec4 = TgdVec4.W
     ): this {
+        const [m00, m01, m02, m03] = row0
+        const [m10, m11, m12, m13] = row1
+        const [m20, m21, m22, m23] = row2
+        const [m30, m31, m32, m33] = row3
         this.m00 = m00
         this.m01 = m01
         this.m02 = m02
@@ -112,37 +133,8 @@ export class TgdMat4 extends Float32Array {
         return this
     }
 
-    multiply(mat4: TgdMat4): this {
-        // prettier-ignore
-        const [
-            a00, a01, a02, a03,
-            a10, a11, a12, a13,
-            a20, a21, a22, a23,
-            a30, a31, a32, a33,
-        ] = this
-        // prettier-ignore
-        const [
-            b00, b01, b02, b03,
-            b10, b11, b12, b13,
-            b20, b21, b22, b23,
-            b30, b31, b32, b33,
-        ] = mat4
-        this.m00 = a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03
-        this.m10 = a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13
-        this.m20 = a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23
-        this.m30 = a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33
-        this.m01 = a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03
-        this.m11 = a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13
-        this.m21 = a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23
-        this.m31 = a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33
-        this.m02 = a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03
-        this.m12 = a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13
-        this.m22 = a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23
-        this.m32 = a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33
-        this.m03 = a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03
-        this.m13 = a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13
-        this.m23 = a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23
-        this.m33 = a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33
+    multiply(mat: TgdMat4): this {
+        mat4.multiply(this, this, mat)
         return this
     }
 
@@ -150,74 +142,27 @@ export class TgdMat4 extends Float32Array {
      * @param from This matrix will become the inversion of `from`.
      * If not defined, the matrix will invert itself.
      */
-     
-    invert(from?: TgdMat4): this {
-        // prettier-ignore
-        const [
-            a00, a01, a02, a03,
-            a10, a11, a12, a13,
-            a20, a21, a22, a23,
-            a30, a31, a32, a33,
-        ] =from ?? this
-        const b00 = a00 * a11 - a01 * a10
-        const b01 = a00 * a12 - a02 * a10
-        const b02 = a00 * a13 - a03 * a10
-        const b03 = a01 * a12 - a02 * a11
-        const b04 = a01 * a13 - a03 * a11
-        const b05 = a02 * a13 - a03 * a12
-        const b06 = a20 * a31 - a21 * a30
-        const b07 = a20 * a32 - a22 * a30
-        const b08 = a20 * a33 - a23 * a30
-        const b09 = a21 * a32 - a22 * a31
-        const b10 = a21 * a33 - a23 * a31
-        const b11 = a22 * a33 - a23 * a32
-        // Calculate the determinant
-        const det =
-            b00 * b11 -
-            b01 * b10 +
-            b02 * b09 +
-            b03 * b08 -
-            b04 * b07 +
-            b05 * b06
-        if (!det) {
-            return this
-        }
-        const invDet = 1 / det
 
-        this[0] = (a11 * b11 - a12 * b10 + a13 * b09) * invDet
-        this[1] = (a02 * b10 - a01 * b11 - a03 * b09) * invDet
-        this[2] = (a31 * b05 - a32 * b04 + a33 * b03) * invDet
-        this[3] = (a22 * b04 - a21 * b05 - a23 * b03) * invDet
-        this[4] = (a12 * b08 - a10 * b11 - a13 * b07) * invDet
-        this[5] = (a00 * b11 - a02 * b08 + a03 * b07) * invDet
-        this[6] = (a32 * b02 - a30 * b05 - a33 * b01) * invDet
-        this[7] = (a20 * b05 - a22 * b02 + a23 * b01) * invDet
-        this[8] = (a10 * b10 - a11 * b08 + a13 * b06) * invDet
-        this[9] = (a01 * b08 - a00 * b10 - a03 * b06) * invDet
-        this[10] = (a30 * b04 - a31 * b02 + a33 * b00) * invDet
-        this[11] = (a21 * b02 - a20 * b04 - a23 * b00) * invDet
-        this[12] = (a11 * b07 - a10 * b09 - a12 * b06) * invDet
-        this[13] = (a00 * b09 - a01 * b07 + a02 * b06) * invDet
-        this[14] = (a31 * b01 - a30 * b03 - a32 * b00) * invDet
-        this[15] = (a20 * b03 - a21 * b01 + a22 * b00) * invDet
+    invert(from?: TgdMat4): this {
+        mat4.invert(this, from ?? this)
         return this
     }
 
     get translation(): TgdVec3 {
-        const { m30, m31, m32 } = this
-        return new TgdVec3(m30, m31, m32)
+        const { m03, m13, m23 } = this
+        return new TgdVec3(m03, m13, m23)
     }
     set translation(vec: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4) {
         const [x, y, z] = vec
-        this.m30 = x
-        this.m31 = y
-        this.m32 = z
+        this.m03 = x
+        this.m13 = y
+        this.m23 = z
     }
 
     toTanslation(target: TgdVec3 | TgdVec4): this {
-        target.x = this.m30
-        target.y = this.m31
-        target.z = this.m32
+        target.x = this.m03
+        target.y = this.m13
+        target.z = this.m23
         return this
     }
 
@@ -226,36 +171,16 @@ export class TgdMat4 extends Float32Array {
      */
     translate(delta: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4): this {
         const [x, y, z] = delta
-        this.m30 += x
-        this.m31 += y
-        this.m32 += z
+        this.m03 += x
+        this.m13 += y
+        this.m23 += z
         return this
     }
 
     from(mat: TgdMat4 | ArrayNumber16): this {
-        // prettier-ignore
-        const [
-            m00, m01, m02, m03,
-            m10, m11, m12, m13,
-            m20, m21, m22, m23,
-            m30, m31, m32, m33,
-        ] = mat
-        this.m00 = m00
-        this.m01 = m01
-        this.m02 = m02
-        this.m03 = m03
-        this.m10 = m10
-        this.m11 = m11
-        this.m12 = m12
-        this.m13 = m13
-        this.m20 = m20
-        this.m21 = m21
-        this.m22 = m22
-        this.m23 = m23
-        this.m30 = m30
-        this.m31 = m31
-        this.m32 = m32
-        this.m33 = m33
+        for (let index = 0; index < this.length; index++) {
+            this[index] = mat[index] ?? 0
+        }
         return this
     }
 
@@ -272,7 +197,7 @@ export class TgdMat4 extends Float32Array {
         return this
     }
 
-    toAxis(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3): this {
+    toAxes(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3): this {
         this.toAxisX(axisX)
         this.toAxisY(axisY)
         return this.toAxisZ(axisZ)
@@ -280,260 +205,125 @@ export class TgdMat4 extends Float32Array {
 
     toAxisX(axisX: TgdVec3): this {
         axisX.x = this.m00
-        axisX.y = this.m10
-        axisX.z = this.m20
+        axisX.y = this.m01
+        axisX.z = this.m02
         return this
     }
 
     toAxisY(axisY: TgdVec3): this {
-        axisY.x = this.m01
+        axisY.x = this.m10
         axisY.y = this.m11
-        axisY.z = this.m21
+        axisY.z = this.m12
         return this
     }
 
     toAxisZ(axisZ: TgdVec3): this {
-        axisZ.x = this.m02
-        axisZ.y = this.m12
+        axisZ.x = this.m20
+        axisZ.y = this.m21
         axisZ.z = this.m22
         return this
     }
 
     fromQuat({ x, y, z, w }: Readonly<TgdQuat>): this {
-        const x2 = x + x
-        const y2 = y + y
-        const z2 = z + z
-        const xx = x * x2
-        const yx = y * x2
-        const yy = y * y2
-        const zx = z * x2
-        const zy = z * y2
-        const zz = z * z2
-        const wx = w * x2
-        const wy = w * y2
-        const wz = w * z2
-
-        this.m00 = 1 - yy - zz
-        this.m10 = yx - wz
-        this.m20 = zx + wy
-
-        this.m01 = yx + wz
-        this.m11 = 1 - xx - zz
-        this.m21 = zy - wx
-
-        this.m02 = zx - wy
-        this.m12 = zy + wx
-        this.m22 = 1 - xx - yy
-
+        mat4.fromQuat(this, [x, y, z, w])
         return this
     }
 
-    /**
-     * Col 0, row 0.
-     */
     get m00() {
-        return this[0]
+        return this[IDX_m00]
     }
-    /**
-     * Col 0, row 0.
-     */
     set m00(v: number) {
-        this[0] = v
+        this[IDX_m00] = v
     }
-
-    /**
-     * Col 0, row 1.
-     */
-    get m01() {
-        return this[1]
-    }
-    /**
-     * Col 0, row 1.
-     */
-    set m01(v: number) {
-        this[1] = v
-    }
-
-    /**
-     * Col 0, row 2.
-     */
-    get m02() {
-        return this[2]
-    }
-    /**
-     * Col 0, row 2.
-     */
-    set m02(v: number) {
-        this[2] = v
-    }
-
-    /**
-     * Col 0, row 3.
-     */
-    get m03() {
-        return this[3]
-    }
-    /**
-     * Col 0, row 3.
-     */
-    set m03(v: number) {
-        this[3] = v
-    }
-
-    /**
-     * Col 1, row 0.
-     */
     get m10() {
-        return this[4]
+        return this[IDX_m10]
     }
-    /**
-     * Col 1, row 0.
-     */
     set m10(v: number) {
-        this[4] = v
+        this[IDX_m10] = v
     }
-
-    /**
-     * Col 1, row 1.
-     */
-    get m11() {
-        return this[5]
-    }
-    /**
-     * Col 1, row 1.
-     */
-    set m11(v: number) {
-        this[5] = v
-    }
-
-    /**
-     * Col 1, row 2.
-     */
-    get m12() {
-        return this[6]
-    }
-    /**
-     * Col 1, row 2.
-     */
-    set m12(v: number) {
-        this[6] = v
-    }
-
-    /**
-     * Col 1, row 3.
-     */
-    get m13() {
-        return this[7]
-    }
-    /**
-     * Col 1, row 3.
-     */
-    set m13(v: number) {
-        this[7] = v
-    }
-
-    /**
-     * Col 2, row 0.
-     */
     get m20() {
-        return this[8]
+        return this[IDX_m20]
     }
-    /**
-     * Col 2, row 0.
-     */
     set m20(v: number) {
-        this[8] = v
+        this[IDX_m20] = v
     }
-
-    /**
-     * Col 2, row 1.
-     */
-    get m21() {
-        return this[9]
-    }
-    /**
-     * Col 2, row 1.
-     */
-    set m21(v: number) {
-        this[9] = v
-    }
-
-    /**
-     * Col 2, row 2.
-     */
-    get m22() {
-        return this[10]
-    }
-    /**
-     * Col 2, row 2.
-     */
-    set m22(v: number) {
-        this[10] = v
-    }
-
-    /**
-     * Col 2, row 3.
-     */
-    get m23() {
-        return this[11]
-    }
-    /**
-     * Col 2, row 3.
-     */
-    set m23(v: number) {
-        this[11] = v
-    }
-
-    /**
-     * Col 3, row 0.
-     */
     get m30() {
-        return this[12]
+        return this[IDX_m30]
     }
-    /**
-     * Col 3, row 0.
-     */
     set m30(v: number) {
-        this[12] = v
+        this[IDX_m30] = v
     }
-
-    /**
-     * Col 3, row 1.
-     */
+    get m01() {
+        return this[IDX_m01]
+    }
+    set m01(v: number) {
+        this[IDX_m01] = v
+    }
+    get m11() {
+        return this[IDX_m11]
+    }
+    set m11(v: number) {
+        this[IDX_m11] = v
+    }
+    get m21() {
+        return this[IDX_m21]
+    }
+    set m21(v: number) {
+        this[IDX_m21] = v
+    }
     get m31() {
-        return this[13]
+        return this[IDX_m31]
     }
-    /**
-     * Col 3, row 1.
-     */
     set m31(v: number) {
-        this[13] = v
+        this[IDX_m31] = v
     }
-
-    /**
-     * Col 3, row 2.
-     */
+    get m02() {
+        return this[IDX_m02]
+    }
+    set m02(v: number) {
+        this[IDX_m02] = v
+    }
+    get m12() {
+        return this[IDX_m12]
+    }
+    set m12(v: number) {
+        this[IDX_m12] = v
+    }
+    get m22() {
+        return this[IDX_m22]
+    }
+    set m22(v: number) {
+        this[IDX_m22] = v
+    }
     get m32() {
-        return this[14]
+        return this[IDX_m32]
     }
-    /**
-     * Col 3, row 2.
-     */
     set m32(v: number) {
-        this[14] = v
+        this[IDX_m32] = v
     }
-
-    /**
-     * Col 3, row 3.
-     */
+    get m03() {
+        return this[IDX_m03]
+    }
+    set m03(v: number) {
+        this[IDX_m03] = v
+    }
+    get m13() {
+        return this[IDX_m13]
+    }
+    set m13(v: number) {
+        this[IDX_m13] = v
+    }
+    get m23() {
+        return this[IDX_m23]
+    }
+    set m23(v: number) {
+        this[IDX_m23] = v
+    }
     get m33() {
-        return this[15]
+        return this[IDX_m33]
     }
-    /**
-     * Col 3, row 3.
-     */
     set m33(v: number) {
-        this[15] = v
+        this[IDX_m33] = v
     }
 
     debug(caption = "Mat4") {
@@ -549,3 +339,20 @@ export class TgdMat4 extends Float32Array {
         console.log("   ", [c0[3], c1[3], c2[3], c3[3]].join(" | "))
     }
 }
+
+const IDX_m00 = 0
+const IDX_m10 = 1
+const IDX_m20 = 2
+const IDX_m30 = 3
+const IDX_m01 = 4
+const IDX_m11 = 5
+const IDX_m21 = 6
+const IDX_m31 = 7
+const IDX_m02 = 8
+const IDX_m12 = 9
+const IDX_m22 = 10
+const IDX_m32 = 11
+const IDX_m03 = 12
+const IDX_m13 = 13
+const IDX_m23 = 14
+const IDX_m33 = 15

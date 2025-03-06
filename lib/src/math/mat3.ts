@@ -1,22 +1,23 @@
-import from "gl-"
 import { padColOfNumbers } from "@tgd/debug"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 import { TgdMat4 } from "./mat4"
+import { mat3 } from "gl-matrix"
 
 /**
- * Column-first 4x4 matrix.
+ * Column-first 3x3 matrix.
  *
- * `m23` means row 2 and column 3.
+ * - `m12` means row 2 and column 3 (__A__).
+ * - `m20` means row 3 and column 1 (__B__).
  *
  * ```
  * +-+-+-+
  * | | | |
  * +-+-+-+
- * | | |#|
+ * | | |A|
  * +-+-+-+
- * | | | |
+ * |B| | |
  * +-+-+-+
  * ```
  *
@@ -114,34 +115,13 @@ export class TgdMat3 extends Float32Array {
             ])
         } else {
             // eslint-disable-next-line prefer-rest-params
-            console.error("[TgdMat3] ", arguments)
-            throw Error(`Invalid TgdMat3 initialization!`)
+            console.error("[TgdMat3]", arguments)
+            throw new Error(`Invalid TgdMat3 initialization!`)
         }
     }
 
     multiply(mat: TgdMat3): this {
-        mat3.
-        // prettier-ignore
-        const [
-            a00, a01, a02,
-            a10, a11, a12,
-            a20, a21, a22,
-        ] = this
-        // prettier-ignore
-        const [
-            b00, b01, b02,
-            b10, b11, b12,
-            b20, b21, b22,
-        ] = mat3
-        this.m00 = a00 * b00 + a10 * b01 + a20 * b02
-        this.m10 = a00 * b10 + a10 * b11 + a20 * b12
-        this.m20 = a00 * b20 + a10 * b21 + a20 * b22
-        this.m01 = a01 * b00 + a11 * b01 + a21 * b02
-        this.m11 = a01 * b10 + a11 * b11 + a21 * b12
-        this.m21 = a01 * b20 + a11 * b21 + a21 * b22
-        this.m02 = a02 * b00 + a12 * b01 + a22 * b02
-        this.m12 = a02 * b10 + a12 * b11 + a22 * b12
-        this.m22 = a02 * b20 + a12 * b21 + a22 * b22
+        mat3.multiply(this, this, mat)
         return this
     }
 
@@ -159,35 +139,11 @@ export class TgdMat3 extends Float32Array {
     }
 
     fromQuat({ x, y, z, w }: Readonly<TgdQuat>): TgdMat3 {
-        const x2 = x + x
-        const y2 = y + y
-        const z2 = z + z
-        const xx = x * x2
-        const yx = y * x2
-        const yy = y * y2
-        const zx = z * x2
-        const zy = z * y2
-        const zz = z * z2
-        const wx = w * x2
-        const wy = w * y2
-        const wz = w * z2
-
-        this.m00 = 1 - yy - zz
-        this.m10 = yx - wz
-        this.m20 = zx + wy
-
-        this.m01 = yx + wz
-        this.m11 = 1 - xx - zz
-        this.m21 = zy - wx
-
-        this.m02 = zx - wy
-        this.m12 = zy + wx
-        this.m22 = 1 - xx - yy
-
+        mat3.fromQuat(this, [x, y, z, w])
         return this
     }
 
-    toAxis(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3) {
+    toAxes(axisX: TgdVec3, axisY: TgdVec3, axisZ: TgdVec3) {
         this.toAxisX(axisX)
         this.toAxisY(axisY)
         return this.toAxisZ(axisZ)
@@ -228,66 +184,66 @@ export class TgdMat3 extends Float32Array {
     }
 
     get m00() {
-        return this[0]
+        return this[IDX_m00]
     }
     set m00(v: number) {
-        this[0] = v
-    }
-
-    get m01() {
-        return this[1]
-    }
-    set m01(v: number) {
-        this[1] = v
-    }
-
-    get m02() {
-        return this[2]
-    }
-    set m02(v: number) {
-        this[2] = v
+        this[IDX_m00] = v
     }
 
     get m10() {
-        return this[3]
+        return this[IDX_m10]
     }
     set m10(v: number) {
-        this[3] = v
-    }
-
-    get m11() {
-        return this[4]
-    }
-    set m11(v: number) {
-        this[4] = v
-    }
-
-    get m12() {
-        return this[5]
-    }
-    set m12(v: number) {
-        this[5] = v
+        this[IDX_m10] = v
     }
 
     get m20() {
-        return this[6]
+        return this[IDX_m20]
     }
     set m20(v: number) {
-        this[6] = v
+        this[IDX_m20] = v
+    }
+
+    get m01() {
+        return this[IDX_m01]
+    }
+    set m01(v: number) {
+        this[IDX_m01] = v
+    }
+
+    get m11() {
+        return this[IDX_m11]
+    }
+    set m11(v: number) {
+        this[IDX_m11] = v
     }
 
     get m21() {
-        return this[7]
+        return this[IDX_m21]
     }
     set m21(v: number) {
-        this[7] = v
+        this[IDX_m21] = v
+    }
+
+    get m02() {
+        return this[IDX_m02]
+    }
+    set m02(v: number) {
+        this[IDX_m02] = v
+    }
+
+    get m12() {
+        return this[IDX_m12]
+    }
+    set m12(v: number) {
+        this[IDX_m12] = v
     }
 
     get m22() {
-        return this[8]
+        return this[IDX_m22]
     }
     set m22(v: number) {
-        this[8] = v
+        this[IDX_m22] = v
     }
 
     debug(caption = "Mat3") {
@@ -301,3 +257,13 @@ export class TgdMat3 extends Float32Array {
         console.log("   ", [c0[2], c1[2], c2[2]].join(" | "))
     }
 }
+
+const IDX_m00 = 0
+const IDX_m10 = 1
+const IDX_m20 = 2
+const IDX_m01 = 3
+const IDX_m11 = 4
+const IDX_m21 = 5
+const IDX_m02 = 6
+const IDX_m12 = 7
+const IDX_m22 = 8

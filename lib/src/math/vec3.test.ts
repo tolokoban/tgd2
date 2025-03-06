@@ -1,23 +1,6 @@
 import { ArrayNumber3 } from "@tgd/types"
 import { TgdVec3 } from "./vec3"
-
-function expectVectorsToBeClose(
-    v1: ArrayLike<number>,
-    v2: ArrayLike<number>,
-    precision = 5
-) {
-    try {
-        if (v1.length !== v2.length) throw new Error("Different sizes!")
-        for (let i = 0; i < v1.length; i++) {
-            const d = Math.abs(v1[i] - v2[i])
-            if (d > Math.pow(10, -precision))
-                throw new Error(`${v1[i]} is not close to ${v2[i]}!`)
-        }
-    } catch (ex) {
-        const message = ex instanceof Error ? ex.message : `${ex}`
-        throw new Error(`[${v1}] is not close to [${v2}]: ${message}`)
-    }
-}
+import { expectVectorsToBeClose } from "./common.test"
 
 describe("tgd/math/vec3.ts", () => {
     describe("TgdVec3.distanceToLineSquared()", () => {

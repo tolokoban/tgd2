@@ -155,7 +155,7 @@ export class TgdCanvasGizmo {
             } else {
                 axisY.from(axisZ).cross(axisX)
             }
-            const quat = new TgdQuat().fromAxis(axisX, axisY, axisZ)
+            const quat = new TgdQuat().fromAxes(axisX, axisY, axisZ)
             if (quat.isEqual(camera.orientation)) {
                 quat.rotateAroundY(Math.PI)
             }

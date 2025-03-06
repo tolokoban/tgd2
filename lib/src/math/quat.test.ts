@@ -41,7 +41,7 @@ describe("math/quat.ts", () => {
             [0, 0, 0, 1],
         ],
     ]
-    describe("TgdQuat.fromAxis()", () => {
+    describe("TgdQuat.fromAxes()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
         for (const [X, Y, Z, Q] of cases) {
             it(`should get ${string_(Q)} from ${string_(X)}, ${string_(
@@ -50,7 +50,7 @@ describe("math/quat.ts", () => {
                 const axisX = new TgdVec3(...X)
                 const axisY = new TgdVec3(...Y)
                 const axisZ = new TgdVec3(...Z)
-                quat.fromAxis(axisX, axisY, axisZ)
+                quat.fromAxes(axisX, axisY, axisZ)
                 const got = [quat.x, quat.y, quat.z, quat.w]
                 const exp: number[] = [...Q]
                 expect(got[0]).toBeCloseTo(exp[0], 5)
