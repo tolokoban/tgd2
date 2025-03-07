@@ -3,6 +3,7 @@ import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
+import { ArrayNumber3 } from "@tgd/types"
 
 export type TgdQuatFace = keyof typeof FACES
 
@@ -83,44 +84,22 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
+    fromAxesTransposed(
+        [m00, m01, m02]: Readonly<TgdVec3 | ArrayNumber3>,
+        [m10, m11, m12]: Readonly<TgdVec3 | ArrayNumber3>,
+        [m20, m21, m22]: Readonly<TgdVec3 | ArrayNumber3>
+    ): this {
+        return this.fromAxes([m00, m10, m20], [m01, m11, m21], [m02, m12, m22])
+    }
+
     fromAxes(
-        X: Readonly<TgdVec3>,
-        Y: Readonly<TgdVec3>,
-        Z: Readonly<TgdVec3>
+        X: Readonly<TgdVec3 | ArrayNumber3>,
+        Y: Readonly<TgdVec3 | ArrayNumber3>,
+        Z: Readonly<TgdVec3 | ArrayNumber3>
     ): this {
         const [x, y, z] = Z
         quat.setAxes(this, [-x, -y, -z], X, Y)
         return this
-        // // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
-        // // article "Quaternion Calculus and Fast Animation".
-        // const fTrace = X.x + Y.y + Z.z
-        // if (fTrace > 0) {
-        //     // |w| > 1/2, may as well choose w > 1/2
-        //     const fRoot = Math.sqrt(fTrace + 1) // 2w
-        //     this.w = 0.5 * fRoot
-        //     const halfRoot = 0.5 / fRoot // 1/(4w)
-        //     this.x = (Z.y - Y.z) * halfRoot
-        //     this.y = (X.z - Z.x) * halfRoot
-        //     this.z = (Y.x - X.y) * halfRoot
-        // } else {
-        //     // |w| <= 1/2
-        //     const axis = [X, Y, Z]
-        //     let index = 0
-        //     if (Y.y > X.x) index = 1
-        //     if (Z.z > axis[index][index]) index = 2
-        //     const index_ = (index + 1) % 3
-        //     const k = (index + 2) % 3
-
-        //     let fRoot = Math.sqrt(
-        //         axis[index][index] - axis[index_][index_] - axis[k][k] + 1
-        //     )
-        //     this[index] = 0.5 * fRoot
-        //     fRoot = 0.5 / fRoot
-        //     this[3] = (axis[index_][k] - axis[k][index_]) * fRoot
-        //     this[index_] = (axis[index_][index] + axis[index][index_]) * fRoot
-        //     this[k] = (axis[k][index] + axis[index][k]) * fRoot
-        // }
-        // return this.normalize()
     }
 
     fromMatrix(mat: TgdMat3 | TgdMat4): this {
@@ -264,13 +243,13 @@ export class TgdQuat extends TgdVec4 {
         this.toAxisY(axisY)
         this.toAxisZ(axisZ)
         mat.m00 = axisX.x
-        mat.m10 = axisX.y
-        mat.m20 = axisX.z
-        mat.m01 = axisY.x
+        mat.m01 = axisX.y
+        mat.m02 = axisX.z
+        mat.m10 = axisY.x
         mat.m11 = axisY.y
-        mat.m21 = axisY.z
-        mat.m02 = axisZ.x
-        mat.m12 = axisZ.y
+        mat.m12 = axisY.z
+        mat.m20 = axisZ.x
+        mat.m21 = axisZ.y
         mat.m22 = axisZ.z
         return mat
     }

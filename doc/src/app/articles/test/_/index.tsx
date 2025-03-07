@@ -13,6 +13,10 @@ import {
     TgdPainterFramebuffer,
     tgdCalcDegToRad,
     TgdPainterAxes,
+    TgdMat3,
+    TgdPainterMesh,
+    TgdGeometryBox,
+    TgdMaterialNormals,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -24,18 +28,6 @@ export default function DemoContainer() {
 }
 
 function init(context: TgdContext) {
-    document.addEventListener("keydown", evt => {
-        console.log("🚀 [index] evt.key = ", evt.key) // @FIXME: Remove this line written on 2024-02-16 at 16:02
-        switch (evt.key) {
-            case "0":
-                context.camera.face("+X+Y+Z")
-                break
-            case ".":
-                context.camera.zoom = 1
-                break
-        }
-        context.paint()
-    })
     const camera = new TgdCameraPerspective({
         distance: 3.5,
         far: 100,
@@ -43,16 +35,17 @@ function init(context: TgdContext) {
         fovy: Math.PI / 4,
         zoom: 1,
     })
+    camera.moveTarget(2, 0, 0)
     context.camera = camera
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
-        inertiaOrbit: 0,
-        geo: {
-            lat: 0,
-            lng: 0,
-            minLat: tgdCalcDegToRad(-45),
-            maxLat: tgdCalcDegToRad(+45),
-        },
+        inertiaOrbit: 900,
+        // geo: {
+        //     lat: 0,
+        //     lng: 0,
+        //     minLat: tgdCalcDegToRad(-45),
+        //     maxLat: tgdCalcDegToRad(+45),
+        // },
     })
     context.paint()
     const action = async () => {
@@ -60,6 +53,14 @@ function init(context: TgdContext) {
         if (!asset) return
 
         console.log("Suzanne has been loaded!")
+        const mesh = new TgdPainterMeshGltf(context, {
+            asset,
+        })
+        const box = new TgdPainterMesh(context, {
+            geometry: new TgdGeometryBox(),
+            material: new TgdMaterialNormals(),
+        })
+        box.transfo.setPosition(2, 0, 0)
         const state = new TgdPainterState(context, {
             depth: webglPresetDepth.less,
             children: [
@@ -67,9 +68,8 @@ function init(context: TgdContext) {
                     color: [0.2, 0.1, 0, 1],
                     depth: 1,
                 }),
-                new TgdPainterMeshGltf(context, {
-                    asset,
-                }),
+                mesh,
+                box,
                 new TgdPainterAxes(context, { scale: 10 }),
             ],
         })
@@ -86,12 +86,51 @@ function init(context: TgdContext) {
                 filters: [hue],
                 texture: fb.textureColor0,
                 flipY: true,
-            }),
-            new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1))
+            })
+            // new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1)),
         )
         context.paint()
-        console.log("========================================")
-        console.log(context.debugHierarchy())
+        document.addEventListener("keydown", evt => {
+            const step = tgdCalcDegToRad(15)
+            switch (evt.key) {
+                case "0":
+                    context.camera.face("+X+Y+Z")
+                    mesh.transfo.orientation.face("+X+Y+Z")
+                    break
+                case ".":
+                    context.camera.zoom = 1
+                    break
+                case "6":
+                    if (!evt.shiftKey) {
+                        context.camera.orbitAroundY(step)
+                    } else {
+                        mesh.transfo.orbitAroundY(step)
+                    }
+                    break
+                case "4":
+                    if (!evt.shiftKey) {
+                        context.camera.orbitAroundY(-step)
+                    } else {
+                        mesh.transfo.orbitAroundY(-step)
+                    }
+                    break
+                case "8":
+                    if (!evt.shiftKey) {
+                        context.camera.orbitAroundX(-step)
+                    } else {
+                        mesh.transfo.orbitAroundX(-step)
+                    }
+                    break
+                case "2":
+                    if (!evt.shiftKey) {
+                        context.camera.orbitAroundX(step)
+                    } else {
+                        mesh.transfo.orbitAroundX(step)
+                    }
+                    break
+            }
+            context.paint()
+        })
     }
     void action()
 }

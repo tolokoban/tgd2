@@ -263,8 +263,8 @@ export class TgdControllerCameraOrbit {
         const speed = 3 * (slowDown ? 0.1 : 1) * this.speedOrbit
         const dx = deltaX * speed
         const dy = deltaY * speed
-        if (!keyboard.isDown("x")) camera.orbitAroundY(dx)
-        if (!keyboard.isDown("y")) camera.orbitAroundX(-dy)
+        if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
+        if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
         this.fireOrbitChange()
     }
 
@@ -287,14 +287,10 @@ export class TgdControllerCameraOrbit {
         const vecX = new TgdVec3(vecY).cross(vecZ)
         const mat = new TgdMat3()
         orientation.toMatrix(mat)
-        mat.debug("Current orientation")
         const final = new TgdMat3(vecX, vecY, vecZ)
-        final.debug("Final orientation")
         final.multiply(mat)
-        final.debug("Multiplication")
         this.tmpQuat.fromMatrix(final)
         this.context.camera.orientation = this.tmpQuat
-        this.context.camera.orientation.debug("Camera quaternion")
     }
 
     private readonly handleMoveStart = () => {

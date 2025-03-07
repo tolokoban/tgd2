@@ -40,6 +40,12 @@ describe("math/quat.ts", () => {
             [0, 0, 1],
             [0, 0, 0, 1],
         ],
+        [
+            [0.965926, 0, -0.258819],
+            [0, 1, 0],
+            [0.258819, 0, 0.965926],
+            [0, -0.130526, 0, 0.991445],
+        ],
     ]
     describe("TgdQuat.fromAxes()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
@@ -95,7 +101,7 @@ describe("math/quat.ts", () => {
                 expectVector(gotZ, Z, 5)
             })
         }
-    })
+    })    
 })
 
 function string_(input: Iterable<number>): string {

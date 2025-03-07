@@ -1,6 +1,7 @@
 import { TgdQuat, TgdVec3, TgdMat3, TgdMat4, TgdQuatFace } from "@tgd/math"
 import { TgdEvent } from "../event"
 import { ArrayNumber3, ArrayNumber4 } from ".."
+import { quat } from "gl-matrix"
 
 export interface TgdCameraOptions {
     near?: number
@@ -382,47 +383,22 @@ export abstract class TgdCamera {
     }
 
     orbitAroundX(angleInRadians: number): this {
-        this.updateAxisIfNeeded()
-        const {
-            _axisX: axisX,
-            _axisY: axisY,
-            _axisZ: axisZ,
-            _orientation: orientation,
-        } = this
-        axisX.debug("axis X")
-        axisY.rotateAround(axisX, angleInRadians)
-        axisZ.rotateAround(axisX, angleInRadians)
-        orientation.fromAxes(axisX, axisY, axisZ)
+        const orientation = this._orientation
+        quat.rotateX(orientation, orientation, angleInRadians)
         this.dirtyModelView = true
         return this
     }
 
     orbitAroundY(angleInRadians: number): this {
-        this.updateAxisIfNeeded()
-        const {
-            _axisX: axisX,
-            _axisY: axisY,
-            _axisZ: axisZ,
-            _orientation: orientation,
-        } = this
-        axisX.rotateAround(axisY, angleInRadians)
-        axisZ.rotateAround(axisY, angleInRadians)
-        orientation.fromAxes(axisX, axisY, axisZ)
+        const orientation = this._orientation
+        quat.rotateY(orientation, orientation, angleInRadians)
         this.dirtyModelView = true
         return this
     }
 
     orbitAroundZ(angleInRadians: number): this {
-        this.updateAxisIfNeeded()
-        const {
-            _axisX: axisX,
-            _axisY: axisY,
-            _axisZ: axisZ,
-            _orientation: orientation,
-        } = this
-        axisX.rotateAround(axisZ, angleInRadians)
-        axisY.rotateAround(axisZ, angleInRadians)
-        orientation.fromAxes(axisX, axisY, axisZ)
+        const orientation = this._orientation
+        quat.rotateZ(orientation, orientation, angleInRadians)
         this.dirtyModelView = true
         return this
     }

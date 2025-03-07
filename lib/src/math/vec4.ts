@@ -124,10 +124,10 @@ export class TgdVec4 extends Float32Array {
      */
     applyMatrix(mat: TgdMat4): this {
         const { x, y, z, w } = this
-        this.x = x * mat.m00 + y * mat.m10 + z * mat.m20 + w * mat.m30
-        this.y = x * mat.m01 + y * mat.m11 + z * mat.m21 + w * mat.m31
-        this.z = x * mat.m02 + y * mat.m12 + z * mat.m22 + w * mat.m32
-        this.w = x * mat.m03 + y * mat.m13 + z * mat.m23 + w * mat.m33
+        this.x = x * mat.m00 + y * mat.m01 + z * mat.m02 + w * mat.m03
+        this.y = x * mat.m10 + y * mat.m11 + z * mat.m12 + w * mat.m13
+        this.z = x * mat.m20 + y * mat.m21 + z * mat.m22 + w * mat.m23
+        this.w = x * mat.m30 + y * mat.m31 + z * mat.m32 + w * mat.m33
         return this
     }
 
@@ -214,6 +214,10 @@ export class TgdVec4 extends Float32Array {
     debug(caption = "vec4") {
         const { x, y, z, w } = this
         const out: string[] = [x, y, z, w].map(n => n.toFixed(6))
-        console.log(`${caption}:   `, out.join(" | "))
+        console.log(
+            `${caption}:   `,
+            out.join(" | "),
+            `  (length = ${this.size})`
+        )
     }
 }
