@@ -11,6 +11,8 @@ import {
     TgdPainterState,
     webglPresetDepth,
     TgdPainterFramebuffer,
+    tgdCalcDegToRad,
+    TgdPainterAxes,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -35,7 +37,7 @@ function init(context: TgdContext) {
         context.paint()
     })
     const camera = new TgdCameraPerspective({
-        distance: 3,
+        distance: 3.5,
         far: 100,
         near: 0.1,
         fovy: Math.PI / 4,
@@ -44,7 +46,13 @@ function init(context: TgdContext) {
     context.camera = camera
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
-        inertiaOrbit: 900,
+        inertiaOrbit: 0,
+        geo: {
+            lat: 0,
+            lng: 0,
+            minLat: tgdCalcDegToRad(-45),
+            maxLat: tgdCalcDegToRad(+45),
+        },
     })
     context.paint()
     const action = async () => {
@@ -56,12 +64,13 @@ function init(context: TgdContext) {
             depth: webglPresetDepth.less,
             children: [
                 new TgdPainterClear(context, {
-                    color: [0, 0.3, 0, 1],
+                    color: [0.2, 0.1, 0, 1],
                     depth: 1,
                 }),
                 new TgdPainterMeshGltf(context, {
                     asset,
                 }),
+                new TgdPainterAxes(context, { scale: 10 }),
             ],
         })
         const fb = new TgdPainterFramebuffer(context, {

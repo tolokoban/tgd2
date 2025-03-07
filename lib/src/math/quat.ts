@@ -88,7 +88,8 @@ export class TgdQuat extends TgdVec4 {
         Y: Readonly<TgdVec3>,
         Z: Readonly<TgdVec3>
     ): this {
-        quat.setAxes(this, X, Y, Z)
+        const [x, y, z] = Z
+        quat.setAxes(this, [-x, -y, -z], X, Y)
         return this
         // // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
         // // article "Quaternion Calculus and Fast Animation".
@@ -122,9 +123,9 @@ export class TgdQuat extends TgdVec4 {
         // return this.normalize()
     }
 
-    fromMatrix(mat: TgdMat3 | TgdMat4) {
-        mat.toAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
-        return this.fromAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
+    fromMatrix(mat: TgdMat3 | TgdMat4): this {
+        quat.fromMat3(this, mat)
+        return this
     }
 
     rotateAround(axis: TgdVec3, angleInRadians: number): this {

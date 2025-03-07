@@ -1,4 +1,5 @@
-import { TgdMath, TgdVec2 } from "../math"
+import { tgdCalcDegToRad } from "@tgd/utils"
+import { TgdVec2 } from "../math"
 import { TgdFilter } from "./filter"
 
 export interface TgdFilterBlurOptions {
@@ -82,7 +83,7 @@ function figureOutDirection(
     if (direction === undefined) return DEFAULT_DIRECTION
 
     if (typeof direction === "number") {
-        const ang = TgdMath.degreesToRadians(direction)
+        const ang = tgdCalcDegToRad(direction)
         return new TgdVec2(Math.cos(ang), Math.sin(ang))
     }
 

@@ -1,12 +1,11 @@
 import {
+    tgdCalcDegToRad,
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdFilterVerbatim,
-    TgdFilterZoom,
     TgdGeometryPlane,
     TgdMaterialSolid,
-    TgdMath,
     TgdPainterClear,
     TgdPainterDebugStencil,
     TgdPainterFilter,
@@ -34,16 +33,16 @@ function init(context: TgdContext, assets: Assets) {
         distance: 2,
         far: 100,
         near: 0.01,
-        fovy: TgdMath.degreesToRadians(35),
+        fovy: tgdCalcDegToRad(35),
         zoom: 1,
     })
     new TgdControllerCameraOrbit(context, {
         speedPanning: 0,
         inertiaOrbit: 1000,
         geo: {
-            lat: TgdMath.degreesToRadians(50),
-            minLat: TgdMath.degreesToRadians(20),
-            maxLat: TgdMath.degreesToRadians(80),
+            lat: tgdCalcDegToRad(50),
+            minLat: tgdCalcDegToRad(20),
+            maxLat: tgdCalcDegToRad(80),
         },
     })
     const clear = new TgdPainterClear(context, {

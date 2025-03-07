@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix"
 import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "../types"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
@@ -30,25 +31,12 @@ export class TgdTransfo {
     get matrix(): Readonly<TgdMat4> {
         if (this.dirty) {
             const m = this._matrix
-            m.m03 = 0
-            m.m13 = 0
-            m.m23 = 0
-            m.m33 = 1
-            const [tx, ty, tz] = this._position
-            m.m30 = tx
-            m.m31 = ty
-            m.m32 = tz
-            m.fromQuat(this._orientation)
-            const [sx, sy, sz] = this._scale
-            m.m00 *= sx
-            m.m01 *= sx
-            m.m03 *= sx
-            m.m10 *= sy
-            m.m11 *= sy
-            m.m13 *= sy
-            m.m20 *= sz
-            m.m21 *= sz
-            m.m23 *= sz
+            mat4.fromRotationTranslationScale(
+                m,
+                this._orientation,
+                this._position,
+                this._scale
+            )
             this.dirty = false
         }
         return this._matrix

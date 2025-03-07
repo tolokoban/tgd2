@@ -1,4 +1,4 @@
-export * from "./axis"
+export * from "./axes"
 export * from "./background"
 export * from "./clear"
 export * from "./debug"

@@ -1,5 +1,6 @@
 import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdCamera, TgdCameraOptions } from "./camera"
+import { mat4 } from "gl-matrix"
 
 export interface TgdCameraPerspectiveOptions extends TgdCameraOptions {
     fovy?: number
@@ -79,29 +80,9 @@ export class TgdCameraPerspective extends TgdCamera {
         const near = this._near
         const far = this._far
         const out = this._matrixProjection
-        const f = this.zoom / Math.tan(fovy / 2)
-        out[0] = f / aspect
-        out[1] = 0
-        out[2] = 0
-        out[3] = 0
-        out[4] = 0
-        out[5] = f
-        out[6] = 0
-        out[7] = 0
-        out[8] = 0
-        out[9] = 0
-        out[11] = -1
-        out[12] = 0
-        out[13] = 0
-        out[15] = 0
-        if (far === Infinity) {
-            out[10] = -1
-            out[14] = -2 * near
-        } else {
-            const nf = 1 / (near - far)
-            out[10] = (far + near) * nf
-            out[14] = 2 * far * near * nf
-        }
+        mat4.perspective(out, fovy, aspect, near, far)
+        out[0] *= this.zoom
+        out[5] *= this.zoom
         this.dirtyProjection = true
     }
 }

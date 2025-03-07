@@ -5,24 +5,24 @@ import { TgdDataset } from "@tgd/dataset"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdVec4 } from "@tgd/math"
 
-import VERT from "./axis.vert"
-import FRAG from "./axis.frag"
+import VERT from "./axes.vert"
+import FRAG from "./axes.frag"
 
-export type TgdPainterAxisOptions = {
+export type TgdPainterAxesOptions = {
     x: number
     y: number
     z: number
     scale: number
 }
 
-export class TgdPainterAxis extends TgdPainter {
+export class TgdPainterAxes extends TgdPainter {
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
     private readonly translateAndScale: TgdVec4
 
     constructor(
         public readonly context: TgdContext,
-        { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxisOptions> = {}
+        { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxesOptions> = {}
     ) {
         super()
         const prg = new TgdProgram(context.gl, {

@@ -1,10 +1,10 @@
-import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace } from "@tgd/math"
-import { TgdMat3 } from "@tgd/math/mat3"
+import { TgdQuat, TgdVec3, TgdMat3, TgdMat4, TgdQuatFace } from "@tgd/math"
 import { TgdEvent } from "../event"
 import { ArrayNumber3, ArrayNumber4 } from ".."
 
 export interface TgdCameraOptions {
     near?: number
+    /** Can be Infinity for perspective camera (`Number.POSITIVE_INFINITY`) */
     far?: number
     target?: ArrayNumber3 | TgdVec3
     orientation?: ArrayNumber4 | TgdQuat
@@ -365,14 +365,13 @@ export abstract class TgdCamera {
         const { _target: target } = this
         this.updateAxisIfNeeded()
         const { _axisX: axisX, _axisY: axisY, _axisZ: axisZ, tmpVec3 } = this
-        tmpVec3
-            .from(axisX)
-            .scale(x)
-            .addWithScale(axisY, y)
-            .addWithScale(axisZ, z)
-        target.x += tmpVec3.x
-        target.y += tmpVec3.y
-        target.z += tmpVec3.z
+        target.add(
+            tmpVec3
+                .from(axisX)
+                .scale(x)
+                .addWithScale(axisY, y)
+                .addWithScale(axisZ, z)
+        )
         this.dirtyModelView = true
     }
 
@@ -390,6 +389,7 @@ export abstract class TgdCamera {
             _axisZ: axisZ,
             _orientation: orientation,
         } = this
+        axisX.debug("axis X")
         axisY.rotateAround(axisX, angleInRadians)
         axisZ.rotateAround(axisX, angleInRadians)
         orientation.fromAxes(axisX, axisY, axisZ)

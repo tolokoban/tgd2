@@ -5,6 +5,10 @@ import { TgdMat4 } from "./mat4"
 import { TgdVec4 } from "./vec4"
 
 export class TgdVec3 extends Float32Array {
+    static X: Readonly<TgdVec3> = new TgdVec3(1, 0, 0)
+    static Y: Readonly<TgdVec3> = new TgdVec3(0, 1, 0)
+    static Z: Readonly<TgdVec3> = new TgdVec3(0, 0, 1)
+
     static newFrom([x, y, z]:
         | TgdVec3
         | TgdVec4
@@ -215,9 +219,7 @@ export class TgdVec3 extends Float32Array {
     }
 
     get size() {
-        return Math.hypot(
-            this[0], this[1], this[2]
-        )
+        return Math.hypot(this[0], this[1], this[2])
     }
 
     normalize(): this {

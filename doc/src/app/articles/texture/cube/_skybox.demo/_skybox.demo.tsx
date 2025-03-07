@@ -3,7 +3,7 @@ import {
     TgdCameraNode,
     TgdCameraPerspective,
     TgdContext,
-    TgdPainterAxis,
+    TgdPainterAxes,
     TgdPainterBackground,
     TgdPainterLogic,
     TgdPainterNode,

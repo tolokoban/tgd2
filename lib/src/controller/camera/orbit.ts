@@ -13,6 +13,7 @@ import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
 import { TgdContext } from "@tgd/context"
+import { quat } from "gl-matrix"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -62,17 +63,26 @@ export interface TgdControllerCameraOrbitOptions {
      * before the zoom event. If it returns `false`,
      * the event is not dispatched.
      */
-    onZoomRequest(this: void, event: TgdControllerCameraOrbitZoomRequest): boolean
+    onZoomRequest(
+        this: void,
+        event: TgdControllerCameraOrbitZoomRequest
+    ): boolean
     /**
      * If this attribute is defined, the orbit will follow latitude/longitude.
      * You can also add limits.
      */
     geo: Partial<{
+        /** Expressed in radians */
         lat: number
+        /** Expressed in radians */
         lng: number
+        /** Expressed in radians */
         minLat: number
+        /** Expressed in radians */
         maxLat: number
+        /** Expressed in radians */
         maxLng: number
+        /** Expressed in radians */
         minLng: number
     }>
 }
@@ -130,6 +140,7 @@ export class TgdControllerCameraOrbit {
         maxLng: number
         minLng: number
     }
+    private readonly tmpQuat = new TgdQuat()
 
     constructor(
         private readonly context: TgdContext,
@@ -252,8 +263,8 @@ export class TgdControllerCameraOrbit {
         const speed = 3 * (slowDown ? 0.1 : 1) * this.speedOrbit
         const dx = deltaX * speed
         const dy = deltaY * speed
-        if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
-        if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
+        if (!keyboard.isDown("x")) camera.orbitAroundY(dx)
+        if (!keyboard.isDown("y")) camera.orbitAroundX(-dy)
         this.fireOrbitChange()
     }
 
@@ -263,22 +274,27 @@ export class TgdControllerCameraOrbit {
      * @param lng Expressed in radians
      */
     public orbitGeo(lat: number, lng: number) {
-        const { geo: latlng } = this
-        if (!latlng) return
+        const { geo } = this
+        if (!geo) return
 
-        lat = tgdCalcClamp(lat, latlng.minLat, latlng.maxLat)
-        latlng.lat = lat
-        lng = tgdCalcClamp(lng, latlng.minLng, latlng.maxLng)
-        latlng.lng = lng
+        lat = tgdCalcClamp(lat, geo.minLat, geo.maxLat)
+        geo.lat = lat
+        lng = tgdCalcClamp(lng, geo.minLng, geo.maxLng)
+        geo.lng = lng
         const { orientation } = this.cameraInitialState
         const vecZ = makeGeoVec3(lat, lng)
         const vecY = makeGeoVec3(lat + Math.PI / 2, lng)
         const vecX = new TgdVec3(vecY).cross(vecZ)
         const mat = new TgdMat3()
         orientation.toMatrix(mat)
+        mat.debug("Current orientation")
         const final = new TgdMat3(vecX, vecY, vecZ)
+        final.debug("Final orientation")
         final.multiply(mat)
-        this.context.camera.orientation = TgdQuat.fromMatrix(final)
+        final.debug("Multiplication")
+        this.tmpQuat.fromMatrix(final)
+        this.context.camera.orientation = this.tmpQuat
+        this.context.camera.orientation.debug("Camera quaternion")
     }
 
     private readonly handleMoveStart = () => {

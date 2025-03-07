@@ -247,14 +247,14 @@ export class TgdMat3 extends Float32Array {
     }
 
     debug(caption = "Mat3") {
-        const c0 = padColOfNumbers([this.m00, this.m01, this.m02])
-        const c1 = padColOfNumbers([this.m10, this.m11, this.m12])
-        const c2 = padColOfNumbers([this.m20, this.m21, this.m22])
+        const row0 = padColOfNumbers([this.m00, this.m01, this.m02])
+        const row1 = padColOfNumbers([this.m10, this.m11, this.m12])
+        const row2 = padColOfNumbers([this.m20, this.m21, this.m22])
 
-        console.log(caption)
-        console.log("   ", [c0[0], c1[0], c2[0]].join(" | "))
-        console.log("   ", [c0[1], c1[1], c2[1]].join(" | "))
-        console.log("   ", [c0[2], c1[2], c2[2]].join(" | "))
+        console.log(caption, this.slice())
+        console.log("   ", row0.join(" | "))
+        console.log("   ", row1.join(" | "))
+        console.log("   ", row2.join(" | "))
     }
 }
 
