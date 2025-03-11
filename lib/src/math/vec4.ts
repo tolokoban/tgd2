@@ -90,6 +90,17 @@ export class TgdVec4 extends Float32Array {
         return this
     }
 
+    /**
+     * Warning! The `w` component will stay unchanged.
+     */
+    fromVec3(vec: Readonly<TgdVec3 | ArrayNumber3>) {
+        const [x, y, z] = vec
+        this.x = x
+        this.y = y
+        this.z = z
+        return this
+    }
+
     clone() {
         return new TgdVec4(this)
     }

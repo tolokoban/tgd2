@@ -1,7 +1,16 @@
-import { TgdQuat, TgdVec3, TgdMat3, TgdMat4, TgdQuatFace } from "@tgd/math"
+import {
+    TgdQuat,
+    TgdVec3,
+    TgdMat3,
+    TgdMat4,
+    TgdQuatFace,
+    TgdVec4,
+    TgdTransfo,
+} from "@tgd/math"
 import { TgdEvent } from "../event"
 import { ArrayNumber3, ArrayNumber4 } from ".."
 import { quat } from "gl-matrix"
+import { TgdInterfaceTransformable } from "../interface"
 
 export interface TgdCameraOptions {
     near?: number
@@ -23,7 +32,7 @@ export interface TgdCameraState {
     shift: TgdVec3
 }
 
-export abstract class TgdCamera {
+export abstract class TgdCamera implements TgdInterfaceTransformable {
     private static incrementalId = 1
 
     /**
@@ -31,6 +40,7 @@ export abstract class TgdCamera {
      */
     public readonly eventTransformChange = new TgdEvent<TgdCamera>()
     public readonly name: string
+    public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
 
     private _screenWidth = 1920
     private _screenHeight = 1080
@@ -437,17 +447,27 @@ export abstract class TgdCamera {
         const { x: sx, y: sy, z: sz } = this._shift
         const { x: tx, y: ty, z: tz } = this._target
         const { x: ax, y: ay, z: az } = this._axisZ
+        this._axisZ.debug("Axis Z")
         _position.x = tx + d * ax
         _position.y = ty + d * ay
         _position.z = tz + d * az
         _position.addWithScale(this._axisX, sx)
         _position.addWithScale(this._axisY, sy)
         _position.addWithScale(this._axisZ, sz)
-        tmpVec3.from(_position).applyMatrix(tmpMat3.transpose()).scale(-1)
-        mat.m03 = tmpVec3.x
-        mat.m13 = tmpVec3.y
-        mat.m23 = tmpVec3.z
+        this._target.debug("Target")
+        this._position.debug("position")
+        tmpVec3.from(_position).applyMatrix(tmpMat3.transpose())
         mat.fromMat3(tmpMat3)
+        mat.m03 = -tmpVec3.x
+        mat.m13 = -tmpVec3.y
+        mat.m23 = -tmpVec3.z
+        mat.reset()
+        mat.m23 = 15
+        mat.invert()
+        mat.debug("model view")
+        const p = new TgdVec4(this._target.x, this._target.y, this._target.z, 1)
+        p.applyMatrix(mat)
+        p.debug("Point in camera space")
         this.dirtyModelView = false
     }
 

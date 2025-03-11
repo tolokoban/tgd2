@@ -1,4 +1,5 @@
-import { ArrayNumber3, ArrayNumber4 } from ".."
+import { quat, vec3 } from "gl-matrix"
+import { ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
 import { tgdCalcMix } from "../utils/math"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
@@ -113,11 +114,16 @@ export class TgdVec3 extends Float32Array {
     /**
      * V := M×V
      */
-    applyMatrix(mat: Readonly<TgdMat3 | TgdMat4>): this {
+    applyMatrix(matrix: Readonly<TgdMat3 | TgdMat4>): this {
         const { x, y, z } = this
-        this.x = x * mat.m00 + y * mat.m10 + z * mat.m20
-        this.y = x * mat.m01 + y * mat.m11 + z * mat.m21
-        this.z = x * mat.m02 + y * mat.m12 + z * mat.m22
+        this.x = x * matrix.m00 + y * matrix.m10 + z * matrix.m20
+        this.y = x * matrix.m01 + y * matrix.m11 + z * matrix.m21
+        this.z = x * matrix.m02 + y * matrix.m12 + z * matrix.m22
+        return this
+    }
+
+    applyQuaternion(quaternion: Readonly<TgdQuat | ArrayNumber4>): this {
+        vec3.transformQuat(this, this, quaternion)
         return this
     }
 

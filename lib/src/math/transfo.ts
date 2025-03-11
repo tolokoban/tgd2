@@ -17,7 +17,9 @@ export class TgdTransfo {
     private readonly _position = new TgdVec3(0, 0, 0)
     private readonly _orientation = new TgdQuat(0, 0, 0, 1)
     private readonly _scale = new TgdVec3(1, 1, 1)
+    private _distance = 0
 
+    private readonly tmpMat4 = new TgdMat4()
     private readonly tmpMat3 = new TgdMat3()
     private readonly tmpVec3 = new TgdVec3()
 
@@ -37,6 +39,16 @@ export class TgdTransfo {
                 this._position,
                 this._scale
             )
+            const d = this._distance
+            if (d !== 0) {
+                this.tmpVec3.reset(0, 0, d)
+                this.tmpVec3.scale(d).applyQuaternion(this._orientation)
+                m.m03 += this.tmpVec3.x
+                m.m13 += this.tmpVec3.y
+                m.m23 += this.tmpVec3.z
+                console.log()
+                m.debug("Matrix")
+            }
             this.dirty = false
         }
         return this._matrix
@@ -50,6 +62,18 @@ export class TgdTransfo {
     reset(): this {
         this._matrix.reset()
         this.dirty = false
+        return this
+    }
+
+    get distance() {
+        return this._distance
+    }
+    set distance(value: number) {
+        this._distance = value
+        this.setDirty()
+    }
+    setDistance(value: number): this {
+        this.distance = value
         return this
     }
 
@@ -103,7 +127,7 @@ export class TgdTransfo {
     orbitAroundY(angleInRadians: number): this {
         this.tmpMat3.fromQuat(this._orientation)
         this.tmpMat3.toAxisY(this.tmpVec3)
-        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this._orientation.rotateAround(this.tmpVec3.scale(-1), angleInRadians)
         this.setDirty()
         return this
     }

@@ -40,12 +40,12 @@ function init(context: TgdContext) {
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
-        // geo: {
-        //     lat: 0,
-        //     lng: 0,
-        //     minLat: tgdCalcDegToRad(-45),
-        //     maxLat: tgdCalcDegToRad(+45),
-        // },
+        geo: {
+            lat: 0,
+            lng: 0,
+            minLat: tgdCalcDegToRad(-60),
+            maxLat: tgdCalcDegToRad(+60),
+        },
     })
     context.paint()
     const action = async () => {
@@ -60,7 +60,12 @@ function init(context: TgdContext) {
             geometry: new TgdGeometryBox(),
             material: new TgdMaterialNormals(),
         })
-        box.transfo.setPosition(2, 0, 0)
+        box.transfo.setPosition(0, 0, 0).distance = 2
+        const box2 = new TgdPainterMesh(context, {
+            geometry: new TgdGeometryBox(),
+            material: new TgdMaterialNormals(),
+        })
+        box2.transfo.setPosition(0, 1, 0)
         const state = new TgdPainterState(context, {
             depth: webglPresetDepth.less,
             children: [
@@ -68,8 +73,9 @@ function init(context: TgdContext) {
                     color: [0.2, 0.1, 0, 1],
                     depth: 1,
                 }),
-                mesh,
+                // mesh,
                 box,
+                box2,
                 new TgdPainterAxes(context, { scale: 10 }),
             ],
         })
@@ -87,45 +93,50 @@ function init(context: TgdContext) {
                 texture: fb.textureColor0,
                 flipY: true,
             })
-            // new TgdPainterLogic(time => (hue.hueShiftInDegrees = time * 0.1)),
+            // new TgdPainterLogic((_time, delay) =>
+            //     box.transfo.orbitAroundY(delay)
+            // )
         )
-        context.paint()
+        context.play()
         document.addEventListener("keydown", evt => {
             const step = tgdCalcDegToRad(15)
             switch (evt.key) {
                 case "0":
                     context.camera.face("+X+Y+Z")
+                    context.camera.distance = 15
+                    context.camera.zoom = 1
+                    context.camera.setTarget(0, 0, 0)
                     mesh.transfo.orientation.face("+X+Y+Z")
                     break
                 case ".":
                     context.camera.zoom = 1
                     break
                 case "6":
-                    if (!evt.shiftKey) {
+                    if (evt.shiftKey) {
                         context.camera.orbitAroundY(step)
                     } else {
-                        mesh.transfo.orbitAroundY(step)
+                        box.transfo.orbitAroundY(step)
                     }
                     break
                 case "4":
-                    if (!evt.shiftKey) {
+                    if (evt.shiftKey) {
                         context.camera.orbitAroundY(-step)
                     } else {
-                        mesh.transfo.orbitAroundY(-step)
+                        box.transfo.orbitAroundY(-step)
                     }
                     break
                 case "8":
-                    if (!evt.shiftKey) {
+                    if (evt.shiftKey) {
                         context.camera.orbitAroundX(-step)
                     } else {
-                        mesh.transfo.orbitAroundX(-step)
+                        box.transfo.orbitAroundX(-step)
                     }
                     break
                 case "2":
-                    if (!evt.shiftKey) {
+                    if (evt.shiftKey) {
                         context.camera.orbitAroundX(step)
                     } else {
-                        mesh.transfo.orbitAroundX(step)
+                        box.transfo.orbitAroundX(step)
                     }
                     break
             }
