@@ -1,4 +1,4 @@
-import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace, TgdTransfo } from "@tgd/math"
+import { TgdQuat, TgdVec3, TgdMat4, TgdTransfo } from "@tgd/math"
 import { ArrayNumber3, ArrayNumber4 } from ".."
 import { TgdInterfaceTransformable } from "../interface"
 
@@ -58,6 +58,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
             .setDistance(options.distance ?? 10)
             .setPosition(tx, ty, tz)
             .setOrientation(qx, qy, qz, qw)
+        transfo.debug("Camera transfo")
         this.zoom = options.zoom ?? 1
     }
 
@@ -164,18 +165,11 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     abstract copyProjectionFrom(camera: TgdCamera): this
 
+    /**
+     * This matrix will transform a world coordinate into a camera coordinate.
+     */
     get matrixModelView(): Readonly<TgdMat4> {
-        const mat = this._matrixModelView
-        mat.from(this.transfo.matrix)
-        return this._matrixModelView
-    }
-
-    get matrixModelViewInverse(): Readonly<TgdMat4> {
-        // if (this.dirtyModelViewInverse) {
-        this._matrixModelViewInverse.invert(this.matrixModelView)
-        // this.dirtyModelViewInverse = false
-        // }
-        return this._matrixModelViewInverse
+        return this._matrixModelView.invert(this.transfo.matrix)
     }
 
     abstract get matrixProjection(): Readonly<TgdMat4>
@@ -201,8 +195,11 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     debug(caption?: string) {
         const name = caption ?? this.name
+        console.log("Distance:", this.transfo.distance)
+        console.log("Zoom:", this.zoom)
         this.transfo.orientation.debug(`${name} orientation`)
         this.transfo.position.debug(`${name} target`)
+        this.transfo.actualPosition.debug(`${name} actual position`)
         this.matrixModelView.debug(`${name} matrixModelView`)
         this.matrixProjection.debug(`${name} matrixProjection`)
     }

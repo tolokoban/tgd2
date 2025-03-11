@@ -41,7 +41,7 @@ export class TgdTransfo {
         return this._updateCount
     }
 
-    get matrix(): Readonly<TgdMat4> {
+    get matrix(): TgdMat4 {
         this.updateIfNeeded()
         return this._matrix
     }
@@ -79,8 +79,7 @@ export class TgdTransfo {
         m.toAxisZ(this._axisZ)
         const d = this._distance
         if (d !== 0) {
-            this.tmpVec3.reset(0, 0, d)
-            this.tmpVec3.scale(d).applyQuaternion(this._orientation)
+            this.tmpVec3.reset(0, 0, d).applyQuaternion(this._orientation)
             m.m03 += this.tmpVec3.x
             m.m13 += this.tmpVec3.y
             m.m23 += this.tmpVec3.z
@@ -212,6 +211,15 @@ export class TgdTransfo {
             .addWithScale(this.axisZ, dz)
         this.setDirty()
         return this
+    }
+
+    debug(caption = "Transfo") {
+        console.log(caption)
+        console.log("Distance:", this.distance)
+        this.orientation.debug("Orientation")
+        this.scale.debug("Scale")
+        this.position.debug("Position")
+        this.matrix.debug("Matrix")
     }
 
     private setDirty() {

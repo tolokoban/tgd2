@@ -35,17 +35,20 @@ function init(context: TgdContext) {
         fovy: Math.PI / 8,
         zoom: 1,
     })
-    camera.transfo.moveAlongAxes(2, 0, 0)
+    camera.transfo.moveAlongAxes(0, 1, 0)
     context.camera = camera
     camera.transfo.orientation.face("+X+Y+Z")
+    camera.transfo.matrix.reset()
+    camera.transfo.debug()
+    camera.matrixModelView.debug("Model View")
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
-        geo: {
-            lat: 0,
-            lng: 0,
-            minLat: tgdCalcDegToRad(-60),
-            maxLat: tgdCalcDegToRad(+60),
-        },
+        // geo: {
+        //     lat: 0,
+        //     lng: 0,
+        //     minLat: tgdCalcDegToRad(-60),
+        //     maxLat: tgdCalcDegToRad(+60),
+        // },
     })
     context.paint()
     const action = async () => {
@@ -56,6 +59,7 @@ function init(context: TgdContext) {
         const mesh = new TgdPainterMeshGltf(context, {
             asset,
         })
+        mesh.transfo.setPosition(0, 0, -3)
         const box = new TgdPainterMesh(context, {
             geometry: new TgdGeometryBox(),
             material: new TgdMaterialNormals(),
@@ -73,7 +77,7 @@ function init(context: TgdContext) {
                     color: [0.2, 0.1, 0, 1],
                     depth: 1,
                 }),
-                // mesh,
+                mesh,
                 box,
                 box2,
                 new TgdPainterAxes(context, { scale: 10 }),
@@ -124,9 +128,14 @@ function init(context: TgdContext) {
                 case "2":
                     angX = step
                     break
+                case " ":
+                    context.camera.transfo.debug("SPACE")
+                    context.paint()
+                    return
             }
             context.camera.transfo.orbitAroundX(angX)
             context.camera.transfo.orbitAroundY(angY)
+            context.camera.debug("Camera")
             context.paint()
         })
     }
