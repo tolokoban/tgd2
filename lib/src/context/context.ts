@@ -64,7 +64,13 @@ export class TgdContext {
     public readonly implementationColorReadType: number
     public readonly eventPaint = new TgdEvent<TgdContext>()
 
-    private _camera: TgdCamera
+    private _camera: TgdCamera = new TgdCameraPerspective({
+        transfo: { distance: 15 },
+        far: 100,
+        near: 0.1,
+        fovy: Math.PI / 8,
+        zoom: 1,
+    })
     private _aspectRatio = 1
     private _aspectRatioInverse = 1
     private readonly observer: ResizeObserver
@@ -109,7 +115,7 @@ export class TgdContext {
         })
         this.observer.observe(canvas)
         this.inputs = new TgdInputs(canvas)
-        this._camera = options.camera ?? new TgdCameraPerspective()
+        if (options.camera) this._camera = options.camera
         this.painters = new TgdPainterGroup()
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
         this.painters.name = this.name

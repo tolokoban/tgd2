@@ -30,7 +30,7 @@ export default function DemoContainer() {
 
 function init(context: TgdContext) {
     const camera = new TgdCameraPerspective({
-        distance: 15,
+        transfo: { distance: 15 },
         far: 100,
         near: 0.1,
         fovy: Math.PI / 8,

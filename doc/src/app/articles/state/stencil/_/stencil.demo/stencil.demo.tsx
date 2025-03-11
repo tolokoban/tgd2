@@ -22,7 +22,7 @@ import SuzanneURL from "@/assets/mesh/suzanne.glb"
 function init(ctx: TgdContext, assets: Assets) {
     // #begin
     const camera = new TgdCameraPerspective({
-        distance: 3,
+        transfo: { distance: 3 },
         far: 100,
         near: 0.01,
         fovy: Math.PI / 4,

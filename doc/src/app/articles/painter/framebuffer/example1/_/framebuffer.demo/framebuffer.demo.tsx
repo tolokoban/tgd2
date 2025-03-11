@@ -26,7 +26,7 @@ function init(context: TgdContext, assets: Assets) {
     // #begin
     const defaultTexture = new TgdTexture2D(context)
     context.camera = new TgdCameraPerspective({
-        distance: 6,
+        transfo: { distance: 6 },
         far: 100,
         near: 0.01,
         fovy: Math.PI / 4,

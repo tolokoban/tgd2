@@ -30,7 +30,7 @@ function init(context: TgdContext, assets: Assets) {
     // #begin
     const defaultTexture = new TgdTexture2D(context)
     context.camera = new TgdCameraPerspective({
-        distance: 2,
+        transfo: { distance: 2 },
         far: 100,
         near: 0.01,
         fovy: tgdCalcDegToRad(35),

@@ -16,7 +16,7 @@ import BackgroundURL from "@/assets/image/dino.webp"
 function init(context: TgdContext, assets: Assets) {
     // #begin
     context.camera = new TgdCameraPerspective({
-        distance: 3,
+        transfo: { distance: 3 },
         far: 100,
         near: 0.01,
         fovy: Math.PI / 4,

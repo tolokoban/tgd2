@@ -1,16 +1,11 @@
 import { TgdMat4 } from "@tgd/math"
 import { TgdPainter } from "../painter"
 import { TgdTransfo, TgdTransfoOptions } from "../../math/transfo"
-import { TgdInterfaceTransformable } from "../../interface"
-
-interface TgdPainterNodeChild extends TgdInterfaceTransformable {
-    paint(time: number, delay: number): void
-    delete(): void
-}
+import { TgdInterfaceTransformablePainter } from "../../interface"
 
 export interface TgdPainterNodeOptions {
     transfo: TgdTransfo | Partial<TgdTransfoOptions>
-    painter: TgdPainterNodeChild
+    painter: TgdInterfaceTransformablePainter
     children: TgdPainterNode[]
 }
 
@@ -22,7 +17,7 @@ export interface TgdPainterNodeOptions {
  */
 export class TgdPainterNode extends TgdPainter {
     public readonly transfo: TgdTransfo
-    public painter: TgdPainterNodeChild | null = null
+    public painter: TgdInterfaceTransformablePainter | null = null
 
     private readonly parentMatrix = new TgdMat4()
     private readonly globalMatrix = new TgdMat4()

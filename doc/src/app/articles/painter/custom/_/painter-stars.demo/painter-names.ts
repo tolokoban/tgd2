@@ -20,10 +20,9 @@ export class PainterNames extends TgdPainter {
     private readonly count: number
 
     private readonly fixedCamera = new TgdCameraPerspective({
-        distance: 0,
+        transfo: { distance: 0, position: [0, 0, 0] },
         near: 0.1,
         far: 2.0,
-        target: [0, 0, 0],
         fovy: Math.PI / 3,
     })
 

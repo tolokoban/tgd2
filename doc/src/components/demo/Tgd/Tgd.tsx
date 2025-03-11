@@ -8,8 +8,9 @@ import {
 } from "@tolokoban/tgd"
 import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
 
-import styles from "./tgd.module.css"
 import Spinner from "../../Spinner"
+
+import styles from "./tgd.module.css"
 
 export interface Assets {
     image: Record<string, HTMLImageElement>

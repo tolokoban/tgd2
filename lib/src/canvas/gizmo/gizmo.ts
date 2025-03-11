@@ -29,9 +29,9 @@ export class TgdCanvasGizmo {
     private cameraExternal: TgdCamera | null = null
     private readonly cameraInternal = new TgdCameraPerspective({
         fovy: Math.PI / 3,
-        distance: 2.7,
         near: 0.01,
         far: 10,
+        transfo: { distance: 2.7 },
     })
     private orbiter: TgdControllerCameraOrbit | null = null
     private tipsPainter: TipsPainter | null = null

@@ -1,16 +1,19 @@
-import { TgdQuat, TgdVec3, TgdMat4, TgdTransfo } from "@tgd/math"
-import { ArrayNumber3, ArrayNumber4 } from ".."
+import {
+    TgdQuat,
+    TgdVec3,
+    TgdMat4,
+    TgdTransfo,
+    TgdTransfoOptions,
+} from "@tgd/math"
 import { TgdInterfaceTransformable } from "../interface"
 
 export interface TgdCameraOptions {
     near?: number
     /** Can be Infinity for perspective camera (`Number.POSITIVE_INFINITY`) */
     far?: number
-    target?: ArrayNumber3 | TgdVec3
-    orientation?: ArrayNumber4 | TgdQuat
-    distance?: number
     name?: string
     zoom?: number
+    transfo?: Partial<TgdTransfoOptions> | TgdTransfo
 }
 
 export interface TgdCameraState {
@@ -25,7 +28,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     private static incrementalId = 1
 
     public readonly name: string
-    public readonly transfo: TgdTransfo = new TgdTransfo()
+    public readonly transfo: TgdTransfo
 
     private _screenWidth = 1920
     private _screenHeight = 1080
@@ -43,7 +46,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     // transformation
     private readonly _matrixModelView = new TgdMat4()
-    private readonly _matrixModelViewInverse = new TgdMat4()
     private readonly _matrixProjectionInverse = new TgdMat4()
     private _zoom = 1
 
@@ -51,14 +53,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.name = options.name ?? `TgdCamera#${TgdCamera.incrementalId++}`
         this._near = options.near ?? 1e-3
         this._far = options.far ?? 1e6
-        const { transfo } = this
-        const [tx, ty, tz] = options.target ?? [0, 0, 0]
-        const [qx, qy, qz, qw] = options.orientation ?? [0, 0, 0, 1]
-        transfo
-            .setDistance(options.distance ?? 10)
-            .setPosition(tx, ty, tz)
-            .setOrientation(qx, qy, qz, qw)
-        transfo.debug("Camera transfo")
+        this.transfo = new TgdTransfo(options.transfo)
         this.zoom = options.zoom ?? 1
     }
 

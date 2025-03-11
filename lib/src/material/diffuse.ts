@@ -1,4 +1,4 @@
-import { WebglAttributeType, WebglUniformType } from "@tgd/types"
+import { ArrayNumber4, WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
 import { TgdCodeBloc } from "@tgd/shader/code"
@@ -7,7 +7,7 @@ import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 
 export type TgdMaterialDiffuseOptions = Partial<{
-    color: TgdVec4 | TgdTexture2D
+    color: TgdVec4 | ArrayNumber4 | TgdTexture2D
     light: TgdLight
     ambient: TgdLight
     specularExponent: number
@@ -39,7 +39,10 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 
     constructor(options: TgdMaterialDiffuseOptions = {}) {
         super()
-        const color = options.color ?? DEFAULT_COLOR
+        const color =
+            options.color instanceof TgdTexture2D
+                ? options.color
+                : new TgdVec4(options.color ?? DEFAULT_COLOR)
         if (options.light) {
             this.light = options.light
         }

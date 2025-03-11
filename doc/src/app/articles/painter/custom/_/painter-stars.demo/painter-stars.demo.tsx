@@ -55,10 +55,9 @@ export class PainterStars extends TgdPainter {
     private readonly vao: TgdVertexArray
 
     private readonly fixedCamera = new TgdCameraPerspective({
-        distance: 0,
+        transfo: { distance: 0 },
         near: 0.1,
         far: 2.0,
-        target: [0, 0, 0],
         fovy: Math.PI / 3,
     })
 

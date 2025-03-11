@@ -45,17 +45,19 @@ function init(context: TgdContext) {
         context.paint()
     })
     const camera = new TgdCameraPerspective({
-        distance: 5,
+        transfo: {
+            distance: 5,
+            orientation: new TgdQuat(
+                2 * Math.random() - 1,
+                2 * Math.random() - 1,
+                2 * Math.random() - 1,
+                2 * Math.random() - 1
+            ).normalize(),
+        },
         far: 100,
         near: 0.1,
         fovy: Math.PI / 4,
         zoom: 0.1,
-        orientation: new TgdQuat(
-            2 * Math.random() - 1,
-            2 * Math.random() - 1,
-            2 * Math.random() - 1,
-            2 * Math.random() - 1
-        ).normalize(),
     })
     context.camera = camera
     new TgdControllerCameraOrbit(context, {
