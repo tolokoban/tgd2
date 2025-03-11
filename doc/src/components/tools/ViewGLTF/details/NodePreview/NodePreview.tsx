@@ -139,7 +139,11 @@ function createNodePainter(
             meshIndex: node.mesh,
             primitiveIndex: 0,
         })
-        painter.add(mesh)
+        const meshNode = new TgdPainterNode({
+            painter: mesh,
+        })
+        meshNode.transfo.from(mesh.transfo)
+        painter.add(meshNode)
     }
     const children = node.children ?? []
     for (const child of children) {

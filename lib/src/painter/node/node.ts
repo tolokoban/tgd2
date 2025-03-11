@@ -1,15 +1,17 @@
 import { TgdMat4 } from "@tgd/math"
 import { TgdPainter } from "../painter"
-import { TgdTransfo } from "../../math/transfo"
+import { TgdTransfo, TgdTransfoOptions } from "../../math/transfo"
+import { TgdInterfaceTransformable } from "../../interface"
 
-export interface TgdPainterNodeChild {
+interface TgdPainterNodeChild extends TgdInterfaceTransformable {
     paint(time: number, delay: number): void
     delete(): void
-    transfo: TgdTransfo
 }
 
 export interface TgdPainterNodeOptions {
-    children: Array<TgdPainterNode | TgdPainterNodeChild>
+    transfo: TgdTransfo | Partial<TgdTransfoOptions>
+    painter: TgdPainterNodeChild
+    children: TgdPainterNode[]
 }
 
 /**
@@ -19,78 +21,58 @@ export interface TgdPainterNodeOptions {
  * Each Node is a local space for its children.
  */
 export class TgdPainterNode extends TgdPainter {
-    public parentTransfo: TgdTransfo = new TgdTransfo()
-    public readonly transfo = new TgdTransfo()
+    public readonly transfo: TgdTransfo
+    public painter: TgdPainterNodeChild | null = null
 
-    private readonly matrixTransfo = new TgdMat4()
-    private parentUpdateCount = 0
-    private updateCount = 0
-    private readonly childrenNodes: TgdPainterNode[] = []
-    private readonly children: TgdPainterNodeChild[] = []
+    private readonly parentMatrix = new TgdMat4()
+    private readonly globalMatrix = new TgdMat4()
+    private readonly children: TgdPainterNode[] = []
 
     constructor(options: Partial<TgdPainterNodeOptions> = {}) {
         super()
-        const { children = [] } = options
+        const { children = [], painter = null, transfo } = options
         for (const child of children) this.add(child)
+        this.painter = painter
+        this.transfo = new TgdTransfo(transfo)
     }
 
     delete(): void {
         for (const child of this.children) {
             child.delete()
         }
-        for (const child of this.childrenNodes) {
-            child.delete()
-        }
+        this.painter?.delete()
     }
 
-    add(...children: Array<TgdPainterNode | TgdPainterNodeChild>) {
+    add(...children: TgdPainterNode[]): this {
         for (const child of children) {
-            if (child instanceof TgdPainterNode) {
-                this.childrenNodes.push(child)
-            } else {
-                this.children.push(child)
-            }
+            this.children.push(child)
         }
+        return this
     }
 
-    remove(...children: Array<TgdPainterNode | TgdPainterNodeChild>) {
+    remove(...children: TgdPainterNode[]) {
         for (const child of children) {
-            if (child instanceof TgdPainterNode) {
-                const nodePosition = this.childrenNodes.indexOf(child)
-                if (nodePosition !== -1)
-                    this.childrenNodes.splice(nodePosition, 1)
-            } else {
-                const childPosition = this.children.indexOf(child)
-                if (childPosition !== -1) this.children.splice(childPosition, 1)
-            }
+            const nodePosition = this.children.indexOf(child)
+            if (nodePosition !== -1) this.children.splice(nodePosition, 1)
         }
     }
 
     paint(time: number, delay: number): void {
-        const {
-            transfo,
-            parentTransfo,
-            matrixTransfo,
-            parentUpdateCount,
-            updateCount,
-            children,
-            childrenNodes,
-        } = this
-        if (
-            transfo.updateCount > updateCount ||
-            parentTransfo.updateCount > parentUpdateCount
-        ) {
-            this.updateCount = transfo.updateCount
-            this.parentUpdateCount = parentTransfo.updateCount
-            matrixTransfo.from(parentTransfo.matrix).multiply(transfo.matrix)
-        }
-        for (const child of children) {
-            child.transfo.matrix = matrixTransfo
-            child.paint(time, delay)
-        }
-        for (const child of childrenNodes) {
-            child.parentTransfo.matrix = matrixTransfo
-            child.paint(time, delay)
+        this.parentMatrix.reset()
+        const fringe: TgdPainterNode[] = [this]
+        while (fringe.length > 0) {
+            const node = fringe.shift() as TgdPainterNode
+            node.globalMatrix
+                .from(node.parentMatrix)
+                .multiply(node.transfo.matrix)
+            if (node.painter) {
+                node.painter.transfo.matrix.from(node.globalMatrix)
+                node.painter.paint(time, delay)
+            }
+            for (const child of node.children) {
+                child.parentMatrix.from(node.globalMatrix)
+                fringe.push(child)
+            }
         }
     }
 }

@@ -1,10 +1,16 @@
 import { mat4 } from "gl-matrix"
 import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "../types"
-import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
+
+export interface TgdTransfoOptions {
+    distance: number
+    position: TgdVec3 | ArrayNumber3
+    scale: TgdVec3 | ArrayNumber3
+    orientation: TgdQuat | ArrayNumber4
+}
 
 export class TgdTransfo {
     // prettier-ignore
@@ -19,7 +25,6 @@ export class TgdTransfo {
     private readonly _scale = new TgdVec3(1, 1, 1)
     private _distance = 0
 
-    private readonly tmpMat3 = new TgdMat3()
     private readonly tmpVec3 = new TgdVec3()
     private readonly _axisX = new TgdVec3()
     private readonly _axisY = new TgdVec3()
@@ -28,12 +33,30 @@ export class TgdTransfo {
     private dirty = false
     private _updateCount = 0
 
+    constructor(source?: TgdTransfo | Partial<TgdTransfoOptions>) {
+        if (!source) return
+        if (source instanceof TgdTransfo) this.from(source)
+        else {
+            this.distance = source.distance ?? this.distance
+            this.position = source.position ?? this.position
+            this.orientation = source.orientation ?? this.orientation
+            this.scale = source.scale ?? this.scale
+        }
+        this.setDirty()
+    }
+
     from(transfo: Readonly<TgdTransfo>): this {
         this.position = transfo.position
         this.orientation = transfo.orientation
         this.scale = transfo.scale
         this.distance = transfo.distance
         this.setDirty()
+        return this
+    }
+
+    fromMatrix(mat: TgdMat4 | ArrayNumber16): this {
+        this.matrix.from(mat)
+        this.dirty = false
         return this
     }
 
