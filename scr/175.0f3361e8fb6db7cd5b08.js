@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk_tolokoban_tgd=self.webpackChunk_tolokoban_tgd||[]).push([[175],{175:(t,o,e)=>{e.r(o),e.d(o,{default:()=>s});var n=e(4848);function s(){return(0,n.jsx)("iframe",{src:"/docs/index.html",style:{position:"absolute",left:0,top:0,right:0,bottom:0,width:"100%",height:"100%",border:"none"}})}}}]);
