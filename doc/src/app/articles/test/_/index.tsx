@@ -37,7 +37,7 @@ function init(context: TgdContext) {
     })
     camera.transfo.moveAlongAxes(2, 0, 0)
     context.camera = camera
-    camera.face("+X+Y+Z")
+    camera.transfo.orientation.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
         geo: {
@@ -100,46 +100,33 @@ function init(context: TgdContext) {
         context.play()
         document.addEventListener("keydown", evt => {
             const step = tgdCalcDegToRad(15)
+            let angX = 0
+            let angY = 0
             switch (evt.key) {
                 case "0":
-                    context.camera.face("+X+Y+Z")
-                    context.camera.transfo.distance = 15
+                    context.camera.transfo.orientation.face("+X+Y+Z")
                     context.camera.zoom = 1
-                    context.camera.transfo.setPosition(0, 0, 0)
+                    context.camera.transfo.setPosition(0, 0, 0).setDistance(15)
                     mesh.transfo.orientation.face("+X+Y+Z")
                     break
                 case ".":
                     context.camera.zoom = 1
                     break
                 case "6":
-                    if (evt.shiftKey) {
-                        context.camera.transfo.orbitAroundY(step)
-                    } else {
-                        box.transfo.orbitAroundY(step)
-                    }
+                    angY = step
                     break
                 case "4":
-                    if (evt.shiftKey) {
-                        context.camera.transfo.orbitAroundY(-step)
-                    } else {
-                        box.transfo.orbitAroundY(-step)
-                    }
+                    angY = -step
                     break
                 case "8":
-                    if (evt.shiftKey) {
-                        context.camera.transfo.orbitAroundX(-step)
-                    } else {
-                        box.transfo.orbitAroundX(-step)
-                    }
+                    angX = -step
                     break
                 case "2":
-                    if (evt.shiftKey) {
-                        context.camera.transfo.orbitAroundX(step)
-                    } else {
-                        box.transfo.orbitAroundX(step)
-                    }
+                    angX = step
                     break
             }
+            context.camera.transfo.orbitAroundX(angX)
+            context.camera.transfo.orbitAroundY(angY)
             context.paint()
         })
     }

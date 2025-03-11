@@ -131,11 +131,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.setSpaceHeightAtTarget((v * this.screenHeight) / this.screenWidth)
     }
 
-    face(face: TgdQuatFace) {
-        this.transfo.orientation.face(face)
-        this.dirtyModelView = true
-    }
-
     from(camera: TgdCamera): this {
         const { zoom, screenWidth, screenHeight } = camera
         this.transfo.from(camera.transfo)
@@ -176,10 +171,10 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     }
 
     get matrixModelViewInverse(): Readonly<TgdMat4> {
-        if (this.dirtyModelViewInverse) {
-            this._matrixModelViewInverse.invert(this.matrixModelView)
-            this.dirtyModelViewInverse = false
-        }
+        // if (this.dirtyModelViewInverse) {
+        this._matrixModelViewInverse.invert(this.matrixModelView)
+        // this.dirtyModelViewInverse = false
+        // }
         return this._matrixModelViewInverse
     }
 

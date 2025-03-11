@@ -36,7 +36,7 @@ function init(context: TgdContext) {
         console.log("🚀 [index] evt.key = ", evt.key) // @FIXME: Remove this line written on 2024-02-16 at 16:02
         switch (evt.key) {
             case "0":
-                context.camera.face("+X+Y+Z")
+                context.camera.transfo.orientation.face("+X+Y+Z")
                 break
             case ".":
                 context.camera.zoom = 1

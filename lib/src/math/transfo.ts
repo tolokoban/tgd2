@@ -84,8 +84,6 @@ export class TgdTransfo {
             m.m03 += this.tmpVec3.x
             m.m13 += this.tmpVec3.y
             m.m23 += this.tmpVec3.z
-            console.log()
-            m.debug("Matrix")
         }
         this.dirty = false
     }

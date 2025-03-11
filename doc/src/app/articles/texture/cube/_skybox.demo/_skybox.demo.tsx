@@ -17,7 +17,7 @@ import imageNegZ from "./6.webp"
 function init(context: TgdContext) {
     // #begin
     const { camera } = context
-    camera.face("+X+Z-Y")
+    camera.transfo.orientation.face("+X+Z-Y")
     const skybox = new TgdPainterSkybox(context, {
         imagePosX,
         imagePosY,
