@@ -13,7 +13,6 @@ import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
 import { TgdContext } from "@tgd/context"
-import { quat } from "gl-matrix"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -363,7 +362,7 @@ export class TgdControllerCameraOrbit {
         const x = x1 * x2 + y1 * y2
         const y = x1 * y2 - y1 * x2
         const ang = Math.atan2(y, x) * this.speedOrbit
-        camera.transfo.orbitAroundZ(-ang)
+        camera.transfo.orbitAroundZ(ang)
         this.fireOrbitChange()
         return
     }

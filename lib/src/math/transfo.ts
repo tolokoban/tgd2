@@ -181,25 +181,19 @@ export class TgdTransfo {
     }
 
     orbitAroundX(angleInRadians: number): this {
-        this.tmpMat3.fromQuat(this._orientation)
-        this.tmpMat3.toAxisX(this.tmpVec3)
-        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this._orientation.rotateAround(TgdVec3.X, angleInRadians)
         this.setDirty()
         return this
     }
 
     orbitAroundY(angleInRadians: number): this {
-        this.tmpMat3.fromQuat(this._orientation)
-        this.tmpMat3.toAxisY(this.tmpVec3)
-        this._orientation.rotateAround(this.tmpVec3.scale(-1), angleInRadians)
+        this._orientation.rotateAround(TgdVec3.Y, angleInRadians)
         this.setDirty()
         return this
     }
 
     orbitAroundZ(angleInRadians: number): this {
-        this.tmpMat3.fromQuat(this._orientation)
-        this.tmpMat3.toAxisZ(this.tmpVec3)
-        this._orientation.rotateAround(this.tmpVec3, angleInRadians)
+        this._orientation.rotateAround(TgdVec3.Z, angleInRadians)
         this.setDirty()
         return this
     }

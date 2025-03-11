@@ -35,12 +35,9 @@ function init(context: TgdContext) {
         fovy: Math.PI / 8,
         zoom: 1,
     })
-    camera.transfo.moveAlongAxes(0, 1, 0)
     context.camera = camera
     camera.transfo.orientation.face("+X+Y+Z")
-    camera.transfo.matrix.reset()
-    camera.transfo.debug()
-    camera.matrixModelView.debug("Model View")
+    camera.transfo.setPosition(0, 0, -3)
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
         // geo: {
