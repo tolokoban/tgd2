@@ -100,12 +100,12 @@ function useTgdContext(
         // const center = TgdVec3.newFromMix(bbox.min, bbox.max)
         // context.camera = new TgdCameraOrthographic()
         const diag = 10
-        context.camera.target = [0, 0, 0]
-        context.camera.distance = diag
+        context.camera.transfo.position = [0, 0, 0]
+        context.camera.transfo.distance = diag
         context.camera.spaceHeightAtTarget = diag
         context.camera.near = diag * 1e-3
         context.camera.far = diag * 10
-        context.camera.setOrientation(0, 0, 0, 1)
+        context.camera.transfo.setOrientation(0, 0, 0, 1)
         context.paint()
         const controller = new TgdControllerCameraOrbit(context, {
             inertiaOrbit: 500,

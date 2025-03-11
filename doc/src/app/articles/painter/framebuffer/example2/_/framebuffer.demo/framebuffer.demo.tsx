@@ -81,10 +81,10 @@ function init(context: TgdContext, assets: Assets) {
         screen,
         new TgdPainterLogic((time, delay) => {
             const { camera } = context
-            camera.orbitAroundY(delay * 0.0001047)
-            // camera.orbitAroundX(delay * 0.00007154)
-            // camera.orbitAroundZ(delay * 0.0003051)
-            // camera.zoom = 0.333 + 0.3 * Math.abs(Math.sin(time * 0.001457))
+            camera.transfo.orbitAroundY(delay * 0.0001047)
+            // camera.transfo.orbitAroundX(delay * 0.00007154)
+            // camera.transfo.orbitAroundZ(delay * 0.0003051)
+            // camera.transfo.zoom = 0.333 + 0.3 * Math.abs(Math.sin(time * 0.001457))
         })
     )
     context.paint()

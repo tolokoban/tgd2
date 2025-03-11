@@ -1,15 +1,5 @@
-import {
-    TgdQuat,
-    TgdVec3,
-    TgdMat3,
-    TgdMat4,
-    TgdQuatFace,
-    TgdVec4,
-    TgdTransfo,
-} from "@tgd/math"
-import { TgdEvent } from "../event"
+import { TgdQuat, TgdVec3, TgdMat4, TgdQuatFace, TgdTransfo } from "@tgd/math"
 import { ArrayNumber3, ArrayNumber4 } from ".."
-import { quat } from "gl-matrix"
 import { TgdInterfaceTransformable } from "../interface"
 
 export interface TgdCameraOptions {
@@ -29,18 +19,13 @@ export interface TgdCameraState {
     zoom: number
     orientation: TgdQuat
     target: TgdVec3
-    shift: TgdVec3
 }
 
 export abstract class TgdCamera implements TgdInterfaceTransformable {
     private static incrementalId = 1
 
-    /**
-     * A change in the position/orientation/size of the camera.
-     */
-    public readonly eventTransformChange = new TgdEvent<TgdCamera>()
     public readonly name: string
-    public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
+    public readonly transfo: TgdTransfo = new TgdTransfo()
 
     private _screenWidth = 1920
     private _screenHeight = 1080
@@ -56,42 +41,32 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     protected _near = 1e-3
     protected _far = Infinity
 
-    private readonly _axisX = new TgdVec3()
-    private readonly _axisY = new TgdVec3()
-    private readonly _axisZ = new TgdVec3()
     // transformation
     private readonly _matrixModelView = new TgdMat4()
     private readonly _matrixModelViewInverse = new TgdMat4()
     private readonly _matrixProjectionInverse = new TgdMat4()
-    private readonly _orientation = new TgdQuat(0, 0, 0, 1).face("+X+Z-Y")
-    private readonly _shift = new TgdVec3(0, 0, 0)
-    private readonly _target = new TgdVec3(0, 0, 0)
-    private readonly _position = new TgdVec3(0, 0, 0)
-    private _distance = 10
     private _zoom = 1
-    // For fast calculations (we don't want to recreate them).
-    private readonly tmpMat3 = new TgdMat3()
-    private readonly tmpVec3 = new TgdVec3()
 
     constructor(options: TgdCameraOptions = {}) {
         this.name = options.name ?? `TgdCamera#${TgdCamera.incrementalId++}`
         this._near = options.near ?? 1e-3
         this._far = options.far ?? 1e6
-        this._distance = options.distance ?? 10
-        this._zoom = options.zoom ?? 1
+        const { transfo } = this
         const [tx, ty, tz] = options.target ?? [0, 0, 0]
-        this.target.reset(tx, ty, tz)
         const [qx, qy, qz, qw] = options.orientation ?? [0, 0, 0, 1]
-        this.orientation.reset(qx, qy, qz, qw)
+        transfo
+            .setDistance(options.distance ?? 10)
+            .setPosition(tx, ty, tz)
+            .setOrientation(qx, qy, qz, qw)
+        this.zoom = options.zoom ?? 1
     }
 
     getCurrentState(): Readonly<TgdCameraState> {
         return {
-            distance: this.distance,
-            orientation: this.orientation.clone(),
-            shift: this.shift.clone(),
+            distance: this.transfo.distance,
+            orientation: this.transfo.orientation.clone(),
             spaceHeightAtTarget: this.spaceHeightAtTarget,
-            target: this.target.clone(),
+            target: this.transfo.position.clone(),
             zoom: this.zoom,
         }
     }
@@ -157,40 +132,24 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     }
 
     face(face: TgdQuatFace) {
-        this._orientation.face(face)
+        this.transfo.orientation.face(face)
         this.dirtyModelView = true
-        this.dirtyAxis = true
     }
 
     from(camera: TgdCamera): this {
-        const {
-            _orientation: orientation,
-            _target: target,
-            distance,
-            zoom,
-            screenWidth,
-            screenHeight,
-        } = camera
-        this._orientation.from(orientation)
-        this._target.from(target)
-        this.distance = distance
+        const { zoom, screenWidth, screenHeight } = camera
+        this.transfo.from(camera.transfo)
         this.zoom = zoom
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
         this.dirtyModelView = true
-        this.dirtyAxis = true
         this.copyProjectionFrom(camera)
         return this
     }
 
-    fromTransfo(transfo: TgdMat4): this {
-        const x = transfo.m03
-        const y = transfo.m13
-        const z = transfo.m23
-        this.setTarget(x, y, z)
-        this._orientation.fromMatrix(transfo)
+    fromTransfo(transfo: Readonly<TgdTransfo>): this {
+        this.transfo.from(transfo)
         this.dirtyModelView = true
-        this.dirtyAxis = true
         return this
     }
 
@@ -210,23 +169,9 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     abstract copyProjectionFrom(camera: TgdCamera): this
 
-    get axisX(): Readonly<TgdVec3> {
-        this.updateAxisIfNeeded()
-        return this._axisX
-    }
-
-    get axisY(): Readonly<TgdVec3> {
-        this.updateAxisIfNeeded()
-        return this._axisY
-    }
-
-    get axisZ(): Readonly<TgdVec3> {
-        this.updateAxisIfNeeded()
-        return this._axisZ
-    }
-
     get matrixModelView(): Readonly<TgdMat4> {
-        this.updateIfNeeded()
+        const mat = this._matrixModelView
+        mat.from(this.transfo.matrix)
         return this._matrixModelView
     }
 
@@ -248,116 +193,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         return this._matrixProjectionInverse
     }
 
-    get orientation(): Readonly<TgdQuat> {
-        return this._orientation
-    }
-
-    set orientation(quat: TgdQuat) {
-        const { _orientation } = this
-        if (quat.isEqual(_orientation)) return
-
-        const [x, y, z, w] = quat
-        _orientation.x = x
-        _orientation.y = y
-        _orientation.z = z
-        _orientation.w = w
-        this.dirtyModelView = true
-        this.dirtyAxis = true
-    }
-
-    setOrientation(x: number, y: number, z: number, w: number): this {
-        const { _orientation } = this
-        _orientation.x = x
-        _orientation.y = y
-        _orientation.z = z
-        _orientation.w = w
-        this.dirtyModelView = true
-        this.dirtyAxis = true
-        return this
-    }
-
-    get position(): Readonly<TgdVec3> {
-        this.updateIfNeeded()
-        return this._position
-    }
-
-    get target(): Readonly<TgdVec3> {
-        return this._target
-    }
-    set target(v: Readonly<TgdVec3 | ArrayNumber3>) {
-        this._target.from(v)
-        this.dirtyModelView = true
-    }
-
-    setTarget(x: number, y: number, z: number): this {
-        const { _target } = this
-        _target.x = x
-        _target.y = y
-        _target.z = z
-        this.dirtyModelView = true
-        return this
-    }
-
-    get shift(): Readonly<TgdVec3> {
-        return this._shift
-    }
-    set shift(v: TgdVec3) {
-        this._shift.from(v)
-        this.dirtyModelView = true
-    }
-
-    setShift(x: number, y: number, z: number): this {
-        const { _shift } = this
-        _shift.x = x
-        _shift.y = y
-        _shift.z = z
-        this.dirtyModelView = true
-        return this
-    }
-
-    get x() {
-        return this._target.x
-    }
-    set x(v: number) {
-        const { _target: target } = this
-        if (v === target.x) return
-
-        target.x = v
-        this.dirtyModelView = true
-    }
-
-    get y() {
-        return this._target.y
-    }
-    set y(v: number) {
-        const { _target: target } = this
-        if (v === target.y) return
-
-        target.y = v
-        this.dirtyModelView = true
-    }
-
-    get z() {
-        return this._target.z
-    }
-    set z(v: number) {
-        const { _target: target } = this
-        if (v === target.z) return
-
-        target.z = v
-        this.dirtyModelView = true
-    }
-
-    get distance() {
-        return this._distance
-    }
-    set distance(v: number) {
-        if (this._distance === v) return
-
-        this._distance = v
-        this.dirtyModelView = true
-    }
-
     get zoom() {
         return this._zoom
     }
@@ -365,59 +200,14 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         if (this._zoom === v) return
 
         this._zoom = v
+        this.transfo.setScale(v, v, v)
         this.dirtyModelView = true
-    }
-
-    /**
-     * Add (x,y,z) to the target coords in Camera space.
-     * That means we are moving along the camera axis.
-     */
-    moveTarget(x: number, y: number, z: number) {
-        const { _target: target } = this
-        this.updateAxisIfNeeded()
-        const { _axisX: axisX, _axisY: axisY, _axisZ: axisZ, tmpVec3 } = this
-        target.add(
-            tmpVec3
-                .from(axisX)
-                .scale(x)
-                .addWithScale(axisY, y)
-                .addWithScale(axisZ, z)
-        )
-        this.dirtyModelView = true
-    }
-
-    moveShift(x: number, y: number, z: number) {
-        const [sx, sy, sz] = this._shift
-        this._shift.reset(x + sx, y + sy, z + sz)
-        this._dirtyModelView = true
-    }
-
-    orbitAroundX(angleInRadians: number): this {
-        const orientation = this._orientation
-        quat.rotateX(orientation, orientation, angleInRadians)
-        this.dirtyModelView = true
-        return this
-    }
-
-    orbitAroundY(angleInRadians: number): this {
-        const orientation = this._orientation
-        quat.rotateY(orientation, orientation, angleInRadians)
-        this.dirtyModelView = true
-        return this
-    }
-
-    orbitAroundZ(angleInRadians: number): this {
-        const orientation = this._orientation
-        quat.rotateZ(orientation, orientation, angleInRadians)
-        this.dirtyModelView = true
-        return this
     }
 
     debug(caption?: string) {
         const name = caption ?? this.name
-        this._orientation.debug(`${name} orientation`)
-        this._target.debug(`${name} target`)
-        this._position.debug(`${name} position`)
+        this.transfo.orientation.debug(`${name} orientation`)
+        this.transfo.position.debug(`${name} target`)
         this.matrixModelView.debug(`${name} matrixModelView`)
         this.matrixProjection.debug(`${name} matrixProjection`)
     }
@@ -426,51 +216,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     protected abstract setSpaceHeightAtTarget(v: number): void
 
-    private updateAxisIfNeeded() {
-        if (this.dirtyAxis) this.updateAxis()
-    }
-
-    private updateAxis() {
-        const { tmpMat3 } = this
-        tmpMat3.fromQuat(this._orientation)
-        tmpMat3.toAxes(this._axisX, this._axisY, this._axisZ)
-        this.dirtyAxis = false
-    }
-
-    private updateIfNeeded(): void {
-        if (!this.dirtyModelView) return
-
-        const { tmpMat3, tmpVec3, _position } = this
-        const mat = this._matrixModelView
-        this.updateAxis()
-        const d = this._distance
-        const { x: sx, y: sy, z: sz } = this._shift
-        const { x: tx, y: ty, z: tz } = this._target
-        const { x: ax, y: ay, z: az } = this._axisZ
-        this._axisZ.debug("Axis Z")
-        _position.x = tx + d * ax
-        _position.y = ty + d * ay
-        _position.z = tz + d * az
-        _position.addWithScale(this._axisX, sx)
-        _position.addWithScale(this._axisY, sy)
-        _position.addWithScale(this._axisZ, sz)
-        this._target.debug("Target")
-        this._position.debug("position")
-        tmpVec3.from(_position).applyMatrix(tmpMat3.transpose())
-        mat.fromMat3(tmpMat3)
-        mat.m03 = -tmpVec3.x
-        mat.m13 = -tmpVec3.y
-        mat.m23 = -tmpVec3.z
-        mat.reset()
-        mat.m23 = 15
-        mat.invert()
-        mat.debug("model view")
-        const p = new TgdVec4(this._target.x, this._target.y, this._target.z, 1)
-        p.applyMatrix(mat)
-        p.debug("Point in camera space")
-        this.dirtyModelView = false
-    }
-
     private get dirtyModelView(): boolean {
         return this._dirtyModelView
     }
@@ -478,15 +223,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this._dirtyModelView = v
         if (v) {
             this.dirtyModelViewInverse = true
-            this.eventTransformChange.dispatch(this)
         }
-    }
-
-    private get dirtyAxis(): boolean {
-        return this._dirtyAxis
-    }
-    private set dirtyAxis(v: boolean) {
-        this._dirtyAxis = v
     }
 
     protected get dirtyProjection(): boolean {

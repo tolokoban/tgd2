@@ -1,41 +1,32 @@
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
-import { TgdQuat, TgdVec3 } from "@tgd/math"
+import { TgdTransfo } from "@tgd/math"
 import { tgdCalcMix } from "../math"
+import { tgdActionCreateTransfoInterpolation } from "./transfo"
 
 export function tgdActionCreateCameraInterpolation(
     camera: TgdCamera,
     destination: Partial<TgdCameraState>
 ) {
-    const beginSpaceHeightAtTarget = camera.spaceHeightAtTarget
-    const beginDistance = camera.distance
+    const transfoDestination = new TgdTransfo().from(camera.transfo)
+    if (typeof destination.distance === "number")
+        transfoDestination.distance = destination.distance
     const beginZoom = camera.zoom
-    const beginOrientation = new TgdQuat(camera.orientation)
-    const beginTarget = new TgdVec3(camera.target)
-    const beginShift = new TgdVec3(camera.shift)
-    const endSpaceHeightAtTarget =
-        destination.spaceHeightAtTarget ?? beginSpaceHeightAtTarget
-    const endDistance = destination.distance ?? beginDistance
     const endZoom = destination.zoom ?? beginZoom
-    const endOrientation = new TgdQuat(
-        destination.orientation ?? beginOrientation
+    const action = tgdActionCreateTransfoInterpolation(
+        camera.transfo,
+        transfoDestination
     )
-    const endTarget = new TgdVec3(destination.target ?? beginTarget)
-    const endShift = new TgdVec3(destination.shift ?? beginShift)
-    const orientation = new TgdQuat()
-    const target = new TgdVec3()
-    const shift = new TgdVec3()
+    const beginSpaceHeightAtTarget = camera.spaceHeightAtTarget
+    const endSpaceHeightAtTarget =
+        destination.spaceHeightAtTarget ?? camera.spaceHeightAtTarget
+
     return (t: number) => {
+        action(t)
         camera.spaceHeightAtTarget = tgdCalcMix(
             beginSpaceHeightAtTarget,
             endSpaceHeightAtTarget,
             t
         )
-        camera.distance = tgdCalcMix(beginDistance, endDistance, t)
         camera.zoom = tgdCalcMix(beginZoom, endZoom, t)
-        camera.orientation = orientation
-            .fromSlerp(beginOrientation, endOrientation, t)
-            .normalize()
-        camera.target = target.fromMix(beginTarget, endTarget, t)
-        camera.shift = shift.fromMix(beginShift, endShift, t)
     }
 }

@@ -63,7 +63,7 @@ export class TgdPainterSkybox extends TgdPainter {
         // Compute matrix for the next frame.
         const { camera, matrix, tmpMat } = this
         if (camera !== context.camera) {
-            camera.orientation = context.camera.orientation
+            camera.transfo.orientation = context.camera.transfo.orientation
         }
         matrix.from(camera.matrixProjection)
         tmpMat.fromMat3(camera.matrixModelView)

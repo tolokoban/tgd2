@@ -52,30 +52,24 @@ export class TgdCanvasGizmo {
     detach() {
         const camera = this.cameraExternal
         if (camera) {
-            camera.eventTransformChange.removeListener(
-                this.handleExternalToInternal
-            )
             this.cameraExternal = null
         }
     }
 
     private attach() {
-        const camera = this.cameraExternal
-        if (camera)
-            camera.eventTransformChange.addListener(
-                this.handleExternalToInternal
-            )
         this.context?.paint()
     }
 
     private readonly handleExternalToInternal = (externalCamera: TgdCamera) => {
-        this.cameraInternal.orientation = externalCamera.orientation
+        this.cameraInternal.transfo.orientation =
+            externalCamera.transfo.orientation
     }
 
     private readonly handleInternalToExternal = (internalCamera: TgdCamera) => {
         const { cameraExternal } = this
         if (cameraExternal) {
-            cameraExternal.orientation = internalCamera.orientation
+            cameraExternal.transfo.orientation =
+                internalCamera.transfo.orientation
         }
     }
 
@@ -156,11 +150,11 @@ export class TgdCanvasGizmo {
                 axisY.from(axisZ).cross(axisX)
             }
             const quat = new TgdQuat().fromAxes(axisX, axisY, axisZ)
-            if (quat.isEqual(camera.orientation)) {
+            if (quat.isEqual(camera.transfo.orientation)) {
                 quat.rotateAroundY(Math.PI)
             }
             this.eventTipClick.dispatch({
-                from: new TgdQuat(camera.orientation),
+                from: new TgdQuat(camera.transfo.orientation),
                 to: quat,
             })
         }
@@ -171,7 +165,7 @@ export class TgdCanvasGizmo {
         let bestTip = TIPS[0]
         const vec = new TgdVec3()
         const mat = new TgdMat3()
-        mat.fromQuat(this.cameraInternal.orientation).transpose()
+        mat.fromQuat(this.cameraInternal.transfo.orientation).transpose()
         for (const tip of TIPS) {
             vec.from(tip).applyMatrix(mat)
             if (vec.x > bestScore) {
@@ -187,7 +181,7 @@ export class TgdCanvasGizmo {
         let bestTip = TIPS[0]
         const vec = new TgdVec3()
         const mat = new TgdMat3()
-        mat.fromQuat(this.cameraInternal.orientation).transpose()
+        mat.fromQuat(this.cameraInternal.transfo.orientation).transpose()
         for (const tip of TIPS) {
             vec.from(tip).applyMatrix(mat)
             if (vec.y > bestScore) {

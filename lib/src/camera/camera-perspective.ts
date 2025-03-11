@@ -30,15 +30,16 @@ export class TgdCameraPerspective extends TgdCamera {
         screenX: number,
         screenY: number
     ): Readonly<{ origin: TgdVec3; direction: TgdVec3 }> {
+        const { transfo } = this
         const { origin, direction } = this._ray
-        origin.from(this.position)
+        origin.from(transfo.actualPosition)
         const h = Math.atan(this.fovy)
         const w = h * this.screenAspectRatio
         direction
             .from(origin)
-            .subtract(this.axisZ)
-            .addWithScale(this.axisX, w * screenX)
-            .addWithScale(this.axisY, h * screenY)
+            .subtract(transfo.axisZ)
+            .addWithScale(transfo.axisX, w * screenX)
+            .addWithScale(transfo.axisY, h * screenY)
             .subtract(origin)
             .normalize()
         return this._ray
@@ -65,11 +66,11 @@ export class TgdCameraPerspective extends TgdCamera {
     }
 
     protected getSpaceHeightAtTarget() {
-        return 2 * Math.tan(this.fovy * 0.5) * this.distance
+        return 2 * Math.tan(this.fovy * 0.5) * this.transfo.distance
     }
 
     protected setSpaceHeightAtTarget(v: number) {
-        this.distance = v / (2 * Math.tan(this.fovy * 0.5))
+        this.transfo.setDistance(v / (2 * Math.tan(this.fovy * 0.5)))
     }
 
     private updateProjectionIfNeeded(): void {

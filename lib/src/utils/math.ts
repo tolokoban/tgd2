@@ -4,8 +4,12 @@ export function tgdCalcClamp(value: number, min: number, max: number): number {
     return value
 }
 
-export function tgdCalcMix(a: number, b: number, t: number): number {
-    return (1 - t) * a + t * b
+export function tgdCalcMix(
+    valueAtT0: number,
+    valueAtT1: number,
+    t: number
+): number {
+    return (1 - t) * valueAtT0 + t * valueAtT1
 }
 
 const DEG_PER_RAD = 180 / Math.PI

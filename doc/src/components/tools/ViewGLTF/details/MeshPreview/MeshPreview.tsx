@@ -4,20 +4,15 @@ import {
     TgdCanvasGizmo,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdMaterialDiffuse,
     TgdPainterClear,
-    TgdPainterDepth,
-    TgdPainterMesh,
     TgdPainterMeshGltf,
-    TgdGeometryBox,
     TgdParserGLTransfertFormatBinary,
-    TgdQuat,
-    TgdVec3,
-    TgdVec4,
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutBack,
     TgdPainterState,
     webglPresetDepth,
+    TgdVec3,
+    TgdQuat,
 } from "@tolokoban/tgd"
 
 import Style from "./MeshPreview.module.css"
@@ -110,12 +105,12 @@ function useTgdContext(
         const diag = TgdVec3.distance(bbox.min, bbox.max)
         const center = TgdVec3.newFromMix(bbox.min, bbox.max)
         // context.camera = new TgdCameraOrthographic()
-        context.camera.target = center
-        context.camera.distance = diag
+        context.camera.transfo.position = center
+        context.camera.transfo.distance = diag
         context.camera.spaceHeightAtTarget = diag
         context.camera.near = diag * 1e-3
         context.camera.far = diag * 10
-        context.camera.setOrientation(0, 0, 0, 1)
+        context.camera.transfo.setOrientation(0, 0, 0, 1)
         context.add(clear, state)
         context.paint()
         const controller = new TgdControllerCameraOrbit(context, {

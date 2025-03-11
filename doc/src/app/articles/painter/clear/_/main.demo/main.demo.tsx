@@ -1,5 +1,4 @@
 import {
-    ArrayNumber3,
     tgdActionCreateVec3Interpolation,
     TgdContext,
     TgdPainterClear,

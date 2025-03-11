@@ -1,10 +1,5 @@
 import {
-    TgdCamera,
-    TgdCameraNode,
-    TgdCameraPerspective,
     TgdContext,
-    TgdPainterAxes,
-    TgdPainterBackground,
     TgdPainterLogic,
     TgdPainterNode,
     TgdPainterSkybox,
@@ -31,10 +26,7 @@ function init(context: TgdContext) {
         imageNegY,
         imageNegZ,
     })
-    const node2 = new TgdPainterNode({
-        children: [new TgdCameraNode(camera)],
-    })
-    const node1 = new TgdPainterNode({ children: [node2] })
+    const node1 = new TgdPainterNode({ children: [] })
     const turn = new TgdQuat()
     context.add(
         skybox,
@@ -44,7 +36,7 @@ function init(context: TgdContext) {
             node1.transfo.orientation = turn
             const quat = new TgdQuat().face("+X+Z-Y")
             quat.rotateAroundX(0.5 * Math.sin(time * 0.0003721) + 0.25)
-            node2.transfo.orientation = quat
+            // node2.transfo.orientation = quat
         })
     )
     context.play()

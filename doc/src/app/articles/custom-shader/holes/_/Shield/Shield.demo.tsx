@@ -67,7 +67,7 @@ function init(context: TgdContext, assets: Assets) {
         holes.loadBitmap(canvas)
         context.paint()
     }, 500)
-    context.camera.distance = 2.5
+    context.camera.transfo.distance = 2.5
     const painter = new TgdPainterMeshGltf(context, {
         asset,
         materialFactory: ({ color }: { color?: TgdTexture2D }) => {

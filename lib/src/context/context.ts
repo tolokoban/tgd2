@@ -6,6 +6,7 @@ import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
+import { TgdEvent } from "../event"
 
 /**
  * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
@@ -61,6 +62,7 @@ export class TgdContext {
     public readonly inputs: TgdInputs
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
+    public readonly eventPaint = new TgdEvent<TgdContext>()
 
     private _camera: TgdCamera
     private _aspectRatio = 1
@@ -130,8 +132,6 @@ export class TgdContext {
     set camera(camera: TgdCamera) {
         if (camera === this._camera) return
 
-        this._camera.eventTransformChange.removeListener(this.paint)
-        camera.eventTransformChange.addListener(this.paint)
         this._camera = camera
         this.paint()
     }
@@ -302,6 +302,7 @@ export class TgdContext {
         this.painters.paint(timeInSec, delayInSec)
         if (this.animationManager.paint(timeInSec) || this.isPlaying)
             this.paint()
+        this.eventPaint.dispatch(this)
     }
 
     destroy() {
@@ -311,7 +312,6 @@ export class TgdContext {
         this.observer.unobserve(this.canvas)
     }
 
-     
     stateReset() {
         const { gl } = this
         const numberAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) as number

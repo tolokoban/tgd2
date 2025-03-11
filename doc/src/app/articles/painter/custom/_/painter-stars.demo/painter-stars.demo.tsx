@@ -83,7 +83,7 @@ export class PainterStars extends TgdPainter {
     paint() {
         const { context, prg, vao, fixedCamera } = this
         const { camera, gl } = context
-        fixedCamera.orientation = camera.orientation
+        fixedCamera.transfo.orientation = camera.transfo.orientation
         prg.use()
         prg.uniformMatrix4fv("uniModelViewMatrix", fixedCamera.matrixModelView)
         prg.uniformMatrix4fv(

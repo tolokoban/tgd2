@@ -97,13 +97,8 @@ function init(context: TgdContext, assets: Assets) {
         screen,
         new TgdPainterLogic(time => {
             const { camera } = context
-            camera.orbitAroundX(Math.sin(time * 0.005045) * 0.03)
-            camera.orbitAroundY(Math.sin(time * 0.001751) * 0.02)
-            camera.setShift(
-                Math.sin(time * 0.001414),
-                Math.sin(time * 0.003414) * 0.1,
-                Math.sin(time * 0.002049) * 1.2
-            )
+            camera.transfo.orbitAroundX(Math.sin(time * 0.005045) * 0.03)
+            camera.transfo.orbitAroundY(Math.sin(time * 0.001751) * 0.02)
             filterZoom.translation.x = 0.005 * Math.sin(time * 0.0024581)
             filterZoom.translation.y = 0.005 * Math.sin(time * 0.0037151)
         })

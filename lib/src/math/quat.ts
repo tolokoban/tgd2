@@ -45,10 +45,10 @@ export class TgdQuat extends TgdVec4 {
         return this
     }
 
-    fromSlerp(a: TgdQuat, b: TgdQuat, t: number): this {
+    fromSlerp(valueAtT0: TgdQuat, valueAtT1: TgdQuat, t: number): this {
         const EPSILON = 1e-6
-        const [ax, ay, az, aw] = a
-        let [bx, by, bz, bw] = b
+        const [ax, ay, az, aw] = valueAtT0
+        let [bx, by, bz, bw] = valueAtT1
 
         let scale0, scale1
 

@@ -66,7 +66,7 @@ export class PainterNames extends TgdPainter {
     paint(): void {
         const { context, prg, vao, texture, fixedCamera } = this
         const { camera, gl } = context
-        fixedCamera.orientation = camera.orientation
+        fixedCamera.transfo.orientation = camera.transfo.orientation
         prg.use()
         prg.uniform1f("uniAspect", context.width / context.height)
         prg.uniform1f("uniAspectInverse", context.height / context.width)

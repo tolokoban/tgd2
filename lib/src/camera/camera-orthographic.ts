@@ -27,14 +27,15 @@ export class TgdCameraOrthographic extends TgdCamera {
         screenX: number,
         screenY: number
     ): Readonly<{ origin: TgdVec3; direction: TgdVec3 }> {
+        const { transfo } = this
         const { origin, direction } = this._ray
-        direction.from(this.axisZ)
+        direction.from(transfo.axisZ)
         const h = this.spaceHeight * 0.5
         const w = h * this.screenAspectRatio
         origin
-            .from(this.position)
-            .addWithScale(this.axisX, w * screenX)
-            .addWithScale(this.axisY, h * screenY)
+            .from(transfo.actualPosition)
+            .addWithScale(transfo.axisX, w * screenX)
+            .addWithScale(transfo.axisY, h * screenY)
         return this._ray
     }
 

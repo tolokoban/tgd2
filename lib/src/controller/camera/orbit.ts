@@ -263,8 +263,8 @@ export class TgdControllerCameraOrbit {
         const speed = 3 * (slowDown ? 0.1 : 1) * this.speedOrbit
         const dx = deltaX * speed
         const dy = deltaY * speed
-        if (!keyboard.isDown("x")) camera.orbitAroundY(-dx)
-        if (!keyboard.isDown("y")) camera.orbitAroundX(dy)
+        if (!keyboard.isDown("x")) camera.transfo.orbitAroundY(-dx)
+        if (!keyboard.isDown("y")) camera.transfo.orbitAroundX(dy)
         this.fireOrbitChange()
     }
 
@@ -290,7 +290,7 @@ export class TgdControllerCameraOrbit {
         const final = new TgdMat3(vecX, vecY, vecZ)
         final.multiply(mat)
         this.tmpQuat.fromMatrix(final)
-        this.context.camera.orientation = this.tmpQuat
+        this.context.camera.transfo.orientation = this.tmpQuat
     }
 
     private readonly handleMoveStart = () => {
@@ -342,9 +342,9 @@ export class TgdControllerCameraOrbit {
             panSpeed *
             camera.spaceHeightAtTarget
         if (fixedTarget) {
-            camera.moveShift(-dx, -dy, 0)
+            // camera.moveShift(-dx, -dy, 0)
         } else {
-            camera.moveTarget(-dx, -dy, 0)
+            camera.transfo.moveAlongAxes(-dx, -dy, 0)
         }
         this.fireOrbitChange()
         return
@@ -363,7 +363,7 @@ export class TgdControllerCameraOrbit {
         const x = x1 * x2 + y1 * y2
         const y = x1 * y2 - y1 * x2
         const ang = Math.atan2(y, x) * this.speedOrbit
-        camera.orbitAroundZ(-ang)
+        camera.transfo.orbitAroundZ(-ang)
         this.fireOrbitChange()
         return
     }

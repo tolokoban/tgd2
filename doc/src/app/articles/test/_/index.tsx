@@ -35,7 +35,7 @@ function init(context: TgdContext) {
         fovy: Math.PI / 8,
         zoom: 1,
     })
-    camera.moveTarget(2, 0, 0)
+    camera.transfo.moveAlongAxes(2, 0, 0)
     context.camera = camera
     camera.face("+X+Y+Z")
     new TgdControllerCameraOrbit(context, {
@@ -103,9 +103,9 @@ function init(context: TgdContext) {
             switch (evt.key) {
                 case "0":
                     context.camera.face("+X+Y+Z")
-                    context.camera.distance = 15
+                    context.camera.transfo.distance = 15
                     context.camera.zoom = 1
-                    context.camera.setTarget(0, 0, 0)
+                    context.camera.transfo.setPosition(0, 0, 0)
                     mesh.transfo.orientation.face("+X+Y+Z")
                     break
                 case ".":
@@ -113,28 +113,28 @@ function init(context: TgdContext) {
                     break
                 case "6":
                     if (evt.shiftKey) {
-                        context.camera.orbitAroundY(step)
+                        context.camera.transfo.orbitAroundY(step)
                     } else {
                         box.transfo.orbitAroundY(step)
                     }
                     break
                 case "4":
                     if (evt.shiftKey) {
-                        context.camera.orbitAroundY(-step)
+                        context.camera.transfo.orbitAroundY(-step)
                     } else {
                         box.transfo.orbitAroundY(-step)
                     }
                     break
                 case "8":
                     if (evt.shiftKey) {
-                        context.camera.orbitAroundX(-step)
+                        context.camera.transfo.orbitAroundX(-step)
                     } else {
                         box.transfo.orbitAroundX(-step)
                     }
                     break
                 case "2":
                     if (evt.shiftKey) {
-                        context.camera.orbitAroundX(step)
+                        context.camera.transfo.orbitAroundX(step)
                     } else {
                         box.transfo.orbitAroundX(step)
                     }
