@@ -20,10 +20,7 @@ function init(context: TgdContext, assets: Assets) {
     // #begin
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 1000,
-        geo: {
-            minLat: tgdCalcDegToRad(-60),
-            maxLat: tgdCalcDegToRad(+60),
-        },
+        geo: {},
     })
     const skybox = new TgdPainterSkybox(context, {
         transfo: { orientation: TgdQuat.fromFace("+Y+Z+X") },
