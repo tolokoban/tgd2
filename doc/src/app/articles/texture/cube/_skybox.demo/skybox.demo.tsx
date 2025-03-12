@@ -19,6 +19,7 @@ import imageNegZ from "./6.webp" // -Z
 function init(context: TgdContext, assets: Assets) {
     // #begin
     new TgdControllerCameraOrbit(context, {
+        inertiaOrbit: 1000,
         geo: {
             minLat: tgdCalcDegToRad(-60),
             maxLat: tgdCalcDegToRad(+60),
@@ -33,12 +34,7 @@ function init(context: TgdContext, assets: Assets) {
         imageNegY: assets.image.imageNegY,
         imageNegZ: assets.image.imageNegZ,
     })
-    context.add(
-        skybox,
-        new TgdPainterAxes(context, { scale: 10 }),
-        new TgdPainterLogic((time: number, delay: number) => {})
-    )
-    // context.paint()
+    context.add(skybox, new TgdPainterAxes(context, { scale: 1 }))
     // #end
 }
 

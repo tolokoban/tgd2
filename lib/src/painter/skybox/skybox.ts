@@ -19,6 +19,7 @@ export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
 export class TgdPainterSkybox extends TgdPainter {
     public readonly transfo: TgdTransfo
     public camera: TgdCameraPerspective
+    public zoom = 1
 
     private readonly texture: TgdTextureCubeImpl
     private readonly program: TgdProgram
@@ -61,6 +62,7 @@ export class TgdPainterSkybox extends TgdPainter {
         program.use()
         program.uniformMatrix4fv("uniTransform", this.transfo.matrix)
         program.uniformMatrix4fv("uniMatrix", this.matrix)
+        program.uniform1f("uniZoom", this.zoom)
         texture.activate(0, program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)

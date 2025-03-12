@@ -223,8 +223,12 @@ export class TgdControllerCameraOrbit {
     }
 
     private readonly handleMove = (event: TgdInputPointerEventMove) => {
-        if (!this.enabled) return
+        if (!this.enabled || this.animOrbit) return
 
+        this.actualMove(event)
+    }
+
+    private readonly actualMove = (event: TgdInputPointerEventMove) => {
         const dt = event.current.t - event.previous.t
         if (dt <= 0) return
 
@@ -298,7 +302,10 @@ export class TgdControllerCameraOrbit {
         if (!this.enabled) return
 
         const { animOrbit, context } = this
-        if (animOrbit) context.animCancel(animOrbit)
+        if (animOrbit) {
+            context.animCancel(animOrbit)
+            this.animOrbit = null
+        }
     }
 
     private readonly handleMoveEnd = (event: TgdInputPointerEventMove) => {
@@ -306,22 +313,29 @@ export class TgdControllerCameraOrbit {
 
         const { context, inertiaOrbit } = this
         if (inertiaOrbit > 0) {
-            const inverseDeltaTime =
-                inertiaOrbit / (event.current.t - event.previous.t)
-            const slowDown = event.shiftKey
-            const dx = inverseDeltaTime * (event.current.x - event.previous.x)
-            const dy = inverseDeltaTime * (event.current.y - event.previous.y)
-            let previousAlpha = 0
+            const inverseDeltaTime = 1 / (event.current.t - event.previous.t)
+            const speedX =
+                inverseDeltaTime * (event.current.x - event.previous.x)
+            const speedY =
+                inverseDeltaTime * (event.current.y - event.previous.y)
+            const currentEvent = structuredClone(event)
+            currentEvent.current.t = Date.now()
             this.animOrbit = {
-                duration: inertiaOrbit,
+                duration: inertiaOrbit * 1e-3,
                 action: alpha => {
-                    const t = alpha - previousAlpha
-                    previousAlpha = alpha
-                    if (this.geo) {
-                        // this.orbitLatLng(lat, lng)
-                    } else {
-                        this.orbit(dx * t, dy * t, slowDown)
-                    }
+                    currentEvent.previous.t = currentEvent.current.t
+                    currentEvent.previous.x = currentEvent.current.x
+                    currentEvent.previous.y = currentEvent.current.y
+                    currentEvent.previous.fingersCount =
+                        currentEvent.current.fingersCount
+                    currentEvent.current.t = Date.now()
+                    const deltaTime =
+                        currentEvent.current.t - currentEvent.previous.t
+                    const strength = 1 - alpha
+                    const factor = strength * deltaTime
+                    currentEvent.current.x += factor * speedX
+                    currentEvent.current.y += factor * speedY
+                    this.actualMove(currentEvent)
                 },
                 easingFunction: tgdEasingFunctionOutQuad,
             }
