@@ -73,9 +73,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             `);`,
             `return color;`,
         ]
-        this.vertexShaderCode = [
-            "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
-        ]
+        this.vertexShaderCode = ["varNormal = mat3(uniTransfoMatrix) * NORMAL;"]
         this.varyings = {
             varNormal: "vec3",
         }

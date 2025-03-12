@@ -32,7 +32,7 @@ function init(ctx: TgdContext) {
                     transfo: {
                         position: [0, -0.5, -0.5],
                     },
-                    painter: new TgdPainterMesh(ctx, {
+                    target: new TgdPainterMesh(ctx, {
                         geometry: new TgdGeometryBox(),
                         material: new TgdMaterialNormals(),
                         // material: new TgdMaterialDiffuse({

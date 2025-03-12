@@ -1,7 +1,7 @@
 import { TgdContext } from "@tgd/context"
-import { TgdGeometry } from "@tgd/geometry"
-import { TgdMaterial } from "@tgd/material"
-import { TgdTransfo, TgdVec3 } from "@tgd/math"
+import { TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
+import { TgdMaterial, TgdMaterialNormals } from "@tgd/material"
+import { TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
@@ -10,14 +10,18 @@ import { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdPainter } from "../../painter"
 
 export interface TgdPainterMeshOptions {
-    geometry: TgdGeometry
-    material: TgdMaterial
+    transfo?: Partial<TgdTransfoOptions> | TgdTransfo
+    geometry?: TgdGeometry
+    material?: TgdMaterial
     name?: string
 }
 
 /**
  */
-export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
+export class TgdPainterMesh
+    extends TgdPainter
+    implements TgdInterfaceTransformable
+{
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -35,9 +39,14 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         options: TgdPainterMeshOptions
     ) {
         super()
-        const { material, geometry } = options
-        this.geometry = geometry
+        const {
+            transfo,
+            material = new TgdMaterialNormals(),
+            geometry = new TgdGeometryBox(),
+        } = options
+        this.transfo = new TgdTransfo(transfo)
         this.material = material
+        this.geometry = geometry
         this.drawMode =
             typeof geometry.drawMode === "number"
                 ? geometry.drawMode

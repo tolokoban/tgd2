@@ -140,7 +140,7 @@ function createNodePainter(
             primitiveIndex: 0,
         })
         const meshNode = new TgdPainterNode({
-            painter: mesh,
+            target: mesh,
         })
         meshNode.transfo.from(mesh.transfo)
         painter.add(meshNode)

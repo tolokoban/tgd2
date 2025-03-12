@@ -5,8 +5,9 @@ import { TgdInterfaceTransformablePainter } from "../../interface"
 
 export interface TgdPainterNodeOptions {
     transfo: TgdTransfo | Partial<TgdTransfoOptions>
-    painter: TgdInterfaceTransformablePainter
+    target: TgdInterfaceTransformablePainter
     children: TgdPainterNode[]
+    logic(time: number, delay: number): void
 }
 
 /**
@@ -14,28 +15,56 @@ export interface TgdPainterNodeOptions {
  * TgdPainterNodeChild interface.
  *
  * Each Node is a local space for its children.
+ *
+ * All objects implementing `TgdInterfaceTransformable` have a `transfo` attribute
+ * that controls its position/orientation/scale in the world coordinate system. If
+ * you need an object's transformation to be defined in another object coordinate
+ * system, you just have to wrap it in a `TgdPainterNode`.
+ *
+ * As long as a `Transformable` is hold by the `painter` attribute of a `TgdPainterNode`,
+ * it will be controlled by the node.
+ * That means, you should not use its `transfo` attribute because it will be
+ * overwritten by the node.
+ *
+ * @example
+ * ```
+ * const body = new TgdPainterNode({
+ *   target: new TgdPainterMesh(context)
+ * })
+ * const leftArm = new TgdPainterNode({
+ *   transfo: { poition: [1, 0, 0] },
+ *   target: new TgdPainterMesh(context)
+ * })
+ * const rightArm = new TgdPainterNode({
+ *   transfo: { poition: [-1, 0, 0] },
+ *   target: new TgdPainterMesh(context)
+ * })
+ * body.add( leftArm, rightArm )
+ * ```
  */
 export class TgdPainterNode extends TgdPainter {
     public readonly transfo: TgdTransfo
-    public painter: TgdInterfaceTransformablePainter | null = null
+    public target: TgdInterfaceTransformablePainter | null = null
 
     private readonly parentMatrix = new TgdMat4()
     private readonly globalMatrix = new TgdMat4()
     private readonly children: TgdPainterNode[] = []
+    private readonly logic?: (time: number, delay: number) => void
 
     constructor(options: Partial<TgdPainterNodeOptions> = {}) {
         super()
-        const { children = [], painter = null, transfo } = options
+        const { children = [], target = null, transfo, logic } = options
         for (const child of children) this.add(child)
-        this.painter = painter
+        this.target = target
         this.transfo = new TgdTransfo(transfo)
+        this.logic = logic
     }
 
     delete(): void {
         for (const child of this.children) {
             child.delete()
         }
-        this.painter?.delete()
+        this.target?.delete?.()
     }
 
     add(...children: TgdPainterNode[]): this {
@@ -53,6 +82,7 @@ export class TgdPainterNode extends TgdPainter {
     }
 
     paint(time: number, delay: number): void {
+        this.logic?.(time, delay)
         this.parentMatrix.reset()
         const fringe: TgdPainterNode[] = [this]
         while (fringe.length > 0) {
@@ -60,9 +90,9 @@ export class TgdPainterNode extends TgdPainter {
             node.globalMatrix
                 .from(node.parentMatrix)
                 .multiply(node.transfo.matrix)
-            if (node.painter) {
-                node.painter.transfo.matrix.from(node.globalMatrix)
-                node.painter.paint(time, delay)
+            if (node.target) {
+                node.target.transfo.matrix.from(node.globalMatrix)
+                node.target.paint?.(time, delay)
             }
             for (const child of node.children) {
                 child.parentMatrix.from(node.globalMatrix)

@@ -4,7 +4,7 @@ import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdCameraPerspective } from "@tgd/camera"
-import { TgdMat4 } from "@tgd/math"
+import { TgdMat4, TgdTransfo, TgdTransfoOptions } from "@tgd/math"
 
 import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
@@ -13,9 +13,11 @@ import { TgdTextureCubeImpl } from "@tgd/texture"
 
 export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
     camera?: TgdCameraPerspective
+    transfo?: Partial<TgdTransfoOptions> | TgdTransfo
 }
 
 export class TgdPainterSkybox extends TgdPainter {
+    public readonly transfo: TgdTransfo
     public camera: TgdCameraPerspective
 
     private readonly texture: TgdTextureCubeImpl
@@ -29,6 +31,8 @@ export class TgdPainterSkybox extends TgdPainter {
         options: TgdPainterSkyboxOptions
     ) {
         super()
+        this.transfo = new TgdTransfo(options.transfo)
+        // new TgdTransfo(options.transfo)
         this.camera = options.camera ?? new TgdCameraPerspective()
         this.texture = new TgdTextureCubeImpl(context, options)
         this.program = new TgdProgram(context.gl, {
@@ -55,6 +59,7 @@ export class TgdPainterSkybox extends TgdPainter {
         const { gl } = context
 
         program.use()
+        program.uniformMatrix4fv("uniTransform", this.transfo.matrix)
         program.uniformMatrix4fv("uniMatrix", this.matrix)
         texture.activate(0, program, "uniTexture")
         vao.bind()
@@ -67,13 +72,6 @@ export class TgdPainterSkybox extends TgdPainter {
         }
         matrix.from(camera.matrixProjection)
         tmpMat.fromMat3(camera.matrixModelView)
-        tmpMat.m30 = 0
-        tmpMat.m31 = 0
-        tmpMat.m32 = 0
-        tmpMat.m33 = 1
-        tmpMat.m03 = 0
-        tmpMat.m13 = 0
-        tmpMat.m23 = 0
         matrix.multiply(tmpMat).invert()
     }
 }

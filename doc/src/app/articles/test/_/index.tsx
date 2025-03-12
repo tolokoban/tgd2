@@ -18,6 +18,8 @@ import {
     TgdGeometryBox,
     TgdMaterialNormals,
     TgdPainterNode,
+    TgdMaterialGhost,
+    TgdMaterialDiffuse,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -55,7 +57,7 @@ function init(context: TgdContext) {
 
         console.log("Suzanne has been loaded!")
         const mesh = new TgdPainterNode({
-            painter: new TgdPainterMeshGltf(context, {
+            target: new TgdPainterMeshGltf(context, {
                 asset,
             }),
             transfo: {
@@ -63,7 +65,7 @@ function init(context: TgdContext) {
             },
         })
         const box = new TgdPainterNode({
-            painter: new TgdPainterMesh(context, {
+            target: new TgdPainterMesh(context, {
                 geometry: new TgdGeometryBox(),
                 material: new TgdMaterialNormals(),
             }),
@@ -72,9 +74,9 @@ function init(context: TgdContext) {
             },
         })
         const box2 = new TgdPainterNode({
-            painter: new TgdPainterMesh(context, {
+            target: new TgdPainterMesh(context, {
                 geometry: new TgdGeometryBox(),
-                material: new TgdMaterialNormals(),
+                material: new TgdMaterialDiffuse(),
             }),
             transfo: { position: [0, 1, 0] },
         })

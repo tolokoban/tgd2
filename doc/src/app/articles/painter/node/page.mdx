@@ -7,6 +7,11 @@ that controls its position/orientation/scale in the world coordinate system. If
 you need an object's transformation to be defined in another object coordinate
 system, you just have to wrap it in a `TgdPainterNode`.
 
+As long as a `Transformable` is hold by the `painter` attribute of a `TgdPainterNode`,
+it will be controlled by the node.
+That means, you should not use its `transfo` attribute because it will be
+overwritten by the node.
+
 ## Example
 
 <Demo />

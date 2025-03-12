@@ -19,6 +19,10 @@ export class TgdQuat extends TgdVec4 {
         return quat
     }
 
+    static fromFace(face: TgdQuatFace): TgdQuat {
+        return new TgdQuat().face(face)
+    }
+
     constructor()
     constructor(source: TgdQuat)
     constructor(source: TgdVec4)

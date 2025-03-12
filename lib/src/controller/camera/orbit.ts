@@ -186,6 +186,7 @@ export class TgdControllerCameraOrbit {
         this.maxZoom = maxZoom
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
+        globalThis.setTimeout(() => context.paint())
     }
 
     get enabled() {
@@ -290,6 +291,7 @@ export class TgdControllerCameraOrbit {
         final.multiply(mat)
         this.tmpQuat.fromMatrix(final)
         this.context.camera.transfo.orientation = this.tmpQuat
+        this.fireOrbitChange()
     }
 
     private readonly handleMoveStart = () => {
