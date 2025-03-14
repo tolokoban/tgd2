@@ -2,6 +2,8 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdFilterChromaticAberration,
+    TgdFilterVerbatim,
+    TgdFilterZoom,
     TgdGeometryBox,
     TgdMaterialDiffuse,
     TgdMaterialNormals,
@@ -36,12 +38,15 @@ function init(context: TgdContext, assets: Assets) {
     // #begin
     const fb = new TgdPainterFramebuffer(context, {
         children: [meshPainter],
+        depthBuffer: true,
+        textureColor0: new TgdTexture2D(context),
     })
     const filters = new TgdPainterFilter(context, {
         filters: [
-            new TgdFilterChromaticAberration({
-                strength: 10,
-            }),
+            // new TgdFilterChromaticAberration({
+            //     strength: 10,
+            // }),
+            new TgdFilterVerbatim(),
         ],
         texture: fb.textureColor0,
     })

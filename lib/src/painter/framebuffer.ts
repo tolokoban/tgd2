@@ -50,6 +50,9 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     public readonly textureColor3: TgdTexture2D | undefined
     public readonly textureDepth: TgdTexture2D | undefined
 
+    /**
+     * The framebuffer becomes dirty as soon as the width or height changes.
+     */
     private dirty = true
     private _width = 0
     private _height = 0
@@ -82,7 +85,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     get width(): number {
         return this._width
     }
-    set width(v: number) {
+    private set width(v: number) {
         if (this._width === v) return
 
         this._width = v
@@ -92,7 +95,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     get height(): number {
         return this._height
     }
-    set height(v: number) {
+    private set height(v: number) {
         if (this._height === v) return
 
         this._height = v
@@ -100,63 +103,63 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     }
 
     private updateTextureForColor(
-        texture: TgdTexture2D | undefined,
+        tgdTexture: TgdTexture2D | undefined,
         attachment: number
     ) {
-        if (!texture) return
+        if (!tgdTexture) return
 
         const { context, width, height } = this
         const { gl } = context
-        texture.resize(width, height)
+        tgdTexture.resize(width, height)
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
             gl.COLOR_ATTACHMENT0 + attachment,
             gl.TEXTURE_2D,
-            texture,
+            tgdTexture.glTexture,
             0
         )
     }
 
     private createTextureForDepth() {
-        const texture = this.textureDepth
-        if (!texture) return
+        const tgdTexture = this.textureDepth
+        if (!tgdTexture) return
 
         const { context, width, height } = this
         const { gl } = context
-        texture.resize(width, height)
+        tgdTexture.resize(width, height)
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
             gl.DEPTH_ATTACHMENT,
             gl.TEXTURE_2D,
-            texture,
+            tgdTexture.glTexture,
             0
         )
     }
 
     private createDepthBuffer(gl: WebGL2RenderingContext) {
-        if (this.options.depthBuffer !== false) {
-            const { width, height } = this
-            // Create a Depth Buffer, because the default
-            // framebuffer has none.
-            const depthBuffer = gl.createRenderbuffer()
-            if (!depthBuffer)
-                throw new Error("Unable to create WebGLRenderBuffer for depth!")
+        if (this.options.depthBuffer === false) return
 
-            this._depthBuffer = depthBuffer
-            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
-            gl.renderbufferStorage(
-                gl.RENDERBUFFER,
-                gl.DEPTH_COMPONENT16,
-                width,
-                height
-            )
-            gl.framebufferRenderbuffer(
-                gl.FRAMEBUFFER,
-                gl.DEPTH_ATTACHMENT,
-                gl.RENDERBUFFER,
-                depthBuffer
-            )
-        }
+        const { width, height } = this
+        // Create a Depth Buffer, because the default
+        // framebuffer has none.
+        const depthBuffer = gl.createRenderbuffer()
+        if (!depthBuffer)
+            throw new Error("Unable to create WebGLRenderBuffer for depth!")
+
+        this._depthBuffer = depthBuffer
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+        gl.renderbufferStorage(
+            gl.RENDERBUFFER,
+            gl.DEPTH_COMPONENT16,
+            width,
+            height
+        )
+        gl.framebufferRenderbuffer(
+            gl.FRAMEBUFFER,
+            gl.DEPTH_ATTACHMENT,
+            gl.RENDERBUFFER,
+            depthBuffer
+        )
     }
 
     private createStencilBuffer(gl: WebGL2RenderingContext) {
@@ -164,7 +167,9 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             const { width, height } = this
             const stencilBuffer = gl.createRenderbuffer()
             if (!stencilBuffer)
-                throw new Error("Unable to create WebGLRenderBuffer for stencil!")
+                throw new Error(
+                    "Unable to create WebGLRenderBuffer for stencil!"
+                )
 
             this._stencilBuffer = stencilBuffer
             gl.bindRenderbuffer(gl.RENDERBUFFER, stencilBuffer)
