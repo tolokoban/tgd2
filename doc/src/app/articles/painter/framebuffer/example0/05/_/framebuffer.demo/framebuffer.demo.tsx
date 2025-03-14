@@ -1,12 +1,7 @@
 import {
-    TgdCameraPerspective,
     TgdContext,
     TgdFilterChromaticAberration,
-    TgdFilterVerbatim,
-    TgdFilterZoom,
-    TgdGeometryBox,
     TgdMaterialDiffuse,
-    TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
@@ -22,9 +17,12 @@ import TextureURL from "@/assets/image/whale-1024.webp"
 
 function init(context: TgdContext, assets: Assets) {
     context.camera.transfo.distance = 5
+    // #begin
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
+        depth: 1,
     })
+    // #end
     const texture = new TgdTexture2D(context).loadBitmap(assets.image.texture)
     const mesh = new TgdPainterMesh(context, {
         material: new TgdMaterialDiffuse({
@@ -35,18 +33,16 @@ function init(context: TgdContext, assets: Assets) {
         depth: webglPresetDepth.less,
         children: [clear, mesh],
     })
-    // #begin
     const fb = new TgdPainterFramebuffer(context, {
         children: [meshPainter],
         depthBuffer: true,
         textureColor0: new TgdTexture2D(context),
     })
+    const chromaticAberrationFilter = new TgdFilterChromaticAberration({
+        strength: 10,
+    })
     const filters = new TgdPainterFilter(context, {
-        filters: [
-            new TgdFilterChromaticAberration({
-                strength: 10,
-            }),
-        ],
+        filters: [chromaticAberrationFilter],
         texture: fb.textureColor0,
     })
     context.add(
@@ -55,9 +51,9 @@ function init(context: TgdContext, assets: Assets) {
         new TgdPainterLogic((time, delay) => {
             mesh.transfo.orbitAroundX(delay * Math.sin(time))
             mesh.transfo.orbitAroundZ(delay * 1.341)
+            chromaticAberrationFilter.strength = Math.sin(time) * 100
         })
     )
-    // #end
     context.play()
 }
 

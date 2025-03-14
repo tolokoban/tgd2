@@ -63,13 +63,22 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
 
     constructor(
         private readonly context: TgdContext,
-        private readonly options: Partial<TgdPainterFramebufferOptions> = {}
+        private readonly options: Partial<TgdPainterFramebufferOptions>
     ) {
         super(options.children)
-        this.textureColor0 = options.textureColor0
-        this.textureColor1 = options.textureColor1
-        this.textureColor2 = options.textureColor2
-        this.textureColor3 = options.textureColor3
+        const { textureColor0, textureColor1, textureColor2, textureColor3 } =
+            options
+        if (
+            !(textureColor0 || textureColor1 || textureColor2 || textureColor3)
+        ) {
+            console.error(
+                "[TgdPainterFramebuffer] You gave no color texture in the constructor: nothing will be rendered!"
+            )
+        }
+        this.textureColor0 = textureColor0
+        this.textureColor1 = textureColor1
+        this.textureColor2 = textureColor2
+        this.textureColor3 = textureColor3
         this.textureDepth = options.textureDepth
         this.onEnter = options.onEnter
         this.onExit = options.onExit

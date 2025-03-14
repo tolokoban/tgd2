@@ -73,6 +73,7 @@ function init(context: TgdContext, assets: Assets) {
     })
 
     const framebuffer = new TgdPainterFramebuffer(context, {
+        textureColor0: new TgdTexture2D(context),
         children: [clear, scene],
     })
     const filter = new TgdPainterFilter(context, {

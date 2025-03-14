@@ -38,6 +38,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/framebuffer/example0/02": ["/articles/painter/framebuffer/example0/02"],
     "/articles/painter/framebuffer/example0/03": ["/articles/painter/framebuffer/example0/03"],
     "/articles/painter/framebuffer/example0/04": ["/articles/painter/framebuffer/example0/04"],
+    "/articles/painter/framebuffer/example0/05": ["/articles/painter/framebuffer/example0/05"],
     "/articles/painter/framebuffer/example1": ["/articles/painter/framebuffer/example1"],
     "/articles/painter/framebuffer/example2": ["/articles/painter/framebuffer/example2"],
     "/articles/painter/framebuffer/example3": ["/articles/painter/framebuffer/example3"],

@@ -33,8 +33,12 @@ function init(context: TgdContext, assets: Assets) {
         speedPanning: 0,
         inertiaOrbit: 1000,
     })
-    const framebufferRender = new TgdPainterFramebuffer(context)
-    const framebufferCopy = new TgdPainterFramebuffer(context)
+    const framebufferRender = new TgdPainterFramebuffer(context, {
+        textureColor0: new TgdTexture2D(context),
+    })
+    const framebufferCopy = new TgdPainterFramebuffer(context, {
+        textureColor0: new TgdTexture2D(context),
+    })
     const material = new Material()
     material.texture = new TgdTexture2D(context).loadBitmap(
         assets.image.background
@@ -81,13 +85,10 @@ function init(context: TgdContext, assets: Assets) {
         screen,
         new TgdPainterLogic((time, delay) => {
             const { camera } = context
-            camera.transfo.orbitAroundY(delay * 0.0001047)
-            // camera.transfo.orbitAroundX(delay * 0.00007154)
-            // camera.transfo.orbitAroundZ(delay * 0.0003051)
-            // camera.transfo.zoom = 0.333 + 0.3 * Math.abs(Math.sin(time * 0.001457))
+            camera.transfo.orbitAroundY(delay)
         })
     )
-    context.paint()
+    context.play()
     // #end
 }
 

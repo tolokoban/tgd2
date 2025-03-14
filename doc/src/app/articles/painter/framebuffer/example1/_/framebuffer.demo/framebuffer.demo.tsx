@@ -32,8 +32,12 @@ function init(context: TgdContext, assets: Assets) {
         fovy: Math.PI / 4,
         zoom: 1,
     })
-    const framebuffer1 = new TgdPainterFramebuffer(context)
-    const framebuffer2 = new TgdPainterFramebuffer(context)
+    const framebuffer1 = new TgdPainterFramebuffer(context, {
+        textureColor0: new TgdTexture2D(context),
+    })
+    const framebuffer2 = new TgdPainterFramebuffer(context, {
+        textureColor0: new TgdTexture2D(context),
+    })
     const background = new TgdPainterFilter(context, {
         texture: framebuffer2.textureColor0 ?? defaultTexture,
         filters: [new TgdFilterZoom()],

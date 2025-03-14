@@ -32,6 +32,7 @@ export type RoutePath =
     | "/articles/painter/framebuffer/example0/02"
     | "/articles/painter/framebuffer/example0/03"
     | "/articles/painter/framebuffer/example0/04"
+    | "/articles/painter/framebuffer/example0/05"
     | "/articles/painter/framebuffer/example1"
     | "/articles/painter/framebuffer/example2"
     | "/articles/painter/framebuffer/example3"
@@ -52,7 +53,7 @@ export type RoutePath =
     | "/tools/gltf"
 
 export function isRoutePath(path: string): path is RoutePath {
-    return ["/","/api","/articles","/articles/custom-shader","/articles/custom-shader/holes","/articles/math","/articles/math/fractal","/articles/math/fractal/pascal-triangle","/articles/painter","/articles/painter/background","/articles/painter/background/2","/articles/painter/clear","/articles/painter/custom","/articles/painter/filter","/articles/painter/filter/blur","/articles/painter/filter/chromatic-aberration","/articles/painter/filter/custom","/articles/painter/filter/hue","/articles/painter/framebuffer","/articles/painter/framebuffer/example0","/articles/painter/framebuffer/example0/01","/articles/painter/framebuffer/example0/02","/articles/painter/framebuffer/example0/03","/articles/painter/framebuffer/example0/04","/articles/painter/framebuffer/example1","/articles/painter/framebuffer/example2","/articles/painter/framebuffer/example3","/articles/painter/logic","/articles/painter/node","/articles/state","/articles/state/cull","/articles/state/stencil","/articles/suzanne","/articles/test","/articles/texture","/articles/texture/2d","/articles/texture/2d/bitmap","/articles/texture/2d/data","/articles/texture/cube","/tools","/tools/filter","/tools/gltf"].includes(path)
+    return ["/","/api","/articles","/articles/custom-shader","/articles/custom-shader/holes","/articles/math","/articles/math/fractal","/articles/math/fractal/pascal-triangle","/articles/painter","/articles/painter/background","/articles/painter/background/2","/articles/painter/clear","/articles/painter/custom","/articles/painter/filter","/articles/painter/filter/blur","/articles/painter/filter/chromatic-aberration","/articles/painter/filter/custom","/articles/painter/filter/hue","/articles/painter/framebuffer","/articles/painter/framebuffer/example0","/articles/painter/framebuffer/example0/01","/articles/painter/framebuffer/example0/02","/articles/painter/framebuffer/example0/03","/articles/painter/framebuffer/example0/04","/articles/painter/framebuffer/example0/05","/articles/painter/framebuffer/example1","/articles/painter/framebuffer/example2","/articles/painter/framebuffer/example3","/articles/painter/logic","/articles/painter/node","/articles/state","/articles/state/cull","/articles/state/stencil","/articles/suzanne","/articles/test","/articles/texture","/articles/texture/2d","/articles/texture/2d/bitmap","/articles/texture/2d/data","/articles/texture/cube","/tools","/tools/filter","/tools/gltf"].includes(path)
 }
 
 export interface RouteMatch {
