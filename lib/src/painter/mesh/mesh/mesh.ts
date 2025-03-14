@@ -18,10 +18,7 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -36,7 +33,7 @@ export class TgdPainterMesh
 
     constructor(
         protected readonly context: TgdContext,
-        options: TgdPainterMeshOptions
+        options: TgdPainterMeshOptions = {}
     ) {
         super()
         const {

@@ -2,49 +2,44 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdGeometryBox,
+    TgdMaterialDiffuse,
     TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterState,
+    TgdTexture2D,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import SuzanneURL from "@/assets/mesh/logo.glb"
-import BackgroundURL from "@/assets/image/dino.webp"
+import TextureURL from "@/assets/image/whale-1024.webp"
 
 function init(context: TgdContext, assets: Assets) {
-    // #begin
-    context.camera = new TgdCameraPerspective({
-        transfo: { distance: 3 },
-        far: 100,
-        near: 0.01,
-        fovy: Math.PI / 4,
-        zoom: 1,
-    })
+    context.camera.transfo.distance = 5
     const clear = new TgdPainterClear(context, {
-        color: [0.2, 0.2, 0.2, 1],
-        depth: 1,
+        color: [0, 0, 0, 1],
     })
+    // #begin
+    const texture = new TgdTexture2D(context).loadBitmap(assets.image.texture)
     const mesh = new TgdPainterMesh(context, {
-        geometry: new TgdGeometryBox(),
-        material: new TgdMaterialNormals(),
+        material: new TgdMaterialDiffuse({
+            color: texture,
+        }),
     })
-    let loop = 1
-    const spin = new TgdPainterLogic((_time, delay) => {
-        console.log("🚀 [framebuffer.demo] delay = ", delay) // @FIXME: Remove this line written on 2025-03-04 at 20:22
-        mesh.transfo.orbitAroundZ(delay)
-        // mesh.transfo.setPosition(Math.sin(time), Math.sin(time * 1.2763), 0)
-        // if (loop > 3) context.pause()
-    })
+    // #end
     const meshPainter = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
-        children: [spin, mesh],
+        children: [clear, mesh],
     })
-    context.add(clear, meshPainter)
+    context.add(
+        meshPainter,
+        new TgdPainterLogic((time, delay) => {
+            mesh.transfo.orbitAroundX(delay * Math.sin(time))
+            mesh.transfo.orbitAroundZ(delay * 1.341)
+        })
+    )
     context.play()
-    // #end
 }
 
 export default function Demo() {
@@ -52,11 +47,8 @@ export default function Demo() {
         <View
             onReady={init}
             assets={{
-                glb: {
-                    mesh: SuzanneURL,
-                },
                 image: {
-                    background: BackgroundURL,
+                    texture: TextureURL,
                 },
             }}
         />

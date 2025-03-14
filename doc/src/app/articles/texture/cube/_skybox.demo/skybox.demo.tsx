@@ -9,12 +9,12 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import imagePosX from "./1.webp" // +X
-import imagePosY from "./2.webp" // +Y
-import imagePosZ from "./3.webp" // +Z
-import imageNegX from "./4.webp" // -X
-import imageNegY from "./5.webp" // -Y
-import imageNegZ from "./6.webp" // -Z
+import imagePosX from "./posX.webp" // +X
+import imagePosY from "./posY.webp" // +Y
+import imagePosZ from "./posZ.webp" // +Z
+import imageNegX from "./negX.webp" // -X
+import imageNegY from "./negY.webp" // -Y
+import imageNegZ from "./negZ.webp" // -Z
 
 function init(context: TgdContext, assets: Assets) {
     // #begin

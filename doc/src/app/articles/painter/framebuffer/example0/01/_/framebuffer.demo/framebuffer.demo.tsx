@@ -4,6 +4,7 @@ import {
     TgdGeometryBox,
     TgdMaterialNormals,
     TgdPainterClear,
+    TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterState,
     webglPresetDepth,
@@ -15,25 +16,22 @@ import BackgroundURL from "@/assets/image/dino.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
-    context.camera = new TgdCameraPerspective({
-        transfo: { distance: 3 },
-        far: 100,
-        near: 0.01,
-        fovy: Math.PI / 4,
-        zoom: 1,
-    })
+    context.camera.transfo.distance = 5
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
     })
-    const mesh = new TgdPainterMesh(context, {
-        geometry: new TgdGeometryBox(),
-        material: new TgdMaterialNormals(),
-    })
+    const mesh = new TgdPainterMesh(context)
     const meshPainter = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
         children: [clear, mesh],
     })
-    context.add(meshPainter)
+    context.add(
+        meshPainter,
+        new TgdPainterLogic((time, delay) => {
+            mesh.transfo.orbitAroundX(delay * Math.sin(time))
+            mesh.transfo.orbitAroundZ(delay * 1.341)
+        })
+    )
     context.play()
     // #end
 }
