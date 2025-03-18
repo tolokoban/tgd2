@@ -36,7 +36,7 @@ export class TgdFilterChromaticAberration extends TgdFilter {
             uniforms: {
                 uniStrength: "float",
             },
-            setUniforms: (program, _time) => {
+            setUniforms: ({ program }) => {
                 program.uniform1f("uniStrength", this.strength)
                 program.uniform1f(
                     "uniInverseHeight",

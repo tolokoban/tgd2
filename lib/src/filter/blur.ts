@@ -63,7 +63,7 @@ export class TgdFilterBlur extends TgdFilter {
                 uniInverseWidth: "float",
                 uniInverseHeight: "float",
             },
-            setUniforms(program, _time) {
+            setUniforms({ program }) {
                 program.uniform1f(
                     "uniInverseWidth",
                     1 / program.gl.drawingBufferWidth

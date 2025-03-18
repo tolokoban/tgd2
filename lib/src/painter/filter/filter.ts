@@ -39,14 +39,14 @@ export class TgdPainterFilter extends TgdPainter {
         super()
         this.z = options.z ?? 0.999999
         this.texture = options.texture
-        const filters = options.filters
+        const filters = options.filters ?? []
         if (filters.length === 0) {
             throw new Error(
                 `[TgdPainterFilter] filters is expected to have at least one element!`
             )
         }
 
-        const programs = options.filters.map(filter => {
+        const programs = filters.map(filter => {
             const vert = new TgdShaderVertex({
                 attributes: {
                     attPoint: "vec2",
@@ -110,7 +110,7 @@ export class TgdPainterFilter extends TgdPainter {
         }
     }
 
-    paint(time: number): void {
+    paint(time: number, delay: number): void {
         const { vaos, texture, z, context } = this
         const { gl } = this.program
         let inputTexture = texture?.glTexture
@@ -138,6 +138,7 @@ export class TgdPainterFilter extends TgdPainter {
                 )
                 paintOneFilter(
                     time,
+                    delay,
                     vao,
                     programs[index],
                     filters[index],
@@ -153,6 +154,7 @@ export class TgdPainterFilter extends TgdPainter {
         }
         paintOneFilter(
             time,
+            delay,
             this.vao,
             this.program,
             this.filter,
@@ -208,6 +210,7 @@ export class TgdPainterFilter extends TgdPainter {
 
 function paintOneFilter(
     time: number,
+    delay: number,
     vao: TgdVertexArray,
     program: TgdProgram,
     filter: TgdFilter,
@@ -218,7 +221,7 @@ function paintOneFilter(
     const { gl } = program
     program.use()
     program.uniform1f("uniZ", z)
-    filter.setUniforms(program, time, context)
+    filter.setUniforms({ context, program, time, delay })
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     program.uniform1i("uniTexture", 0)

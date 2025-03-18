@@ -35,12 +35,7 @@ export class TgdFilter {
     public readonly extraFunctions: TgdCodeFunctions | TgdCodeBloc = {}
 
     public readonly setUniforms = (
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        program: TgdProgram,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        time: number,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        context: TgdContext
+        _parameters: TgdFilterSerUniformsParameters
     ): void => {}
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
@@ -57,5 +52,12 @@ export interface TgdFilterOptions {
     uniforms: { [name: string]: WebglUniformType }
     fragmentShaderCode: TgdCodeBloc
     extraFunctions: TgdCodeFunctions | TgdCodeBloc
-    setUniforms(program: TgdProgram, time: number, context: TgdContext): void
+    setUniforms(parameters: TgdFilterSerUniformsParameters): void
+}
+
+export interface TgdFilterSerUniformsParameters {
+    context: TgdContext
+    program: TgdProgram
+    time: number
+    delay: number
 }

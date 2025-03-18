@@ -1,5 +1,5 @@
 import { TgdProgram } from "@tgd/program"
-import { TgdFilter } from "./filter"
+import { TgdFilter, TgdFilterSerUniformsParameters } from "./filter"
 
 export class TgdFilterHueRotation extends TgdFilter {
     private hueShift = 0
@@ -43,10 +43,9 @@ export class TgdFilterHueRotation extends TgdFilter {
         this.hueShift = (v * Math.PI) / 180
     }
 
-    public readonly setUniforms = (
-        program: TgdProgram,
-        _time: number
-    ): void => {
+    public readonly setUniforms = ({
+        program,
+    }: TgdFilterSerUniformsParameters): void => {
         program.uniform1f("uniHueShift", this.hueShift)
     }
 }
