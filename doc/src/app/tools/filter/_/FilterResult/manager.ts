@@ -44,7 +44,7 @@ export class FilterManager {
                             uniAspectRatio: "float",
                             uniAspectRatioInverse: "float",
                         },
-                        setUniforms: (program, time) => {
+                        setUniforms: ({ program, time }) => {
                             program.uniform1f("uniTime", time)
                             program.uniform1f(
                                 "uniEffectStrength",

@@ -22,7 +22,7 @@ function init(context: TgdContext) {
             uniAspectRatio: "float",
             uniAspectRatioInverse: "float",
         },
-        setUniforms(program, time) {
+        setUniforms({ program, time }) {
             program.uniform1f("uniTime", time)
             program.uniform1f("uniAspectRatio", context.aspectRatio)
             program.uniform1f(

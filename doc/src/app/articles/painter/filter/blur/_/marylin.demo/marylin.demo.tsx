@@ -3,6 +3,7 @@ import {
     TgdFilterBlur,
     tgdLoadImage,
     TgdPainterFilter,
+    TgdPainterLogic,
     TgdTexture2D,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
@@ -27,8 +28,15 @@ function init(context: TgdContext) {
         texture,
         filters: [horizontalBlurFilter, verticalBlurFilter],
     })
-    context.add(filter)
-    context.paint()
+    context.add(
+        filter,
+        new TgdPainterLogic(time => {
+            const strength = (1 - Math.abs(Math.sin(time))) * 5
+            horizontalBlurFilter.strength = strength
+            verticalBlurFilter.strength = strength
+        })
+    )
+    context.play()
     // #end
 }
 

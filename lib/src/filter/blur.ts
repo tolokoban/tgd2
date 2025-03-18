@@ -10,13 +10,16 @@ export interface TgdFilterBlurOptions {
      *  * __90__: vertical blur.
      */
     direction: Readonly<TgdVec2> | number
+    strength: number
 }
 
 const DEFAULT_DIRECTION: Readonly<TgdVec2> = new TgdVec2(1, 0)
 
 export class TgdFilterBlur extends TgdFilter {
+    public strength: number
+
     constructor(options: Partial<TgdFilterBlurOptions> = {}) {
-        const { size = 4 } = options
+        const { size = 4, strength = 1 } = options
         const direction: TgdVec2 = figureOutDirection(options.direction)
         const length = direction.size
         const invLength = length > 0 ? 1 / length : 1
@@ -46,7 +49,7 @@ export class TgdFilterBlur extends TgdFilter {
         total = total + total + size + 1
         super({
             fragmentShaderCode: [
-                "vec2 dir = vec2(",
+                "vec2 dir = uniStrength * vec2(",
                 [
                     `uniInverseWidth * ${sx.toFixed(9)},`,
                     `uniInverseHeight * ${sy.toFixed(9)}`,
@@ -59,11 +62,11 @@ export class TgdFilterBlur extends TgdFilter {
                 `FragColor = color * ${(1 / total).toFixed(9)};`,
             ],
             uniforms: {
-                uniHueShift: "float",
+                uniStrength: "float",
                 uniInverseWidth: "float",
                 uniInverseHeight: "float",
             },
-            setUniforms({ program }) {
+            setUniforms: ({ program }) => {
                 program.uniform1f(
                     "uniInverseWidth",
                     1 / program.gl.drawingBufferWidth
@@ -72,8 +75,10 @@ export class TgdFilterBlur extends TgdFilter {
                     "uniInverseHeight",
                     1 / program.gl.drawingBufferHeight
                 )
+                program.uniform1f("uniStrength", this.strength)
             },
         })
+        this.strength = strength
     }
 }
 

@@ -46,6 +46,9 @@ export class TgdFilter {
         if (extraFunctions) this.extraFunctions = extraFunctions
         if (setUniforms) this.setUniforms = setUniforms
     }
+
+    /** Cleanup function. */
+    delete() {}
 }
 
 export interface TgdFilterOptions {
