@@ -3,7 +3,7 @@ import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdCameraPerspective } from "@tgd/camera"
+import { TgdCamera } from "@tgd/camera"
 import { TgdMat4, TgdTransfo, TgdTransfoOptions } from "@tgd/math"
 
 import VERT from "./skybox.vert"
@@ -12,14 +12,15 @@ import { TgdProgram } from "@tgd/program"
 import { TgdTextureCubeImpl } from "@tgd/texture"
 
 export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
-    camera?: TgdCameraPerspective
+    camera: TgdCamera
     transfo?: Partial<TgdTransfoOptions> | TgdTransfo
+    z?: number
 }
 
 export class TgdPainterSkybox extends TgdPainter {
     public readonly transfo: TgdTransfo
-    public camera: TgdCameraPerspective
-    public zoom = 1
+    public camera: TgdCamera
+    public z = 1
 
     private readonly texture: TgdTextureCubeImpl
     private readonly program: TgdProgram
@@ -32,9 +33,9 @@ export class TgdPainterSkybox extends TgdPainter {
         options: TgdPainterSkyboxOptions
     ) {
         super()
+        this.z = options.z ?? 1
         this.transfo = new TgdTransfo(options.transfo)
-        // new TgdTransfo(options.transfo)
-        this.camera = options.camera ?? new TgdCameraPerspective()
+        this.camera = options.camera
         this.texture = new TgdTextureCubeImpl(context, options)
         this.program = new TgdProgram(context.gl, {
             vert: VERT,
@@ -56,24 +57,26 @@ export class TgdPainterSkybox extends TgdPainter {
     }
 
     paint(): void {
-        const { context, vao, program, texture } = this
+        const { context, vao, program, texture, z } = this
         const { gl } = context
 
+        // Compute matrix from current camera.
+        const { camera, matrix, tmpMat } = this
+        camera.screenWidth = context.width
+        camera.screenHeight = context.height
+        matrix.from(camera.matrixProjection)
+        tmpMat.fromMat3(this.transfo.matrix).multiply(camera.matrixModelView)
+        tmpMat.m03 = 0
+        tmpMat.m13 = 0
+        tmpMat.m23 = 0
+        matrix.multiply(tmpMat).invert()
+
         program.use()
-        program.uniformMatrix4fv("uniTransform", this.transfo.matrix)
-        program.uniformMatrix4fv("uniMatrix", this.matrix)
-        program.uniform1f("uniZoom", this.zoom)
+        program.uniformMatrix4fv("uniMatrix", matrix)
+        program.uniform1f("uniZ", z)
         texture.activate(0, program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-        // Compute matrix for the next frame.
-        const { camera, matrix, tmpMat } = this
-        if (camera !== context.camera) {
-            camera.transfo.orientation = context.camera.transfo.orientation
-        }
-        matrix.from(camera.matrixProjection)
-        tmpMat.fromMat3(camera.matrixModelView)
-        matrix.multiply(tmpMat).invert()
+        vao.unbind()
     }
 }

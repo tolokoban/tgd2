@@ -74,6 +74,7 @@ function init(context: TgdContext) {
         depth: webglPresetDepth.less,
     })
     const skybox = new TgdPainterSkybox(context, {
+        camera: context.camera,
         imagePosX: PosX,
         imagePosY: PosY,
         imagePosZ: PosZ,

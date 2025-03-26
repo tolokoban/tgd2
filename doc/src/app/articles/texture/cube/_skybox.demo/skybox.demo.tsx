@@ -1,13 +1,22 @@
+import React from "react"
 import {
-    tgdCalcDegToRad,
+    TgdCamera,
+    TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
+    TgdGeometryBox,
     TgdPainterAxes,
-    TgdPainterLogic,
+    TgdPainterClear,
+    TgdPainterMesh,
     TgdPainterSkybox,
-    TgdQuat,
+    TgdPainterState,
+    TgdQuatFace,
+    webglPresetDepth,
 } from "@tolokoban/tgd"
+
 import View, { Assets } from "@/components/demo/Tgd"
+import { useStateCameraPerspective } from "@/utils/hooks/camera"
+import { ViewButton } from "@tolokoban/ui"
 
 import imagePosX from "./posX.webp" // +X
 import imagePosY from "./posY.webp" // +Y
@@ -16,14 +25,27 @@ import imageNegX from "./negX.webp" // -X
 import imageNegY from "./negY.webp" // -Y
 import imageNegZ from "./negZ.webp" // -Z
 
-function init(context: TgdContext, assets: Assets) {
+import styles from "./skybox.demo.module.css"
+
+function init(
+    context: TgdContext,
+    assets: Assets
+): {
+    camera: TgdCamera
+} {
     // #begin
+    const camera = new TgdCameraPerspective({
+        transfo: {
+            distance: 6,
+        },
+    })
+    context.camera = camera
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 1000,
         geo: {},
     })
     const skybox = new TgdPainterSkybox(context, {
-        transfo: { orientation: TgdQuat.fromFace("+Y+Z+X") },
+        camera: context.camera,
         imagePosX: assets.image.imagePosX,
         imagePosY: assets.image.imagePosY,
         imagePosZ: assets.image.imagePosZ,
@@ -31,14 +53,44 @@ function init(context: TgdContext, assets: Assets) {
         imageNegY: assets.image.imageNegY,
         imageNegZ: assets.image.imageNegZ,
     })
-    context.add(skybox, new TgdPainterAxes(context, { scale: 1 }))
+    const clear = new TgdPainterClear(context, {
+        depth: 1,
+    })
+    const cube = new TgdPainterMesh(context)
+    const axes = new TgdPainterAxes(context, { scale: 3 })
+    const state = new TgdPainterState(context, {
+        depth: webglPresetDepth.lessOrEqual,
+        children: [axes, cube, skybox],
+    })
+    context.add(clear, state)
+    context.paint()
+    return { camera }
     // #end
 }
 
 export default function Demo() {
+    const [camera, setCamera] = React.useState<TgdCamera | null>(null)
+    const refContext = React.useRef<TgdContext | null>(null)
+    const handleReady = (context: TgdContext, assets: Assets) => {
+        const resources = init(context, assets)
+        setCamera(resources.camera)
+    }
+    const face = (value: TgdQuatFace) => {
+        if (!camera) return
+
+        console.log("🚀 [skybox.demo] value =", value) // @FIXME: Remove this line written on 2025-03-26 at 14:17
+        camera.transfo.orientation.debug("Before")
+        camera.transfo.orientation.face(value)
+        camera.transfo.orientation.debug("After")
+        const context = refContext.current
+        if (!context) return
+
+        context.paint()
+    }
     return (
         <View
-            onReady={init}
+            className={styles.skybox}
+            onReady={handleReady}
             assets={{
                 image: {
                     imagePosX,
@@ -49,6 +101,15 @@ export default function Demo() {
                     imageNegZ,
                 },
             }}
-        />
+        >
+            <footer className={styles.footer}>
+                <ViewButton onClick={() => face("+Z+Y-X")}>+X</ViewButton>
+                <ViewButton>+Y</ViewButton>
+                <ViewButton>+Z</ViewButton>
+                <ViewButton>-X</ViewButton>
+                <ViewButton>-Y</ViewButton>
+                <ViewButton>-Z</ViewButton>
+            </footer>
+        </View>
     )
 }

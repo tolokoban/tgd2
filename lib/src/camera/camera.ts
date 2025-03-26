@@ -100,6 +100,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this._screenWidth = v
         this.dirtyProjection = true
         this._screenAspectRatio = this._screenWidth / this._screenHeight
+        console.log("🚀 [camera] screenWidth =", v) // @FIXME: Remove this line written on 2025-03-25 at 18:39
     }
 
     get screenHeight() {

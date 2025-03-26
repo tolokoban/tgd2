@@ -2,6 +2,7 @@
 
 precision highp float;
 
+uniform mat4 uniMatrix;
 uniform samplerCube uniTexture;
 
 in vec4 varPoint;
@@ -9,6 +10,6 @@ in vec4 varPoint;
 out vec4 FragColor;
 
 void main() {
-    vec4 t = varPoint;
-    FragColor = texture(uniTexture, normalize(t.xyz / t.w));
+    vec4 t = uniMatrix * varPoint;
+    FragColor = texture(uniTexture, normalize(t.xyz));
 }

@@ -42,6 +42,7 @@ export default function Tgd({
     assets,
     children,
 }: TgdProps) {
+    const [landscape, setLandscape] = React.useState(true)
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
     const refCanvas = React.useRef<HTMLCanvasElement | null>(null)
@@ -110,7 +111,14 @@ export default function Tgd({
 
     return (
         <div className={Theme.classNames.join(className, styles.Tgd)}>
-            <ViewPanel display="flex" justifyContent="flex-end">
+            <ViewPanel display="flex" justifyContent="space-between">
+                <ViewButton
+                    variant="elevated"
+                    onClick={() => setLandscape(!landscape)}
+                    enabled={!loading}
+                >
+                    {landscape ? "Switch to Portrait" : "Switch to Landscape"}
+                </ViewButton>
                 {fullscreenAvailable && (
                     <ViewButton
                         variant="elevated"
@@ -122,7 +130,13 @@ export default function Tgd({
                 )}
             </ViewPanel>
             <div className={styles.relative}>
-                <canvas style={{ width, height }} ref={mountCanvas}></canvas>
+                <canvas
+                    style={{
+                        width: landscape ? width : height,
+                        height: landscape ? height : width,
+                    }}
+                    ref={mountCanvas}
+                ></canvas>
                 <div
                     className={Theme.classNames.join(
                         styles.overlay,
