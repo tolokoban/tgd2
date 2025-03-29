@@ -1,23 +1,33 @@
-import { TgdTransfo } from "@tgd/math"
+import { TgdTransfo, TgdTransfoOptions } from "@tgd/math"
 import { tgdCalcMix } from "../math"
 
 export function tgdActionCreateTransfoInterpolation(
     transfo: TgdTransfo,
-    target: Readonly<TgdTransfo>
+    target: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>
 ) {
-    const beginOrientation = transfo.orientation.clone()
-    const beginPosition = transfo.position.clone()
-    const beginScale = transfo.scale.clone()
-    const beginDistance = transfo.distance
-    const endOrientation = target.orientation.clone()
-    const endPosition = target.position.clone()
-    const endScale = target.scale.clone()
-    const endDistance = target.distance
+    const distance = transfo.distance
+    const position = transfo.position.clone()
+    const scale = transfo.scale.clone()
+    const orientation = transfo.orientation.clone()
+    const endTransfo =
+        target instanceof TgdTransfo
+            ? target
+            : new TgdTransfo({
+                  distance,
+                  position,
+                  scale,
+                  orientation,
+                  ...target,
+              })
+    const endOrientation = endTransfo.orientation.clone()
+    const endPosition = endTransfo.position.clone()
+    const endScale = endTransfo.scale.clone()
+    const endDistance = endTransfo.distance
 
     return (t: number) => {
-        transfo.distance = tgdCalcMix(beginDistance, endDistance, t)
-        transfo.position.fromMix(beginPosition, endPosition, t)
-        transfo.scale.fromMix(beginScale, endScale, t)
-        transfo.orientation.fromSlerp(beginOrientation, endOrientation, t)
+        transfo.distance = tgdCalcMix(distance, endDistance, t)
+        transfo.position.fromMix(position, endPosition, t)
+        transfo.scale.fromMix(scale, endScale, t)
+        transfo.orientation.fromSlerp(orientation, endOrientation, t)
     }
 }

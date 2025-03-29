@@ -135,6 +135,17 @@ export class TgdVec3 extends Float32Array {
         return this
     }
 
+    /**
+     * `this = -vec`
+     */
+    fromOpposite(vec: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>): this {
+        const [x, y, z] = vec
+        this.x = -x
+        this.y = -y
+        this.z = -z
+        return this
+    }
+
     fromMix(
         valueAtT0: TgdVec3 | TgdVec4,
         valueAtT1: TgdVec3 | TgdVec4,

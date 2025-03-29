@@ -41,7 +41,7 @@ export default function MeshPreview({
 
         const ctx = new TgdContext(canvas)
         setContext(ctx)
-        refGizmo.current.attachCamera(ctx.camera)
+        refGizmo.current.attachContext(ctx)
         const resetCamera = (evt: { from: TgdQuat; to: TgdQuat }) => {
             const center = refCenter.current
             ctx.animSchedule({

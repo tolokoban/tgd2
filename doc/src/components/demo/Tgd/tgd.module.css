@@ -28,3 +28,23 @@
 .overlay.loading {
     opacity: 1;
 }
+
+.screen {
+    position: relative;    
+}
+
+.screen > canvas.canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.screen > canvas.gizmo {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 128px;
+    height: 128px;
+}

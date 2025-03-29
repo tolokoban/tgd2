@@ -89,7 +89,7 @@ export interface TgdControllerCameraOrbitOptions {
 export class TgdControllerCameraOrbit {
     private static counter = 0
 
-    public readonly id = `Orbit-${TgdControllerCameraOrbit.counter++}`
+    public readonly id = `TgdControllerCameraOrbit-${TgdControllerCameraOrbit.counter++}`
     public readonly eventChange = new TgdEvent<TgdCamera>()
     public minZoom = 1e-3
     public maxZoom = Infinity
@@ -267,8 +267,8 @@ export class TgdControllerCameraOrbit {
         const speed = 3 * (slowDown ? 0.1 : 1) * this.speedOrbit
         const dx = deltaX * speed
         const dy = deltaY * speed
-        if (!keyboard.isDown("x")) camera.transfo.orbitAroundY(-dx)
-        if (!keyboard.isDown("y")) camera.transfo.orbitAroundX(dy)
+        if (!keyboard.isDown("x")) camera.transfo.orbitAroundY(dx)
+        if (!keyboard.isDown("y")) camera.transfo.orbitAroundX(-dy)
         this.fireOrbitChange()
     }
 

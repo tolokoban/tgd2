@@ -45,11 +45,13 @@ export class TgdTransfo {
         this.setDirty()
     }
 
-    from(transfo: Readonly<TgdTransfo>): this {
-        this.position = transfo.position
-        this.orientation = transfo.orientation
-        this.scale = transfo.scale
-        this.distance = transfo.distance
+    from(
+        transfo: Readonly<TgdTransfo> | Readonly<Partial<TgdTransfoOptions>>
+    ): this {
+        this.position = transfo.position ?? this.position
+        this.orientation = transfo.orientation ?? this.orientation
+        this.scale = transfo.scale ?? this.scale
+        this.distance = transfo.distance ?? this.distance
         this.setDirty()
         return this
     }
@@ -129,6 +131,7 @@ export class TgdTransfo {
     }
 
     get position(): Readonly<TgdVec3> {
+        this.setDirty()
         return this._position
     }
     set position(value: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>) {
@@ -182,23 +185,26 @@ export class TgdTransfo {
     }
 
     get orientation(): Readonly<TgdQuat> {
+        this.setDirty()
         return this._orientation
     }
     set orientation(quat: Readonly<TgdQuat | ArrayNumber4>) {
         this.setDirty()
         this._orientation.from(quat)
     }
+    setOrientation(source: TgdVec4 | ArrayNumber4 | TgdQuat): this
+    setOrientation(x: number, y: number, z: number, w: number): this
     setOrientation(
-        x: number | TgdVec4 | ArrayNumber4,
-        y: number,
-        z: number,
-        w: number
+        x: number | TgdVec4 | ArrayNumber4 | TgdQuat,
+        y?: number,
+        z?: number,
+        w?: number
     ): this {
         this.setDirty()
         if (typeof x === "number") {
             this._orientation.reset(x, y, z, w)
         } else {
-            this._orientation.reset(x[0], x[1], x[2], x[4])
+            this._orientation.reset(x[0], x[1], x[2], x[3])
         }
         return this
     }

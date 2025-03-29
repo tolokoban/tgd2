@@ -1,21 +1,28 @@
 import React from "react"
 import {
+    tgdActionCreateTransfoInterpolation,
     TgdCamera,
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
+    tgdEasingFunctionInOutBounce,
+    tgdEasingFunctionInOutCubic,
     TgdGeometryBox,
+    TgdMat3,
     TgdPainterAxes,
     TgdPainterClear,
+    TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterSkybox,
     TgdPainterState,
+    TgdQuat,
     TgdQuatFace,
+    TgdTransfo,
+    TgdVec3,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
 import View, { Assets } from "@/components/demo/Tgd"
-import { useStateCameraPerspective } from "@/utils/hooks/camera"
 import { ViewButton } from "@tolokoban/ui"
 
 import imagePosX from "./posX.webp" // +X
@@ -42,8 +49,8 @@ function init(
     context.camera = camera
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 1000,
-        geo: {},
     })
+    context.camera.debug()
     const skybox = new TgdPainterSkybox(context, {
         camera: context.camera,
         imagePosX: assets.image.imagePosX,
@@ -74,22 +81,25 @@ export default function Demo() {
     const handleReady = (context: TgdContext, assets: Assets) => {
         const resources = init(context, assets)
         setCamera(resources.camera)
+        refContext.current = context
     }
     const face = (value: TgdQuatFace) => {
-        if (!camera) return
-
-        console.log("🚀 [skybox.demo] value =", value) // @FIXME: Remove this line written on 2025-03-26 at 14:17
-        camera.transfo.orientation.debug("Before")
-        camera.transfo.orientation.face(value)
-        camera.transfo.orientation.debug("After")
         const context = refContext.current
-        if (!context) return
+        if (!camera || !context) return
 
-        context.paint()
+        const orientation = TgdQuat.fromFace(value)
+        context.animSchedule({
+            action: tgdActionCreateTransfoInterpolation(camera.transfo, {
+                orientation,
+            }),
+            duration: 0.3,
+            easingFunction: tgdEasingFunctionInOutCubic,
+        })
     }
     return (
         <View
             className={styles.skybox}
+            gizmo
             onReady={handleReady}
             assets={{
                 image: {
@@ -103,12 +113,13 @@ export default function Demo() {
             }}
         >
             <footer className={styles.footer}>
-                <ViewButton onClick={() => face("+Z+Y-X")}>+X</ViewButton>
-                <ViewButton>+Y</ViewButton>
-                <ViewButton>+Z</ViewButton>
-                <ViewButton>-X</ViewButton>
-                <ViewButton>-Y</ViewButton>
-                <ViewButton>-Z</ViewButton>
+                <ViewButton onClick={() => face("+X+Y+Z")}>Reset</ViewButton>
+                <ViewButton onClick={() => face("-Z-Y-X")}>+X</ViewButton>
+                <ViewButton onClick={() => face("+X+Z-Y")}>+Y</ViewButton>
+                <ViewButton onClick={() => face("+X-Y-Z")}>+Z</ViewButton>
+                <ViewButton onClick={() => face("+Z-Y+X")}>-X</ViewButton>
+                <ViewButton onClick={() => face("+X-Z+Y")}>-Y</ViewButton>
+                <ViewButton onClick={() => face("-X-Y+Z")}>-Z</ViewButton>
             </footer>
         </View>
     )

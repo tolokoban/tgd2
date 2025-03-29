@@ -1,6 +1,9 @@
 import React from "react"
 import {
+    tgdActionCreateCameraInterpolation,
+    TgdCanvasGizmo,
     TgdContext,
+    tgdEasingFunctionInOutCubic,
     tgdLoadArrayBuffer,
     tgdLoadGlb,
     tgdLoadImage,
@@ -29,6 +32,7 @@ interface TgdProps {
     width?: string
     height?: string
     noBorder?: boolean
+    gizmo?: boolean
     assets?: Partial<AssetsToLoad>
     children?: React.ReactNode
 }
@@ -36,6 +40,7 @@ export default function Tgd({
     className,
     options,
     onReady,
+    gizmo = false,
     width = "640px",
     height = "480px",
     noBorder = false,
@@ -46,6 +51,8 @@ export default function Tgd({
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
     const refCanvas = React.useRef<HTMLCanvasElement | null>(null)
+    const refGizmo = React.useRef<TgdCanvasGizmo | null>(null)
+    const refScreen = React.useRef<HTMLDivElement | null>(null)
     const [loading, setLoading] = React.useState(true)
     let aspectRatio = "auto"
     if (width.endsWith("px") && height.endsWith("px")) {
@@ -70,12 +77,35 @@ export default function Tgd({
                 setLoading(false)
             })
             .catch(() => setLoading(false))
+        const gizmo = refGizmo.current
+        if (gizmo) gizmo.attachContext(context)
+    }
+    const mountGizmo = (canvas: HTMLCanvasElement) => {
+        const gizmo = new TgdCanvasGizmo({
+            canvas,
+        })
+        refGizmo.current = gizmo
+        gizmo.eventTipClick.addListener(({ to }) => {
+            const context = refContext.current
+            console.log("🚀 [tgd] to, context =", to, context) // @FIXME: Remove this line written on 2025-03-29 at 10:43
+            if (!context) return
+
+            context.animSchedule({
+                duration: 0.2,
+                easingFunction: tgdEasingFunctionInOutCubic,
+                action: tgdActionCreateCameraInterpolation(context.camera, {
+                    orientation: to,
+                }),
+            })
+        })
+        const context = refContext.current
+        if (context) gizmo.attachContext(context)
     }
     const handleFullscreen = () => {
-        const canvas = refCanvas.current
-        if (!canvas) return
+        const div = refScreen.current
+        if (!div) return
 
-        canvas.requestFullscreen()
+        div.requestFullscreen()
     }
     React.useEffect(() => {
         const canvas = refCanvas.current
@@ -130,13 +160,25 @@ export default function Tgd({
                 )}
             </ViewPanel>
             <div className={styles.relative}>
-                <canvas
+                <div
+                    ref={refScreen}
+                    className={styles.screen}
                     style={{
                         width: landscape ? width : height,
                         height: landscape ? height : width,
                     }}
-                    ref={mountCanvas}
-                ></canvas>
+                >
+                    <canvas
+                        className={styles.canvas}
+                        ref={mountCanvas}
+                    ></canvas>
+                    {gizmo && (
+                        <canvas
+                            className={styles.gizmo}
+                            ref={mountGizmo}
+                        ></canvas>
+                    )}
+                </div>
                 <div
                     className={Theme.classNames.join(
                         styles.overlay,
@@ -147,6 +189,14 @@ export default function Tgd({
                 </div>
                 {children}
             </div>
+        </div>
+    )
+}
+
+function CanvasScreen() {
+    return (
+        <div>
+            <canvas></canvas>
         </div>
     )
 }

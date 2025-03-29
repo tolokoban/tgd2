@@ -3,6 +3,12 @@ import { TgdCamera, TgdCameraOptions } from "./camera"
 import { mat4 } from "gl-matrix"
 
 export interface TgdCameraPerspectiveOptions extends TgdCameraOptions {
+    /**
+     * Vertical field of view in radians.
+     *
+     * The revealed space at a distance of 1 from the camera
+     * will have a height of `2 * tan(fovy / 2)`.
+     */
     fovy?: number
 }
 
@@ -33,14 +39,12 @@ export class TgdCameraPerspective extends TgdCamera {
         const { transfo } = this
         const { origin, direction } = this._ray
         origin.from(transfo.actualPosition)
-        const h = Math.atan(this.fovy)
+        const h = Math.atan(this.fovy * 0.5)
         const w = h * this.screenAspectRatio
         direction
-            .from(origin)
-            .subtract(transfo.axisZ)
+            .fromOpposite(transfo.axisZ)
             .addWithScale(transfo.axisX, w * screenX)
             .addWithScale(transfo.axisY, h * screenY)
-            .subtract(origin)
             .normalize()
         return this._ray
     }

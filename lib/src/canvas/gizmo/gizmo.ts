@@ -1,9 +1,10 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdContext, TgdContextOptions } from "@tgd/context"
 import { TgdControllerCameraOrbit } from "@tgd/controller"
 import { TgdEvent } from "@tgd/event"
 import { TgdQuat, TgdMat3, TgdVec3 } from "@tgd/math"
-import { TgdPainterClear, TgdPainterDepth } from "@tgd/painter"
+import { TgdPainterClear, TgdPainterDepth, TgdPainterLogic } from "@tgd/painter"
 import { TgdInputPointerEventTap } from "@tgd/types"
 import { TipsPainter } from "./painter/tips"
 
@@ -26,7 +27,7 @@ export class TgdCanvasGizmo {
 
     private _canvas: HTMLCanvasElement | null = null
     private context: TgdContext | null = null
-    private cameraExternal: TgdCamera | null = null
+    private contextExternal: TgdContext | null = null
     private readonly cameraInternal = new TgdCameraPerspective({
         fovy: Math.PI / 3,
         near: 0.01,
@@ -43,33 +44,34 @@ export class TgdCanvasGizmo {
     /**
      * Attach the camera we want to track and control.
      */
-    attachCamera(camera: TgdCamera) {
+    attachContext(context: TgdContext) {
         this.detach()
-        this.cameraExternal = camera
+        this.contextExternal = context
         this.attach()
     }
 
     detach() {
-        const camera = this.cameraExternal
-        if (camera) {
-            this.cameraExternal = null
-        }
+        if (!this.contextExternal) return
+
+        this.contextExternal.eventPaint.removeListener(this.handleExternalPaint)
+        this.contextExternal = null
     }
 
     private attach() {
+        this.contextExternal?.eventPaint.addListener(this.handleExternalPaint)
         this.context?.paint()
     }
 
-    private readonly handleExternalToInternal = (externalCamera: TgdCamera) => {
-        this.cameraInternal.transfo.orientation =
-            externalCamera.transfo.orientation
+    private readonly handleExternalPaint = () => {
+        this.context?.paint()
     }
 
     private readonly handleInternalToExternal = (internalCamera: TgdCamera) => {
-        const { cameraExternal } = this
-        if (cameraExternal) {
-            cameraExternal.transfo.orientation =
+        const { contextExternal } = this
+        if (contextExternal?.camera) {
+            contextExternal.camera.transfo.orientation =
                 internalCamera.transfo.orientation
+            contextExternal.paint()
         }
     }
 
@@ -113,6 +115,15 @@ export class TgdCanvasGizmo {
         const painter = new TipsPainter(context)
         this.tipsPainter = painter
         context.add(
+            new TgdPainterLogic(() => {
+                const srcTransfo = this.contextExternal?.camera.transfo
+                if (!srcTransfo) return
+
+                const dstTransfo = this.context?.camera.transfo
+                if (!dstTransfo) return
+
+                dstTransfo.orientation = srcTransfo.orientation
+            }),
             new TgdPainterClear(context, {
                 color: [0, 0, 0, 0],
                 depth: 1,
@@ -128,17 +139,17 @@ export class TgdCanvasGizmo {
         if (!camera) return
 
         const { origin, direction } = camera.castRay(event.x, event.y)
-        const maxDistribution = 1
-        let bestDistribution = maxDistribution
+        const maxDistance = 1
+        let bestDistance = maxDistance
         let bestTip = TIPS[0]
         for (const tip of TIPS) {
-            const distribution = tip.distanceToLineSquared(origin, direction)
-            if (distribution < bestDistribution) {
-                bestDistribution = distribution
+            const distance = tip.distanceToLineSquared(origin, direction)
+            if (distance < bestDistance) {
+                bestDistance = distance
                 bestTip = tip
             }
         }
-        if (bestDistribution < maxDistribution) {
+        if (bestDistance < maxDistance) {
             const axisX = new TgdVec3()
             const axisY = new TgdVec3()
             const axisZ = bestTip
@@ -154,7 +165,7 @@ export class TgdCanvasGizmo {
                 quat.rotateAroundY(Math.PI)
             }
             this.eventTipClick.dispatch({
-                from: new TgdQuat(camera.transfo.orientation),
+                from: camera.transfo.orientation,
                 to: quat,
             })
         }

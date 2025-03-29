@@ -8,7 +8,7 @@ export class TgdVec4 extends Float32Array {
     static Z: Readonly<TgdVec4> = new TgdVec4(0, 0, 1, 0)
     static W: Readonly<TgdVec4> = new TgdVec4(0, 0, 0, 1)
 
-    static newFromMix(
+    static fromSlerp(
         [x1, y1, z1, w1 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         [x2, y2, z2, w2 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         a = 0.5

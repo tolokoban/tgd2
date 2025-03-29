@@ -5,6 +5,12 @@ import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 import { ArrayNumber3 } from "@tgd/types"
 
+/**
+ * A string with three axes:
+ * * the right axis
+ * * the up axis
+ * * the axis toward the camera.
+ */
 export type TgdQuatFace = keyof typeof FACES
 
 const temporaryAxisX = new TgdVec3()
@@ -21,6 +27,14 @@ export class TgdQuat extends TgdVec4 {
 
     static fromFace(face: TgdQuatFace): TgdQuat {
         return new TgdQuat().face(face)
+    }
+
+    static fromSlerp(
+        valueAtT0: TgdQuat,
+        valueAtT1: TgdQuat,
+        t: number
+    ): TgdQuat {
+        return new TgdQuat().fromSlerp(valueAtT0, valueAtT1, t)
     }
 
     constructor()
@@ -126,20 +140,7 @@ export class TgdQuat extends TgdVec4 {
     }
 
     rotateAroundX(angleInRadians: number): this {
-        const rad = angleInRadians * 0.5
-
-        const ax = this[0]
-        const ay = this[1]
-        const az = this[2]
-        const aw = this[3]
-        const bx = Math.sin(rad)
-        const bw = Math.cos(rad)
-
-        this[0] = ax * bw + aw * bx
-        this[1] = ay * bw + az * bx
-        this[2] = az * bw - ay * bx
-        this[3] = aw * bw - ax * bx
-        return this
+        return this.rotateAround(TgdVec3.X, angleInRadians)
     }
 
     static rotateAroundY(angleInRadians: number): TgdQuat {
@@ -147,20 +148,7 @@ export class TgdQuat extends TgdVec4 {
     }
 
     rotateAroundY(angleInRadians: number): this {
-        const rad = angleInRadians * 0.5
-
-        const ax = this[0]
-        const ay = this[1]
-        const az = this[2]
-        const aw = this[3]
-        const by = Math.sin(rad)
-        const bw = Math.cos(rad)
-
-        this[0] = ax * bw - az * by
-        this[1] = ay * bw + aw * by
-        this[2] = az * bw + ax * by
-        this[3] = aw * bw - ay * by
-        return this
+        return this.rotateAround(TgdVec3.Y, angleInRadians)
     }
 
     static rotateAroundZ(angleInRadians: number): TgdQuat {
@@ -168,20 +156,7 @@ export class TgdQuat extends TgdVec4 {
     }
 
     rotateAroundZ(angleInRadians: number): this {
-        const rad = angleInRadians * 0.5
-
-        const ax = this[0]
-        const ay = this[1]
-        const az = this[2]
-        const aw = this[3]
-        const bz = Math.sin(rad)
-        const bw = Math.cos(rad)
-
-        this[0] = ax * bw + ay * bz
-        this[1] = ay * bw - ax * bz
-        this[2] = az * bw + aw * bz
-        this[3] = aw * bw - az * bz
-        return this
+        return this.rotateAround(TgdVec3.Z, angleInRadians)
     }
 
     toAxisX(vec: TgdVec3 | TgdVec4): typeof vec {
@@ -258,6 +233,11 @@ export class TgdQuat extends TgdVec4 {
         return mat
     }
 
+    invert(): this {
+        quat.invert(this, this)
+        return this
+    }
+
     face(face: TgdQuatFace = "+X+Y+Z"): this {
         const [x, y, z, w] = FACES[face]
         this.x = x
@@ -272,28 +252,55 @@ const A = Math.sqrt(2) / 2
 const H = 0.5
 
 const FACES = {
-    "+X+Y+Z": [+0, +0, +0, +1],
-    "-Z+Y+X": [+0, +A, +0, +A],
-    "-X+Y-Z": [+0, +1, +0, +0],
-    "+Z+Y-X": [+0, -A, +0, +A],
-    "+X+Z-Y": [+A, +0, +0, +A],
-    "+Y+Z+X": [+H, +H, +H, +H],
-    "-X+Z+Y": [+0, +A, +A, +0],
-    "-Y+Z-X": [+H, -H, -H, +H],
-    "+X-Y-Z": [+1, +0, +0, +0],
-    "+X-Z+Y": [-A, +0, +0, +A],
     "-X-Y+Z": [+0, +0, +1, +0],
-    "-X-Z-Y": [+0, +A, -A, +0],
-    "+Y+X-Z": [+A, +A, +0, +0],
-    "+Y-X+Z": [+0, +0, +A, +A],
-    "+Y-Z-X": [+H, +H, -H, -H],
-    "-Y+X+Z": [+0, +0, -A, +A],
+    "-X-Z-Y": [+0, -A, +A, +0],
+    "-X+Y-Z": [+0, +1, +0, +0],
+    "-X+Z+Y": [+0, +A, +A, +0],
     "-Y-X-Z": [+A, -A, +0, +0],
     "-Y-Z+X": [+H, -H, +H, -H],
-    "+Z+X+Y": [+H, +H, +H, -H],
+    "-Y+X+Z": [+0, +0, -A, +A],
+    "-Y+Z-X": [+H, -H, -H, +H],
+    "-Z-X+Y": [+H, -H, -H, -H],
+    "-Z-Y-X": [-A, +0, +A, +0],
+    "-Z+X-Y": [+H, +H, -H, +H],
+    "-Z+Y+X": [+0, +A, +0, +A],
+    "+X-Y-Z": [+1, +0, +0, +0],
+    "+X-Z+Y": [-A, +0, +0, +A],
+    "+X+Y+Z": [+0, +0, +0, +1],
+    "+X+Z-Y": [+A, +0, +0, +A],
+    "+Y-X+Z": [+0, +0, +A, +A],
+    "+Y-Z-X": [-H, -H, +H, +H],
+    "+Y+X-Z": [+A, +A, +0, +0],
+    "+Y+Z+X": [+H, +H, +H, +H],
     "+Z-X-Y": [+H, -H, +H, +H],
     "+Z-Y+X": [+A, +0, +A, +0],
-    "-Z+X-Y": [+H, +H, -H, +H],
+    "+Z+X+Y": [+H, +H, +H, -H],
+    "+Z+Y-X": [+0, -A, +0, +A],
+}
+
+const FACES_2 = {
+    "-X-Y+Z": [+0, +0, +1, +0],
+    "-X-Z-Y": [+0, +A, -A, +0],
+    "-X+Y-Z": [+0, +1, +0, +0],
+    "-X+Z+Y": [+0, +A, +A, +0],
+    "-Y-X-Z": [+A, -A, +0, +0],
+    "-Y-Z+X": [+H, -H, +H, -H],
+    "-Y+X+Z": [+0, +0, -A, +A],
+    "-Y+Z-X": [+H, -H, -H, +H],
     "-Z-X+Y": [+H, -H, -H, -H],
     "-Z-Y-X": [+A, +0, -A, +0],
+    "-Z+X-Y": [+H, +H, -H, +H],
+    "-Z+Y+X": [+0, +A, +0, +A],
+    "+X-Y-Z": [+1, +0, +0, +0],
+    "+X-Z+Y": [-A, +0, +0, +A],
+    "+X+Y+Z": [+0, +0, +0, +1],
+    "+X+Z-Y": [+A, +0, +0, +A],
+    "+Y-X+Z": [+0, +0, +A, +A],
+    "+Y-Z-X": [+H, +H, -H, -H],
+    "+Y+X-Z": [+A, +A, +0, +0],
+    "+Y+Z+X": [+H, +H, +H, +H],
+    "+Z-X-Y": [+H, -H, +H, +H],
+    "+Z-Y+X": [+A, +0, +A, +0],
+    "+Z+X+Y": [+H, +H, +H, -H],
+    "+Z+Y-X": [+0, -A, +0, +A],
 }

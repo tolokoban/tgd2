@@ -280,7 +280,7 @@ export class TgdContext {
      * Trigger the painters to render the scene.
      */
     readonly paint = () => {
-        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+        // globalThis.cancelAnimationFrame(this.requestAnimationFrame)
         this.requestAnimationFrame = globalThis.requestAnimationFrame(
             this.actualPaint
         )
@@ -297,6 +297,9 @@ export class TgdContext {
         }
 
         const delay = time - this.lastTime
+        // Prevent too many painting in the same refresh.
+        if (delay < 1.016) return
+
         this.lastTime = time
         this._camera.screenWidth = gl.drawingBufferWidth
         this._camera.screenHeight = gl.drawingBufferHeight

@@ -148,7 +148,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     /**
      * @param screenX -1 is the left edge, 0 id the center and +1 is the right edge.
      * @param screenY -1 is the bottom edge, 0 id the center and +1 is the top edge.
-     * @returns The normalized ray vector that goes from the camera position
+     * @returns The __normalized__ ray vector that goes from the camera position
      * to the point designed on the screen.
      */
     abstract castRay(
@@ -190,14 +190,15 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     }
 
     debug(caption?: string) {
-        const name = caption ?? this.name
-        console.log("Distance:", this.transfo.distance)
-        console.log("Zoom:", this.zoom)
-        this.transfo.orientation.debug(`${name} orientation`)
-        this.transfo.position.debug(`${name} target`)
-        this.transfo.actualPosition.debug(`${name} actual position`)
-        this.matrixModelView.debug(`${name} matrixModelView`)
-        this.matrixProjection.debug(`${name} matrixProjection`)
+        const name = `${this.name}: ${caption ?? ""}`
+        console.log("TgdCamera", name)
+        console.log("    Distance:", this.transfo.distance)
+        console.log("    Zoom:", this.zoom)
+        this.transfo.orientation.debug(`   Orientation`)
+        this.transfo.position.debug(`    Target`)
+        this.transfo.actualPosition.debug(`    Actual position`)
+        this.matrixModelView.debug(`    MatrixModelView`)
+        this.matrixProjection.debug(`    MatrixProjection`)
     }
 
     protected abstract getSpaceHeightAtTarget(): number
