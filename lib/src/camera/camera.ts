@@ -21,7 +21,7 @@ export interface TgdCameraState {
     distance: number
     zoom: number
     orientation: TgdQuat
-    target: TgdVec3
+    position: TgdVec3
 }
 
 export abstract class TgdCamera implements TgdInterfaceTransformable {
@@ -62,7 +62,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
             distance: this.transfo.distance,
             orientation: this.transfo.orientation.clone(),
             spaceHeightAtTarget: this.spaceHeightAtTarget,
-            target: this.transfo.position.clone(),
+            position: this.transfo.position.clone(),
             zoom: this.zoom,
         }
     }
@@ -100,7 +100,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this._screenWidth = v
         this.dirtyProjection = true
         this._screenAspectRatio = this._screenWidth / this._screenHeight
-        console.log("🚀 [camera] screenWidth =", v) // @FIXME: Remove this line written on 2025-03-25 at 18:39
     }
 
     get screenHeight() {

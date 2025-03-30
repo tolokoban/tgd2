@@ -23,11 +23,13 @@ export function tgdActionCreateTransfoInterpolation(
     const endPosition = endTransfo.position.clone()
     const endScale = endTransfo.scale.clone()
     const endDistance = endTransfo.distance
+    console.log("🚀 [transfo] target =", target) // @FIXME: Remove this line written on 2025-03-30 at 15:24
 
     return (t: number) => {
         transfo.distance = tgdCalcMix(distance, endDistance, t)
         transfo.position.fromMix(position, endPosition, t)
         transfo.scale.fromMix(scale, endScale, t)
         transfo.orientation.fromSlerp(orientation, endOrientation, t)
+        transfo.position.debug()
     }
 }

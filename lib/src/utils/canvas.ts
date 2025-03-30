@@ -60,6 +60,17 @@ export function tgdCanvasCreatePalette(colors: string[], colums = 0, rows = 0) {
     return canvas
 }
 
+export function tgdCanvasCreateFill(
+    width: number,
+    height: number,
+    fillColor: string = "#000"
+) {
+    const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
+    ctx.fillStyle = fillColor
+    ctx.fillRect(0, 0, width, height)
+    return canvas
+}
+
 export function tgdCanvasCreateGradientHorizontal(
     size: number,
     colors: string[]

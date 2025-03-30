@@ -108,7 +108,7 @@ function init(context: TgdContext) {
             duration: 1000,
             action: tgdActionCreateCameraInterpolation(context.camera, {
                 zoom: 1,
-                target: new TgdVec3(0, 0, 0),
+                position: new TgdVec3(0, 0, 0),
                 orientation: new TgdQuat(0, 0, 0, 1),
             }),
             easingFunction: tgdEasingFunctionOutBack,

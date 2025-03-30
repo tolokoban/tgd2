@@ -73,6 +73,35 @@ export class TgdParserGLTransfertFormatBinary {
         return node
     }
 
+    getNodeByName(nodeName: string): TgdFormatGltfNode | undefined {
+        const nodes = this.gltf.nodes
+        if (!nodes) return
+
+        for (const node of nodes) {
+            if (node.name === nodeName) return node
+        }
+    }
+
+    getNodeByNameOrThrow(nodeName: string): TgdFormatGltfNode {
+        const node = this.getNodeByName(nodeName)
+        if (node) return node
+
+        throw new Error(
+            `Unknown node "${nodeName}"!\nAvailable names:${(
+                this.gltf.nodes ?? []
+            )
+                .map(
+                    (node, index) =>
+                        `\n  - ${
+                            typeof node.name === "string"
+                                ? JSON.stringify(node.name)
+                                : `#${index}`
+                        }`
+                )
+                .join("")}`
+        )
+    }
+
     getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
         const accessor = this.gltf.accessors?.[accessorIndex]
         if (!accessor) {

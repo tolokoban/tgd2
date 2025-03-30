@@ -47,7 +47,7 @@ export default function MeshPreview({
             ctx.animSchedule({
                 duration: 300,
                 action: tgdActionCreateCameraInterpolation(ctx.camera, {
-                    target: center,
+                    position: center,
                     orientation: evt.to,
                     zoom: 1,
                 }),

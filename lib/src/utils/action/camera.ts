@@ -8,6 +8,7 @@ export function tgdActionCreateCameraInterpolation(
     destination: Partial<TgdCameraState>
 ) {
     const transfoDestination = new TgdTransfo(camera.transfo).from(destination)
+    transfoDestination.debug()
     if (typeof destination.distance === "number")
         transfoDestination.distance = destination.distance
     const beginZoom = camera.zoom
@@ -22,11 +23,13 @@ export function tgdActionCreateCameraInterpolation(
 
     return (t: number) => {
         action(t)
-        camera.spaceHeightAtTarget = tgdCalcMix(
-            beginSpaceHeightAtTarget,
-            endSpaceHeightAtTarget,
-            t
-        )
+        if (typeof destination.spaceHeightAtTarget === "number") {
+            camera.spaceHeightAtTarget = tgdCalcMix(
+                beginSpaceHeightAtTarget,
+                endSpaceHeightAtTarget,
+                t
+            )
+        }
         camera.zoom = tgdCalcMix(beginZoom, endZoom, t)
     }
 }
