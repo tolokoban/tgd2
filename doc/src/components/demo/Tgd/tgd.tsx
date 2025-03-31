@@ -47,6 +47,7 @@ export default function Tgd({
     assets,
     children,
 }: TgdProps) {
+    console.log("Render Tgd!")
     const [landscape, setLandscape] = React.useState(true)
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
@@ -126,17 +127,19 @@ export default function Tgd({
     }, [refContext.current, refCanvas.current])
     if (noBorder)
         return (
-            <canvas
-                className={className}
+            <div
+                ref={refScreen}
+                className={styles.screen}
                 style={{
-                    width,
-                    height,
-                    aspectRatio,
-                    maxWidth: "95%",
-                    maxHeight: "95%",
+                    width: landscape ? width : height,
+                    height: landscape ? height : width,
                 }}
-                ref={mountCanvas}
-            ></canvas>
+            >
+                <canvas className={styles.canvas} ref={mountCanvas}></canvas>
+                {gizmo && (
+                    <canvas className={styles.gizmo} ref={mountGizmo}></canvas>
+                )}
+            </div>
         )
 
     return (

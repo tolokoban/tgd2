@@ -88,12 +88,14 @@ function figureColor(
         if (!emissive) return DEFAULT_COLOR
 
         const color = asset.createTexture2D(context, emissive.index ?? 0)
+        color.eventChange.addListener(context.paint)
         return color
     }
 
     if (pbr.baseColorTexture) {
         const textureIndex = pbr.baseColorTexture?.index
         const color = asset.createTexture2D(context, textureIndex ?? 0)
+        color.eventChange.addListener(context.paint)
         return color
     }
     if (pbr.baseColorFactor) {

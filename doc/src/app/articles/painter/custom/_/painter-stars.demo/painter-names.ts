@@ -91,7 +91,7 @@ function makeCanvasForNames(): {
 
     assertType<Record<string, [number, number]>>(names, [
         "map",
-        ["array(2)", "number"],
+        ["array", "number", { min: 2, max: 2 }],
     ])
     const attLatLng: number[] = []
     const attUV: number[] = []

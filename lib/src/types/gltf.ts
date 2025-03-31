@@ -11,6 +11,8 @@ export interface TgdFormatGltfAccessor {
     count: number
     type: string
     name?: string
+    min?: ArrayNumber3
+    max?: ArrayNumber3
 }
 
 export interface TgdFormatGltfMaterialPbrMetallicRoughness {
@@ -144,31 +146,47 @@ export interface TgdFormatGltfNode {
 }
 
 export type TgdFormatGltfCamera =
-    | {
-          type: "perspective"
-          name?: string
-          perspective: {
-              aspectRatio?: number
-              /**
-               * The floating-point vertical field of view in radians.
-               * This value SHOULD be less than π. */
-              yfov: number
-              zfar?: number
-              znear: number
-          }
-      }
-    | {
-          type: "orthographic"
-          name?: string
-          orthographic: {
-              /** The floating-point horizontal magnification of the view. */
-              xmag: number
-              /** The floating-point vertical magnification of the view. */
-              ymag: number
-              zfar: number
-              znear: number
-          }
-      }
+    | TgdFormatGltfCameraPerspective
+    | TgdFormatGltfCameraOrthographic
+
+export interface TgdFormatGltfCameraPerspective {
+    type: "perspective"
+    name?: string
+    perspective: {
+        aspectRatio?: number
+        /**
+         * The floating-point vertical field of view in radians.
+         * This value SHOULD be less than π. */
+        yfov: number
+        zfar?: number
+        znear: number
+    }
+}
+
+export function isTgdFormatGltfCameraPerspective(
+    data: TgdFormatGltfCamera
+): data is TgdFormatGltfCameraPerspective {
+    return data.type === "perspective"
+}
+
+export interface TgdFormatGltfCameraOrthographic {
+    type: "orthographic"
+    name?: string
+    orthographic: {
+        /** The floating-point horizontal magnification of the view. */
+        xmag: number
+        /** The floating-point vertical magnification of the view. */
+        ymag: number
+        zfar: number
+        znear: number
+    }
+}
+
+export function isTgdFormatGltfCameraOrthographic(
+    data: TgdFormatGltfCamera
+): data is TgdFormatGltfCameraOrthographic {
+    return data.type === "orthographic"
+}
 
 /**
  * @see https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html

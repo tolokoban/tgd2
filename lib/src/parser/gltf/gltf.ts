@@ -51,6 +51,12 @@ export class TgdParserGLTransfertFormatBinary {
         }
     }
 
+    get fileSize() {
+        return (
+            12 + this.chunks.reduce((size, chunk) => size + chunk.byteLength, 0)
+        )
+    }
+
     getScenes(): TgdFormatGltfScene[] {
         return this.gltf.scenes ?? []
     }

@@ -1,18 +1,22 @@
 import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
 
 export async function tgdLoadGlb(
-    url: string
+    urlOrFile: string | File
 ): Promise<TgdParserGLTransfertFormatBinary | null> {
     try {
-        const resp = await fetch(url)
+        if (urlOrFile instanceof File) {
+            const data = await urlOrFile.arrayBuffer()
+            return new TgdParserGLTransfertFormatBinary(data)
+        }
+
+        const resp = await fetch(urlOrFile)
         if (!resp.ok) {
             throw new Error(
-                `Unable to load GLB from url "${url}"!\nError #${resp.status}: ${resp.statusText}`
+                `Unable to load GLB from url "${urlOrFile}"!\nError #${resp.status}: ${resp.statusText}`
             )
         }
         const data = await resp.arrayBuffer()
-        const parser = new TgdParserGLTransfertFormatBinary(data)
-        return parser
+        return new TgdParserGLTransfertFormatBinary(data)
     } catch (error) {
         console.error(error)
         return null
@@ -20,10 +24,13 @@ export async function tgdLoadGlb(
 }
 
 export async function tgdLoadArrayBuffer(
-    url: string
+    urlOrFile: string | File
 ): Promise<ArrayBuffer | null> {
+    if (urlOrFile instanceof File) {
+        return await urlOrFile.arrayBuffer()
+    }
     try {
-        const resp = await fetch(url)
+        const resp = await fetch(urlOrFile)
         const data = await resp.arrayBuffer()
         return data
     } catch (error) {
