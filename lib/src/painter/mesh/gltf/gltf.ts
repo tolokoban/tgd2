@@ -107,12 +107,13 @@ function figureColor(
 function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
     const material = new TgdMaterialDiffuse({
         color,
+        // specularIntensity: 0,
         light: new TgdLight({
             color: new TgdVec4(1, 1, 1, 1),
             direction: new TgdVec3(1, 0.2, 0),
         }),
         ambient: new TgdLight({
-            color: new TgdVec4(0.75, 0.75, 0.75, 1),
+            color: new TgdVec4(0.2, 0.1, 0, 1),
         }),
     })
     return material

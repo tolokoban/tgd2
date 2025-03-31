@@ -14,11 +14,11 @@ export type TgdMaterialDiffuseOptions = Partial<{
     specularIntensity: number
 }>
 
-const DEFAULT_COLOR = new TgdVec4(0.8, 0.8, 0.8, 1)
+const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
 
 export class TgdMaterialDiffuse extends TgdMaterial {
     public light = new TgdLight()
-    public ambient = new TgdLight({ color: new TgdVec4(0.8, 0.8, 0.8, 0) })
+    public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 20
     public specularIntensity = 1
 
@@ -29,6 +29,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         uniAmbient: "vec3",
         uniSpecularExponent: "float",
         uniSpecularIntensity: "float",
+        uniModelViewMatrix: "mat4",
     }
     public readonly fragmentShaderCode: TgdCodeBloc
     public readonly vertexShaderCode: TgdCodeBloc
@@ -59,11 +60,12 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         this.texture = hasTexture ? color : null
         this.fragmentShaderCode = [
             "vec3 normal = normalize(varNormal);",
-            `float light = -dot(normal, uniLightDir);`,
+            `float light = 1.0 - dot(normal, uniLightDir);`,
             hasTexture
                 ? `vec4 color = texture(texDiffuse, varUV);`
                 : `vec4 color = vec4(${color.join(", ")});`,
-            `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
+            `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
+            `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
             `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
             `color = vec4(`,
             `  color.rgb * (`,
