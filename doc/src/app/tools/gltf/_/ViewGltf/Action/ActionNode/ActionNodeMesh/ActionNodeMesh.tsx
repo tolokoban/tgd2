@@ -28,19 +28,21 @@ export function ViewActionNodeMesh({
                 {mesh.primitives.map((primitive, index) => (
                     <li key={index}>
                         <b>Primitive {index}</b>
-                        {Object.keys(primitive.attributes).map(attName => (
-                            <Expander key={attName} title={attName}>
-                                <pre>
-                                    {JSON.stringify(
-                                        data.getAccessor(
-                                            primitive.attributes[attName]
-                                        ),
-                                        null,
-                                        "  "
-                                    )}
-                                </pre>
-                            </Expander>
-                        ))}
+                        <Expander title="Attrinutes">
+                            {Object.keys(primitive.attributes).map(attName => (
+                                <Expander key={attName} title={attName}>
+                                    <pre>
+                                        {JSON.stringify(
+                                            data.getAccessor(
+                                                primitive.attributes[attName]
+                                            ),
+                                            null,
+                                            "  "
+                                        )}
+                                    </pre>
+                                </Expander>
+                            ))}
+                        </Expander>
                     </li>
                 ))}
             </ul>

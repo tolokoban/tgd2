@@ -38,3 +38,19 @@ export async function tgdLoadArrayBuffer(
         return null
     }
 }
+
+export async function tgdLoadText(
+    urlOrFile: string | File
+): Promise<string | null> {
+    if (urlOrFile instanceof File) {
+        return await urlOrFile.text()
+    }
+    try {
+        const resp = await fetch(urlOrFile)
+        const data = await resp.text()
+        return data
+    } catch (error) {
+        console.error(error)
+        return null
+    }
+}

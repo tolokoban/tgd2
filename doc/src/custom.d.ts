@@ -51,6 +51,11 @@ declare module "*.dat" {
     export = value
 }
 
+declare module "*.swc" {
+    const value: string
+    export = value
+}
+
 declare module "*.glb" {
     const value: any
     export = value

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-useless-spread */
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
 import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
@@ -9,6 +10,7 @@ import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreatePalette } from "@tgd/utils"
 import { TgdCamera } from "@tgd/camera"
+import { TgdVec3 } from "@tgd/math"
 
 export type TgdPainterSegmentsOptions = {
     /**
@@ -58,6 +60,9 @@ export class TgdPainterSegments extends TgdPainter {
     public radiusSwitch = 0
     public light = 1
     public shiftZ = 0
+    public contrast = 0.3
+    public specularIntensity = 0.4
+    public specularExponent = 30
 
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
@@ -69,16 +74,15 @@ export class TgdPainterSegments extends TgdPainter {
             gl: WebGL2RenderingContext
             camera: TgdCamera
         },
-        factory: { makeDataset: () => InstanceDataset; readonly count: number },
-        {
-            roundness = 3,
-            minRadius = 0,
-        }: Partial<TgdPainterSegmentsOptions> = {}
+        options: Partial<TgdPainterSegmentsOptions> & {
+            makeDataset: () => InstanceDataset
+        }
     ) {
         super()
+        const { roundness = 3, minRadius = 0, makeDataset } = options
         this.minRadius = minRadius
-        if (roundness > 125) {
-            throw new Error("[TgdPainterSegments] Max roundness is 125!")
+        if (roundness > 127) {
+            throw new Error("[TgdPainterSegments] Max roundness is 127!")
         }
         if (roundness < 0) {
             throw new Error("[TgdPainterSegments] Min roundness is 0!")
@@ -91,14 +95,15 @@ export class TgdPainterSegments extends TgdPainter {
                 wrapS: "CLAMP_TO_EDGE",
                 wrapT: "CLAMP_TO_EDGE",
             })
-            .loadBitmap(tgdCanvasCreatePalette(["#f00", "#0f0", "#00f"]))
+            .loadBitmap(tgdCanvasCreatePalette(["#f44", "#4f4", "#44f"]))
         const prg = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,
         })
         this.prg = prg
         const { capsule, elements } = makeCapsule(roundness)
-        const instance = factory.makeDataset()
+        const instance = makeDataset()
+        instance.debug()
         this.vao = new TgdVertexArray(
             context.gl,
             prg,
@@ -126,6 +131,9 @@ export class TgdPainterSegments extends TgdPainter {
             radiusConstant,
             radiusSwitch,
             shiftZ,
+            contrast,
+            specularIntensity,
+            specularExponent,
         } = this
         const { gl, camera } = context
         prg.use()
@@ -138,6 +146,9 @@ export class TgdPainterSegments extends TgdPainter {
         prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         prg.uniform1f("uniRadiusConstant", radiusConstant)
         prg.uniform1f("uniRadiusSwitch", radiusSwitch)
+        prg.uniform1f("uniContrast", contrast)
+        prg.uniform1f("uniSpecularIntensity", specularIntensity)
+        prg.uniform1f("uniSpecularExponent", specularExponent)
         colorTexture.activate(0, prg, "uniTexture")
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
@@ -170,9 +181,9 @@ export class TgdPainterSegmentsData {
     /**
      * @param Axyzr (x,y,z) and radius of point A.
      * @param Bxyzr (x,y,z) and radius of point B.
-     * @param Auv
-     * @param Buv
-     * @param radiusMultiplierInfluenceA
+     * @param Auv Texture coordinates for point A.
+     * @param Buv Texture coordinates for point B.
+     * @param radiusMultiplierInfluenceA If you put 0, the radius won't change regardless to the currently applied radius multiplicator.
      * @param radiusMultiplierInfluenceB
      */
     add(
@@ -192,7 +203,7 @@ export class TgdPainterSegmentsData {
         this._count++
     }
 
-    makeDataset(): InstanceDataset {
+    readonly makeDataset = (): InstanceDataset => {
         const dataset = new TgdDataset(
             {
                 attAxyzr: "vec4",
@@ -219,7 +230,7 @@ export class TgdPainterSegmentsData {
 type CapsuleDataset = TgdDataset
 
 /**
- * The capsule is a 2D shape (x,y) that will be uses
+ * The capsule is a 2D shape (x,y) that will be used
  * as a pattern for the segment.
  * The segment will expand this template along Y axis.
  * The tip pointing toward +Y is called A.
@@ -232,13 +243,22 @@ function makeCapsule(roundness: number): {
     elements: Uint8Array
 } {
     // prettier-ignore
-    const offset: number[] =[
-         0, 0, 0,
-         1, 0, 0,
-        -1, 0, 0,
-         0, 0, 1,
-         1, 0, 1,
-        -1, 0, 1,
+    const offset: number[] = [
+        ...[0, 0, 0], // 0
+        ...[1, 0, 0], // 1
+        ...[-1, 0, 0], // 2
+        ...[0, 0, 1], // 3
+        ...[1, 0, 1], // 4
+        ...[-1, 0, 1], // 5
+    ]
+    // prettier-ignore
+    const normal: number[] = [
+        ...[0, 0, 1],  // 0
+        ...[1, 0, 0],  // 1
+        ...[-1, 0, 0], // 2
+        ...[0, 0, 1],  // 3
+        ...[1, 0, 0],  // 4
+        ...[-1, 0, 0], // 5
     ]
     // prettier-ignore
     const elements: number[] = [
@@ -251,6 +271,8 @@ function makeCapsule(roundness: number): {
         let oldIndexA = 1
         let oldIndexB = 4
         let elementIndex = 6
+        // Temporary variable to prevent multiple new() calls.
+        const n = new TgdVec3()
         for (
             let roundnessStep = 0;
             roundnessStep < roundness;
@@ -261,11 +283,15 @@ function makeCapsule(roundness: number): {
             const y = Math.sin(ang)
             // We set z to 0 because it's related to tip A.
             offset.push(x, y, 0)
+            n.from([x, 0, 1 - Math.abs(x)]) //.normalize()
+            normal.push(n.x, n.y, n.z)
             elements.push(0, oldIndexA, elementIndex)
             oldIndexA = elementIndex
             elementIndex++
             // We set z to 1 because it's related to tip B.
             offset.push(x, -y, 1)
+            n.from([x, 0, 1 - Math.abs(x)]).normalize()
+            normal.push(n.x, n.y, n.z)
             elements.push(3, elementIndex, oldIndexB)
             oldIndexB = elementIndex
             elementIndex++
@@ -275,8 +301,10 @@ function makeCapsule(roundness: number): {
     }
     const capsule: CapsuleDataset = new TgdDataset({
         attOffset: "vec3",
+        attNormal: "vec3",
     })
     capsule.set("attOffset", new Float32Array(offset))
+    capsule.set("attNormal", new Float32Array(normal))
     return {
         capsule,
         elements: new Uint8Array(elements),

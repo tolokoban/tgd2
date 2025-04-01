@@ -408,11 +408,12 @@ export class TgdControllerCameraOrbit {
         let speed = 0.1 * this.speedZoom
         if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
         const dz = -event.direction * speed
-        camera.zoom = tgdCalcClamp(
-            camera.zoom * (1 + dz),
-            this.minZoom,
-            this.maxZoom
-        )
+        camera.transfo.distance = Math.max(0, camera.transfo.distance + dz)
+        // camera.zoom = tgdCalcClamp(
+        //     camera.zoom * (1 + dz),
+        //     this.minZoom,
+        //     this.maxZoom
+        // )
         event.preventDefault()
         this.fireZoomChange()
     }

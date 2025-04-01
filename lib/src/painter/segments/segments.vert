@@ -34,6 +34,8 @@ uniform float uniShiftZ;
 // radius of 1.
 // Z tells you what tip is your center: 0 for A and 1 for B.
 in vec3 attOffset;
+// Normals of the tube that represents the segment.
+in vec3 attNormal;
 
 //=====================
 // Instance attributes
@@ -53,6 +55,7 @@ in float attBinfluence;
 
 
 out vec4 varColor;
+out vec3 varNormal;
 
 
 vec3 worldToCamera(vec3 v);
@@ -63,16 +66,20 @@ void main() {
     vec3 camA = worldToCamera(attAxyzr.xyz);
     vec3 camB = worldToCamera(attBxyzr.xyz);
     float tip = attOffset.z;
-    vec2 uv = mix(attAuv, attBuv, tip);
-    varColor = texture(uniTexture, uv)
-        *   vec4(uniLight, uniLight, uniLight, 1.0);
     float radius = getRadius(tip);
     mat3 transfo = getTransfoMatrix(tip, camA, camB);
     vec3 point = transfo * vec3(attOffset.xy * radius, 1.0);
-    point.z -= uniShiftZ;
+    varNormal = attNormal;
+    point.z -= uniShiftZ + abs(attOffset.y) * radius;
     gl_Position = 
         uniProjectionMatrix 
         * vec4(point, 1);
+    vec2 uv = mix(attAuv, attBuv, tip);
+    // float Z = 1.0 - abs(point.z) * 0.0001;
+    // Z = pow(Z, 0.025);
+    float light = uniLight; // * Z;
+    varColor = texture(uniTexture, uv) * vec4(vec3(light), 1.0);
+    // varColor = vec4(vec3(1.0 - Z, Z, 0.0), varColor.a);
 }
 
 float getRadius(float tip) {

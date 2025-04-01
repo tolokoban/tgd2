@@ -7,6 +7,7 @@ import {
     tgdLoadArrayBuffer,
     tgdLoadGlb,
     tgdLoadImage,
+    tgdLoadText,
     TgdParserGLTransfertFormatBinary,
 } from "@tolokoban/tgd"
 import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
@@ -19,6 +20,7 @@ export interface Assets {
     image: Record<string, HTMLImageElement>
     glb: Record<string, TgdParserGLTransfertFormatBinary>
     data: Record<string, ArrayBuffer>
+    text: Record<string, string>
 }
 
 type AssetsToLoad = {
@@ -47,7 +49,6 @@ export default function Tgd({
     assets,
     children,
 }: TgdProps) {
-    console.log("Render Tgd!")
     const [landscape, setLandscape] = React.useState(true)
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
     const refContext = React.useRef<TgdContext | null>(null)
@@ -207,12 +208,14 @@ function CanvasScreen() {
 async function loadAssets({
     glb,
     data,
+    text,
     image,
 }: Partial<AssetsToLoad> = {}): Promise<Assets> {
-    console.log("🚀 [Tgd] glb, data, image = ", glb, data, image) // @FIXME: Remove this line written on 2024-11-08 at 14:33
+    console.log("🚀 [Tgd] glb, data, text, image = ", glb, data, text, image) // @FIXME: Remove this line written on 2024-11-08 at 14:33
     const assets: Assets = {
         glb: {},
         data: {},
+        text: {},
         image: {},
     }
     const loaders: Array<() => Promise<void>> = []
@@ -242,6 +245,15 @@ async function loadAssets({
                 const url = data[key]
                 const asset = await tgdLoadArrayBuffer(url)
                 if (asset) assets.data[key] = asset
+            })
+        })
+    }
+    if (text) {
+        Object.keys(text).forEach(key => {
+            loaders.push(async () => {
+                const url = text[key]
+                const asset = await tgdLoadText(url)
+                if (asset) assets.text[key] = asset
             })
         })
     }

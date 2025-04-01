@@ -60,7 +60,10 @@ function useReadyHandler(
             context.camera.transfo.position = bbox.center
             context.camera.transfo.distance = bbox.radius * 2
             context.camera.far = bbox.radius * 10
-            new TgdControllerCameraOrbit(context, { inertiaOrbit: 1000 })
+            new TgdControllerCameraOrbit(context, {
+                inertiaOrbit: 1000,
+                speedZoom: bbox.radius * 0.25,
+            })
             const clear = new TgdPainterClear(context, {
                 color: [0.2, 0.2, 0.2, 1],
                 depth: 1,
