@@ -7,6 +7,7 @@ import { Action } from "../types"
 import Styles from "./Action.module.css"
 import { ViewVerbatim } from "@/app/tools/gltf/_/ViewGltf/Action/Verbatim"
 import { ViewActionNode } from "./ActionNode"
+import { ViewActionImage } from "./ActionImage"
 
 const $ = Theme.classNames
 
@@ -26,6 +27,10 @@ export function ViewAction(props: ViewActionProps): JSX.Element {
         case "node":
             return (
                 <ViewActionNode data={props.data} index={props.action.index} />
+            )
+        case "image":
+            return (
+                <ViewActionImage data={props.data} index={props.action.index} />
             )
         default:
             return (

@@ -9,11 +9,12 @@ import {
 } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
-import Styles from "./ViewGltf.module.css"
 import { ViewGltfTree } from "./GltfTree"
 import { useData } from "./hooks"
 import { Action } from "./types"
-import { ViewAction } from "@/app/tools/gltf/_/ViewGltf/Action"
+import { ViewAction } from "./Action"
+
+import Styles from "./ViewGltf.module.css"
 
 const $ = Theme.classNames
 
@@ -66,7 +67,11 @@ export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
                     {data && <ViewGltfTree data={data} onAction={setAction} />}
                 </ViewPanel>
             </ViewStrip>
-            {data && <ViewAction action={action} data={data} />}
+            {data && (
+                <ViewPanel position="relative" overflow="auto" fullsize>
+                    <ViewAction action={action} data={data} />
+                </ViewPanel>
+            )}
         </ViewStrip>
     )
 }

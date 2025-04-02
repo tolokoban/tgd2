@@ -4,7 +4,8 @@ import {
     TgdParserGLTransfertFormatBinary,
 } from "@tolokoban/tgd"
 
-import DefaultURL from "./danatia.glb"
+// import DefaultURL from "./danatia.glb"
+import DefaultURL from "./apple.glb"
 
 export function useData(): [
     TgdParserGLTransfertFormatBinary | null,

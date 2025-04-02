@@ -13,8 +13,24 @@ export interface TgdPainterBackgroundOptions {
     x: number
     y: number
     z: number
+    /**
+     * By default, we preserve the aspect ratio.
+     * But you can change `scaleX` and `scaleY` if you need
+     * another behavior.
+     */
     scaleX: number
+    /**
+     * By default, we preserve the aspect ratio.
+     * But you can change `scaleX` and `scaleY` if you need
+     * another behavior.
+     */
     scaleY: number
+    /**
+     * Defaults to `cover`.
+     * If you choose `contain`, the image will be totally visible
+     * and taking the maximum space.
+     */
+    mode: "cover" | "contain"
 }
 
 export class TgdPainterBackground extends TgdPainter {
@@ -31,6 +47,7 @@ export class TgdPainterBackground extends TgdPainter {
     public x = 0
     public y = 0
     public z = 1
+    public mode: "cover" | "contain" = "cover"
 
     constructor(
         private readonly context: { gl: WebGL2RenderingContext },
@@ -42,9 +59,11 @@ export class TgdPainterBackground extends TgdPainter {
             zoom = 1,
             scaleX = 1,
             scaleY = 1,
+            mode = "cover",
         }: Partial<TgdPainterBackgroundOptions> = {}
     ) {
         super()
+        this.mode = mode
         this.x = x
         this.y = y
         this.z = z
@@ -82,16 +101,12 @@ export class TgdPainterBackground extends TgdPainter {
 
     paint(): void {
         const { gl } = this.context
-        const { vao, program, texture, zoom, x, y, z } = this
+        const { vao, program, texture, zoom, x, y, z, mode } = this
         program.use()
-        const { drawingBufferWidth: width, drawingBufferHeight: height } = gl
-        const horizontal = texture.width * height > texture.height * width
-        const scaleX = horizontal
-            ? (texture.width * height) / (width * texture.height)
-            : 1
-        const scaleY = horizontal
-            ? 1
-            : (texture.height * width) / (height * texture.width)
+        const { scaleX, scaleY } =
+            mode === "cover"
+                ? this.getScaleForCover()
+                : this.getScaleForContain()
         program.uniform2f("uniScale", scaleX, scaleY)
         program.uniform2f("uniScroll", x, y)
         program.uniform1f("uniZoom", 1 / zoom)
@@ -100,5 +115,40 @@ export class TgdPainterBackground extends TgdPainter {
         gl.disable(gl.CULL_FACE)
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    }
+
+    getScaleForCover() {
+        const { texture, context } = this
+        const { drawingBufferWidth: width, drawingBufferHeight: height } =
+            context.gl
+        const horizontal = texture.width * height > texture.height * width
+        const scaleX = horizontal
+            ? (texture.width * height) / (width * texture.height)
+            : 1
+        const scaleY = horizontal
+            ? 1
+            : (texture.height * width) / (height * texture.width)
+        return { scaleX, scaleY }
+    }
+
+    getScaleForContain() {
+        const { texture, context } = this
+        const { drawingBufferWidth: width, drawingBufferHeight: height } =
+            context.gl
+        const aspectRatio = width / height
+        const aspectRatioTexture = texture.width / texture.height
+        const sx = width / texture.width
+        const sy = height / texture.height
+        if (sx > sy) {
+            // We took all vertical space and have void on right an left.
+            return {
+                scaleX: aspectRatioTexture / aspectRatio,
+                scaleY: 1,
+            }
+        }
+        return {
+            scaleX: 1,
+            scaleY: aspectRatio / aspectRatioTexture,
+        }
     }
 }

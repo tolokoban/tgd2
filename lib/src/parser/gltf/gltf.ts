@@ -24,6 +24,10 @@ export class TgdParserGLTransfertFormatBinary {
     public readonly gltf: Readonly<TgdFormatGltf>
 
     private readonly chunks: ArrayBuffer[]
+    private readonly chunkDetails: Array<{
+        size: number
+        type: "JSON" | "BIN"
+    }> = []
     private readonly cacheImages = new Map<
         number,
         Promise<HTMLImageElement | undefined>
@@ -44,11 +48,16 @@ export class TgdParserGLTransfertFormatBinary {
             const data = parseGLB(content)
             this.gltf = data.gltf
             this.chunks = data.chunks
+            this.chunkDetails = data.chunkTypes
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : JSON.stringify(error)
             throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
         }
+    }
+
+    getChunkDetails() {
+        return structuredClone(this.chunkDetails)
     }
 
     get fileSize() {

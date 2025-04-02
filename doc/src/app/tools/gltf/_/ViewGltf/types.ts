@@ -1,6 +1,6 @@
 import { isType } from "@tolokoban/type-guards"
 
-export type Action = ActionVerbatim | ActionNode
+export type Action = ActionVerbatim | ActionNode | ActionImage
 
 export interface ActionVerbatim {
     type: "verbatim"
@@ -8,6 +8,11 @@ export interface ActionVerbatim {
 
 export interface ActionNode {
     type: "node"
+    index: number
+}
+
+export interface ActionImage {
+    type: "image"
     index: number
 }
 

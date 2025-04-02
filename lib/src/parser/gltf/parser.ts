@@ -7,6 +7,7 @@ import { TgdFormatGltf, assertTgdFormatGltf } from "../../types/gltf"
 export function parseGLB(data: ArrayBuffer): {
     gltf: TgdFormatGltf
     chunks: ArrayBuffer[]
+    chunkTypes: Array<{ size: number; type: "JSON" | "BIN" }>
 } {
     const view = new DataView(data)
     const magicNumber = view.getUint32(0, true)
@@ -22,6 +23,7 @@ export function parseGLB(data: ArrayBuffer): {
     const length = view.getUint32(8, true)
     let gltf = {} as TgdFormatGltf
     const chunks: ArrayBuffer[] = []
+    const chunkTypes: Array<{ size: number; type: "JSON" | "BIN" }> = []
     let offset = 12
     while (offset < length) {
         const chunkLength = view.getUint32(offset, true)
@@ -37,6 +39,7 @@ export function parseGLB(data: ArrayBuffer): {
                 const object: unknown = JSON.parse(json)
                 assertTgdFormatGltf(object)
                 gltf = object
+                chunkTypes.push({ type: "JSON", size: chunkData.byteLength })
             } catch (error) {
                 console.error("Unable to parse this JSON file:", json)
                 console.error(error)
@@ -44,6 +47,7 @@ export function parseGLB(data: ArrayBuffer): {
             }
         } else if (chunkType === 0x004e4942) {
             chunks.push(chunkData)
+            chunkTypes.push({ type: "BIN", size: chunkData.byteLength })
         } else {
             throw new Error(
                 `We got an invalid chunk type: 0x${chunkType
@@ -52,5 +56,5 @@ export function parseGLB(data: ArrayBuffer): {
             )
         }
     }
-    return { gltf, chunks }
+    return { gltf, chunks, chunkTypes }
 }

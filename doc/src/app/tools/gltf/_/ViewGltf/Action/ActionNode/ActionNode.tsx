@@ -39,6 +39,7 @@ export function ViewActionNode(props: ViewActionNodeProps) {
             orientation="column"
             template="-1"
             className={$.join(props.className, Styles.actionNode)}
+            fullsize
         >
             <ViewPanel
                 display="flex"

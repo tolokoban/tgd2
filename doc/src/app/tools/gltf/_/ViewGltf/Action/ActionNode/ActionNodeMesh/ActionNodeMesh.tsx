@@ -6,6 +6,7 @@ import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 import Styles from "./ActionNodeMesh.module.css"
 import Error from "@/components/Error"
 import { Expander } from "../../../GltfTree/Expander"
+import { isNumber } from "@tolokoban/type-guards"
 
 const $ = Theme.classNames
 
@@ -42,6 +43,20 @@ export function ViewActionNodeMesh({
                                     </pre>
                                 </Expander>
                             ))}
+                        </Expander>
+                        <Expander title="Material">
+                            {isNumber(primitive.material) && (
+                                <pre>
+                                    {JSON.stringify(
+                                        data.getMaterial(primitive.material),
+                                        null,
+                                        "  "
+                                    )}
+                                </pre>
+                            )}
+                        </Expander>
+                        <Expander title="Verbatim">
+                            <pre>{JSON.stringify(primitive, null, "  ")}</pre>
                         </Expander>
                     </li>
                 ))}
