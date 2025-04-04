@@ -84,6 +84,11 @@ export interface TgdControllerCameraOrbitOptions {
         /** Expressed in radians */
         minLng: number
     }>
+    /**
+     * If `debug` is set, the special hotkey `?` will drop the
+     * current camera status to the console.
+     */
+    debug?: boolean
 }
 
 export class TgdControllerCameraOrbit {
@@ -154,6 +159,7 @@ export class TgdControllerCameraOrbit {
             inertiaOrbit = 0,
             inertiaPanning = 0,
             fixedTarget = false,
+            debug = false,
             onZoomRequest = alwaysTrue,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
@@ -187,6 +193,13 @@ export class TgdControllerCameraOrbit {
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
+        if (debug) {
+            context.inputs.keyboard.eventKeyPress.addListener(event => {
+                if (event.key === "?") {
+                    console.log(this.context.camera.toCode())
+                }
+            })
+        }
     }
 
     get enabled() {

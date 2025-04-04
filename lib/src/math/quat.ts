@@ -3,7 +3,7 @@ import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
-import { ArrayNumber3 } from "@tgd/types"
+import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
 /**
  * A string with three axes:
@@ -40,12 +40,13 @@ export class TgdQuat extends TgdVec4 {
     constructor()
     constructor(source: TgdQuat)
     constructor(source: TgdVec4)
+    constructor(source: ArrayNumber4)
     constructor(x: number)
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
     constructor(
-        x: number | TgdVec4 = 0,
+        x: number | TgdVec4 | ArrayNumber4 = 0,
         y: number = 0,
         z: number = 0,
         w: number = 1
@@ -270,33 +271,6 @@ const FACES = {
     "+X+Z-Y": [+A, +0, +0, +A],
     "+Y-X+Z": [+0, +0, +A, +A],
     "+Y-Z-X": [-H, -H, +H, +H],
-    "+Y+X-Z": [+A, +A, +0, +0],
-    "+Y+Z+X": [+H, +H, +H, +H],
-    "+Z-X-Y": [+H, -H, +H, +H],
-    "+Z-Y+X": [+A, +0, +A, +0],
-    "+Z+X+Y": [+H, +H, +H, -H],
-    "+Z+Y-X": [+0, -A, +0, +A],
-}
-
-const FACES_2 = {
-    "-X-Y+Z": [+0, +0, +1, +0],
-    "-X-Z-Y": [+0, +A, -A, +0],
-    "-X+Y-Z": [+0, +1, +0, +0],
-    "-X+Z+Y": [+0, +A, +A, +0],
-    "-Y-X-Z": [+A, -A, +0, +0],
-    "-Y-Z+X": [+H, -H, +H, -H],
-    "-Y+X+Z": [+0, +0, -A, +A],
-    "-Y+Z-X": [+H, -H, -H, +H],
-    "-Z-X+Y": [+H, -H, -H, -H],
-    "-Z-Y-X": [+A, +0, -A, +0],
-    "-Z+X-Y": [+H, +H, -H, +H],
-    "-Z+Y+X": [+0, +A, +0, +A],
-    "+X-Y-Z": [+1, +0, +0, +0],
-    "+X-Z+Y": [-A, +0, +0, +A],
-    "+X+Y+Z": [+0, +0, +0, +1],
-    "+X+Z-Y": [+A, +0, +0, +A],
-    "+Y-X+Z": [+0, +0, +A, +A],
-    "+Y-Z-X": [+H, +H, -H, -H],
     "+Y+X-Z": [+A, +A, +0, +0],
     "+Y+Z+X": [+H, +H, +H, +H],
     "+Z-X-Y": [+H, -H, +H, +H],

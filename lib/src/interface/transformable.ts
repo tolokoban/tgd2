@@ -4,8 +4,8 @@ export interface TgdInterfaceTransformable {
     transfo: Readonly<{ matrix: TgdMat4 }>
 }
 
-export interface TgdInterfaceTransformablePainter
-    extends TgdInterfaceTransformable {
+export interface TgdInterfaceTransformablePainter extends TgdInterfaceTransformable {
+    name?: string
     delete?(): void
     paint?(time: number, delay: number): void
 }

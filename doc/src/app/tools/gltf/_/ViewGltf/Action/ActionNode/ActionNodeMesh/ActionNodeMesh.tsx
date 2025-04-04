@@ -29,7 +29,7 @@ export function ViewActionNodeMesh({
                 {mesh.primitives.map((primitive, index) => (
                     <li key={index}>
                         <b>Primitive {index}</b>
-                        <Expander title="Attrinutes">
+                        <Expander title="Attributes">
                             {Object.keys(primitive.attributes).map(attName => (
                                 <Expander key={attName} title={attName}>
                                     <pre>
@@ -44,7 +44,18 @@ export function ViewActionNodeMesh({
                                 </Expander>
                             ))}
                         </Expander>
-                        <Expander title="Material">
+                        <Expander
+                            title={
+                                <div>
+                                    Material{" "}
+                                    <b>
+                                        {data.getMaterial(
+                                            primitive.material ?? -1
+                                        )?.name ?? "Material"}
+                                    </b>
+                                </div>
+                            }
+                        >
                             {isNumber(primitive.material) && (
                                 <pre>
                                     {JSON.stringify(

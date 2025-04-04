@@ -31,7 +31,6 @@ export class TgdTransfo {
     private readonly _axisZ = new TgdVec3()
 
     private dirty = false
-    private _updateCount = 0
 
     constructor(source?: TgdTransfo | Partial<TgdTransfoOptions>) {
         if (!source) return
@@ -42,7 +41,11 @@ export class TgdTransfo {
             this.orientation = source.orientation ?? this.orientation
             this.scale = source.scale ?? this.scale
         }
-        this.setDirty()
+        this.updateMatrix()
+    }
+
+    clone(): TgdTransfo {
+        return new TgdTransfo(this)
     }
 
     from(
@@ -52,7 +55,7 @@ export class TgdTransfo {
         this.orientation = transfo.orientation ?? this.orientation
         this.scale = transfo.scale ?? this.scale
         this.distance = transfo.distance ?? this.distance
-        this.setDirty()
+        this.updateMatrix()
         return this
     }
 
@@ -62,17 +65,12 @@ export class TgdTransfo {
         return this
     }
 
-    get updateCount() {
-        return this._updateCount
-    }
-
     get matrix(): TgdMat4 {
         this.updateIfNeeded()
         return this._matrix
     }
     set matrix(value: Readonly<TgdMat4> | ArrayNumber16) {
         this._matrix.from(value)
-        this._updateCount++
         this.dirty = false
     }
 
@@ -113,8 +111,10 @@ export class TgdTransfo {
     }
 
     reset(): this {
-        this._matrix.reset()
-        this.dirty = false
+        this.orientation.reset()
+        this.position.reset()
+        this.scale.reset()
+        this.dirty = true
         return this
     }
 
@@ -123,7 +123,7 @@ export class TgdTransfo {
     }
     set distance(value: number) {
         this._distance = value
-        this.setDirty()
+        this.updateMatrix()
     }
     setDistance(value: number): this {
         this.distance = value
@@ -131,11 +131,11 @@ export class TgdTransfo {
     }
 
     get position(): Readonly<TgdVec3> {
-        this.setDirty()
+        this.updateMatrix()
         return this._position
     }
     set position(value: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>) {
-        this.setDirty()
+        this.updateMatrix()
         this._position.from(value)
     }
     setPosition(
@@ -143,7 +143,7 @@ export class TgdTransfo {
         y: number,
         z: number
     ): this {
-        this.setDirty()
+        this.updateMatrix()
         if (typeof x === "number") {
             this._position.reset(x, y, z)
         } else {
@@ -167,17 +167,17 @@ export class TgdTransfo {
         return this._scale
     }
     set scale(value: Readonly<TgdVec3 | ArrayNumber3>) {
-        this.setDirty()
+        this.updateMatrix()
         this._scale.from(value)
     }
     setScale(
         x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        y: number,
-        z: number
+        y?: number,
+        z?: number
     ): this {
-        this.setDirty()
+        this.updateMatrix()
         if (typeof x === "number") {
-            this._scale.reset(x, y, z)
+            this._scale.reset(x, y ?? x, z ?? y ?? x)
         } else {
             this._scale.reset(x[0], x[1], x[2])
         }
@@ -185,11 +185,11 @@ export class TgdTransfo {
     }
 
     get orientation(): Readonly<TgdQuat> {
-        this.setDirty()
+        this.updateMatrix()
         return this._orientation
     }
     set orientation(quat: Readonly<TgdQuat | ArrayNumber4>) {
-        this.setDirty()
+        this.updateMatrix()
         this._orientation.from(quat)
     }
     setOrientation(source: TgdVec4 | ArrayNumber4 | TgdQuat): this
@@ -200,7 +200,7 @@ export class TgdTransfo {
         z?: number,
         w?: number
     ): this {
-        this.setDirty()
+        this.updateMatrix()
         if (typeof x === "number") {
             this._orientation.reset(x, y, z, w)
         } else {
@@ -211,19 +211,19 @@ export class TgdTransfo {
 
     orbitAroundX(angleInRadians: number): this {
         this._orientation.rotateAround(TgdVec3.X, angleInRadians)
-        this.setDirty()
+        this.updateMatrix()
         return this
     }
 
     orbitAroundY(angleInRadians: number): this {
         this._orientation.rotateAround(TgdVec3.Y, angleInRadians)
-        this.setDirty()
+        this.updateMatrix()
         return this
     }
 
     orbitAroundZ(angleInRadians: number): this {
         this._orientation.rotateAround(TgdVec3.Z, angleInRadians)
-        this.setDirty()
+        this.updateMatrix()
         return this
     }
 
@@ -232,7 +232,7 @@ export class TgdTransfo {
             .addWithScale(this.axisX, dx)
             .addWithScale(this.axisY, dy)
             .addWithScale(this.axisZ, dz)
-        this.setDirty()
+        this.updateMatrix()
         return this
     }
 
@@ -245,8 +245,7 @@ export class TgdTransfo {
         this.matrix.debug("Matrix")
     }
 
-    private setDirty() {
-        this._updateCount++
+    updateMatrix() {
         this.dirty = true
     }
 }

@@ -112,4 +112,27 @@ export class TgdCameraOrthographic extends TgdCamera {
         out[15] = 1
         this.dirtyProjection = true
     }
+
+    toCode(caption?: string): string {
+        const code: string[] = []
+        if (caption) code.push(`// ${caption}`)
+        code.push(`const camera = new TgdCameraOrthographic({`)
+        if (this.name) code.push(`  name: ${JSON.stringify(this.name)},`)
+        code.push(`  spaceHeight: ${this.spaceHeight},`)
+        code.push(`  near: ${this._near},`)
+        code.push(`  far: ${this._far},`)
+        code.push(`  zoom: ${this.zoom},`)
+        code.push(`  transfo: {`)
+        code.push(`  distance: ${this.transfo.distance},`)
+        code.push(
+            `    position: ${JSON.stringify([...this.transfo.position])},`
+        )
+        code.push(
+            `    orientation: ${JSON.stringify([...this.transfo.orientation])},`
+        )
+        code.push(`    scale: ${JSON.stringify([...this.transfo.scale])},`)
+        code.push(`  }`)
+        code.push("}")
+        return code.join("\n")
+    }
 }

@@ -1,19 +1,13 @@
 import {
-    tgdCalcDegToRad,
-    TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdGeometryBox,
-    tgdLoadImage,
-    TgdMaterialDiffuse,
     TgdMaterialNormals,
-    TgdPainterBackground,
     TgdPainterClear,
     TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterNode,
     TgdPainterState,
-    TgdTexture2D,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
@@ -32,13 +26,12 @@ function init(ctx: TgdContext) {
                     transfo: {
                         position: [0, -0.5, -0.5],
                     },
-                    target: new TgdPainterMesh(ctx, {
-                        geometry: new TgdGeometryBox(),
-                        material: new TgdMaterialNormals(),
-                        // material: new TgdMaterialDiffuse({
-                        //     color: [0.9, 0.6, 0.3, 1],
-                        // }),
-                    }),
+                    children: [
+                        new TgdPainterMesh(ctx, {
+                            geometry: new TgdGeometryBox(),
+                            material: new TgdMaterialNormals(),
+                        }),
+                    ],
                 }),
             ],
         })

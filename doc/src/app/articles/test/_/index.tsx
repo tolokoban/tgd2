@@ -57,27 +57,33 @@ function init(context: TgdContext) {
 
         console.log("Suzanne has been loaded!")
         const mesh = new TgdPainterNode({
-            target: new TgdPainterMeshGltf(context, {
-                asset,
-            }),
+            children: [
+                new TgdPainterMeshGltf(context, {
+                    asset,
+                }),
+            ],
             transfo: {
                 position: [0, 0, -3],
             },
         })
         const box = new TgdPainterNode({
-            target: new TgdPainterMesh(context, {
-                geometry: new TgdGeometryBox(),
-                material: new TgdMaterialNormals(),
-            }),
+            children: [
+                new TgdPainterMesh(context, {
+                    geometry: new TgdGeometryBox(),
+                    material: new TgdMaterialNormals(),
+                }),
+            ],
             transfo: {
                 position: [0, 0, 2],
             },
         })
         const box2 = new TgdPainterNode({
-            target: new TgdPainterMesh(context, {
-                geometry: new TgdGeometryBox(),
-                material: new TgdMaterialDiffuse(),
-            }),
+            children: [
+                new TgdPainterMesh(context, {
+                    geometry: new TgdGeometryBox(),
+                    material: new TgdMaterialDiffuse(),
+                }),
+            ],
             transfo: { position: [0, 1, 0] },
         })
         mesh.add(box.add(box2))

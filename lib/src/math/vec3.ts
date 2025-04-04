@@ -160,7 +160,7 @@ export class TgdVec3 extends Float32Array {
         )
     }
 
-    reset(x: number, y: number, z: number): this {
+    reset(x: number = 0, y: number = 0, z: number = 0): this {
         this[0] = x
         this[1] = y
         this[2] = z

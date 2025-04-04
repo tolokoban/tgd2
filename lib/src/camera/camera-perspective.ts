@@ -90,4 +90,27 @@ export class TgdCameraPerspective extends TgdCamera {
         out[5] *= this.zoom
         this.dirtyProjection = true
     }
+
+    toCode(caption?: string): string {
+        const code: string[] = []
+        if (caption) code.push(`// ${caption}`)
+        code.push(`const camera = new TgdCameraPerspective({`)
+        if (this.name) code.push(`  name: ${JSON.stringify(this.name)},`)
+        code.push(`  fovy: ${this._fovy},`)
+        code.push(`  near: ${this._near},`)
+        code.push(`  far: ${this._far},`)
+        code.push(`  zoom: ${this.zoom},`)
+        code.push(`  transfo: {`)
+        code.push(`  distance: ${this.transfo.distance},`)
+        code.push(
+            `    position: ${JSON.stringify([...this.transfo.position])},`
+        )
+        code.push(
+            `    orientation: ${JSON.stringify([...this.transfo.orientation])},`
+        )
+        code.push(`    scale: ${JSON.stringify([...this.transfo.scale])},`)
+        code.push(`  }`)
+        code.push("}")
+        return code.join("\n")
+    }
 }

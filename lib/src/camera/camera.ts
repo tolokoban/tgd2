@@ -188,6 +188,10 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.dirtyModelView = true
     }
 
+    toCode(caption?: string): string {
+        return `// ${caption ?? "TgdCamera"}\n// Not implemented yet`
+    }
+
     debug(caption?: string) {
         const name = `${this.name}: ${caption ?? ""}`
         console.log("TgdCamera", name)

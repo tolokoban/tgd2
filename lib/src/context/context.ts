@@ -142,8 +142,15 @@ export class TgdContext {
         this.paint()
     }
 
-    animSchedule(animation: TgdAnimation): TgdAnimation {
-        const result = this.animationManager.schedule(animation)
+    animSchedule(...animations: TgdAnimation[]): TgdAnimation[] {
+        const result: TgdAnimation[] = []
+        let delay = 0
+        for (const animation of animations) {
+            const duration = animation.duration + (animation.delay ?? 0)
+            animation.delay = delay + (animation.delay ?? 0)
+            delay += duration
+            result.push(this.animationManager.schedule(animation))
+        }
         this.paint()
         return result
     }

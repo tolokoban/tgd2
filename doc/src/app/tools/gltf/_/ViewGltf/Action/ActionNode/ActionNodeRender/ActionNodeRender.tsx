@@ -18,6 +18,7 @@ import {
     TgdVec4,
     webglPresetDepth,
     TgdInterfaceTransformable,
+    tgdMakeMeshGlbPainter,
 } from "@tolokoban/tgd"
 
 import Styles from "./ActionNodeRender.module.css"
@@ -68,73 +69,21 @@ function useReadyHandler(
                 color: [0.2, 0.2, 0.2, 1],
                 depth: 1,
             })
+            const { painter: nodePainter } = tgdMakeMeshGlbPainter({
+                data,
+                node,
+                context,
+            })
+            nodePainter.debug("nodePainter")
             const state = new TgdPainterState(context, {
                 depth: webglPresetDepth.lessOrEqual,
-                children: [makeNodePainter(data, node, context)],
+                children: [nodePainter],
             })
             context.add(clear, state)
             context.paint()
         },
         [data, node]
     )
-}
-
-function makeNodePainter(
-    data: TgdParserGLTransfertFormatBinary,
-    node: TgdFormatGltfNode,
-    context: TgdContext
-): TgdPainterNode {
-    const transfo: Partial<TgdTransfoOptions> = {}
-    if (node.translation) {
-        transfo.position = node.translation
-    }
-    if (node.rotation) {
-        transfo.orientation = node.rotation
-    }
-    if (node.scale) {
-        transfo.scale = node.scale
-    }
-    const target: TgdInterfaceTransformable | undefined = makeMeshPainter(
-        data,
-        node.mesh,
-        context
-    )
-    const children: TgdPainterNode[] = []
-    if (node.children) {
-        for (const nodeIndex of node.children) {
-            children.push(
-                makeNodePainter(data, data.getNode(nodeIndex), context)
-            )
-        }
-    }
-    const painter = new TgdPainterNode({
-        target,
-        transfo,
-        children,
-    })
-    return painter
-}
-
-function makeMeshPainter(
-    asset: TgdParserGLTransfertFormatBinary,
-    meshIndex: number | undefined,
-    context: TgdContext
-): TgdInterfaceTransformable | undefined {
-    if (!isNumber(meshIndex)) return undefined
-
-    const mesh = asset.getMesh(meshIndex)
-    return new TgdPainterNode({
-        children: mesh.primitives.map(
-            (_, primitiveIndex) =>
-                new TgdPainterNode({
-                    target: new TgdPainterMeshGltf(context, {
-                        asset,
-                        meshIndex,
-                        primitiveIndex,
-                    }),
-                })
-        ),
-    })
 }
 
 interface BBox {

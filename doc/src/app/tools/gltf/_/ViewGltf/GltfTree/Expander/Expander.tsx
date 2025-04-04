@@ -18,7 +18,7 @@ const $ = Theme.classNames
 export type ViewExpanderProps = CommonProps & {
     name?: string
     icon?: Icon
-    title: string
+    title: React.ReactNode
     style?: React.CSSProperties
     onClick?(): void
     children?: React.ReactNode

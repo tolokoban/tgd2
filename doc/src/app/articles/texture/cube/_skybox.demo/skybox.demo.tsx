@@ -89,9 +89,13 @@ export default function Demo() {
 
         const orientation = TgdQuat.fromFace(value)
         context.animSchedule({
-            action: tgdActionCreateTransfoInterpolation(camera.transfo, {
-                orientation,
-            }),
+            action: tgdActionCreateTransfoInterpolation(
+                camera.transfo,
+                {},
+                {
+                    orientation,
+                }
+            ),
             duration: 0.3,
             easingFunction: tgdEasingFunctionInOutCubic,
         })

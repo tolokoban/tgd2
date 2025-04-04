@@ -15,6 +15,7 @@ export function tgdActionCreateCameraInterpolation(
     const endZoom = destination.zoom ?? beginZoom
     const action = tgdActionCreateTransfoInterpolation(
         camera.transfo,
+        {},
         transfoDestination
     )
     const beginSpaceHeightAtTarget = camera.spaceHeightAtTarget

@@ -1,3 +1,4 @@
+export * from "./animation"
 export * from "./arrays"
 export * from "./elements"
 export * from "./gltf"

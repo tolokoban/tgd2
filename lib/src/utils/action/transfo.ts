@@ -3,33 +3,26 @@ import { tgdCalcMix } from "../math"
 
 export function tgdActionCreateTransfoInterpolation(
     transfo: TgdTransfo,
-    target: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>
+    transfoAtT0: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>,
+    transfoAtT1: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>
 ) {
-    const distance = transfo.distance
-    const position = transfo.position.clone()
-    const scale = transfo.scale.clone()
-    const orientation = transfo.orientation.clone()
-    const endTransfo =
-        target instanceof TgdTransfo
-            ? target
-            : new TgdTransfo({
-                  distance,
-                  position,
-                  scale,
-                  orientation,
-                  ...target,
-              })
-    const endOrientation = endTransfo.orientation.clone()
-    const endPosition = endTransfo.position.clone()
-    const endScale = endTransfo.scale.clone()
-    const endDistance = endTransfo.distance
-    console.log("🚀 [transfo] target =", target) // @FIXME: Remove this line written on 2025-03-30 at 15:24
+    const beginTransfo = transfo.clone().from(transfoAtT0)
+    const distanceAt0 = beginTransfo.distance
+    const positionAt0 = beginTransfo.position.clone()
+    const scaleAt0 = beginTransfo.scale.clone()
+    const orientationAt0 = beginTransfo.orientation.clone()
+
+    const endTransfo = transfo.clone().from(transfoAtT1)
+    const orientationAt1 = endTransfo.orientation.clone()
+    const positionAt1 = endTransfo.position.clone()
+    const scaleAt1 = endTransfo.scale.clone()
+    const distanceAt1 = endTransfo.distance
 
     return (t: number) => {
-        transfo.distance = tgdCalcMix(distance, endDistance, t)
-        transfo.position.fromMix(position, endPosition, t)
-        transfo.scale.fromMix(scale, endScale, t)
-        transfo.orientation.fromSlerp(orientation, endOrientation, t)
-        transfo.position.debug()
+        transfo.distance = tgdCalcMix(distanceAt0, distanceAt1, t)
+        transfo.position.fromMix(positionAt0, positionAt1, t)
+        transfo.scale.fromMix(scaleAt0, scaleAt1, t)
+        transfo.orientation.fromSlerp(orientationAt0, orientationAt1, t)
+        transfo.updateMatrix()
     }
 }
