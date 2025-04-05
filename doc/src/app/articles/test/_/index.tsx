@@ -27,7 +27,7 @@ import View from "@/components/demo/Tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
 
 export default function DemoContainer() {
-    return <View onReady={init} />
+    return <View onReady={init} gizmo />
 }
 
 function init(context: TgdContext) {

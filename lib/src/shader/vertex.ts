@@ -18,7 +18,7 @@ import {
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderVertex {
-    public precision: "lowp" | "mediump" | "highp" = "mediump"
+    public precision: "lowp" | "mediump" | "highp"
     public uniforms: TgdCodeVariables<WebglUniformType>
     public attributes: TgdCodeVariables<WebglAttributeType>
     public varying: TgdCodeVariables<WebglAttributeType>
@@ -26,7 +26,7 @@ export class TgdShaderVertex {
     public mainCode: TgdCodeBloc
 
     constructor({
-        precision = "mediump",
+        precision = "highp",
         uniforms = {},
         attributes = {},
         varying = {},

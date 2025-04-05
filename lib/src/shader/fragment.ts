@@ -28,7 +28,7 @@ export class TgdShaderFragment {
     public mainCode: TgdCodeBloc
 
     constructor({
-        precision = "mediump",
+        precision = "highp",
         uniforms = {},
         outputs = {
             FragColor: "vec4",

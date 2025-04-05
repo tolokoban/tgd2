@@ -121,6 +121,7 @@ export class TgdContext {
         this.painters.name = this.name
         // Prevent system gestures.
         canvas.style.touchAction = "none"
+        this.stateReset()
     }
 
     get time() {

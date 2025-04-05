@@ -1,6 +1,6 @@
 #version 300 es
 
-precision mediump float;
+precision highp float;
 
 uniform vec4 uniTS;
 uniform mat4 uniModelViewMatrix;
