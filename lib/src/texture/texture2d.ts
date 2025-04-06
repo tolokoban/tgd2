@@ -12,6 +12,11 @@ interface TgdTexture2DStorage {
     height: number
     levels: number
     flipY: boolean
+    /**
+     * Do we want to use premultiplied alpha?
+     * Default to `false`.
+     */
+    premultipliedAlpha: boolean
     internalFormat:
         | "R8"
         | "R16F"
@@ -84,9 +89,14 @@ export class TgdTexture2D {
             internalFormat: "RGBA8",
             levels: 1,
             flipY: false,
+            premultipliedAlpha: false,
             ...storage,
         }
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         if (
             typeof storage?.width === "number" &&
             typeof storage?.height === "number"
