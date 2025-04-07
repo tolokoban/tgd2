@@ -15,6 +15,7 @@ import { Action } from "../types"
 import Styles from "./GltfTree.module.css"
 import { ViewNodes } from "./Nodes"
 import { ViewImages } from "./Images"
+import { ViewLights } from "./Lights"
 
 const $ = Theme.classNames
 
@@ -42,6 +43,7 @@ export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
                 </ViewButton>
                 <ViewNodes data={props.data} onAction={props.onAction} />
                 <ViewImages data={props.data} onAction={props.onAction} />
+                <ViewLights data={props.data} onAction={props.onAction} />
             </Expander>
             <Expander title="Chunks" name="root">
                 <ViewPanel

@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { Theme } from "@tolokoban/ui"
+import { IconImage, Theme } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 
 import { Expander } from "../Expander"
@@ -22,7 +22,11 @@ export function ViewImages({
     onAction,
 }: ViewImagesProps): JSX.Element {
     return (
-        <Expander className={$.join(className, Styles.images)} title="Images">
+        <Expander
+            className={$.join(className, Styles.images)}
+            icon={IconImage}
+            title="Images"
+        >
             {(data.gltf.images ?? []).map((image, index) => (
                 <Expander
                     key={index}

@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import { Theme, CommonProps, styleCommon } from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, IconTree } from "@tolokoban/ui"
 import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
 import { Action } from "../../types"
 
@@ -20,7 +20,7 @@ export function ViewNodes(props: ViewNodesProps): JSX.Element {
     if (!nodes) return <p>No nodes.</p>
 
     return (
-        <Expander title="Nodes">
+        <Expander title="Nodes" icon={IconTree}>
             {nodes.map((node, index) => (
                 <ViewNode
                     key={`#${index}`}
