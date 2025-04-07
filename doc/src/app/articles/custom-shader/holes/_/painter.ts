@@ -2,18 +2,14 @@ import {
     TgdContext,
     TgdMaterialNormals,
     TgdPainterMesh,
-    TgdParserGLTransfertFormatBinary,
+    TgdDataGlb,
     TgdTexture2D,
 } from "@tolokoban/tgd"
 
 export class ShieldPainter extends TgdPainterMesh {
     private readonly texAbedo: TgdTexture2D
 
-    constructor(
-        context: TgdContext,
-        glb: TgdParserGLTransfertFormatBinary,
-        abedo: HTMLImageElement
-    ) {
+    constructor(context: TgdContext, glb: TgdDataGlb, abedo: HTMLImageElement) {
         const texAbedo = new TgdTexture2D(context).loadBitmap(abedo)
         // const material = new TgdMaterialDiffuse({
         //     color: texAbedo,

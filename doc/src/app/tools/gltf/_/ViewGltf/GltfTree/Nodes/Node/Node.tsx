@@ -1,9 +1,6 @@
 import * as React from "react"
 
-import {
-    TgdParserGLTransfertFormatBinary,
-    TgdFormatGltfNode,
-} from "@tolokoban/tgd"
+import { TgdDataGlb, TgdFormatGltfNode } from "@tolokoban/tgd"
 import {
     CommonProps,
     Icon,
@@ -24,7 +21,7 @@ const $ = Theme.classNames
 
 export type ViewNodeProps = CommonProps & {
     name?: string
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     index: number
     onAction?(action: Action): void
 }

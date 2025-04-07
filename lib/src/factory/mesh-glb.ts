@@ -6,7 +6,7 @@ import {
     TgdPainterNode,
     TgdPainterNodeChild,
 } from "@tgd/painter"
-import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
+import { TgdDataGlb } from "@tgd/parser"
 import { TgdTexture2D } from "@tgd/texture"
 import {
     TgdFormatGltfMesh,
@@ -17,7 +17,7 @@ import {
 import { isNumber, isString } from "@tgd/types/guards"
 
 interface OverrideMaterialOptions {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     mesh: TgdFormatGltfMesh
     primitive: TgdFormatGltfMeshPrimitive
 }
@@ -27,7 +27,7 @@ type MaterialOverrider = (
 ) => (this: void, options: { color?: TgdVec4 | TgdTexture2D }) => TgdMaterial
 
 interface MakeMeshGlbPainterOptions {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     context: TgdContext
     node: number | string | TgdFormatGltfNode
     overrideMaterial?: MaterialOverrider
@@ -59,7 +59,7 @@ export function tgdMakeMeshGlbPainter(options: MakeMeshGlbPainterOptions): {
 }
 
 function getActualNode(
-    data: TgdParserGLTransfertFormatBinary,
+    data: TgdDataGlb,
     node: number | string | TgdFormatGltfNode
 ): TgdFormatGltfNode {
     if (isNumber(node)) return data.getNode(node)

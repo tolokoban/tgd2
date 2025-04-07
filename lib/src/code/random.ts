@@ -3,9 +3,11 @@ import { TgdCodeFunctions } from "@tgd/shader"
 /**
  * Generates function `float random(vec2 seed)`.
  */
-export function tgdCodeFunction_random(options: {
-    name: string
-}): TgdCodeFunctions {
+export function tgdCodeFunction_random(
+    options: {
+        name?: string
+    } = {}
+): TgdCodeFunctions {
     const { name = "random" } = options
     return {
         [name]: `float ${name}(vec2 seed){

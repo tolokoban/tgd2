@@ -1,7 +1,7 @@
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
-import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
+import { TgdDataGlb } from "@tgd/parser"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial, TgdMaterialDiffuse } from "@tgd/material"
 import { TgdLight } from "@tgd/light"
@@ -10,7 +10,7 @@ import { TgdPainterMesh } from "../mesh"
 import { TgdTexture2D } from "@tgd/texture"
 
 export interface TgdPainterMeshGltfOptions {
-    asset: TgdParserGLTransfertFormatBinary
+    asset: TgdDataGlb
     meshIndex?: number
     primitiveIndex?: number
     name?: string
@@ -72,7 +72,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
 const DEFAULT_COLOR = new TgdVec4(0.9, 0.5, 0.1, 1)
 
 function figureColor(
-    asset: TgdParserGLTransfertFormatBinary,
+    asset: TgdDataGlb,
     meshIndex: number,
     primitiveIndex: number,
     context: TgdContext

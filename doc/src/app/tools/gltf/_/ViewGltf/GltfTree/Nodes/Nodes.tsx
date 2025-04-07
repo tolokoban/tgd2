@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { Theme, CommonProps, styleCommon, IconTree } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 import { Action } from "../../types"
 
 import Styles from "./Nodes.module.css"
@@ -11,7 +11,7 @@ import { Expander } from "../Expander"
 const $ = Theme.classNames
 
 export type ViewNodesProps = {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     onAction?(action: Action): void
 }
 

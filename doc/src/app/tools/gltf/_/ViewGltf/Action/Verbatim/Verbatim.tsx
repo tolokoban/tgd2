@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import Styles from "./Verbatim.module.css"
 
@@ -9,7 +9,7 @@ const $ = Theme.classNames
 
 export type ViewVerbatimProps = {
     className?: string
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
 }
 
 export function ViewVerbatim(props: ViewVerbatimProps): JSX.Element {

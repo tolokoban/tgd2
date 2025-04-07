@@ -1,12 +1,12 @@
-import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
+import { TgdDataGlb } from "@tgd/parser"
 
 export async function tgdLoadGlb(
     urlOrFile: string | File
-): Promise<TgdParserGLTransfertFormatBinary | null> {
+): Promise<TgdDataGlb | null> {
     try {
         if (urlOrFile instanceof File) {
             const data = await urlOrFile.arrayBuffer()
-            return new TgdParserGLTransfertFormatBinary(data)
+            return new TgdDataGlb(data)
         }
 
         const resp = await fetch(urlOrFile)
@@ -16,7 +16,7 @@ export async function tgdLoadGlb(
             )
         }
         const data = await resp.arrayBuffer()
-        return new TgdParserGLTransfertFormatBinary(data)
+        return new TgdDataGlb(data)
     } catch (error) {
         console.error(error)
         return null

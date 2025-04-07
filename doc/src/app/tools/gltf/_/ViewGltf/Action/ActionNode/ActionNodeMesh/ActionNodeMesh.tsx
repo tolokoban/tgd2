@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { Theme, CommonProps, styleCommon } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import Styles from "./ActionNodeMesh.module.css"
 import Error from "@/components/Error"
@@ -11,7 +11,7 @@ import { isNumber } from "@tolokoban/type-guards"
 const $ = Theme.classNames
 
 export type ViewActionNodeMeshProps = CommonProps & {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     meshIndex: number
 }
 

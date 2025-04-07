@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { Theme, CommonProps, styleCommon } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 import { Action } from "../types"
 
 import Styles from "./Action.module.css"
@@ -12,7 +12,7 @@ import { ViewActionImage } from "./ActionImage"
 const $ = Theme.classNames
 
 export type ViewActionProps = CommonProps & {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     action: Action
 }
 

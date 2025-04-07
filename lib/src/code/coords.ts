@@ -38,9 +38,11 @@ export function tgdCodeFunction_xy2uv(
  * The function will return a vec2 with the length as first component,
  * and the angle as second.
  */
-export function tgdCodeFunction_xy2polar(options: {
-    name: string
-}): TgdCodeFunctions {
+export function tgdCodeFunction_xy2polar(
+    options: {
+        name?: string
+    } = {}
+): TgdCodeFunctions {
     const { name = "xy2polar" } = options
     return {
         [name]: `vec2 ${name}(vec2 xy) {
@@ -57,12 +59,14 @@ export function tgdCodeFunction_xy2polar(options: {
  * Reverse function of `xy2polar`.
  * @see tgdCodeFunction_xy2polar
  */
-export function tgdCodeFunction_polar2xy(options: {
-    name: string
-}): TgdCodeFunctions {
+export function tgdCodeFunction_polar2xy(
+    options: {
+        name?: string
+    } = {}
+): TgdCodeFunctions {
     const { name = "polar2uv" } = options
     return {
-        [name]: `vec2 ≈${name}(vec2 polar) {
+        [name]: `vec2 ${name}(vec2 polar) {
     float r = polar.x;
     float a = polar.y;
     return vec2(

@@ -7,7 +7,7 @@ import {
     ViewPanel,
     ViewStrip,
 } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { ViewGltfTree } from "./GltfTree"
 import { useData } from "./hooks"
@@ -25,7 +25,7 @@ export type ViewViewGltfProps = {
 export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
     const [action, setAction] = React.useState<Action>({ type: "verbatim" })
     const [data, load] = useData()
-    React.useState<TgdParserGLTransfertFormatBinary | null>(null)
+    React.useState<TgdDataGlb | null>(null)
     function handleLoad(files: File[]): void {
         const [file] = files
         if (!file) return

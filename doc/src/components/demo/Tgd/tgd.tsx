@@ -8,7 +8,7 @@ import {
     tgdLoadGlb,
     tgdLoadImage,
     tgdLoadText,
-    TgdParserGLTransfertFormatBinary,
+    TgdDataGlb,
 } from "@tolokoban/tgd"
 import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
 
@@ -18,7 +18,7 @@ import styles from "./tgd.module.css"
 
 export interface Assets {
     image: Record<string, HTMLImageElement>
-    glb: Record<string, TgdParserGLTransfertFormatBinary>
+    glb: Record<string, TgdDataGlb>
     data: Record<string, ArrayBuffer>
     text: Record<string, string>
 }

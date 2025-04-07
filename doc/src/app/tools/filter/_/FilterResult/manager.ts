@@ -21,7 +21,13 @@ export class FilterManager {
     ) {
         const context = new TgdContext(canvas)
         this.context = context
-        const texture = new TgdTexture2D(context).loadBitmap(BackgroundURL)
+        const texture = new TgdTexture2D(context)
+            .loadBitmap(BackgroundURL)
+            .setParams({
+                wrapR: "MIRRORED_REPEAT",
+                wrapS: "MIRRORED_REPEAT",
+                wrapT: "MIRRORED_REPEAT",
+            })
         this.texture = texture
         this.destroy = () => {
             texture.delete()

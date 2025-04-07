@@ -1,4 +1,4 @@
-import { TgdParserGLTransfertFormatBinary } from "@tgd/parser"
+import { TgdDataGlb } from "@tgd/parser"
 import { tgdLoadGlb } from "./binary"
 import { tgdLoadImage } from "./image"
 
@@ -8,10 +8,10 @@ export async function tgdLoadAssets<GLB extends string, IMG extends string>(
         img: Record<IMG, string>
     }>
 ): Promise<{
-    glb: Record<GLB, TgdParserGLTransfertFormatBinary>
+    glb: Record<GLB, TgdDataGlb>
     img: Record<IMG, HTMLImageElement>
 }> {
-    const glb = {} as Record<GLB, TgdParserGLTransfertFormatBinary>
+    const glb = {} as Record<GLB, TgdDataGlb>
     const img = {} as Record<IMG, HTMLImageElement>
     const tasks: Promise<void>[] = [
         ...getPromisedLoaders(tgdLoadGlb, urls.glb, glb),

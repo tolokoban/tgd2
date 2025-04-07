@@ -7,7 +7,19 @@ import {
     ViewTab,
     ViewTabs,
 } from "@tolokoban/ui"
-import { tgdCodeStringify } from "@tolokoban/tgd"
+import {
+    tgdCodeConstants,
+    tgdCodeFunction_luminance,
+    tgdCodeFunction_polar2uv,
+    tgdCodeFunction_polar2xy,
+    tgdCodeFunction_random,
+    tgdCodeFunction_shiftHue,
+    tgdCodeFunction_uv2polar,
+    tgdCodeFunction_uv2xy,
+    tgdCodeFunction_xy2polar,
+    tgdCodeFunction_xy2uv,
+    tgdCodeStringify,
+} from "@tolokoban/tgd"
 
 import { ViewVertexShaderCodeEditor } from "./VertexShaderCodeEditor"
 import { ViewFilterResult } from "./FilterResult"
@@ -54,25 +66,27 @@ export function ViewFilter(): JSX.Element {
 }
 
 const DEFAULT_FRAGMENT_SHADER = tgdCodeStringify([
-    "vec4 color = texture(uniTexture, varUV);",
-    "FragColor = color;",
+    `vec2 polar = uv2polar(varUV);`,
+    `polar.y += polar.x * cos(uniTime);`,
+    `vec2 uv = polar2uv(polar);`,
+    `vec4 color = texture(uniTexture, uv);`,
+    `FragColor = vec4(`,
+    [`shiftHue(color.rgb, polar.y + uniTime),`, `1.0`],
+    `);`,
 ])
 
-const DEFAULT_FUNCTIONS = tgdCodeStringify(`
-vec2 uv2xy(vec2 uv) {
-    return 2.0 * (uv - vec2(0.5)) * vec2(uniAspectRatio, 1.0);
-}
-
-vec2 xy2uv(vec2 xy) {
-    return (xy * vec2(uniAspectRatioInverse, 1.0) + vec2(1.0)) * 0.5;
-}
-
-vec2 random( vec2 p ) {
-    return fract(sin(vec2(
-        dot(p,vec2(127.1,311.7)),
-        dot(p,vec2(269.5,183.3))
-    ))*43758.5453);
-}
-
+const DEFAULT_FUNCTIONS = tgdCodeStringify([
+    tgdCodeConstants("PI", "TAU", "E"),
+    tgdCodeFunction_random(),
+    tgdCodeFunction_shiftHue(),
+    tgdCodeFunction_polar2uv(),
+    tgdCodeFunction_polar2xy(),
+    tgdCodeFunction_uv2polar(),
+    tgdCodeFunction_xy2polar(),
+    tgdCodeFunction_uv2xy(),
+    tgdCodeFunction_xy2uv(),
+    tgdCodeFunction_luminance(),
+    `
 float dot2( in vec2 v ) { return dot(v,v); }
-`)
+`,
+])

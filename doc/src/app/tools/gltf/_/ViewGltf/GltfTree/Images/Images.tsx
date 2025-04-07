@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { IconImage, Theme } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { Expander } from "../Expander"
 import { Action } from "../../types"
@@ -12,7 +12,7 @@ const $ = Theme.classNames
 
 export type ViewImagesProps = {
     className?: string
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     onAction?(action: Action): void
 }
 

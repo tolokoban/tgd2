@@ -23,6 +23,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/animation/transfo": ["/articles/animation/transfo"],
     "/articles/custom-shader": ["/articles/custom-shader"],
     "/articles/custom-shader/holes": ["/articles/custom-shader/holes"],
+    "/articles/gltf": ["/articles/gltf"],
     "/articles/math": ["/articles/math"],
     "/articles/math/fractal": ["/articles/math/fractal"],
     "/articles/math/fractal/pascal-triangle": ["/articles/math/fractal/pascal-triangle"],

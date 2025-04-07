@@ -9,7 +9,7 @@ import {
     ViewTabs,
     ViewTab,
 } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { isTypeCamera } from "../../types"
 import { ViewActionNodeTransfo } from "./ActionNodeTransfo"
@@ -23,7 +23,7 @@ import { ViewActionNodeMesh } from "./ActionNodeMesh"
 const $ = Theme.classNames
 
 export type ViewActionNodeProps = CommonProps & {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     index: number
 }
 

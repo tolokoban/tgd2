@@ -1,4 +1,5 @@
 import { TgdEvent } from "@tgd/event"
+import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdProgram } from "@tgd/program"
 import { isWebglImage, WebglImage, WebglTexParameter } from "@tgd/types"
 import {
@@ -153,12 +154,16 @@ export class TgdTexture2D {
     }
 
     loadBitmap(
-        bmp: WebglImage | null | Promise<WebglImage | null>,
+        bmp: string | WebglImage | null | Promise<WebglImage | null>,
         options: {
             level?: number
         } = {}
     ): this {
         if (!bmp) return this
+
+        if (typeof bmp === "string") {
+            return this.loadBitmap(tgdLoadImage(bmp), options)
+        }
 
         if (!isWebglImage(bmp)) {
             bmp.then(data => this.loadBitmap(data)).catch(error =>

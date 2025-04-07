@@ -7,7 +7,7 @@ import {
     ViewButton,
     ViewPanel,
 } from "@tolokoban/ui"
-import { TgdParserGLTransfertFormatBinary } from "@tolokoban/tgd"
+import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { Expander } from "./Expander"
 import { Action } from "../types"
@@ -20,7 +20,7 @@ import { ViewLights } from "./Lights"
 const $ = Theme.classNames
 
 export type ViewGltfTreeProps = CommonProps & {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     onAction(action: Action): void
 }
 

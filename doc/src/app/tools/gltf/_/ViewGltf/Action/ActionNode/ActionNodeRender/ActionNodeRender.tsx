@@ -11,7 +11,7 @@ import {
     TgdPainterMeshGltf,
     TgdPainterNode,
     TgdPainterState,
-    TgdParserGLTransfertFormatBinary,
+    TgdDataGlb,
     TgdTransfo,
     TgdTransfoOptions,
     TgdVec3,
@@ -28,7 +28,7 @@ import { isNumber, isType } from "@tolokoban/type-guards"
 const $ = Theme.classNames
 
 export type ViewActionNodeRenderProps = {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     node: TgdFormatGltfNode
 }
 
@@ -51,10 +51,7 @@ export function ViewActionNodeRender({
     )
 }
 
-function useReadyHandler(
-    data: TgdParserGLTransfertFormatBinary,
-    node: TgdFormatGltfNode
-) {
+function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
     return React.useCallback(
         (context: TgdContext) => {
             const bbox = computeBBox(data, node)
@@ -91,10 +88,7 @@ interface BBox {
     radius: number
 }
 
-function computeBBox(
-    data: TgdParserGLTransfertFormatBinary,
-    node: TgdFormatGltfNode
-): BBox {
+function computeBBox(data: TgdDataGlb, node: TgdFormatGltfNode): BBox {
     const bboxes: BBox[] = []
     if (isNumber(node.mesh))
         bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
@@ -105,10 +99,7 @@ function computeBBox(
     return applyTransfo(averageBBoxes(bboxes), node)
 }
 
-function computeMeshBBox(
-    data: TgdParserGLTransfertFormatBinary,
-    meshIndex: number
-): BBox[] {
+function computeMeshBBox(data: TgdDataGlb, meshIndex: number): BBox[] {
     const mesh = data.getMesh(meshIndex)
     if (!mesh) {
         return [

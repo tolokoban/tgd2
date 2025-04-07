@@ -20,7 +20,7 @@ import {
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdTexture2D } from "@tgd/texture"
 
-export class TgdParserGLTransfertFormatBinary {
+export class TgdDataGlb {
     public readonly gltf: Readonly<TgdFormatGltf>
 
     private readonly chunks: ArrayBuffer[]
@@ -43,6 +43,9 @@ export class TgdParserGLTransfertFormatBinary {
         | Float32Array
     >()
 
+    /**
+     * @param content The binary content of a GLB file.
+     */
     constructor(content: ArrayBuffer) {
         try {
             const data = parseGLB(content)

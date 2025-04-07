@@ -6,7 +6,7 @@ import {
     tgdCalcRadToDeg,
     TgdFormatGltfCamera,
     TgdFormatGltfNode,
-    TgdParserGLTransfertFormatBinary,
+    TgdDataGlb,
 } from "@tolokoban/tgd"
 
 import Error from "@/components/Error"
@@ -18,7 +18,7 @@ import { ensureNumber } from "@tolokoban/type-guards"
 const $ = Theme.classNames
 
 export type ViewActionNodeCameraProps = CommonProps & {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     node: TgdFormatGltfNode
 }
 

@@ -5,7 +5,7 @@ import {
     TgdContext,
     TgdPainterBackground,
     TgdPainterClear,
-    TgdParserGLTransfertFormatBinary,
+    TgdDataGlb,
     TgdTexture2D,
 } from "@tolokoban/tgd"
 import Tgd, { Assets } from "@/components/demo/Tgd"
@@ -19,7 +19,7 @@ import Styles from "./ActionImage.module.css"
 const $ = Theme.classNames
 
 export type ViewActionImageProps = {
-    data: TgdParserGLTransfertFormatBinary
+    data: TgdDataGlb
     index: number
 }
 
