@@ -10,6 +10,7 @@ import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
 import { TgdProgram } from "@tgd/program"
 import { TgdTextureCubeImpl } from "@tgd/texture"
+import { webglCullExec, webglPresetCull } from "@tgd/utils"
 
 export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
     camera: TgdCamera
@@ -62,21 +63,25 @@ export class TgdPainterSkybox extends TgdPainter {
 
         // Compute matrix from current camera.
         const { camera, matrix, tmpMat } = this
-        camera.screenWidth = context.width
-        camera.screenHeight = context.height
-        matrix.from(camera.matrixProjection)
-        tmpMat.fromMat3(this.transfo.matrix).multiply(camera.matrixModelView)
-        tmpMat.m03 = 0
-        tmpMat.m13 = 0
-        tmpMat.m23 = 0
-        matrix.multiply(tmpMat).invert()
+        webglCullExec(gl, webglPresetCull.off, () => {
+            camera.screenWidth = context.width
+            camera.screenHeight = context.height
+            matrix.from(camera.matrixProjection)
+            tmpMat
+                .fromMat3(this.transfo.matrix)
+                .multiply(camera.matrixModelView)
+            tmpMat.m03 = 0
+            tmpMat.m13 = 0
+            tmpMat.m23 = 0
+            matrix.multiply(tmpMat).invert()
 
-        program.use()
-        program.uniformMatrix4fv("uniMatrix", matrix)
-        program.uniform1f("uniZ", z)
-        texture.activate(0, program, "uniTexture")
-        vao.bind()
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-        vao.unbind()
+            program.use()
+            program.uniformMatrix4fv("uniMatrix", matrix)
+            program.uniform1f("uniZ", z)
+            texture.activate(0, program, "uniTexture")
+            vao.bind()
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+            vao.unbind()
+        })
     }
 }

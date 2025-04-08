@@ -49,4 +49,8 @@ export interface TgdInputPointer {
      * `tapDelay` milliseconds.
      */
     tapDelay: number
+
+    isTouching(
+        hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean
+    ): boolean
 }

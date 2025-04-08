@@ -58,6 +58,16 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         canvas.addEventListener("pointerup", this.handlePointerUp)
     }
 
+    isTouching(
+        hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean
+    ) {
+        if (!this.pointerEvent) return false
+
+        if (!hitTest) return true
+
+        return hitTest(this.current)
+    }
+
     detach() {
         const { canvas } = this
         if (!canvas) return
@@ -77,7 +87,7 @@ export class TgdInputPointerImpl implements TgdInputPointer {
 
     private readonly handleCanvasWheel = (event: WheelEvent) => {
         let delta = event.deltaX + event.deltaY + event.deltaZ
-        delta = delta > 0 ? 1 : -1;
+        delta = delta > 0 ? 1 : -1
         this.eventZoom.dispatch({
             current: this.getPoint(event),
             direction: delta,

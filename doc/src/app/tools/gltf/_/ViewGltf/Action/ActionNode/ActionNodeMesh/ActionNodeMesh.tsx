@@ -44,28 +44,32 @@ export function ViewActionNodeMesh({
                                 </Expander>
                             ))}
                         </Expander>
-                        <Expander
-                            title={
-                                <div>
-                                    Material{" "}
-                                    <b>
-                                        {data.getMaterial(
-                                            primitive.material ?? -1
-                                        )?.name ?? "Material"}
-                                    </b>
-                                </div>
-                            }
-                        >
-                            {isNumber(primitive.material) && (
-                                <pre>
-                                    {JSON.stringify(
-                                        data.getMaterial(primitive.material),
-                                        null,
-                                        "  "
-                                    )}
-                                </pre>
-                            )}
-                        </Expander>
+                        {(primitive.material ?? -1) > -1 && (
+                            <Expander
+                                title={
+                                    <div>
+                                        Material{" "}
+                                        <b>
+                                            {data.getMaterial(
+                                                primitive.material ?? -1
+                                            )?.name ?? "Material"}
+                                        </b>
+                                    </div>
+                                }
+                            >
+                                {isNumber(primitive.material) && (
+                                    <pre>
+                                        {JSON.stringify(
+                                            data.getMaterial(
+                                                primitive.material
+                                            ),
+                                            null,
+                                            "  "
+                                        )}
+                                    </pre>
+                                )}
+                            </Expander>
+                        )}
                         <Expander title="Verbatim">
                             <pre>{JSON.stringify(primitive, null, "  ")}</pre>
                         </Expander>
