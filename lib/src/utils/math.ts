@@ -22,3 +22,44 @@ export function tgdCalcDegToRad(deg: number) {
 export function tgdCalcRadToDeg(rad: number) {
     return rad * DEG_PER_RAD
 }
+
+export function tgdCalcSmoothStep(
+    boundFor0: number,
+    boundFor1: number,
+    value: number
+): number {
+    const t = tgdCalcClamp((value - boundFor0) / (boundFor1 - boundFor0), 0, 1)
+    return t * t * (3 - 2 * t)
+}
+
+export function tgdCalcRandom(min = 1, max?: number) {
+    if (typeof max !== "number") return Math.random() * min
+    return min + (max - min) * Math.random()
+}
+
+/**
+ * Force `value` to be between `min` and `max` by shifting it
+ * by `max - min` as many times as needed.
+ * @example
+ * ```ts
+ * tgdCalcModulo(3, 10, 20) === 13
+ * tgdCalcModulo(13, 10, 20) === 13
+ * tgdCalcModulo(23, 10, 20) === 13
+ * ```
+ */
+export function tgdCalcModulo(value: number, min: number, max: number) {
+    const range = max - min
+    if (range === 0) return min
+
+    if (value < min) {
+        const n = Math.ceil((min - value) / range)
+        return value + n * range
+    }
+
+    if (value > max) {
+        const n = Math.ceil((value - max) / range)
+        return value - n * range
+    }
+
+    return value
+}

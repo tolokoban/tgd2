@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix"
+import { mat4, quat } from "gl-matrix"
 import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "../types"
 import { TgdMat4 } from "./mat4"
 import { TgdQuat } from "./quat"
@@ -86,6 +86,12 @@ export class TgdTransfo {
         this.updateIfNeeded()
         return this._axisZ
     }
+
+    // fromZupToYup(): this {
+    //     this.dirty = true
+    //     this._orientation.multiply(TgdQuat.fromFace("+X+Z-Y"))
+    //     return this
+    // }
 
     private updateIfNeeded() {
         if (!this.dirty) return
@@ -189,8 +195,8 @@ export class TgdTransfo {
         return this._orientation
     }
     set orientation(quat: Readonly<TgdQuat | ArrayNumber4>) {
-        this.updateMatrix()
         this._orientation.from(quat)
+        this.updateMatrix()
     }
     setOrientation(source: TgdVec4 | ArrayNumber4 | TgdQuat): this
     setOrientation(x: number, y: number, z: number, w: number): this
@@ -200,12 +206,31 @@ export class TgdTransfo {
         z?: number,
         w?: number
     ): this {
-        this.updateMatrix()
         if (typeof x === "number") {
             this._orientation.reset(x, y, z, w)
         } else {
             this._orientation.reset(x[0], x[1], x[2], x[3])
         }
+        this.updateMatrix()
+        return this
+    }
+
+    /**
+     * Reset the orientation by applying an Euler rotation
+     * based on angles expressed in __degrees__.
+     */
+    setEulerRotation(
+        degreesAroundX: number,
+        degreesAroundY: number,
+        degreesAroundZ: number
+    ): this {
+        quat.fromEuler(
+            this._orientation,
+            degreesAroundX,
+            degreesAroundY,
+            degreesAroundZ
+        )
+        this.updateMatrix()
         return this
     }
 

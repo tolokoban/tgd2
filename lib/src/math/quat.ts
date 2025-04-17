@@ -51,7 +51,10 @@ export class TgdQuat extends TgdVec4 {
         z: number = 0,
         w: number = 1
     ) {
-        if (typeof x === "number") super(x, y, z, w)
+        if (Array.isArray(x)) {
+            const [xx, yy, zz, ww] = x
+            super(xx, yy, zz, ww)
+        } else if (typeof x === "number") super(x, y, z, w)
         else super(x)
     }
 

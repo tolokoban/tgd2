@@ -19,6 +19,7 @@ import { RouteMatch, RoutePath } from "./types"
 import Layout0 from "./layout"
 import Layout2 from "./articles/layout"
 import Layout13 from "./articles/painter/layout"
+import Layout50 from "./tricks/layout"
 import Loading0 from "./loading"
 const Page0 = React.lazy(() => import("./page"))
 const Page1 = React.lazy(() => import("./api/page"))
@@ -65,6 +66,9 @@ const Page46 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
 const Page47 = React.lazy(() => import("./tools/page.mdx"))
 const Page48 = React.lazy(() => import("./tools/filter/page"))
 const Page49 = React.lazy(() => import("./tools/gltf/page"))
+const Page50 = React.lazy(() => import("./tricks/page.mdx"))
+const Page51 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
+const Page52 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -118,6 +122,10 @@ export default function App({ lang }: { lang?: string }) {
     const pg47 = Page47
     const pg48 = Page48
     const pg49 = Page49
+    const ly50 = Layout50
+    const pg50 = Page50
+    const pg51 = Page51
+    const pg52 = Page52
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -183,6 +191,11 @@ export default function App({ lang }: { lang?: string }) {
             <Route path="/tools" Page={pg47} fallback={fb0} context={context}>
                 <Route path="/tools/filter" Page={pg48} fallback={fb0} context={context}/>
                 <Route path="/tools/gltf" Page={pg49} fallback={fb0} context={context}/>
+            </Route>
+            <Route path="/tricks" Page={pg50} Layout={ly50} fallback={fb0} context={context}>
+                <Route path="/tricks/color-mask" Page={pg51} fallback={fb0} context={context}>
+                    <Route path="/tricks/color-mask/2" Page={pg52} fallback={fb0} context={context}/>
+                </Route>
             </Route>
         </Route>
     )

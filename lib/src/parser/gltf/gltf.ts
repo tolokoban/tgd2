@@ -7,6 +7,7 @@ import { parseGLB } from "./parser"
 import {
     TgdFormatGltf,
     TgdFormatGltfAccessor,
+    TgdFormatGltfCamera,
     TgdFormatGltfMaterial,
     TgdFormatGltfMesh,
     TgdFormatGltfMeshPrimitive,
@@ -19,6 +20,8 @@ import {
 } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdTexture2D } from "@tgd/texture"
+import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
+import { TgdQuat, TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 
 export class TgdDataGlb {
     public readonly gltf: Readonly<TgdFormatGltf>
@@ -57,6 +60,50 @@ export class TgdDataGlb {
                 error instanceof Error ? error.message : JSON.stringify(error)
             throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
         }
+    }
+
+    createTransfoFromNode(node: TgdFormatGltfNode): TgdTransfo {
+        const transfo: Partial<TgdTransfoOptions> = {}
+        if (node.rotation) {
+            console.log("🚀 [gltf] node.rotation =", node.rotation) // @FIXME: Remove this line written on 2025-04-17 at 21:07
+            transfo.orientation = new TgdQuat(node.rotation)
+        }
+        if (node.translation) transfo.position = new TgdVec3(node.translation)
+        if (node.scale) transfo.scale = new TgdVec3(node.scale)
+        return new TgdTransfo(transfo)
+    }
+
+    createCameraByName(name: string): TgdCamera {
+        const node = this.getNodeByNameOrThrow(name)
+        if (typeof node.camera === "number") {
+            const camera = this.getCamera(node.camera)
+            if (camera.type === "perspective") {
+                const perspective = new TgdCameraPerspective({
+                    name,
+                    near: camera.perspective.znear,
+                    far: camera.perspective.zfar,
+                    fovy: camera.perspective.yfov,
+                    transfo: this.createTransfoFromNode(node),
+                })
+                return perspective
+            } else {
+                throw new Error(
+                    "Sorry, but for now, we do not support Orthographic cameras..."
+                )
+            }
+        } else {
+            console.error(node)
+            throw new Error(`Node "${name}" is not of type Camera!`)
+        }
+    }
+
+    getCamera(cameraIndex: number): TgdFormatGltfCamera {
+        const camera = this.gltf.cameras?.[cameraIndex]
+        if (!camera) {
+            throw new Error(`Asset has no camera with index #${cameraIndex}!`)
+        }
+
+        return camera
     }
 
     getChunkDetails() {

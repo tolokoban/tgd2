@@ -45,7 +45,16 @@ export class TgdPainterState extends TgdPainterGroup {
         },
         action: () => void
     ) {
+        const self = {
+            color: {
+                red: true,
+                green: true,
+                blue: true,
+                alpha: true,
+            },
+        }
         const { onEnterActions, onExitActions } = prepareActions(
+            self,
             options.gl,
             options
         )
@@ -54,22 +63,32 @@ export class TgdPainterState extends TgdPainterGroup {
         for (const action of onExitActions) action()
     }
 
+    readonly color = {
+        red: true,
+        green: true,
+        blue: true,
+        alpha: true,
+    }
+
     constructor(
         context: TgdContext,
         options: Partial<TgdPainterStateOptions> = {}
     ) {
+        super(options.children)
         const { gl } = context
-        const { onEnterActions, onExitActions } = prepareActions(gl, options)
-        super(options.children, {
-            onEnter(time, delay) {
-                options.onEnter?.(time, delay)
-                for (const f of onEnterActions) f()
-            },
-            onExit(time, delay) {
-                for (const f of onExitActions) f()
-                options.onExit?.(time, delay)
-            },
-        })
+        const { onEnterActions, onExitActions } = prepareActions(
+            this,
+            gl,
+            options
+        )
+        this.onEnter = (time, delay) => {
+            options.onEnter?.(time, delay)
+            for (const f of onEnterActions) f()
+        }
+        this.onExit = (time, delay) => {
+            for (const f of onExitActions) f()
+            options.onExit?.(time, delay)
+        }
         this.name = options.name ?? `State/${this.name}`
     }
 }
@@ -83,6 +102,9 @@ function figureOutColorMask(
 }
 
 function prepareActions(
+    self: {
+        color: { red: boolean; green: boolean; blue: boolean; alpha: boolean }
+    },
     gl: WebGL2RenderingContext,
     options: Partial<TgdPainterStateOptions>
 ) {
@@ -91,6 +113,11 @@ function prepareActions(
     const onExitActions: Array<() => void> = []
     const colorMask: undefined | [boolean, boolean, boolean, boolean] =
         figureOutColorMask(color)
+    const [red, green, blue, alpha] = colorMask ?? [true, true, true, true]
+    self.color.red = red
+    self.color.green = green
+    self.color.blue = blue
+    self.color.alpha = alpha
     if (Array.isArray(colorMask)) {
         let savedColorMask:
             | [boolean, boolean, boolean, boolean]
@@ -103,7 +130,12 @@ function prepareActions(
                 boolean,
                 boolean
             ]
-            gl.colorMask(...colorMask)
+            gl.colorMask(
+                self.color.red,
+                self.color.green,
+                self.color.blue,
+                self.color.alpha
+            )
         })
         onExitActions.push(() => {
             gl.colorMask(...(savedColorMask ?? [true, true, true, true]))
