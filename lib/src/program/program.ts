@@ -16,17 +16,27 @@ export class TgdProgram {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        private readonly code: TgdProgramOptions
+        private readonly options: TgdProgramOptions
     ) {
         const prg = gl.createProgram()
         if (!prg) throw new Error("Unable to create WebGLProgram!")
 
-        const vert = tgdCodeStringify(code.vert)
+        const vert = tgdCodeStringify(options.vert)
         const vertShader = this.createShader("VERTEX_SHADER", vert)
         gl.attachShader(prg, vertShader)
-        const frag = tgdCodeStringify(code.frag)
+        const frag = tgdCodeStringify(options.frag)
         const fragShader = this.createShader("FRAGMENT_SHADER", frag)
         gl.attachShader(prg, fragShader)
+        const { transformFeedback } = options
+        if (transformFeedback) {
+            const bufferMode = Array.isArray(transformFeedback)
+                ? gl.INTERLEAVED_ATTRIBS
+                : gl[transformFeedback.bufferMode]
+            const varyings = Array.isArray(transformFeedback)
+                ? transformFeedback
+                : transformFeedback.varyings
+            gl.transformFeedbackVaryings(prg, varyings, bufferMode)
+        }
         gl.linkProgram(prg)
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
             const info = gl.getProgramInfoLog(prg) ?? ""
@@ -53,12 +63,12 @@ export class TgdProgram {
             `  const prg = gl.createProgram()`,
             `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
             `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(
-                this.code.vert
+                this.options.vert
             )}\`)`,
             `  gl.compileShader(vertexShader)`,
             `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
             `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(
-                this.code.frag
+                this.options.frag
             )}\`)`,
             `  gl.compileShader(fragmentShader)`,
             `  gl.attachShader(prg, vertexShader)`,
@@ -202,7 +212,7 @@ export class TgdProgram {
 
     debug(caption = "TgdProgram") {
         console.log(caption)
-        const { code } = this
+        const { options: code } = this
         logCode("Vertex Shader", tgdCodeStringify(code.vert))
         logCode("Fragment Shader", tgdCodeStringify(code.frag))
     }

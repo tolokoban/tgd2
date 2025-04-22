@@ -67,6 +67,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/tricks": ["/tricks"],
     "/tricks/color-mask": ["/tricks/color-mask"],
     "/tricks/color-mask/2": ["/tricks/color-mask/2"],
+    "/tricks/color-mask/3": ["/tricks/color-mask/3"],
 }
 
 /**

@@ -1,5 +1,4 @@
 import { TgdGeometry } from "@tgd/geometry"
-import { TgdContext } from "@tgd/context"
 import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdDataGlb } from "@tgd/parser"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
@@ -8,6 +7,8 @@ import { TgdLight } from "@tgd/light"
 
 import { TgdPainterMesh } from "../mesh"
 import { TgdTexture2D } from "@tgd/texture"
+import { TgdCamera } from "@tgd/camera"
+import { TgdFormatGltfMaterial } from "@tgd/types"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdDataGlb
@@ -23,7 +24,14 @@ export interface TgdPainterMeshGltfOptions {
 /**
  */
 export class TgdPainterMeshGltf extends TgdPainterMesh {
-    constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
+    constructor(
+        context: {
+            gl: WebGL2RenderingContext
+            camera: TgdCamera
+            paint?: () => void
+        },
+        options: TgdPainterMeshGltfOptions
+    ) {
         const {
             asset,
             meshIndex = 0,
@@ -75,27 +83,22 @@ function figureColor(
     asset: TgdDataGlb,
     meshIndex: number,
     primitiveIndex: number,
-    context: TgdContext
-) {
+    context: { gl: WebGL2RenderingContext; paint?: () => void }
+): TgdVec4 | TgdTexture2D {
     const primitive = asset.getMeshPrimitive(meshIndex, primitiveIndex)
     const materialIndex = primitive.material ?? -1
     if (materialIndex === -1) return DEFAULT_COLOR
 
     const material = asset.getMaterial(materialIndex)
+    const textureEmissive = getTextureEmissive(context, asset, material)
     const pbr = material.pbrMetallicRoughness
-    if (!pbr) {
-        const emissive = material.emissiveTexture
-        if (!emissive) return DEFAULT_COLOR
-
-        const color = asset.createTexture2D(context, emissive.index ?? 0)
-        color.eventChange.addListener(context.paint)
-        return color
-    }
+    if (!pbr) return textureEmissive ?? DEFAULT_COLOR
+    if (textureEmissive) return textureEmissive
 
     if (pbr.baseColorTexture) {
         const textureIndex = pbr.baseColorTexture?.index
         const color = asset.createTexture2D(context, textureIndex ?? 0)
-        color.eventChange.addListener(context.paint)
+        if (context.paint) color.eventChange.addListener(context.paint)
         return color
     }
     if (pbr.baseColorFactor) {
@@ -118,4 +121,17 @@ function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
         }),
     })
     return material
+}
+
+function getTextureEmissive(
+    context: { gl: WebGL2RenderingContext; paint?: () => void },
+    asset: TgdDataGlb,
+    material: TgdFormatGltfMaterial
+): TgdTexture2D | null {
+    const emissive = material.emissiveTexture
+    if (!emissive) return null
+
+    const color = asset.createTexture2D(context, emissive.index ?? 0)
+    if (context.paint) color.eventChange.addListener(context.paint)
+    return color
 }

@@ -1,4 +1,3 @@
-import { TgdContext } from "@tgd/context"
 import { TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
 import { TgdMaterial, TgdMaterialNormals } from "@tgd/material"
 import { TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
@@ -8,6 +7,7 @@ import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdPainter } from "../../painter"
+import { TgdCamera } from "@tgd/camera"
 
 export interface TgdPainterMeshOptions {
     transfo?: Partial<TgdTransfoOptions> | TgdTransfo
@@ -18,7 +18,10 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
+export class TgdPainterMesh
+    extends TgdPainter
+    implements TgdInterfaceTransformable
+{
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -32,7 +35,11 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
     private bboxMax: TgdVec3 | null = null
 
     constructor(
-        protected readonly context: TgdContext,
+        protected readonly context: {
+            gl: WebGL2RenderingContext
+            camera: TgdCamera
+            paint?: () => void
+        },
         options: TgdPainterMeshOptions = {}
     ) {
         super()

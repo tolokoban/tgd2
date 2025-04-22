@@ -12,7 +12,7 @@ import {
 import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
-import { TgdContext } from "@tgd/context"
+import { TgdInputs } from "@tgd/input"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -147,7 +147,14 @@ export class TgdControllerCameraOrbit {
     private readonly tmpQuat = new TgdQuat()
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: {
+            camera: TgdCamera
+            inputs: TgdInputs
+            time: number
+            animSchedule(...animations: TgdAnimation[]): TgdAnimation[]
+            animCancel(animation: TgdAnimation): void
+            paint(): void
+        },
         {
             geo,
             minZoom = 1e-3,

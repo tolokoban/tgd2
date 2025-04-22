@@ -2,6 +2,7 @@ import { TgdEvent } from "@tgd/event"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdProgram } from "@tgd/program"
 import { isWebglImage, WebglImage, WebglTexParameter } from "@tgd/types"
+import { webglLookup } from "@tgd/utils"
 import {
     WebglTextureInternalFormat,
     WebglTextureParameters,
@@ -59,10 +60,17 @@ export class TgdTexture2D {
     public readonly gl: WebGL2RenderingContext
     public readonly eventChange = new TgdEvent<TgdTexture2D>()
 
-    private readonly _texture: WebGLTexture | null = null
-    private _width = 0
-    private _height = 0
+    private _texture: WebGLTexture | null = null
+    private _width = -1
+    private _height = -1
     private readonly storage: TgdTexture2DStorage
+    private params: WebglTextureParameters = {
+        magFilter: "LINEAR",
+        minFilter: "LINEAR",
+        wrapS: "REPEAT",
+        wrapT: "REPEAT",
+        wrapR: "REPEAT",
+    }
 
     private static counter = 0
 
@@ -73,41 +81,27 @@ export class TgdTexture2D {
         const { gl } = context
         this.gl = gl
         this.name = `Texture2D/${TgdTexture2D.counter++}`
-        const texture = gl.createTexture()
-        if (!texture) throw new Error("Unable to create a WebGLTexture!")
-
-        this._texture = texture
-        this.setParams({
-            magFilter: "LINEAR",
-            minFilter: "LINEAR",
-            wrapS: "REPEAT",
-            wrapT: "REPEAT",
-            wrapR: "REPEAT",
-        })
         this.storage = {
-            width: 1,
-            height: 1,
+            width: 0,
+            height: 0,
             internalFormat: "RGBA8",
             levels: 1,
             flipY: false,
             premultipliedAlpha: false,
             ...storage,
         }
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        gl.pixelStorei(
-            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-            this.storage.premultipliedAlpha
-        )
-        if (
-            typeof storage?.width === "number" &&
-            typeof storage?.height === "number"
-        ) {
-            this.resize(storage?.width, storage?.height)
+        const width = storage?.width
+        const height = storage?.height
+        if (typeof width == "number" && typeof height === "number") {
+            this.resize(width, height)
+        } else {
+            this.createTexture()
         }
     }
 
     delete() {
-        this.gl.deleteTexture(this.glTexture)
+        if (this._texture) this.gl.deleteTexture(this._texture)
+        this._texture = null
     }
 
     get width() {
@@ -118,12 +112,30 @@ export class TgdTexture2D {
         return this._height
     }
 
+    private createTexture() {
+        this.delete()
+        const texture = this.gl.createTexture()
+        if (!texture) throw new Error("Unable to create a WebGLTexture!")
+
+        this._texture = texture
+        this.setParams(this.params)
+    }
+
     resize(width: number, height: number) {
         if (width === this.width && height === this.height) return
 
         const { gl, storage } = this
-        this._width = storage.width = width
-        this._height = storage.height = height
+        this.createTexture()
+        this._width = width
+        this._height = height
+        storage.width = width
+        storage.height = height
+        this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         const { internalFormat, levels } = this.storage
         if (internalFormat.startsWith("COMPRESSED_")) {
             // We need to load an extension for that.
@@ -133,7 +145,6 @@ export class TgdTexture2D {
                     'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!'
                 )
         }
-        this.bind()
         gl.texStorage2D(
             gl.TEXTURE_2D,
             levels,
@@ -141,6 +152,18 @@ export class TgdTexture2D {
             width,
             height
         )
+        this.checkError()
+    }
+
+    private checkError() {
+        const { gl } = this
+        const error = gl.getError()
+        if (error !== gl.NO_ERROR) {
+            console.error(
+                `[TgdTexture2D::${this.name}] Error:`,
+                webglLookup(error)
+            )
+        }
     }
 
     get glTexture(): WebGLTexture {
@@ -185,6 +208,7 @@ export class TgdTexture2D {
             gl.UNSIGNED_BYTE,
             bmp
         )
+        this.checkError()
         this.eventChange.dispatch(this)
         return this
     }
@@ -230,6 +254,7 @@ export class TgdTexture2D {
             data
             // offset
         )
+        this.checkError()
         this.eventChange.dispatch(this)
         return this
     }
@@ -260,6 +285,10 @@ export class TgdTexture2D {
     setParams(parameters: WebglTextureParameters) {
         this.bind()
         webglTextureParametersSet(this.gl, parameters)
+        this.params = {
+            ...this.params,
+            ...parameters,
+        }
         return this
     }
 
@@ -298,6 +327,41 @@ export class TgdTexture2D {
             | boolean
             | null
         return value
+    }
+
+    debug(title?: string) {
+        console.log(
+            title ?? this.name ?? "TgdTexture2D",
+            "  ",
+            this.width,
+            "×",
+            this.height
+        )
+        const parameters: WebglTexParameter[] = [
+            "TEXTURE_MAG_FILTER",
+            "TEXTURE_MIN_FILTER",
+            "TEXTURE_WRAP_R",
+            "TEXTURE_WRAP_S",
+            "TEXTURE_WRAP_T",
+            "TEXTURE_MAX_LEVEL",
+            "TEXTURE_MAX_LOD",
+            "TEXTURE_MIN_LOD",
+            "TEXTURE_BASE_LEVEL",
+            "TEXTURE_COMPARE_FUNC",
+            "TEXTURE_COMPARE_MODE",
+            "TEXTURE_IMMUTABLE_FORMAT",
+            "TEXTURE_IMMUTABLE_LEVELS",
+        ]
+        for (const name of parameters) {
+            const value = this.getParameter(name)
+            console.log(
+                ">",
+                name,
+                "=",
+                value,
+                typeof value === "number" ? `(${webglLookup(value)})` : " "
+            )
+        }
     }
 }
 

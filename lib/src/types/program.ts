@@ -5,4 +5,11 @@ export interface TgdProgramOptions {
     vert: TgdCodeBloc
     /** Code of the fragment shader */
     frag: TgdCodeBloc
+    /** What attributes to record in a TransformFeedback operation */
+    transformFeedback?:
+        | string[]
+        | {
+              bufferMode: "INTERLEAVED_ATTRIBS" | "SEPARATE_ATTRIBS"
+              varyings: string[]
+          }
 }

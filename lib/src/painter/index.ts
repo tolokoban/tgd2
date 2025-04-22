@@ -1,5 +1,6 @@
 export * from "./axes"
 export * from "./background"
+export * from "./background-with-depth"
 export * from "./clear"
 export * from "./debug"
 export * from "./depth"

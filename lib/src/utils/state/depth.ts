@@ -10,11 +10,26 @@ export interface WebglDepthOptions {
 }
 
 export const webglPresetDepth: Readonly<
-    Record<"off" | "less" | "lessOrEqual", WebglDepthOptions>
+    Record<
+        | "off"
+        | "writeOnly"
+        | "less"
+        | "lessOrEqual"
+        | "lessReadOnly"
+        | "lessOrEqualReadOnly",
+        WebglDepthOptions
+    >
 > = {
     off: {
         enabled: false,
-        func: WebglEnumDepthFunction.LESS,
+        func: WebglEnumDepthFunction.ALWAYS,
+        mask: false,
+        rangeMin: 0,
+        rangeMax: 1,
+    },
+    writeOnly: {
+        enabled: false,
+        func: WebglEnumDepthFunction.ALWAYS,
         mask: true,
         rangeMin: 0,
         rangeMax: 1,
@@ -30,6 +45,20 @@ export const webglPresetDepth: Readonly<
         enabled: true,
         func: WebglEnumDepthFunction.LEQUAL,
         mask: true,
+        rangeMin: 0,
+        rangeMax: 1,
+    },
+    lessReadOnly: {
+        enabled: true,
+        func: WebglEnumDepthFunction.LESS,
+        mask: false,
+        rangeMin: 0,
+        rangeMax: 1,
+    },
+    lessOrEqualReadOnly: {
+        enabled: true,
+        func: WebglEnumDepthFunction.LEQUAL,
+        mask: false,
         rangeMin: 0,
         rangeMax: 1,
     },

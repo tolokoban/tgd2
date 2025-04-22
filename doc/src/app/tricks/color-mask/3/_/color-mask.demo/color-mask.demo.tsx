@@ -4,10 +4,11 @@ import {
     TgdContext,
     tgdMakeMeshGlbPainter,
     TgdMaterialFlat,
-    TgdPainterBackground,
+    TgdPainterBackgroundWithDepth,
     TgdPainterClear,
     TgdPainterLogic,
     TgdPainterMesh,
+    TgdPainterMeshGltf,
     TgdPainterState,
     TgdTexture2D,
     webglPresetCull,
@@ -24,16 +25,6 @@ function init(context: TgdContext, assets: Assets) {
     // #begin
     context.camera = assets.glb.scene.createCameraByName("Camera")
     console.log(context.camera.toCode())
-    // new TgdControllerCameraOrbit(context)
-    const clear = new TgdPainterClear(context, {
-        depth: 1,
-    })
-    const cube = new TgdPainterMesh(context)
-    cube.transfo.setPosition(11.02, 0, -8.75).setScale(3)
-    const background = new TgdPainterBackground(
-        context,
-        new TgdTexture2D(context).loadBitmap(BackgroundURL)
-    )
     const { painter } = tgdMakeMeshGlbPainter({
         context,
         data: assets.glb.scene,
@@ -41,29 +32,48 @@ function init(context: TgdContext, assets: Assets) {
         overrideMaterial: () => () =>
             new TgdMaterialFlat({ color: [1, 0, 1, 1] }),
     })
-    const mask = new TgdPainterState(context, {
-        color: false,
-        cull: webglPresetCull.back,
+    const background = new TgdPainterBackgroundWithDepth(context, {
+        background: new TgdTexture2D(context)
+            .loadBitmap(BackgroundURL)
+            .setParams({
+                wrapS: "MIRRORED_REPEAT",
+            }),
         children: [painter],
     })
+    const object = new TgdPainterMeshGltf(context, {
+        asset: assets.glb.suzanne,
+    })
+    object.transfo.setPosition(11.02, 0, -8.75).setScale(1.5).setScale(8)
+
+    const cube = new TgdPainterMesh(context)
+    cube.transfo.setPosition(11.02, 10, -8.75).setScale(15)
+
     context.add(
-        clear,
         background,
         new TgdPainterState(context, {
             depth: webglPresetDepth.lessOrEqual,
-            children: [mask, cube],
+            children: [
+                new TgdPainterLogic(() => {
+                    TgdPainterState.debug(context.gl)
+                }),
+                cube,
+            ],
         }),
+        // new TgdPainterState(context, {
+        //     depth: webglPresetDepth.lessOrEqual,
+        //     children: [object],
+        // }),
         new TgdPainterLogic(time => {
             const mod = tgdCalcModulo(time * 0.1, 0, 2)
             let y = 0
             if (mod < 1) y = mod * 25
             else y = 25 * (2 - mod)
-            const { x, z } = cube.transfo.position
-            cube.transfo.setPosition(x, y, z)
-            cube.transfo.setEulerRotation(time, time * 47, -time * 120)
+            const { x, z } = object.transfo.position
+            object.transfo.setPosition(x, y, z)
+            object.transfo.setEulerRotation(time, time * 47, -time * 120)
         })
     )
-    context.play()
+    window.setTimeout(() => context.paint(), 1000)
     // #end
 }
 

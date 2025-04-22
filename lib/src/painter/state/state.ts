@@ -16,6 +16,7 @@ import {
     webglStencilSet,
 } from "@tgd/utils/state"
 import { TgdPainterFunction } from "@tgd/types/painter"
+import { webglLookup } from "@tgd/utils"
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
@@ -63,6 +64,18 @@ export class TgdPainterState extends TgdPainterGroup {
         for (const action of onExitActions) action()
     }
 
+    public static debug(gl: WebGL2RenderingContext) {
+        const depth = webglDepthGet(gl)
+        console.log("Depth:", {
+            enabled: depth.enabled,
+            func: webglLookup(depth.func),
+            mask: depth.mask,
+            range: [depth.rangeMin, depth.rangeMax],
+        })
+        console.log("Cull:", webglCullGet(gl))
+        console.log("Blend:", webglBlendGet(gl))
+    }
+
     readonly color = {
         red: true,
         green: true,
@@ -71,7 +84,7 @@ export class TgdPainterState extends TgdPainterGroup {
     }
 
     constructor(
-        context: TgdContext,
+        context: { gl: WebGL2RenderingContext },
         options: Partial<TgdPainterStateOptions> = {}
     ) {
         super(options.children)

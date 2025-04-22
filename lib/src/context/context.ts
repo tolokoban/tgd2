@@ -71,10 +71,14 @@ export class TgdContext {
         fovy: Math.PI / 8,
         zoom: 1,
     })
+    private _fps = 0
     private _aspectRatio = 1
     private _aspectRatioInverse = 1
     private readonly observer: ResizeObserver
     private readonly painters: TgdPainterGroup
+    private paintingIsOngoing = false
+    // We need to start another paiting after the current one is finished
+    private paintingIsQueued = false
     private isPlaying = false
     private requestAnimationFrame = -1
     // Last time the context has been painted.
@@ -122,6 +126,10 @@ export class TgdContext {
         // Prevent system gestures.
         canvas.style.touchAction = "none"
         this.stateReset()
+    }
+
+    get fps() {
+        return this._fps
     }
 
     get time() {
@@ -288,38 +296,54 @@ export class TgdContext {
      * Trigger the painters to render the scene.
      */
     readonly paint = () => {
-        // globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-        this.requestAnimationFrame = globalThis.requestAnimationFrame(
-            this.actualPaint
-        )
+        if (this.paintingIsOngoing) {
+            this.paintingIsQueued = true
+        } else {
+            this.paintingIsQueued = false
+            this.paintingIsOngoing = true
+            globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+            this.requestAnimationFrame = globalThis.requestAnimationFrame(
+                this.actualPaint
+            )
+        }
     }
 
     private readonly actualPaint = (time: number) => {
-        this.timeShift = time - Date.now()
-        const { lastTime, gl } = this
-        if (lastTime < 0) {
+        try {
+            this.timeShift = time - Date.now()
+            const { lastTime, gl } = this
+            if (lastTime < 0) {
+                this.lastTime = time
+                // First frame, let's skip it to get better timing.
+                this.paint()
+                return
+            }
+
+            const delay = time - this.lastTime
+            this._fps = Math.round(1 / delay)
             this.lastTime = time
-            // First frame, let's skip it to get better timing.
-            this.paint()
-            return
+            this._camera.screenWidth = gl.drawingBufferWidth
+            this._camera.screenHeight = gl.drawingBufferHeight
+            this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
+            this._aspectRatioInverse = 1 / this._aspectRatio
+
+            const timeInSec = time * 1e-3
+            const delayInSec = delay * 1e-3
+            this.painters.paint(timeInSec, delayInSec)
+            this.eventPaint.dispatch(this)
+            if (
+                this.paintingIsQueued ||
+                this.animationManager.paint(timeInSec) ||
+                this.isPlaying
+            ) {
+                this.paintingIsOngoing = false
+                this.paint()
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            this.paintingIsOngoing = false
         }
-
-        const delay = time - this.lastTime
-        // Prevent too many painting in the same refresh.
-        if (delay < 1.016) return
-
-        this.lastTime = time
-        this._camera.screenWidth = gl.drawingBufferWidth
-        this._camera.screenHeight = gl.drawingBufferHeight
-        this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
-        this._aspectRatioInverse = 1 / this._aspectRatio
-
-        const timeInSec = time * 1e-3
-        const delayInSec = delay * 1e-3
-        this.painters.paint(timeInSec, delayInSec)
-        if (this.animationManager.paint(timeInSec) || this.isPlaying)
-            this.paint()
-        this.eventPaint.dispatch(this)
     }
 
     destroy() {
