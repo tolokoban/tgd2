@@ -88,10 +88,9 @@ function init(context: TgdContext, assets: Assets) {
                     color: new TgdVec4(0.5, 0.5, 0.5, 1),
                     depth: 1,
                 }),
-                new TgdPainterBackground(
-                    context,
-                    new TgdTexture2D(context).loadBitmap(background)
-                ),
+                new TgdPainterBackground(context, {
+                    texture: new TgdTexture2D(context).loadBitmap(background),
+                }),
                 painter,
             ],
         })

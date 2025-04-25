@@ -213,6 +213,11 @@ export class TgdContext {
         if (value === this.isPlaying) return
 
         if (value) this.paint()
+        else {
+            this.paintingIsOngoing = false
+            this.paintingIsQueued = false
+            globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+        }
         this.isPlaying = value
     }
 
@@ -347,8 +352,7 @@ export class TgdContext {
     }
 
     destroy() {
-        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-        this.playing = false
+        this.pause()
         this.painters.delete()
         this.observer.unobserve(this.canvas)
     }

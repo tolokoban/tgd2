@@ -136,6 +136,7 @@ export class TgdPainterSegments extends TgdPainter {
             specularExponent,
         } = this
         const { gl, camera } = context
+        gl.disable(gl.DITHER)
         prg.use()
         const minRadius =
             (this.minRadius * camera.spaceHeightAtTarget) /

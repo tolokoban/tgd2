@@ -2,15 +2,18 @@ import {
     TgdContext,
     TgdControllerCameraOrbit,
     TgdGeometryBox,
+    TgdMaterialDiffuse,
     TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterNode,
     TgdPainterState,
+    TgdTexture2D,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
+import WoodURL from "./wood.webp"
 
 function init(ctx: TgdContext) {
     // #begin
@@ -29,7 +32,12 @@ function init(ctx: TgdContext) {
                     children: [
                         new TgdPainterMesh(ctx, {
                             geometry: new TgdGeometryBox(),
-                            material: new TgdMaterialNormals(),
+                            material: new TgdMaterialDiffuse({
+                                color: new TgdTexture2D(ctx).loadBitmap(
+                                    WoodURL,
+                                    { generateMipmap: true }
+                                ),
+                            }),
                         }),
                     ],
                 }),

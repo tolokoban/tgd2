@@ -119,9 +119,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
 
         const { context, width, height } = this
         const { gl } = context
-        tgdTexture.debug("Before")
         tgdTexture.resize(width, height)
-        tgdTexture.debug("After")
         gl.framebufferTexture2D(
             gl.FRAMEBUFFER,
             gl.COLOR_ATTACHMENT0 + attachment,

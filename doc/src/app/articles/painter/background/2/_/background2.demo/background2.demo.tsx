@@ -13,7 +13,7 @@ function init(ctx: TgdContext) {
     // #begin
     const texture = new TgdTexture2D(ctx)
     texture.loadBitmap(tgdLoadImage(BackgroundURL))
-    const background = new TgdPainterBackground(ctx, texture)
+    const background = new TgdPainterBackground(ctx, { texture })
     const logic = new TgdPainterLogic(time => {
         background.x = Math.cos(time * 0.251)
         background.y = Math.cos(time * 0.745)

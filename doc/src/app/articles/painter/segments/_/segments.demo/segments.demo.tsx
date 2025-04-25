@@ -28,10 +28,6 @@ function init(context: TgdContext) {
         const y = step * 0.2
         const z = r * Math.sin(ang)
         const thickness = 1.0 - Math.abs(step) / 50
-        // const x = 0
-        // const y = step * 5
-        // const z = 0
-        // const thickness = 2
         if (first) first = false
         else
             data.add(

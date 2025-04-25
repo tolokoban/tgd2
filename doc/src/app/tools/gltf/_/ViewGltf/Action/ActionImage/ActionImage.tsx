@@ -48,11 +48,10 @@ export function ViewActionImage({
                     setImage(img)
                     setDimensions([img.width, img.height])
                     const texture = new TgdTexture2D(context).loadBitmap(img)
-                    const background = new TgdPainterBackground(
-                        context,
+                    const background = new TgdPainterBackground(context, {
+                        mode: "contain",
                         texture,
-                        { mode: "contain" }
-                    )
+                    })
                     context.add(background)
                     context.paint()
                 })

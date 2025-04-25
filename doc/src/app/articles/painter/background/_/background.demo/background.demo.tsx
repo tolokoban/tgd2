@@ -17,7 +17,7 @@ function init(ctx: TgdContext) {
             ctx.paint()
         }
     })
-    const background = new TgdPainterBackground(ctx, texture)
+    const background = new TgdPainterBackground(ctx, { texture })
     ctx.add(background)
     ctx.paint()
     // #end

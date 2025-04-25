@@ -30,10 +30,9 @@ function init(context: TgdContext, assets: Assets) {
     })
     const cube = new TgdPainterMesh(context)
     cube.transfo.setPosition(11.02, 0, -8.75).setScale(3)
-    const background = new TgdPainterBackground(
-        context,
-        new TgdTexture2D(context).loadBitmap(BackgroundURL)
-    )
+    const background = new TgdPainterBackground(context, {
+        texture: new TgdTexture2D(context).loadBitmap(BackgroundURL),
+    })
     const { painter } = tgdMakeMeshGlbPainter({
         context,
         data: assets.glb.scene,

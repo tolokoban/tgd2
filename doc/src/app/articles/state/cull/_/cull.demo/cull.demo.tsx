@@ -19,7 +19,7 @@ import SuzanneURL from "@/assets/mesh/suzanne.glb"
 function init(ctx: TgdContext, assets: Assets) {
     // #begin
     const camera = new TgdCameraPerspective({
-        transfo: { distance: 3 },
+        transfo: { distance: 5 },
         far: 100,
         near: 0.01,
         fovy: Math.PI / 4,
@@ -35,10 +35,9 @@ function init(ctx: TgdContext, assets: Assets) {
             depth: 1,
             stencil: 0,
         }),
-        new TgdPainterBackground(
-            ctx,
-            new TgdTexture2D(ctx).loadBitmap(BackgroundURL)
-        ),
+        new TgdPainterBackground(ctx, {
+            texture: new TgdTexture2D(ctx).loadBitmap(BackgroundURL),
+        }),
         new TgdPainterState(ctx, {
             depth: webglPresetDepth.less,
             cull: webglPresetCull.front,

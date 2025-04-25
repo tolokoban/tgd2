@@ -38,10 +38,9 @@ function init(ctx: TgdContext, assets: Assets) {
             depth: 1,
             stencil: 0,
         }),
-        new TgdPainterBackground(
-            ctx,
-            new TgdTexture2D(ctx).loadBitmap(BackgroundURL)
-        ),
+        new TgdPainterBackground(ctx, {
+            texture: new TgdTexture2D(ctx).loadBitmap(BackgroundURL),
+        }),
         new TgdPainterState(ctx, {
             color: false,
             depth: webglPresetDepth.off,

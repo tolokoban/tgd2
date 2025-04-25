@@ -18,10 +18,7 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -102,7 +99,6 @@ export class TgdPainterMesh
             vert,
             frag,
         })
-        prg.debug()
         this.prg = prg
         this.vao = new TgdVertexArray(
             context.gl,
@@ -113,6 +109,10 @@ export class TgdPainterMesh
         this.elementsType = geometry.elementsType
         this.count = geometry.count
         this.name = options.name ?? `Mesh/${this.name}`
+    }
+
+    debug(caption?: string) {
+        this.prg.debug(caption ?? this.name)
     }
 
     computeBoundingBox(): {

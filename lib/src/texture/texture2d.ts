@@ -75,7 +75,10 @@ export class TgdTexture2D {
     private static counter = 0
 
     constructor(
-        context: { gl: WebGL2RenderingContext },
+        private readonly context: {
+            gl: WebGL2RenderingContext
+            paint?: () => void
+        },
         storage?: Partial<TgdTexture2DStorage>
     ) {
         const { gl } = context
@@ -117,6 +120,12 @@ export class TgdTexture2D {
         const texture = this.gl.createTexture()
         if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
+        const { gl } = this
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         this._texture = texture
         this.setParams(this.params)
     }
@@ -180,6 +189,8 @@ export class TgdTexture2D {
         bmp: string | WebglImage | null | Promise<WebglImage | null>,
         options: {
             level?: number
+            generateMipmap?: boolean
+            onLoad?: () => void
         } = {}
     ): this {
         if (!bmp) return this
@@ -209,6 +220,12 @@ export class TgdTexture2D {
             bmp
         )
         this.checkError()
+        if (options.generateMipmap) {
+            this.generateMipmap()
+            this.checkError()
+        }
+        this.context.paint?.()
+        options.onLoad?.()
         this.eventChange.dispatch(this)
         return this
     }
@@ -236,8 +253,8 @@ export class TgdTexture2D {
             level = 0,
             width,
             height,
-            // internalFormat,
-            // format,
+            internalFormat = "RGB",
+            format = "RGB",
             // offset = 0,
         } = options
         const { gl } = this
@@ -245,11 +262,11 @@ export class TgdTexture2D {
         gl.texImage2D(
             gl.TEXTURE_2D,
             level,
-            gl.RGB, //gl[internalFormat],
+            gl[internalFormat],
             width,
             height,
             0,
-            gl.RGB, // gl[format],
+            gl[format],
             gl.UNSIGNED_BYTE,
             data
             // offset

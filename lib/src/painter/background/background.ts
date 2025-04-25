@@ -9,6 +9,7 @@ import VERT from "./background.vert"
 import FRAG from "./background.frag"
 
 export interface TgdPainterBackgroundOptions {
+    texture: TgdTexture2D
     zoom: number
     x: number
     y: number
@@ -34,7 +35,7 @@ export interface TgdPainterBackgroundOptions {
 }
 
 export class TgdPainterBackground extends TgdPainter {
-    public texture: TgdTexture2D
+    public texture: TgdTexture2D | undefined
 
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
@@ -51,8 +52,8 @@ export class TgdPainterBackground extends TgdPainter {
 
     constructor(
         private readonly context: { gl: WebGL2RenderingContext },
-        texture: TgdTexture2D,
         {
+            texture,
             x = 0,
             y = 0,
             z = 0.999999,
@@ -63,6 +64,7 @@ export class TgdPainterBackground extends TgdPainter {
         }: Partial<TgdPainterBackgroundOptions> = {}
     ) {
         super()
+        this.texture = texture
         this.mode = mode
         this.x = x
         this.y = y
@@ -95,7 +97,8 @@ export class TgdPainterBackground extends TgdPainter {
     }
 
     delete(): void {
-        const { vao } = this
+        const { program, vao } = this
+        program.delete()
         vao.delete()
     }
 
@@ -111,7 +114,7 @@ export class TgdPainterBackground extends TgdPainter {
         program.uniform2f("uniScroll", x, y)
         program.uniform1f("uniZoom", 1 / zoom)
         program.uniform1f("uniZ", z)
-        texture.activate(0, program, "uniTexture")
+        texture?.activate(0, program, "uniTexture")
         gl.disable(gl.CULL_FACE)
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
@@ -119,6 +122,8 @@ export class TgdPainterBackground extends TgdPainter {
 
     getScaleForCover() {
         const { texture, context } = this
+        if (!texture) return { scaleX: 1, scaleY: 1 }
+
         const { drawingBufferWidth: width, drawingBufferHeight: height } =
             context.gl
         const horizontal = texture.width * height > texture.height * width
@@ -133,6 +138,8 @@ export class TgdPainterBackground extends TgdPainter {
 
     getScaleForContain() {
         const { texture, context } = this
+        if (!texture) return { scaleX: 1, scaleY: 1 }
+
         const { drawingBufferWidth: width, drawingBufferHeight: height } =
             context.gl
         const aspectRatio = width / height
