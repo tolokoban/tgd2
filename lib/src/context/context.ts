@@ -15,7 +15,7 @@ import { TgdEvent } from "../event"
  */
 export type TgdContextOptions = WebGLContextAttributes & {
     /**
-     * You can override the behaviour for when a resize even occurs,
+     * You can override the behaviour for when a resize event occurs,
      * by providing a callback `onResize(...)`.
      *
      * By default, this is what will happen:
@@ -111,11 +111,15 @@ export class TgdContext {
         this.observer = new ResizeObserver(() => {
             const width = canvas.clientWidth
             const height = canvas.clientHeight
-            canvas.width = width
-            canvas.height = height
-            gl.viewport(0, 0, width, height)
+            const { onResize } = options
+            if (onResize) {
+                onResize(this, canvas.clientWidth, canvas.clientHeight)
+            } else {
+                canvas.width = width
+                canvas.height = height
+            }
+            gl.viewport(0, 0, canvas.width, canvas.height)
             this.paint()
-            options.onResize?.(this, canvas.clientWidth, canvas.clientHeight)
         })
         this.observer.observe(canvas)
         this.inputs = new TgdInputs(canvas)
