@@ -72,7 +72,8 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             !(textureColor0 || textureColor1 || textureColor2 || textureColor3)
         ) {
             console.error(
-                "[TgdPainterFramebuffer] You gave no color texture in the constructor: nothing will be rendered!"
+                "[TgdPainterFramebuffer] You gave no color texture in the constructor: nothing will be rendered!",
+                options
             )
         }
         this.textureColor0 = textureColor0
