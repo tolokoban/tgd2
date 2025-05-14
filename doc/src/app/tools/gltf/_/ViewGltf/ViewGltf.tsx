@@ -24,6 +24,7 @@ export type ViewViewGltfProps = {
 
 export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
     const [action, setAction] = React.useState<Action>({ type: "verbatim" })
+    console.log("🚀 [ViewGltf] action =", action) // @FIXME: Remove this line written on 2025-05-14 at 09:54
     const [data, load] = useData()
     React.useState<TgdDataGlb | null>(null)
     function handleLoad(files: File[]): void {

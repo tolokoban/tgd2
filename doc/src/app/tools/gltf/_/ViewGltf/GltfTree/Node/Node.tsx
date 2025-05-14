@@ -12,10 +12,9 @@ import {
     styleCommon,
     Theme,
 } from "@tolokoban/ui"
-import { Action, isTypeCamera, isTypeLight, isTypeMesh } from "../../../types"
+import { Action, isTypeCamera, isTypeLight, isTypeMesh } from "../../types"
 import Styles from "./Node.module.css"
-import { Expander } from "../../Expander"
-import { isNumber, isType } from "@tolokoban/type-guards"
+import { Expander } from "../Expander"
 
 const $ = Theme.classNames
 

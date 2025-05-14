@@ -58,6 +58,9 @@ export function tgdMakeMeshGlbPainter(options: MakeMeshGlbPainterOptions): {
     return { painter }
 }
 
+/**
+ * Retrieve node by index or by name
+ */
 function getActualNode(
     data: TgdDataGlb,
     node: number | string | TgdFormatGltfNode

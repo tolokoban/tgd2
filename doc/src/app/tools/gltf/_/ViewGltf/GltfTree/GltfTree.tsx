@@ -16,6 +16,7 @@ import Styles from "./GltfTree.module.css"
 import { ViewNodes } from "./Nodes"
 import { ViewImages } from "./Images"
 import { ViewLights } from "./Lights"
+import { ViewScenes } from "./Scenes"
 
 const $ = Theme.classNames
 
@@ -41,6 +42,7 @@ export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
                 >
                     Show verbatim content
                 </ViewButton>
+                <ViewScenes data={props.data} onAction={props.onAction} />
                 <ViewNodes data={props.data} onAction={props.onAction} />
                 <ViewImages data={props.data} onAction={props.onAction} />
                 <ViewLights data={props.data} onAction={props.onAction} />
@@ -59,9 +61,11 @@ export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
                         .getChunkDetails()
                         .map(({ type, size }, index) => (
                             <>
-                                <div>#{index}</div>
-                                <div>{type}</div>
-                                <div>{formatNumber(size)}</div>
+                                <div key={`Index#${index}`}>#{index}</div>
+                                <div key={`Type#${index}`}>{type}</div>
+                                <div key={`Size#${index}`}>
+                                    {formatNumber(size)}
+                                </div>
                             </>
                         ))}
                 </ViewPanel>

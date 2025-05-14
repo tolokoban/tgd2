@@ -12,7 +12,7 @@ export type ViewVerbatimProps = {
     data: TgdDataGlb
 }
 
-export function ViewVerbatim(props: ViewVerbatimProps): JSX.Element {
+export function ViewActionVerbatim(props: ViewVerbatimProps): JSX.Element {
     return (
         <ViewPanel
             className={$.join(props.className, Styles.verbatin)}

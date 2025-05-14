@@ -5,38 +5,42 @@ import {
     ArrayNumber3,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdFormatGltfNode,
-    TgdPainterClear,
-    TgdPainterState,
     TgdDataGlb,
+    TgdFormatGltfNode,
+    TgdFormatGltfScene,
+    TgdGeometryBox,
+    tgdMakeMeshGlbPainter,
+    TgdPainterClear,
+    TgdPainterMesh,
+    TgdPainterNode,
+    TgdPainterState,
     TgdTransfo,
     TgdTransfoOptions,
     TgdVec3,
     TgdVec4,
     webglPresetDepth,
-    tgdMakeMeshGlbPainter,
 } from "@tolokoban/tgd"
 
-import Styles from "./ActionNodeRender.module.css"
+import Styles from "./ActionScene.module.css"
 import Tgd from "@/components/demo/Tgd"
 import { isNumber, isType } from "@tolokoban/type-guards"
 
 const $ = Theme.classNames
 
-export type ViewActionNodeRenderProps = {
-    data: TgdDataGlb
-    node: TgdFormatGltfNode
-}
+export type ViewActionSceneProps = { data: TgdDataGlb; index: number }
 
-export function ViewActionNodeRender({
+export function ViewActionScene({
     data,
-    node,
-}: ViewActionNodeRenderProps): JSX.Element {
-    const handleReady = useReadyHandler(data, node)
+    index,
+}: ViewActionSceneProps): JSX.Element {
+    const scene = data.gltf.scenes?.[index]
+    const handleReady = useReadyHandler(data, scene)
+
+    if (!scene) return <p>No scene...</p>
     return (
-        <div className={Styles.actionNodeRender}>
+        <div className={$.join(Styles.actionScene)}>
             <Tgd
-                key={JSON.stringify(node)}
+                key={JSON.stringify(scene)}
                 onReady={handleReady}
                 width="100%"
                 height="100%"
@@ -47,10 +51,40 @@ export function ViewActionNodeRender({
     )
 }
 
-function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
+function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
     return React.useCallback(
         (context: TgdContext) => {
-            const bbox = computeBBox(data, node)
+            if (!scene) {
+                console.error("No Scene!")
+                return
+            }
+
+            console.log("🚀 [ActionScene] context =", context) // @FIXME: Remove this line written on 2025-05-14 at 11:04
+            const scenePainter = new TgdPainterNode({
+                children: (scene.nodes ?? [])
+                    .filter(nodeIndex => {
+                        const node = data.getNode(nodeIndex)
+                        return (
+                            isNumber(node.mesh) ||
+                            (Array.isArray(node.children) &&
+                                node.children.length > 0)
+                        )
+                    })
+                    .map(
+                        node =>
+                            tgdMakeMeshGlbPainter({
+                                data,
+                                node,
+                                context,
+                            }).painter
+                    ),
+                name: scene.name ?? "Scene",
+            })
+            scenePainter.debug()
+            const bboxes = (scene.nodes ?? []).map(nodeIndex =>
+                computeBBox(data, data.getNode(nodeIndex))
+            )
+            const bbox = averageBBoxes(bboxes)
             context.camera.transfo.position = bbox.center
             context.camera.transfo.distance = bbox.radius * 2
             context.camera.far = bbox.radius * 10
@@ -62,20 +96,14 @@ function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
                 color: [0.2, 0.2, 0.2, 1],
                 depth: 1,
             })
-            const { painter: nodePainter } = tgdMakeMeshGlbPainter({
-                data,
-                node,
-                context,
-            })
-            nodePainter.debug("nodePainter")
             const state = new TgdPainterState(context, {
                 depth: webglPresetDepth.lessOrEqual,
-                children: [nodePainter],
+                children: [scenePainter],
             })
             context.add(clear, state)
             context.paint()
         },
-        [data, node]
+        [data, scene]
     )
 }
 

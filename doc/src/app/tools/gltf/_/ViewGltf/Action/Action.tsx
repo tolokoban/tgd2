@@ -5,9 +5,10 @@ import { TgdDataGlb } from "@tolokoban/tgd"
 import { Action } from "../types"
 
 import Styles from "./Action.module.css"
-import { ViewVerbatim } from "@/app/tools/gltf/_/ViewGltf/Action/Verbatim"
+import { ViewActionVerbatim } from "@/app/tools/gltf/_/ViewGltf/Action/ActionVerbatim"
 import { ViewActionNode } from "./ActionNode"
 import { ViewActionImage } from "./ActionImage"
+import { ViewActionScene } from "./ActionScene"
 
 const $ = Theme.classNames
 
@@ -22,8 +23,12 @@ export function ViewAction(props: ViewActionProps): JSX.Element {
     }
 
     switch (props.action.type) {
+        case "scene":
+            return (
+                <ViewActionScene data={props.data} index={props.action.index} />
+            )
         case "verbatim":
-            return <ViewVerbatim data={props.data} />
+            return <ViewActionVerbatim data={props.data} />
         case "node":
             return (
                 <ViewActionNode data={props.data} index={props.action.index} />

@@ -5,7 +5,7 @@ import { TgdDataGlb } from "@tolokoban/tgd"
 import { Action } from "../../types"
 
 import Styles from "./Nodes.module.css"
-import { ViewNode } from "./Node/Node"
+import { ViewNode } from "../Node"
 import { Expander } from "../Expander"
 
 const $ = Theme.classNames
