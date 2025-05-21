@@ -1,4 +1,4 @@
-import { TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdMat2, TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
 import { tgdCodeStringify } from "@tgd/shader/code"
 import { TgdProgramOptions } from "@tgd/types"
 
@@ -183,6 +183,11 @@ export class TgdProgram {
     uniform4ui(name: string, x: number, y: number, z: number, w: number) {
         const { gl } = this
         gl.uniform4ui(this.getUniformLocation(name), x, y, z, w)
+    }
+
+    uniformMatrix2fv(name: string, mat2: TgdMat2) {
+        const { gl } = this
+        gl.uniformMatrix2fv(this.getUniformLocation(name), false, mat2)
     }
 
     uniformMatrix3fv(name: string, mat3: TgdMat3) {
