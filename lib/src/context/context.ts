@@ -34,6 +34,11 @@ export type TgdContextOptions = WebGLContextAttributes & {
     name?: string
     camera?: TgdCamera
     enableTextureFloatStorage?: boolean
+    /**
+     * Size of a pixel. If under 1, you will start to have  pixelated render.
+     * Defaut to 1.
+     */
+    resolution?: number
 }
 
 /**
@@ -63,6 +68,7 @@ export class TgdContext {
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
     public readonly eventPaint = new TgdEvent<TgdContext>()
+    public resolution = 1
 
     private _camera: TgdCamera = new TgdCameraPerspective({
         transfo: { distance: 15 },
@@ -98,6 +104,7 @@ export class TgdContext {
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
+        this.resolution = options.resolution ?? 1
         if (options.enableTextureFloatStorage) {
             gl.getExtension("EXT_color_buffer_float")
         }
@@ -109,8 +116,8 @@ export class TgdContext {
         ) as number
         this.gl = gl
         this.observer = new ResizeObserver(() => {
-            const width = canvas.clientWidth
-            const height = canvas.clientHeight
+            const width = canvas.clientWidth * this.resolution
+            const height = canvas.clientHeight * this.resolution
             const { onResize } = options
             if (onResize) {
                 onResize(this, canvas.clientWidth, canvas.clientHeight)

@@ -43,6 +43,40 @@ export class TgdVertexArray {
         gl.bindVertexArray(null)
     }
 
+    /**
+     * When you change the data of a dataset,
+     * you must call this function to update the VAO.
+     * Because datasets do not own any buffer.
+     */
+    updateDataset(dataset: TgdDataset) {
+        const { datasets } = this
+        if (!datasets) {
+            console.error(
+                "You cannot update any dataset because no dataset has been attached to this VAO yet!"
+            )
+            return false
+        }
+        const index = datasets.indexOf(dataset)
+        if (index === -1) {
+            console.error("This dataset is not bound to this VAO!")
+            dataset.debug()
+            this.debug()
+            return false
+        }
+        const buffer = this.getBuffer(index)
+        if (!buffer) {
+            console.error(
+                `There is no buffer with index #${index} in this VAO!`
+            )
+            this.debug()
+            return false
+        }
+        buffer.bufferData({
+            data: dataset.data,
+        })
+        return true
+    }
+
     getBuffer(index: number): TgdBuffer | undefined {
         return this.drawBuffers[index]
     }
