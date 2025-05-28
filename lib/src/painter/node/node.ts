@@ -119,7 +119,7 @@ export class TgdPainterNode extends TgdPainter {
         return [...this.targets]
     }
 
-    paintAllLayers(time: number, delay: number): void {
+    paint(time: number, delay: number): void {
         this.logic?.(time, delay)
         this.parentMatrix.reset()
         const fringe: TgdPainterNode[] = [this]

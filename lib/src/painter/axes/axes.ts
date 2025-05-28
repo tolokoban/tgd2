@@ -90,7 +90,7 @@ export class TgdPainterAxes extends TgdPainter {
         this.vao.delete()
     }
 
-    paintAllLayers(): void {
+    paint(): void {
         const { context, prg, vao, translateAndScale } = this
         const { gl, camera } = context
         prg.use()

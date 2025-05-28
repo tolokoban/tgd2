@@ -77,7 +77,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
         vao.delete()
     }
 
-    paintAllLayers(time: number, delay: number): void {
+    paint(time: number, delay: number): void {
         const { context, vao, program, texture, depthTexture } = this
         const { gl } = context
         this.paintDepthBuffer(time, delay)
@@ -156,8 +156,8 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
                 `Your Framebuffer is incomplete: ${webglLookup(status)}!`
             )
         }
-        clear.paintAllLayers()
-        renderer.paintAllLayers(time, delay)
+        clear.paint()
+        renderer.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
 

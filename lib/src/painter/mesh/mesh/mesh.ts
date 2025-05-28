@@ -149,7 +149,7 @@ export class TgdPainterMesh
         return { min, max }
     }
 
-    public readonly paintAllLayers = (time: number, delay: number) => {
+    public readonly paint = (time: number, delay: number) => {
         const { context, prg, geometry, material, drawMode, count, transfo } =
             this
         const { gl, camera } = context

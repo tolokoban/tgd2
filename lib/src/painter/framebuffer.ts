@@ -222,7 +222,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = false
     }
 
-    paintAllLayers(time: number, delay: number): void {
+    paint(time: number, delay: number): void {
         const { context, options } = this
         const { gl } = context
         const { viewportMatchingScale = 1 } = options
@@ -231,7 +231,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         gl.drawBuffers(this.drawBuffers)
-        super.paintAllLayers(time, delay)
+        super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
 

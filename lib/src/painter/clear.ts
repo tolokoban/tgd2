@@ -60,7 +60,7 @@ export class TgdPainterClear extends TgdPainter {
     /** Nothing to destroy. */
     delete(): void {}
 
-    paintAllLayers(): void {
+    paint(): void {
         const {
             clearMask,
             gl,

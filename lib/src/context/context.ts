@@ -345,7 +345,7 @@ export class TgdContext {
 
             const timeInSec = time * 1e-3
             const delayInSec = delay * 1e-3
-            this.painters.paintAllLayers(timeInSec, delayInSec)
+            this.painters.paint(timeInSec, delayInSec)
             this.eventPaint.dispatch(this)
             if (
                 this.paintingIsQueued ||

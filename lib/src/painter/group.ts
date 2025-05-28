@@ -73,13 +73,13 @@ export class TgdPainterGroup extends TgdPainter {
         this.painters.splice(0, this.painters.length)
     }
 
-    paintAllLayers(time: number, delay: number): void {
+    paint(time: number, delay: number): void {
         if (!this.active) return
 
         this.onEnter?.(time, delay)
         for (const painter of this.painters) {
             if (painter.active) {
-                painter.paintAllLayers(time, delay)
+                painter.paint(time, delay)
             }
         }
         this.onExit?.(time, delay)

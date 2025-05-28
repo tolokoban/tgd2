@@ -110,7 +110,7 @@ export class TgdPainterFilter extends TgdPainter {
         }
     }
 
-    paintAllLayers(time: number, delay: number): void {
+    paint(time: number, delay: number): void {
         const { vaos, texture, z, context } = this
         const { gl } = this.program
         let inputTexture = texture?.glTexture

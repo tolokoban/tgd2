@@ -37,7 +37,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
         this.elementsCount = count
     }
 
-    public readonly paintAllLayers = () => {
+    public readonly paint = () => {
         const { context, prg } = this
         const { gl, camera } = context
         gl.enable(gl.CULL_FACE)

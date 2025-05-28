@@ -118,7 +118,7 @@ export class TgdPainterSegments extends TgdPainter {
         this.vao.delete()
     }
 
-    paintAllLayers(_time: number, _delay: number): void {
+    paint(_time: number, _delay: number): void {
         const {
             context,
             prg,
