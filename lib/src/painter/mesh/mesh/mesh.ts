@@ -18,7 +18,10 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
+export class TgdPainterMesh
+    extends TgdPainter
+    implements TgdInterfaceTransformable
+{
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -146,7 +149,7 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         return { min, max }
     }
 
-    public readonly paint = (time: number, delay: number) => {
+    public readonly paintAllLayers = (time: number, delay: number) => {
         const { context, prg, geometry, material, drawMode, count, transfo } =
             this
         const { gl, camera } = context

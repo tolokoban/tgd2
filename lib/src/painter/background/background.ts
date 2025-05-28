@@ -102,7 +102,7 @@ export class TgdPainterBackground extends TgdPainter {
         vao.delete()
     }
 
-    paint(): void {
+    paintAllLayers(): void {
         const { gl } = this.context
         const { vao, program, texture, zoom, x, y, z, mode } = this
         program.use()

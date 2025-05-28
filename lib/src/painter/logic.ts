@@ -14,7 +14,7 @@ export class TgdPainterLogic extends TgdPainter {
 
     delete(): void {}
 
-    paint(time: number, delay: number): void {
+    paintAllLayers(time: number, delay: number): void {
         this.logicFunction(time, delay)
     }
 }

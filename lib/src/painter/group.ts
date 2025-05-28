@@ -28,7 +28,8 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     forEachChild(callback: (child: TgdPainter, index: number) => void) {
-        for (const [index, child] of this.painters.entries()) callback(child, index)
+        for (const [index, child] of this.painters.entries())
+            callback(child, index)
     }
 
     has(painter: TgdPainter): boolean {
@@ -72,13 +73,13 @@ export class TgdPainterGroup extends TgdPainter {
         this.painters.splice(0, this.painters.length)
     }
 
-    paint(time: number, delay: number): void {
+    paintAllLayers(time: number, delay: number): void {
         if (!this.active) return
 
         this.onEnter?.(time, delay)
         for (const painter of this.painters) {
             if (painter.active) {
-                painter.paint(time, delay)
+                painter.paintAllLayers(time, delay)
             }
         }
         this.onExit?.(time, delay)

@@ -57,7 +57,7 @@ export class TgdPainterSkybox extends TgdPainter {
         vao.delete()
     }
 
-    paint(): void {
+    paintAllLayers(): void {
         const { context, vao, program, texture, z } = this
         const { gl } = context
 

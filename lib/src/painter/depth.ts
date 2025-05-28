@@ -39,7 +39,7 @@ export class TgdPainterDepth extends TgdPainter {
 
     delete(): void {}
 
-    paint(): void {
+    paintAllLayers(): void {
         const { gl } = this
         const { enabled } = this
         if (!enabled) {

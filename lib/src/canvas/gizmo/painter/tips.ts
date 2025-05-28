@@ -57,7 +57,7 @@ export class TipsPainter extends TgdPainter {
         this.vao.delete()
     }
 
-    paint(): void {
+    paintAllLayers(): void {
         const { context, prg, vao } = this
         const { gl, camera } = context
         prg.use()

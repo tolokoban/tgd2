@@ -51,7 +51,7 @@ export class TgdPainterClear extends TgdPainter {
                 "[TgdPainterClear] You must give at least a color or a depth in the constructor!"
             )
         }
-         
+
         ;[this.red, this.green, this.blue, this.alpha] = color
         this.depth = depth
         this.stencil = stencil
@@ -60,7 +60,7 @@ export class TgdPainterClear extends TgdPainter {
     /** Nothing to destroy. */
     delete(): void {}
 
-    paint(): void {
+    paintAllLayers(): void {
         const {
             clearMask,
             gl,

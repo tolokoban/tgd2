@@ -29,7 +29,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 
-    paint(_time: number, _delay: number): void {
+    paintAllLayers(_time: number, _delay: number): void {
         const { context, program, vao } = this
         const { gl } = context
         const state = webglStencilGet(gl)
