@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.25",
+    "version": "2.0.26",
     "description": "ToloGameDev library for WebGL2",
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
@@ -36,11 +36,11 @@
         "@typescript-eslint/eslint-plugin": "^8.26.0",
         "build-typescript-library": "^0.7.5",
         "eslint": "^9.21.0",
-        "eslint-plugin-unicorn": "^57.0.0",
+        "eslint-plugin-unicorn": "^59.0.1",
         "jest-canvas-mock": "^2.5.2",
         "jest-environment-jsdom": "^29.7.0",
         "ts-jest": "^29.2.6",
-        "typedoc": "^0.27.9",
+        "typedoc": "^0.28.5",
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.26.0"
     },
