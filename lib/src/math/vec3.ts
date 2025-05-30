@@ -37,6 +37,17 @@ export class TgdVec3 extends Float32Array {
         return Math.hypot(x, y, z)
     }
 
+    static center(points: Array<TgdVec3 | ArrayNumber3>): TgdVec3 {
+        const center = new TgdVec3()
+        if (points.length === 0) return center
+
+        for (const point of points) {
+            center.add(point)
+        }
+        center.scale(1 / points.length)
+        return center
+    }
+
     constructor()
     constructor(x: Readonly<TgdVec3 | ArrayNumber3>)
     constructor(x: number)
