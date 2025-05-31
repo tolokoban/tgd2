@@ -6,10 +6,10 @@
     "typings": "./dist/index.d.ts",
     "scripts": {
         "doc": "typedoc",
-        "build": "build-typescript-library .",
+        "build": "build-typescript-library --allow-circular .",
         "lint": "eslint -c eslint.config.mjs './src/**/*.ts'",
         "lint:fix": "eslint -c eslint.config.mjs --fix './src/**/*.ts'",
-        "start": "build-typescript-library --watch --runAfter doc .",
+        "start": "build-typescript-library --allow-circular --watch --runAfter doc .",
         "test": "jest",
         "test:watch": "jest --watch"
     },
@@ -29,12 +29,12 @@
     },
     "homepage": "https://tolokoban.github.io/tgd2",
     "devDependencies": {
-        "@eslint/js": "^9.21.0",
+        "@eslint/js": "^9.28.0",
         "@jest/globals": "^29.7.0",
         "@types/jest": "^29.5.14",
-        "@types/node": "^22.13.9",
+        "@types/node": "^22.15.29",
         "@typescript-eslint/eslint-plugin": "^8.26.0",
-        "build-typescript-library": "^0.7.5",
+        "build-typescript-library": "^0.8.1",
         "eslint": "^9.21.0",
         "eslint-plugin-unicorn": "^59.0.1",
         "jest-canvas-mock": "^2.5.2",

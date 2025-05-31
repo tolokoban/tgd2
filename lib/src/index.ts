@@ -25,6 +25,7 @@ export * from "./table"
 export * from "./texture"
 export * from "./utils"
 export * from "./vao"
+export * from "./wasm"
 export * from "./webgl"
 
 export * from "./types"
