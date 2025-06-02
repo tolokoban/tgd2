@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import { WasmType } from "./../types"
+import { WasmType } from "../../types"
 import { TgdCodeBloc } from "@tgd/shader"
-import { WasmFunctionExport, WasmFunctionImport } from "../types"
+import { WasmFunctionExport, WasmFunctionImport } from "../../types"
 
 export function codeFunctionImport(func: WasmFunctionImport): TgdCodeBloc[] {
     const body: TgdCodeBloc = []
@@ -31,6 +31,7 @@ export function codeFunctionExport(func: WasmFunctionExport): TgdCodeBloc[] {
     if (func.locals) {
         body.push(codeGenericParam("local", func.locals))
     }
+    if (func.body) body.push(...func.body)
     return [`(func (export ${JSON.stringify(func.name)})`, body, ")"]
 }
 

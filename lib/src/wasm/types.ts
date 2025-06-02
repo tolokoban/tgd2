@@ -1,6 +1,6 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 import { TgdCodeBloc } from "@tgd/shader"
 
-/* eslint-disable unicorn/prevent-abbreviations */
 export type WasmModule = {
     exports: WasmFunctionExport[]
     imports?: WasmFunctionImport[]

@@ -59,6 +59,6 @@
     "dependencies": {
         "gl-matrix": "^3.4.3",
         "tslib": "^2.8.1",
-        "wabt": "^1.0.37"
+        "wassemble": "^0.0.2"
     }
 }

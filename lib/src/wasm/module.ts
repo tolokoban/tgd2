@@ -1,8 +1,11 @@
 import { TgdCodeBloc } from "@tgd/shader"
-import { WasmModule } from "../types"
-import { codeFunctionExport, codeFunctionImport } from "./function"
+import { WasmModule } from "./types"
+import {
+    codeFunctionExport,
+    codeFunctionImport,
+} from "./language/to-code/function"
 
-export function wasmModule(module: WasmModule): TgdCodeBloc {
+export function wasm_module(module: WasmModule): TgdCodeBloc {
     const body: TgdCodeBloc = []
     const { imports, exports, functions } = module
     if (imports && imports.length > 0) {

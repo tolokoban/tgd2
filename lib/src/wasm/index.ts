@@ -1,25 +1,30 @@
-import Wabt from "wabt"
+/* eslint-disable unicorn/prevent-abbreviations */
+import wassemble from "wassemble/wassemble.mjs"
 
-import { WasmModule } from "./language/types"
-import { wasmModule } from "./language/to-code"
+import { WasmModule } from "./types"
+import { wasm_module } from "./module"
 import { tgdCodeStringify } from "@tgd/shader"
 
-export type * from "./language/types"
-export * from "./language/to-code"
+export type * from "./types"
+export * from "./code"
+export * from "./local"
+export * from "./module"
 
-export async function tgdWasmCompile(module: WasmModule) {
-    const wabt = await Wabt()
-    const code = tgdCodeStringify(wasmModule(module))
-    const compiler = wabt.parseWat("tgd2.wat", code)
-    compiler.resolveNames()
-    compiler.validate()
-    const binary = compiler.toBinary({
-        log: true,
-        write_debug_names: true,
-    })
-    const { buffer } = binary
-    compiler.destroy()
-    const compiledModule = await WebAssembly.compile(buffer)
-    const instance = await WebAssembly.instantiate(compiledModule, importObject)
-    return instance
+export async function tgdWasmCompile<T>(
+    typeGuard: (data: unknown) => asserts data is T,
+    module: WasmModule,
+    importObject: Record<
+        string,
+        Record<string, (...args: unknown[]) => unknown>
+    > = {}
+): Promise<T> {
+    const code = tgdCodeStringify(wasm_module(module))
+    const binary = wassemble(code)
+    const instance = await WebAssembly.instantiate(
+        new WebAssembly.Module(binary),
+        importObject
+    )
+    const { exports } = instance
+    typeGuard(exports)
+    return exports as T
 }
