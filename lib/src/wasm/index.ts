@@ -1,6 +1,4 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import wassemble from "wassemble/wassemble.mjs"
-
 import { WasmModule } from "./types"
 import { wasm_module } from "./module"
 import { tgdCodeStringify } from "@tgd/shader"

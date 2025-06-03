@@ -63,14 +63,14 @@ export class TgdPainterGroup extends TgdPainter {
         for (const painter of this.painters) {
             painter.delete()
         }
-        this.painters.splice(0, this.painters.length)
+        this.painters.splice(0)
     }
 
     delete(): void {
         for (const painter of this.painters) {
             painter.delete()
         }
-        this.painters.splice(0, this.painters.length)
+        this.painters.splice(0)
     }
 
     paint(time: number, delay: number): void {

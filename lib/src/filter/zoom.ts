@@ -1,4 +1,3 @@
-import { TgdProgram } from "@tgd/program"
 import { TgdVec2 } from "../math"
 import {
     TgdFilter,

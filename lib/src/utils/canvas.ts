@@ -1,3 +1,6 @@
+import { TgdColor } from "@tgd/color"
+import { isString } from "@tgd/types/guards"
+
 /**
  * Helper to get a canvas with the given size.
  */
@@ -63,24 +66,24 @@ export function tgdCanvasCreatePalette(colors: string[], colums = 0, rows = 0) {
 export function tgdCanvasCreateFill(
     width: number,
     height: number,
-    fillColor: string = "#000"
+    fillColor: string | TgdColor = "#000"
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-    ctx.fillStyle = fillColor
+    ctx.fillStyle = isString(fillColor) ? fillColor : fillColor.toString()
     ctx.fillRect(0, 0, width, height)
     return canvas
 }
 
 export function tgdCanvasCreateGradientHorizontal(
     size: number,
-    colors: string[]
+    colors: Array<string | TgdColor>
 ) {
     return tgdCanvasCreateGradient(size, 1, 1, 0, colors)
 }
 
 export function tgdCanvasCreateCreateGradientvertical(
     size: number,
-    colors: string[]
+    colors: Array<string | TgdColor>
 ) {
     return tgdCanvasCreateGradient(1, size, 0, 1, colors)
 }
@@ -98,7 +101,7 @@ export function tgdCanvasCreateGradient(
     height: number,
     directionX: number,
     directionY: number,
-    colors: string[]
+    colors: Array<string | TgdColor>
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
     const gradient = ctx.createLinearGradient(
@@ -108,9 +111,10 @@ export function tgdCanvasCreateGradient(
         height * directionY
     )
     for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+        const color = colors[colorIndex]
         gradient.addColorStop(
             colorIndex / (colors.length - 1),
-            colors[colorIndex]
+            isString(color) ? color : color.toString()
         )
     }
     ctx.fillStyle = gradient

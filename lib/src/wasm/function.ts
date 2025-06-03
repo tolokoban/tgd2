@@ -15,7 +15,7 @@ export function wasm_function_import(func: WasmFunctionImport): TgdCodeBloc[] {
         `(func $${func.name} (import ${JSON.stringify(
             func.moduleName
         )} ${JSON.stringify(func.moduleFunc ?? func.name)})`,
-        body,
+        ...body,
         ")",
     ]
 }

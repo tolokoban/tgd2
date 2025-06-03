@@ -1,4 +1,3 @@
-import { TgdContext } from "@tgd/context"
 import { TgdPainterGroup } from "../group"
 import { TgdPainter } from "../painter"
 import {

@@ -1,4 +1,3 @@
-import { TgdProgram } from "@tgd/program"
 import { TgdFilter, TgdFilterSerUniformsParameters } from "./filter"
 
 export class TgdFilterHueRotation extends TgdFilter {

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-single-call */
 import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdCamera, TgdCameraOptions } from "./camera"
 

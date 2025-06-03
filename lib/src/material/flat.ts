@@ -2,7 +2,6 @@ import { ArrayNumber4, WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
 import { TgdCodeBloc } from "@tgd/shader/code"
-import { TgdProgram } from "@tgd/program"
 
 export type TgdMaterialFlatOptions = Partial<{
     color: ArrayNumber4 | TgdVec4

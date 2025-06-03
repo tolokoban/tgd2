@@ -15,7 +15,6 @@ import VERT from "./background.vert"
 import FRAG from "./background.frag"
 import { TgdPainterState } from "../state"
 import { TgdPainterClear } from "../clear"
-import { TgdPainterMesh } from "../mesh"
 
 export interface TgdPainterBackgroundWithDepthOptions {
     background: TgdTexture2D

@@ -6,18 +6,18 @@ import {
     WasmModule,
     tgdCodeStringify,
     tgdWasmCompile,
-    wasm_f32_add,
-    wasm_f32_mul,
-    wasm_f32_sub,
-    wasm_i32_add,
-    wasm_i32_and,
-    wasm_i32_const,
-    wasm_i32_mul,
-    wasm_i32_shr_s,
-    wasm_if,
-    wasm_if_i32,
+    wasm_i64_add,
+    wasm_i64_and,
+    wasm_i64_const,
+    wasm_i64_eq,
+    wasm_i64_gt_s,
+    wasm_i64_mul,
+    wasm_i64_shr_s,
+    wasm_if_i64,
     wasm_local_get,
+    wasm_local_set,
     wasm_module,
+    wasm_while,
 } from "@tolokoban/tgd"
 
 import "./index.css"
@@ -46,7 +46,7 @@ function start() {
 start()
 
 function assertTestFunction(data: unknown): asserts data is {
-    test(a: number): number
+    test(a: bigint): bigint
 } {
     assertType(data, { test: "function" })
 }
@@ -63,16 +63,39 @@ async function test() {
         // ],
         functions: {
             test: {
-                params: { a: "i32" },
-                results: ["i32"],
-                body: wasm_if_i32(
-                    wasm_i32_and(wasm_local_get("a"), wasm_i32_const(1)),
-                    wasm_i32_add(
-                        wasm_i32_const(1),
-                        wasm_i32_mul(wasm_local_get("a"), wasm_i32_const(3))
+                params: { a: "i64" },
+                results: ["i64"],
+                body: [
+                    wasm_if_i64(
+                        wasm_i64_gt_s(wasm_local_get("a"), wasm_i64_const(1)),
+                        [
+                            wasm_while(
+                                wasm_i64_eq(
+                                    wasm_i64_const(0),
+                                    wasm_i64_and(
+                                        wasm_local_get("a"),
+                                        wasm_i64_const(1)
+                                    )
+                                ),
+                                wasm_local_set(
+                                    "a",
+                                    wasm_i64_shr_s(
+                                        wasm_local_get("a"),
+                                        wasm_i64_const(1)
+                                    )
+                                )
+                            ),
+                            wasm_i64_add(
+                                wasm_i64_const(1),
+                                wasm_i64_mul(
+                                    wasm_local_get("a"),
+                                    wasm_i64_const(3)
+                                )
+                            ),
+                        ],
+                        wasm_i64_const(1)
                     ),
-                    wasm_i32_shr_s(wasm_local_get("a"), wasm_i32_const(1))
-                ),
+                ],
             },
         },
         exports: ["test"],
@@ -82,11 +105,12 @@ async function test() {
     const code = tgdCodeStringify(codeBloc)
     console.log(code)
     const bundle = await tgdWasmCompile(assertTestFunction, module)
-    let value = 4523
-    while (value > 1) {
+    let value = 4523n
+    while (value > 4n) {
         console.log("Syracuse: ", value)
         value = bundle.test(value)
     }
+    console.log("End: ", value)
 }
 
 test()

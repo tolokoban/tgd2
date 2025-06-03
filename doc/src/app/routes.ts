@@ -27,6 +27,8 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/math": ["/articles/math"],
     "/articles/math/fractal": ["/articles/math/fractal"],
     "/articles/math/fractal/pascal-triangle": ["/articles/math/fractal/pascal-triangle"],
+    "/articles/mesh": ["/articles/mesh"],
+    "/articles/mesh/volume-to-mesh": ["/articles/mesh/volume-to-mesh"],
     "/articles/painter": ["/articles/painter"],
     "/articles/painter/background": ["/articles/painter/background"],
     "/articles/painter/background/2": ["/articles/painter/background/2"],

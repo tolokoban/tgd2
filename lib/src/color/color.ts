@@ -1,4 +1,13 @@
 export class TgdColor {
+    static fromHSL(H: number, S: number, L: number): TgdColor {
+        const color = new TgdColor()
+        color.H = H
+        color.S = S
+        color.L = L
+        color.hsl2rgb()
+        return color
+    }
+
     /** Red [0..1] */
     public R: number = 1
 

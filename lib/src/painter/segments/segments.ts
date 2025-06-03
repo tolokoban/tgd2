@@ -297,8 +297,7 @@ function makeCapsule(roundness: number): {
             oldIndexB = elementIndex
             elementIndex++
         }
-        elements.push(0, oldIndexA, 2)
-        elements.push(3, 5, oldIndexB)
+        elements.push(0, oldIndexA, 2, 3, 5, oldIndexB)
     }
     const capsule: CapsuleDataset = new TgdDataset({
         attOffset: "vec3",

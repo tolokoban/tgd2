@@ -1,4 +1,4 @@
-import { quat, vec3 } from "gl-matrix"
+import { vec3 } from "gl-matrix"
 import { ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
 import { tgdCalcMix } from "../utils/math"
 import { TgdMat3 } from "./mat3"

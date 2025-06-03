@@ -2,6 +2,13 @@
 import { TgdCodeBloc } from "@tgd/shader"
 import { WasmType } from "./types"
 
+// Used to generate unique labels.
+let ID = 0
+
+function newLabel(name: string) {
+    return `$_label_${name}_${ID++}`
+}
+
 export function wasm_call(
     funcName: string,
     ...args: TgdCodeBloc[]
@@ -35,7 +42,7 @@ export function wasm_if(
 export function wasm_if_i32(
     condition: TgdCodeBloc[],
     thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
+    elseBloc: TgdCodeBloc[]
 ): TgdCodeBloc[] {
     return wasm_if_typed("i32", condition, thenBloc, elseBloc)
 }
@@ -46,7 +53,7 @@ export function wasm_if_i32(
 export function wasm_if_i64(
     condition: TgdCodeBloc[],
     thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
+    elseBloc: TgdCodeBloc[]
 ): TgdCodeBloc[] {
     return wasm_if_typed("i64", condition, thenBloc, elseBloc)
 }
@@ -57,7 +64,7 @@ export function wasm_if_i64(
 export function wasm_if_f32(
     condition: TgdCodeBloc[],
     thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
+    elseBloc: TgdCodeBloc[]
 ): TgdCodeBloc[] {
     return wasm_if_typed("f32", condition, thenBloc, elseBloc)
 }
@@ -68,7 +75,7 @@ export function wasm_if_f32(
 export function wasm_if_f64(
     condition: TgdCodeBloc[],
     thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
+    elseBloc: TgdCodeBloc[]
 ): TgdCodeBloc[] {
     return wasm_if_typed("f64", condition, thenBloc, elseBloc)
 }
@@ -84,10 +91,22 @@ export function wasm_if_typed(
         [
             ...condition,
             "(then",
-            thenBloc,
+            ...thenBloc,
             ")",
             ...(elseBloc ? ["(else", elseBloc, ")"] : []),
         ],
+        ")",
+    ]
+}
+
+export function wasm_while(
+    condition: TgdCodeBloc[],
+    body: TgdCodeBloc[]
+): TgdCodeBloc[] {
+    const label = newLabel("loop")
+    return [
+        `(loop ${label}`,
+        wasm_if(condition, [...body, `(br ${label})`]),
         ")",
     ]
 }

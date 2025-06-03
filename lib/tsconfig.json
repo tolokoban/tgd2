@@ -40,7 +40,8 @@
         "baseUrl": "./src/",
         "paths": {
             "@tgd/*": ["*"],
-            "@tgd": ["index"]
+            "@tgd": ["index"],
+            "@tolokoban/tgd": ["index"]
         }
     },
     "include": ["./src/**/*"]

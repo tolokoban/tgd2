@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-single-call */
 import { TgdMat4, TgdVec3 } from "@tgd/math"
 import { TgdCamera, TgdCameraOptions } from "./camera"
 import { mat4 } from "gl-matrix"
@@ -96,21 +97,25 @@ export class TgdCameraPerspective extends TgdCamera {
         if (caption) code.push(`// ${caption}`)
         code.push(`const camera = new TgdCameraPerspective({`)
         if (this.name) code.push(`  name: ${JSON.stringify(this.name)},`)
-        code.push(`  fovy: ${this._fovy},`)
-        code.push(`  near: ${this._near},`)
-        code.push(`  far: ${this._far},`)
-        code.push(`  zoom: ${this.zoom},`)
-        code.push(`  transfo: {`)
-        code.push(`  distance: ${this.transfo.distance},`)
+        code.push(
+            `  fovy: ${this._fovy},`,
+            `  near: ${this._near},`,
+            `  far: ${this._far},`,
+            `  zoom: ${this.zoom},`,
+            `  transfo: {`,
+            `  distance: ${this.transfo.distance},`
+        )
         code.push(
             `    position: ${JSON.stringify([...this.transfo.position])},`
         )
         code.push(
             `    orientation: ${JSON.stringify([...this.transfo.orientation])},`
         )
-        code.push(`    scale: ${JSON.stringify([...this.transfo.scale])},`)
-        code.push(`  }`)
-        code.push("}")
+        code.push(
+            `    scale: ${JSON.stringify([...this.transfo.scale])},`,
+            `  }`,
+            "}"
+        )
         return code.join("\n")
     }
 }
