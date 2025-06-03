@@ -1,5 +1,8 @@
 import {
+    tgdCalcDegToRad,
+    TgdCameraPerspective,
     TgdContext,
+    TgdControllerCameraOrbit,
     TgdPainterClear,
     TgdPainterState,
     webglPresetCull,
@@ -7,11 +10,20 @@ import {
 } from "@tolokoban/tgd"
 
 import React from "react"
+import { PainterCube } from "./painter-cube"
 
 class VolumeToMeshManager {
     private _context: TgdContext | null = null
 
     set context(context: TgdContext) {
+        const { camera } = context
+        if (camera instanceof TgdCameraPerspective) {
+            camera.fovy = tgdCalcDegToRad(90)
+            camera.transfo.distance = 3
+        }
+        new TgdControllerCameraOrbit(context, {
+            inertiaOrbit: 1000,
+        })
         if (this._context) this._context.destroy()
         this._context = context
         const clear = new TgdPainterClear(context, {
@@ -22,6 +34,7 @@ class VolumeToMeshManager {
             depth: webglPresetDepth.less,
             cull: webglPresetCull.off,
         })
+        state.add(new PainterCube(context))
         context.add(clear, state)
         context.paint()
     }

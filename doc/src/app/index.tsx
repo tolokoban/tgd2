@@ -32,6 +32,7 @@ const Page6 = React.lazy(() => import("./articles/animation/transfo/page.mdx"))
 const Page8 = React.lazy(() => import("./articles/custom-shader/holes/page.mdx"))
 const Page9 = React.lazy(() => import("./articles/gltf/page.mdx"))
 const Page12 = React.lazy(() => import("./articles/math/fractal/pascal-triangle/page.mdx"))
+const Page13 = React.lazy(() => import("./articles/mesh/page.mdx"))
 const Page14 = React.lazy(() => import("./articles/mesh/volume-to-mesh/page"))
 const Page15 = React.lazy(() => import("./articles/painter/page.mdx"))
 const Page16 = React.lazy(() => import("./articles/painter/background/page.mdx"))
@@ -89,6 +90,7 @@ export default function App({ lang }: { lang?: string }) {
     const pg8 = Page8
     const pg9 = Page9
     const pg12 = Page12
+    const pg13 = Page13
     const pg14 = Page14
     const ly15 = Layout15
     const pg15 = Page15
@@ -149,7 +151,7 @@ export default function App({ lang }: { lang?: string }) {
                         <Route path="/articles/math/fractal/pascal-triangle" Page={pg12} fallback={fb0} context={context}/>
                     </Route>
                 </Route>
-                <Route path="/articles/mesh" fallback={fb0} context={context}>
+                <Route path="/articles/mesh" Page={pg13} fallback={fb0} context={context}>
                     <Route path="/articles/mesh/volume-to-mesh" Page={pg14} fallback={fb0} context={context}/>
                 </Route>
                 <Route path="/articles/painter" Page={pg15} Layout={ly15} fallback={fb0} context={context}>

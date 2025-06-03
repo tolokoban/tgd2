@@ -1,15 +1,12 @@
-import {
-    tgdCanvasCreateGradientHorizontal,
-    tgdColorMakeHueWheel,
-    TgdContext,
-    TgdDataset,
-    TgdPainter,
-    TgdProgram,
-    TgdShaderFragment,
-    TgdShaderVertex,
-    TgdTexture2D,
-    TgdVertexArray,
-} from "@tolokoban/tgd"
+import { TgdTexture2D } from "@tgd/texture"
+import { TgdPainter } from "../painter"
+import { TgdDataset } from "@tgd/dataset"
+import { TgdProgram } from "@tgd/program"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdContext } from "@tgd/context"
+import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
+import { tgdColorMakeHueWheel } from "@tgd/color"
+import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 
 export interface TgdPainterLinesOptions {
     /**
