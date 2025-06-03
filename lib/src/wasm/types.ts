@@ -2,13 +2,13 @@
 import { TgdCodeBloc } from "@tgd/shader"
 
 export type WasmModule = {
-    exports: WasmFunctionExport[]
+    /** Names of the functions to export */
     imports?: WasmFunctionImport[]
-    functions?: WasmFunctionPrivate[]
+    functions: Record<string, WasmFunction>
+    exports: string[]
 }
 
-export type WasmFunctionExport = {
-    name: string
+export type WasmFunction = {
     params?: Record<string, WasmType>
     results?: WasmType[]
     locals?: Record<string, WasmType>
@@ -22,7 +22,5 @@ export type WasmFunctionImport = {
     moduleName: string
     moduleFunc?: string
 }
-
-export type WasmFunctionPrivate = Omit<WasmFunctionExport, "moduleName">
 
 export type WasmType = "i32" | "i64" | "f32" | "f64" | "v128"
