@@ -13,7 +13,7 @@ export class TgdVertexArray {
         public readonly gl: WebGL2RenderingContext,
         private readonly program?: TgdProgram,
         private readonly datasets?: Readonly<TgdDataset>[],
-        private readonly elements?: TgdTypeArrayForElements
+        private elements?: TgdTypeArrayForElements
     ) {
         const vao = gl.createVertexArray()
         if (!vao) throw new Error("Unable to create VertexArrayObject!")
@@ -75,6 +75,31 @@ export class TgdVertexArray {
             data: dataset.data,
         })
         return true
+    }
+
+    updateElements(elements: number[]) {
+        if (!this.elements) {
+            throw new Error("This VAO has no elements data!")
+        }
+        if (!this.elemBuffer) {
+            throw new Error("This VAO has no elements buffer!")
+        }
+        switch (this.elements.BYTES_PER_ELEMENT) {
+            case 1:
+                this.elements = new Uint8Array(elements)
+                break
+            case 2:
+                this.elements = new Uint16Array(elements)
+                break
+            case 4:
+                this.elements = new Uint32Array(elements)
+                break
+            default:
+                throw new Error(
+                    `Don't know how to deal with ${this.elements.BYTES_PER_ELEMENT} bytes per element!`
+                )
+        }
+        this.elemBuffer.bufferData({ data: this.elements })
     }
 
     getBuffer(index: number): TgdBuffer | undefined {

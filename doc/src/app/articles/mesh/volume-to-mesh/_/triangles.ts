@@ -7,19 +7,25 @@ import {
     TgdShaderVertex,
     TgdVertexArray,
 } from "@tolokoban/tgd"
-import { cubeEdges, cubeVertices } from "./geometry"
+import {
+    cubeEdges,
+    cubeMidPoints,
+    cubeVertices,
+    trianglesStringToElements,
+} from "./geometry"
 
-export class PainterCube extends TgdPainter {
+export class PainterTriangles extends TgdPainter {
     private readonly dataset: TgdDataset
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
+    private elementsCount = 0
+    private _triangles = ""
 
     constructor(private readonly context: TgdContext) {
         super()
         this.dataset = this.createDataset()
         this.program = this.createProgram()
-        // prettier-ignore
-        const elements = cubeEdges
+        const elements = new Uint8Array()
         this.vao = new TgdVertexArray(
             context.gl,
             this.program,
@@ -28,19 +34,26 @@ export class PainterCube extends TgdPainter {
         )
     }
 
+    set triangles(value: string) {
+        const elements = trianglesStringToElements(value)
+        this.vao.updateElements(elements)
+        this.elementsCount = elements.length
+        this.context.paint()
+    }
+
     delete(): void {
         this.program.delete()
         this.vao.delete()
     }
 
     paint(): void {
-        const { context, program, vao } = this
+        const { context, program, vao, elementsCount } = this
         const { gl, camera } = context
         program.use()
         program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
-        gl.drawElements(gl.LINES, 24, gl.UNSIGNED_BYTE, 0)
+        gl.drawElements(gl.TRIANGLES, elementsCount, gl.UNSIGNED_BYTE, 0)
         vao.unbind()
     }
 
@@ -48,7 +61,7 @@ export class PainterCube extends TgdPainter {
         const dataset = new TgdDataset({
             attPoint: "vec3",
         })
-        dataset.set("attPoint", cubeVertices)
+        dataset.set("attPoint", cubeMidPoints)
         return dataset
     }
 
@@ -57,15 +70,12 @@ export class PainterCube extends TgdPainter {
             uniforms: {
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
+                uniLight: "float",
             },
             attributes: {
                 attPoint: "vec4",
             },
-            varying: {
-                varColor: "vec3",
-            },
             mainCode: [
-                "varColor = abs(attPoint.xyz);",
                 "gl_Position = uniProjectionMatrix * uniModelViewMatrix * attPoint;",
             ],
         }).code
@@ -73,11 +83,14 @@ export class PainterCube extends TgdPainter {
             uniforms: {
                 uniTexture: "sampler2D",
             },
-            varying: {
-                varColor: "vec3",
-            },
             outputs: { FragColor: "vec4" },
-            mainCode: ["FragColor = vec4(varColor, 1.0);"],
+            mainCode: [
+                "float a = 1.0;",
+                "FragColor = vec4(",
+                "  .8 * (gl_FrontFacing ? vec3(0, .5, 1) : vec3(1, 0, 0)),",
+                "  a",
+                ");",
+            ],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
         return program

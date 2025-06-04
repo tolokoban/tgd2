@@ -29,9 +29,34 @@ for (let i = 0; i < cubeEdges.length; i += 2) {
     const a = 3 * cubeEdges[i]
     const b = 3 * cubeEdges[i + 1]
     const x = 0.5 * (cubeVertices[a + 0] + cubeVertices[b + 0])
-    const y = 0.5 * (cubeVertices[a + 0] + cubeVertices[b + 1])
-    const z = 0.5 * (cubeVertices[a + 0] + cubeVertices[b + 2])
+    const y = 0.5 * (cubeVertices[a + 1] + cubeVertices[b + 1])
+    const z = 0.5 * (cubeVertices[a + 2] + cubeVertices[b + 2])
     midPoints.push(x, y, z)
 }
 
 export const cubeMidPoints = new Float32Array(midPoints)
+
+export function trianglesStringToElements(value: string) {
+    const elements: number[] = []
+    for (const C of value.trim().toUpperCase()) {
+        if (C < "A" || C > "L") continue
+
+        elements.push(C.charCodeAt(0) - "A".charCodeAt(0))
+    }
+    return elements
+}
+
+/**
+ * A case number defines what corner is inside (1) or outside (0)
+ * of the volume.
+ * @returns An array of 8 elements with 1 if the corner is inside,
+ * and 0 if it is outside.
+ */
+export function caseNumberToColors(value: number): number[] {
+    const colors: number[] = []
+    for (let i = 0; i < 8; i++) {
+        const mask = 1 << i
+        colors.push(value & mask ? 1 : 0)
+    }
+    return colors
+}
