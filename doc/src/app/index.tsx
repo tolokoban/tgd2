@@ -8,14 +8,13 @@
  * https://github.com/tolokoban/build-react-routes/issues
  */
 
+export * from "./routes"
+export * from "./types"
+
 import React from "react"
 
 import { matchRoute, useRouteContext, ROUTES } from "./routes"
 import { RouteMatch, RoutePath } from "./types"
-
-export * from "./routes"
-export * from "./types"
-
 
 import Layout0 from "./layout"
 import Layout2 from "./articles/layout"
@@ -213,7 +212,7 @@ export default function App({ lang }: { lang?: string }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function intl<T extends PageComponent | ContainerComponent | React.ReactNode>(
+function intl<T extends PageComponent | ContainerComponent | JSX.Element>(
     page: T,
     translations: Record<string, T>,
     lang = ""
@@ -236,8 +235,8 @@ type ContainerComponent = React.FC<{
 
 interface RouteProps {
     path: string
-    element?: React.ReactNode
-    fallback?: React.ReactNode
+    element?: JSX.Element
+    fallback?: JSX.Element
     children?: React.ReactNode
     Page?: PageComponent
     Layout?: ContainerComponent
