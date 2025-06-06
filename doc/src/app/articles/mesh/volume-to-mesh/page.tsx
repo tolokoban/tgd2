@@ -3,19 +3,25 @@ import View from "@/components/demo/Tgd"
 import {
     IconArrowLeft,
     IconArrowRight,
+    IconReset,
     useLocalStorageState,
+    ViewButton,
     ViewFloatingButton,
     ViewInputText,
     ViewPanel,
     ViewSlider,
 } from "@tolokoban/ui"
-import { tgdCalcClamp } from "@tolokoban/tgd"
+import {
+    tgdCalcClamp,
+    tgdDataMarchingCubesConfigurations,
+} from "@tolokoban/tgd"
 
 import { useVolumeToMeshManager } from "./_/manager"
 import { ensureNumber } from "@tolokoban/type-guards"
 
 import styles from "./page.module.css"
 import { trianglesStringToElements } from "./_/geometry"
+import { CONFIGURATIONS } from "./_/configurations"
 
 export default function Page() {
     const [caseNumber, setCaseNumber] = useLocalStorageState(
@@ -26,7 +32,9 @@ export default function Page() {
     const [triangles, setTriangles] = React.useState("")
     const key = `volume-to-mesh/triangles/${caseNumber}`
     React.useEffect(() => {
-        setTriangles(globalThis.localStorage.getItem(key) ?? "")
+        setTriangles(
+            globalThis.localStorage.getItem(key) ?? CONFIGURATIONS[caseNumber]
+        )
         manager.caseNumber = caseNumber
     }, [caseNumber])
     React.useEffect(() => {
@@ -42,6 +50,22 @@ export default function Page() {
     const manager = useVolumeToMeshManager()
     return (
         <div>
+            <h1>Marching cubes</h1>
+            <p>
+                <a href="https://en.wikipedia.org/wiki/Marching_cubes">
+                    Marching cubes
+                </a>{" "}
+                is a technique to generate meshes from a volume.
+                <br />A volume is a function that tells you, for each point in a
+                box, it you are inside or outside an object.
+            </p>
+            <p>
+                A voxel is a unit cube. Each corner of a voxel is either inside
+                the volume (<b>red</b>) or outside (<b>blue</b>). With
+                triangles, touching the edges of the voxel, we need to separate
+                the space between red and blue corners.
+            </p>
+            <p>A voxel has 8 corners, so we have 256 configurations.</p>
             <View onReady={context => (manager.context = context)} />
             <ViewSlider
                 className={styles.flex1}
@@ -54,21 +78,48 @@ export default function Page() {
                 step={1}
             ></ViewSlider>
             <br />
-            <ViewPanel display="flex" alignItems="center" fullwidth gap="M">
-                <ViewInputText
-                    label="Triangles (from mid points ABCDEFGHIJKL)"
-                    value={triangles}
-                    onChange={setTriangles}
-                />
-                <ViewFloatingButton icon={IconArrowLeft} onClick={handleLeft} />
-                <ViewFloatingButton
-                    icon={IconArrowRight}
-                    onClick={handleRight}
-                />
+            <ViewPanel
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+            >
+                <ViewPanel display="flex" alignItems="center" fullwidth gap="M">
+                    <ViewInputText
+                        label="Triangles (from mid points ABCDEFGHIJKL)"
+                        value={triangles}
+                        onChange={setTriangles}
+                    />
+                    <ViewFloatingButton
+                        icon={IconArrowLeft}
+                        onClick={handleLeft}
+                    />
+                    <ViewFloatingButton
+                        icon={IconArrowRight}
+                        onClick={handleRight}
+                    />
+                </ViewPanel>
+                <ViewButton onClick={handleReset} icon={IconReset}>
+                    Reset
+                </ViewButton>
             </ViewPanel>
-            <pre>{getTriangles()}</pre>
+            <br />
+            <br />
+            <details>
+                <summary>List of triangles per configuration</summary>
+                <pre>{getTriangles()}</pre>
+            </details>
         </div>
     )
+}
+
+function handleReset() {
+    const configurations = tgdDataMarchingCubesConfigurations()
+    for (let i = 0; i < configurations.length; i++) {
+        const config = configurations[i]
+        const code = config.map(i => "ABCDEFGHIJKL".charAt(i)).join("")
+        globalThis.localStorage.setItem(`volume-to-mesh/triangles/${i}`, code)
+    }
+    location.reload()
 }
 
 function getTriangles() {
@@ -81,20 +132,6 @@ function getTriangles() {
         else {
             const elements = trianglesStringToElements(text)
             lines.push(`${JSON.stringify(elements)},`)
-            const opposite = i ^ 0xff
-            if (opposite > i) {
-                const reverse: number[] = []
-                for (let k = 0; k < elements.length; k += 3) {
-                    const a = elements[k]
-                    const b = elements[k + 1]
-                    const c = elements[k + 2]
-                    reverse.push(a, c, b)
-                }
-                globalThis.localStorage.setItem(
-                    `volume-to-mesh/triangles/${opposite}`,
-                    reverse.map(v => "ABCDEFGHIJKL".charAt(v)).join("")
-                )
-            }
         }
     }
     return lines.join("\n")

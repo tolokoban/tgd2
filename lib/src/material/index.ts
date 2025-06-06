@@ -1,4 +1,5 @@
 export * from "./diffuse"
+export * from "./face-orientation"
 export * from "./flat"
 export * from "./ghost"
 export * from "./hull"

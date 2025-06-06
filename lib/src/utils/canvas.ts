@@ -112,10 +112,8 @@ export function tgdCanvasCreateGradient(
     )
     for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
         const color = colors[colorIndex]
-        gradient.addColorStop(
-            colorIndex / (colors.length - 1),
-            isString(color) ? color : color.toString()
-        )
+        const cssColor = isString(color) ? color : color.toString()
+        gradient.addColorStop(colorIndex / (colors.length - 1), cssColor)
     }
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, width, height)

@@ -76,7 +76,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
             this.texture = new TgdTexture2D(context).loadBitmap(
                 tgdCanvasCreateGradientHorizontal(
                     128,
-                    tgdColorMakeHueWheel({ luminance: 10 })
+                    tgdColorMakeHueWheel({ luminance: 0.2 })
                 )
             )
             this.textureMustBeDeleted = true

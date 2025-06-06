@@ -1,3 +1,5 @@
+import { tgdCalcClamp, tgdCalcModulo } from "@tgd/utils"
+
 export class TgdColor {
     static fromHSL(H: number, S: number, L: number): TgdColor {
         const color = new TgdColor()
@@ -9,25 +11,25 @@ export class TgdColor {
     }
 
     /** Red [0..1] */
-    public R: number = 1
+    private _R: number = 1
 
     /** Green [0..1] */
-    public G: number = 1
+    private _G: number = 1
 
     /** Blue [0..1] */
-    public B: number = 1
+    private _B: number = 1
 
     /** Alpha [0..1] */
-    public A: number = 1
+    private _A: number = 1
 
     /** Hue [0..1] */
-    public H: number = 1
+    private _H: number = 1
 
     /** Saturation [0..1] */
-    public S: number = 1
+    private _S: number = 1
 
     /** Lumimance [0..1] */
-    public L: number = 1
+    private _L: number = 1
 
     constructor(r: number | string = 0, g = 0, b = 0, a = 1) {
         if (typeof r === "string") {
@@ -38,6 +40,55 @@ export class TgdColor {
             this.B = b
             this.A = a
         }
+    }
+
+    get R() {
+        return this._R
+    }
+    set R(v: number) {
+        this._R = tgdCalcClamp(v, 0, 1)
+    }
+
+    get G() {
+        return this._G
+    }
+    set G(v: number) {
+        this._G = tgdCalcClamp(v, 0, 1)
+    }
+
+    get B() {
+        return this._B
+    }
+    set B(v: number) {
+        this._B = tgdCalcClamp(v, 0, 1)
+    }
+
+    get A() {
+        return this._A
+    }
+    set A(v: number) {
+        this._A = tgdCalcClamp(v, 0, 1)
+    }
+
+    get H() {
+        return this._H
+    }
+    set H(v: number) {
+        this._H = tgdCalcModulo(v, 0, 1)
+    }
+
+    get S() {
+        return this._S
+    }
+    set S(v: number) {
+        this._S = tgdCalcClamp(v, 0, 1)
+    }
+
+    get L() {
+        return this._L
+    }
+    set L(v: number) {
+        this._L = tgdCalcClamp(v, 0, 1)
     }
 
     parse(color: string) {

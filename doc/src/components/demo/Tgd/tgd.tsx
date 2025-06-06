@@ -78,7 +78,10 @@ export default function Tgd({
                 context.paint()
                 setLoading(false)
             })
-            .catch(() => setLoading(false))
+            .catch(ex => {
+                console.error("Unable to initialize the scene!", ex)
+                setLoading(false)
+            })
         const gizmo = refGizmo.current
         if (gizmo) gizmo.attachContext(context)
     }

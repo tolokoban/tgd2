@@ -53,7 +53,7 @@ class VolumeToMeshManager {
         const triangles = new PainterTriangles(context)
         this.trianglesPainter = triangles
         state.add(
-            new TgdPainterAxes(context, { scale: 2 }),
+            // new TgdPainterAxes(context, { scale: 2 }),
             new PainterCube(context),
             wireframe,
             new TgdPainterState(context, {
