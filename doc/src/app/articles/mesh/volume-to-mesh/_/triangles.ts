@@ -7,12 +7,7 @@ import {
     TgdShaderVertex,
     TgdVertexArray,
 } from "@tolokoban/tgd"
-import {
-    cubeEdges,
-    cubeMidPoints,
-    cubeVertices,
-    trianglesStringToElements,
-} from "./geometry"
+import { cubeMidPoints, trianglesStringToElements } from "./geometry"
 
 export class PainterTriangles extends TgdPainter {
     private readonly dataset: TgdDataset

@@ -12,6 +12,7 @@ import {
     TgdPainterPointsCloud,
     TgdPainterState,
     tgdSdfCapsule,
+    tgdSdfSphere,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
@@ -26,18 +27,20 @@ function init(ctx: TgdContext) {
     const options: MakeGeometryFromVolumeOptions = {
         bboxCorner: [-2, -2, -2],
         bboxSize: [4, 4, 4],
-        voxelSize: 1 / 16,
+        voxelSize: 1 / 8,
         sdfPoint(x, y, z) {
             const p: ArrayNumber3 = [x, y, z]
-            const a: ArrayNumber3 = [-1, 0, 0]
-            const b: ArrayNumber3 = [+1, 0, 0]
-            const c: ArrayNumber3 = [-1, +1, 0]
-            return tgdSdfCapsule(p, a, b, 0.5, 0)
-            // return Math.min(
-            //     tgdSdfCapsule(p, a, b, 0.5, 0),
-            //     tgdSdfCapsule(p, a, c, 0.25, 0.1)
-            // )
+            const o: ArrayNumber3 = [0, 0.5, 0]
+            return Math.min(
+                tgdSdfCapsule(p, o, [0, -1, -0.4], 0.5, 0.2),
+                tgdSdfCapsule(p, o, [1.2, -1.6, 1.6], 0.5, 0.3),
+                tgdSdfCapsule(p, o, [-1.5, -1, -1.2], 0.5, 0.1),
+                tgdSdfCapsule(p, o, [-1.2, -1.5, 1.2], 0.5, 0.2),
+                tgdSdfCapsule(p, o, [-0.2, 1.5, 0.2], 0.5, 0.4),
+                tgdSdfSphere(p, [0, 0, 0], 0.8)
+            )
         },
+        smoothingLevel: 2,
     }
     const geometry = tgdMakeGeometryFromVolume(options)
     const mesh = new TgdPainterMesh(ctx, {
@@ -45,13 +48,12 @@ function init(ctx: TgdContext) {
         material: new TgdMaterialFaceOrientation(),
     })
     const dataPoint = tgdMakePointsCloudFromVolume(options, 1)
-    console.log("🚀 [marching-cubes.demo] dataPoint =", dataPoint) // @FIXME: Remove this line written on 2025-06-06 at 15:42
-    const cloud = new TgdPainterPointsCloud(ctx, {
-        dataPoint,
-    })
+    // const cloud = new TgdPainterPointsCloud(ctx, {
+    //     dataPoint,
+    // })
     const state = new TgdPainterState(ctx, {
         depth: webglPresetDepth.less,
-        children: [cloud, mesh],
+        children: [mesh],
     })
     ctx.add(
         new TgdPainterClear(ctx, { color: [0.2, 0.2, 0.2, 1], depth: 1 }),

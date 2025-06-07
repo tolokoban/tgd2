@@ -13,10 +13,12 @@ export type TgdMaterialFaceOrientationOptions = Partial<{
 }>
 
 export class TgdMaterialFaceOrientation extends TgdMaterial {
-    public light = new TgdLight()
+    public light = new TgdLight({
+        direction: new TgdVec3(0.1, 0.2, -1).normalize(),
+    })
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 20
-    public specularIntensity = 1
+    public specularIntensity = 0.5
 
     public readonly varyings: { [name: string]: WebglAttributeType }
     public readonly uniforms: { [name: string]: WebglUniformType } = {
@@ -48,11 +50,10 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
             this.specularIntensity = options.specularIntensity
         }
         this.fragmentShaderCode = [
-            "vec3 normal = normalize(varNormal);",
+            "vec3 normal = mat3(uniModelViewMatrix) * normalize(varNormal);",
             `float light = 1.0 - dot(normal, uniLightDir);`,
             `vec4 color = vec4(0.8 * (gl_FrontFacing ? vec3(0, .5, 1) : vec3(1, 0, 0)), 1.0);`,
-            `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
-            `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
+            `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
             `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
             `color = vec4(`,
             `  color.rgb * (`,

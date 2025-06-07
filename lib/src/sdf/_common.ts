@@ -26,5 +26,5 @@ export function scale(a: Vec3, f: number): Vec3 {
 
 export function sign(v: number) {
     if (v === 0) return 0
-    return v < 1 ? -1 : +1
+    return v < 0 ? -1 : +1
 }
