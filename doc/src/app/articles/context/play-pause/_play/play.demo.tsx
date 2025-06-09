@@ -33,15 +33,6 @@ function init(ctx: TgdContext) {
         else ctx.play()
     })
     // #end
-    new TgdControllerCameraOrbit(ctx, {
-        geo: {
-            maxLng: 0,
-            minLng: 0,
-            minLat: tgdCalcDegToRad(-60),
-            maxLat: tgdCalcDegToRad(+60),
-        },
-        inertiaOrbit: 1000,
-    })
 }
 
 export default function Demo() {

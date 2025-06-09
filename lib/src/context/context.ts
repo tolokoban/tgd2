@@ -223,12 +223,8 @@ export class TgdContext extends TgdPainterGroup {
     play() {
         this.playing = true
         if (this.pauseTime > 0) {
-            this.pauseAccumulation += Date.now() - this.pauseTime
+            this.pauseAccumulation += this.time - this.pauseTime
         }
-        console.log(
-            "🚀 [context] this.pauseAccumulation =",
-            this.pauseAccumulation
-        ) // @FIXME: Remove this line written on 2025-06-09 at 12:20
     }
 
     /**
@@ -239,8 +235,7 @@ export class TgdContext extends TgdPainterGroup {
      */
     pause() {
         this.playing = false
-        this.pauseTime = Date.now()
-        console.log("🚀 [context] this.pauseTime =", this.pauseTime) // @FIXME: Remove this line written on 2025-06-09 at 12:20
+        this.pauseTime = this.time
     }
 
     takeSnapshotToCanvas(target: HTMLCanvasElement) {
@@ -297,8 +292,6 @@ export class TgdContext extends TgdPainterGroup {
             if (this.playing) {
                 // the pause is like a frozen time.
                 time -= this.pauseAccumulation
-            } else {
-                time = this.pauseTime
             }
             const { gl } = this
             const delay = time - this.lastTime
