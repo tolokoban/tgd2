@@ -12,6 +12,10 @@ export type TgdMaterialFaceOrientationOptions = Partial<{
     specularIntensity: number
 }>
 
+/**
+ * This material is useful to debug meshes.
+ * The outside faces are blue and the inside one are red.
+ */
 export class TgdMaterialFaceOrientation extends TgdMaterial {
     public light = new TgdLight({
         direction: new TgdVec3(0.1, 0.2, -1).normalize(),

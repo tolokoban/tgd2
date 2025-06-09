@@ -25,7 +25,7 @@ export class TgdCanvasLandscape {
 
         this._canvas = canvas
         if (this.context) {
-            this.context.destroy()
+            this.context.delete()
             this.context = null
         }
         if (!canvas) return

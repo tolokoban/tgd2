@@ -1,15 +1,13 @@
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdInputs } from "@tgd/input"
-import { TgdPainterFunction as TgdPainterFunctionType } from "@tgd/types/painter"
 import { TgdPainterGroup } from "../painter/group"
-import { TgdPainter } from "../painter/painter"
 import { tgdCanvasCreate } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
 import { TgdEvent } from "../event"
 
 /**
- * You can pass all the attributes of the [WebGLContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGLContextAttributes)
+ * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
  * object.
  * @see {@link TgdContext}
  */
@@ -45,7 +43,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
  * This class gives you a [WebGL2RenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext) for a given canvas,
  * through its public readonly attribute `gl`.
  *
- * It also acts as a resource manager for most of the WebGL2 reources you need.
+ * It also takes care of the canvas resizing and the animation frames.
  *
  * @example
  * ```
@@ -59,7 +57,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
  * }
  * ```
  */
-export class TgdContext {
+export class TgdContext extends TgdPainterGroup {
     private static incrementalId = 1
 
     public readonly name: string
@@ -81,7 +79,6 @@ export class TgdContext {
     private _aspectRatio = 1
     private _aspectRatioInverse = 1
     private readonly observer: ResizeObserver
-    private readonly painters: TgdPainterGroup
     private paintingIsOngoing = false
     // We need to start another paiting after the current one is finished
     private paintingIsQueued = false
@@ -91,6 +88,10 @@ export class TgdContext {
     private lastTime = -1
     // Difference between `Data.now()` and the time in `requestAnimationFrame()`.
     private timeShift = 0
+    // Last time `pause()` was called.
+    private pauseTime = 0
+    // Number of seconds while we have been in pause.
+    private pauseAccumulation = 0
     private readonly animationManager = new TgdManagerAnimation()
 
     /**
@@ -101,6 +102,7 @@ export class TgdContext {
         public readonly canvas: HTMLCanvasElement,
         private readonly options: TgdContextOptions = {}
     ) {
+        super()
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
@@ -131,9 +133,7 @@ export class TgdContext {
         this.observer.observe(canvas)
         this.inputs = new TgdInputs(canvas)
         if (options.camera) this._camera = options.camera
-        this.painters = new TgdPainterGroup()
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
-        this.painters.name = this.name
         // Prevent system gestures.
         canvas.style.touchAction = "none"
         this.stateReset()
@@ -145,10 +145,6 @@ export class TgdContext {
 
     get time() {
         return Date.now() + this.timeShift
-    }
-
-    debugHierarchy() {
-        return this.painters.debugHierarchy()
     }
 
     get camera() {
@@ -177,20 +173,6 @@ export class TgdContext {
 
     animCancel(animation: TgdAnimation) {
         this.animationManager.cancel(animation)
-    }
-
-    get onEnter(): TgdPainterFunctionType | undefined {
-        return this.painters.onEnter
-    }
-    set onEnter(v: TgdPainterFunctionType | undefined) {
-        this.painters.onEnter = v
-    }
-
-    get onExit(): TgdPainterFunctionType | undefined {
-        return this.painters.onExit
-    }
-    set onExit(v: TgdPainterFunctionType | undefined) {
-        this.painters.onExit = v
     }
 
     get width() {
@@ -240,6 +222,13 @@ export class TgdContext {
      */
     play() {
         this.playing = true
+        if (this.pauseTime > 0) {
+            this.pauseAccumulation += Date.now() - this.pauseTime
+        }
+        console.log(
+            "🚀 [context] this.pauseAccumulation =",
+            this.pauseAccumulation
+        ) // @FIXME: Remove this line written on 2025-06-09 at 12:20
     }
 
     /**
@@ -250,41 +239,11 @@ export class TgdContext {
      */
     pause() {
         this.playing = false
+        this.pauseTime = Date.now()
+        console.log("🚀 [context] this.pauseTime =", this.pauseTime) // @FIXME: Remove this line written on 2025-06-09 at 12:20
     }
 
-    /**
-     * Check if `painter` already exist in the current list of painters.
-     */
-    has(painter: TgdPainter): boolean {
-        return this.painters.has(painter)
-    }
-
-    /**
-     * Add one or more painters.
-     */
-    add(...painters: TgdPainter[]) {
-        this.painters.add(...painters)
-    }
-
-    /**
-     * Add one or more painters at the beginning of the list.
-     */
-    addFirst(...painters: TgdPainter[]) {
-        this.painters.addFirst(...painters)
-    }
-
-    /**
-     * Remove one or more painters.
-     * */
-    remove(...painters: TgdPainter[]) {
-        this.painters.remove(...painters)
-    }
-
-    removeAll() {
-        this.painters.removeAll()
-    }
-
-    takeSnapshot(target: HTMLCanvasElement) {
+    takeSnapshotToCanvas(target: HTMLCanvasElement) {
         const context_ = target.getContext("2d")
         if (!context_)
             throw new Error(
@@ -294,7 +253,7 @@ export class TgdContext {
         const { width, height } = target
         const canvas = tgdCanvasCreate(width, height)
         const context = new TgdContext(canvas, this.options)
-        this.painters.forEachChild(painter => context.add(painter))
+        this.forEachChild(painter => context.add(painter))
         context.actualPaint(this.lastTime)
         context.gl.finish()
         context_.drawImage(canvas, 0, 0)
@@ -325,16 +284,23 @@ export class TgdContext {
     }
 
     private readonly actualPaint = (time: number) => {
+        if (this.lastTime < 0) {
+            this.lastTime = time
+            this.paintingIsOngoing = false
+            this.paintingIsQueued = false
+            // First frame, let's skip it to get better timing.
+            this.paint()
+            return
+        }
         try {
             this.timeShift = time - Date.now()
-            const { lastTime, gl } = this
-            if (lastTime < 0) {
-                this.lastTime = time
-                // First frame, let's skip it to get better timing.
-                this.paint()
-                return
+            if (this.playing) {
+                // the pause is like a frozen time.
+                time -= this.pauseAccumulation
+            } else {
+                time = this.pauseTime
             }
-
+            const { gl } = this
             const delay = time - this.lastTime
             this._fps = Math.round(1 / delay)
             this.lastTime = time
@@ -345,8 +311,7 @@ export class TgdContext {
 
             const timeInSec = time * 1e-3
             const delayInSec = delay * 1e-3
-            this.painters.paint(timeInSec, delayInSec)
-            this.eventPaint.dispatch(this)
+            super.paint(timeInSec, delayInSec)
             if (
                 this.paintingIsQueued ||
                 this.animationManager.paint(timeInSec) ||
@@ -355,6 +320,7 @@ export class TgdContext {
                 this.paintingIsOngoing = false
                 this.paint()
             }
+            this.eventPaint.dispatch(this)
         } catch (error) {
             console.error(error)
         } finally {
@@ -362,10 +328,10 @@ export class TgdContext {
         }
     }
 
-    destroy() {
+    delete() {
         this.pause()
-        this.painters.delete()
         this.observer.unobserve(this.canvas)
+        super.delete()
     }
 
     stateReset() {

@@ -31,7 +31,7 @@ export class FilterManager {
         this.texture = texture
         this.destroy = () => {
             texture.delete()
-            context.destroy()
+            context.delete()
         }
     }
 

@@ -34,7 +34,7 @@ class VolumeToMeshManager {
         new TgdControllerCameraOrbit(context, {
             inertiaOrbit: 1000,
         })
-        if (this._context) this._context.destroy()
+        if (this._context) this._context.delete()
         this._context = context
         const clear = new TgdPainterClear(context, {
             color: [0, 0, 0, 1],

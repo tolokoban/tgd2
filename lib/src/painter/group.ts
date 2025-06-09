@@ -14,7 +14,7 @@ export class TgdPainterGroup extends TgdPainter {
     public active = true
     public onEnter: TgdPainterFunction | undefined
     public onExit: TgdPainterFunction | undefined
-    private readonly painters: TgdPainter[]
+    protected readonly painters: TgdPainter[]
 
     constructor(
         painters: TgdPainter[] = [],

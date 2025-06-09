@@ -9,7 +9,6 @@ import {
     TgdPainterAxes,
     TgdPainterClear,
     TgdPainterMesh,
-    TgdPainterPointsCloud,
     TgdPainterState,
     tgdSdfCapsule,
     tgdSdfSphere,
@@ -47,10 +46,6 @@ function init(ctx: TgdContext) {
         geometry,
         material: new TgdMaterialFaceOrientation(),
     })
-    const dataPoint = tgdMakePointsCloudFromVolume(options, 1)
-    // const cloud = new TgdPainterPointsCloud(ctx, {
-    //     dataPoint,
-    // })
     const state = new TgdPainterState(ctx, {
         depth: webglPresetDepth.less,
         children: [mesh],

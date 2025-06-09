@@ -84,7 +84,7 @@ export class TgdCanvasGizmo {
         this._canvas = canvas
         if (this.context) {
             this.context.inputs.pointer.eventTap.removeListener(this.handleTap)
-            this.context.destroy()
+            this.context.delete()
             this.context = null
             const { orbiter } = this
             if (orbiter) {
