@@ -79,13 +79,13 @@ export default env => {
         },
         plugins: [
             new Webpack.ProgressPlugin(),
-            new WebpackShellPluginNext({
-                onBeforeCompile:{
-                  scripts: ['npm run generate'],
-                  blocking: true,
-                  parallel: false
-                },
-              }),
+            // new WebpackShellPluginNext({
+            //     onBeforeCompile:{
+            //       scripts: ['npm run generate'],
+            //       blocking: true,
+            //       parallel: false
+            //     },
+            //   }),
             // // List of the needed files for later caching.
             // new WebpackManifestPlugin({
             //     filter: (file) => {
