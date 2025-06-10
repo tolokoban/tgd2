@@ -66,27 +66,7 @@ function init(context: TgdContext) {
                 position: [0, 0, -3],
             },
         })
-        const box = new TgdPainterNode({
-            children: [
-                new TgdPainterMesh(context, {
-                    geometry: new TgdGeometryBox(),
-                    material: new TgdMaterialNormals(),
-                }),
-            ],
-            transfo: {
-                position: [0, 0, 2],
-            },
-        })
-        const box2 = new TgdPainterNode({
-            children: [
-                new TgdPainterMesh(context, {
-                    geometry: new TgdGeometryBox(),
-                    material: new TgdMaterialDiffuse(),
-                }),
-            ],
-            transfo: { position: [0, 1, 0] },
-        })
-        mesh.add(box.add(box2))
+        const axes = new TgdPainterAxes(context, { scale: 10 })
         const state = new TgdPainterState(context, {
             depth: webglPresetDepth.less,
             children: [
@@ -95,28 +75,17 @@ function init(context: TgdContext) {
                     depth: 1,
                 }),
                 mesh,
-                new TgdPainterAxes(context, { scale: 10 }),
+                axes,
             ],
         })
-        const fb = new TgdPainterFramebuffer(context, {
-            depthBuffer: true,
-            viewportMatchingScale: 1,
-        })
-        fb.add(state)
         const hue = new TgdFilterHueRotation()
         context.add(
-            // fb,
             state,
-            new TgdPainterFilter(context, {
-                filters: [hue],
-                texture: fb.textureColor0,
-                flipY: true,
-            }),
             new TgdPainterLogic((time, delay) => {
-                mesh.transfo.orbitAroundY(delay)
-                box.transfo.orbitAroundZ(delay * 1.3)
-                const s = 1 + 0.5 * Math.sin(time)
-                box2.transfo.orbitAroundY(-delay).setScale(s, s, s)
+                const { camera } = context
+                const { axisX, axisY, axisZ } = camera.transfo
+                axes.updateAxes(axisX, axisY, axisZ)
+                console.log("🚀 [index] axisX.x =", axisX.x) // @FIXME: Remove this line written on 2025-06-10 at 18:13
             })
         )
         context.play()

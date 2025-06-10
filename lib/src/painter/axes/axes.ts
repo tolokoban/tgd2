@@ -3,10 +3,11 @@ import { TgdProgram } from "@tgd/program"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdVec4 } from "@tgd/math"
+import { TgdVec3, TgdVec4 } from "@tgd/math"
 
 import VERT from "./axes.vert"
 import FRAG from "./axes.frag"
+import { ArrayNumber3 } from "@tgd/types"
 
 export type TgdPainterAxesOptions = {
     x: number
@@ -18,6 +19,7 @@ export type TgdPainterAxesOptions = {
 export class TgdPainterAxes extends TgdPainter {
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
+    private readonly dataset: TgdDataset
     private readonly translateAndScale: TgdVec4
 
     constructor(
@@ -34,6 +36,7 @@ export class TgdPainterAxes extends TgdPainter {
             attPos: "vec3",
             attColor: "vec4",
         })
+        this.dataset = dataset
         // prettier-ignore
         dataset.set("attPos", new Float32Array([
             0, 0, 0, +1, +0, +0,
@@ -56,6 +59,23 @@ export class TgdPainterAxes extends TgdPainter {
         ]))
         this.vao = new TgdVertexArray(context.gl, prg, [dataset])
         this.translateAndScale = new TgdVec4(x, y, z, scale)
+    }
+
+    updateAxes(
+        [Xx, Xy, Xz]: TgdVec3 | ArrayNumber3,
+        [Yx, Yy, Yz]: TgdVec3 | ArrayNumber3,
+        [Zx, Zy, Zz]: TgdVec3 | ArrayNumber3
+    ) {
+        // prettier-ignore
+        this.dataset.set("attPos", new Float32Array([
+            0, 0, 0, +Xx, +Xy, +Xz,
+            0, 0, 0, +Yx, +Yy, +Yz,
+            0, 0, 0, +Zx, +Zy, +Zz,
+            0, 0, 0, -Xx, -Xy, -Xz,
+            0, 0, 0, -Yx, -Yy, -Yz,
+            0, 0, 0, -Zx, -Zy, -Zz,
+        ]))
+        this.vao.updateDataset(this.dataset)
     }
 
     get x(): number {

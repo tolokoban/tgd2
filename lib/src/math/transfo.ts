@@ -103,9 +103,18 @@ export class TgdTransfo {
             this._position,
             this._scale
         )
-        m.toAxisX(this._axisX)
-        m.toAxisY(this._axisY)
-        m.toAxisZ(this._axisZ)
+        const X = this._axisX
+        const Y = this._axisY
+        const Z = this._axisZ
+        X.x = m.m00
+        X.y = m.m10
+        X.z = m.m20
+        Y.x = m.m01
+        Y.y = m.m11
+        Y.z = m.m21
+        Z.x = m.m02
+        Z.y = m.m12
+        Z.z = m.m22
         const d = this._distance
         if (d !== 0) {
             this.tmpVec3.reset(0, 0, d).applyQuaternion(this._orientation)

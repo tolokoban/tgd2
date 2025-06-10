@@ -133,6 +133,29 @@ export class TgdMat4 extends Float32Array {
         return this
     }
 
+    transpose(): this {
+        // prettier-ignore
+        const {
+            m01, m02, m03,
+            m10, m12, m13,
+            m20, m21, m23,
+            m30, m31, m32,
+        } = this
+        this.m01 = m10
+        this.m02 = m20
+        this.m03 = m30
+        this.m10 = m01
+        this.m12 = m21
+        this.m13 = m31
+        this.m20 = m02
+        this.m21 = m12
+        this.m23 = m32
+        this.m30 = m03
+        this.m31 = m13
+        this.m32 = m23
+        return this
+    }
+
     multiply(mat: TgdMat4): this {
         mat4.multiply(this, this, mat)
         return this
