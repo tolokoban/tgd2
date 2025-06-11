@@ -132,14 +132,26 @@ class VolumeHelper {
     private readonly _cache = new Map<string, number>()
 
     constructor(private readonly options: MakeGeometryFromVolumeOptions) {
+        let { voxelSize } = options
+        if (voxelSize <= 0) {
+            throw new Error(
+                `We cannot do marching cube with voxels so small: ${voxelSize}`
+            )
+        }
         const time0 = Date.now()
         this.configurations = tgdDataMarchingCubesConfigurations()
         this.corners = tgdDataMarchingCubesVoxelCorners()
         this.midPoints = tgdDataMarchingCubesVoxelMidPoints()
-        const { bboxSize, voxelSize } = options
-        this.dimX = Math.ceil(bboxSize[0] / voxelSize)
-        this.dimY = Math.ceil(bboxSize[1] / voxelSize)
-        this.dimZ = Math.ceil(bboxSize[2] / voxelSize)
+        const { bboxSize } = options
+        while (true) {
+            this.dimX = Math.ceil(bboxSize[0] / voxelSize)
+            this.dimY = Math.ceil(bboxSize[1] / voxelSize)
+            this.dimZ = Math.ceil(bboxSize[2] / voxelSize)
+            if (this.dimX * this.dimY * this.dimZ < 1e9) break
+
+            // Volume is too big, let's double the size of the voxel.
+            voxelSize *= 2
+        }
         this.volume = this.computeVolume()
         console.log("Volume: ", Date.now() - time0, "ms")
     }

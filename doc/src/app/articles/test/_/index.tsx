@@ -20,6 +20,8 @@ import {
     TgdPainterNode,
     TgdMaterialGhost,
     TgdMaterialDiffuse,
+    TgdPainterSegments,
+    TgdPainterSegmentsData,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -32,15 +34,15 @@ export default function DemoContainer() {
 
 function init(context: TgdContext) {
     const camera = new TgdCameraPerspective({
-        transfo: { distance: 15 },
+        transfo: { distance: 5 },
         far: 100,
         near: 0.1,
-        fovy: Math.PI / 8,
+        fovy: Math.PI / 2,
         zoom: 1,
     })
     context.camera = camera
     camera.transfo.orientation.face("+X+Y+Z")
-    camera.transfo.setPosition(0, 0, -3)
+    camera.transfo.setPosition(0, 0, 0)
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
         geo: {
@@ -56,17 +58,10 @@ function init(context: TgdContext) {
         if (!asset) return
 
         console.log("Suzanne has been loaded!")
-        const mesh = new TgdPainterNode({
-            children: [
-                new TgdPainterMeshGltf(context, {
-                    asset,
-                }),
-            ],
-            transfo: {
-                position: [0, 0, -3],
-            },
-        })
         const axes = new TgdPainterAxes(context, { scale: 10 })
+        const segments = new TgdPainterSegmentsData()
+        segments.add([0, 0, 0, 0.2], [5, 0, 0, 1])
+        segments.add([3, 0, 0, 1], [3, 3, 0, 0.5], [1, 1], [1, 1])
         const state = new TgdPainterState(context, {
             depth: webglPresetDepth.less,
             children: [
@@ -74,21 +69,15 @@ function init(context: TgdContext) {
                     color: [0.2, 0.1, 0, 1],
                     depth: 1,
                 }),
-                mesh,
                 axes,
+                new TgdPainterSegments(context, {
+                    makeDataset: segments.makeDataset,
+                    roundness: 6,
+                }),
             ],
         })
-        const hue = new TgdFilterHueRotation()
-        context.add(
-            state,
-            new TgdPainterLogic((time, delay) => {
-                const { camera } = context
-                const { axisX, axisY, axisZ } = camera.transfo
-                axes.updateAxes(axisX, axisY, axisZ)
-                console.log("🚀 [index] axisX.x =", axisX.x) // @FIXME: Remove this line written on 2025-06-10 at 18:13
-            })
-        )
-        context.play()
+        context.add(state)
+        context.paint()
         document.addEventListener("keydown", evt => {
             const step = tgdCalcDegToRad(15)
             let angX = 0

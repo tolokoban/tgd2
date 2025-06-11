@@ -11,6 +11,7 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeHighlightCodeLines from "rehype-highlight-code-lines"
 import highlightJs from "highlight.js"
 import WebpackShellPluginNext from "webpack-shell-plugin-next"
+import MiniCssExtractPlugin from "mini-css-extract-plugin"
 import Webpack from "webpack"
 import path from "path"
 
@@ -123,6 +124,7 @@ export default env => {
                     removeComments: isProdMode,
                 },
             }),
+            new MiniCssExtractPlugin(),
         ],
         performance: {
             hints: "warning",
@@ -213,12 +215,13 @@ export default env => {
                 {
                     test: /\.css$/,
                     use: [
-                        {
-                            loader: "style-loader",
-                            options: {
-                                injectType: "styleTag",
-                            },
-                        },
+                        // {
+                        //     loader: "style-loader",
+                        //     options: {
+                        //         injectType: "styleTag",
+                        //     },
+                        // },
+                        { loader: MiniCssExtractPlugin.loader, options: {} },
                         {
                             loader: "css-loader",
                             options: {

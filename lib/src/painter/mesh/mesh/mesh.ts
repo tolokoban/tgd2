@@ -81,7 +81,7 @@ export class TgdPainterMesh
                 ],
             },
             mainCode: [
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * getPosition(POSITION);",
+                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * getPosition(${geometry.attPosition});`,
                 "applyMaterial();",
             ],
         }).code

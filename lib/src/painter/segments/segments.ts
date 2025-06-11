@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-single-call */
 /* eslint-disable unicorn/no-useless-spread */
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
@@ -11,17 +12,14 @@ import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreatePalette } from "@tgd/utils"
 import { TgdCamera } from "@tgd/camera"
 import { TgdVec3 } from "@tgd/math"
+import { TgdGeometry } from "@tgd/geometry"
+import { TgdPainterMesh } from "../mesh"
+import { TgdMaterialFaceOrientation } from "@tgd/material"
 
 export type TgdPainterSegmentsOptions = {
     /**
-     * How round the tip will be?
-     *  - **0** means that the tip is flat.
-     *  - **1** will gives you a triangled tip.
-     *  - **>1** starts to have a semi-circle shape.
-     *
-     * **0** is the fastest to render, but you will have
-     * a bad connection at joints between segments.
-     *
+     * Number of faces around the cylinder.
+     * Min is 3.
      * Default to **3**.
      */
     roundness: number
@@ -64,10 +62,12 @@ export class TgdPainterSegments extends TgdPainter {
     public specularIntensity = 0.4
     public specularExponent = 30
 
-    private readonly vao: TgdVertexArray
-    private readonly prg: TgdProgram
-    private readonly vertexCount: number
-    private readonly instanceCount: number
+    // private readonly vao: TgdVertexArray
+    // private readonly prg: TgdProgram
+    // private readonly vertexCount: number
+    // private readonly instanceCount: number
+
+    private readonly painter: TgdPainter
 
     constructor(
         protected readonly context: {
@@ -95,72 +95,78 @@ export class TgdPainterSegments extends TgdPainter {
                 wrapS: "CLAMP_TO_EDGE",
                 wrapT: "CLAMP_TO_EDGE",
             })
-            .loadBitmap(tgdCanvasCreatePalette(["#f44", "#4f4", "#44f"]))
-        const prg = new TgdProgram(context.gl, {
-            vert: VERT,
-            frag: FRAG,
+            .loadBitmap(tgdCanvasCreatePalette(["#f44", "#4f4", "#47f"]))
+        // const prg = new TgdProgram(context.gl, {
+        //     vert: VERT,
+        //     frag: FRAG,
+        // })
+        // this.prg = prg
+        const geometry = makeCapsule(roundness)
+        this.painter = new TgdPainterMesh(context, {
+            geometry,
+            material: new TgdMaterialFaceOrientation(),
         })
-        this.prg = prg
-        const { capsule, elements } = makeCapsule(roundness)
-        const instance = makeDataset()
-        instance.debug()
-        this.vao = new TgdVertexArray(
-            context.gl,
-            prg,
-            [capsule, instance],
-            elements
-        )
-        this.vertexCount = elements.length
-        this.instanceCount = instance.count
+        // const instance = makeDataset()
+        // instance.debug()
+        // this.vao = new TgdVertexArray(
+        //     context.gl,
+        //     prg,
+        //     [capsule, instance],
+        //     elements
+        // )
+        // this.vertexCount = elements.length
+        // this.instanceCount = instance.count
     }
 
     delete(): void {
-        this.vao.delete()
+        // this.vao.delete()
+        this.painter.delete()
     }
 
     paint(_time: number, _delay: number): void {
-        const {
-            context,
-            prg,
-            vao,
-            colorTexture,
-            vertexCount,
-            instanceCount,
-            light,
-            radiusMultiplier,
-            radiusConstant,
-            radiusSwitch,
-            shiftZ,
-            contrast,
-            specularIntensity,
-            specularExponent,
-        } = this
-        const { gl, camera } = context
-        gl.disable(gl.DITHER)
-        prg.use()
-        const minRadius =
-            (this.minRadius * camera.spaceHeightAtTarget) /
-            (camera.zoom * camera.screenHeight)
-        prg.uniform1f("uniMinRadius", minRadius)
-        prg.uniform1f("uniLight", light)
-        prg.uniform1f("uniShiftZ", shiftZ)
-        prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
-        prg.uniform1f("uniRadiusConstant", radiusConstant)
-        prg.uniform1f("uniRadiusSwitch", radiusSwitch)
-        prg.uniform1f("uniContrast", contrast)
-        prg.uniform1f("uniSpecularIntensity", specularIntensity)
-        prg.uniform1f("uniSpecularExponent", specularExponent)
-        colorTexture.activate(0, prg, "uniTexture")
-        prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
-        prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        vao.bind()
-        gl.drawElementsInstanced(
-            gl.TRIANGLES,
-            vertexCount,
-            gl.UNSIGNED_BYTE,
-            0,
-            instanceCount
-        )
+        this.painter.paint(_time, _delay)
+        // const {
+        //     context,
+        //     prg,
+        //     vao,
+        //     colorTexture,
+        //     vertexCount,
+        //     instanceCount,
+        //     light,
+        //     radiusMultiplier,
+        //     radiusConstant,
+        //     radiusSwitch,
+        //     shiftZ,
+        //     contrast,
+        //     specularIntensity,
+        //     specularExponent,
+        // } = this
+        // const { gl, camera } = context
+        // gl.disable(gl.DITHER)
+        // prg.use()
+        // const minRadius =
+        //     (this.minRadius * camera.spaceHeightAtTarget) /
+        //     (camera.zoom * camera.screenHeight)
+        // prg.uniform1f("uniMinRadius", minRadius)
+        // prg.uniform1f("uniLight", light)
+        // prg.uniform1f("uniShiftZ", shiftZ)
+        // prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
+        // prg.uniform1f("uniRadiusConstant", radiusConstant)
+        // prg.uniform1f("uniRadiusSwitch", radiusSwitch)
+        // prg.uniform1f("uniContrast", contrast)
+        // prg.uniform1f("uniSpecularIntensity", specularIntensity)
+        // prg.uniform1f("uniSpecularExponent", specularExponent)
+        // colorTexture.activate(0, prg, "uniTexture")
+        // prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
+        // prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        // vao.bind()
+        // gl.drawElementsInstanced(
+        //     gl.TRIANGLES,
+        //     vertexCount,
+        //     gl.UNSIGNED_BYTE,
+        //     0,
+        //     instanceCount
+        // )
     }
 }
 
@@ -230,83 +236,72 @@ export class TgdPainterSegmentsData {
 
 type CapsuleDataset = TgdDataset
 
+const TAU = 2 * Math.PI
+
 /**
- * The capsule is a 2D shape (x,y) that will be used
- * as a pattern for the segment.
- * The segment will expand this template along Y axis.
- * The tip pointing toward +Y is called A.
- * The tip pointing toward -Y is called B.
- * The z coodinates indicates to which tip the point
- * is attached: 0 for A and 1 for B.
+ * The capsule is a 3D shape mae of a cylinder
+ * and two hemispheres, all of radius 1.
+ * The roundness gives use the number of faces around the cylinder.
+ * Every vertex has 4 coordinates: x, y, z, and a number that will
+ * be 0.0 for bottom tip, and 1.1 for top tip.
+ * The cylinder is aligned along Z axis.
  */
-function makeCapsule(roundness: number): {
-    capsule: CapsuleDataset
-    elements: Uint8Array
-} {
-    // prettier-ignore
-    const offset: number[] = [
-        ...[0, 0, 0], // 0
-        ...[1, 0, 0], // 1
-        ...[-1, 0, 0], // 2
-        ...[0, 0, 1], // 3
-        ...[1, 0, 1], // 4
-        ...[-1, 0, 1], // 5
-    ]
-    // prettier-ignore
-    const normal: number[] = [
-        ...[0, 0, 1],  // 0
-        ...[1, 0, 0],  // 1
-        ...[-1, 0, 0], // 2
-        ...[0, 0, 1],  // 3
-        ...[1, 0, 0],  // 4
-        ...[-1, 0, 0], // 5
-    ]
-    // prettier-ignore
-    const elements: number[] = [
-        0, 3, 1,
-        3, 4, 1,
-        0, 2, 5,
-        3, 0, 5,
-    ]
-    if (roundness > 0) {
-        let oldIndexA = 1
-        let oldIndexB = 4
-        let elementIndex = 6
-        // Temporary variable to prevent multiple new() calls.
-        const n = new TgdVec3()
-        for (
-            let roundnessStep = 0;
-            roundnessStep < roundness;
-            roundnessStep++
-        ) {
-            const ang = (Math.PI * (roundnessStep + 1)) / (roundness + 1)
-            const x = Math.cos(ang)
-            const y = Math.sin(ang)
-            // We set z to 0 because it's related to tip A.
-            offset.push(x, y, 0)
-            n.from([x, 0, 1 - Math.abs(x)]) //.normalize()
-            normal.push(n.x, n.y, n.z)
-            elements.push(0, oldIndexA, elementIndex)
-            oldIndexA = elementIndex
-            elementIndex++
-            // We set z to 1 because it's related to tip B.
-            offset.push(x, -y, 1)
-            n.from([x, 0, 1 - Math.abs(x)]).normalize()
-            normal.push(n.x, n.y, n.z)
-            elements.push(3, elementIndex, oldIndexB)
-            oldIndexB = elementIndex
-            elementIndex++
+function makeCapsule(roundness: number): TgdGeometry {
+    roundness = Math.max(3, roundness)
+    const tips: number[] = []
+    const offset: number[] = []
+    const elements: number[] = []
+    const angleStep = TAU / roundness
+    for (let face = 0; face < roundness; face++) {
+        const angle = angleStep * face
+        const x = Math.cos(angle)
+        const y = Math.sin(angle)
+        offset.push(x, y, +1)
+        tips.push(1)
+        offset.push(x, y, -1)
+        tips.push(0)
+        const top1 = face * 2
+        const bottom1 = top1 + 1
+        const top2 = ((face + 1) % roundness) * 2
+        const bottom2 = top2 + 1
+        elements.push(top2, top1, bottom1)
+        elements.push(top2, bottom1, bottom2)
+    }
+    const elementBase = elements.length
+    for (let ring = 1; ring < roundness - 1; ring++) {
+        const phi = angleStep * ring
+        const z = Math.sin(phi)
+        const radius = Math.cos(phi)
+        for (let face = 0; face < roundness; face++) {
+            const angle = angleStep * face
+            const x = Math.cos(angle) * radius
+            const y = Math.sin(angle) * radius
+            offset.push(x, y, z + 1)
+            offset.push(x, y, -z - 1)
+            const top1 = elementBase + (ring - 1) * roundness * 2 + face * 2
+            const bottom1 = top1 + roundness * 2
+            const top2 =
+                elementBase +
+                (ring - 1) * roundness * 2 +
+                ((face + 1) % roundness) * 2
+            const bottom2 = top2 + +roundness * 2
+            elements.push(top2, top1, bottom1)
+            elements.push(top2, bottom1, bottom2)
         }
-        elements.push(0, oldIndexA, 2, 3, 5, oldIndexB)
     }
     const capsule: CapsuleDataset = new TgdDataset({
-        attOffset: "vec3",
-        attNormal: "vec3",
+        attTip: "float",
+        POSITION: "vec3",
+        NORMAL: "vec3",
     })
-    capsule.set("attOffset", new Float32Array(offset))
-    capsule.set("attNormal", new Float32Array(normal))
-    return {
-        capsule,
-        elements: new Uint8Array(elements),
-    }
+    capsule.set("POSITION", new Float32Array(offset))
+    capsule.set("attTip", new Float32Array(tips))
+    const geometry = new TgdGeometry({
+        dataset: capsule,
+        elements: new Uint16Array(elements),
+        computeNormalsIfMissing: true,
+        // attPosition: "attPosition",
+        // attNormal: "attNormal",
+    })
+    return geometry
 }
