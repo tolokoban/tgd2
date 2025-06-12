@@ -40,7 +40,7 @@ for (const line of lines) {
     const bv = parseFloat(line.substring(109, 114))
     if (Number.isNaN(bv)) continue
 
-    let magnitude = parseFloat(line.substring(102, 107))
+    const magnitude = parseFloat(line.substring(102, 107))
     if (magnitude > 10) continue
 
     const id = line.substring(25, 31)

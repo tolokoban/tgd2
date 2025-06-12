@@ -1,11 +1,8 @@
-/* eslint-disable unicorn/prefer-single-call */
-/* eslint-disable unicorn/no-useless-spread */
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
 import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 
-import FRAG from "./segments.frag"
 import VERT from "./segments.vert"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
@@ -14,7 +11,9 @@ import { TgdCamera } from "@tgd/camera"
 import { TgdVec3 } from "@tgd/math"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdPainterMesh } from "../mesh"
-import { TgdMaterialFaceOrientation } from "@tgd/material"
+import { TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
+import { makeCapsule } from "./capsule"
+import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 
 export type TgdPainterSegmentsOptions = {
     /**
@@ -27,6 +26,10 @@ export type TgdPainterSegmentsOptions = {
      * With orthographic camera, this is a value in pixels.
      */
     minRadius: number
+    /**
+     * Material to apply to the resulting mesh.
+     */
+    material?: TgdMaterial
 }
 
 /**
@@ -52,7 +55,7 @@ export type TgdPainterSegmentsOptions = {
  */
 export class TgdPainterSegments extends TgdPainter {
     public colorTexture: TgdTexture2D
-    public minRadius: number = 0
+    public minRadius: number = 1
     public radiusMultiplier = 1
     public radiusConstant = 1
     public radiusSwitch = 0
@@ -62,12 +65,13 @@ export class TgdPainterSegments extends TgdPainter {
     public specularIntensity = 0.4
     public specularExponent = 30
 
-    // private readonly vao: TgdVertexArray
-    // private readonly prg: TgdProgram
-    // private readonly vertexCount: number
-    // private readonly instanceCount: number
+    private readonly vao: TgdVertexArray
+    private readonly prg: TgdProgram
+    private readonly vertexCount: number
+    private readonly instanceCount: number
+    private readonly material: TgdMaterial
 
-    private readonly painter: TgdPainter
+    // private readonly painter: TgdPainter
 
     constructor(
         protected readonly context: {
@@ -79,7 +83,10 @@ export class TgdPainterSegments extends TgdPainter {
         }
     ) {
         super()
-        const { roundness = 3, minRadius = 0, makeDataset } = options
+        const { roundness = 3, minRadius = 1, makeDataset } = options
+        const geometry = makeCapsule(roundness)
+        const material = options.material ?? new TgdMaterialFaceOrientation()
+        this.material = material
         this.minRadius = minRadius
         if (roundness > 127) {
             throw new Error("[TgdPainterSegments] Max roundness is 127!")
@@ -95,55 +102,134 @@ export class TgdPainterSegments extends TgdPainter {
                 wrapS: "CLAMP_TO_EDGE",
                 wrapT: "CLAMP_TO_EDGE",
             })
-            .loadBitmap(tgdCanvasCreatePalette(["#f44", "#4f4", "#47f"]))
-        // const prg = new TgdProgram(context.gl, {
-        //     vert: VERT,
-        //     frag: FRAG,
-        // })
-        // this.prg = prg
-        const geometry = makeCapsule(roundness)
-        this.painter = new TgdPainterMesh(context, {
-            geometry,
-            material: new TgdMaterialFaceOrientation(),
+            .loadBitmap(
+                tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
+            )
+        const vert = new TgdShaderVertex({
+            uniforms: {
+                uniTransfoMatrix: "mat4",
+                uniModelViewMatrix: "mat4",
+                uniProjectionMatrix: "mat4",
+                uniMinRadius: "float",
+                ...material.uniforms,
+            },
+            attributes: {
+                [geometry.attPosition]: "vec3",
+                [geometry.attNormal]: "vec3",
+                attTip: "float",
+                attXYZR0: "vec4",
+                attXYZR1: "vec4",
+                attUV0: "vec2",
+                attUV1: "vec2",
+            },
+            varying: material.varyings,
+            functions: {
+                applyMaterial: [
+                    "void applyMaterial() {",
+                    [material.vertexShaderCode],
+                    "}",
+                ],
+                getPosition: [
+                    "vec4 getPosition(vec4 pos) {",
+                    [material.vertexShaderCodeForGetPosition ?? "return pos;"],
+                    "}",
+                ],
+            },
+            mainCode: [
+                `vec3 normal = NORMAL;`,
+                `vec3 pos = POSITION;`,
+                `vec4 xyzr = mix(attXYZR0, attXYZR1, attTip);`,
+                `vec3 center = xyzr.xyz;`,
+                `float radius = max(`,
+                [
+                    `xyzr.w,`,
+                    `uniMinRadius * (uniProjectionMatrix * uniModelViewMatrix * vec4(center, 1)).w`,
+                ],
+                `);`,
+                `vec3 dir = attXYZR1.xyz - attXYZR0.xyz;`,
+                `float len = length(dir);`,
+                `if (len == 0.0) {`,
+                [`// Just a sphere`, `pos *= radius;`, `pos += center.xyz;`],
+                `} else {`,
+                [
+                    `// Full capsule`,
+                    `vec3 Z = dir / len;`,
+                    `vec3 v = abs(Z.z) > 0.7 ? vec3(1,0,0) : vec3(0,0,1);`,
+                    `vec3 Y = cross(v, Z);`,
+                    `vec3 X = cross(Y, Z);`,
+                    `mat3 mat = mat3(X, Y, Z);`,
+                    `pos *= radius;`,
+                    `pos = mat * pos + center.xyz;`,
+                    `normal = mat * normal;`,
+                ],
+                `}`,
+                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * vec4(pos, 1);`,
+                "applyMaterial();",
+                "varNormal = normal;",
+            ],
+        }).code
+        const frag = new TgdShaderFragment({
+            uniforms: material.uniforms,
+            outputs: { FragColor: "vec4" },
+            varying: material.varyings,
+            functions: {
+                applyMaterial: [
+                    "vec4 applyMaterial() {",
+                    [material.fragmentShaderCode],
+                    "}",
+                ],
+            },
+            mainCode: [`FragColor = applyMaterial();`],
+        }).code
+        const prg = new TgdProgram(context.gl, {
+            vert,
+            frag,
         })
-        // const instance = makeDataset()
-        // instance.debug()
-        // this.vao = new TgdVertexArray(
-        //     context.gl,
-        //     prg,
-        //     [capsule, instance],
-        //     elements
-        // )
-        // this.vertexCount = elements.length
-        // this.instanceCount = instance.count
+        prg.debug()
+        this.prg = prg
+        // this.painter = new TgdPainterMesh(context, {
+        //     geometry,
+        //     material: new TgdMaterialFaceOrientation(),
+        // })
+        const instance = makeDataset()
+        this.vao = new TgdVertexArray(
+            context.gl,
+            prg,
+            [geometry.dataset, instance],
+            geometry.elements
+        )
+        this.vertexCount = geometry.elements?.length ?? 0
+        this.instanceCount = instance.count
     }
 
     delete(): void {
-        // this.vao.delete()
-        this.painter.delete()
+        this.vao.delete()
+        this.prg.delete()
+        // this.painter.delete()
     }
 
-    paint(_time: number, _delay: number): void {
-        this.painter.paint(_time, _delay)
-        // const {
-        //     context,
-        //     prg,
-        //     vao,
-        //     colorTexture,
-        //     vertexCount,
-        //     instanceCount,
-        //     light,
-        //     radiusMultiplier,
-        //     radiusConstant,
-        //     radiusSwitch,
-        //     shiftZ,
-        //     contrast,
-        //     specularIntensity,
-        //     specularExponent,
-        // } = this
-        // const { gl, camera } = context
-        // gl.disable(gl.DITHER)
-        // prg.use()
+    paint(time: number, delay: number): void {
+        // this.painter.paint(_time, _delay)
+        const {
+            context,
+            prg,
+            vao,
+            colorTexture,
+            vertexCount,
+            instanceCount,
+            light,
+            radiusMultiplier,
+            radiusConstant,
+            radiusSwitch,
+            shiftZ,
+            contrast,
+            specularIntensity,
+            specularExponent,
+        } = this
+        const { gl, camera } = context
+        gl.disable(gl.DITHER)
+        prg.use()
+        this.material.setUniforms(prg, time, delay)
         // const minRadius =
         //     (this.minRadius * camera.spaceHeightAtTarget) /
         //     (camera.zoom * camera.screenHeight)
@@ -157,16 +243,20 @@ export class TgdPainterSegments extends TgdPainter {
         // prg.uniform1f("uniSpecularIntensity", specularIntensity)
         // prg.uniform1f("uniSpecularExponent", specularExponent)
         // colorTexture.activate(0, prg, "uniTexture")
-        // prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
-        // prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        // vao.bind()
-        // gl.drawElementsInstanced(
-        //     gl.TRIANGLES,
-        //     vertexCount,
-        //     gl.UNSIGNED_BYTE,
-        //     0,
-        //     instanceCount
-        // )
+        prg.uniform1f(
+            "uniMinRadius",
+            (this.minRadius * 2) / gl.drawingBufferHeight
+        )
+        prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
+        prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        vao.bind()
+        gl.drawElementsInstanced(
+            gl.TRIANGLES,
+            vertexCount,
+            gl.UNSIGNED_SHORT,
+            0,
+            instanceCount
+        )
     }
 }
 
@@ -174,134 +264,62 @@ type InstanceDataset = TgdDataset
 
 export class TgdPainterSegmentsData {
     private _count = 0
-    private readonly attAxyzr: number[] = []
-    private readonly attAuv: number[] = []
-    private readonly attAinfluence: number[] = []
-    private readonly attBxyzr: number[] = []
-    private readonly attBuv: number[] = []
-    private readonly attBinfluence: number[] = []
+    private readonly attXYZR0: number[] = []
+    private readonly attUV0: number[] = []
+    private readonly attInfluence0: number[] = []
+    private readonly attXYZR1: number[] = []
+    private readonly attUV1: number[] = []
+    private readonly attInfluence1: number[] = []
 
     get count() {
         return this._count
     }
 
     /**
-     * @param Axyzr (x,y,z) and radius of point A.
-     * @param Bxyzr (x,y,z) and radius of point B.
-     * @param Auv Texture coordinates for point A.
-     * @param Buv Texture coordinates for point B.
-     * @param radiusMultiplierInfluenceA If you put 0, the radius won't change regardless to the currently applied radius multiplicator.
-     * @param radiusMultiplierInfluenceB
+     * @param XYZR0 (x,y,z) and radius of point A.
+     * @param XYZR1 (x,y,z) and radius of point B.
+     * @param UV0 Texture coordinates for point A.
+     * @param UV1 Texture coordinates for point B.
+     * @param radiusMultiplierInfluence0 If you put 0, the radius won't change regardless to the currently applied radius multiplicator.
+     * @param radiusMultiplierInfluence1
      */
     add(
-        Axyzr: ArrayNumber4,
-        Bxyzr: ArrayNumber4,
-        Auv: ArrayNumber2 = [0, 0],
-        Buv: ArrayNumber2 = [0, 0],
-        radiusMultiplierInfluenceA = 1,
-        radiusMultiplierInfluenceB = 1
+        XYZR0: ArrayNumber4,
+        XYZR1: ArrayNumber4,
+        UV0: ArrayNumber2 = [0, 0],
+        UV1: ArrayNumber2 = [0, 0],
+        radiusMultiplierInfluence0 = 1,
+        radiusMultiplierInfluence1 = 1
     ) {
-        this.attAxyzr.push(...Axyzr)
-        this.attAuv.push(...Auv)
-        this.attAinfluence.push(radiusMultiplierInfluenceA)
-        this.attBxyzr.push(...Bxyzr)
-        this.attBuv.push(...Buv)
-        this.attBinfluence.push(radiusMultiplierInfluenceB)
+        this.attXYZR0.push(...XYZR0)
+        this.attUV0.push(...UV0)
+        this.attInfluence0.push(radiusMultiplierInfluence0)
+        this.attXYZR1.push(...XYZR1)
+        this.attUV1.push(...UV1)
+        this.attInfluence1.push(radiusMultiplierInfluence1)
         this._count++
     }
 
     readonly makeDataset = (): InstanceDataset => {
         const dataset = new TgdDataset(
             {
-                attAxyzr: "vec4",
-                attAuv: "vec2",
-                attAinfluence: "float",
-                attBxyzr: "vec4",
-                attBuv: "vec2",
-                attBinfluence: "float",
+                attXYZR0: "vec4",
+                attUV0: "vec2",
+                attInfluence0: "float",
+                attXYZR1: "vec4",
+                attUV1: "vec2",
+                attInfluence1: "float",
             },
             {
                 divisor: 1,
             }
         )
-        dataset.set("attAxyzr", new Float32Array(this.attAxyzr))
-        dataset.set("attAuv", new Float32Array(this.attAuv))
-        dataset.set("attAinfluence", new Float32Array(this.attAinfluence))
-        dataset.set("attBxyzr", new Float32Array(this.attBxyzr))
-        dataset.set("attBuv", new Float32Array(this.attBuv))
-        dataset.set("attBinfluence", new Float32Array(this.attBinfluence))
+        dataset.set("attXYZR0", new Float32Array(this.attXYZR0))
+        dataset.set("attUV0", new Float32Array(this.attUV0))
+        dataset.set("attInfluence0", new Float32Array(this.attInfluence0))
+        dataset.set("attXYZR1", new Float32Array(this.attXYZR1))
+        dataset.set("attUV1", new Float32Array(this.attUV1))
+        dataset.set("attInfluence1", new Float32Array(this.attInfluence1))
         return dataset
     }
-}
-
-type CapsuleDataset = TgdDataset
-
-const TAU = 2 * Math.PI
-
-/**
- * The capsule is a 3D shape mae of a cylinder
- * and two hemispheres, all of radius 1.
- * The roundness gives use the number of faces around the cylinder.
- * Every vertex has 4 coordinates: x, y, z, and a number that will
- * be 0.0 for bottom tip, and 1.1 for top tip.
- * The cylinder is aligned along Z axis.
- */
-function makeCapsule(roundness: number): TgdGeometry {
-    roundness = Math.max(3, roundness)
-    const tips: number[] = []
-    const offset: number[] = []
-    const elements: number[] = []
-    const angleStep = TAU / roundness
-    for (let face = 0; face < roundness; face++) {
-        const angle = angleStep * face
-        const x = Math.cos(angle)
-        const y = Math.sin(angle)
-        offset.push(x, y, +1)
-        tips.push(1)
-        offset.push(x, y, -1)
-        tips.push(0)
-        const top1 = face * 2
-        const bottom1 = top1 + 1
-        const top2 = ((face + 1) % roundness) * 2
-        const bottom2 = top2 + 1
-        elements.push(top2, top1, bottom1)
-        elements.push(top2, bottom1, bottom2)
-    }
-    const elementBase = elements.length
-    for (let ring = 1; ring < roundness - 1; ring++) {
-        const phi = angleStep * ring
-        const z = Math.sin(phi)
-        const radius = Math.cos(phi)
-        for (let face = 0; face < roundness; face++) {
-            const angle = angleStep * face
-            const x = Math.cos(angle) * radius
-            const y = Math.sin(angle) * radius
-            offset.push(x, y, z + 1)
-            offset.push(x, y, -z - 1)
-            const top1 = elementBase + (ring - 1) * roundness * 2 + face * 2
-            const bottom1 = top1 + roundness * 2
-            const top2 =
-                elementBase +
-                (ring - 1) * roundness * 2 +
-                ((face + 1) % roundness) * 2
-            const bottom2 = top2 + +roundness * 2
-            elements.push(top2, top1, bottom1)
-            elements.push(top2, bottom1, bottom2)
-        }
-    }
-    const capsule: CapsuleDataset = new TgdDataset({
-        attTip: "float",
-        POSITION: "vec3",
-        NORMAL: "vec3",
-    })
-    capsule.set("POSITION", new Float32Array(offset))
-    capsule.set("attTip", new Float32Array(tips))
-    const geometry = new TgdGeometry({
-        dataset: capsule,
-        elements: new Uint16Array(elements),
-        computeNormalsIfMissing: true,
-        // attPosition: "attPosition",
-        // attNormal: "attNormal",
-    })
-    return geometry
 }

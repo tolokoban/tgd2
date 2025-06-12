@@ -3,6 +3,10 @@ import { WebglAttributeType, WebglUniformType } from ".."
 import { TgdProgram } from "@tgd/program"
 
 export abstract class TgdMaterial {
+    public attPosition = "POSITION"
+    public attNormal = "NORMAL"
+    public attUV = "TEXCOORD_0"
+
     /**
      * Example:
      * ```

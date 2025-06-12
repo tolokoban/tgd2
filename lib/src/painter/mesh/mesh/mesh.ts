@@ -55,6 +55,9 @@ export class TgdPainterMesh
             typeof geometry.drawMode === "number"
                 ? geometry.drawMode
                 : context.gl[geometry.drawMode]
+        material.attPosition = geometry.attPosition
+        material.attNormal = geometry.attNormal
+        material.attUV = geometry.attUV
         const vert = new TgdShaderVertex({
             uniforms: {
                 uniTransfoMatrix: "mat4",

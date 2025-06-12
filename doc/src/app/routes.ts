@@ -27,6 +27,8 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/custom-shader": ["/articles/custom-shader"],
     "/articles/custom-shader/holes": ["/articles/custom-shader/holes"],
     "/articles/gltf": ["/articles/gltf"],
+    "/articles/material": ["/articles/material"],
+    "/articles/material/face-orientation": ["/articles/material/face-orientation"],
     "/articles/math": ["/articles/math"],
     "/articles/math/fractal": ["/articles/math/fractal"],
     "/articles/math/fractal/pascal-triangle": ["/articles/math/fractal/pascal-triangle"],
@@ -223,7 +225,7 @@ class RouteContext {
         const newHash = this.extractHash(event.newURL)
         const absHash = this.ensureAbsoluteHash(newHash, oldHash)
         if (absHash !== newHash) {
-            history.replaceState({}, "", `#${absHash}`)
+            globalThis.history.replaceState({}, "", `#${absHash}`)
         }
         void this.setHash(absHash)
     }

@@ -8,7 +8,6 @@ export function tgdActionCreateCameraInterpolation(
     destination: Partial<TgdCameraState>
 ) {
     const transfoDestination = new TgdTransfo(camera.transfo).from(destination)
-    transfoDestination.debug()
     if (typeof destination.distance === "number")
         transfoDestination.distance = destination.distance
     const beginZoom = camera.zoom

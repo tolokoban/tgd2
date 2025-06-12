@@ -1,4 +1,5 @@
 import {
+    ArrayNumber4,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdPainterClear,
@@ -19,26 +20,20 @@ function init(context: TgdContext) {
         depth: 1,
     })
     const data = new TgdPainterSegmentsData()
-    const r = 5
-    const p = new TgdVec3(0, 0, 0)
-    let first = true
-    for (let step = -50; step < 50; step++) {
+    const radius = 10
+    const nodes: ArrayNumber4[] = []
+    const width = 50
+    for (let step = -width; step < width; step++) {
         const ang = step * 0.5
+        const r = radius * Math.cos((step * Math.PI * 0.5) / width)
         const x = r * Math.cos(ang)
         const y = step * 0.2
         const z = r * Math.sin(ang)
-        const thickness = 1.0 - Math.abs(step) / 50
-        if (first) first = false
-        else
-            data.add(
-                [p.x, p.y, p.z, thickness],
-                [x, y, z, thickness],
-                [thickness, 0],
-                [thickness, 0]
-            )
-        p.x = x
-        p.y = y
-        p.z = z
+        const thickness = Math.max(0, 1.0 - Math.abs(step) / width)
+        nodes.push([x, y, z, thickness])
+    }
+    for (let i = 1; i < nodes.length; i++) {
+        data.add(nodes[i - 1], nodes[i])
     }
     const segments = new TgdPainterSegments(context, {
         makeDataset: data.makeDataset,

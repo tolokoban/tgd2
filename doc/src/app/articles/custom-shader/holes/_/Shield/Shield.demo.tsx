@@ -1,6 +1,7 @@
 import * as React from "react"
 import {
     tgdCanvasCreateWithContext2D,
+    TgdCodeBloc,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterial,
@@ -108,7 +109,7 @@ interface MaterialHoleOptions {
     holes: TgdTexture2D
 }
 
-class MaterialHole implements TgdMaterial {
+class MaterialHole extends TgdMaterial {
     private readonly lightDirection = new TgdVec3(0.1, 0.2, 1)
 
     public readonly varyings: { [name: string]: WebglAttributeType } = {
@@ -137,7 +138,9 @@ class MaterialHole implements TgdMaterial {
         "varUV = TEXCOORD_0;",
     ]
 
-    constructor(private readonly options: MaterialHoleOptions) {}
+    constructor(private readonly options: MaterialHoleOptions) {
+        super()
+    }
 
     setUniforms(program: TgdProgram): void {
         program.uniform3fv("uniLightDir", this.lightDirection)

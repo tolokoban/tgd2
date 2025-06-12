@@ -34,8 +34,7 @@ export default tseslint.config({
         "unicorn/number-literal-case": "off",
         "unicorn/no-array-push-push": "off",
         "unicorn/no-array-reduce": "off",
-        "unicorn/prefer-single-call": "off",
-        "unicorn/prevent-abbreviations": "off",
-        "unicorn/no-for-loop": "off",
+        "unicorn/prevent-abbreviations": "warn",
+        "prefer-single-call": "off",
     },
 })

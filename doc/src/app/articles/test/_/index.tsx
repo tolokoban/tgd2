@@ -22,6 +22,9 @@ import {
     TgdMaterialDiffuse,
     TgdPainterSegments,
     TgdPainterSegmentsData,
+    TgdVec3,
+    tgdCalcRandom,
+    webglPresetCull,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -43,6 +46,7 @@ function init(context: TgdContext) {
     context.camera = camera
     camera.transfo.orientation.face("+X+Y+Z")
     camera.transfo.setPosition(0, 0, 0)
+    camera.spaceHeightAtTarget = 6
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 900,
         geo: {
@@ -60,10 +64,22 @@ function init(context: TgdContext) {
         console.log("Suzanne has been loaded!")
         const axes = new TgdPainterAxes(context, { scale: 10 })
         const segments = new TgdPainterSegmentsData()
-        segments.add([0, 0, 0, 0.2], [5, 0, 0, 1])
-        segments.add([3, 0, 0, 1], [3, 3, 0, 0.5], [1, 1], [1, 1])
+        for (let loop = 0; loop < 12; loop++) {
+            const tip = new TgdVec3(
+                Math.random() - 0.5,
+                Math.random() - 0.5,
+                Math.random() - 0.5
+            )
+                .normalize()
+                .scale(tgdCalcRandom(1, 3))
+            segments.add(
+                [0, 0, 0, 0.5],
+                [tip.x, tip.y, tip.z, tgdCalcRandom(0, 0.5)]
+            )
+        }
         const state = new TgdPainterState(context, {
             depth: webglPresetDepth.less,
+            cull: webglPresetCull.back,
             children: [
                 new TgdPainterClear(context, {
                     color: [0.2, 0.1, 0, 1],
@@ -72,7 +88,7 @@ function init(context: TgdContext) {
                 axes,
                 new TgdPainterSegments(context, {
                     makeDataset: segments.makeDataset,
-                    roundness: 6,
+                    roundness: 4,
                 }),
             ],
         })

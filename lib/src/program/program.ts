@@ -40,7 +40,7 @@ export class TgdProgram {
         gl.linkProgram(prg)
         if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
             const info = gl.getProgramInfoLog(prg) ?? ""
-            console.warn(info)
+            console.error(info)
             const errorLines = getErrorLines(info)
             const cause = [
                 logCode("Vertex Shader", vert, errorLines),

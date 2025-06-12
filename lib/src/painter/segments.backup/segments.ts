@@ -103,7 +103,7 @@ export class TgdPainterSegments extends TgdPainter {
         this.prg = prg
         const { capsule, elements } = makeCapsule(roundness)
         const instance = makeDataset()
-        instance.debug()
+        // instance.debug()
         this.vao = new TgdVertexArray(
             context.gl,
             prg,
