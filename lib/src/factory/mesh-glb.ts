@@ -150,7 +150,7 @@ function makeMeshPainters(
             asset: data,
             meshIndex,
             primitiveIndex,
-            materialFactory,
+            material: materialFactory,
         })
         targets.push(target)
     }

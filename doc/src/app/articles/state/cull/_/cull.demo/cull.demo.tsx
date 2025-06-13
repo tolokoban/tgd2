@@ -44,7 +44,7 @@ function init(ctx: TgdContext, assets: Assets) {
             children: [
                 new TgdPainterMeshGltf(ctx, {
                     asset: assets.glb.suzanne,
-                    materialFactory: () =>
+                    material: () =>
                         new TgdMaterialHull({
                             color: [0, 0, 0, 1],
                             expansion: 0.05,

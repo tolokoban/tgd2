@@ -49,7 +49,7 @@ function init(ctx: TgdContext, assets: Assets) {
             children: [
                 new TgdPainterMeshGltf(ctx, {
                     asset: assets.glb.ring,
-                    materialFactory: () => new TgdMaterialSolid(),
+                    material: () => new TgdMaterialSolid(),
                 }),
             ],
         }),

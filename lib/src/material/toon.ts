@@ -1,28 +1,26 @@
-import { WebglAttributeType, WebglUniformType } from "@tgd/types"
+import { ArrayNumber4, WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
 import { TgdCodeBloc } from "@tgd/shader/code"
 import { TgdLight } from "@tgd/light"
+import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 
-export type TgdMaterialFaceOrientationOptions = Partial<{
+export type TgdMaterialToonOptions = Partial<{
+    color: TgdVec4 | ArrayNumber4 | TgdTexture2D
     light: TgdLight
     ambient: TgdLight
     specularExponent: number
     specularIntensity: number
 }>
 
-/**
- * This material is useful to debug meshes.
- * The outside faces are blue and the inside one are red.
- */
-export class TgdMaterialFaceOrientation extends TgdMaterial {
-    public light = new TgdLight({
-        direction: new TgdVec3(0.1, 0.2, -1).normalize(),
-    })
+const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
+
+export class TgdMaterialToon extends TgdMaterial {
+    public light = new TgdLight()
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 20
-    public specularIntensity = 0.5
+    public specularIntensity = 1
 
     public readonly varyings: { [name: string]: WebglAttributeType }
     public readonly uniforms: { [name: string]: WebglUniformType } = {
@@ -36,11 +34,16 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
     public readonly fragmentShaderCode: TgdCodeBloc
     public readonly vertexShaderCode: TgdCodeBloc
 
+    private readonly texture: TgdTexture2D | null
     private readonly lightColor = new TgdVec3()
     private readonly ambientColor = new TgdVec3()
 
-    constructor(options: TgdMaterialFaceOrientationOptions = {}) {
+    constructor(options: TgdMaterialToonOptions = {}) {
         super()
+        const color =
+            options.color instanceof TgdTexture2D
+                ? options.color
+                : new TgdVec4(options.color ?? DEFAULT_COLOR)
         if (options.light) {
             this.light = options.light
         }
@@ -53,12 +56,23 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
         if (typeof options.specularIntensity === "number") {
             this.specularIntensity = options.specularIntensity
         }
+        const hasTexture = !(color instanceof TgdVec4)
+        this.texture = hasTexture ? color : null
         this.fragmentShaderCode = [
-            "vec3 normal = mat3(uniModelViewMatrix) * normalize(varNormal);",
-            `float light = 1.0 - dot(normal, uniLightDir);`,
-            `vec4 color = vec4(0.8 * (gl_FrontFacing ? vec3(0, .5, 1) : vec3(1, 0, 0)), 1.0);`,
-            `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
+            "vec3 normal = normalize(varNormal);",
+            `float light = .2 + .4 * (1.0 - dot(normal, uniLightDir));`,
+            `light *= 3.0;`,
+            `light -= fract(light);`,
+            `light /= 3.0;`,
+            hasTexture
+                ? `vec4 color = texture(texDiffuse, varUV);`
+                : `vec4 color = vec4(${color.join(", ")});`,
+            `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
+            `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
             `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
+            `spec *= 3.0;`,
+            `spec -= fract(spec);`,
+            `spec /= 3.0;`,
             `color = vec4(`,
             `  color.rgb * (`,
             `    uniAmbient + uniLight * light`,
@@ -67,9 +81,14 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
             `);`,
             `return color;`,
         ]
-        this.vertexShaderCode = ["varNormal = mat3(uniTransfoMatrix) * normal;"]
+        this.vertexShaderCode = ["varNormal = mat3(uniTransfoMatrix) * NORMAL;"]
         this.varyings = {
             varNormal: "vec3",
+        }
+        if (hasTexture) {
+            this.vertexShaderCode.push("varUV = TEXCOORD_0;")
+            this.varyings.varUV = "vec2"
+            this.uniforms.texDiffuse = "sampler2D"
         }
     }
 
@@ -81,5 +100,8 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
         program.uniform3fv("uniAmbient", this.ambientColor)
         program.uniform1f("uniSpecularExponent", this.specularExponent)
         program.uniform1f("uniSpecularIntensity", this.specularIntensity)
+
+        const { texture } = this
+        if (texture) texture.activate(0, program, "texDiffuse")
     }
 }

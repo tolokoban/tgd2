@@ -72,20 +72,21 @@ export class TgdPainterMesh
             },
             varying: material.varyings,
             functions: {
-                applyMaterial: [
-                    "void applyMaterial() {",
-                    [material.vertexShaderCode],
-                    "}",
-                ],
                 getPosition: [
                     "vec4 getPosition(vec4 pos) {",
                     [material.vertexShaderCodeForGetPosition ?? "return pos;"],
                     "}",
                 ],
+                applyMaterial: [
+                    `void applyMaterial(vec3 position, vec3 normal, vec2 uv) {`,
+                    [material.vertexShaderCode],
+                    "}",
+                ],
             },
             mainCode: [
-                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * getPosition(${geometry.attPosition});`,
-                "applyMaterial();",
+                `vec4 position = getPosition(${geometry.attPosition});`,
+                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;`,
+                `applyMaterial(position.xyz, ${geometry.attNormal}.xyz, ${geometry.attUV}.xy);`,
             ],
         }).code
         const frag = new TgdShaderFragment({
@@ -106,6 +107,7 @@ export class TgdPainterMesh
             frag,
         })
         this.prg = prg
+        prg.debug()
         this.vao = new TgdVertexArray(
             context.gl,
             prg,
@@ -161,13 +163,15 @@ export class TgdPainterMesh
         prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        this.vao.bind()
-        if (geometry.elements) {
-            gl.drawElements(drawMode, count, this.elementsType, 0)
-        } else {
-            gl.drawArrays(drawMode, 0, count)
-        }
-        this.vao.unbind()
+        material.applyState(gl, () => {
+            this.vao.bind()
+            if (geometry.elements) {
+                gl.drawElements(drawMode, count, this.elementsType, 0)
+            } else {
+                gl.drawArrays(drawMode, 0, count)
+            }
+            this.vao.unbind()
+        })
     }
 
     delete(): void {

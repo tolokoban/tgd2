@@ -71,8 +71,9 @@ function init(context: TgdContext, assets: Assets) {
     context.camera.transfo.distance = 2.5
     const painter = new TgdPainterMeshGltf(context, {
         asset,
-        materialFactory: ({ color }: { color?: TgdTexture2D }) => {
-            if (!color) throw Error("No abedo provided!")
+        material: ({ color }) => {
+            if (!(color instanceof TgdTexture2D))
+                throw Error("No abedo provided!")
 
             return new MaterialHole({ abedo: color, holes })
         },

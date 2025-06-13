@@ -1,5 +1,10 @@
 import { TgdCodeBloc } from "@tgd/shader/code"
-import { WebglAttributeType, WebglUniformType } from ".."
+import {
+    TgdPainterState,
+    TgdPainterStateOptions,
+    WebglAttributeType,
+    WebglUniformType,
+} from ".."
 import { TgdProgram } from "@tgd/program"
 
 export abstract class TgdMaterial {
@@ -26,7 +31,7 @@ export abstract class TgdMaterial {
     abstract readonly fragmentShaderCode: TgdCodeBloc
 
     /**
-     * The code of a `void applyMaterial()` function.
+     * The code of a `void applyMaterial(position, normal, uv)` function.
      */
     abstract readonly vertexShaderCode: TgdCodeBloc
 
@@ -40,4 +45,16 @@ export abstract class TgdMaterial {
     vertexShaderCodeForGetPosition?: TgdCodeBloc
 
     abstract setUniforms(program: TgdProgram, time: number, delay: number): void
+
+    protected readonly state: Partial<TgdPainterStateOptions> = {}
+
+    public applyState(gl: WebGL2RenderingContext, action: () => void) {
+        TgdPainterState.do(
+            {
+                gl,
+                ...this.state,
+            },
+            action
+        )
+    }
 }

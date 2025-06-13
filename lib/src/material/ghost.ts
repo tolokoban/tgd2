@@ -32,7 +32,7 @@ export class TgdMaterialGhost extends TgdMaterial {
             )}, color.a) * light;`,
         ]
         this.vertexShaderCode = [
-            "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
+            "varNormal = mat3(uniModelViewMatrix) * normal;",
         ]
         this.varyings = {
             varNormal: "vec3",

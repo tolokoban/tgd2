@@ -53,7 +53,7 @@ function init(context: TgdContext, assets: Assets) {
             }),
             new TgdPainterMeshGltf(context, {
                 asset: assets.glb.mesh,
-                materialFactory: () =>
+                material: () =>
                     new TgdMaterialDiffuse({
                         color: new TgdVec4(1, 0.666, 0),
                         specularExponent: 5,

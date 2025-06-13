@@ -15,10 +15,12 @@ export interface TgdPainterMeshGltfOptions {
     meshIndex?: number
     primitiveIndex?: number
     name?: string
-    materialFactory?(
-        this: void,
-        options: { color?: TgdVec4 | TgdTexture2D }
-    ): TgdMaterial
+    material?:
+        | TgdMaterial
+        | ((
+              this: void,
+              options: { color?: TgdVec4 | TgdTexture2D }
+          ) => TgdMaterial)
 }
 
 /**
@@ -36,10 +38,13 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
             asset,
             meshIndex = 0,
             primitiveIndex = 0,
-            materialFactory = makeMaterial,
+            material: materialFactory = makeMaterial,
         } = options
         const color = figureColor(asset, meshIndex, primitiveIndex, context)
-        const material = materialFactory({ color })
+        const material =
+            materialFactory instanceof TgdMaterial
+                ? materialFactory
+                : materialFactory({ color })
         let computeNormals = false
         const attributes: TgdDatasetTypeRecord = {
             POSITION: "vec3",

@@ -59,11 +59,6 @@ export class TgdPainterSegments extends TgdPainter {
     public radiusMultiplier = 1
     public radiusConstant = 1
     public radiusSwitch = 0
-    public light = 1
-    public shiftZ = 0
-    public contrast = 0.3
-    public specularIntensity = 0.4
-    public specularExponent = 30
 
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
@@ -210,53 +205,28 @@ export class TgdPainterSegments extends TgdPainter {
 
     paint(time: number, delay: number): void {
         // this.painter.paint(_time, _delay)
-        const {
-            context,
-            prg,
-            vao,
-            colorTexture,
-            vertexCount,
-            instanceCount,
-            light,
-            radiusMultiplier,
-            radiusConstant,
-            radiusSwitch,
-            shiftZ,
-            contrast,
-            specularIntensity,
-            specularExponent,
-        } = this
+        const { context, prg, vao, vertexCount, instanceCount, material } = this
         const { gl, camera } = context
         gl.disable(gl.DITHER)
         prg.use()
         this.material.setUniforms(prg, time, delay)
-        // const minRadius =
-        //     (this.minRadius * camera.spaceHeightAtTarget) /
-        //     (camera.zoom * camera.screenHeight)
-        // prg.uniform1f("uniMinRadius", minRadius)
-        // prg.uniform1f("uniLight", light)
-        // prg.uniform1f("uniShiftZ", shiftZ)
-        // prg.uniform1f("uniRadiusMultiplier", radiusMultiplier)
-        // prg.uniform1f("uniRadiusConstant", radiusConstant)
-        // prg.uniform1f("uniRadiusSwitch", radiusSwitch)
-        // prg.uniform1f("uniContrast", contrast)
-        // prg.uniform1f("uniSpecularIntensity", specularIntensity)
-        // prg.uniform1f("uniSpecularExponent", specularExponent)
-        // colorTexture.activate(0, prg, "uniTexture")
         prg.uniform1f(
             "uniMinRadius",
             (this.minRadius * 2) / gl.drawingBufferHeight
         )
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        vao.bind()
-        gl.drawElementsInstanced(
-            gl.TRIANGLES,
-            vertexCount,
-            gl.UNSIGNED_SHORT,
-            0,
-            instanceCount
-        )
+        material.applyState(gl, () => {
+            vao.bind()
+            gl.drawElementsInstanced(
+                gl.TRIANGLES,
+                vertexCount,
+                gl.UNSIGNED_SHORT,
+                0,
+                instanceCount
+            )
+            vao.unbind()
+        })
     }
 }
 

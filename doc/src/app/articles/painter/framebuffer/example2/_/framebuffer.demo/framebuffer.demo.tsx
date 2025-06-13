@@ -53,7 +53,7 @@ function init(context: TgdContext, assets: Assets) {
             }),
             new TgdPainterMeshGltf(context, {
                 asset: assets.glb.mesh,
-                materialFactory: () => material,
+                material: () => material,
             }),
         ],
     })
