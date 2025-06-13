@@ -1,0 +1,240 @@
+.V3aob0pLE9HcHxN5iVyj > summary {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5em;
+    cursor: pointer;
+}
+
+.V3aob0pLE9HcHxN5iVyj > div {
+    margin-left: 0.5em;
+    padding-left: 0.5em;
+    border-left: 1px solid color-mix(in srgb, currentColor, transparent);
+}
+
+.PbWyyuXizmAAIbcs5urg {
+    opacity: 0.5;
+}
+
+.XPMLtzXBRVSrxv_Xe50A {
+    line-height: 1.5;
+}
+
+.NDcVYWtiNdLrATykGHx3 {
+}
+
+.o4_1rbAB9XmGcjjHG22H {
+}
+
+.G3CJ6oAzpvDypk53NREK {
+}
+
+.TivnAbABYZdpWW9GZs6n {
+    position: relative;
+}
+
+.EOCnuXPaVAQQjOaVzDWk > pre {
+    white-space: pre-wrap;
+}
+
+.wG5Gt8UucKgObpD7Yp3g {
+    display: inline-block;
+    position: relative;
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-size: 0.9rem;
+    margin: 0.5em;
+    background: #0d1117;
+    color: #eee;
+    padding: 0.5em;
+    margin: 0.5em;
+    overflow: auto;
+    box-shadow: 0 0.25em 0.5em #fff1;
+    border: 1px solid #fff3;
+}
+
+.WFvjeSIkQyiXg5gY8rSw {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+.WFvjeSIkQyiXg5gY8rSw > div {
+    background: var(--theme-color-secondary-5);
+    color: var(--theme-color-on-secondary-5);
+}
+
+.wG5Gt8UucKgObpD7Yp3g .function {
+    color: mediumpurple;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .keyword {
+    color: #f53;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .string {
+    color: greenyellow;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .operator {
+    color: orange;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .punctuation {
+    color: cyan;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .template-string {
+    background: #9f02;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .interpolation {
+    font-style: italic;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .number {
+    font-weight: bold;
+}
+
+.wG5Gt8UucKgObpD7Yp3g .comment {
+    opacity: 0.6;
+}
+
+.YXMiTxYNCxTJZifDB0En {
+}
+
+.H0UnrqUJgmcVuhNY9Flo {
+    white-space: pre-wrap;
+    font-family: monospace;
+    background-color: #a00;
+    color: #fff;
+    padding: 1em;
+    margin: 1em;
+    box-shadow: 0 0.125em 0.25em #000;
+}
+
+.H9dDNSbXjsX6jN3Bf3xh {
+}
+
+.FHDDVaFyhGXfoGBta3yQ {
+}
+
+.WlQP8S7OoKQ5p9KJGWab {
+    width: 100%;
+    height: 100%;
+}
+
+.WlQP8S7OoKQ5p9KJGWab > * {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.hgIjhDQIuBCJEQ4ZgLXp {
+    display: inline-block;
+    margin: 1em;
+}
+
+.hgIjhDQIuBCJEQ4ZgLXp canvas {
+    box-shadow: 0 0.25em 0.5em #fff1;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+.efOyHCihw9wfMB6AaAqw {
+    position: relative;
+}
+
+.ywC8N0Uxbvm2Ug2DwPkE {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-color: var(--theme-color-primary-1);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.ywC8N0Uxbvm2Ug2DwPkE.PBWSRsbiwEqGpeL0hEfm {
+    opacity: 1;
+}
+
+.BErChOLWGtciKhh3IFud {
+    position: relative;    
+}
+
+.BErChOLWGtciKhh3IFud > canvas.fT7FcYouYlPbElIAEXRP {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.BErChOLWGtciKhh3IFud > canvas.uAPfWt_Dhe7RaRrnmIu0 {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 128px;
+    height: 128px;
+    box-shadow: none;
+    border: none;
+}
+.p9Kbtkuegy0iOh66GNDX {
+}
+
+.C9I4sL1N2ssiuRkPggbA {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+div.C9I4sL1N2ssiuRkPggbA > header {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+}
+
+.v6mssTjMLNc8Ogj4uBSq {
+    padding: 0.5em 1em;
+    border-radius: 0 0 0.5em 0;
+    color: #fff;
+    background-color: #0008;
+}
+
+.lHntNRydftoMSCTh5gwv {
+    padding: 0.5em 1em;
+    border-radius: 0 0 0 0.5em;
+    color: #fff;
+    background-color: #0008;
+}
+
+.IUOTuyuq_tmmW8h_lBpp {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.jgtK2RMH89K4DKGqzXgk {
+}
+

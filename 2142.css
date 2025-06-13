@@ -1,0 +1,24 @@
+._Ss22zzg0v4UgIIqogTo > * {
+    grid-column: 2/4;
+}
+
+._Ss22zzg0v4UgIIqogTo > .margin-left {
+    grid-column: 1/2;
+}
+
+._Ss22zzg0v4UgIIqogTo > .margin-right {
+    grid-column: 3/4;
+}
+
+._Ss22zzg0v4UgIIqogTo > .half-left {
+    grid-column: 1/3;
+}
+
+._Ss22zzg0v4UgIIqogTo > .half-right {
+    grid-column: 2/4;
+}
+
+._Ss22zzg0v4UgIIqogTo > .full-width {
+    grid-column: 1/-1;
+}
+
