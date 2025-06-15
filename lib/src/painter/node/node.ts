@@ -53,6 +53,7 @@ export type TgdPainterNodeChild =
  */
 export class TgdPainterNode extends TgdPainter {
     public readonly transfo: TgdTransfo
+    public logic?: ((time: number, delay: number) => void) | undefined
 
     private readonly parentMatrix = new TgdMat4()
     /**
@@ -61,7 +62,6 @@ export class TgdPainterNode extends TgdPainter {
     private readonly globalMatrix = new TgdMat4()
     private readonly nodes: TgdPainterNode[] = []
     private readonly targets: TgdInterfaceTransformablePainter[] = []
-    private readonly logic?: (time: number, delay: number) => void
     private readonly paintTheTargets: boolean
 
     constructor(options: Partial<TgdPainterNodeOptions> = {}) {

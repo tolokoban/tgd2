@@ -58,6 +58,10 @@ export class TgdDataGlb {
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : JSON.stringify(error)
+            console.error(
+                "[TgdParserGLTransfertFormatBinary::new] content:",
+                content
+            )
             throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
         }
     }

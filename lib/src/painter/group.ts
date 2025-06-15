@@ -1,5 +1,8 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
-import { TgdDebugPainterhierarchy, TgdPainter } from "./painter"
+import {
+    TgdDebugPainterHierarchy as TgdDebugPainterHierarchy,
+    TgdPainter,
+} from "./painter"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
@@ -15,6 +18,8 @@ export class TgdPainterGroup extends TgdPainter {
     public onEnter: TgdPainterFunction | undefined
     public onExit: TgdPainterFunction | undefined
     protected readonly painters: TgdPainter[]
+
+    private readonly logics: Array<(time: number, delay: number) => void> = []
 
     constructor(
         painters: TgdPainter[] = [],
@@ -71,6 +76,28 @@ export class TgdPainterGroup extends TgdPainter {
             painter.delete()
         }
         this.painters.splice(0)
+        this.logicClear()
+    }
+
+    logicAdd(logic?: (time: number, delay: number) => void) {
+        if (logic) {
+            this.logicRemove(logic)
+            this.logics.push(logic)
+        }
+    }
+
+    logicRemove(logic?: (time: number, delay: number) => void) {
+        if (!logic) return
+
+        const { logics } = this
+        const index = logics.indexOf(logic)
+        if (index === -1) return
+
+        logics.splice(index, 1)
+    }
+
+    logicClear() {
+        this.logics.splice(0)
     }
 
     paint(time: number, delay: number): void {
@@ -82,13 +109,20 @@ export class TgdPainterGroup extends TgdPainter {
                 painter.paint(time, delay)
             }
         }
+        for (const logic of this.logics) {
+            logic(time, delay)
+        }
         this.onExit?.(time, delay)
     }
 
-    debugHierarchy(): TgdDebugPainterhierarchy {
+    get hierarchy(): TgdDebugPainterHierarchy {
         return {
             [this.active ? this.name : `${this.name} (Inactive)`]:
-                this.painters.map(painter => painter.debugHierarchy()),
+                this.painters.map(painter => painter.hierarchy),
         }
+    }
+
+    debugHierarchy(caption?: string) {
+        console.log(caption ?? this.name, this.hierarchy)
     }
 }

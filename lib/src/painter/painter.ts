@@ -1,8 +1,8 @@
 import { TgdLogger } from "@tgd/log"
 
-export type TgdDebugPainterhierarchy = Record<
+export type TgdDebugPainterHierarchy = Record<
     string,
-    TgdDebugPainterhierarchy[] | null
+    TgdDebugPainterHierarchy[] | null
 >
 
 export abstract class TgdPainter {
@@ -22,7 +22,7 @@ export abstract class TgdPainter {
 
     abstract paint(time: number, delay: number): void
 
-    debugHierarchy(): TgdDebugPainterhierarchy {
+    get hierarchy(): TgdDebugPainterHierarchy {
         return {
             [this.active ? this.name : `${this.name} (Inactive)`]: null,
         }

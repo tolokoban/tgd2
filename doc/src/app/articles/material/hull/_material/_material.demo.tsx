@@ -17,8 +17,7 @@ import SuzaneURL from "@/assets/mesh/suzanne.glb"
 function init(ctx: TgdContext, assets: Assets) {
     const material2 = new TgdMaterialToon({
         color: [1, 0.667, 0, 1],
-        specularExponent: 10,
-        specularIntensity: 0.5,
+        specularSharpness: 1,
     })
     const mesh2 = new TgdPainterMeshGltf(ctx, {
         asset: assets.glb.suzane,

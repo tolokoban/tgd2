@@ -107,7 +107,6 @@ export class TgdPainterMesh
             frag,
         })
         this.prg = prg
-        prg.debug()
         this.vao = new TgdVertexArray(
             context.gl,
             prg,

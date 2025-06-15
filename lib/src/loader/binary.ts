@@ -18,6 +18,7 @@ export async function tgdLoadGlb(
         const data = await resp.arrayBuffer()
         return new TgdDataGlb(data)
     } catch (error) {
+        console.error("Unable to load GLB:", urlOrFile)
         console.error(error)
         return null
     }
@@ -34,6 +35,7 @@ export async function tgdLoadArrayBuffer(
         const data = await resp.arrayBuffer()
         return data
     } catch (error) {
+        console.error("Unable to fetch ArrayBuffer:", urlOrFile)
         console.error(error)
         return null
     }

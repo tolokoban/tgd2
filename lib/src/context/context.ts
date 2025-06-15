@@ -144,7 +144,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     get time() {
-        return Date.now() + this.timeShift
+        return this.lastTime
     }
 
     get camera() {
@@ -249,7 +249,7 @@ export class TgdContext extends TgdPainterGroup {
         const canvas = tgdCanvasCreate(width, height)
         const context = new TgdContext(canvas, this.options)
         this.forEachChild(painter => context.add(painter))
-        context.actualPaint(this.lastTime)
+        context.actualPaint(this.lastTime * 1e3)
         context.gl.finish()
         context_.drawImage(canvas, 0, 0)
     }
@@ -278,9 +278,14 @@ export class TgdContext extends TgdPainterGroup {
         }
     }
 
+    private now() {
+        return Date.now() * 1e-3
+    }
+
     private readonly actualPaint = (time: number) => {
+        let timeInSec = time * 1e-3
         if (this.lastTime < 0) {
-            this.lastTime = time
+            this.lastTime = timeInSec
             this.paintingIsOngoing = false
             this.paintingIsQueued = false
             // First frame, let's skip it to get better timing.
@@ -288,21 +293,20 @@ export class TgdContext extends TgdPainterGroup {
             return
         }
         try {
-            this.timeShift = time - Date.now()
+            this.timeShift = timeInSec - this.now()
             if (this.playing) {
                 // the pause is like a frozen time.
-                time -= this.pauseAccumulation
+                timeInSec -= this.pauseAccumulation
             }
             const { gl } = this
-            const delay = time - this.lastTime
+            const delay = timeInSec - this.lastTime
             this._fps = Math.round(1 / delay)
-            this.lastTime = time
+            this.lastTime = timeInSec
             this._camera.screenWidth = gl.drawingBufferWidth
             this._camera.screenHeight = gl.drawingBufferHeight
             this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
             this._aspectRatioInverse = 1 / this._aspectRatio
 
-            const timeInSec = time * 1e-3
             const delayInSec = delay * 1e-3
             super.paint(timeInSec, delayInSec)
             if (

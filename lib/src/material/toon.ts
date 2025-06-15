@@ -10,24 +10,31 @@ export type TgdMaterialToonOptions = Partial<{
     color: TgdVec4 | ArrayNumber4 | TgdTexture2D
     light: TgdLight
     ambient: TgdLight
-    specularExponent: number
+    specularSharpness: number
+    specularSize: number
     specularIntensity: number
 }>
 
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
 
+export type TgdMaterialToonShades = number
+
 export class TgdMaterialToon extends TgdMaterial {
-    public light = new TgdLight()
+    public light = new TgdLight({
+        direction: new TgdVec3(0.2, -0.3, -0.6).normalize(),
+    })
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
-    public specularExponent = 20
-    public specularIntensity = 1
+    public specularSharpness = 0.9
+    public specularSize = 0.1
+    public specularIntensity = 0.5
 
     public readonly varyings: { [name: string]: WebglAttributeType }
     public readonly uniforms: { [name: string]: WebglUniformType } = {
         uniLight: "vec3",
         uniLightDir: "vec3",
         uniAmbient: "vec3",
-        uniSpecularExponent: "float",
+        uniSpecularSharpness: "float",
+        uniSpecularSize: "float",
         uniSpecularIntensity: "float",
         uniModelViewMatrix: "mat4",
     }
@@ -37,6 +44,8 @@ export class TgdMaterialToon extends TgdMaterial {
     private readonly texture: TgdTexture2D | null
     private readonly lightColor = new TgdVec3()
     private readonly ambientColor = new TgdVec3()
+
+    private _shades: TgdMaterialToonShades = 3
 
     constructor(options: TgdMaterialToonOptions = {}) {
         super()
@@ -50,8 +59,11 @@ export class TgdMaterialToon extends TgdMaterial {
         if (options.ambient) {
             this.ambient = options.ambient
         }
-        if (typeof options.specularExponent === "number") {
-            this.specularExponent = options.specularExponent
+        if (typeof options.specularSharpness === "number") {
+            this.specularSharpness = options.specularSharpness
+        }
+        if (typeof options.specularSize === "number") {
+            this.specularSize = options.specularSize
         }
         if (typeof options.specularIntensity === "number") {
             this.specularIntensity = options.specularIntensity
@@ -69,10 +81,9 @@ export class TgdMaterialToon extends TgdMaterial {
                 : `vec4 color = vec4(${color.join(", ")});`,
             `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
             `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
-            `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
-            `spec *= 3.0;`,
-            `spec -= fract(spec);`,
-            `spec /= 3.0;`,
+            `float a = 1.0 - uniSpecularSize;`,
+            `float b = a + (1.0 - a) * (1.0 * uniSpecularSharpness);`,
+            `spec = smoothstep(a, b, spec) * uniSpecularIntensity;`,
             `color = vec4(`,
             `  color.rgb * (`,
             `    uniAmbient + uniLight * light`,
@@ -98,7 +109,8 @@ export class TgdMaterialToon extends TgdMaterial {
         program.uniform3fv("uniLight", this.lightColor)
         this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
         program.uniform3fv("uniAmbient", this.ambientColor)
-        program.uniform1f("uniSpecularExponent", this.specularExponent)
+        program.uniform1f("uniSpecularSharpness", this.specularSharpness)
+        program.uniform1f("uniSpecularSize", this.specularSize)
         program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
         const { texture } = this
