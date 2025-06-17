@@ -34,6 +34,7 @@ export class TgdPainterSkybox extends TgdPainter {
         options: TgdPainterSkyboxOptions
     ) {
         super()
+        this.name = "TgdPainterSkybox"
         this.z = options.z ?? 1
         this.transfo = new TgdTransfo(options.transfo)
         this.camera = options.camera

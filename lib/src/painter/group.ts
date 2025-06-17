@@ -123,6 +123,18 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     debugHierarchy(caption?: string) {
-        console.log(caption ?? this.name, this.hierarchy)
+        console.log(caption ?? this.name)
+        this.recursiveDebug(this.hierarchy)
+    }
+
+    private recursiveDebug(h: TgdDebugPainterHierarchy, indent = "") {
+        const indent2 = `${indent}  `
+        for (const key of Object.keys(h)) {
+            console.log(`${indent}${key}`)
+            const value = h[key]
+            if (value) {
+                for (const child of value) this.recursiveDebug(child, indent2)
+            }
+        }
     }
 }
