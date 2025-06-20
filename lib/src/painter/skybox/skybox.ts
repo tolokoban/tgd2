@@ -9,7 +9,7 @@ import { TgdMat4, TgdTransfo, TgdTransfoOptions } from "@tgd/math"
 import VERT from "./skybox.vert"
 import FRAG from "./skybox.frag"
 import { TgdProgram } from "@tgd/program"
-import { TgdTextureCubeImpl } from "@tgd/texture"
+import { TgdTextureCube } from "@tgd/texture"
 import { webglCullExec, webglPresetCull } from "@tgd/utils"
 
 export type TgdPainterSkyboxOptions = TgdTextureCubeOptions & {
@@ -23,7 +23,7 @@ export class TgdPainterSkybox extends TgdPainter {
     public camera: TgdCamera
     public z = 1
 
-    private readonly texture: TgdTextureCubeImpl
+    private readonly texture: TgdTextureCube
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly matrix = new TgdMat4()
@@ -38,7 +38,7 @@ export class TgdPainterSkybox extends TgdPainter {
         this.z = options.z ?? 1
         this.transfo = new TgdTransfo(options.transfo)
         this.camera = options.camera
-        this.texture = new TgdTextureCubeImpl(context, options)
+        this.texture = new TgdTextureCube(context, options)
         this.program = new TgdProgram(context.gl, {
             vert: VERT,
             frag: FRAG,

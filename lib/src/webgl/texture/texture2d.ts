@@ -76,7 +76,6 @@ export function webglTextureCreate2DFromArray(
     const texture = webglTextureCreate(gl)
     gl.activeTexture(gl.TEXTURE0 + (options.unit ?? 0))
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    if (options.flipY) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, options.flipY)
     webglTextureParametersSet(gl, options)
     const {
         level = 0,
@@ -87,6 +86,7 @@ export function webglTextureCreate2DFromArray(
         type = "UNSIGNED_BYTE",
         offset = 0,
     } = options
+    if (options.flipY) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, options.flipY)
     gl.texImage2D(
         gl.TEXTURE_2D,
         level,

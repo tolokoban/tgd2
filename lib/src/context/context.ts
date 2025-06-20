@@ -85,7 +85,7 @@ export class TgdContext extends TgdPainterGroup {
     private isPlaying = false
     private requestAnimationFrame = -1
     // Last time the context has been painted.
-    private lastTime = -1
+    private lastTimeInSec = -1
     // Difference between `Data.now()` and the time in `requestAnimationFrame()`.
     private timeShift = 0
     // Last time `pause()` was called.
@@ -106,6 +106,7 @@ export class TgdContext extends TgdPainterGroup {
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
         this.resolution = options.resolution ?? 1
         if (options.enableTextureFloatStorage) {
             gl.getExtension("EXT_color_buffer_float")
@@ -144,7 +145,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     get time() {
-        return this.lastTime
+        return this.lastTimeInSec
     }
 
     get camera() {
@@ -249,7 +250,7 @@ export class TgdContext extends TgdPainterGroup {
         const canvas = tgdCanvasCreate(width, height)
         const context = new TgdContext(canvas, this.options)
         this.forEachChild(painter => context.add(painter))
-        context.actualPaint(this.lastTime * 1e3)
+        context.actualPaint(this.lastTimeInSec * 1e3)
         context.gl.finish()
         context_.drawImage(canvas, 0, 0)
     }
@@ -284,8 +285,8 @@ export class TgdContext extends TgdPainterGroup {
 
     private readonly actualPaint = (time: number) => {
         let timeInSec = time * 1e-3
-        if (this.lastTime < 0) {
-            this.lastTime = timeInSec
+        if (this.lastTimeInSec < 0) {
+            this.lastTimeInSec = timeInSec
             this.paintingIsOngoing = false
             this.paintingIsQueued = false
             // First frame, let's skip it to get better timing.
@@ -299,15 +300,14 @@ export class TgdContext extends TgdPainterGroup {
                 timeInSec -= this.pauseAccumulation
             }
             const { gl } = this
-            const delay = timeInSec - this.lastTime
-            this._fps = Math.round(1 / delay)
-            this.lastTime = timeInSec
+            const delayInSec = timeInSec - this.lastTimeInSec
+            this._fps = Math.round(1 / delayInSec)
+            this.lastTimeInSec = timeInSec
             this._camera.screenWidth = gl.drawingBufferWidth
             this._camera.screenHeight = gl.drawingBufferHeight
             this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
             this._aspectRatioInverse = 1 / this._aspectRatio
 
-            const delayInSec = delay * 1e-3
             super.paint(timeInSec, delayInSec)
             if (
                 this.paintingIsQueued ||

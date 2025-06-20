@@ -193,17 +193,34 @@ export class TgdDataGlb {
         return material
     }
 
-    getMesh(meshIndex = 0): TgdFormatGltfMesh {
-        const mesh = this.gltf.meshes?.[meshIndex]
+    getMesh(
+        meshIndexOrName: TgdFormatGltfMesh | number | string = 0
+    ): TgdFormatGltfMesh {
+        if (
+            typeof meshIndexOrName !== "number" &&
+            typeof meshIndexOrName !== "string"
+        )
+            return meshIndexOrName
+
+        const mesh =
+            typeof meshIndexOrName === "number"
+                ? this.gltf.meshes?.[meshIndexOrName]
+                : (this.gltf.meshes ?? []).find(
+                      item => item.name === meshIndexOrName
+                  )
         if (!mesh) {
-            throw new Error(`Asset has no mesh with index #${meshIndex}!`)
+            throw new Error(
+                `Asset has no mesh with index/name ${JSON.stringify(
+                    meshIndexOrName
+                )}!`
+            )
         }
 
         return mesh
     }
 
     getMeshPrimitive(
-        meshIndex = 0,
+        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
         primitiveIndex = 0
     ): {
         attributes: Record<string, number>
@@ -211,11 +228,24 @@ export class TgdDataGlb {
         mode?: number
         material?: number
     } {
-        const mesh = this.getMesh(meshIndex)
+        const mesh =
+            typeof meshIndexOrName === "number" ||
+            typeof meshIndexOrName === "string"
+                ? this.getMesh(meshIndexOrName)
+                : meshIndexOrName
+        if (!mesh) {
+            throw new Error(
+                `Asset has no mesh with index/name ${JSON.stringify(
+                    meshIndexOrName
+                )}!`
+            )
+        }
         const primitive = mesh.primitives[primitiveIndex]
         if (!primitive) {
             throw new Error(
-                `Asset has no primitive #${primitiveIndex} in mesh #${meshIndex}!`
+                `Asset has no primitive #${primitiveIndex} in mesh ${JSON.stringify(
+                    meshIndexOrName
+                )}!`
             )
         }
 
@@ -223,10 +253,10 @@ export class TgdDataGlb {
     }
 
     getMeshPrimitiveIndices(
-        meshIndex = 0,
+        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
         primitiveIndex = 0
     ): TgdTypeArrayForElements {
-        const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
+        const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex)
         const accessor = this.getAccessor(primitive.indices ?? 0)
         const elements = this.getBufferViewData(
             accessor.bufferView ?? 0,
@@ -427,13 +457,13 @@ export class TgdDataGlb {
     setAttrib(
         dataset: TgdDataset,
         attribName: string,
-        meshIndex = 0,
+        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
         primitiveIndex = 0,
         primitiveAttribName?: string
     ) {
         const { gltf } = this
         const accessorIndex =
-            gltf.meshes?.[meshIndex].primitives[primitiveIndex].attributes[
+            this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes[
                 primitiveAttribName ?? attribName
             ] ?? -1
         const accessor = gltf.accessors?.[accessorIndex]
@@ -441,7 +471,7 @@ export class TgdDataGlb {
             throw new Error(
                 `No attribute "${
                     primitiveAttribName ?? attribName
-                }" for primitive #${primitiveIndex} of mesh #${meshIndex}!`
+                }" for primitive #${primitiveIndex} of mesh #${meshIndexOrName}!`
             )
         }
 

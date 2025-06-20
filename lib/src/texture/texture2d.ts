@@ -117,16 +117,12 @@ export class TgdTexture2D {
 
     private createTexture() {
         this.delete()
-        const texture = this.gl.createTexture()
+        const { gl } = this
+        const texture = gl.createTexture()
         if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
-        const { gl } = this
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        gl.pixelStorei(
-            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-            this.storage.premultipliedAlpha
-        )
         this._texture = texture
+        this.bind()
         this.setParams(this.params)
     }
 
@@ -139,12 +135,6 @@ export class TgdTexture2D {
         this._height = height
         storage.width = width
         storage.height = height
-        this.bind()
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        gl.pixelStorei(
-            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-            this.storage.premultipliedAlpha
-        )
         const { internalFormat, levels } = this.storage
         if (internalFormat.startsWith("COMPRESSED_")) {
             // We need to load an extension for that.
@@ -154,6 +144,12 @@ export class TgdTexture2D {
                     'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!'
                 )
         }
+        this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         gl.texStorage2D(
             gl.TEXTURE_2D,
             levels,
@@ -161,6 +157,7 @@ export class TgdTexture2D {
             width,
             height
         )
+        this.unbind()
         this.checkError()
     }
 
@@ -183,6 +180,10 @@ export class TgdTexture2D {
 
     bind() {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture)
+    }
+
+    unbind() {
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null)
     }
 
     loadBitmap(
@@ -211,6 +212,11 @@ export class TgdTexture2D {
         this._width = bmp.width
         this._height = bmp.height
         this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         gl.texImage2D(
             gl.TEXTURE_2D,
             level,
@@ -224,6 +230,7 @@ export class TgdTexture2D {
             this.generateMipmap()
             this.checkError()
         }
+        this.unbind()
         this.context.paint?.()
         options.onLoad?.()
         this.eventChange.dispatch(this)
@@ -259,6 +266,11 @@ export class TgdTexture2D {
         } = options
         const { gl } = this
         this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(
+            gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
+            this.storage.premultipliedAlpha
+        )
         gl.texImage2D(
             gl.TEXTURE_2D,
             level,
@@ -271,6 +283,7 @@ export class TgdTexture2D {
             data
             // offset
         )
+        this.unbind()
         this.checkError()
         this.eventChange.dispatch(this)
         return this
@@ -280,7 +293,7 @@ export class TgdTexture2D {
      *
      * @param unit Unit to link the texture to
      * @param program The program that owns the uniform to update
-     * @param uniformName The uniform that hold the texture
+     * @param uniformName The uniform that holds the texture
      */
     activate(unit: number, program?: TgdProgram, uniformName?: string) {
         const { gl } = this
@@ -296,6 +309,7 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         gl.generateMipmap(gl.TEXTURE_2D)
+        this.unbind()
         return this
     }
 
@@ -306,6 +320,7 @@ export class TgdTexture2D {
             ...this.params,
             ...parameters,
         }
+        this.unbind()
         return this
     }
 
@@ -313,36 +328,46 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, value)
+        this.unbind()
     }
 
     get textureBaseLevel(): number {
         const { gl } = this
         this.bind()
-        return gl.getTexParameter(
+        const value = gl.getTexParameter(
             gl.TEXTURE_2D,
             gl.TEXTURE_BASE_LEVEL
         ) as number
+        this.unbind()
+        return value
     }
 
     set textureMaxLevel(value: number) {
         const { gl } = this
         this.bind()
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, value)
+        this.unbind()
     }
 
     get textureMaxLevel(): number {
         const { gl } = this
         this.bind()
-        return gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL) as number
+        const value = gl.getTexParameter(
+            gl.TEXTURE_2D,
+            gl.TEXTURE_MAX_LEVEL
+        ) as number
+        this.unbind()
+        return value
     }
 
     getParameter(parameter: WebglTexParameter): number | boolean | null {
-        const { gl, glTexture } = this
-        gl.bindTexture(gl.TEXTURE_2D, glTexture)
+        const { gl } = this
+        this.bind()
         const value = gl.getTexParameter(gl.TEXTURE_2D, gl[parameter]) as
             | number
             | boolean
             | null
+        this.unbind()
         return value
     }
 

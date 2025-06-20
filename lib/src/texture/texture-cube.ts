@@ -1,12 +1,11 @@
 import { TgdProgram } from "@tgd/program"
 import { TgdTextureCubeOptions, WebglImage } from "@tgd/types"
 
-export class TgdTextureCubeImpl {
+export class TgdTextureCube {
     public readonly texture: WebGLTexture
 
     private _width = 0
     private _height = 0
-    private numberOfImagesToLoad = 6
 
     constructor(
         public readonly context: {
@@ -20,20 +19,24 @@ export class TgdTextureCubeImpl {
         if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
         this.texture = texture
+        const flipY = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL)
         this.loadImage(gl.TEXTURE_CUBE_MAP_POSITIVE_X, options.imagePosX)
         this.loadImage(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, options.imageNegX)
         this.loadImage(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, options.imagePosY)
         this.loadImage(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, options.imageNegY)
         this.loadImage(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, options.imagePosZ)
         this.loadImage(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, options.imageNegZ)
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
+        gl.texParameteri(
+            gl.TEXTURE_CUBE_MAP,
+            gl.TEXTURE_MIN_FILTER,
+            gl.LINEAR_MIPMAP_LINEAR
+        )
     }
 
     delete() {
         this.context.gl.deleteTexture(this.texture)
-    }
-
-    get ready() {
-        return this.numberOfImagesToLoad === 0
     }
 
     get width() {
@@ -49,13 +52,15 @@ export class TgdTextureCubeImpl {
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture)
     }
 
-    activate(unit: number, program: TgdProgram, uniformName: string) {
-        if (!this.ready) return
+    unbind() {
+        const { gl } = this.context
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
+    }
 
-        const { context, texture } = this
-        const { gl } = context
+    activate(unit: number, program: TgdProgram, uniformName: string) {
+        const { gl } = this.context
         gl.activeTexture(gl.TEXTURE0 + unit)
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+        this.bind()
         program.uniform1i(uniformName, unit)
     }
 
@@ -74,20 +79,10 @@ export class TgdTextureCubeImpl {
                 `Images in a CubeMap must all have the same size, but we got ${this._width}×${this._height} and ${width}×${height}!`
             )
         }
-        const { context, texture } = this
+        const { context } = this
         const { gl } = context
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+        this.bind()
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, image instanceof Image)
         gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-        this.numberOfImagesToLoad--
-        if (this.numberOfImagesToLoad === 0) {
-            gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
-            gl.texParameteri(
-                gl.TEXTURE_CUBE_MAP,
-                gl.TEXTURE_MIN_FILTER,
-                gl.LINEAR_MIPMAP_LINEAR
-            )
-            context.paint()
-        }
     }
 }
