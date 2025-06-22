@@ -1,7 +1,7 @@
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdInputs } from "@tgd/input"
 import { TgdPainterGroup } from "../painter/group"
-import { tgdCanvasCreate } from "../utils"
+import { tgdCanvasCreate, webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
 import { TgdEvent } from "../event"
@@ -157,6 +157,18 @@ export class TgdContext extends TgdPainterGroup {
 
         this._camera = camera
         this.paint()
+    }
+
+    /**
+     * Check if the last WebGL command has returned an error.
+     */
+    checkError(caption: string, action?: () => void) {
+        const { gl } = this
+        const error = gl.getError()
+        if (error !== gl.NO_ERROR) {
+            console.error(`WebGL Error in ${caption}:`, webglLookup(error))
+            action?.()
+        }
     }
 
     animSchedule(...animations: TgdAnimation[]): TgdAnimation[] {

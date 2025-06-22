@@ -1,14 +1,15 @@
 import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
-import { TgdPainterMesh } from "../mesh"
+import { TgdTexture2D } from "@tgd/texture"
+import { webglPresetBlend, webglPresetCull, webglPresetDepth } from "@tgd/utils"
 import { TgdMaterialGhost, TgdMaterialGhostOptions } from "@tgd/material"
+import { TgdPainterMesh } from "../mesh"
 import { TgdPainter } from "../painter"
 import { TgdPainterState } from "../state"
-import { webglPresetBlend, webglPresetCull, webglPresetDepth } from "@tgd/utils"
-import { TgdPainterFramebuffer } from "../framebuffer"
 import { TgdPainterClear } from "../clear"
 import { TgdPainterBackground } from "../background"
-import { TgdTexture2D } from "@tgd/texture"
+import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
+// import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
     geometry: TgdGeometry
@@ -17,7 +18,7 @@ export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
 export class TgdPainterXRay extends TgdPainter {
     private readonly texture: TgdTexture2D
     private readonly painterMesh: TgdPainter
-    private readonly painterFB: TgdPainterFramebuffer
+    private readonly painterFB: TgdPainterFramebufferWithAntiAliasing
     private readonly painterClear: TgdPainterClear
     private readonly painterState: TgdPainterState
     private readonly painterBackground: TgdPainterBackground
@@ -42,7 +43,7 @@ export class TgdPainterXRay extends TgdPainter {
             color: [0, 0, 0, 1],
             depth: 1,
         })
-        this.painterFB = new TgdPainterFramebuffer(context, {
+        this.painterFB = new TgdPainterFramebufferWithAntiAliasing(context, {
             depthBuffer: true,
             children: [this.painterClear, this.painterState],
             textureColor0: this.texture,

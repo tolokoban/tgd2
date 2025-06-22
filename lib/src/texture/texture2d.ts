@@ -56,7 +56,7 @@ interface TgdTexture2DStorage {
 }
 
 export class TgdTexture2D {
-    public readonly name: string
+    public name: string
     public readonly gl: WebGL2RenderingContext
     public readonly eventChange = new TgdEvent<TgdTexture2D>()
 
@@ -157,17 +157,25 @@ export class TgdTexture2D {
             width,
             height
         )
+        this.checkError(`resize(${width}, ${height})
+gl.texStorage2D(
+    gl.TEXTURE_2D,
+    ${levels},
+    gl.${internalFormat},
+    ${width},
+    ${height}
+)`)
         this.unbind()
-        this.checkError()
     }
 
-    private checkError() {
+    private checkError(caption: string) {
         const { gl } = this
         const error = gl.getError()
         if (error !== gl.NO_ERROR) {
             console.error(
-                `[TgdTexture2D::${this.name}] Error:`,
-                webglLookup(error)
+                `[TgdTexture2D::${this.name}] Error in ${caption}:`,
+                webglLookup(error),
+                this
             )
         }
     }
@@ -225,10 +233,28 @@ export class TgdTexture2D {
             gl.UNSIGNED_BYTE,
             bmp
         )
-        this.checkError()
+        this.checkError(
+            `loadBitmap(${JSON.stringify({
+                width: bmp.width,
+                height: bmp.height,
+            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
+                storage.internalFormat
+            }, gl.${figureOutCompatibleFormat(
+                storage.internalFormat
+            )}, gl.UNSIGNED_BYTE, bmp)`
+        )
         if (options.generateMipmap) {
             this.generateMipmap()
-            this.checkError()
+            this.checkError(
+                `loadBitmap(${JSON.stringify({
+                    width: bmp.width,
+                    height: bmp.height,
+                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
+                    storage.internalFormat
+                }, gl.${figureOutCompatibleFormat(
+                    storage.internalFormat
+                )}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`
+            )
         }
         this.unbind()
         this.context.paint?.()
@@ -283,8 +309,10 @@ export class TgdTexture2D {
             data
             // offset
         )
+        this.checkError(
+            `loadData(${printArray(data)}, ${JSON.stringify(options)})`
+        )
         this.unbind()
-        this.checkError()
         this.eventChange.dispatch(this)
         return this
     }
@@ -459,4 +487,15 @@ function figureOutCompatibleFormat(
     throw new Error(
         `There is no compatible format for internalFormat "${internalFormat}" and type "UNSIGNED_BYTE"!`
     )
+}
+
+function printArray(
+    data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike>
+) {
+    if (data.length > 10) {
+        return `[${data.slice(0, 10).join(", ")}, ...] (${
+            data.length
+        } elements)`
+    }
+    return JSON.stringify(data)
 }

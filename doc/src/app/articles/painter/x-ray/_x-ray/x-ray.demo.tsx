@@ -20,12 +20,15 @@ function init(context: TgdContext, assets: Assets) {
         depth: 1,
     })
     const brain = new TgdPainterXRay(context, {
+        color: [0.1, 0.2, 1, 1],
+        exponent: 0.2,
+        intensity: 4,
         geometry: new TgdGeometryGltf({ data: assets.glb.brain }),
     })
     const suzanne = new TgdPainterXRay(context, {
-        color: [1, 0.1, 0.1, 1],
+        color: [1, 0.333, 0.1, 1],
         exponent: 5,
-        intensity: 10,
+        intensity: 20,
         geometry: new TgdGeometryGltf({
             data: assets.glb.suzanne,
         }),
