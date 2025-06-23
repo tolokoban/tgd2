@@ -147,48 +147,6 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         )
     }
 
-    private createTextureForDepth() {
-        const tgdTexture = this.textureDepth
-        if (!tgdTexture) return
-
-        const { context, width, height } = this
-        const { gl } = context
-        tgdTexture.resize(width, height)
-        gl.framebufferTexture2D(
-            gl.FRAMEBUFFER,
-            gl.DEPTH_ATTACHMENT,
-            gl.TEXTURE_2D,
-            tgdTexture.glTexture,
-            0
-        )
-    }
-
-    private createDepthBuffer(gl: WebGL2RenderingContext) {
-        if (this.options.depthBuffer === false) return
-
-        const { width, height } = this
-        // Create a Depth Buffer, because the default
-        // framebuffer has none.
-        const depthBuffer = gl.createRenderbuffer()
-        if (!depthBuffer)
-            throw new Error("Unable to create WebGLRenderBuffer for depth!")
-
-        this._depthBuffer = depthBuffer
-        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
-        gl.renderbufferStorage(
-            gl.RENDERBUFFER,
-            gl.DEPTH_COMPONENT16,
-            width,
-            height
-        )
-        gl.framebufferRenderbuffer(
-            gl.FRAMEBUFFER,
-            gl.DEPTH_ATTACHMENT,
-            gl.RENDERBUFFER,
-            depthBuffer
-        )
-    }
-
     private createDepthBufferMSAA(gl: WebGL2RenderingContext) {
         if (this.options.depthBuffer === false) return
 
@@ -281,8 +239,6 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         this.updateTextureForColor(this.textureColor1, 1)
         this.updateTextureForColor(this.textureColor2, 2)
         this.updateTextureForColor(this.textureColor3, 3)
-        this.createTextureForDepth()
-        this.createDepthBuffer(gl)
         this.createStencilBuffer(gl)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {

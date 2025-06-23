@@ -21,7 +21,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     const brain = new TgdPainterXRay(context, {
         color: [0.1, 0.2, 1, 1],
-        exponent: 0.2,
+        exponent: 1.2,
         intensity: 4,
         geometry: new TgdGeometryGltf({ data: assets.glb.brain }),
     })
@@ -36,7 +36,6 @@ function init(context: TgdContext, assets: Assets) {
     const state = new TgdPainterState(context, {
         children: [brain, suzanne],
         depth: webglPresetDepth.less,
-        cull: webglPresetCull.back,
     })
     context.add(clear, state)
     context.paint()

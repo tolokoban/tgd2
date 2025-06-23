@@ -7,7 +7,7 @@ import { TgdPainterMesh } from "../mesh"
 import { TgdPainter } from "../painter"
 import { TgdPainterState } from "../state"
 import { TgdPainterClear } from "../clear"
-import { TgdPainterBackground } from "../background"
+import { TgdPainterBackground } from "./background"
 import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
 // import { TgdPainterFramebuffer } from "../framebuffer"
 
@@ -50,7 +50,6 @@ export class TgdPainterXRay extends TgdPainter {
         })
         this.painterBackground = new TgdPainterBackground(context, {
             texture: this.texture,
-            scaleY: -1,
         })
     }
 
@@ -66,12 +65,12 @@ export class TgdPainterXRay extends TgdPainter {
     paint(time: number, delay: number): void {
         const { context, painterFB, painterBackground } = this
         painterFB.paint(time, delay)
-        painterBackground.texture = painterFB.textureColor0
         TgdPainterState.do(
             {
                 gl: context.gl,
                 blend: webglPresetBlend.add,
                 depth: webglPresetDepth.off,
+                cull: webglPresetCull.off,
             },
             () => {
                 painterBackground.paint()
