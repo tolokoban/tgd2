@@ -1,7 +1,11 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdContext } from "../context"
 import { TgdPainterGroup } from "./group"
-import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
+import {
+    webglCreateFramebuffer,
+    webglLookup,
+    webglRenderbufferStorageMultisample,
+} from "@tgd/utils"
 import { TgdPainter } from "./painter"
 import { TgdTexture2D } from "@tgd/texture"
 
@@ -197,21 +201,14 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
 
         this._depthBufferMSAA = depthBuffer
         gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
-        gl.renderbufferStorageMultisample(
-            gl.RENDERBUFFER,
+        webglRenderbufferStorageMultisample(
+            gl,
             this.samples,
             gl.DEPTH_COMPONENT16,
             width,
             height
         )
-        this.context.checkError(`createDepthBufferMSAA()
-gl.renderbufferStorageMultisample(
-    gl.RENDERBUFFER,
-    ${this.samples},
-    gl.DEPTH_COMPONENT16,
-    ${width},
-    ${height}
-)`)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
     }
 
     private createStencilBuffer(gl: WebGL2RenderingContext) {
@@ -305,7 +302,6 @@ gl.renderbufferStorageMultisample(
             gl.readBuffer(gl.COLOR_ATTACHMENT0 + index)
             const buffers: GLenum[] = [gl.NONE, gl.NONE, gl.NONE, gl.NONE]
             buffers[index] = gl.COLOR_ATTACHMENT0 + index
-            console.log("🚀 [framebuffer-msaa] buffers =", buffers) // @FIXME: Remove this line written on 2025-06-21 at 14:16
             gl.drawBuffers(buffers)
             gl.blitFramebuffer(
                 0,
@@ -372,6 +368,8 @@ gl.renderbufferStorageMultisample(
             textureColor1,
             textureColor2,
             textureColor3,
+            width,
+            height,
         } = this
         const { gl } = context
         this.deleteRenderbuffersMSAA()
@@ -388,12 +386,12 @@ gl.renderbufferStorageMultisample(
                 throw new Error("Unable to create RenderBuffer!")
 
             gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderBuffer)
-            gl.renderbufferStorageMultisample(
-                gl.RENDERBUFFER,
+            webglRenderbufferStorageMultisample(
+                gl,
                 this.samples,
-                gl.RGBA,
-                texture.width,
-                texture.height
+                gl.RGBA8,
+                width,
+                height
             )
             gl.bindRenderbuffer(gl.RENDERBUFFER, null)
             return colorRenderBuffer
