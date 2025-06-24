@@ -49,9 +49,9 @@ function init(context: TgdContext, assets: Assets) {
         fb,
         filters,
         new TgdPainterLogic((time, delay) => {
-            mesh.transfo.orbitAroundX(delay * Math.sin(time))
-            mesh.transfo.orbitAroundZ(delay * 1.341)
-            chromaticAberrationFilter.strength = Math.sin(time) * 100
+            mesh.transfo.orbitAroundX(delay * Math.sin(time * 0.5))
+            mesh.transfo.orbitAroundZ(delay * 0.341)
+            chromaticAberrationFilter.strength = Math.sin(time) * 10
         })
     )
     context.play()

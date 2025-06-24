@@ -6,4 +6,8 @@ Let's use the framebuffer to simulate water. We want the objects deeply flooded
 to be almost invisible. That's why we need to store the height of every rendered
 pixels.
 
+In this demo, we store the distance from the camera on the alpha channel. That
+means, that w have only 1 byte for the resolution. You can see some weird lines
+in the texture under the water.
+
 <Demo />

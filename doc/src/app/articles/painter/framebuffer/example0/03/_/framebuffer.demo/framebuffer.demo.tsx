@@ -21,6 +21,7 @@ function init(context: TgdContext, assets: Assets) {
     context.camera.transfo.distance = 5
     const clear = new TgdPainterClear(context, {
         color: [0, 0, 0, 1],
+        depth: 1,
     })
     const texture = new TgdTexture2D(context).loadBitmap(assets.image.texture)
     const mesh = new TgdPainterMesh(context, {
@@ -44,8 +45,7 @@ function init(context: TgdContext, assets: Assets) {
         meshPainter,
         filters,
         new TgdPainterLogic((time, delay) => {
-            mesh.transfo.orbitAroundX(delay * Math.sin(time))
-            mesh.transfo.orbitAroundZ(delay * 1.341)
+            hueRotation.strength = Math.sin(time) * 10
         })
     )
     // #end
