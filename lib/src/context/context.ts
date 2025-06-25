@@ -68,6 +68,11 @@ export class TgdContext extends TgdPainterGroup {
     public readonly eventPaint = new TgdEvent<TgdContext>()
     public resolution = 1
 
+    /**
+     * If this function is set, it will be called once at the end of the next repaint.
+     * This is useful for snapshots.
+     */
+    private doSnapshot: null | (() => void) = null
     private _camera: TgdCamera = new TgdCameraPerspective({
         transfo: { distance: 15 },
         far: 100,
@@ -251,20 +256,23 @@ export class TgdContext extends TgdPainterGroup {
         this.pauseTime = this.time
     }
 
-    takeSnapshotToCanvas(target: HTMLCanvasElement) {
-        const context_ = target.getContext("2d")
-        if (!context_)
-            throw new Error(
-                "[TgdContext.takeSnapshot] We cannot get a 2D context for the target canvas! Maybe it already has another type of context."
-            )
-
-        const { width, height } = target
-        const canvas = tgdCanvasCreate(width, height)
-        const context = new TgdContext(canvas, this.options)
-        this.forEachChild(painter => context.add(painter))
-        context.actualPaint(this.lastTimeInSec * 1e3)
-        context.gl.finish()
-        context_.drawImage(canvas, 0, 0)
+    takeSnapshot(): Promise<HTMLImageElement> {
+        const { canvas } = this
+        return new Promise(resolve => {
+            this.doSnapshot = () => {
+                canvas.toBlob(blob => {
+                    const img = new Image()
+                    if (!blob) {
+                        resolve(img)
+                        return
+                    }
+                    const url = URL.createObjectURL(blob)
+                    img.src = url
+                    // eslint-disable-next-line unicorn/prefer-add-event-listener
+                    img.onload = () => resolve(img)
+                })
+            }
+        })
     }
 
     lookupWebglConstant(value: number): string {
@@ -334,6 +342,7 @@ export class TgdContext extends TgdPainterGroup {
             console.error(error)
         } finally {
             this.paintingIsOngoing = false
+            this.doSnapshot?.()
         }
     }
 

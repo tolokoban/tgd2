@@ -92,7 +92,6 @@ export default function Tgd({
         refGizmo.current = gizmo
         gizmo.eventTipClick.addListener(({ to }) => {
             const context = refContext.current
-            console.log("🚀 [tgd] to, context =", to, context) // @FIXME: Remove this line written on 2025-03-29 at 10:43
             if (!context) return
 
             context.animSchedule({
@@ -112,6 +111,20 @@ export default function Tgd({
 
         div.requestFullscreen()
     }
+    const handleScreenshot = () => {
+        const context = refContext.current
+        if (!context) return
+
+        context.takeSnapshot().then(img => {
+            const a = document.createElement("a")
+            document.body.appendChild(a)
+            a.style.display = "none"
+            a.href = img.src
+            a.download = `snapshot.png`
+            a.click()
+            window.setTimeout(() => document.body.removeChild(a), 30000)
+        })
+    }
     React.useEffect(() => {
         const canvas = refCanvas.current
         const scene = refContext.current
@@ -129,7 +142,8 @@ export default function Tgd({
         setFullscreenAvailable(Boolean(canvas.requestFullscreen))
         return () => observer.unobserve(canvas)
     }, [refContext.current, refCanvas.current])
-    if (noBorder)
+
+    if (noBorder) {
         return (
             <div
                 ref={refScreen}
@@ -145,6 +159,7 @@ export default function Tgd({
                 )}
             </div>
         )
+    }
 
     return (
         <div className={Theme.classNames.join(className, styles.Tgd)}>
@@ -155,6 +170,13 @@ export default function Tgd({
                     enabled={!loading}
                 >
                     {landscape ? "Switch to Portrait" : "Switch to Landscape"}
+                </ViewButton>
+                <ViewButton
+                    variant="elevated"
+                    onClick={handleScreenshot}
+                    enabled={!loading}
+                >
+                    Screenshot
                 </ViewButton>
                 {fullscreenAvailable && (
                     <ViewButton
