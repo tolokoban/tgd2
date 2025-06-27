@@ -16,7 +16,7 @@
         "declarationMap": true /* Create sourcemaps for d.ts files. */,
         "sourceMap": false /* Create source map files for emitted JavaScript files. */,
         "inlineSourceMap": true,
-        "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+        "outDir": "./tmp" /* Specify an output folder for all emitted files. */,
         "removeComments": false /* Disable emitting comments. */,
         "preserveConstEnums": true /* Disable erasing 'const enum' declarations in generated code. */,
 

@@ -44,6 +44,9 @@ export default env => {
             path: Path.resolve(__dirname, "build"),
             devtoolModuleFilenameTemplate: "[absolute-resource-path]",
         },
+        watchOptions: {
+            aggregateTimeout: 600,
+        },
         entry: {
             app: "./src/index.tsx",
         },

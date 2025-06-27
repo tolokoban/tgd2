@@ -162,7 +162,7 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         webglRenderbufferStorageMultisample(
             gl,
             this.samples,
-            gl.DEPTH_COMPONENT16,
+            gl.DEPTH_COMPONENT24,
             width,
             height
         )

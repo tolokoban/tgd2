@@ -20,7 +20,7 @@ export * from "./types"
 import Layout0 from "./layout"
 import Layout2 from "./articles/layout"
 import Layout24 from "./articles/painter/layout"
-import Layout62 from "./tricks/layout"
+import Layout63 from "./tricks/layout"
 import Loading0 from "./loading"
 const Page0 = React.lazy(() => import("./page"))
 const Page1 = React.lazy(() => import("./api/page"))
@@ -45,44 +45,45 @@ const Page22 = React.lazy(() => import("./articles/mesh/marching-cubes/page.mdx"
 const Page23 = React.lazy(() => import("./articles/mesh/volume-to-mesh/page"))
 const Page24 = React.lazy(() => import("./articles/painter/page.mdx"))
 const Page25 = React.lazy(() => import("./articles/painter/background/page.mdx"))
+const Page27 = React.lazy(() => import("./articles/painter/background-with-depth/page.mdx"))
 const Page26 = React.lazy(() => import("./articles/painter/background/2/page.mdx"))
-const Page27 = React.lazy(() => import("./articles/painter/clear/page.mdx"))
-const Page28 = React.lazy(() => import("./articles/painter/custom/page.mdx"))
-const Page29 = React.lazy(() => import("./articles/painter/filter/page.mdx"))
-const Page30 = React.lazy(() => import("./articles/painter/filter/blur/page.mdx"))
-const Page31 = React.lazy(() => import("./articles/painter/filter/chromatic-aberration/page.mdx"))
-const Page32 = React.lazy(() => import("./articles/painter/filter/custom/page.mdx"))
-const Page33 = React.lazy(() => import("./articles/painter/filter/hue/page.mdx"))
-const Page34 = React.lazy(() => import("./articles/painter/framebuffer/page.mdx"))
-const Page36 = React.lazy(() => import("./articles/painter/framebuffer/example0/01/page.mdx"))
-const Page37 = React.lazy(() => import("./articles/painter/framebuffer/example0/02/page.mdx"))
-const Page38 = React.lazy(() => import("./articles/painter/framebuffer/example0/03/page.mdx"))
-const Page39 = React.lazy(() => import("./articles/painter/framebuffer/example0/04/page.mdx"))
-const Page40 = React.lazy(() => import("./articles/painter/framebuffer/example0/05/page.mdx"))
-const Page41 = React.lazy(() => import("./articles/painter/framebuffer/example1/page.mdx"))
-const Page42 = React.lazy(() => import("./articles/painter/framebuffer/example2/page.mdx"))
-const Page43 = React.lazy(() => import("./articles/painter/framebuffer/example3/page.mdx"))
-const Page44 = React.lazy(() => import("./articles/painter/logic/page.mdx"))
-const Page45 = React.lazy(() => import("./articles/painter/node/page.mdx"))
-const Page46 = React.lazy(() => import("./articles/painter/segments/page.mdx"))
-const Page47 = React.lazy(() => import("./articles/painter/segments/02/page.mdx"))
-const Page48 = React.lazy(() => import("./articles/painter/x-ray/page.mdx"))
-const Page49 = React.lazy(() => import("./articles/state/page.mdx"))
-const Page50 = React.lazy(() => import("./articles/state/cull/page.mdx"))
-const Page51 = React.lazy(() => import("./articles/state/stencil/page.mdx"))
-const Page52 = React.lazy(() => import("./articles/suzanne/page.mdx"))
-const Page53 = React.lazy(() => import("./articles/test/page.mdx"))
-const Page54 = React.lazy(() => import("./articles/texture/page.mdx"))
-const Page56 = React.lazy(() => import("./articles/texture/2d/bitmap/page.mdx"))
-const Page57 = React.lazy(() => import("./articles/texture/2d/data/page.mdx"))
-const Page58 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
-const Page59 = React.lazy(() => import("./tools/page.mdx"))
-const Page60 = React.lazy(() => import("./tools/filter/page"))
-const Page61 = React.lazy(() => import("./tools/gltf/page"))
-const Page62 = React.lazy(() => import("./tricks/page.mdx"))
-const Page63 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
-const Page64 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
-const Page65 = React.lazy(() => import("./tricks/color-mask/3/page.mdx"))
+const Page28 = React.lazy(() => import("./articles/painter/clear/page.mdx"))
+const Page29 = React.lazy(() => import("./articles/painter/custom/page.mdx"))
+const Page30 = React.lazy(() => import("./articles/painter/filter/page.mdx"))
+const Page31 = React.lazy(() => import("./articles/painter/filter/blur/page.mdx"))
+const Page32 = React.lazy(() => import("./articles/painter/filter/chromatic-aberration/page.mdx"))
+const Page33 = React.lazy(() => import("./articles/painter/filter/custom/page.mdx"))
+const Page34 = React.lazy(() => import("./articles/painter/filter/hue/page.mdx"))
+const Page35 = React.lazy(() => import("./articles/painter/framebuffer/page.mdx"))
+const Page37 = React.lazy(() => import("./articles/painter/framebuffer/example0/01/page.mdx"))
+const Page38 = React.lazy(() => import("./articles/painter/framebuffer/example0/02/page.mdx"))
+const Page39 = React.lazy(() => import("./articles/painter/framebuffer/example0/03/page.mdx"))
+const Page40 = React.lazy(() => import("./articles/painter/framebuffer/example0/04/page.mdx"))
+const Page41 = React.lazy(() => import("./articles/painter/framebuffer/example0/05/page.mdx"))
+const Page42 = React.lazy(() => import("./articles/painter/framebuffer/example1/page.mdx"))
+const Page43 = React.lazy(() => import("./articles/painter/framebuffer/example2/page.mdx"))
+const Page44 = React.lazy(() => import("./articles/painter/framebuffer/example3/page.mdx"))
+const Page45 = React.lazy(() => import("./articles/painter/logic/page.mdx"))
+const Page46 = React.lazy(() => import("./articles/painter/node/page.mdx"))
+const Page47 = React.lazy(() => import("./articles/painter/segments/page.mdx"))
+const Page48 = React.lazy(() => import("./articles/painter/segments/02/page.mdx"))
+const Page49 = React.lazy(() => import("./articles/painter/x-ray/page.mdx"))
+const Page50 = React.lazy(() => import("./articles/state/page.mdx"))
+const Page51 = React.lazy(() => import("./articles/state/cull/page.mdx"))
+const Page52 = React.lazy(() => import("./articles/state/stencil/page.mdx"))
+const Page53 = React.lazy(() => import("./articles/suzanne/page.mdx"))
+const Page54 = React.lazy(() => import("./articles/test/page.mdx"))
+const Page55 = React.lazy(() => import("./articles/texture/page.mdx"))
+const Page57 = React.lazy(() => import("./articles/texture/2d/bitmap/page.mdx"))
+const Page58 = React.lazy(() => import("./articles/texture/2d/data/page.mdx"))
+const Page59 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
+const Page60 = React.lazy(() => import("./tools/page.mdx"))
+const Page61 = React.lazy(() => import("./tools/filter/page"))
+const Page62 = React.lazy(() => import("./tools/gltf/page"))
+const Page63 = React.lazy(() => import("./tricks/page.mdx"))
+const Page64 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
+const Page65 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
+const Page66 = React.lazy(() => import("./tricks/color-mask/3/page.mdx"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -114,8 +115,8 @@ export default function App({ lang }: { lang?: string }) {
     const ly24 = Layout24
     const pg24 = Page24
     const pg25 = Page25
-    const pg26 = Page26
     const pg27 = Page27
+    const pg26 = Page26
     const pg28 = Page28
     const pg29 = Page29
     const pg30 = Page30
@@ -123,7 +124,7 @@ export default function App({ lang }: { lang?: string }) {
     const pg32 = Page32
     const pg33 = Page33
     const pg34 = Page34
-    const pg36 = Page36
+    const pg35 = Page35
     const pg37 = Page37
     const pg38 = Page38
     const pg39 = Page39
@@ -142,17 +143,18 @@ export default function App({ lang }: { lang?: string }) {
     const pg52 = Page52
     const pg53 = Page53
     const pg54 = Page54
-    const pg56 = Page56
+    const pg55 = Page55
     const pg57 = Page57
     const pg58 = Page58
     const pg59 = Page59
     const pg60 = Page60
     const pg61 = Page61
-    const ly62 = Layout62
     const pg62 = Page62
+    const ly63 = Layout63
     const pg63 = Page63
     const pg64 = Page64
     const pg65 = Page65
+    const pg66 = Page66
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -189,55 +191,56 @@ export default function App({ lang }: { lang?: string }) {
                     <Route path="/articles/painter/background" Page={pg25} fallback={fb0} context={context}>
                         <Route path="/articles/painter/background/2" Page={pg26} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/painter/clear" Page={pg27} fallback={fb0} context={context}/>
-                    <Route path="/articles/painter/custom" Page={pg28} fallback={fb0} context={context}/>
-                    <Route path="/articles/painter/filter" Page={pg29} fallback={fb0} context={context}>
-                        <Route path="/articles/painter/filter/blur" Page={pg30} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/filter/chromatic-aberration" Page={pg31} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/filter/custom" Page={pg32} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/filter/hue" Page={pg33} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/background-with-depth" Page={pg27} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/clear" Page={pg28} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/custom" Page={pg29} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/filter" Page={pg30} fallback={fb0} context={context}>
+                        <Route path="/articles/painter/filter/blur" Page={pg31} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/chromatic-aberration" Page={pg32} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/custom" Page={pg33} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/filter/hue" Page={pg34} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/painter/framebuffer" Page={pg34} fallback={fb0} context={context}>
+                    <Route path="/articles/painter/framebuffer" Page={pg35} fallback={fb0} context={context}>
                         <Route path="/articles/painter/framebuffer/example0" fallback={fb0} context={context}>
-                            <Route path="/articles/painter/framebuffer/example0/01" Page={pg36} fallback={fb0} context={context}/>
-                            <Route path="/articles/painter/framebuffer/example0/02" Page={pg37} fallback={fb0} context={context}/>
-                            <Route path="/articles/painter/framebuffer/example0/03" Page={pg38} fallback={fb0} context={context}/>
-                            <Route path="/articles/painter/framebuffer/example0/04" Page={pg39} fallback={fb0} context={context}/>
-                            <Route path="/articles/painter/framebuffer/example0/05" Page={pg40} fallback={fb0} context={context}/>
+                            <Route path="/articles/painter/framebuffer/example0/01" Page={pg37} fallback={fb0} context={context}/>
+                            <Route path="/articles/painter/framebuffer/example0/02" Page={pg38} fallback={fb0} context={context}/>
+                            <Route path="/articles/painter/framebuffer/example0/03" Page={pg39} fallback={fb0} context={context}/>
+                            <Route path="/articles/painter/framebuffer/example0/04" Page={pg40} fallback={fb0} context={context}/>
+                            <Route path="/articles/painter/framebuffer/example0/05" Page={pg41} fallback={fb0} context={context}/>
                         </Route>
-                        <Route path="/articles/painter/framebuffer/example1" Page={pg41} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/framebuffer/example2" Page={pg42} fallback={fb0} context={context}/>
-                        <Route path="/articles/painter/framebuffer/example3" Page={pg43} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/framebuffer/example1" Page={pg42} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/framebuffer/example2" Page={pg43} fallback={fb0} context={context}/>
+                        <Route path="/articles/painter/framebuffer/example3" Page={pg44} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/painter/logic" Page={pg44} fallback={fb0} context={context}/>
-                    <Route path="/articles/painter/node" Page={pg45} fallback={fb0} context={context}/>
-                    <Route path="/articles/painter/segments" Page={pg46} fallback={fb0} context={context}>
-                        <Route path="/articles/painter/segments/02" Page={pg47} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/logic" Page={pg45} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/node" Page={pg46} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/segments" Page={pg47} fallback={fb0} context={context}>
+                        <Route path="/articles/painter/segments/02" Page={pg48} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/painter/x-ray" Page={pg48} fallback={fb0} context={context}/>
+                    <Route path="/articles/painter/x-ray" Page={pg49} fallback={fb0} context={context}/>
                 </Route>
-                <Route path="/articles/state" Page={pg49} fallback={fb0} context={context}>
-                    <Route path="/articles/state/cull" Page={pg50} fallback={fb0} context={context}/>
-                    <Route path="/articles/state/stencil" Page={pg51} fallback={fb0} context={context}/>
+                <Route path="/articles/state" Page={pg50} fallback={fb0} context={context}>
+                    <Route path="/articles/state/cull" Page={pg51} fallback={fb0} context={context}/>
+                    <Route path="/articles/state/stencil" Page={pg52} fallback={fb0} context={context}/>
                 </Route>
-                <Route path="/articles/suzanne" Page={pg52} fallback={fb0} context={context}/>
-                <Route path="/articles/test" Page={pg53} fallback={fb0} context={context}/>
-                <Route path="/articles/texture" Page={pg54} fallback={fb0} context={context}>
+                <Route path="/articles/suzanne" Page={pg53} fallback={fb0} context={context}/>
+                <Route path="/articles/test" Page={pg54} fallback={fb0} context={context}/>
+                <Route path="/articles/texture" Page={pg55} fallback={fb0} context={context}>
                     <Route path="/articles/texture/2d" fallback={fb0} context={context}>
-                        <Route path="/articles/texture/2d/bitmap" Page={pg56} fallback={fb0} context={context}/>
-                        <Route path="/articles/texture/2d/data" Page={pg57} fallback={fb0} context={context}/>
+                        <Route path="/articles/texture/2d/bitmap" Page={pg57} fallback={fb0} context={context}/>
+                        <Route path="/articles/texture/2d/data" Page={pg58} fallback={fb0} context={context}/>
                     </Route>
-                    <Route path="/articles/texture/cube" Page={pg58} fallback={fb0} context={context}/>
+                    <Route path="/articles/texture/cube" Page={pg59} fallback={fb0} context={context}/>
                 </Route>
             </Route>
-            <Route path="/tools" Page={pg59} fallback={fb0} context={context}>
-                <Route path="/tools/filter" Page={pg60} fallback={fb0} context={context}/>
-                <Route path="/tools/gltf" Page={pg61} fallback={fb0} context={context}/>
+            <Route path="/tools" Page={pg60} fallback={fb0} context={context}>
+                <Route path="/tools/filter" Page={pg61} fallback={fb0} context={context}/>
+                <Route path="/tools/gltf" Page={pg62} fallback={fb0} context={context}/>
             </Route>
-            <Route path="/tricks" Page={pg62} Layout={ly62} fallback={fb0} context={context}>
-                <Route path="/tricks/color-mask" Page={pg63} fallback={fb0} context={context}>
-                    <Route path="/tricks/color-mask/2" Page={pg64} fallback={fb0} context={context}/>
-                    <Route path="/tricks/color-mask/3" Page={pg65} fallback={fb0} context={context}/>
+            <Route path="/tricks" Page={pg63} Layout={ly63} fallback={fb0} context={context}>
+                <Route path="/tricks/color-mask" Page={pg64} fallback={fb0} context={context}>
+                    <Route path="/tricks/color-mask/2" Page={pg65} fallback={fb0} context={context}/>
+                    <Route path="/tricks/color-mask/3" Page={pg66} fallback={fb0} context={context}/>
                 </Route>
             </Route>
         </Route>

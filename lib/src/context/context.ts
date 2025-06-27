@@ -166,6 +166,10 @@ export class TgdContext extends TgdPainterGroup {
 
     /**
      * Check if the last WebGL command has returned an error.
+     * If an error has been found, output `caption` to the console
+     * and execute `action()`.
+     * Do not use this function in a loop because it is slow.
+     * @returns `true` is an error has been detected.
      */
     checkError(caption: string, action?: () => void) {
         const { gl } = this
@@ -173,7 +177,9 @@ export class TgdContext extends TgdPainterGroup {
         if (error !== gl.NO_ERROR) {
             console.error(`WebGL Error in ${caption}:`, webglLookup(error))
             action?.()
+            return true
         }
+        return false
     }
 
     animSchedule(...animations: TgdAnimation[]): TgdAnimation[] {

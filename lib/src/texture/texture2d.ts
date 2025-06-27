@@ -53,6 +53,9 @@ interface TgdTexture2DStorage {
         | "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
         | "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
         | "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
+        | "DEPTH_COMPONENT24"
+        | "DEPTH_COMPONENT16"
+        | "DEPTH_COMPONENT32F"
 }
 
 export class TgdTexture2D {
@@ -75,7 +78,7 @@ export class TgdTexture2D {
     private static counter = 0
 
     constructor(
-        private readonly context: {
+        public readonly context: {
             gl: WebGL2RenderingContext
             paint?: () => void
         },
@@ -87,7 +90,7 @@ export class TgdTexture2D {
         this.storage = {
             width: 0,
             height: 0,
-            internalFormat: "RGBA8",
+            internalFormat: storage?.internalFormat ?? "RGBA8",
             levels: 1,
             flipY: false,
             premultipliedAlpha: false,

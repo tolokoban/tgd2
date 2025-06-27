@@ -3,7 +3,7 @@ import { TgdContext } from "../context"
 import { TgdPainterGroup } from "./group"
 import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
 import { TgdPainter } from "./painter"
-import { TgdTexture2D } from "@tgd/texture"
+import { TgdTexture2D, TgdTextureDepth } from "@tgd/texture"
 
 export interface TgdPainterFramebufferOptions {
     /**
@@ -31,7 +31,7 @@ export interface TgdPainterFramebufferOptions {
     textureColor1?: TgdTexture2D
     textureColor2?: TgdTexture2D
     textureColor3?: TgdTexture2D
-    textureDepth?: TgdTexture2D
+    textureDepth?: TgdTextureDepth
     /**
      * Function to execute before painting.
      */
@@ -48,7 +48,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     public readonly textureColor1: TgdTexture2D | undefined
     public readonly textureColor2: TgdTexture2D | undefined
     public readonly textureColor3: TgdTexture2D | undefined
-    public readonly textureDepth: TgdTexture2D | undefined
+    public readonly textureDepth: TgdTextureDepth | undefined
 
     /**
      * The framebuffer becomes dirty as soon as the width or height changes.
@@ -71,16 +71,22 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         if (
             !(textureColor0 || textureColor1 || textureColor2 || textureColor3)
         ) {
-            console.error(
+            console.warn(
                 "[TgdPainterFramebuffer] You gave no color texture in the constructor: nothing will be rendered!",
                 options
             )
+            this.debugHierarchy()
         }
         this.textureColor0 = nameTexture(textureColor0, "textureColor0")
         this.textureColor1 = nameTexture(textureColor1, "textureColor1")
         this.textureColor2 = nameTexture(textureColor2, "textureColor2")
         this.textureColor3 = nameTexture(textureColor3, "textureColor3")
         this.textureDepth = options.textureDepth
+        if (options.textureDepth) {
+            this.options.depthBuffer = true
+        } else if (this.options.depthBuffer) {
+            this.textureDepth = new TgdTextureDepth(context)
+        }
         this.onEnter = options.onEnter
         this.onExit = options.onExit
         const { gl } = this.context
@@ -130,46 +136,21 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         )
     }
 
-    private createTextureForDepth() {
-        const tgdTexture = this.textureDepth
-        if (!tgdTexture) return
-
-        const { context, width, height } = this
-        const { gl } = context
-        tgdTexture.resize(width, height)
-        gl.framebufferTexture2D(
-            gl.FRAMEBUFFER,
-            gl.DEPTH_ATTACHMENT,
-            gl.TEXTURE_2D,
-            tgdTexture.glTexture,
-            0
-        )
-    }
-
-    private createDepthBuffer(gl: WebGL2RenderingContext) {
+    private updateDepthBuffer(gl: WebGL2RenderingContext) {
         if (this.options.depthBuffer === false) return
 
-        const { width, height } = this
-        // Create a Depth Buffer, because the default
-        // framebuffer has none.
-        const depthBuffer = gl.createRenderbuffer()
-        if (!depthBuffer)
-            throw new Error("Unable to create WebGLRenderBuffer for depth!")
-
-        this._depthBuffer = depthBuffer
-        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
-        gl.renderbufferStorage(
-            gl.RENDERBUFFER,
-            gl.DEPTH_COMPONENT16,
-            width,
-            height
-        )
-        gl.framebufferRenderbuffer(
-            gl.FRAMEBUFFER,
-            gl.DEPTH_ATTACHMENT,
-            gl.RENDERBUFFER,
-            depthBuffer
-        )
+        const { textureDepth, width, height } = this
+        textureDepth?.resize(width, height)
+        if (this.textureDepth) {
+            this.textureDepth.bind()
+            gl.framebufferTexture2D(
+                gl.FRAMEBUFFER,
+                gl.DEPTH_ATTACHMENT,
+                gl.TEXTURE_2D,
+                this.textureDepth.glTexture,
+                0
+            )
+        }
     }
 
     private createStencilBuffer(gl: WebGL2RenderingContext) {
@@ -210,8 +191,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.updateTextureForColor(this.textureColor1, 1)
         this.updateTextureForColor(this.textureColor2, 2)
         this.updateTextureForColor(this.textureColor3, 3)
-        this.createTextureForDepth()
-        this.createDepthBuffer(gl)
+        this.updateDepthBuffer(gl)
         this.createStencilBuffer(gl)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {

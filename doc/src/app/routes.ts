@@ -40,6 +40,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/mesh/volume-to-mesh": ["/articles/mesh/volume-to-mesh"],
     "/articles/painter": ["/articles/painter"],
     "/articles/painter/background": ["/articles/painter/background"],
+    "/articles/painter/background-with-depth": ["/articles/painter/background-with-depth"],
     "/articles/painter/background/2": ["/articles/painter/background/2"],
     "/articles/painter/clear": ["/articles/painter/clear"],
     "/articles/painter/custom": ["/articles/painter/custom"],

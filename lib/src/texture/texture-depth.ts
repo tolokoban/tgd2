@@ -1,5 +1,4 @@
-import { TgdEvent } from "@tgd/event"
-import { TgdProgram } from "@tgd/program"
+import { TgdTexture2D } from "./texture2d"
 
 interface TgdTextureDepthStorage {
     width: number
@@ -7,81 +6,95 @@ interface TgdTextureDepthStorage {
     type: "DEPTH_COMPONENT24" | "DEPTH_COMPONENT16" | "DEPTH_COMPONENT32F"
 }
 
-export class TgdTextureDepth {
-    public readonly name: string
-    public readonly gl: WebGL2RenderingContext
-    public readonly eventChange = new TgdEvent<TgdTextureDepth>()
-
-    private readonly _texture: WebGLTexture | null = null
-    private _width = 0
-    private _height = 0
-
-    private static counter = 0
-
+export class TgdTextureDepth extends TgdTexture2D {
     constructor(
-        context: { gl: WebGL2RenderingContext },
-        options: Partial<TgdTextureDepthStorage> & {
-            width: number
-            height: number
-        }
+        public readonly context: {
+            gl: WebGL2RenderingContext
+            paint?: () => void
+        },
+        {
+            width = 1,
+            height = 1,
+            type = "DEPTH_COMPONENT24",
+        }: Partial<TgdTextureDepthStorage> = {}
     ) {
-        const { gl } = context
-        this.gl = gl
-        this.name = `TextureDepth/${TgdTextureDepth.counter++}`
-        const texture = gl.createTexture()
-        if (!texture) throw new Error("Unable to create a WebGLTexture!")
-
-        this._texture = texture
-        console.log("🚀 [texture-depth] options =", options) // @FIXME: Remove this line written on 2025-04-18 at 14:30
-        // this.setParams({
-        //     magFilter: "NEAREST",
-        //     minFilter: "NEAREST",
-        //     wrapS: "REPEAT",
-        //     wrapT: "REPEAT",
-        //     wrapR: "REPEAT",
-        // })
-        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        // gl.pixelStorei(
-        //     gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-        //     this.storage.premultipliedAlpha
-        // )
-    }
-
-    delete() {
-        this.gl.deleteTexture(this.glTexture)
-    }
-
-    get width() {
-        return this._width
-    }
-
-    get height() {
-        return this._height
-    }
-
-    get glTexture(): WebGLTexture {
-        if (this._texture) return this._texture
-
-        throw new Error(`Texture "${this.name}" has been deleted!`)
-    }
-
-    bind() {
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture)
-    }
-
-    /**
-     *
-     * @param unit Unit to link the texture to
-     * @param program The program that owns the uniform to update
-     * @param uniformName The uniform that hold the texture
-     */
-    activate(unit: number, program?: TgdProgram, uniformName?: string) {
-        const { gl } = this
-        gl.activeTexture(gl.TEXTURE0 + unit)
-        this.bind()
-        if (program && uniformName) {
-            program.uniform1i(uniformName, unit)
+        super(context, {
+            width,
+            height,
+            internalFormat: type,
+        })
+        this.setParams({
+            magFilter: "NEAREST",
+            minFilter: "NEAREST",
+            wrapS: "CLAMP_TO_EDGE",
+            wrapT: "CLAMP_TO_EDGE",
+        })
+        switch (type) {
+            case "DEPTH_COMPONENT16":
+                this.resize = this.resize16
+                break
+            case "DEPTH_COMPONENT24":
+                this.resize = this.resize24
+                break
+            default:
+                this.resize = this.resize32F
+                break
         }
-        return this
+    }
+
+    readonly resize: (width: number, height: number) => void
+
+    private readonly resize16 = (width: number, height: number) => {
+        const { context } = this
+        const { gl } = context
+
+        this.bind()
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.DEPTH_COMPONENT16,
+            width,
+            height,
+            0,
+            gl.DEPTH_COMPONENT,
+            gl.UNSIGNED_SHORT,
+            null
+        )
+    }
+
+    private readonly resize24 = (width: number, height: number) => {
+        const { context } = this
+        const { gl } = context
+
+        this.bind()
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.DEPTH_COMPONENT24,
+            width,
+            height,
+            0,
+            gl.DEPTH_COMPONENT,
+            gl.UNSIGNED_INT,
+            null
+        )
+    }
+
+    private readonly resize32F = (width: number, height: number) => {
+        const { context } = this
+        const { gl } = context
+
+        this.bind()
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.DEPTH_COMPONENT32F,
+            width,
+            height,
+            0,
+            gl.DEPTH_COMPONENT,
+            gl.FLOAT,
+            null
+        )
     }
 }
