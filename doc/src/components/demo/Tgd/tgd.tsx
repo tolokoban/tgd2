@@ -10,7 +10,14 @@ import {
     tgdLoadText,
     TgdDataGlb,
 } from "@tolokoban/tgd"
-import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui"
+import {
+    IconFullscreen,
+    IconOrientation,
+    IconSnapshot,
+    Theme,
+    ViewButton,
+    ViewPanel,
+} from "@tolokoban/ui"
 
 import Spinner from "../../Spinner"
 
@@ -163,31 +170,24 @@ export default function Tgd({
 
     return (
         <div className={Theme.classNames.join(className, styles.Tgd)}>
-            <ViewPanel display="flex" justifyContent="space-between">
-                <ViewButton
-                    variant="elevated"
-                    onClick={() => setLandscape(!landscape)}
-                    enabled={!loading}
-                >
-                    {landscape ? "Switch to Portrait" : "Switch to Landscape"}
-                </ViewButton>
-                <ViewButton
-                    variant="elevated"
-                    onClick={handleScreenshot}
-                    enabled={!loading}
-                >
-                    Screenshot
-                </ViewButton>
-                {fullscreenAvailable && (
-                    <ViewButton
-                        variant="elevated"
-                        onClick={handleFullscreen}
-                        enabled={!loading}
-                    >
-                        Fullscreen
-                    </ViewButton>
+            <div
+                className={Theme.classNames.join(
+                    styles.actions,
+                    !loading && styles.enabled
                 )}
-            </ViewPanel>
+            >
+                <div>
+                    <IconOrientation onClick={() => setLandscape(!landscape)} />
+                </div>
+                <div>
+                    <IconSnapshot onClick={handleScreenshot} />
+                </div>
+                {fullscreenAvailable && (
+                    <div>
+                        <IconFullscreen onClick={handleFullscreen} />
+                    </div>
+                )}
+            </div>
             <div className={styles.relative}>
                 <div
                     ref={refScreen}

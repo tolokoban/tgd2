@@ -11,6 +11,6 @@ void main() {
     vec2 s = vec2(uniScale, 1.0);
     vec2 o = vec2(0.5, 0);
     varUV = o + (attUV - o) * s;
-    varUVDepth = attUV;
+    varUVDepth = attUV * vec2(1, -1);
     gl_Position = vec4(attPoint, 1.0, 1.0);
 }

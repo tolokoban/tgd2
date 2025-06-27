@@ -4,25 +4,23 @@ precision highp float;
 
 uniform sampler2D uniTexture;
 uniform sampler2D uniTextureDepth;
-uniform float uniMin;
-uniform float uniMax;
 
 in vec2 varUV;
 in vec2 varUVDepth;
 
 out vec4 FragColor;
 
+float computeDepth(vec4 vec) {
+    float byte = 255.0;
+    float R = vec.r * byte;
+    float G = vec.g * byte;
+    float B = vec.b * byte;
+    return (R + G * float(0x100) + B * float(0x10000)) / float(0xFFFFFF);
+}
+
 void main() {
-    float depth = texture(uniTextureDepth, varUVDepth).r;
+    float depth = computeDepth(texture(uniTextureDepth, varUVDepth));
     vec3 color = texture(uniTexture, varUV).rgb;
-    FragColor = vec4(color * smoothstep(0.999, 1.0, gl_FragDepth), 1.0);
-    float min = uniMin;
-    float max = uniMax;
-    float light = clamp(
-        (depth - min) / (max - min),
-        0.0,
-        1.0
-    );
-    FragColor = mix(FragColor, vec4(vec3(light), 1), .999);
+    FragColor = vec4(color, 1.0);
     gl_FragDepth = depth;
 }

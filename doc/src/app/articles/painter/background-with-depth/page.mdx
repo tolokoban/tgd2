@@ -1,0 +1,14 @@
+import Demo from "./_background-with-depth/background-with-depth.demo"
+
+# [TgdPainterBackgroundWithDepth](docs/classes/TgdPainterBackgroundWithDepth.html)
+
+In case you have a fixed camera and a complex environment you can optimize the
+painting by pre-rendering it in Blender and generating a low poly version of it.
+
+TgdPainterBackgroundWithDepth will paint the high definition image and fill the
+depth buffer with the low poly mesh. If the canvas size doesn't change, then the
+low poly mesh won't even been rendered.
+
+## Example
+
+<Demo />

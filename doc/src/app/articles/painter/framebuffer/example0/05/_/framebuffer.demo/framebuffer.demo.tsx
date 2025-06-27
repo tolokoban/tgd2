@@ -43,7 +43,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     const fb = new TgdPainterFramebuffer(context, {
         children: [meshPainter],
-        depthBuffer: false,
+        depthBuffer: true,
         textureColor0: new TgdTexture2D(context),
     })
     const chromaticAberrationFilter = new TgdFilterChromaticAberration({

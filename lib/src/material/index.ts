@@ -1,3 +1,4 @@
+export * from "./depth"
 export * from "./diffuse"
 export * from "./face-orientation"
 export * from "./flat"

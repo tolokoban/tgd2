@@ -13,6 +13,7 @@
         "ci": "cd lib && npm install && npm run build && npm run doc",
         "doc": "cd lib && npm run doc && cd ../doc && npm run deploy",
         "test": "cd lib && npm test",
+        "build": "cd lib && npm run build && cd ../doc && npm run build",
         "predeploy": "npm run ci && cd doc && npm run deploy",
         "deploy": "npm run ci && npm publish --access=public",
         "minor": "npm version minor --no-git-tag-version && cd lib && npm version minor --no-git-tag-version && cd ../doc && npm version minor --no-git-tag-version",

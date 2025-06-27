@@ -28,6 +28,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/custom-shader/holes": ["/articles/custom-shader/holes"],
     "/articles/gltf": ["/articles/gltf"],
     "/articles/material": ["/articles/material"],
+    "/articles/material/depth": ["/articles/material/depth"],
     "/articles/material/face-orientation": ["/articles/material/face-orientation"],
     "/articles/material/flat": ["/articles/material/flat"],
     "/articles/material/ghost": ["/articles/material/ghost"],
