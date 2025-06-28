@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WebGL2 FBO Depth Texture to gl_FragDepth</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+                font-family: "Inter", sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: #1a202c; /* Dark background */
+                color: #e2e8f0; /* Light text */
+            }
+            canvas {
+                border-radius: 1rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                background-color: #2d3748; /* Slightly lighter dark background for canvas */
+            }
+            .info-box {
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                background-color: rgba(0, 0, 0, 0.7);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                font-size: 0.9rem;
+                color: #cbd5e0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="glCanvas" width="800" height="600"></canvas>
+        <div class="info-box">
+            <p>
+                This demonstrates rendering a cube to an offscreen FBO with a
+                depth texture,
+            </p>
+            <p>
+                then using that depth texture to explicitly set `gl_FragDepth`
+                on the main canvas.
+            </p>
+            <p>
+                The canvas shows a visualization of the depth (red is near, blue
+                is far).
+            </p>
+            <p>
+                Any objects rendered after this pass would use this depth
+                buffer.
+            </p>
+        </div>
+        <!-- prettier-ignore -->
+        <script id="vs-fbo" type="x-shader/x-vertex">#version 300 es
+            in vec4 a_position;
+            in vec4 a_color;
+            uniform mat4 u_modelViewProjectionMatrix;
+            out vec4 v_color; // Output color to fragment shader
+            void main() {
+                gl_Position = u_modelViewProjectionMatrix * a_position;
+                v_color = a_color;
+            }
+        </script>
+
+        <!-- prettier-ignore -->
+        <script id="fs-fbo" type="x-shader/x-fragment">#version 300 es
+            precision highp float;
+            in vec4 v_color;
+            out vec4 outColor; // Output color for the FBO's color attachment
+            void main() {
+                outColor = v_color;
+            }
+        </script>
+
+        <!-- prettier-ignore -->
+        <script id="vs-quad" type="x-shader/x-vertex">#version 300 es
+            in vec2 a_position;
+            out vec2 v_texCoord; // Output texture coordinates for fragment shader
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                // Convert clip space [-1,1] to texture space [0,1]
+                v_texCoord = (a_position * 0.5) + 0.5;
+            }
+        </script>
+
+        <!-- prettier-ignore -->
+        <script id="fs-quad" type="x-shader/x-fragment">#version 300 es
+            precision highp float;
+            uniform sampler2D u_depthTexture; // The depth texture from the FBO
+            in vec2 v_texCoord;
+            out vec4 outColor; // Output color for the main canvas
+
+            void main() {
+                // Sample the depth value from the depth texture.
+                // Depth textures typically store depth in the red (r) channel.
+                float depth = texture(u_depthTexture, v_texCoord).r;
+
+                // Explicitly set the fragment's depth value.
+                // This is the core of your request: writing the sampled depth
+                // directly into the main canvas's depth buffer.
+                gl_FragDepth = depth;
+
+                // Optional: Visualize the depth for debugging purposes.
+                // Map depth from [0,1] to a color: near (0.0) will be red, far (1.0) will be blue.
+                outColor = vec4(1.0 - depth, 0.0, depth, 1.0);
+            }
+        </script>
+
+        <script>
+            // Global variables for WebGL context and program info
+            let gl
+            let fboProgramInfo
+            let quadProgramInfo
+            let cubeVao
+            let quadVao
+            let depthTexture // The texture attached to the FBO's depth attachment
+            let fbo // The offscreen framebuffer
+            let animationFrameId
+
+            // Constants for FBO dimensions and cube rotation
+            const FBO_SIZE = 512 // Size of the offscreen framebuffer
+            let cubeRotationX = 0
+            let cubeRotationY = 0
+
+            // --- Utility Functions ---
+
+            // Helper to create a WebGL shader
+            function createShader(gl, type, sourceId) {
+                const source = document.getElementById(sourceId).text
+                const shader = gl.createShader(type)
+                gl.shaderSource(shader, source)
+                gl.compileShader(shader)
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error(
+                        "An error occurred compiling the shaders:",
+                        gl.getShaderInfoLog(shader)
+                    )
+                    gl.deleteShader(shader)
+                    return null
+                }
+                return shader
+            }
+
+            // Helper to create a WebGL program
+            function createProgram(gl, vsSourceId, fsSourceId) {
+                const vertexShader = createShader(
+                    gl,
+                    gl.VERTEX_SHADER,
+                    vsSourceId
+                )
+                const fragmentShader = createShader(
+                    gl,
+                    gl.FRAGMENT_SHADER,
+                    fsSourceId
+                )
+
+                if (!vertexShader || !fragmentShader) return null
+
+                const shaderProgram = gl.createProgram()
+                gl.attachShader(shaderProgram, vertexShader)
+                gl.attachShader(shaderProgram, fragmentShader)
+                gl.linkProgram(shaderProgram)
+
+                if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                    console.error(
+                        "Unable to initialize the shader program:",
+                        gl.getProgramInfoLog(shaderProgram)
+                    )
+                    gl.deleteProgram(shaderProgram)
+                    return null
+                }
+                return shaderProgram
+            }
+
+            // --- Initialization Functions ---
+
+            // Initializes the WebGL context
+            function initWebGL() {
+                const canvas = document.getElementById("glCanvas")
+                // Get WebGL2 context. Disabling default antialiasing is good practice
+                // if you're managing MSAA manually or rendering to textures.
+                gl = canvas.getContext("webgl2", { antialias: false })
+
+                if (!gl) {
+                    alert(
+                        "Unable to initialize WebGL2. Your browser or machine may not support it."
+                    )
+                    return false
+                }
+
+                // Set canvas dimensions to match CSS for proper scaling
+                const displayWidth = canvas.clientWidth
+                const displayHeight = canvas.clientHeight
+                if (
+                    canvas.width !== displayWidth ||
+                    canvas.height !== displayHeight
+                ) {
+                    canvas.width = displayWidth
+                    canvas.height = displayHeight
+                }
+
+                gl.enable(gl.DEPTH_TEST) // Enable depth testing globally
+                gl.depthFunc(gl.LEQUAL) // Near things obscure far things
+
+                return true
+            }
+
+            // Initializes the shader programs for both rendering passes
+            function initPrograms() {
+                // Program for rendering the cube to FBO
+                const fboShaderProgram = createProgram(gl, "vs-fbo", "fs-fbo")
+                if (!fboShaderProgram) return false
+                fboProgramInfo = {
+                    program: fboShaderProgram,
+                    attribLocations: {
+                        position: gl.getAttribLocation(
+                            fboShaderProgram,
+                            "a_position"
+                        ),
+                        color: gl.getAttribLocation(
+                            fboShaderProgram,
+                            "a_color"
+                        ),
+                    },
+                    uniformLocations: {
+                        modelViewProjectionMatrix: gl.getUniformLocation(
+                            fboShaderProgram,
+                            "u_modelViewProjectionMatrix"
+                        ),
+                    },
+                }
+
+                // Program for rendering the full-screen quad to canvas
+                const quadShaderProgram = createProgram(
+                    gl,
+                    "vs-quad",
+                    "fs-quad"
+                )
+                if (!quadShaderProgram) return false
+                quadProgramInfo = {
+                    program: quadShaderProgram,
+                    attribLocations: {
+                        position: gl.getAttribLocation(
+                            quadShaderProgram,
+                            "a_position"
+                        ),
+                    },
+                    uniformLocations: {
+                        depthTexture: gl.getUniformLocation(
+                            quadShaderProgram,
+                            "u_depthTexture"
+                        ),
+                    },
+                }
+                return true
+            }
+
+            // Initializes geometry data for the cube
+            function initCubeGeometry() {
+                const positions = new Float32Array([
+                    // Front face
+                    -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
+                    1.0,
+
+                    // Back face
+                    -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0,
+                    1.0, -1.0,
+
+                    // Top face
+                    -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                    -1.0,
+
+                    // Bottom face
+                    -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0,
+                    -1.0, 1.0,
+
+                    // Right face
+                    1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+                    1.0,
+
+                    // Left face
+                    -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0,
+                    1.0, -1.0,
+                ])
+
+                // Define colors for each face (for visualization, not directly related to depth)
+                const colors = new Float32Array([
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0, // Front (Red)
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0, // Back (Blue)
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    1.0, // Top (Green)
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0, // Bottom (Yellow)
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0, // Right (Magenta)
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0, // Left (Cyan)
+                ])
+
+                const indices = new Uint16Array([
+                    0,
+                    1,
+                    2,
+                    0,
+                    2,
+                    3, // Front
+                    4,
+                    5,
+                    6,
+                    4,
+                    6,
+                    7, // Back
+                    8,
+                    9,
+                    10,
+                    8,
+                    10,
+                    11, // Top
+                    12,
+                    13,
+                    14,
+                    12,
+                    14,
+                    15, // Bottom
+                    16,
+                    17,
+                    18,
+                    16,
+                    18,
+                    19, // Right
+                    20,
+                    21,
+                    22,
+                    20,
+                    22,
+                    23, // Left
+                ])
+
+                cubeVao = gl.createVertexArray()
+                gl.bindVertexArray(cubeVao)
+
+                // Position buffer
+                const positionBuffer = gl.createBuffer()
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW)
+                gl.vertexAttribPointer(
+                    fboProgramInfo.attribLocations.position,
+                    3,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                )
+                gl.enableVertexAttribArray(
+                    fboProgramInfo.attribLocations.position
+                )
+
+                // Color buffer
+                const colorBuffer = gl.createBuffer()
+                gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)
+                gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW)
+                gl.vertexAttribPointer(
+                    fboProgramInfo.attribLocations.color,
+                    4,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                )
+                gl.enableVertexAttribArray(fboProgramInfo.attribLocations.color)
+
+                // Index buffer
+                const indexBuffer = gl.createBuffer()
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+
+                gl.bindVertexArray(null) // Unbind VAO
+                return true
+            }
+
+            // Initializes geometry data for the full-screen quad
+            function initQuadGeometry() {
+                const positions = new Float32Array([
+                    -1.0,
+                    -1.0, // Bottom-left
+                    1.0,
+                    -1.0, // Bottom-right
+                    -1.0,
+                    1.0, // Top-left
+                    1.0,
+                    1.0, // Top-right
+                ])
+
+                const indices = new Uint16Array([
+                    0,
+                    1,
+                    2, // Triangle 1
+                    2,
+                    1,
+                    3, // Triangle 2 (or 2,3,1 for consistent winding)
+                ])
+
+                quadVao = gl.createVertexArray()
+                gl.bindVertexArray(quadVao)
+
+                // Position buffer
+                const positionBuffer = gl.createBuffer()
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW)
+                gl.vertexAttribPointer(
+                    quadProgramInfo.attribLocations.position,
+                    2,
+                    gl.FLOAT,
+                    false,
+                    0,
+                    0
+                )
+                gl.enableVertexAttribArray(
+                    quadProgramInfo.attribLocations.position
+                )
+
+                // Index buffer
+                const indexBuffer = gl.createBuffer()
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+
+                gl.bindVertexArray(null) // Unbind VAO
+                return true
+            }
+
+            // Initializes the FBO and its depth texture attachment
+            function initFBO() {
+                fbo = gl.createFramebuffer()
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
+
+                // 1. Create the depth texture
+                depthTexture = gl.createTexture()
+                gl.bindTexture(gl.TEXTURE_2D, depthTexture)
+
+                // Define the depth texture's properties:
+                // internalformat: gl.DEPTH_COMPONENT32F for floating-point depth (high precision)
+                // width, height: FBO_SIZE
+                // border: 0
+                // format: gl.DEPTH_COMPONENT (always for depth textures)
+                // type: gl.FLOAT (for DEPTH_COMPONENT32F)
+                // data: null (texture data will be written by rendering)
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.DEPTH_COMPONENT32F,
+                    FBO_SIZE,
+                    FBO_SIZE,
+                    0,
+                    gl.DEPTH_COMPONENT,
+                    gl.FLOAT,
+                    null
+                )
+
+                // Set texture parameters for sampling
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MAG_FILTER,
+                    gl.NEAREST
+                ) // Must be NEAREST for depth sampling
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MIN_FILTER,
+                    gl.NEAREST
+                ) // Must be NEAREST for depth sampling
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_S,
+                    gl.CLAMP_TO_EDGE
+                )
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_T,
+                    gl.CLAMP_TO_EDGE
+                )
+
+                // 2. Attach the depth texture to the FBO's depth attachment point
+                gl.framebufferTexture2D(
+                    gl.FRAMEBUFFER,
+                    gl.DEPTH_ATTACHMENT,
+                    gl.TEXTURE_2D,
+                    depthTexture,
+                    0
+                )
+
+                // 3. Create and attach a color attachment to the FBO.
+                // An FBO must have at least one color attachment OR have `gl.drawBuffers([gl.NONE])` set
+                // if you only want to render to depth/stencil.
+                // For this example, we attach a color renderbuffer so the cube actually draws color to the FBO.
+                const colorRenderbuffer = gl.createRenderbuffer()
+                gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer)
+                gl.renderbufferStorage(
+                    gl.RENDERBUFFER,
+                    gl.RGBA8,
+                    FBO_SIZE,
+                    FBO_SIZE
+                )
+                gl.framebufferRenderbuffer(
+                    gl.FRAMEBUFFER,
+                    gl.COLOR_ATTACHMENT0,
+                    gl.RENDERBUFFER,
+                    colorRenderbuffer
+                )
+
+                // 4. Check FBO completeness
+                const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+                if (status !== gl.FRAMEBUFFER_COMPLETE) {
+                    console.error("Framebuffer is not complete:", status)
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                    return false
+                }
+
+                // Unbind FBO and textures for now
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                gl.bindTexture(gl.TEXTURE_2D, null)
+                gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+
+                return true
+            }
+
+            // --- Matrix Math Utilities (simplified) ---
+            function createProjectionMatrix(fov, aspect, near, far) {
+                const f = 1.0 / Math.tan(fov / 2)
+                return [
+                    f / aspect,
+                    0,
+                    0,
+                    0,
+                    0,
+                    f,
+                    0,
+                    0,
+                    0,
+                    0,
+                    (far + near) / (near - far),
+                    -1,
+                    0,
+                    0,
+                    (2 * far * near) / (near - far),
+                    0,
+                ]
+            }
+
+            function createViewMatrix(x, y, z) {
+                // Simple translation matrix
+                return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -x, -y, -z, 1]
+            }
+
+            function createModelMatrix(rotationX, rotationY) {
+                const cX = Math.cos(rotationX)
+                const sX = Math.sin(rotationX)
+                const cY = Math.cos(rotationY)
+                const sY = Math.sin(rotationY)
+
+                // Rotation around X then Y (applied in reverse order in matrix multiplication)
+                // Identity matrix
+                let R_X = [1, 0, 0, 0, 0, cX, sX, 0, 0, -sX, cX, 0, 0, 0, 0, 1]
+                let R_Y = [cY, 0, -sY, 0, 0, 1, 0, 0, sY, 0, cY, 0, 0, 0, 0, 1]
+                return multiplyMatrices(R_Y, R_X) // Multiply Y by X
+            }
+
+            function multiplyMatrices(a, b) {
+                const out = []
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        out[i * 4 + j] =
+                            a[i * 4 + 0] * b[0 * 4 + j] +
+                            a[i * 4 + 1] * b[1 * 4 + j] +
+                            a[i * 4 + 2] * b[2 * 4 + j] +
+                            a[i * 4 + 3] * b[3 * 4 + j]
+                    }
+                }
+                return out
+            }
+
+            // --- Main Drawing Function ---
+            function drawScene(deltaTime) {
+                // Update cube rotation
+                cubeRotationX += deltaTime * 0.0005
+                cubeRotationY += deltaTime * 0.0007
+
+                // --- Pass 1: Render Cube to FBO (generating depth texture) ---
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo) // Bind our custom FBO
+                gl.viewport(0, 0, FBO_SIZE, FBO_SIZE) // Set viewport to FBO dimensions
+                gl.clearColor(0.0, 0.0, 0.0, 0.0) // Clear color for the FBO (e.g., transparent black)
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear both color and depth buffers in FBO
+
+                gl.useProgram(fboProgramInfo.program) // Use the cube rendering shader
+                gl.bindVertexArray(cubeVao) // Bind the cube's VAO
+
+                // Set up matrices for the cube rendering pass
+                const fieldOfView = (45 * Math.PI) / 180 // in radians
+                const aspect = FBO_SIZE / FBO_SIZE
+                const zNear = 0.1
+                const zFar = 100.0
+                const projectionMatrix = createProjectionMatrix(
+                    fieldOfView,
+                    aspect,
+                    zNear,
+                    zFar
+                )
+                const viewMatrix = createViewMatrix(0, 0, -6) // Move camera back
+                const modelMatrix = createModelMatrix(
+                    cubeRotationX,
+                    cubeRotationY
+                )
+
+                const modelViewMatrix = multiplyMatrices(
+                    viewMatrix,
+                    modelMatrix
+                )
+                const modelViewProjectionMatrix = multiplyMatrices(
+                    projectionMatrix,
+                    modelViewMatrix
+                )
+
+                gl.uniformMatrix4fv(
+                    fboProgramInfo.uniformLocations.modelViewProjectionMatrix,
+                    false,
+                    modelViewProjectionMatrix
+                )
+
+                gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0) // Draw the cube (36 indices)
+
+                // --- Pass 2: Render Full-Screen Quad to Canvas (using depth texture to set gl_FragDepth) ---
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null) // Bind to the default framebuffer (canvas)
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height) // Set viewport to canvas size
+                gl.clearColor(0.1, 0.1, 0.1, 1.0) // Background color for the canvas
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear canvas color and depth (important for a clean slate)
+
+                gl.useProgram(quadProgramInfo.program) // Use the full-screen quad shader
+                gl.bindVertexArray(quadVao) // Bind the quad's VAO
+
+                // Activate texture unit 0 and bind the depth texture
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, depthTexture)
+                gl.uniform1i(quadProgramInfo.uniformLocations.depthTexture, 0) // Tell shader to use texture unit 0
+
+                // Ensure depth writes are enabled for gl_FragDepth to have an effect.
+                // If you did gl.depthMask(false) previously, re-enable it.
+                gl.depthMask(true)
+
+                // For this pass, we are explicitly setting `gl_FragDepth`.
+                // The depth function determines if early Z-culling occurs. If you
+                // want to guarantee gl_FragDepth is always written, use gl.ALWAYS.
+                // If you want to use existing depth for a pre-test, use gl.LESS/LEQUAL etc.
+                // For this visualization, gl.ALWAYS is fine.
+                gl.depthFunc(gl.ALWAYS)
+
+                gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0) // Draw the full-screen quad (6 indices)
+            }
+
+            // --- Animation Loop ---
+            let lastTime = 0
+            function animate(currentTime) {
+                const deltaTime = currentTime - lastTime
+                lastTime = currentTime
+
+                drawScene(deltaTime) // Call the main drawing function
+
+                animationFrameId = requestAnimationFrame(animate) // Request next frame
+            }
+
+            // --- Main Execution ---
+            window.onload = function () {
+                if (
+                    initWebGL() &&
+                    initPrograms() &&
+                    initCubeGeometry() &&
+                    initQuadGeometry() &&
+                    initFBO()
+                ) {
+                    requestAnimationFrame(animate) // Start the animation loop
+                } else {
+                    console.error(
+                        "Initialization failed. Check console for errors."
+                    )
+                }
+            }
+
+            // --- Cleanup (Good Practice) ---
+            window.onbeforeunload = function () {
+                if (gl) {
+                    gl.deleteFramebuffer(fbo)
+                    gl.deleteTexture(depthTexture)
+                    gl.deleteProgram(fboProgramInfo.program)
+                    gl.deleteProgram(quadProgramInfo.program)
+                    gl.deleteVertexArray(cubeVao)
+                    gl.deleteVertexArray(quadVao)
+                    // Also delete renderbuffers and buffers if explicitly created and not part of VAO
+                }
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId)
+                }
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,1 @@
+function explode(t){let e=Math.floor(16777215*t);const o=(255&e)/255;e>>=8;const n=(255&e)/255;return e>>=8,[o,n,(255&e)/255]}function implode([t,e,o]){return(255*(255*o+e)+t)/65535}function test(t){const e=explode(t),o=implode(e);console.log(t,e,o)}test(0),test(.33),test(.5),test(.66),test(1);
