@@ -19,8 +19,8 @@ float computeDepth(vec4 vec) {
 }
 
 void main() {
-    float depth = computeDepth(texture(uniTextureDepth, varUVDepth));
     vec3 color = texture(uniTexture, varUV).rgb;
     FragColor = vec4(color, 1.0);
+    float depth = computeDepth(texture(uniTextureDepth, varUVDepth));
     gl_FragDepth = depth;
 }

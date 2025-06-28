@@ -1,5 +1,18 @@
 {
     "entryPoints": ["src/index.ts"],
     "includeVersion": true,
-    "out": "../doc/public/docs"
+    "out": "../doc/public/docs",
+    "highlightLanguages": [
+        "bash",
+        "css",
+        "html",
+        "javascript",
+        "json",
+        "jsonc",
+        "json5",
+        "yaml",
+        "tsx",
+        "typescript",
+        "glsl"
+    ]
 }

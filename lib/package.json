@@ -6,12 +6,12 @@
     "typings": "./dist/index.d.ts",
     "scripts": {
         "doc": "typedoc",
-        "copy": "rm -rf ./dist && cp -r ./tmp ./dist",
-        "build": "build-typescript-library --allow-circular --runAfter copy .",
+        "build": "build-typescript-library --allow-circular .",
+        "build:only": "build-typescript-library --allow-circular .",
         "postbuild": "npm run doc",
         "lint": "eslint -c eslint.config.mjs './src/**/*.ts'",
         "lint:fix": "eslint -c eslint.config.mjs --fix './src/**/*.ts'",
-        "start": "build-typescript-library --allow-circular --watch --runAfter copy .",
+        "start": "build-typescript-library --allow-circular --watch .",
         "test": "jest",
         "test:watch": "jest --watch"
     },
