@@ -1,15 +1,15 @@
-import * as React from "react"
+import type * as React from "react"
 
 import {
     Theme,
-    CommonProps,
+    type CommonProps,
     styleCommon,
     ViewPanel,
     ViewStrip,
     ViewTabs,
     ViewTab,
 } from "@tolokoban/ui"
-import { TgdDataGlb } from "@tolokoban/tgd"
+import type { TgdDataGlb } from "@tolokoban/tgd"
 
 import { isTypeCamera } from "../../types"
 import { ViewActionNodeTransfo } from "./ActionNodeTransfo"
@@ -31,7 +31,7 @@ export function ViewActionNode(props: ViewActionNodeProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
-    const node = props.data.gltf.nodes?.[props.index]
+    const node = props.data.getNode(props.index)
     if (!node) return null
 
     return (

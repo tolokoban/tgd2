@@ -1,632 +1,677 @@
+import { tgdCanvasCreateWithContext2D } from "@tolokoban/tgd";
+/* eslint-disable unicorn/prefer-type-error */
 /**
  * GLTF specs can be found here:
  * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
  */
-import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
-import { parseGLB } from "./parser"
+import { load } from "@loaders.gl/core";
+import { GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf";
+import { DracoLoader } from "@loaders.gl/draco";
+
+import type { TgdDatasetTypeRecord } from "@tgd/dataset";
+import { TgdDataset } from "@tgd/dataset";
+import type {
+	TgdFormatGltf,
+	TgdFormatGltfAccessor,
+	TgdFormatGltfCamera,
+	TgdFormatGltfImage,
+	TgdFormatGltfMaterial,
+	TgdFormatGltfMesh,
+	TgdFormatGltfMeshPrimitive,
+	TgdFormatGltfNode,
+	TgdFormatGltfScene,
+} from "@tgd/types/gltf";
 import {
-    TgdFormatGltf,
-    TgdFormatGltfAccessor,
-    TgdFormatGltfCamera,
-    TgdFormatGltfMaterial,
-    TgdFormatGltfMesh,
-    TgdFormatGltfMeshPrimitive,
-    TgdFormatGltfNode,
-    TgdFormatGltfScene,
-} from "@tgd/types/gltf"
+	assertTgdTypeArrayForElements,
+	expectArrayNumber16,
+	expectArrayNumber3,
+	expectArrayNumber4,
+	type TgdTypeArrayForElements,
+} from "@tgd/types";
+import { TgdGeometry } from "@tgd/geometry";
+import { TgdTexture2D } from "@tgd/texture";
+import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera";
 import {
-    assertTgdTypeArrayForElements,
-    TgdTypeArrayForElements,
-} from "@tgd/types"
-import { TgdGeometry } from "@tgd/geometry"
-import { TgdTexture2D } from "@tgd/texture"
-import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
-import { TgdQuat, TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
+	TgdQuat,
+	TgdTransfo,
+	type TgdTransfoOptions,
+	TgdVec3,
+} from "@tgd/math";
+import { ensureNumber } from "@tgd/types/guards";
+import { tgdLoadImage } from "@tgd/loader";
 
 export class TgdDataGlb {
-    public readonly gltf: Readonly<TgdFormatGltf>
+	static async load(url: string): Promise<TgdDataGlb> {
+		const gltf: GLTFWithBuffers = await load(url, GLTFLoader, {
+			DracoLoader,
+			decompress: true,
+		});
+		return new TgdDataGlb(gltf);
+	}
 
-    private readonly chunks: ArrayBuffer[]
-    private readonly chunkDetails: Array<{
-        size: number
-        type: "JSON" | "BIN"
-    }> = []
-    private readonly cacheImages = new Map<
-        number,
-        Promise<HTMLImageElement | undefined>
-    >()
-    private readonly cacheImageURLs = new Map<number, string>()
-    private readonly cacheBufferViewDatas = new Map<
-        number,
-        | Int8Array
-        | Uint8Array
-        | Int16Array
-        | Uint16Array
-        | Uint32Array
-        | Float32Array
-    >()
+	static async parse(data: ArrayBuffer): Promise<TgdDataGlb> {
+		const blob = new Blob([data]);
+		const url = URL.createObjectURL(blob);
+		const glb = await TgdDataGlb.load(url);
+		URL.revokeObjectURL(url);
+		return glb;
+	}
 
-    /**
-     * @param content The binary content of a GLB file.
-     */
-    constructor(content: ArrayBuffer) {
-        try {
-            const data = parseGLB(content)
-            this.gltf = data.gltf
-            this.chunks = data.chunks
-            this.chunkDetails = data.chunkTypes
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : JSON.stringify(error)
-            console.error(
-                "[TgdParserGLTransfertFormatBinary::new] content:",
-                content
-            )
-            throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
-        }
-    }
+	private cacheImages = new Map<
+		number,
+		Promise<HTMLImageElement | undefined>
+	>();
 
-    createTransfoFromNode(node: TgdFormatGltfNode): TgdTransfo {
-        const transfo: Partial<TgdTransfoOptions> = {}
-        if (node.rotation) {
-            console.log("🚀 [gltf] node.rotation =", node.rotation) // @FIXME: Remove this line written on 2025-04-17 at 21:07
-            transfo.orientation = new TgdQuat(node.rotation)
-        }
-        if (node.translation) transfo.position = new TgdVec3(node.translation)
-        if (node.scale) transfo.scale = new TgdVec3(node.scale)
-        return new TgdTransfo(transfo)
-    }
+	/**
+	 * @param content The binary content of a GLB file.
+	 */
+	private constructor(private readonly data: GLTFWithBuffers) {}
 
-    createCameraByName(name: string): TgdCamera {
-        const node = this.getNodeByNameOrThrow(name)
-        if (typeof node.camera === "number") {
-            const camera = this.getCamera(node.camera)
-            if (camera.type === "perspective") {
-                const perspective = new TgdCameraPerspective({
-                    name,
-                    near: camera.perspective.znear,
-                    far: camera.perspective.zfar,
-                    fovy: camera.perspective.yfov,
-                    transfo: this.createTransfoFromNode(node),
-                })
-                return perspective
-            } else {
-                throw new Error(
-                    "Sorry, but for now, we do not support Orthographic cameras..."
-                )
-            }
-        } else {
-            console.error(node)
-            throw new Error(`Node "${name}" is not of type Camera!`)
-        }
-    }
+	getJson(): Readonly<TgdFormatGltf> {
+		return this.data.json as unknown as TgdFormatGltf;
+	}
 
-    getCamera(cameraIndex: number): TgdFormatGltfCamera {
-        const camera = this.gltf.cameras?.[cameraIndex]
-        if (!camera) {
-            throw new Error(`Asset has no camera with index #${cameraIndex}!`)
-        }
+	getImages(): TgdFormatGltfImage[] {
+		return this.data.json.images ?? [];
+	}
 
-        return camera
-    }
+	getImage(imageIndex: number): TgdFormatGltfImage | undefined {
+		return this.data.json.images?.[imageIndex];
+	}
 
-    getChunkDetails() {
-        return structuredClone(this.chunkDetails)
-    }
+	createTransfoFromNode(node: TgdFormatGltfNode): TgdTransfo {
+		const transfo: Partial<TgdTransfoOptions> = {};
+		if (node.rotation) {
+			transfo.orientation = new TgdQuat(node.rotation);
+		}
+		if (node.translation) transfo.position = new TgdVec3(node.translation);
+		if (node.scale) transfo.scale = new TgdVec3(node.scale);
+		return new TgdTransfo(transfo);
+	}
 
-    get fileSize() {
-        return (
-            12 + this.chunks.reduce((size, chunk) => size + chunk.byteLength, 0)
-        )
-    }
+	createCameraByName(name: string): TgdCamera {
+		const node = this.getNodeByNameOrThrow(name);
+		if (typeof node.camera === "number") {
+			const camera = this.getCameraOrThrow(node.camera);
+			if (camera.type === "perspective") {
+				const perspective = new TgdCameraPerspective({
+					name,
+					near: camera.perspective.znear,
+					far: camera.perspective.zfar,
+					fovy: camera.perspective.yfov,
+					transfo: this.createTransfoFromNode(node),
+				});
+				return perspective;
+			} else {
+				throw new Error(
+					"Sorry, but for now, we do not support Orthographic cameras...",
+				);
+			}
+		} else {
+			console.error(node);
+			throw new Error(`Node "${name}" is not of type Camera!`);
+		}
+	}
 
-    getScenes(): TgdFormatGltfScene[] {
-        return this.gltf.scenes ?? []
-    }
+	getCamera(cameraIndex: number): TgdFormatGltfCamera | undefined {
+		const camera = this.data.json.cameras?.[cameraIndex];
+		if (!camera) return;
 
-    getScene(sceneIndex: number): TgdFormatGltfScene {
-        const scene = this.gltf.scenes?.[sceneIndex]
-        if (!scene) {
-            throw new Error(`Asset has no scene with index #${sceneIndex}!`)
-        }
+		if (camera.perspective) {
+			return {
+				type: "perspective",
+				name: camera.name,
+				perspective: camera.perspective,
+			};
+		}
+		if (camera.orthographic) {
+			return {
+				type: "orthographic",
+				name: camera.name,
+				orthographic: camera.orthographic,
+			};
+		}
+		throw new Error(
+			`[TgdDataGlb] Camera #${cameraIndex} is neither perspective, nor orthographic!`,
+		);
+	}
 
-        return scene
-    }
+	getCameraOrThrow(cameraIndex: number): TgdFormatGltfCamera {
+		const camera = this.getCamera(cameraIndex);
+		if (!camera) {
+			throw new Error(`Asset has no camera with index #${cameraIndex}!`);
+		}
 
-    getNode(nodeIndex: number): TgdFormatGltfNode {
-        const node = this.gltf.nodes?.[nodeIndex]
-        if (!node) {
-            throw new Error(`Asset has no node with index #${nodeIndex}!`)
-        }
+		return camera;
+	}
 
-        return node
-    }
+	getScenes(): TgdFormatGltfScene[] {
+		return this.data.json.scenes ?? [];
+	}
 
-    getNodeByName(nodeName: string): TgdFormatGltfNode | undefined {
-        const nodes = this.gltf.nodes
-        if (!nodes) return
+	getScene(sceneIndex: number): TgdFormatGltfScene | undefined {
+		return this.data.json.scenes?.[sceneIndex];
+	}
 
-        for (const node of nodes) {
-            if (node.name === nodeName) return node
-        }
-    }
+	getSceneOrThrow(sceneIndex: number): TgdFormatGltfScene {
+		const scene = this.getScene(sceneIndex);
+		if (!scene) {
+			throw new Error(`Asset has no scene with index #${sceneIndex}!`);
+		}
 
-    getNodeByNameOrThrow(nodeName: string): TgdFormatGltfNode {
-        const node = this.getNodeByName(nodeName)
-        if (node) return node
+		return scene;
+	}
 
-        throw new Error(
-            `Unknown node "${nodeName}"!\nAvailable names:${(
-                this.gltf.nodes ?? []
-            )
-                .map(
-                    (node, index) =>
-                        `\n  - ${
-                            typeof node.name === "string"
-                                ? JSON.stringify(node.name)
-                                : `#${index}`
-                        }`
-                )
-                .join("")}`
-        )
-    }
+	getNodes(): TgdFormatGltfNode[] {
+		const { nodes } = this.data.json;
+		if (!nodes) return [];
 
-    getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
-        const accessor = this.gltf.accessors?.[accessorIndex]
-        if (!accessor) {
-            throw new Error(
-                `Asset has no accessor with index #${accessorIndex}!`
-            )
-        }
+		return nodes.map((node) => ({
+			...node,
+			matrix: node.matrix && expectArrayNumber16(node.matrix),
+			rotation: node.rotation && expectArrayNumber4(node.rotation),
+			scale: node.scale && expectArrayNumber3(node.scale),
+			translation: node.translation && expectArrayNumber3(node.translation),
+		}));
+	}
 
-        return accessor
-    }
+	getNode(nodeIndex: number): TgdFormatGltfNode | undefined {
+		const node = this.data.json.nodes?.[nodeIndex];
+		if (!node) return;
 
-    getMaterial(materialIndex: number): TgdFormatGltfMaterial {
-        const material = this.gltf.materials?.[materialIndex]
-        if (!material) {
-            throw new Error(
-                `Asset has no material with index #${materialIndex}!`
-            )
-        }
+		return {
+			...node,
+			matrix: node.matrix && expectArrayNumber16(node.matrix),
+			rotation: node.rotation && expectArrayNumber4(node.rotation),
+			scale: node.scale && expectArrayNumber3(node.scale),
+			translation: node.translation && expectArrayNumber3(node.translation),
+		};
+	}
 
-        return material
-    }
+	getNodeOrThrow(nodeIndex: number): TgdFormatGltfNode {
+		const node = this.getNode(nodeIndex);
+		if (!node) {
+			throw new Error(`Asset has no node with index #${nodeIndex}!`);
+		}
 
-    getMesh(
-        meshIndexOrName: TgdFormatGltfMesh | number | string = 0
-    ): TgdFormatGltfMesh {
-        if (
-            typeof meshIndexOrName !== "number" &&
-            typeof meshIndexOrName !== "string"
-        )
-            return meshIndexOrName
+		return node;
+	}
 
-        const mesh =
-            typeof meshIndexOrName === "number"
-                ? this.gltf.meshes?.[meshIndexOrName]
-                : (this.gltf.meshes ?? []).find(
-                      item => item.name === meshIndexOrName
-                  )
-        if (!mesh) {
-            throw new Error(
-                `Asset has no mesh with index/name ${JSON.stringify(
-                    meshIndexOrName
-                )}!`
-            )
-        }
+	getNodeByName(nodeName: string): TgdFormatGltfNode | undefined {
+		const nodes = this.data.json.nodes;
+		if (!nodes) return;
 
-        return mesh
-    }
+		const index = nodes.findIndex((node) => node.name === nodeName);
+		if (index === -1) return;
 
-    getMeshPrimitive(
-        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
-        primitiveIndex = 0
-    ): {
-        attributes: Record<string, number>
-        indices?: number
-        mode?: number
-        material?: number
-    } {
-        const mesh =
-            typeof meshIndexOrName === "number" ||
-            typeof meshIndexOrName === "string"
-                ? this.getMesh(meshIndexOrName)
-                : meshIndexOrName
-        if (!mesh) {
-            throw new Error(
-                `Asset has no mesh with index/name ${JSON.stringify(
-                    meshIndexOrName
-                )}!`
-            )
-        }
-        const primitive = mesh.primitives[primitiveIndex]
-        if (!primitive) {
-            throw new Error(
-                `Asset has no primitive #${primitiveIndex} in mesh ${JSON.stringify(
-                    meshIndexOrName
-                )}!`
-            )
-        }
+		return this.getNode(index);
+	}
 
-        return primitive
-    }
+	getNodeByNameOrThrow(nodeName: string): TgdFormatGltfNode {
+		const node = this.getNodeByName(nodeName);
+		if (node) return node;
 
-    getMeshPrimitiveIndices(
-        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
-        primitiveIndex = 0
-    ): TgdTypeArrayForElements {
-        const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex)
-        const accessor = this.getAccessor(primitive.indices ?? 0)
-        const elements = this.getBufferViewData(
-            accessor.bufferView ?? 0,
-            accessor.componentType
-        )
-        assertTgdTypeArrayForElements(elements)
-        return elements
-    }
+		throw new Error(
+			`Unknown node "${nodeName}"!\nAvailable names:${(
+				this.data.json.nodes ?? []
+			)
+				.map(
+					(node, index) =>
+						`\n  - ${
+							typeof node.name === "string"
+								? JSON.stringify(node.name)
+								: `#${index}`
+						}`,
+				)
+				.join("")}`,
+		);
+	}
 
-    getAccessorByAttributeName(
-        primitive: TgdFormatGltfMeshPrimitive,
-        attribName: string
-    ): TgdFormatGltfAccessor {
-        const { attributes } = primitive
-        if (!attributes || Object.keys(attributes).length === 0)
-            throw new Error("No attributes found!")
-        const accessorIndex = attributes[attribName]
-        if (typeof accessorIndex !== "number") {
-            throw new TypeError(
-                `No attribute with name "${attribName}"!\nAvailable names are: ${Object.keys(
-                    attributes
-                )
-                    .map(name => JSON.stringify(name))
-                    .join(", ")}.`
-            )
-        }
-        try {
-            return this.getAccessor(accessorIndex)
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : JSON.stringify(error)
-            throw new Error(
-                `Attribute "${attribName}" pointed to an inexisting accessor!\n${message}`
-            )
-        }
-    }
+	getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
+		const accessor = this.data.json.accessors?.[accessorIndex];
+		if (!accessor) {
+			throw new Error(`Asset has no accessor with index #${accessorIndex}!`);
+		}
 
-    createTexture2D(
-        context: { gl: WebGL2RenderingContext },
-        textureIndex: number
-    ): TgdTexture2D {
-        const gltfTex = this.gltf.textures?.[textureIndex]
-        if (!gltfTex) {
-            throw new Error(`Asset has no texture with index #${textureIndex}!`)
-        }
+		return {
+			...accessor,
+			min: accessor.min && expectArrayNumber3(accessor.min),
+			max: accessor.max && expectArrayNumber3(accessor.max),
+		};
+	}
 
-        const source =
-            gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source ?? 0
-        const url = this.getImageURL(source)
-        const texture = new TgdTexture2D(context)
-        if (url) {
-            loadImage(url)
-                .then(bmp => {
-                    if (bmp) texture.loadBitmap(bmp)
-                    else console.error("Unable to load this file:", url)
-                })
-                .catch(console.error)
-        } else {
-            console.error(`[GLTF] texture index #${textureIndex} is empty!`)
-        }
-        return texture
-    }
+	getMaterial(materialIndex: number): TgdFormatGltfMaterial {
+		const material = this.data.json.materials?.[materialIndex];
+		if (!material) {
+			throw new Error(`Asset has no material with index #${materialIndex}!`);
+		}
 
-    async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
-        const fromCache = this.cacheImages.get(imageIndex)
-        if (fromCache) return fromCache
+		return {
+			...material,
+			pbrMetallicRoughness: {
+				...material.pbrMetallicRoughness,
+				baseColorFactor:
+					material.pbrMetallicRoughness?.baseColorFactor &&
+					expectArrayNumber4(material.pbrMetallicRoughness.baseColorFactor),
+			},
+		};
+	}
 
-        const url = this.getImageURL(imageIndex)
-        if (!url) return
+	getMesh(
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+	): TgdFormatGltfMesh {
+		if (
+			typeof meshIndexOrName !== "number" &&
+			typeof meshIndexOrName !== "string"
+		)
+			return meshIndexOrName;
 
-        const promise = new Promise<HTMLImageElement | undefined>(
-            (resolve, reject) => {
-                const img = new Image()
-                img.src = url
-                img.addEventListener("load", () => {
-                    resolve(img)
-                })
-                img.addEventListener("error", () => {
-                    console.error(
-                        `Unable to load image #${imageIndex}!`,
-                        this.gltf.images?.[imageIndex]
-                    )
-                    reject()
-                })
-            }
-        )
-        this.cacheImages.set(imageIndex, promise)
-        return promise
-    }
+		const mesh =
+			typeof meshIndexOrName === "number"
+				? this.data.json.meshes?.[meshIndexOrName]
+				: (this.data.json.meshes ?? []).find(
+						(item) => item.name === meshIndexOrName,
+					);
+		if (!mesh) {
+			throw new Error(
+				`Asset has no mesh with index/name ${JSON.stringify(meshIndexOrName)}!`,
+			);
+		}
 
-    getImageURL(imageIndex: number): string | undefined {
-        const fromCache = this.cacheImageURLs.get(imageIndex)
-        if (fromCache) return fromCache
+		return {
+			name: `Mesh#${meshIndexOrName}`,
+			...mesh,
+		};
+	}
 
-        const { gltf } = this
-        const image = gltf.images?.[imageIndex]
-        if (!image) return
+	getMeshPrimitive(
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+		primitiveIndex = 0,
+	): {
+		attributes: Record<string, number>;
+		indices?: number;
+		mode?: number;
+		material?: number;
+	} {
+		const mesh =
+			typeof meshIndexOrName === "number" || typeof meshIndexOrName === "string"
+				? this.getMesh(meshIndexOrName)
+				: meshIndexOrName;
+		if (!mesh) {
+			throw new Error(
+				`Asset has no mesh with index/name ${JSON.stringify(meshIndexOrName)}!`,
+			);
+		}
+		const primitive = mesh.primitives[primitiveIndex];
+		if (!primitive) {
+			throw new Error(
+				`Asset has no primitive #${primitiveIndex} in mesh ${JSON.stringify(
+					meshIndexOrName,
+				)}!`,
+			);
+		}
 
-        if (image.uri) return image.uri
+		return primitive;
+	}
 
-        if (typeof image.bufferView !== "number") return
-        const buffer = this.getBufferViewData(image.bufferView, "Uint8")
-        if (!buffer) return
+	getMeshPrimitiveIndices(
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+		primitiveIndex = 0,
+	): TgdTypeArrayForElements {
+		const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex);
+		const accessor = this.getAccessor(primitive.indices ?? 0);
+		const elements = this.getBufferViewData(
+			accessor.bufferView ?? 0,
+			accessor.componentType,
+		);
+		assertTgdTypeArrayForElements(elements);
+		return elements;
+	}
 
-        const blob = new Blob([buffer], {
-            type: image.mimeType,
-        })
-        const url = URL.createObjectURL(blob)
-        this.cacheImageURLs.set(imageIndex, url)
-        return url
-    }
+	getAccessorByAttributeName(
+		primitive: TgdFormatGltfMeshPrimitive,
+		attribName: string,
+	): TgdFormatGltfAccessor {
+		const { attributes } = primitive;
+		if (!attributes || Object.keys(attributes).length === 0)
+			throw new Error("No attributes found!");
+		const accessorIndex = attributes[attribName];
+		if (typeof accessorIndex !== "number") {
+			throw new TypeError(
+				`No attribute with name "${attribName}"!\nAvailable names are: ${Object.keys(
+					attributes,
+				)
+					.map((name) => JSON.stringify(name))
+					.join(", ")}.`,
+			);
+		}
+		try {
+			return this.getAccessor(accessorIndex);
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : JSON.stringify(error);
+			throw new Error(
+				`Attribute "${attribName}" pointed to an inexisting accessor!\n${message}`,
+			);
+		}
+	}
 
-    getBufferViewData(
-        accessor: TgdFormatGltfAccessor
-    ):
-        | Int8Array
-        | Uint8Array
-        | Int16Array
-        | Uint16Array
-        | Uint32Array
-        | Float32Array
-    getBufferViewData(
-        bufferViewIndex: number,
-        type?:
-            | number
-            | "Int8"
-            | "Uint8"
-            | "Int16"
-            | "Uint16"
-            | "Uint32"
-            | "Float32"
-    ):
-        | Int8Array
-        | Uint8Array
-        | Int16Array
-        | Uint16Array
-        | Uint32Array
-        | Float32Array
-    getBufferViewData(
-        accessor: TgdFormatGltfAccessor | number,
-        type:
-            | number
-            | "Int8"
-            | "Uint8"
-            | "Int16"
-            | "Uint16"
-            | "Uint32"
-            | "Float32" = "Float32"
-    ):
-        | Int8Array
-        | Uint8Array
-        | Int16Array
-        | Uint16Array
-        | Uint32Array
-        | Float32Array {
-        if (typeof accessor !== "number") {
-            return this.getBufferViewData(
-                accessor.bufferView ?? 0,
-                accessor.componentType
-            )
-        }
-        const bufferViewIndex = accessor
-        const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
-        if (fromCache) return fromCache
+	createTexture2D(
+		context: { gl: WebGL2RenderingContext },
+		textureIndex: number,
+	): TgdTexture2D {
+		const gltfTex = this.data.json.textures?.[textureIndex];
+		if (!gltfTex) {
+			throw new Error(`Asset has no texture with index #${textureIndex}!`);
+		}
 
-        const { gltf } = this
-        const bufferView = gltf.bufferViews?.[bufferViewIndex]
-        if (!bufferView)
-            throw new Error(`No bufferView with index #${bufferViewIndex}!`)
+		const texture = new TgdTexture2D(context);
+		const source = ensureNumber(
+			gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source,
+			0,
+		);
+		this.loadImage(source).then((bmp) => {
+			if (bmp) texture.loadBitmap(bmp);
+			else console.error("Unable to load this file:", source);
+		});
+		return texture;
+	}
 
-        const buffer = this.chunks[bufferView.buffer]
-        const byteOffset = bufferView.byteOffset ?? 0
-        const data = buffer.slice(
-            byteOffset,
-            byteOffset + bufferView.byteLength
-        )
-        const view = figureOutView(
-            data,
-            convertTypeToNumber(
-                type ??
-                    this.findAccessorForBufferView(bufferViewIndex)
-                        ?.componentType ??
-                    "Float32"
-            )
-        )
-        this.cacheBufferViewDatas.set(bufferViewIndex, view)
-        return view
-    }
+	async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
+		const imageData = this.data.images?.[imageIndex];
+		if (!imageData) return;
 
-    findAccessorForBufferView(
-        bufferViewIndex: number
-    ): TgdFormatGltfAccessor | undefined {
-        return (this.gltf.accessors ?? []).find(
-            accessor => accessor.bufferView === bufferViewIndex
-        )
-    }
+		const imageFromCache = this.cacheImages.get(imageIndex);
+		if (imageFromCache) return imageFromCache;
+		if (imageData instanceof HTMLImageElement) return imageData;
+		if (imageData instanceof ImageBitmap) {
+			const promise = new Promise<HTMLImageElement | undefined>((resolve) => {
+				const { width, height } = imageData;
+				const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height);
+				ctx.drawImage(imageData, 0, 0);
+				canvas.toBlob((blob) => {
+					if (!blob) {
+						resolve(new Image());
+						return;
+					}
 
-    setAttrib(
-        dataset: TgdDataset,
-        attribName: string,
-        meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
-        primitiveIndex = 0,
-        primitiveAttribName?: string
-    ) {
-        const { gltf } = this
-        const accessorIndex =
-            this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes[
-                primitiveAttribName ?? attribName
-            ] ?? -1
-        const accessor = gltf.accessors?.[accessorIndex]
-        if (!accessor) {
-            throw new Error(
-                `No attribute "${
-                    primitiveAttribName ?? attribName
-                }" for primitive #${primitiveIndex} of mesh #${meshIndexOrName}!`
-            )
-        }
+					const action = async () => {
+						const url = URL.createObjectURL(blob);
+						const image = await tgdLoadImage(url);
+						URL.revokeObjectURL(url);
+						resolve(image ?? undefined);
+					};
+					action();
+				}, "image/png");
+			});
+			this.cacheImages.set(imageIndex, promise);
+			return promise;
+		}
 
-        const bufferViewIndex = accessor.bufferView ?? 0
-        const bufferView = gltf.bufferViews?.[bufferViewIndex]
-        if (!bufferView) {
-            throw new Error(`No bufferView with index #${bufferViewIndex}!`)
-        }
-        const view = this.getBufferViewData(
-            bufferViewIndex,
-            accessor.componentType
-        )
-        dataset.set(attribName, view, {
-            byteStride: bufferView.byteStride,
-            byteOffset: accessor.byteOffset,
-            count: accessor.count,
-        })
-    }
+		const def = this.data.json.images?.[imageIndex];
+		const type = def?.mimeType ?? "image/jpeg";
+		const promise = new Promise<HTMLImageElement | undefined>(
+			(resolve, reject) => {
+				const blob = new Blob([imageData.data], { type });
+				const url = URL.createObjectURL(blob);
+				const img = new Image();
+				img.src = url;
+				img.addEventListener("load", () => {
+					URL.revokeObjectURL(url);
+					resolve(img);
+				});
+				img.addEventListener("error", () => {
+					console.error(
+						`Unable to load image #${imageIndex}!`,
+						this.data.json.images?.[imageIndex],
+					);
+					URL.revokeObjectURL(url);
+					reject();
+				});
+			},
+		);
+		this.cacheImages.set(imageIndex, promise);
+		return promise;
+	}
 
-    makeGeometry({
-        computeNormals,
-        meshIndex = 0,
-        primitiveIndex = 0,
-        attPositionName = "POSITION",
-        attNormalName = "NORMAL",
-        attTextureCoordsName = "TEXCOORD_0",
-    }: {
-        computeNormals?: boolean
-        meshIndex?: number
-        primitiveIndex?: number
-        attPositionName?: string
-        attNormalName?: string
-        attTextureCoordsName?: string
-    } = {}): TgdGeometry {
-        const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
-        try {
-            const { attributes } = primitive
-            if (!attributes) throw new Error("No attributes found!")
-            const elements = this.getMeshPrimitiveIndices(
-                meshIndex,
-                primitiveIndex
-            )
-            const definition: TgdDatasetTypeRecord = {
-                [attPositionName]: "vec3",
-            }
-            if (typeof attributes[attNormalName] === "string") {
-                definition[attNormalName] = "vec3"
-            }
-            if (typeof attributes[attTextureCoordsName] === "string") {
-                definition[attTextureCoordsName] = "vec2"
-            }
-            const dataset = new TgdDataset(definition)
-            dataset.set(
-                attPositionName,
-                returnFloat32Array(
-                    this.getBufferViewData(
-                        this.getAccessorByAttributeName(
-                            primitive,
-                            attPositionName
-                        )
-                    )
-                )
-            )
-            if (typeof attributes[attNormalName] === "string") {
-                dataset.set(
-                    attNormalName,
-                    returnFloat32Array(
-                        this.getBufferViewData(
-                            this.getAccessorByAttributeName(
-                                primitive,
-                                attNormalName
-                            )
-                        )
-                    )
-                )
-            }
-            if (typeof attributes[attTextureCoordsName] === "string") {
-                dataset.set(
-                    attTextureCoordsName,
-                    returnFloat32Array(
-                        this.getBufferViewData(
-                            this.getAccessorByAttributeName(
-                                primitive,
-                                attTextureCoordsName
-                            )
-                        )
-                    )
-                )
-            }
-            return new TgdGeometry({
-                computeNormalsIfMissing: computeNormals,
-                dataset,
-                elements,
-                attPosition: attPositionName,
-                attNormal: attNormalName,
-                attUV: attTextureCoordsName,
-            })
-        } catch (error) {
-            const message =
-                error instanceof Error ? error.message : JSON.stringify(error)
-            throw new Error(
-                `Error in primitive #${primitiveIndex} of mesh #${meshIndex}:\n${message}`
-            )
-        }
-    }
+	getBufferViewData(
+		accessor: TgdFormatGltfAccessor,
+	):
+		| Int8Array
+		| Uint8Array
+		| Int16Array
+		| Uint16Array
+		| Uint32Array
+		| Float32Array;
+	getBufferViewData(
+		bufferViewIndex: number,
+		type?:
+			| number
+			| "Int8"
+			| "Uint8"
+			| "Int16"
+			| "Uint16"
+			| "Uint32"
+			| "Float32",
+	):
+		| Int8Array
+		| Uint8Array
+		| Int16Array
+		| Uint16Array
+		| Uint32Array
+		| Float32Array;
+	getBufferViewData(
+		accessor: TgdFormatGltfAccessor | number,
+		type:
+			| number
+			| "Int8"
+			| "Uint8"
+			| "Int16"
+			| "Uint16"
+			| "Uint32"
+			| "Float32" = "Float32",
+	):
+		| Int8Array
+		| Uint8Array
+		| Int16Array
+		| Uint16Array
+		| Uint32Array
+		| Float32Array {
+		if (typeof accessor !== "number") {
+			return this.getBufferViewData(
+				accessor.bufferView ?? 0,
+				accessor.componentType,
+			);
+		}
+		const gltf = this.data.json;
+		const bufferViewIndex = accessor;
+		const bufferView = gltf.bufferViews?.[bufferViewIndex];
+		if (!bufferView)
+			throw new Error(`No bufferView with index #${bufferViewIndex}!`);
+
+		const buffer = this.data.buffers[bufferView.buffer];
+		const byteOffset = bufferView.byteOffset ?? 0;
+		const data = buffer.arrayBuffer.slice(
+			byteOffset,
+			byteOffset + bufferView.byteLength,
+		);
+		const view = figureOutView(
+			data,
+			convertTypeToNumber(
+				type ??
+					this.findAccessorForBufferView(bufferViewIndex)?.componentType ??
+					"Float32",
+			),
+		);
+		return view;
+	}
+
+	findAccessorForBufferView(
+		bufferViewIndex: number,
+	): TgdFormatGltfAccessor | undefined {
+		const accessor = (this.data.json.accessors ?? []).find(
+			(accessor) => accessor.bufferView === bufferViewIndex,
+		);
+		if (!accessor) return accessor;
+
+		return {
+			...accessor,
+			min: accessor.min && expectArrayNumber3(accessor.min),
+			max: accessor.max && expectArrayNumber3(accessor.max),
+		};
+	}
+
+	setAttrib(
+		dataset: TgdDataset,
+		attribName: string,
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+		primitiveIndex = 0,
+		primitiveAttribName?: string,
+	) {
+		const gltf = this.data.json;
+		const accessorIndex =
+			this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes[
+				primitiveAttribName ?? attribName
+			] ?? -1;
+		const accessor = gltf.accessors?.[accessorIndex];
+		if (!accessor) {
+			throw new Error(
+				`No attribute "${
+					primitiveAttribName ?? attribName
+				}" for primitive #${primitiveIndex} of mesh #${meshIndexOrName}!`,
+			);
+		}
+
+		const bufferViewIndex = accessor.bufferView ?? 0;
+		const bufferView = gltf.bufferViews?.[bufferViewIndex];
+		if (!bufferView) {
+			throw new Error(`No bufferView with index #${bufferViewIndex}!`);
+		}
+		const view = this.getBufferViewData(
+			bufferViewIndex,
+			accessor.componentType,
+		);
+		dataset.set(attribName, view, {
+			byteStride: bufferView.byteStride,
+			byteOffset: accessor.byteOffset,
+			count: accessor.count,
+		});
+	}
+
+	makeGeometry({
+		computeNormals,
+		meshIndex = 0,
+		primitiveIndex = 0,
+		attPositionName = "POSITION",
+		attNormalName = "NORMAL",
+		attTextureCoordsName = "TEXCOORD_0",
+	}: {
+		computeNormals?: boolean;
+		meshIndex?: number;
+		primitiveIndex?: number;
+		attPositionName?: string;
+		attNormalName?: string;
+		attTextureCoordsName?: string;
+	} = {}): TgdGeometry {
+		const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex);
+		try {
+			const { attributes } = primitive;
+			if (!attributes) throw new Error("No attributes found!");
+			const elements = this.getMeshPrimitiveIndices(meshIndex, primitiveIndex);
+			const definition: TgdDatasetTypeRecord = {
+				[attPositionName]: "vec3",
+			};
+			if (typeof attributes[attNormalName] === "string") {
+				definition[attNormalName] = "vec3";
+			}
+			if (typeof attributes[attTextureCoordsName] === "string") {
+				definition[attTextureCoordsName] = "vec2";
+			}
+			const dataset = new TgdDataset(definition);
+			dataset.set(
+				attPositionName,
+				returnFloat32Array(
+					this.getBufferViewData(
+						this.getAccessorByAttributeName(primitive, attPositionName),
+					),
+				),
+			);
+			if (typeof attributes[attNormalName] === "string") {
+				dataset.set(
+					attNormalName,
+					returnFloat32Array(
+						this.getBufferViewData(
+							this.getAccessorByAttributeName(primitive, attNormalName),
+						),
+					),
+				);
+			}
+			if (typeof attributes[attTextureCoordsName] === "string") {
+				dataset.set(
+					attTextureCoordsName,
+					returnFloat32Array(
+						this.getBufferViewData(
+							this.getAccessorByAttributeName(primitive, attTextureCoordsName),
+						),
+					),
+				);
+			}
+			return new TgdGeometry({
+				computeNormalsIfMissing: computeNormals,
+				dataset,
+				elements,
+				attPosition: attPositionName,
+				attNormal: attNormalName,
+				attUV: attTextureCoordsName,
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : JSON.stringify(error);
+			throw new Error(
+				`Error in primitive #${primitiveIndex} of mesh #${meshIndex}:\n${message}`,
+			);
+		}
+	}
 }
 
 function figureOutView(data: ArrayBuffer, componentType: number) {
-    switch (componentType) {
-        case 5120:
-            return new Int8Array(data)
-        case 5121:
-            return new Uint8Array(data)
-        case 5122:
-            return new Int16Array(data)
-        case 5123:
-            return new Uint16Array(data)
-        case 5125:
-            return new Uint32Array(data)
-        default:
-            return new Float32Array(data)
-    }
+	switch (componentType) {
+		case 5120:
+			return new Int8Array(data);
+		case 5121:
+			return new Uint8Array(data);
+		case 5122:
+			return new Int16Array(data);
+		case 5123:
+			return new Uint16Array(data);
+		case 5125:
+			return new Uint32Array(data);
+		default:
+			return new Float32Array(data);
+	}
 }
 
 function convertTypeToNumber(type: string | number): number {
-    if (typeof type === "number") return type
+	if (typeof type === "number") return type;
 
-    switch (type) {
-        case "Int8":
-            return 5120
-        case "Uint8":
-            return 5121
-        case "Int16":
-            return 5122
-        case "Uint16":
-            return 5123
-        case "Uint32":
-            return 5125
-        default:
-            return WebGL2RenderingContext.FLOAT
-    }
-    throw new Error("Function not implemented.")
+	switch (type) {
+		case "Int8":
+			return 5120;
+		case "Uint8":
+			return 5121;
+		case "Int16":
+			return 5122;
+		case "Uint16":
+			return 5123;
+		case "Uint32":
+			return 5125;
+		default:
+			return WebGL2RenderingContext.FLOAT;
+	}
 }
 
 function returnFloat32Array(data: unknown): Float32Array {
-    if (data instanceof Float32Array) return data
+	if (data instanceof Float32Array) return data;
 
-    throw new Error("We were expecting a Float32Array!")
-}
-
-function loadImage(url: string): Promise<HTMLImageElement | null> {
-    return new Promise(resolve => {
-        const img = new Image()
-        img.src = url
-        img.addEventListener("load", () => resolve(img))
-        img.addEventListener("error", () => resolve(null))
-    })
+	throw new Error("We were expecting a Float32Array!");
 }

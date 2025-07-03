@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import * as React from "react"
 
 import { IconImage, Theme } from "@tolokoban/ui"
@@ -27,7 +28,7 @@ export function ViewImages({
             icon={IconImage}
             title="Images"
         >
-            {(data.gltf.images ?? []).map((image, index) => (
+            {(data.getImages()).map((image, index) => (
                 <Expander
                     key={index}
                     title={image.name ?? `#${index}`}

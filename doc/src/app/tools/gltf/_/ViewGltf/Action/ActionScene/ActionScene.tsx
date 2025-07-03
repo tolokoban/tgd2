@@ -33,7 +33,7 @@ export function ViewActionScene({
     data,
     index,
 }: ViewActionSceneProps): JSX.Element {
-    const scene = data.gltf.scenes?.[index]
+    const scene = data.getScene(index)
     const handleReady = useReadyHandler(data, scene)
 
     if (!scene) return <p>No scene...</p>
@@ -59,11 +59,10 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                 return
             }
 
-            console.log("🚀 [ActionScene] context =", context) // @FIXME: Remove this line written on 2025-05-14 at 11:04
             const scenePainter = new TgdPainterNode({
                 children: (scene.nodes ?? [])
                     .filter(nodeIndex => {
-                        const node = data.getNode(nodeIndex)
+                        const node = data.getNodeOrThrow(nodeIndex)
                         return (
                             isNumber(node.mesh) ||
                             (Array.isArray(node.children) &&
@@ -82,7 +81,7 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
             })
             scenePainter.debug()
             const bboxes = (scene.nodes ?? []).map(nodeIndex =>
-                computeBBox(data, data.getNode(nodeIndex))
+                computeBBox(data, data.getNodeOrThrow(nodeIndex))
             )
             const bbox = averageBBoxes(bboxes)
             context.camera.transfo.position = bbox.center
@@ -118,6 +117,8 @@ function computeBBox(data: TgdDataGlb, node: TgdFormatGltfNode): BBox {
         bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
     for (const nodeIndex of node.children ?? []) {
         const childNode = data.getNode(nodeIndex)
+        if (!childNode) continue
+
         bboxes.push(computeBBox(data, childNode))
     }
     return applyTransfo(averageBBoxes(bboxes), node)

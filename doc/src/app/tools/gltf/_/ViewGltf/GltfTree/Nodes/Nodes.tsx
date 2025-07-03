@@ -1,14 +1,10 @@
-import * as React from "react"
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
+import { IconTree } from "@tolokoban/ui"
+import type{ TgdDataGlb } from "@tolokoban/tgd"
+import type{ Action } from "../../types"
 
-import { Theme, CommonProps, styleCommon, IconTree } from "@tolokoban/ui"
-import { TgdDataGlb } from "@tolokoban/tgd"
-import { Action } from "../../types"
-
-import Styles from "./Nodes.module.css"
 import { ViewNode } from "../Node"
 import { Expander } from "../Expander"
-
-const $ = Theme.classNames
 
 export type ViewNodesProps = {
     data: TgdDataGlb
@@ -16,12 +12,12 @@ export type ViewNodesProps = {
 }
 
 export function ViewNodes(props: ViewNodesProps): JSX.Element {
-    const { nodes } = props.data.gltf
-    if (!nodes) return <p>No nodes.</p>
+    const nodes = props.data.getNodes()
+    if (nodes.length===0) return <p>No nodes.</p>
 
     return (
         <Expander title="Nodes" icon={IconTree}>
-            {nodes.map((node, index) => (
+            {nodes.map((_node, index) => (
                 <ViewNode
                     key={`#${index}`}
                     data={props.data}

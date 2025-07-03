@@ -1,4 +1,4 @@
-import { TgdDataGlb } from "@tgd/parser"
+import type { TgdDataGlb } from "@tgd/parser"
 import { tgdLoadGlb } from "./binary"
 import { tgdLoadImage } from "./image"
 

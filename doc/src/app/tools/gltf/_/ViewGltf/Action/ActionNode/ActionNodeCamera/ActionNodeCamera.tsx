@@ -1,15 +1,15 @@
-import * as React from "react"
+import type * as React from "react"
 
-import { Theme, CommonProps, styleCommon } from "@tolokoban/ui"
+import { Theme, type CommonProps, styleCommon } from "@tolokoban/ui"
 import {
     isTgdFormatGltfCameraPerspective,
     tgdCalcRadToDeg,
-    TgdFormatGltfCamera,
-    TgdFormatGltfNode,
-    TgdDataGlb,
+    type TgdFormatGltfCamera,
+    type TgdFormatGltfNode,
+    type TgdDataGlb,
 } from "@tolokoban/tgd"
 
-import Error from "@/components/Error"
+import ErrorView from "@/components/Error"
 import CodeViewerView from "@/components/demo/CodeViewer"
 
 import Styles from "./ActionNodeCamera.module.css"
@@ -26,8 +26,8 @@ export function ViewActionNodeCamera(props: ViewActionNodeCameraProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
-    const camera = props.data.gltf.cameras?.[props.node.camera ?? -1]
-    if (!camera) return <Error>No camera found!</Error>
+    const camera =props.data.getCamera(props.node.camera ?? -1)
+    if (!camera) return <ErrorView>No camera found!</ErrorView>
 
     const code: string = figureCode(props.node, camera)
     return (

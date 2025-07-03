@@ -89,7 +89,7 @@ function computeBBox(data: TgdDataGlb, node: TgdFormatGltfNode): BBox {
     if (isNumber(node.mesh))
         bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
     for (const nodeIndex of node.children ?? []) {
-        const childNode = data.getNode(nodeIndex)
+        const childNode = data.getNodeOrThrow(nodeIndex)
         bboxes.push(computeBBox(data, childNode))
     }
     return applyTransfo(averageBBoxes(bboxes), node)

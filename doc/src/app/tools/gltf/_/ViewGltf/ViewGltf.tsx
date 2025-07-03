@@ -7,11 +7,11 @@ import {
     ViewPanel,
     ViewStrip,
 } from "@tolokoban/ui"
-import { TgdDataGlb } from "@tolokoban/tgd"
+import type { TgdDataGlb } from "@tolokoban/tgd"
 
 import { ViewGltfTree } from "./GltfTree"
 import { useData } from "./hooks"
-import { Action } from "./types"
+import type { Action } from "./types"
 import { ViewAction } from "./Action"
 
 import Styles from "./ViewGltf.module.css"
@@ -52,7 +52,7 @@ export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
                     gap="M"
                 >
                     <div>GLB Viewer</div>
-                    {data && <em>{Math.floor(data.fileSize / 1024)} Kb</em>}
+                    {/* {data && <em>{Math.floor(data.fileSize / 1024)} Kb</em>} */}
                     <ViewInputFile accept="glb" onLoad={handleLoad}>
                         <IconImport />
                     </ViewInputFile>

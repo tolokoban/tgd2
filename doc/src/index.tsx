@@ -1,9 +1,9 @@
-import * as React from "react"
-import App from "./app"
 import { createRoot } from "react-dom/client"
+
+import App from "./app"
 import { Theme } from "@tolokoban/ui"
 import {
-    WasmModule,
+    type WasmModule,
     tgdCodeStringify,
     tgdWasmCompile,
     wasm_i64_add,
@@ -19,12 +19,12 @@ import {
     wasm_module,
     wasm_while,
 } from "@tolokoban/tgd"
+import { assertType } from "@tolokoban/type-guards"
 
 import "./index.css"
 import "./highlight.css"
-import { assertType } from "@tolokoban/type-guards"
 
-function start() {
+async function start() {
     new Theme({
         colors: {
             neutral: ["#111", "#999"],
