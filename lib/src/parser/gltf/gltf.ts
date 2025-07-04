@@ -13,6 +13,7 @@ import { TgdDataset } from "@tgd/dataset";
 import type {
 	TgdFormatGltf,
 	TgdFormatGltfAccessor,
+	TgdFormatGltfBufferView,
 	TgdFormatGltfCamera,
 	TgdFormatGltfImage,
 	TgdFormatGltfMaterial,
@@ -38,25 +39,31 @@ import {
 	TgdVec3,
 } from "@tgd/math";
 import { ensureNumber } from "@tgd/types/guards";
-import { tgdLoadImage } from "@tgd/loader";
+import { tgdLoadArrayBuffer, tgdLoadImage } from "@tgd/loader";
 
 export class TgdDataGlb {
 	static async load(url: string): Promise<TgdDataGlb> {
-		const gltf: GLTFWithBuffers = await load(url, GLTFLoader, {
-			DracoLoader,
-			decompress: true,
-		});
-		return new TgdDataGlb(gltf);
+		const data = await tgdLoadArrayBuffer(url);
+		if (!data) throw new Error(`[TgdDataGlb] Unable to load "${url}"!`);
+
+		return TgdDataGlb.parse(data);
 	}
 
 	static async parse(data: ArrayBuffer): Promise<TgdDataGlb> {
 		const blob = new Blob([data]);
 		const url = URL.createObjectURL(blob);
-		const glb = await TgdDataGlb.load(url);
+		const gltf: GLTFWithBuffers = await load(url, GLTFLoader, {
+			DracoLoader,
+			decompress: true,
+			decompressMeshes: true,
+			loadBuffers: true,
+			loadImages: true,
+		});
 		URL.revokeObjectURL(url);
-		return glb;
+		return new TgdDataGlb(gltf, data.byteLength);
 	}
 
+	private readonly chunks: ArrayBuffer[] = [];
 	private cacheImages = new Map<
 		number,
 		Promise<HTMLImageElement | undefined>
@@ -65,7 +72,19 @@ export class TgdDataGlb {
 	/**
 	 * @param content The binary content of a GLB file.
 	 */
-	private constructor(private readonly data: GLTFWithBuffers) {}
+	private constructor(
+		private readonly data: GLTFWithBuffers,
+		public readonly fileSize: number,
+	) {
+		for (const buffer of data.buffers) {
+			this.chunks.push(
+				buffer.arrayBuffer.slice(
+					buffer.byteOffset,
+					buffer.byteOffset + buffer.byteLength,
+				),
+			);
+		}
+	}
 
 	getJson(): Readonly<TgdFormatGltf> {
 		return this.data.json as unknown as TgdFormatGltf;
@@ -434,6 +453,25 @@ export class TgdDataGlb {
 		return promise;
 	}
 
+	getBufferViews(): TgdFormatGltfBufferView[] {
+		return this.data.json.bufferViews ?? [];
+	}
+
+	getBufferView(bufferViewIndex: number): TgdFormatGltfBufferView | undefined {
+		return this.data.json.bufferViews?.[bufferViewIndex];
+	}
+
+	getBufferViewOrThrow(bufferViewIndex: number): TgdFormatGltfBufferView {
+		const bufferView = this.data.json.bufferViews?.[bufferViewIndex];
+		if (!bufferView) {
+			throw new Error(
+				`[TgdDataGlb] BufferView #${bufferViewIndex} does not exist!`,
+			);
+		}
+
+		return bufferView;
+	}
+
 	getBufferViewData(
 		accessor: TgdFormatGltfAccessor,
 	):
@@ -489,12 +527,10 @@ export class TgdDataGlb {
 		if (!bufferView)
 			throw new Error(`No bufferView with index #${bufferViewIndex}!`);
 
-		const buffer = this.data.buffers[bufferView.buffer];
+		const buffer = this.chunks[bufferView.buffer];
 		const byteOffset = bufferView.byteOffset ?? 0;
-		const data = buffer.arrayBuffer.slice(
-			byteOffset,
-			byteOffset + bufferView.byteLength,
-		);
+		const data = buffer.slice(byteOffset, byteOffset + bufferView.byteLength);
+		console.log("🚀 [gltf] data =", data); // @FIXME: Remove this line written on 2025-07-04 at 12:15
 		const view = figureOutView(
 			data,
 			convertTypeToNumber(

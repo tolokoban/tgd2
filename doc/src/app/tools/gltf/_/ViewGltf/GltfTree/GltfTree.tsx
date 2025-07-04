@@ -2,14 +2,12 @@ import type * as React from "react";
 
 import {
 	Theme,
-	CommonProps,
+	type CommonProps,
 	styleCommon,
 	ViewButton,
-	ViewPanel,
 } from "@tolokoban/ui";
-import { TgdDataGlb } from "@tolokoban/tgd";
+import type { TgdDataGlb } from "@tolokoban/tgd";
 
-import { Expander } from "./Expander";
 import type { Action } from "../types";
 
 import Styles from "./GltfTree.module.css";
@@ -17,6 +15,7 @@ import { ViewNodes } from "./Nodes";
 import { ViewImages } from "./Images";
 import { ViewLights } from "./Lights";
 import { ViewScenes } from "./Scenes";
+import { ViewBufferViews } from "./BufferViews";
 
 const $ = Theme.classNames;
 
@@ -33,20 +32,19 @@ export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
 
 	return (
 		<div className={$.join(props.className, Styles.gltfTree)} style={style}>
-			<Expander title="GLTF" name="root">
-				<ViewButton
-					variant="text"
-					color="secondary-5"
-					fullwidth
-					onClick={go({ type: "verbatim" })}
-				>
-					Show verbatim content
-				</ViewButton>
-				<ViewScenes data={props.data} onAction={props.onAction} />
-				<ViewNodes data={props.data} onAction={props.onAction} />
-				<ViewImages data={props.data} onAction={props.onAction} />
-				<ViewLights data={props.data} onAction={props.onAction} />
-			</Expander>
+			<ViewButton
+				variant="text"
+				color="secondary-5"
+				fullwidth
+				onClick={go({ type: "verbatim" })}
+			>
+				Show verbatim content
+			</ViewButton>
+			<ViewScenes data={props.data} onAction={props.onAction} />
+			<ViewNodes data={props.data} onAction={props.onAction} />
+			<ViewImages data={props.data} onAction={props.onAction} />
+			<ViewLights data={props.data} onAction={props.onAction} />
+			<ViewBufferViews data={props.data} onAction={props.onAction} />
 			{/* <Expander title="Chunks" name="root">
                 <ViewPanel
                     display="grid"

@@ -195,13 +195,7 @@ export function isTgdFormatGltfCameraOrthographic(
  */
 export interface TgdFormatGltf {
 	accessors?: TgdFormatGltfAccessor[];
-	bufferViews?: Array<{
-		buffer: number;
-		byteLength: number;
-		byteOffset?: number;
-		byteStride?: number;
-		target?: number;
-	}>;
+	bufferViews?: TgdFormatGltfBufferView[];
 	cameras?: TgdFormatGltfCamera[];
 	images?: TgdFormatGltfImage[];
 	materials?: TgdFormatGltfMaterial[];
@@ -227,6 +221,14 @@ export interface TgdFormatGltf {
 			};
 		};
 	}>;
+}
+
+export interface TgdFormatGltfBufferView {
+	buffer: number;
+	byteLength: number;
+	byteOffset?: number;
+	byteStride?: number;
+	target?: number;
 }
 
 export interface TgdFormatGltfImage {

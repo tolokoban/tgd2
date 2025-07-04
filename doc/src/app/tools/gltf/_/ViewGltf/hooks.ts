@@ -1,8 +1,9 @@
 import React from "react";
 import { tgdLoadArrayBuffer, TgdDataGlb } from "@tolokoban/tgd";
 
-import DefaultURL from "./danatia.glb";
+// import DefaultURL from "./danatia.glb";
 // import DefaultURL from "./apple.glb"
+import DefaultURL from "./cube.glb";
 
 export function useData(): [
 	TgdDataGlb | null,
