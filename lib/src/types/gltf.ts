@@ -2,6 +2,7 @@
 
 import { type TypeDef, assertType } from "@tgd/types/guards";
 import type { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "./arrays";
+import { TgdTypeArrayForElements } from "./elements";
 
 export interface TgdFormatGltfAccessor {
 	bufferView?: number;
@@ -102,11 +103,24 @@ export interface TgdFormatGltfMaterial {
 }
 
 export interface TgdFormatGltfMeshPrimitive {
-	attributes: Record<string, number>;
-	indices?: number;
+	attributes: Record<string, TgdFormatGltfMeshPrimitiveAttribute>;
+	indices?: TgdFormatGltfMeshPrimitiveAttribute;
 	mode?: number;
 	material?: number;
 }
+
+export type TgdFormatGltfMeshPrimitiveAttribute =
+	| number
+	| {
+			value: TgdTypeArrayForElements | Float32Array;
+			size: number;
+			count: number;
+			byteOffset: number;
+			type: string;
+			componentType: number;
+			min?: ArrayNumber3;
+			max?: ArrayNumber3;
+	  };
 
 export interface TgdFormatGltfMesh {
 	name: string;

@@ -7,6 +7,7 @@ import {
 	ViewPanel,
 	ViewStrip,
 } from "@tolokoban/ui";
+import { webglLookup } from "@tolokoban/tgd";
 
 import { ViewGltfTree } from "./GltfTree";
 import { useData } from "./hooks";
@@ -16,7 +17,6 @@ import { ViewAction } from "./Action";
 import { ViewFileSize } from "@/components/FileSize";
 
 import Styles from "./ViewGltf.module.css";
-import { webglLookup } from "../../../../../../../lib/dist";
 
 const $ = Theme.classNames;
 
@@ -75,11 +75,11 @@ export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
 						padding="S"
 						color="primary-1"
 					>
-						{[5120, 5121, 5122, 5123, 5124, 5125, 5126, 34962, 34963].map(
+						{[4, 5120, 5121, 5122, 5123, 5124, 5125, 5126, 34962, 34963].map(
 							(v) => (
 								<>
-									<div key={`${v}`}>{v}</div>
-									<div key={`${webglLookup(v)}`}>{webglLookup(v)}</div>
+									<div key={`NUM/${v}`}>{v}</div>
+									<div key={`STR/${v}`}>{webglLookup(v)}</div>
 								</>
 							),
 						)}

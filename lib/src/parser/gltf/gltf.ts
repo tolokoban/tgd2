@@ -19,6 +19,7 @@ import type {
 	TgdFormatGltfMaterial,
 	TgdFormatGltfMesh,
 	TgdFormatGltfMeshPrimitive,
+	TgdFormatGltfMeshPrimitiveAttribute,
 	TgdFormatGltfNode,
 	TgdFormatGltfScene,
 } from "@tgd/types/gltf";
@@ -38,7 +39,7 @@ import {
 	type TgdTransfoOptions,
 	TgdVec3,
 } from "@tgd/math";
-import { ensureNumber } from "@tgd/types/guards";
+import { ensureNumber, isNumber } from "@tgd/types/guards";
 import { tgdLoadArrayBuffer, tgdLoadImage } from "@tgd/loader";
 
 export class TgdDataGlb {
@@ -306,12 +307,7 @@ export class TgdDataGlb {
 	getMeshPrimitive(
 		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
 		primitiveIndex = 0,
-	): {
-		attributes: Record<string, number>;
-		indices?: number;
-		mode?: number;
-		material?: number;
-	} {
+	): TgdFormatGltfMeshPrimitive {
 		const mesh =
 			typeof meshIndexOrName === "number" || typeof meshIndexOrName === "string"
 				? this.getMesh(meshIndexOrName)
@@ -338,40 +334,21 @@ export class TgdDataGlb {
 		primitiveIndex = 0,
 	): TgdTypeArrayForElements {
 		const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex);
-		const accessor = this.getAccessor(primitive.indices ?? 0);
-		const elements = this.getBufferViewData(
-			accessor.bufferView ?? 0,
-			accessor.componentType,
-		);
-		assertTgdTypeArrayForElements(elements);
-		return elements;
-	}
-
-	getAccessorByAttributeName(
-		primitive: TgdFormatGltfMeshPrimitive,
-		attribName: string,
-	): TgdFormatGltfAccessor {
-		const { attributes } = primitive;
-		if (!attributes || Object.keys(attributes).length === 0)
-			throw new Error("No attributes found!");
-		const accessorIndex = attributes[attribName];
-		if (typeof accessorIndex !== "number") {
-			throw new TypeError(
-				`No attribute with name "${attribName}"!\nAvailable names are: ${Object.keys(
-					attributes,
-				)
-					.map((name) => JSON.stringify(name))
-					.join(", ")}.`,
+		const { indices } = primitive;
+		if (isNumber(indices)) {
+			const accessor = this.getAccessor(indices);
+			const elements = this.getBufferViewData(
+				accessor.bufferView ?? 0,
+				accessor.componentType,
 			);
-		}
-		try {
-			return this.getAccessor(accessorIndex);
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : JSON.stringify(error);
-			throw new Error(
-				`Attribute "${attribName}" pointed to an inexisting accessor!\n${message}`,
-			);
+			assertTgdTypeArrayForElements(elements);
+			return elements;
+		} else if (indices) {
+			const elements = indices.value;
+			assertTgdTypeArrayForElements(elements);
+			return elements;
+		} else {
+			return new Uint8Array();
 		}
 	}
 
@@ -557,6 +534,56 @@ export class TgdDataGlb {
 		};
 	}
 
+	getAttribute(
+		attribName: string,
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+		primitiveIndex = 0,
+	): TgdFormatGltfMeshPrimitiveAttribute | undefined {
+		const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex);
+		const attribute = primitive.attributes[attribName];
+
+		return attribute;
+	}
+
+	getAttributeOrThrow(
+		attribName: string,
+		meshIndexOrName: TgdFormatGltfMesh | number | string = 0,
+		primitiveIndex = 0,
+	): TgdFormatGltfMeshPrimitiveAttribute {
+		const attribute = this.getAttribute(
+			attribName,
+			meshIndexOrName,
+			primitiveIndex,
+		);
+		if (!attribute) {
+			throw new Error(
+				`[TgdDataGlb] No attribute "${attribName}" in mesh "${meshIndexOrName}" and primitive #${primitiveIndex}!`,
+			);
+		}
+
+		return attribute;
+	}
+
+	getAttributeData(
+		attribute: TgdFormatGltfMeshPrimitiveAttribute,
+	): Float32Array {
+		if (isNumber(attribute)) {
+			const accessor = this.getAccessor(attribute);
+			const data = this.getBufferViewData(
+				accessor.bufferView ?? 0,
+				accessor.componentType,
+			);
+			assertFloat32Array(data);
+			return data;
+		} else if (attribute) {
+			const data = attribute.value;
+			assertFloat32Array(data);
+			return data;
+		} else {
+			return new Float32Array();
+		}
+	}
+
 	setAttrib(
 		dataset: TgdDataset,
 		attribName: string,
@@ -565,33 +592,45 @@ export class TgdDataGlb {
 		primitiveAttribName?: string,
 	) {
 		const gltf = this.data.json;
-		const accessorIndex =
-			this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes[
-				primitiveAttribName ?? attribName
-			] ?? -1;
-		const accessor = gltf.accessors?.[accessorIndex];
-		if (!accessor) {
+		const attribute = this.getAttribute(primitiveAttribName ?? attribName);
+		if (attribute === undefined) {
 			throw new Error(
-				`No attribute "${
-					primitiveAttribName ?? attribName
-				}" for primitive #${primitiveIndex} of mesh #${meshIndexOrName}!`,
+				`[TgdDataGlb] No attribute "${primitiveAttribName ?? attribName}" in mesh "${meshIndexOrName}" and primitive #${primitiveIndex}!`,
 			);
 		}
 
-		const bufferViewIndex = accessor.bufferView ?? 0;
-		const bufferView = gltf.bufferViews?.[bufferViewIndex];
-		if (!bufferView) {
-			throw new Error(`No bufferView with index #${bufferViewIndex}!`);
+		if (isNumber(attribute)) {
+			const accessorIndex = attribute;
+			const accessor = gltf.accessors?.[accessorIndex];
+			if (!accessor) {
+				throw new Error(
+					`No attribute "${
+						primitiveAttribName ?? attribName
+					}" for primitive #${primitiveIndex} of mesh #${meshIndexOrName}!`,
+				);
+			}
+
+			const bufferViewIndex = accessor.bufferView ?? 0;
+			const bufferView = gltf.bufferViews?.[bufferViewIndex];
+			if (!bufferView) {
+				throw new Error(`No bufferView with index #${bufferViewIndex}!`);
+			}
+			const view = this.getBufferViewData(
+				bufferViewIndex,
+				accessor.componentType,
+			);
+			dataset.set(attribName, view, {
+				byteStride: bufferView.byteStride,
+				byteOffset: accessor.byteOffset,
+				count: accessor.count,
+			});
+		} else {
+			dataset.set(attribName, attribute.value, {
+				byteStride: resolveStride(attribute.type),
+				byteOffset: attribute.byteOffset,
+				count: attribute.count,
+			});
 		}
-		const view = this.getBufferViewData(
-			bufferViewIndex,
-			accessor.componentType,
-		);
-		dataset.set(attribName, view, {
-			byteStride: bufferView.byteStride,
-			byteOffset: accessor.byteOffset,
-			count: accessor.count,
-		});
 	}
 
 	makeGeometry({
@@ -614,43 +653,41 @@ export class TgdDataGlb {
 			const { attributes } = primitive;
 			if (!attributes) throw new Error("No attributes found!");
 			const elements = this.getMeshPrimitiveIndices(meshIndex, primitiveIndex);
-			const definition: TgdDatasetTypeRecord = {
-				[attPositionName]: "vec3",
-			};
-			if (typeof attributes[attNormalName] === "string") {
+			const definition: TgdDatasetTypeRecord = {};
+			const attPosition = this.getAttribute(
+				attPositionName,
+				meshIndex,
+				primitiveIndex,
+			);
+			if (attPosition) {
+				definition[attPositionName] = "vec3";
+			}
+			const attNormal = this.getAttribute(
+				attNormalName,
+				meshIndex,
+				primitiveIndex,
+			);
+			if (attNormal) {
 				definition[attNormalName] = "vec3";
 			}
-			if (typeof attributes[attTextureCoordsName] === "string") {
+			const attTextureCoords = this.getAttribute(
+				attTextureCoordsName,
+				meshIndex,
+				primitiveIndex,
+			);
+			if (attTextureCoords) {
 				definition[attTextureCoordsName] = "vec2";
 			}
 			const dataset = new TgdDataset(definition);
-			dataset.set(
-				attPositionName,
-				returnFloat32Array(
-					this.getBufferViewData(
-						this.getAccessorByAttributeName(primitive, attPositionName),
-					),
-				),
-			);
-			if (typeof attributes[attNormalName] === "string") {
-				dataset.set(
-					attNormalName,
-					returnFloat32Array(
-						this.getBufferViewData(
-							this.getAccessorByAttributeName(primitive, attNormalName),
-						),
-					),
-				);
+			if (attPosition) {
+				console.log("POSITION:", this.getAttributeData(attPosition));
+				dataset.set(attPositionName, this.getAttributeData(attPosition));
 			}
-			if (typeof attributes[attTextureCoordsName] === "string") {
-				dataset.set(
-					attTextureCoordsName,
-					returnFloat32Array(
-						this.getBufferViewData(
-							this.getAccessorByAttributeName(primitive, attTextureCoordsName),
-						),
-					),
-				);
+			if (attNormal) {
+				dataset.set(attPositionName, this.getAttributeData(attNormal));
+			}
+			if (attTextureCoords) {
+				dataset.set(attPositionName, this.getAttributeData(attTextureCoords));
 			}
 			return new TgdGeometry({
 				computeNormalsIfMissing: computeNormals,
@@ -699,6 +736,8 @@ function convertTypeToNumber(type: string | number): number {
 			return 5122;
 		case "Uint16":
 			return 5123;
+		case "Int32":
+			return 5124;
 		case "Uint32":
 			return 5125;
 		default:
@@ -706,8 +745,24 @@ function convertTypeToNumber(type: string | number): number {
 	}
 }
 
-function returnFloat32Array(data: unknown): Float32Array {
-	if (data instanceof Float32Array) return data;
+function assertFloat32Array(data: unknown): asserts data is Float32Array {
+	if (!(data instanceof Float32Array)) {
+		throw new Error(`Data was expected to ba a Float32Array!`);
+	}
+}
 
-	throw new Error("We were expecting a Float32Array!");
+function resolveStride(type: string): number {
+	switch (type.toLowerCase()) {
+		case "float":
+		case "scalar":
+			return 1 * Float32Array.BYTES_PER_ELEMENT;
+		case "vec2":
+			return 2 * Float32Array.BYTES_PER_ELEMENT;
+		case "vec3":
+			return 3 * Float32Array.BYTES_PER_ELEMENT;
+		case "vec4":
+			return 4 * Float32Array.BYTES_PER_ELEMENT;
+		default:
+			return 0;
+	}
 }

@@ -2,6 +2,7 @@ import { Theme, ViewButton, ViewPanel } from "@tolokoban/ui";
 import type { TgdDataGlb } from "@tolokoban/tgd";
 
 import Styles from "./Verbatim.module.css";
+import { stringifyJson } from "../../util";
 
 const $ = Theme.classNames;
 
@@ -22,18 +23,7 @@ export function ViewActionVerbatim(props: ViewVerbatimProps): JSX.Element {
 			<ViewButton onClick={() => console.log(props.data.getJson())}>
 				Write to console
 			</ViewButton>
-			<pre>{JSON.stringify(props.data.getJson(), replacer, "  ")}</pre>
+			<pre>{stringifyJson(props.data.getJson())}</pre>
 		</ViewPanel>
 	);
-}
-
-function replacer(this: Record<string, unknown>, _key: string, value: unknown) {
-	if (value instanceof Float32Array)
-		return `<<< Float32Array(${value.length}) >>>`;
-	if (value instanceof Uint8Array) return `<<< Uint8Array(${value.length}) >>>`;
-	if (value instanceof Uint16Array)
-		return `<<< Uint16Array(${value.length}) >>>`;
-	if (value instanceof Uint32Array)
-		return `<<< Uint32Array(${value.length}) >>>`;
-	return value;
 }

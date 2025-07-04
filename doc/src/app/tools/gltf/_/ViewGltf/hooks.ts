@@ -3,7 +3,7 @@ import { tgdLoadArrayBuffer, TgdDataGlb } from "@tolokoban/tgd";
 
 // import DefaultURL from "./danatia.glb";
 // import DefaultURL from "./apple.glb"
-import DefaultURL from "./cube.glb";
+import DefaultURL from "./cube-zip.glb";
 
 export function useData(): [
 	TgdDataGlb | null,
