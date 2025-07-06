@@ -45,6 +45,7 @@ import {
 import { ensureNumber, isNumber } from "@tgd/types/guards";
 import { tgdLoadArrayBuffer, tgdLoadImage } from "@tgd/loader";
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils/canvas";
+import { parseGLB } from "./parser";
 
 export class TgdDataGlb {
 	static async load(url: string): Promise<TgdDataGlb> {
@@ -83,10 +84,15 @@ export class TgdDataGlb {
 		return new TgdDataGlb(json, chunks, images, data.byteLength);
 	}
 
-	private cacheImages = new Map<
-		number,
-		Promise<HTMLImageElement | undefined>
-	>();
+	static async parseOld(data: ArrayBuffer): Promise<TgdDataGlb> {
+		const { gltf, chunks } = parseGLB(data);
+		const images: (HTMLImageElement | undefined)[] = [];
+		for (const imageDef of gltf.images ?? []) {
+			console.log("🚀 [gltf] imageDef =", imageDef); // @FIXME: Remove this line written on 2025-07-06 at 11:40
+			images.push(new Image());
+		}
+		return new TgdDataGlb(gltf, chunks, images, data.byteLength);
+	}
 
 	/**
 	 * @param content The binary content of a GLB file.
@@ -264,11 +270,7 @@ export class TgdDataGlb {
 		const accessor = this.json.accessors?.[accessorIndex];
 		if (!accessor) return;
 
-		return {
-			...accessor,
-			min: accessor.min && expectArrayNumber(accessor.min),
-			max: accessor.max && expectArrayNumber(accessor.max),
-		};
+		return accessor;
 	}
 
 	getAccessorOrThrow(accessorIndex = 0): TgdFormatGltfAccessor {

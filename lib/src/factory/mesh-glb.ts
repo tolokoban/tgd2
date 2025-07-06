@@ -124,7 +124,10 @@ function makeMeshPainters(
 			? data.getMaterial(primitive.material)
 			: null;
 		const materialName = material?.name ?? `#${primitive.material}`;
-		if (excludeByMaterialName?.includes(materialName)) {
+        if (
+            excludeByMaterialName &&
+            excludeByMaterialName.includes(materialName)
+        ) {
 			// Skipping this primitive because the material has been excluded.
 			continue;
 		}
