@@ -1,0 +1,6 @@
+.attribute {
+}
+
+.undefined {
+	color: var(--theme-color-error);
+}

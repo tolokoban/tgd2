@@ -46,24 +46,18 @@ export function ViewActionImage({
 			context.add(clear);
 			context.paint();
 			setImageDef(data.getImage(index));
-			data
-				.loadImage(index)
-				.then((img) => {
-					if (!img) {
-						setError("Unable to load the image!");
-						return;
-					}
-					setImage(img);
-					setDimensions([img.width, img.height]);
-					const texture = new TgdTexture2D(context).loadBitmap(img);
-					const background = new TgdPainterBackground(context, {
-						mode: "contain",
-						texture,
-					});
-					context.add(background);
-					context.paint();
-				})
-				.catch(() => setError("Unable to load the image!"));
+			const img = data.getImageAsHTMLElement(index);
+			if (!img) return;
+
+			setImage(img);
+			setDimensions([img.width, img.height]);
+			const texture = new TgdTexture2D(context).loadBitmap(img);
+			const background = new TgdPainterBackground(context, {
+				mode: "contain",
+				texture,
+			});
+			context.add(background);
+			context.paint();
 		},
 		[data, index],
 	);

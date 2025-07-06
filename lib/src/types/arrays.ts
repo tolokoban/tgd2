@@ -94,3 +94,8 @@ export function expectArrayNumber2(data: unknown): ArrayNumber2 {
 	]);
 	return data;
 }
+
+export function expectArrayNumber(data: unknown): number[] {
+	assertType<number[]>(data, ["array", "number"]);
+	return data;
+}

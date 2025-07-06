@@ -2,7 +2,7 @@
 
 import { type TypeDef, assertType } from "@tgd/types/guards";
 import type { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "./arrays";
-import { TgdTypeArrayForElements } from "./elements";
+import type { TgdTypeArrayForElements } from "./elements";
 
 export interface TgdFormatGltfAccessor {
 	bufferView?: number;
@@ -12,8 +12,8 @@ export interface TgdFormatGltfAccessor {
 	count: number;
 	type: string;
 	name?: string;
-	min?: ArrayNumber3;
-	max?: ArrayNumber3;
+	min?: number[];
+	max?: number[];
 }
 
 export interface TgdFormatGltfMaterialPbrMetallicRoughness {
@@ -118,8 +118,8 @@ export type TgdFormatGltfMeshPrimitiveAttribute =
 			byteOffset: number;
 			type: string;
 			componentType: number;
-			min?: ArrayNumber3;
-			max?: ArrayNumber3;
+			min?: number[];
+			max?: number[];
 	  };
 
 export interface TgdFormatGltfMesh {
@@ -163,9 +163,16 @@ export type TgdFormatGltfCamera =
 	| TgdFormatGltfCameraPerspective
 	| TgdFormatGltfCameraOrthographic;
 
-export interface TgdFormatGltfCameraPerspective {
-	type: "perspective";
+interface TgdFormatGltfCameraCommon {
+	type: "perspective" | "orthographic";
 	name?: string;
+	extensions?: Record<string, unknown>;
+	extras?: unknown;
+}
+
+export interface TgdFormatGltfCameraPerspective
+	extends TgdFormatGltfCameraCommon {
+	type: "perspective";
 	perspective: {
 		aspectRatio?: number;
 		/**
@@ -183,9 +190,9 @@ export function isTgdFormatGltfCameraPerspective(
 	return data.type === "perspective";
 }
 
-export interface TgdFormatGltfCameraOrthographic {
+export interface TgdFormatGltfCameraOrthographic
+	extends TgdFormatGltfCameraCommon {
 	type: "orthographic";
-	name?: string;
 	orthographic: {
 		/** The floating-point horizontal magnification of the view. */
 		xmag: number;
@@ -193,8 +200,6 @@ export interface TgdFormatGltfCameraOrthographic {
 		ymag: number;
 		zfar: number;
 		znear: number;
-		extensions?: Record<string, unknown>;
-		extras?: unknown;
 	};
 }
 

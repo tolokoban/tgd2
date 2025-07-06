@@ -137,19 +137,23 @@ function computeMeshBBox(data: TgdDataGlb, meshIndex: number): BBox[] {
 	const bboxes: BBox[] = [];
 	for (const primitive of mesh.primitives) {
 		const attribute = primitive.attributes.POSITION;
+		if (!attribute) continue;
+
 		const { min, max } = isNumber(attribute)
-			? data.getAccessor(attribute)
+			? data.getAccessorOrThrow(attribute)
 			: attribute;
-		const [minX, minY, minZ] = isVec3(min) ? min : [0, 0, 0];
-		const [maxX, maxY, maxZ] = isVec3(max) ? max : [0, 0, 0];
-		bboxes.push({
-			center: TgdVec3.newFromMix([minX, minY, minZ], [maxX, maxY, maxZ]),
-			radius: Math.max(
-				Math.abs(maxX - minX),
-				Math.abs(maxY - minY),
-				Math.abs(maxZ - minZ),
-			),
-		});
+		if (isVec3(min) && isVec3(max)) {
+			const [minX, minY, minZ] = min;
+			const [maxX, maxY, maxZ] = max;
+			bboxes.push({
+				center: TgdVec3.newFromMix([minX, minY, minZ], [maxX, maxY, maxZ]),
+				radius: Math.max(
+					Math.abs(maxX - minX),
+					Math.abs(maxY - minY),
+					Math.abs(maxZ - minZ),
+				),
+			});
+		}
 	}
 
 	return bboxes;

@@ -1,4 +1,3 @@
-import { tgdCanvasCreateWithContext2D } from "@tolokoban/tgd";
 /* eslint-disable unicorn/prefer-type-error */
 /**
  * GLTF specs can be found here:
@@ -24,10 +23,14 @@ import type {
 	TgdFormatGltfScene,
 } from "@tgd/types/gltf";
 import {
+	assertTgdFormatGltf,
 	assertTgdTypeArrayForElements,
+	expectArrayNumber,
 	expectArrayNumber16,
 	expectArrayNumber3,
 	expectArrayNumber4,
+	isTgdFormatGltfCameraOrthographic,
+	isTgdFormatGltfCameraPerspective,
 	type TgdTypeArrayForElements,
 } from "@tgd/types";
 import { TgdGeometry } from "@tgd/geometry";
@@ -41,6 +44,7 @@ import {
 } from "@tgd/math";
 import { ensureNumber, isNumber } from "@tgd/types/guards";
 import { tgdLoadArrayBuffer, tgdLoadImage } from "@tgd/loader";
+import { tgdCanvasCreateWithContext2D } from "@tgd/utils/canvas";
 
 export class TgdDataGlb {
 	static async load(url: string): Promise<TgdDataGlb> {
@@ -61,10 +65,24 @@ export class TgdDataGlb {
 			loadImages: true,
 		});
 		URL.revokeObjectURL(url);
-		return new TgdDataGlb(gltf, data.byteLength);
+		const chunks: ArrayBuffer[] = [];
+		for (const buffer of gltf.buffers) {
+			chunks.push(
+				buffer.arrayBuffer.slice(
+					buffer.byteOffset,
+					buffer.byteOffset + buffer.byteLength,
+				),
+			);
+		}
+		const images: (HTMLImageElement | undefined)[] = [];
+		for (const imageData of gltf.images ?? []) {
+			images.push(await loadImageData(imageData));
+		}
+		const { json } = gltf;
+		assertTgdFormatGltf(json);
+		return new TgdDataGlb(json, chunks, images, data.byteLength);
 	}
 
-	private readonly chunks: ArrayBuffer[] = [];
 	private cacheImages = new Map<
 		number,
 		Promise<HTMLImageElement | undefined>
@@ -74,29 +92,26 @@ export class TgdDataGlb {
 	 * @param content The binary content of a GLB file.
 	 */
 	private constructor(
-		private readonly data: GLTFWithBuffers,
+		private readonly json: TgdFormatGltf,
+		private readonly chunks: ArrayBuffer[],
+		private readonly images: (HTMLImageElement | undefined)[],
 		public readonly fileSize: number,
-	) {
-		for (const buffer of data.buffers) {
-			this.chunks.push(
-				buffer.arrayBuffer.slice(
-					buffer.byteOffset,
-					buffer.byteOffset + buffer.byteLength,
-				),
-			);
-		}
-	}
+	) {}
 
 	getJson(): Readonly<TgdFormatGltf> {
-		return this.data.json as unknown as TgdFormatGltf;
+		return this.json as unknown as TgdFormatGltf;
 	}
 
 	getImages(): TgdFormatGltfImage[] {
-		return this.data.json.images ?? [];
+		return this.json.images ?? [];
 	}
 
 	getImage(imageIndex: number): TgdFormatGltfImage | undefined {
-		return this.data.json.images?.[imageIndex];
+		return this.json.images?.[imageIndex];
+	}
+
+	getImageAsHTMLElement(imageIndex: number): HTMLImageElement | undefined {
+		return this.images[imageIndex];
 	}
 
 	createTransfoFromNode(node: TgdFormatGltfNode): TgdTransfo {
@@ -134,17 +149,17 @@ export class TgdDataGlb {
 	}
 
 	getCamera(cameraIndex: number): TgdFormatGltfCamera | undefined {
-		const camera = this.data.json.cameras?.[cameraIndex];
+		const camera = this.json.cameras?.[cameraIndex];
 		if (!camera) return;
 
-		if (camera.perspective) {
+		if (isTgdFormatGltfCameraPerspective(camera)) {
 			return {
 				type: "perspective",
 				name: camera.name,
 				perspective: camera.perspective,
 			};
 		}
-		if (camera.orthographic) {
+		if (isTgdFormatGltfCameraOrthographic(camera)) {
 			return {
 				type: "orthographic",
 				name: camera.name,
@@ -166,11 +181,11 @@ export class TgdDataGlb {
 	}
 
 	getScenes(): TgdFormatGltfScene[] {
-		return this.data.json.scenes ?? [];
+		return this.json.scenes ?? [];
 	}
 
 	getScene(sceneIndex: number): TgdFormatGltfScene | undefined {
-		return this.data.json.scenes?.[sceneIndex];
+		return this.json.scenes?.[sceneIndex];
 	}
 
 	getSceneOrThrow(sceneIndex: number): TgdFormatGltfScene {
@@ -183,7 +198,7 @@ export class TgdDataGlb {
 	}
 
 	getNodes(): TgdFormatGltfNode[] {
-		const { nodes } = this.data.json;
+		const { nodes } = this.json;
 		if (!nodes) return [];
 
 		return nodes.map((node) => ({
@@ -196,7 +211,7 @@ export class TgdDataGlb {
 	}
 
 	getNode(nodeIndex: number): TgdFormatGltfNode | undefined {
-		const node = this.data.json.nodes?.[nodeIndex];
+		const node = this.json.nodes?.[nodeIndex];
 		if (!node) return;
 
 		return {
@@ -218,7 +233,7 @@ export class TgdDataGlb {
 	}
 
 	getNodeByName(nodeName: string): TgdFormatGltfNode | undefined {
-		const nodes = this.data.json.nodes;
+		const nodes = this.json.nodes;
 		if (!nodes) return;
 
 		const index = nodes.findIndex((node) => node.name === nodeName);
@@ -232,9 +247,7 @@ export class TgdDataGlb {
 		if (node) return node;
 
 		throw new Error(
-			`Unknown node "${nodeName}"!\nAvailable names:${(
-				this.data.json.nodes ?? []
-			)
+			`Unknown node "${nodeName}"!\nAvailable names:${(this.json.nodes ?? [])
 				.map(
 					(node, index) =>
 						`\n  - ${
@@ -247,21 +260,28 @@ export class TgdDataGlb {
 		);
 	}
 
-	getAccessor(accessorIndex = 0): TgdFormatGltfAccessor {
-		const accessor = this.data.json.accessors?.[accessorIndex];
+	getAccessor(accessorIndex = 0): TgdFormatGltfAccessor | undefined {
+		const accessor = this.json.accessors?.[accessorIndex];
+		if (!accessor) return;
+
+		return {
+			...accessor,
+			min: accessor.min && expectArrayNumber(accessor.min),
+			max: accessor.max && expectArrayNumber(accessor.max),
+		};
+	}
+
+	getAccessorOrThrow(accessorIndex = 0): TgdFormatGltfAccessor {
+		const accessor = this.getAccessor(accessorIndex);
 		if (!accessor) {
 			throw new Error(`Asset has no accessor with index #${accessorIndex}!`);
 		}
 
-		return {
-			...accessor,
-			min: accessor.min && expectArrayNumber3(accessor.min),
-			max: accessor.max && expectArrayNumber3(accessor.max),
-		};
+		return accessor;
 	}
 
 	getMaterial(materialIndex: number): TgdFormatGltfMaterial {
-		const material = this.data.json.materials?.[materialIndex];
+		const material = this.json.materials?.[materialIndex];
 		if (!material) {
 			throw new Error(`Asset has no material with index #${materialIndex}!`);
 		}
@@ -288,8 +308,8 @@ export class TgdDataGlb {
 
 		const mesh =
 			typeof meshIndexOrName === "number"
-				? this.data.json.meshes?.[meshIndexOrName]
-				: (this.data.json.meshes ?? []).find(
+				? this.json.meshes?.[meshIndexOrName]
+				: (this.json.meshes ?? []).find(
 						(item) => item.name === meshIndexOrName,
 					);
 		if (!mesh) {
@@ -299,8 +319,8 @@ export class TgdDataGlb {
 		}
 
 		return {
-			name: `Mesh#${meshIndexOrName}`,
 			...mesh,
+			name: mesh.name ?? `Mesh#${meshIndexOrName}`,
 		};
 	}
 
@@ -336,7 +356,7 @@ export class TgdDataGlb {
 		const primitive = this.getMeshPrimitive(meshIndexOrName, primitiveIndex);
 		const { indices } = primitive;
 		if (isNumber(indices)) {
-			const accessor = this.getAccessor(indices);
+			const accessor = this.getAccessorOrThrow(indices);
 			const elements = this.getBufferViewData(
 				accessor.bufferView ?? 0,
 				accessor.componentType,
@@ -356,7 +376,7 @@ export class TgdDataGlb {
 		context: { gl: WebGL2RenderingContext },
 		textureIndex: number,
 	): TgdTexture2D {
-		const gltfTex = this.data.json.textures?.[textureIndex];
+		const gltfTex = this.json.textures?.[textureIndex];
 		if (!gltfTex) {
 			throw new Error(`Asset has no texture with index #${textureIndex}!`);
 		}
@@ -366,80 +386,21 @@ export class TgdDataGlb {
 			gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source,
 			0,
 		);
-		this.loadImage(source).then((bmp) => {
-			if (bmp) texture.loadBitmap(bmp);
-			else console.error("Unable to load this file:", source);
-		});
+		const image = this.getImageAsHTMLElement(source);
+		if (image) texture.loadBitmap(image);
 		return texture;
 	}
 
-	async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
-		const imageData = this.data.images?.[imageIndex];
-		if (!imageData) return;
-
-		const imageFromCache = this.cacheImages.get(imageIndex);
-		if (imageFromCache) return imageFromCache;
-		if (imageData instanceof HTMLImageElement) return imageData;
-		if (imageData instanceof ImageBitmap) {
-			const promise = new Promise<HTMLImageElement | undefined>((resolve) => {
-				const { width, height } = imageData;
-				const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height);
-				ctx.drawImage(imageData, 0, 0);
-				canvas.toBlob((blob) => {
-					if (!blob) {
-						resolve(new Image());
-						return;
-					}
-
-					const action = async () => {
-						const url = URL.createObjectURL(blob);
-						const image = await tgdLoadImage(url);
-						URL.revokeObjectURL(url);
-						resolve(image ?? undefined);
-					};
-					action();
-				}, "image/png");
-			});
-			this.cacheImages.set(imageIndex, promise);
-			return promise;
-		}
-
-		const def = this.data.json.images?.[imageIndex];
-		const type = def?.mimeType ?? "image/jpeg";
-		const promise = new Promise<HTMLImageElement | undefined>(
-			(resolve, reject) => {
-				const blob = new Blob([imageData.data], { type });
-				const url = URL.createObjectURL(blob);
-				const img = new Image();
-				img.src = url;
-				img.addEventListener("load", () => {
-					URL.revokeObjectURL(url);
-					resolve(img);
-				});
-				img.addEventListener("error", () => {
-					console.error(
-						`Unable to load image #${imageIndex}!`,
-						this.data.json.images?.[imageIndex],
-					);
-					URL.revokeObjectURL(url);
-					reject();
-				});
-			},
-		);
-		this.cacheImages.set(imageIndex, promise);
-		return promise;
-	}
-
 	getBufferViews(): TgdFormatGltfBufferView[] {
-		return this.data.json.bufferViews ?? [];
+		return this.json.bufferViews ?? [];
 	}
 
 	getBufferView(bufferViewIndex: number): TgdFormatGltfBufferView | undefined {
-		return this.data.json.bufferViews?.[bufferViewIndex];
+		return this.json.bufferViews?.[bufferViewIndex];
 	}
 
 	getBufferViewOrThrow(bufferViewIndex: number): TgdFormatGltfBufferView {
-		const bufferView = this.data.json.bufferViews?.[bufferViewIndex];
+		const bufferView = this.json.bufferViews?.[bufferViewIndex];
 		if (!bufferView) {
 			throw new Error(
 				`[TgdDataGlb] BufferView #${bufferViewIndex} does not exist!`,
@@ -498,7 +459,7 @@ export class TgdDataGlb {
 				accessor.componentType,
 			);
 		}
-		const gltf = this.data.json;
+		const gltf = this.json;
 		const bufferViewIndex = accessor;
 		const bufferView = gltf.bufferViews?.[bufferViewIndex];
 		if (!bufferView)
@@ -507,7 +468,6 @@ export class TgdDataGlb {
 		const buffer = this.chunks[bufferView.buffer];
 		const byteOffset = bufferView.byteOffset ?? 0;
 		const data = buffer.slice(byteOffset, byteOffset + bufferView.byteLength);
-		console.log("🚀 [gltf] data =", data); // @FIXME: Remove this line written on 2025-07-04 at 12:15
 		const view = figureOutView(
 			data,
 			convertTypeToNumber(
@@ -522,7 +482,7 @@ export class TgdDataGlb {
 	findAccessorForBufferView(
 		bufferViewIndex: number,
 	): TgdFormatGltfAccessor | undefined {
-		const accessor = (this.data.json.accessors ?? []).find(
+		const accessor = (this.json.accessors ?? []).find(
 			(accessor) => accessor.bufferView === bufferViewIndex,
 		);
 		if (!accessor) return accessor;
@@ -568,7 +528,7 @@ export class TgdDataGlb {
 		attribute: TgdFormatGltfMeshPrimitiveAttribute,
 	): Float32Array {
 		if (isNumber(attribute)) {
-			const accessor = this.getAccessor(attribute);
+			const accessor = this.getAccessorOrThrow(attribute);
 			const data = this.getBufferViewData(
 				accessor.bufferView ?? 0,
 				accessor.componentType,
@@ -591,7 +551,7 @@ export class TgdDataGlb {
 		primitiveIndex = 0,
 		primitiveAttribName?: string,
 	) {
-		const gltf = this.data.json;
+		const gltf = this.json;
 		const attribute = this.getAttribute(primitiveAttribName ?? attribName);
 		if (attribute === undefined) {
 			throw new Error(
@@ -765,4 +725,84 @@ function resolveStride(type: string): number {
 		default:
 			return 0;
 	}
+}
+
+// async function loadImage(
+// 	json: TgdFormatGltf,
+// 	imageIndex: number,
+// ): Promise<HTMLImageElement | undefined> {
+// 	const def = json.images?.[imageIndex];
+// 	if (!def) return;
+
+// 	const type = def?.mimeType ?? "image/jpeg";
+// 	const promise = new Promise<HTMLImageElement | undefined>(
+// 		(resolve, reject) => {
+// 			const blob = new Blob([imageData.data], { type });
+// 			const url = URL.createObjectURL(blob);
+// 			const img = new Image();
+// 			img.src = url;
+// 			img.addEventListener("load", () => {
+// 				URL.revokeObjectURL(url);
+// 				resolve(img);
+// 			});
+// 			img.addEventListener("error", () => {
+// 				console.error(
+// 					`Unable to load image #${imageIndex}!`,
+// 					this.json.images?.[imageIndex],
+// 				);
+// 				URL.revokeObjectURL(url);
+// 				reject();
+// 			});
+// 		},
+// 	);
+// 	this.cacheImages.set(imageIndex, promise);
+// 	return promise;
+// }
+
+async function loadImageData(
+	imageData?:
+		| ImageBitmap
+		| HTMLImageElement
+		| {
+				data: Uint8Array;
+				width: number;
+				height: number;
+				compressed?: boolean;
+		  }
+		| {
+				compressed: true;
+				mipmaps: false;
+				width: number;
+				height: number;
+				data: Uint8Array;
+		  },
+): Promise<HTMLImageElement | undefined> {
+	if (!imageData) return;
+
+	if (imageData instanceof HTMLImageElement) return imageData;
+
+	if (imageData instanceof ImageBitmap) {
+		const promise = new Promise<HTMLImageElement | undefined>((resolve) => {
+			const { width, height } = imageData;
+			const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height);
+			ctx.drawImage(imageData, 0, 0);
+			canvas.toBlob((blob) => {
+				if (!blob) {
+					resolve(new Image());
+					return;
+				}
+
+				const action = async () => {
+					const url = URL.createObjectURL(blob);
+					const image = await tgdLoadImage(url);
+					URL.revokeObjectURL(url);
+					resolve(image ?? undefined);
+				};
+				action();
+			}, "image/png");
+		});
+		return promise;
+	}
+
+	return undefined;
 }

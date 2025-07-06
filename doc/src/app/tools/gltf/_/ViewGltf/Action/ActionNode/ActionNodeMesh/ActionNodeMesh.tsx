@@ -8,6 +8,7 @@ import Styles from "./ActionNodeMesh.module.css";
 import ViewError from "@/components/Error";
 import { Expander } from "../../../GltfTree/Expander";
 import { isNumber } from "@tolokoban/type-guards";
+import { ViewAttribute } from "./Attribute";
 import { stringifyJson } from "../../../util";
 
 const $ = Theme.classNames;
@@ -29,22 +30,32 @@ export function ViewActionNodeMesh({
 	return (
 		<div className={$.join(className, Styles.actionNodeMesh)}>
 			<ul>
+				<Expander title={mesh.name || `Mesh #${meshIndex}`}>
+					<pre>{stringifyJson(mesh)}</pre>
+				</Expander>
 				{mesh.primitives.map((primitive, index) => (
 					<li key={index}>
 						<b>Primitive {index}</b>
 						<Expander title="Attributes">
 							{Object.keys(primitive.attributes).map((attName) => (
 								<Expander key={attName} title={attName}>
-									<pre>
-										{stringifyJson(
-											isNumber(primitive.attributes[attName])
-												? data.getAccessor(primitive.attributes[attName])
-												: primitive.attributes[attName],
-										)}
-									</pre>
+									<ViewAttribute
+										data={data}
+										attribute={primitive.attributes[attName]}
+										name={attName}
+									/>
 								</Expander>
 							))}
 						</Expander>
+						{primitive.indices !== undefined && (
+							<Expander title="Indices">
+								<ViewAttribute
+									data={data}
+									attribute={primitive.indices}
+									name={"Indices"}
+								/>
+							</Expander>
+						)}
 						{(primitive.material ?? -1) > -1 && (
 							<Expander
 								title={
@@ -69,7 +80,7 @@ export function ViewActionNodeMesh({
 							</Expander>
 						)}
 						<Expander title="Verbatim">
-							<pre>{JSON.stringify(primitive, null, "  ")}</pre>
+							<pre>{stringifyJson(primitive)}</pre>
 						</Expander>
 					</li>
 				))}
