@@ -71,7 +71,7 @@ export function ViewActionImage({
                 <Error>{error}</Error>
             ) : (
                 <Tgd
-                    key={JSON.stringify(data.gltf.images?.[index])}
+                    key={JSON.stringify(data.json.images?.[index])}
                     options={{ alpha: true }}
                     onReady={onReady}
                     noBorder

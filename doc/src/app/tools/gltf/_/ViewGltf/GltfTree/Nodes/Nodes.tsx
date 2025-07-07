@@ -16,7 +16,7 @@ export type ViewNodesProps = {
 }
 
 export function ViewNodes(props: ViewNodesProps): JSX.Element {
-    const { nodes } = props.data.gltf
+    const { nodes } = props.data.json
     if (!nodes) return <p>No nodes.</p>
 
     return (

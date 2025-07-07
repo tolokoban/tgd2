@@ -21,10 +21,10 @@ export function ViewActionVerbatim(props: ViewVerbatimProps): JSX.Element {
             color="neutral-1"
             padding="S"
         >
-            <ViewButton onClick={() => console.log(props.data.gltf)}>
+            <ViewButton onClick={() => console.log(props.data.json)}>
                 Write to console
             </ViewButton>
-            <pre>{JSON.stringify(props.data.gltf, null, "  ")}</pre>
+            <pre>{JSON.stringify(props.data.json, null, "  ")}</pre>
         </ViewPanel>
     )
 }

@@ -31,7 +31,7 @@ export function ViewActionNode(props: ViewActionNodeProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
-    const node = props.data.gltf.nodes?.[props.index]
+    const node = props.data.json.nodes?.[props.index]
     if (!node) return null
 
     return (

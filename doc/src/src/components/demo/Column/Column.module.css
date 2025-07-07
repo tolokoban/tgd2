@@ -1,0 +1,34 @@
+.marginLeft {
+    grid-column: 1/2;
+}
+
+.marginRight {
+    grid-column: 4/5;
+}
+
+.center {
+    grid-column: 2/4;
+}
+
+.full {
+    grid-column: 1/5;
+}
+
+.halfLeft {
+    grid-column: 1/3;
+}
+
+.halfRight {
+    grid-column: 3/5;
+}
+
+@media (max-width: 1024px) {
+    .marginLeft,
+    .marginRight,
+    .center,
+    .full,
+    .halfLeft,
+    .halfRight {
+        grid-column: 2/4;
+    }
+}

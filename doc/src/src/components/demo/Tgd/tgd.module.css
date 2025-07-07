@@ -1,0 +1,83 @@
+.Tgd {
+    display: inline-block;
+    margin: 1em;
+}
+
+.Tgd canvas {
+    box-shadow: 0 0.25em 0.5em #fff1;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+.relative {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-color: var(--theme-color-primary-1);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.overlay.loading {
+    opacity: 1;
+}
+
+.screen {
+    position: relative;
+}
+
+.screen > canvas.canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.screen > canvas.gizmo {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 128px;
+    height: 128px;
+    box-shadow: none;
+    border: none;
+}
+
+.Tgd > .actions {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s;
+}
+
+.Tgd > .actions.enabled {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.actions > div {
+    display: grid;
+    place-content: center;
+    border-radius: 50%;
+    width: 3em;
+    height: 3em;
+    transition: all 0.3s;
+}
+
+.actions > div:hover {
+    background-color: var(--theme-color-secondary-5);
+    color: var(--theme-color-on-secondary-5);
+}

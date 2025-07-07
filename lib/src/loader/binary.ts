@@ -6,7 +6,7 @@ export async function tgdLoadGlb(
     try {
         if (urlOrFile instanceof File) {
             const data = await urlOrFile.arrayBuffer()
-            return new TgdDataGlb(data)
+            return TgdDataGlb.parse(data)
         }
 
         const resp = await fetch(urlOrFile)
@@ -16,7 +16,7 @@ export async function tgdLoadGlb(
             )
         }
         const data = await resp.arrayBuffer()
-        return new TgdDataGlb(data)
+        return TgdDataGlb.parse(data)
     } catch (error) {
         console.error("Unable to load GLB:", urlOrFile)
         console.error(error)

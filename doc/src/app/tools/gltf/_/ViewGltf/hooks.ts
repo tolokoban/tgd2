@@ -15,8 +15,7 @@ export function useData(): [
                 .then(content => {
                     if (!content) return
 
-                    const parser = new TgdDataGlb(content)
-                    setData(parser)
+                    TgdDataGlb.parse(content).then(setData)
                 })
                 .catch(console.error)
         },

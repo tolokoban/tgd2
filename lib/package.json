@@ -61,6 +61,9 @@
         ]
     },
     "dependencies": {
+        "@loaders.gl/core": "^4.3.4",
+        "@loaders.gl/draco": "^4.3.4",
+        "@loaders.gl/gltf": "^4.3.4",
         "gl-matrix": "^3.4.3",
         "tslib": "^2.8.1"
     }

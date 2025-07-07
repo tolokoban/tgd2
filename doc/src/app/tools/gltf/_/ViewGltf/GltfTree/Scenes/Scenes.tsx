@@ -17,7 +17,7 @@ export type ViewScenesProps = {
 }
 
 export function ViewScenes(props: ViewScenesProps): JSX.Element {
-    const { scenes } = props.data.gltf
+    const { scenes } = props.data.json
     if (!scenes) return <p>No scenes.</p>
 
     return (

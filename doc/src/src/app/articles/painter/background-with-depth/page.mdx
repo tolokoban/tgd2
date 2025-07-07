@@ -1,0 +1,20 @@
+import Demo from "./_background-with-depth/background-with-depth.demo"
+
+# [TgdPainterBackgroundWithDepth](docs/classes/TgdPainterBackgroundWithDepth.html)
+
+In case you have a fixed camera and a complex environment you can optimize the
+painting by pre-rendering it in Blender and generating the depth buffer with simple/fast material.
+
+TgdPainterBackgroundWithDepth will paint the high definition image and fill the
+depth buffer with the meshes you give it as children. If the canvas size doesn't change, then the
+meshes won't even been rendered. That's why you can use high poly meshes if you need accuracy.
+
+In the following example, we used a very low-poly mesh. You can see this when the left cube is on the top.
+The hemi-sphere at the top of the tower is bulky, and the cube acts strange in this area.
+
+But if you know where your moving objects will be, then you can have high definition in these places
+and low poly everywhere else.
+
+## Example
+
+<Demo />

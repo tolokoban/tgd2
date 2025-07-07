@@ -26,7 +26,7 @@ export function ViewActionNodeCamera(props: ViewActionNodeCameraProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
-    const camera = props.data.gltf.cameras?.[props.node.camera ?? -1]
+    const camera = props.data.json.cameras?.[props.node.camera ?? -1]
     if (!camera) return <Error>No camera found!</Error>
 
     const code: string = figureCode(props.node, camera)

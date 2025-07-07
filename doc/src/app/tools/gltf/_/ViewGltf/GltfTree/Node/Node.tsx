@@ -29,7 +29,7 @@ export function ViewNode(props: ViewNodeProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
-    const node = props.data.gltf.nodes?.[props.index]
+    const node = props.data.json.nodes?.[props.index]
     if (!node) return null
 
     const name = node.name ?? `#${props.index}`

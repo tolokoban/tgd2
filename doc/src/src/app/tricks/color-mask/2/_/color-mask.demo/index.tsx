@@ -1,0 +1,25 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./color-mask.demo"
+
+const FOCUS = {"Detail #1":"    context.camera = assets.glb.scene.createCameraByName(\"Camera\")\n    console.log(context.camera.toCode())\n    // new TgdControllerCameraOrbit(context)\n    const clear = new TgdPainterClear(context, {\n        depth: 1,\n    })\n    const cube = new TgdPainterMesh(context)\n    cube.transfo.setPosition(11.02, 0, -8.75).setScale(3)\n    const background = new TgdPainterBackground(context, {\n        texture: new TgdTexture2D(context).loadBitmap(BackgroundURL),\n    })\n    const { painter } = tgdMakeMeshGlbPainter({\n        context,\n        data: assets.glb.scene,\n        node: \"Building\",\n        overrideMaterial: () => () =>\n            new TgdMaterialFlat({ color: [1, 0, 1, 1] }),\n    })\n    const mask = new TgdPainterState(context, {\n        color: false,\n        cull: webglPresetCull.back,\n        children: [painter],\n    })\n    context.add(\n        clear,\n        background,\n        new TgdPainterState(context, {\n            depth: webglPresetDepth.lessOrEqual,\n            children: [mask, cube],\n        }),\n        new TgdPainterLogic(time => {\n            const mod = tgdCalcModulo(time * 0.1, 0, 2)\n            let y = 0\n            if (mod < 1) y = mod * 25\n            else y = 25 * (2 - mod)\n            const { x, z } = cube.transfo.position\n            cube.transfo.setPosition(x, y, z)\n            cube.transfo.setEulerRotation(time, time * 47, -time * 120)\n        })\n    )\n    context.play()"}
+const FULL = "import React from \"react\"\nimport {\n    tgdCalcModulo,\n    TgdContext,\n    tgdMakeMeshGlbPainter,\n    TgdMaterialFlat,\n    TgdPainterBackground,\n    TgdPainterClear,\n    TgdPainterLogic,\n    TgdPainterMesh,\n    TgdPainterState,\n    TgdTexture2D,\n    webglPresetCull,\n    webglPresetDepth,\n} from \"@tolokoban/tgd\"\n\nimport View, { Assets } from \"@/components/demo/Tgd\"\n\nimport BackgroundURL from \"./background.webp\"\nimport BackgroundGLB from \"./background.glb\"\nimport SuzanneURL from \"@/assets/mesh/suzanne.glb\"\n\nfunction init(context: TgdContext, assets: Assets) {\n    context.camera = assets.glb.scene.createCameraByName(\"Camera\")\n    console.log(context.camera.toCode())\n    // new TgdControllerCameraOrbit(context)\n    const clear = new TgdPainterClear(context, {\n        depth: 1,\n    })\n    const cube = new TgdPainterMesh(context)\n    cube.transfo.setPosition(11.02, 0, -8.75).setScale(3)\n    const background = new TgdPainterBackground(context, {\n        texture: new TgdTexture2D(context).loadBitmap(BackgroundURL),\n    })\n    const { painter } = tgdMakeMeshGlbPainter({\n        context,\n        data: assets.glb.scene,\n        node: \"Building\",\n        overrideMaterial: () => () =>\n            new TgdMaterialFlat({ color: [1, 0, 1, 1] }),\n    })\n    const mask = new TgdPainterState(context, {\n        color: false,\n        cull: webglPresetCull.back,\n        children: [painter],\n    })\n    context.add(\n        clear,\n        background,\n        new TgdPainterState(context, {\n            depth: webglPresetDepth.lessOrEqual,\n            children: [mask, cube],\n        }),\n        new TgdPainterLogic(time => {\n            const mod = tgdCalcModulo(time * 0.1, 0, 2)\n            let y = 0\n            if (mod < 1) y = mod * 25\n            else y = 25 * (2 - mod)\n            const { x, z } = cube.transfo.position\n            cube.transfo.setPosition(x, y, z)\n            cube.transfo.setEulerRotation(time, time * 47, -time * 120)\n        })\n    )\n    context.play()\n}\n\nexport default function Demo() {\n    const handleInit = (context: TgdContext, assets: Assets) => {\n        init(context, assets)\n    }\n    const size = 500\n\n    return (\n        <View\n            onReady={handleInit}\n            width={`${size * 1.7777777777777}px`}\n            height={`${size}px`}\n            assets={{\n                glb: {\n                    suzanne: SuzanneURL,\n                    scene: BackgroundGLB,\n                },\n            }}\n        ></View>\n    )\n}\n"
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
+}

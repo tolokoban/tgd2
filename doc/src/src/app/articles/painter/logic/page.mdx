@@ -1,0 +1,20 @@
+import Demo from "./_/logic.demo"
+
+# [TgdPainterLogic](docs/classes/TgdPainterLogic.html)
+
+All the painters have both a `paint()` and a `update()` methods. When we call
+`TgdContext.paint()`, the list of painters will be traversed twice: one time to
+call the `paint()` function, and another time to call the `update()` one.
+
+By convention, `paint()` will be the one to paint on the canvas, and `update()`
+is just here to deal with the logic.
+
+Most of the painters don't implement their `update()` method. But
+`TgdPainterLogic` does. And moreover, it do not implement its `paint()` method.
+
+## Example
+
+In this example, we use `TgdPainterLogic` to change the color depending on the
+time.
+
+<Demo />

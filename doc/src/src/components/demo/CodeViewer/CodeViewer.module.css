@@ -1,0 +1,65 @@
+.CodeViewer {
+    display: inline-block;
+    position: relative;
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-size: 0.9rem;
+    margin: 0.5em;
+    background: #0d1117;
+    color: #eee;
+    padding: 0.5em;
+    margin: 0.5em;
+    overflow: auto;
+    box-shadow: 0 0.25em 0.5em #fff1;
+    border: 1px solid #fff3;
+}
+
+.popup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+.popup > div {
+    background: var(--theme-color-secondary-5);
+    color: var(--theme-color-on-secondary-5);
+}
+
+.CodeViewer :global(.function) {
+    color: mediumpurple;
+}
+
+.CodeViewer :global(.keyword) {
+    color: #f53;
+}
+
+.CodeViewer :global(.string) {
+    color: greenyellow;
+}
+
+.CodeViewer :global(.operator) {
+    color: orange;
+}
+
+.CodeViewer :global(.punctuation) {
+    color: cyan;
+}
+
+.CodeViewer :global(.template-string) {
+    background: #9f02;
+}
+
+.CodeViewer :global(.interpolation) {
+    font-style: italic;
+}
+
+.CodeViewer :global(.number) {
+    font-weight: bold;
+}
+
+.CodeViewer :global(.comment) {
+    opacity: 0.6;
+}

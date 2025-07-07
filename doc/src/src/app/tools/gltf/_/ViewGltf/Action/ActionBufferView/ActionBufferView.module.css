@@ -1,0 +1,14 @@
+.actionBufferView .grid {
+	--custom-columns: 8;
+	display: grid;
+	grid-template-columns: auto repeat(var(--custom-columns), 1fr);
+}
+
+.actionBufferView .grid > div {
+	padding: 0.25em;
+}
+
+.actionBufferView .grid > div.th {
+	opacity: 0.5;
+	font-weight: bold;
+}

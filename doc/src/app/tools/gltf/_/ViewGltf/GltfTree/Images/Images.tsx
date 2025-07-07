@@ -27,7 +27,7 @@ export function ViewImages({
             icon={IconImage}
             title="Images"
         >
-            {(data.gltf.images ?? []).map((image, index) => (
+            {(data.json.images ?? []).map((image, index) => (
                 <Expander
                     key={index}
                     title={image.name ?? `#${index}`}

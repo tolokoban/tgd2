@@ -1,0 +1,21 @@
+.fileSize {
+	font-size: 90%;
+	font-weight: bold;
+	padding: 0 0.5em;
+	border-radius: 99vmax;
+}
+
+.fileSize.bytes {
+	background-color: #fff;
+	color: #000;
+}
+
+.fileSize.Kb {
+	background-color: #ff0;
+	color: #000;
+}
+
+.fileSize.Mb {
+	background-color: #d00;
+	color: #fff;
+}

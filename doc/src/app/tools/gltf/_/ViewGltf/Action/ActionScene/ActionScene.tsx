@@ -33,7 +33,7 @@ export function ViewActionScene({
     data,
     index,
 }: ViewActionSceneProps): JSX.Element {
-    const scene = data.gltf.scenes?.[index]
+    const scene = data.json.scenes?.[index]
     const handleReady = useReadyHandler(data, scene)
 
     if (!scene) return <p>No scene...</p>

@@ -1,0 +1,24 @@
+import DemoRaw from "./_/raw"
+import DemoTable from "./_/table"
+
+# Texture2D from data
+
+Sending data to a texture is more tricky than expected becaue you have to care
+care of **memory alignement**.
+
+Each row of your data must have a number of bytes that is an integral **multiple
+of 4**.
+
+In the following example, we are using only 3 bytes per pixel because we
+specified RGB as format. Since we want a width of 5, we end up with **15 bytes**
+in a row. We cannot divide 15 by 4, so we **MUST add a padding** value at the
+end of the row to have 16 bytes.
+
+If the width you want is 3, for example, then you will need a padding of 3
+bytes.
+
+<DemoRaw />
+
+This padding can be error prone. To help you, you can use `TgdTable*` classes:
+
+<DemoTable />
