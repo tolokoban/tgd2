@@ -5,10 +5,10 @@ import Style from "./Error.module.css"
 const $ = Theme.classNames
 
 export interface ErrorProps {
-    className?: string
-    children: React.ReactNode
+	className?: string
+	children: React.ReactNode
 }
 
-export default function Error({ className, children }: ErrorProps) {
-    return <div className={$.join(className, Style.Error)}>{children}</div>
+export default function ViewError({ className, children }: ErrorProps) {
+	return <div className={$.join(className, Style.Error)}>{children}</div>
 }
