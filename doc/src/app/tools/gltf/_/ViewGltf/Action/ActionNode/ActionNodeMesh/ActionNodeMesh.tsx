@@ -6,6 +6,7 @@ import Styles from "./ActionNodeMesh.module.css"
 import ViewError from "@/components/Error"
 import { Expander } from "../../../GltfTree/Expander"
 import { isNumber } from "@tolokoban/type-guards"
+import { ViewJson } from "@/components/Json"
 
 const $ = Theme.classNames
 
@@ -39,12 +40,33 @@ export function ViewActionNodeMesh({
 
 								return (
 									<Expander key={attName} title={attName}>
-										<pre>
-											{JSON.stringify(data.getAccessor(attribute), null, "  ")}
-										</pre>
+										{isNumber(attribute) ? (
+											<>
+												<div>
+													Accessor: <b>{attribute}</b>
+												</div>
+												<ViewJson value={data.getAccessor(attribute)} />
+											</>
+										) : (
+											<ViewJson value={attribute} />
+										)}
 									</Expander>
 								)
 							})}
+						</Expander>
+						<Expander title="Indices">
+							{primitive.indices &&
+								(isNumber(primitive.indices) ? (
+									<>
+										<div>
+											Accesor: <b>{primitive.indices}</b>
+										</div>
+										<ViewJson value={data.getAccessor(primitive.indices)} />
+									</>
+								) : (
+									<ViewJson value={primitive.indices} />
+								))}
+							{!primitive.indices && <div>No indices...</div>}
 						</Expander>
 						{(primitive.material ?? -1) > -1 && (
 							<Expander
@@ -59,18 +81,12 @@ export function ViewActionNodeMesh({
 								}
 							>
 								{isNumber(primitive.material) && (
-									<pre>
-										{JSON.stringify(
-											data.getMaterial(primitive.material),
-											null,
-											"  ",
-										)}
-									</pre>
+									<ViewJson value={data.getMaterial(primitive.material)} />
 								)}
 							</Expander>
 						)}
 						<Expander title="Verbatim">
-							<pre>{JSON.stringify(primitive, null, "  ")}</pre>
+							<ViewJson value={mesh} />
 						</Expander>
 					</li>
 				))}

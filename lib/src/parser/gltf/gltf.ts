@@ -3,12 +3,12 @@
  * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
  */
 import { load } from "@loaders.gl/core"
-import { GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
+import { GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
 import { DracoLoader } from "@loaders.gl/draco"
 
-import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
+import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { parseGLB } from "./parser"
-import {
+import type {
 	TgdFormatGltf,
 	TgdFormatGltfAccessor,
 	TgdFormatGltfBufferView,
@@ -21,15 +21,17 @@ import {
 	TgdFormatGltfScene,
 } from "@tgd/types/gltf"
 import {
+	assertTgdFormatGltf,
 	assertTgdTypeArrayForElements,
-	TgdTypeArrayForElements,
+	type TgdTypeArrayForElements,
 } from "@tgd/types"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdTexture2D } from "@tgd/texture"
-import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
-import { TgdQuat, TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
+import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
+import { TgdQuat, TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 import { tgdLoadImage } from "@tgd/loader"
 import { isNumber } from "@tgd/types/guards"
+import { log } from "console"
 
 export class TgdDataGlb {
 	public static async parse(content: ArrayBuffer): Promise<TgdDataGlb> {
@@ -73,6 +75,7 @@ export class TgdDataGlb {
 			}
 
 			if (typeof image.bufferView !== "number") {
+				console.log("🚀 [gltf] image =", image) // @FIXME: Remove this line written on 2025-07-08 at 16:34
 				images.push(null)
 				continue
 			}
@@ -84,12 +87,17 @@ export class TgdDataGlb {
 
 			images.push(null)
 		}
-		return new TgdDataGlb(content, images)
+		console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-07-08 at 13:37
+		return new TgdDataGlb(
+			gltf,
+			gltfWithBuffers.buffers.map((buff) => buff.arrayBuffer),
+			images,
+			content.byteLength,
+		)
 	}
 
 	public readonly json: Readonly<TgdFormatGltf>
 
-	private readonly chunks: ArrayBuffer[]
 	private readonly chunkDetails: Array<{
 		size: number
 		type: "JSON" | "BIN"
@@ -112,19 +120,22 @@ export class TgdDataGlb {
 	/**
 	 * @param content The binary content of a GLB file.
 	 */
-	constructor(
-		content: ArrayBuffer,
+	private constructor(
+		json: GLTF,
+		private readonly chunks: ArrayBuffer[],
 		private readonly images: (HTMLImageElement | null)[],
+		public readonly fileSize: number,
 	) {
 		try {
-			const data = parseGLB(content)
-			this.json = data.gltf
-			this.chunks = data.chunks
-			this.chunkDetails = data.chunkTypes
+			// const data = parseGLB(content)
+			assertTgdFormatGltf(json)
+			this.json = json
+			// this.chunks = data.chunks
+			// this.chunkDetails = data.chunkTypes
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : JSON.stringify(error)
-			console.error("[TgdParserGLTransfertFormatBinary::new] content:", content)
+			console.error("[TgdParserGLTransfertFormatBinary::new] json:", json)
 			throw new Error(`[TgdParserGLTransfertFormatBinary] ${message}`)
 		}
 	}
@@ -197,10 +208,6 @@ export class TgdDataGlb {
 
 	getImageAsHTMLElement(imageIndex: number) {
 		return new Image()
-	}
-
-	get fileSize() {
-		return 12 + this.chunks.reduce((size, chunk) => size + chunk.byteLength, 0)
 	}
 
 	getScenes(): TgdFormatGltfScene[] {
