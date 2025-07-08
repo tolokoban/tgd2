@@ -52,6 +52,7 @@ function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
 	return React.useCallback(
 		(context: TgdContext) => {
 			const bbox = computeBBox(data, node)
+			console.log("🚀 [ActionNodeRender] bbox =", bbox) // @FIXME: Remove this line written on 2025-07-08 at 10:13
 			context.camera.transfo.position = bbox.center
 			context.camera.transfo.distance = bbox.radius * 2
 			context.camera.far = bbox.radius * 3
