@@ -1,0 +1,17 @@
+.value {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1em;
+}
+
+.value >em {
+    color: var(--theme-color-error);
+    font-family: monospace;
+}
+
+.value > label {
+    opacity: .8;
+}

@@ -7,6 +7,7 @@ import ViewError from "@/components/Error"
 import { Expander } from "../../../GltfTree/Expander"
 import { isNumber } from "@tolokoban/type-guards"
 import { ViewJson } from "@/components/Json"
+import { ViewAccessor } from "../../../components/Accessor"
 
 const $ = Theme.classNames
 
@@ -41,12 +42,7 @@ export function ViewActionNodeMesh({
 								return (
 									<Expander key={attName} title={attName}>
 										{isNumber(attribute) ? (
-											<>
-												<div>
-													Accessor: <b>{attribute}</b>
-												</div>
-												<ViewJson value={data.getAccessor(attribute)} />
-											</>
+											<ViewAccessor data={data} index={attribute} />
 										) : (
 											<ViewJson value={attribute} />
 										)}
@@ -57,12 +53,7 @@ export function ViewActionNodeMesh({
 						<Expander title="Indices">
 							{primitive.indices &&
 								(isNumber(primitive.indices) ? (
-									<>
-										<div>
-											Accesor: <b>{primitive.indices}</b>
-										</div>
-										<ViewJson value={data.getAccessor(primitive.indices)} />
-									</>
+									<ViewAccessor data={data} index={primitive.indices} />
 								) : (
 									<ViewJson value={primitive.indices} />
 								))}

@@ -3,11 +3,11 @@
  * https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
  */
 import { load } from "@loaders.gl/core"
-import { GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
+import { type GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
 import { DracoLoader } from "@loaders.gl/draco"
 
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
-import { parseGLB } from "./parser"
+// import { parseGLB } from "./parser"
 import type {
 	TgdFormatGltf,
 	TgdFormatGltfAccessor,
@@ -29,9 +29,10 @@ import { TgdGeometry } from "@tgd/geometry"
 import { TgdTexture2D } from "@tgd/texture"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdQuat, TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
-import { tgdLoadImage } from "@tgd/loader"
+import { tgdLoadImage, tgdLoadImageFromArrayBuffer } from "@tgd/loader"
 import { isNumber } from "@tgd/types/guards"
-import { log } from "console"
+
+const EMPTY_IMAGE = new Image()
 
 export class TgdDataGlb {
 	public static async parse(content: ArrayBuffer): Promise<TgdDataGlb> {
@@ -57,7 +58,7 @@ export class TgdDataGlb {
 				),
 			)
 		}
-		const images: (HTMLImageElement | null)[] = []
+		const images: HTMLImageElement[] = []
 		for (
 			let imageIndex = 0;
 			imageIndex < (gltf.images ?? []).length;
@@ -65,18 +66,17 @@ export class TgdDataGlb {
 		) {
 			const image = gltf.images?.[imageIndex]
 			if (!image) {
-				images.push(null)
+				images.push(EMPTY_IMAGE)
 				continue
 			}
 
 			if (image.uri) {
-				images.push(await tgdLoadImage(image.uri))
+				images.push((await tgdLoadImage(image.uri)) ?? EMPTY_IMAGE)
 				continue
 			}
 
 			if (typeof image.bufferView !== "number") {
-				console.log("🚀 [gltf] image =", image) // @FIXME: Remove this line written on 2025-07-08 at 16:34
-				images.push(null)
+				images.push(EMPTY_IMAGE)
 				continue
 			}
 
@@ -85,7 +85,15 @@ export class TgdDataGlb {
 			if (!bufferView)
 				throw new Error(`No bufferView with index #${image.bufferView}!`)
 
-			images.push(null)
+			console.log("Image", imageIndex, bufferView)
+			images.push(
+				(await tgdLoadImageFromArrayBuffer(
+					chunks[bufferView.buffer].slice(
+						bufferView.byteOffset ?? 0,
+						(bufferView.byteOffset ?? 0) + bufferView.byteLength,
+					),
+				)) ?? EMPTY_IMAGE,
+			)
 		}
 		console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-07-08 at 13:37
 		return new TgdDataGlb(
@@ -102,11 +110,6 @@ export class TgdDataGlb {
 		size: number
 		type: "JSON" | "BIN"
 	}> = []
-	private readonly cacheImages = new Map<
-		number,
-		Promise<HTMLImageElement | undefined>
-	>()
-	private readonly cacheImageURLs = new Map<number, string>()
 	private readonly cacheBufferViewDatas = new Map<
 		number,
 		| Int8Array
@@ -123,7 +126,7 @@ export class TgdDataGlb {
 	private constructor(
 		json: GLTF,
 		private readonly chunks: ArrayBuffer[],
-		private readonly images: (HTMLImageElement | null)[],
+		private readonly images: HTMLImageElement[],
 		public readonly fileSize: number,
 	) {
 		try {
@@ -207,7 +210,7 @@ export class TgdDataGlb {
 	}
 
 	getImageAsHTMLElement(imageIndex: number) {
-		return new Image()
+		return this.images[imageIndex] ?? EMPTY_IMAGE
 	}
 
 	getScenes(): TgdFormatGltfScene[] {
@@ -390,68 +393,8 @@ export class TgdDataGlb {
 
 		const source =
 			gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source ?? 0
-		const url = this.getImageURL(source)
-		const texture = new TgdTexture2D(context)
-		if (url) {
-			loadImage(url)
-				.then((bmp) => {
-					if (bmp) texture.loadBitmap(bmp)
-					else console.error("Unable to load this file:", url)
-				})
-				.catch(console.error)
-		} else {
-			console.error(`[GLTF] texture index #${textureIndex} is empty!`)
-		}
+		const texture = new TgdTexture2D(context).loadBitmap(this.images[source])
 		return texture
-	}
-
-	async loadImage(imageIndex: number): Promise<HTMLImageElement | undefined> {
-		const fromCache = this.cacheImages.get(imageIndex)
-		if (fromCache) return fromCache
-
-		const url = this.getImageURL(imageIndex)
-		if (!url) return
-
-		const promise = new Promise<HTMLImageElement | undefined>(
-			(resolve, reject) => {
-				const img = new Image()
-				img.src = url
-				img.addEventListener("load", () => {
-					resolve(img)
-				})
-				img.addEventListener("error", () => {
-					console.error(
-						`Unable to load image #${imageIndex}!`,
-						this.json.images?.[imageIndex],
-					)
-					reject()
-				})
-			},
-		)
-		this.cacheImages.set(imageIndex, promise)
-		return promise
-	}
-
-	getImageURL(imageIndex: number): string | undefined {
-		const fromCache = this.cacheImageURLs.get(imageIndex)
-		if (fromCache) return fromCache
-
-		const { json: gltf } = this
-		const image = gltf.images?.[imageIndex]
-		if (!image) return
-
-		if (image.uri) return image.uri
-
-		if (typeof image.bufferView !== "number") return
-		const buffer = this.getBufferViewData(image.bufferView, "Uint8")
-		if (!buffer) return
-
-		const blob = new Blob([buffer], {
-			type: image.mimeType,
-		})
-		const url = URL.createObjectURL(blob)
-		this.cacheImageURLs.set(imageIndex, url)
-		return url
 	}
 
 	getBufferViewData(
@@ -692,13 +635,4 @@ function returnFloat32Array(data: unknown): Float32Array {
 	if (data instanceof Float32Array) return data
 
 	throw new Error("We were expecting a Float32Array!")
-}
-
-function loadImage(url: string): Promise<HTMLImageElement | null> {
-	return new Promise((resolve) => {
-		const img = new Image()
-		img.src = url
-		img.addEventListener("load", () => resolve(img))
-		img.addEventListener("error", () => resolve(null))
-	})
 }

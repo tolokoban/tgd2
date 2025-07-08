@@ -1,0 +1,11 @@
+.accessor dialog::backdrop{
+    backdrop-filter: brightness(50%);
+    display: grid;
+    place-items: center;
+}
+
+.accessor dialog {
+    border: none;
+    box-shadow: 0 1em 2em #000;
+    padding: 0;
+}
