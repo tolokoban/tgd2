@@ -34,11 +34,6 @@ export function ViewActionNodeMesh({
 						<Expander title="Attributes">
 							{Object.keys(primitive.attributes).map((attName) => {
 								const attribute = primitive.attributes[attName]
-								if (!isNumber(attribute)) {
-									console.log("🚀 [ActionNodeMesh] attribute =", attribute) // @FIXME: Remove this line written on 2025-07-07 at 16:02
-									return <ViewError>Attribute is not a number!</ViewError>
-								}
-
 								return (
 									<Expander key={attName} title={attName}>
 										{isNumber(attribute) ? (

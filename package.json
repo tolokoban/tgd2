@@ -37,6 +37,6 @@
         "gl-matrix": "^3.4.3"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.0.6"
+        "prettier": "^3.6.2"
     }
 }
