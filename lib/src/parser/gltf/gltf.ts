@@ -36,7 +36,6 @@ const EMPTY_IMAGE = new Image()
 
 export class TgdDataGlb {
 	public static async parse(content: ArrayBuffer): Promise<TgdDataGlb> {
-		// const data = parseGLB(content)
 		const blob = new Blob([content])
 		const url = URL.createObjectURL(blob)
 		const gltfWithBuffers: GLTFWithBuffers = await load(url, GLTFLoader, {
@@ -46,7 +45,6 @@ export class TgdDataGlb {
 			loadBuffers: true,
 			loadImages: true,
 		})
-		console.log("🚀 [gltf] gltfWithBuffers =", gltfWithBuffers) // @FIXME: Remove this line written on 2025-07-07 at 15:24
 		URL.revokeObjectURL(url)
 		const gltf = gltfWithBuffers.json
 		const chunks: ArrayBuffer[] = []
@@ -95,10 +93,9 @@ export class TgdDataGlb {
 				)) ?? EMPTY_IMAGE,
 			)
 		}
-		console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-07-08 at 13:37
 		return new TgdDataGlb(
 			gltf,
-			gltfWithBuffers.buffers.map((buff) => buff.arrayBuffer),
+			chunks,
 			images,
 			content.byteLength,
 		)
@@ -448,7 +445,7 @@ export class TgdDataGlb {
 		}
 		const bufferViewIndex = accessor
 		const fromCache = this.cacheBufferViewDatas.get(bufferViewIndex)
-		if (fromCache) return fromCache
+		// if (fromCache) return fromCache
 
 		const { json: gltf } = this
 		const bufferView = gltf.bufferViews?.[bufferViewIndex]
@@ -466,6 +463,7 @@ export class TgdDataGlb {
 					"Float32",
 			),
 		)
+        console.log('🚀 [gltf] view =', view) // @FIXME: Remove this line written on 2025-07-08 at 19:55
 		this.cacheBufferViewDatas.set(bufferViewIndex, view)
 		return view
 	}
