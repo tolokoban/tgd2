@@ -56,9 +56,11 @@ export class TgdMaterialToon extends TgdMaterial {
         if (options.light) {
             this.light = options.light
         }
-        if (options.ambient) {
-            this.ambient = options.ambient
-        }
+        this.ambient =
+            options.ambient ??
+            new TgdLight({
+                color: new TgdVec4(1, 1, 1, 1),
+            })
         if (typeof options.specularSharpness === "number") {
             this.specularSharpness = options.specularSharpness
         }
@@ -70,6 +72,7 @@ export class TgdMaterialToon extends TgdMaterial {
         }
         const hasTexture = !(color instanceof TgdVec4)
         this.texture = hasTexture ? color : null
+
         this.fragmentShaderCode = [
             "vec3 normal = normalize(varNormal);",
             `float light = .2 + .4 * (1.0 - dot(normal, uniLightDir));`,
