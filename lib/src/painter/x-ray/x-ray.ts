@@ -9,6 +9,7 @@ import { TgdPainterState } from "../state"
 import { TgdPainterClear } from "../clear"
 import { TgdPainterBackground } from "./background"
 import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
+import { TgdCamera } from "@tgd/camera"
 // import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
@@ -24,7 +25,13 @@ export class TgdPainterXRay extends TgdPainter {
     private readonly painterBackground: TgdPainterBackground
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: {
+            gl: WebGL2RenderingContext
+            width: Readonly<number>
+            height: Readonly<number>
+            camera: TgdCamera
+            paint?: () => void
+        },
         options: TgdPainterXRayOptions
     ) {
         super()

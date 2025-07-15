@@ -9,7 +9,8 @@ const $ = Theme.classNames
 
 export type ViewVertexShaderCodeEditorProps = CommonProps & {
     code: string
-    onChange(code: string): void
+    onChange?(code: string): void
+    disabled?: boolean
 }
 
 export function ViewVertexShaderCodeEditor(
@@ -20,7 +21,8 @@ export function ViewVertexShaderCodeEditor(
             className={$.join(props.className, Styles.vertexshadercodeeditor)}
             language="glsl"
             value={props.code}
-            onChange={props.onChange}
+            onChange={(code) => props.onChange?.(code)}
+            disabled={props.disabled}
         />
     )
 }

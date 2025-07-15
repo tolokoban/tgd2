@@ -75,7 +75,11 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
     private readonly drawBuffers: number[]
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: {
+            gl: WebGL2RenderingContext
+            width: Readonly<number>
+            height: Readonly<number>
+        },
         private readonly options: Partial<TgdPainterFramebufferWithAntiAliasingOptions>
     ) {
         super(options.children)
@@ -334,7 +338,7 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
             textureColor1,
             textureColor2,
             textureColor3,
-        ].map(texture => {
+        ].map((texture) => {
             if (!texture) return
 
             const colorRenderBuffer = gl.createRenderbuffer()

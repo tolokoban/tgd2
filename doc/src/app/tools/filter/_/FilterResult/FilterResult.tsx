@@ -3,10 +3,11 @@ import * as React from "react"
 import {
     Theme,
     CommonProps,
-    ViewStrip,
     ViewPanel,
     ViewSlider,
+    IconFullscreen,
 } from "@tolokoban/ui"
+import { tgdFullscreenToggle } from "@tolokoban/tgd"
 
 import { FilterManager } from "./manager"
 
@@ -21,9 +22,10 @@ export type ViewFilterResultProps = CommonProps & {
 }
 
 export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
+    const ref = React.useRef<HTMLDivElement | null>(null)
     const [error, setError] = React.useState<string | null>(null)
     const refManager = React.useRef<FilterManager | null>(null)
-    const [uniEffectStrength, setUniEffectStrength] = React.useState(0)
+    const [uniEffectStrength, setUniEffectStrength] = React.useState(0.5)
     const handleMount = (canvas: HTMLCanvasElement | null) => {
         if (!canvas) return
 
@@ -31,6 +33,12 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
             refManager.current = new FilterManager(canvas, setError)
         }
         refManager.current.setCode(props.fragmentShader, props.functions)
+    }
+    const handleToggleFullscreen = () => {
+        const div = ref.current
+        if (!div) return
+
+        tgdFullscreenToggle(div)
     }
     React.useEffect(() => {
         const manager = refManager.current
@@ -51,10 +59,9 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
     }, [])
 
     return (
-        <ViewStrip
+        <div
+            ref={ref}
             className={$.join(props.className, Styles.filterresult)}
-            template="*1*"
-            orientation="column"
             {...props}
         >
             <ViewPanel
@@ -64,21 +71,23 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
                 justifyContent="start"
                 alignItems="center"
                 padding="M"
+                fullwidth
             >
-                Filter output
+                <div>Filter output</div>
+                <IconFullscreen onClick={handleToggleFullscreen} />
             </ViewPanel>
             <canvas ref={handleMount}></canvas>
             {error && (
                 <pre>
-                    {error.split("\n").map(line => {
+                    {error.split("\n").map((line, index) => {
                         if (line.startsWith("#####"))
                             return (
-                                <span className={Styles.error}>
+                                <div className={Styles.error} key={index}>
                                     {line}
                                     {"\n"}
-                                </span>
+                                </div>
                             )
-                        return `${line}\n`
+                        return <div key={index}>{line}</div>
                     })}
                 </pre>
             )}
@@ -89,6 +98,6 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
                 value={uniEffectStrength}
                 onChange={setUniEffectStrength}
             />
-        </ViewStrip>
+        </div>
     )
 }

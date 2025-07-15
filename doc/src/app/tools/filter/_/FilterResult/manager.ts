@@ -49,6 +49,8 @@ export class FilterManager {
                             uniEffectStrength: "float",
                             uniAspectRatio: "float",
                             uniAspectRatioInverse: "float",
+                            uniModelViewMatrix: "mat4",
+                            uniProjectionMatrix: "mat4",
                         },
                         setUniforms: ({ program, time }) => {
                             program.uniform1f("uniTime", time)
@@ -63,6 +65,14 @@ export class FilterManager {
                             program.uniform1f(
                                 "uniAspectRatioInverse",
                                 context.height / context.width
+                            )
+                            program.uniformMatrix4fv(
+                                "uniModelViewMatrix",
+                                context.camera.matrixModelView
+                            )
+                            program.uniformMatrix4fv(
+                                "uniProjectionMatrix",
+                                context.camera.matrixProjection
                             )
                         },
                     }),

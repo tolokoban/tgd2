@@ -3,9 +3,11 @@ import { TgdCodeFunctions } from "@tgd/shader"
 /**
  * Rotate 2D coordinates.
  */
-export function tgdCodeFunction_rotate2D(options: {
-    name: string
-}): TgdCodeFunctions {
+export function tgdCodeFunction_rotate2D(
+    options: Partial<{
+        name: string
+    }> = {}
+): TgdCodeFunctions {
     const { name = "rotate2D" } = options
     return {
         [name]: `vec2 ${name}(vec2 p, float angle) {

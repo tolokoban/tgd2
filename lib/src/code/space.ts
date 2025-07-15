@@ -11,7 +11,11 @@ export function tgdCodeFunction_vertexFromWorldToCamera({
     uniModelViewMatrix?: string
 } = {}): TgdCodeFunctions {
     return {
-        [name]: `vec4 ${name}(vec4 vertex) {
+        [`${name}:vec3`]: `vec4 ${name}(vec3 vertex) {
+    return ${uniModelViewMatrix} * vec4(vertex, 1.0);
+}
+`,
+        [`${name}:vec4`]: `vec4 ${name}(vec4 vertex) {
     return ${uniModelViewMatrix} * vertex;
 }
 `,
@@ -49,7 +53,11 @@ export function tgdCodeFunction_vertexFromWorldToScreen({
     uniProjectionMatrix?: string
 } = {}): TgdCodeFunctions {
     return {
-        [name]: `vec4 ${name}(vec4 vertex) {
+        [`${name}:vec3`]: `vec4 ${name}(vec3 vertex) {
+    return ${uniProjectionMatrix} * ${uniModelViewMatrix} * vec4(vertex, 1.0);
+}
+`,
+        [`${name}:vec4`]: `vec4 ${name}(vec4 vertex) {
     return ${uniProjectionMatrix} * ${uniModelViewMatrix} * vertex;
 }
 `,

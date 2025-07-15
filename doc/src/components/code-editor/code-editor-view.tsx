@@ -11,15 +11,17 @@ export interface CodeEditorViewProps {
     value: string
     onChange(value: string): void
     language: string
+    disabled?: boolean
 }
 
 export default function CodeEditorView(props: CodeEditorViewProps) {
     return (
         <div className={getClassNames(props)}>
             <Editor
+                disabled={props.disabled}
                 value={props.value}
                 onValueChange={props.onChange}
-                highlight={code =>
+                highlight={(code) =>
                     Prism.highlight(
                         code,
                         getGrammarForLanguage(props.language),

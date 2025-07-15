@@ -3,6 +3,7 @@ import * as React from "react"
 import {
     Theme,
     useLocalStorageState,
+    ViewPanel,
     ViewStrip,
     ViewTab,
     ViewTabs,
@@ -18,6 +19,7 @@ import {
     tgdCodeFunction_uv2xy,
     tgdCodeFunction_xy2polar,
     tgdCodeFunction_xy2uv,
+    TgdCodeFunctions,
     tgdCodeStringify,
 } from "@tolokoban/tgd"
 
@@ -26,35 +28,52 @@ import { ViewFilterResult } from "./FilterResult"
 import Doc from "./doc.mdx"
 
 import Styles from "./Filter.module.css"
+import { useGlslFunctions } from "./functions"
 
 const $ = Theme.classNames
 
 export function ViewFilter(): JSX.Element {
+    const library = useGlslFunctions()
+    const functions = React.useMemo(() => {
+        let code: TgdCodeFunctions = {}
+        for (const key of Object.keys(library)) {
+            code = {
+                ...code,
+                ...library[key](),
+            }
+        }
+        return Object.values(code).join("\n")
+    }, [library])
     const [fragShaderCode, setFragShaderCode] = useLocalStorageState(
         DEFAULT_FRAGMENT_SHADER,
-        "Filter/FragementShader"
+        "Filter/FragmentShader"
     )
-    const [functions, setFunctions] = useLocalStorageState(
-        DEFAULT_FUNCTIONS,
-        "Filter/Functions"
-    )
+    console.log("🚀 [Filter] library =", library) // @FIXME: Remove this line written on 2025-07-15 at 15:45
+    console.log(functions)
+
     return (
-        <ViewStrip className={Styles.filter} template="12" orientation="row">
+        <ViewStrip className={Styles.filter} template="11" orientation="row">
             <ViewTabs>
                 <ViewTab label="Fragment Shader" key="shader">
-                    <ViewVertexShaderCodeEditor
-                        code={fragShaderCode}
-                        onChange={setFragShaderCode}
-                    />
+                    <ViewPanel fullsize overflow="auto">
+                        <ViewVertexShaderCodeEditor
+                            code={fragShaderCode}
+                            onChange={setFragShaderCode}
+                        />
+                    </ViewPanel>
                 </ViewTab>
                 <ViewTab label="Extra functions" key="functions">
-                    <ViewVertexShaderCodeEditor
-                        code={functions}
-                        onChange={setFunctions}
-                    />
+                    <ViewPanel fullsize overflow="auto">
+                        <ViewVertexShaderCodeEditor
+                            code={functions}
+                            disabled={true}
+                        />
+                    </ViewPanel>
                 </ViewTab>
                 <ViewTab label="Documentation" key="doc">
-                    <Doc />
+                    <ViewPanel fullsize overflow="auto">
+                        <Doc />
+                    </ViewPanel>
                 </ViewTab>
             </ViewTabs>
             <ViewFilterResult
