@@ -64,7 +64,7 @@ export function tgdCodeFunction_polar2xy(
         name?: string
     } = {}
 ): TgdCodeFunctions {
-    const { name = "polar2uv" } = options
+    const { name = "polar2xy" } = options
     return {
         [name]: `vec2 ${name}(vec2 polar) {
     float r = polar.x;

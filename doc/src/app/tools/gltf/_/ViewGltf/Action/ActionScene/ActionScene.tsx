@@ -62,7 +62,7 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
             console.log("🚀 [ActionScene] context =", context) // @FIXME: Remove this line written on 2025-05-14 at 11:04
             const scenePainter = new TgdPainterNode({
                 children: (scene.nodes ?? [])
-                    .filter(nodeIndex => {
+                    .filter((nodeIndex) => {
                         const node = data.getNode(nodeIndex)
                         return (
                             isNumber(node.mesh) ||
@@ -71,7 +71,7 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                         )
                     })
                     .map(
-                        node =>
+                        (node) =>
                             tgdMakeMeshGlbPainter({
                                 data,
                                 node,
@@ -81,13 +81,14 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                 name: scene.name ?? "Scene",
             })
             scenePainter.debug()
-            const bboxes = (scene.nodes ?? []).map(nodeIndex =>
+            const bboxes = (scene.nodes ?? []).map((nodeIndex) =>
                 computeBBox(data, data.getNode(nodeIndex))
             )
             const bbox = averageBBoxes(bboxes)
             context.camera.transfo.position = bbox.center
             context.camera.transfo.distance = bbox.radius * 2
-            context.camera.far = bbox.radius * 10
+            context.camera.far = bbox.radius * 5
+            context.camera.far = context.camera.near * 1e-5
             new TgdControllerCameraOrbit(context, {
                 inertiaOrbit: 1000,
                 speedZoom: bbox.radius * 0.25,

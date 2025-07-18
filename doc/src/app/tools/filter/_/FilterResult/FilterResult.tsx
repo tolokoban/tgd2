@@ -68,7 +68,7 @@ export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
                 color="primary-5"
                 height="2em"
                 display="flex"
-                justifyContent="start"
+                justifyContent="space-between"
                 alignItems="center"
                 padding="M"
                 fullwidth
