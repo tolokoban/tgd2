@@ -1,9 +1,10 @@
 import { TgdDataset, TgdDatasetType, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
 import { TgdVec3 } from "@tgd/math"
-import { webglElementTypeFromTypedArray } from "@tgd/utils"
+import { webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
 
 interface TgdGeometryOptionsCommon {
+    name?: string
     /**
      * Default mode is TRIANGLES.
      */
@@ -46,6 +47,7 @@ interface Float32Attribute {
  * for the vertices.
  */
 export class TgdGeometry {
+    public readonly name: string
     /** Name of the POSITION attribute in the shader. */
     public readonly attPosition: string
     /** Name of the NORMAL attribute in the shader. */
@@ -58,6 +60,8 @@ export class TgdGeometry {
 
     protected _dataset: TgdDataset
     protected _elementsType: number
+
+    private static counter = 1
 
     public static make(options: TgdGeometryOptions2) {
         const definition: TgdDatasetTypeRecord = {}
@@ -85,7 +89,9 @@ export class TgdGeometry {
             attPosition = "POSITION",
             attNormal = "NORMAL",
             attUV = "TEXCOORD_0",
+            name = `TgdGeometry#${TgdGeometry.counter++}`,
         } = options
+        this.name = name
         this._dataset = dataset
         this.drawMode = drawMode
         const { elements } = options
@@ -98,6 +104,13 @@ export class TgdGeometry {
         this.attUV = attUV
         this.count = elements?.length ?? dataset.count
         if (options.computeNormalsIfMissing) this.computeNormals()
+    }
+
+    debug(caption?: string) {
+        const label = `[${caption ?? this.name}]`
+        this.dataset.debug(`${label} Dataset`)
+        console.log(`${label} Count:`, this.count)
+        console.log(`${label} DrawMode:`, webglLookup(this.drawMode))
     }
 
     get dataset(): Readonly<TgdDataset> {

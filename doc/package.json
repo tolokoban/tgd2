@@ -18,7 +18,7 @@
         "@tolokoban/react-state": "^0.4.0",
         "@tolokoban/tgd": "file:..",
         "@tolokoban/type-guards": "^0.8.3",
-        "@tolokoban/ui": "^0.21.6",
+        "@tolokoban/ui": "^0.22.1",
         "colord": "^2.9.3",
         "highlight.js": "^11.11.1",
         "prismjs": "^1.30.0",

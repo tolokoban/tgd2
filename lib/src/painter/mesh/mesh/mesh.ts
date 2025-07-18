@@ -72,6 +72,7 @@ export class TgdPainterMesh
             },
             varying: material.varyings,
             functions: {
+                ...material.extraVertexShaderFunctions,
                 getPosition: [
                     "vec4 getPosition(vec4 pos) {",
                     [material.vertexShaderCodeForGetPosition ?? "return pos;"],
@@ -94,6 +95,7 @@ export class TgdPainterMesh
             outputs: { FragColor: "vec4" },
             varying: material.varyings,
             functions: {
+                ...material.extraFragmentShaderFunctions,
                 applyMaterial: [
                     "vec4 applyMaterial() {",
                     [material.fragmentShaderCode],
@@ -120,6 +122,7 @@ export class TgdPainterMesh
 
     debug(caption?: string) {
         this.prg.debug(caption ?? this.name)
+        this.geometry.debug(caption ?? this.name)
     }
 
     computeBoundingBox(): {
@@ -158,7 +161,7 @@ export class TgdPainterMesh
             this
         const { gl, camera } = context
         prg.use()
-        material.setUniforms(prg, time, delay)
+        material.setUniforms?.(prg, time, delay)
         prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)

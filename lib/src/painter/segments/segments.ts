@@ -209,7 +209,7 @@ export class TgdPainterSegments extends TgdPainter {
         const { gl, camera } = context
         gl.disable(gl.DITHER)
         prg.use()
-        this.material.setUniforms(prg, time, delay)
+        this.material.setUniforms?.(prg, time, delay)
         prg.uniform1f(
             "uniMinRadius",
             (this.minRadius * 2) / gl.drawingBufferHeight

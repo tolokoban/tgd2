@@ -2,10 +2,9 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdMaterialSolid,
+    TgdMaterialFlat,
     TgdPainterBackground,
     TgdPainterClear,
-    TgdPainterDebugStencil,
     TgdPainterMeshGltf,
     TgdPainterState,
     TgdTexture2D,
@@ -49,7 +48,7 @@ function init(ctx: TgdContext, assets: Assets) {
             children: [
                 new TgdPainterMeshGltf(ctx, {
                     asset: assets.glb.ring,
-                    material: () => new TgdMaterialSolid(),
+                    material: () => new TgdMaterialFlat(),
                 }),
             ],
         }),

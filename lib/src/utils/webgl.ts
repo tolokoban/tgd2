@@ -1,4 +1,5 @@
 import { TgdTypeArrayForElements } from "@tgd/types"
+import { isNumber, isString } from "@tgd/types/guards"
 
 /**
  * drawElements() can be used with 8, 16 or 32 unsinged ints arrays.
@@ -51,7 +52,11 @@ export function webglTypedArrayFromBufferSource(
     }
 }
 
-export function webglLookup(type: number): keyof WebGL2RenderingContext {
+export function webglLookup(
+    type: number | keyof WebGL2RenderingContext
+): keyof WebGL2RenderingContext {
+    if (!isNumber(type)) return type as keyof WebGL2RenderingContext
+
     if (gl) {
         for (const key in gl) {
             const value = gl[key as keyof WebGL2RenderingContext]

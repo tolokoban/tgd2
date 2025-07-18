@@ -29,14 +29,13 @@ function init(canvas: HTMLCanvasElement): TgdContext {
             },
         })
         ctx.animSchedule({
-            duration: 500,
+            duration: 0.5,
             action: colorInterpolator,
             onEnd: () => (enabled = true),
         })
         clear.red = Math.random() + 1
         clear.green = Math.random()
         clear.blue = Math.random()
-        ctx.paint()
     })
     ctx.paint()
     return ctx

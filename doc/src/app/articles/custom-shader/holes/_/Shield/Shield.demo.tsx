@@ -113,41 +113,40 @@ interface MaterialHoleOptions {
 class MaterialHole extends TgdMaterial {
     private readonly lightDirection = new TgdVec3(0.1, 0.2, 1)
 
-    public readonly varyings: { [name: string]: WebglAttributeType } = {
-        varNormal: "vec3",
-        varUV: "vec2",
-    }
-    public readonly uniforms: { [name: string]: WebglUniformType } = {
-        texAbedo: "sampler2D",
-        texHoles: "sampler2D",
-        uniLightDir: "vec3",
-    }
-    public readonly fragmentShaderCode = [
-        "vec3 normal = normalize(varNormal);",
-        `float light = abs(dot(normal, uniLightDir));`,
-        `light = pow(light, 9.0) * 0.9;`,
-        `light += 0.2;`,
-        `vec3 color = texture(texAbedo, varUV).rgb;`,
-        `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
-        `spec = pow(spec, 20.0);`,
-        `vec3 holes = texture(texHoles, varUV).rgb;`,
-        `if (holes.r > 0.99) discard;`,
-        `return vec4(color * light + spec + holes * 0.25, 1.0 - holes.r);`,
-    ]
-    public readonly vertexShaderCode = [
-        "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
-        "varUV = TEXCOORD_0;",
-    ]
-
     constructor(private readonly options: MaterialHoleOptions) {
-        super()
-    }
+        super({
+            uniforms: {
+                texAbedo: "sampler2D",
+                texHoles: "sampler2D",
+                uniLightDir: "vec3",
+            },
+            varyings: {
+                varNormal: "vec3",
+                varUV: "vec2",
+            },
+            fragmentShaderCode: [
+                "vec3 normal = normalize(varNormal);",
+                `float light = abs(dot(normal, uniLightDir));`,
+                `light = pow(light, 9.0) * 0.9;`,
+                `light += 0.2;`,
+                `vec3 color = texture(texAbedo, varUV).rgb;`,
+                `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
+                `spec = pow(spec, 20.0);`,
+                `vec3 holes = texture(texHoles, varUV).rgb;`,
+                `if (holes.r > 0.99) discard;`,
+                `return vec4(color * light + spec + holes * 0.25, 1.0 - holes.r);`,
+            ],
+            vertexShaderCode: [
+                "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
+                "varUV = TEXCOORD_0;",
+            ],
+            setUniforms: (program: TgdProgram): void => {
+                program.uniform3fv("uniLightDir", this.lightDirection)
 
-    setUniforms(program: TgdProgram): void {
-        program.uniform3fv("uniLightDir", this.lightDirection)
-
-        this.options.abedo.activate(0, program, "texAbedo")
-        this.options.holes.activate(1, program, "texHoles")
+                this.options.abedo.activate(0, program, "texAbedo")
+                this.options.holes.activate(1, program, "texHoles")
+            },
+        })
     }
 }
 //#endregion

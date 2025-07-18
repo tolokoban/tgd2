@@ -3,7 +3,7 @@ import {
     tgdAnimChain,
     TgdContext,
     tgdEasingFunctionInOutCubic,
-    TgdMaterialSolid,
+    TgdMaterialFlat,
     TgdPainterClear,
     TgdPainterMesh,
     TgdPainterState,
@@ -22,7 +22,7 @@ function init(ctx: TgdContext) {
             children: [
                 cube,
                 new TgdPainterMesh(ctx, {
-                    material: new TgdMaterialSolid({
+                    material: new TgdMaterialFlat({
                         color: [0.5, 0.5, 0.5, 1],
                     }),
                     transfo: { position: [0, 0, -0.1] },

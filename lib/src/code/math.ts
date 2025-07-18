@@ -76,3 +76,19 @@ vec3  ${name}(const in vec3 v)  { return v*v*v*(v*(v*6.0-15.0)+10.0); }
 vec4  ${name}(const in vec4 v)  { return v*v*v*(v*(v*6.0-15.0)+10.0); }`,
     }
 }
+
+export function tgdCodeFunction_float01ToVec3(
+    options: Partial<{ name: string }> = {}
+): TgdCodeFunctions {
+    const { name = "float01ToVec3" } = options
+    return {
+        [name]: `vec3 float01ToVec3(in float value) {
+    int z = int(float(0xFFFFFF) * value);
+    float r = float(z & 0xFF) / 255.0;
+    z >>= 8;
+    float g = float(z & 0xFF) / 255.0;
+    z >>= 8;
+    float b = float(z & 0xFF) / 255.0;
+    return vec3(r, g, b);
+}`,
+    }

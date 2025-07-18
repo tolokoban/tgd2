@@ -3,34 +3,23 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdFilterVerbatim,
-    TgdGeometryPlane,
     TgdMaterialDiffuse,
-    TgdMaterialSolid,
     TgdPainterClear,
-    TgdPainterDebugStencil,
-    TgdPainterFilter,
-    TgdPainterFramebuffer,
     TgdPainterFramebufferWithAntiAliasing,
     TgdPainterGroup,
-    TgdPainterLogic,
-    TgdPainterMesh,
     TgdPainterMeshGltf,
     TgdPainterState,
     TgdTexture2D,
     TgdVec4,
     webglPresetCull,
     webglPresetDepth,
-    webglPresetStencil,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
 // import WorldURL from "./world.glb"
 import WorldURL from "@/assets/mesh/chinese-chandelier.glb"
 import GridURL from "@/assets/mesh/grid-10x10.glb"
-import { SeaMaterial } from "./sea-material"
 import { PainterSea } from "./sea"
-import { PositionMaterial } from "./position-material"
 import { MaterialDiffuse } from "./diffuse"
 
 function init(context: TgdContext, assets: Assets) {
@@ -84,7 +73,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     if (framebuffer.textureColor0) sea.texture = framebuffer.textureColor0
     context.add(framebuffer, clear, meshOpaque, sea)
-    context.logicAdd(time => {
+    context.logicAdd((time) => {
         sea.y = Math.sin(time * 0.4) * 0.5
     })
     context.play()
