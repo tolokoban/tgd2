@@ -92,3 +92,4 @@ export function tgdCodeFunction_float01ToVec3(
     return vec3(r, g, b);
 }`,
     }
+}

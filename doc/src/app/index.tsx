@@ -20,7 +20,7 @@ export * from "./types"
 import Layout0 from "./layout"
 import Layout2 from "./articles/layout"
 import Layout25 from "./articles/painter/layout"
-import Layout64 from "./tricks/layout"
+import Layout68 from "./tricks/layout"
 import Loading0 from "./loading"
 const Page0 = React.lazy(() => import("./page"))
 const Page1 = React.lazy(() => import("./api/page"))
@@ -81,10 +81,12 @@ const Page60 = React.lazy(() => import("./articles/texture/cube/page.mdx"))
 const Page61 = React.lazy(() => import("./tools/page.mdx"))
 const Page62 = React.lazy(() => import("./tools/filter/page"))
 const Page63 = React.lazy(() => import("./tools/gltf/page"))
-const Page64 = React.lazy(() => import("./tricks/page.mdx"))
-const Page65 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
-const Page66 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
-const Page67 = React.lazy(() => import("./tricks/color-mask/3/page.mdx"))
+const Page64 = React.lazy(() => import("./tools/palette/page"))
+const Page67 = React.lazy(() => import("./tools/palette/[value]/page"))
+const Page68 = React.lazy(() => import("./tricks/page.mdx"))
+const Page69 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
+const Page70 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
+const Page71 = React.lazy(() => import("./tricks/color-mask/3/page.mdx"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -152,11 +154,13 @@ export default function App({ lang }: { lang?: string }) {
     const pg61 = Page61
     const pg62 = Page62
     const pg63 = Page63
-    const ly64 = Layout64
     const pg64 = Page64
-    const pg65 = Page65
-    const pg66 = Page66
     const pg67 = Page67
+    const ly68 = Layout68
+    const pg68 = Page68
+    const pg69 = Page69
+    const pg70 = Page70
+    const pg71 = Page71
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -239,11 +243,16 @@ export default function App({ lang }: { lang?: string }) {
             <Route path="/tools" Page={pg61} fallback={fb0} context={context}>
                 <Route path="/tools/filter" Page={pg62} fallback={fb0} context={context}/>
                 <Route path="/tools/gltf" Page={pg63} fallback={fb0} context={context}/>
+                <Route path="/tools/palette" Page={pg64} fallback={fb0} context={context}>
+                    <Route path="/tools/palette/PalettePreviewDisk" fallback={fb0} context={context}/>
+                    <Route path="/tools/palette/PalettePreviewHorizontal" fallback={fb0} context={context}/>
+                    <Route path="/tools/palette/[value]" Page={pg67} fallback={fb0} context={context}/>
+                </Route>
             </Route>
-            <Route path="/tricks" Page={pg64} Layout={ly64} fallback={fb0} context={context}>
-                <Route path="/tricks/color-mask" Page={pg65} fallback={fb0} context={context}>
-                    <Route path="/tricks/color-mask/2" Page={pg66} fallback={fb0} context={context}/>
-                    <Route path="/tricks/color-mask/3" Page={pg67} fallback={fb0} context={context}/>
+            <Route path="/tricks" Page={pg68} Layout={ly68} fallback={fb0} context={context}>
+                <Route path="/tricks/color-mask" Page={pg69} fallback={fb0} context={context}>
+                    <Route path="/tricks/color-mask/2" Page={pg70} fallback={fb0} context={context}/>
+                    <Route path="/tricks/color-mask/3" Page={pg71} fallback={fb0} context={context}/>
                 </Route>
             </Route>
         </Route>

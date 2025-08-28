@@ -104,6 +104,11 @@ export function tgdCodeFunction_polar2uv(
     }
 }
 
+/**
+ * The result of the function is a vec2 with:
+ * * x: the length
+ * * y: the angle
+ */
 export function tgdCodeFunction_uv2polar(
     options: Partial<{ name: string; uniAspectRatio: string }> = {}
 ): TgdCodeFunctions {

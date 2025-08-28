@@ -67,7 +67,7 @@ export default env => {
             },
             client: {
                 logging: "none",
-                overlay: { errors: true, warnings: false },
+                overlay: { errors: false, warnings: false },
                 progress: true,
             },
             hot: true,

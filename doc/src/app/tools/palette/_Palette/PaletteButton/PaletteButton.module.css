@@ -1,0 +1,26 @@
+.paletteButton {
+    cursor: pointer;
+    font: inherit;
+    color: #eee;
+    border: none;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 0.5em;
+    padding: 0 1em 1em 1em;
+    box-shadow: 0 0.25em 0.5em #444;
+    transition: all 0.2s;
+
+    &:hover {
+        box-shadow: 0 0.25em 0.5em rgb(238, 115, 53);
+    }
+
+    h2 {
+        margin: 0;
+        font-weight: 300;
+    }
+}
+
+.preview {
+    width: min(340px, calc(100vw - 2em));
+    height: 64px;
+}

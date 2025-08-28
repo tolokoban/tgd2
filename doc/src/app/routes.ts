@@ -78,6 +78,8 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/tools": ["/tools"],
     "/tools/filter": ["/tools/filter"],
     "/tools/gltf": ["/tools/gltf"],
+    "/tools/palette": ["/tools/palette"],
+    "/tools/palette/[value]": ["/tools/palette","[value]"],
     "/tricks": ["/tricks"],
     "/tricks/color-mask": ["/tricks/color-mask"],
     "/tricks/color-mask/2": ["/tricks/color-mask/2"],
