@@ -27,8 +27,8 @@ function getPromisedLoaders<N extends string, V>(
     target: Record<N, V>
 ) {
     return Object.keys(urls ?? {}).map(
-        name =>
-            new Promise<void>(resolve => {
+        (name) =>
+            new Promise<void>((resolve) => {
                 if (!urls) {
                     resolve()
                     return
@@ -40,7 +40,7 @@ function getPromisedLoaders<N extends string, V>(
                 }
 
                 loader(url)
-                    .then(value => {
+                    .then((value) => {
                         if (value) target[name as N] = value
                         resolve()
                     })
