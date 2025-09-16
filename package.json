@@ -34,9 +34,13 @@
         "url": "https://github.com/tolokoban/tgd2/issues"
     },
     "dependencies": {
-        "gl-matrix": "^3.4.3"
+        "@loaders.gl/core": "^4.3.4",
+        "@loaders.gl/draco": "^4.3.4",
+        "@loaders.gl/gltf": "^4.3.4",
+        "gl-matrix": "^3.4.4"
     },
     "devDependencies": {
-        "prettier": "^3.6.2"
+        "prettier": "^3.6.2",
+        "typescript": "^5.9.2"
     }
 }
