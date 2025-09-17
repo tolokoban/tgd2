@@ -288,10 +288,12 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         this.height = Math.round(context.height * viewportMatchingScale)
         this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebufferMSAA)
+        gl.viewport(0, 0, this.width, this.height)
         gl.drawBuffers(this.drawBuffers)
         super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         this.blitFramebuffers()
+        gl.viewport(0, 0, context.width, context.height)
     }
 
     delete() {

@@ -32,6 +32,12 @@ export function tgdCanvasCreateWithContext2D(
     return { canvas, ctx: context }
 }
 
+export function tgdCanvasFromImage(img: HTMLImageElement): HTMLCanvasElement {
+    const { canvas, ctx } = tgdCanvasCreateWithContext2D(img.width, img.height)
+    ctx.drawImage(img, 0, 0)
+    return canvas
+}
+
 /**
  * A palette is an image with a different (or not) color for each pixel.
  * It can be used in a texture with NEAREST filter, for instance.

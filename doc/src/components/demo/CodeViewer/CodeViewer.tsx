@@ -5,6 +5,7 @@ import { getGrammarForLanguage } from "./grammar"
 import Style from "./CodeViewer.module.css"
 
 export interface CodeViewerViewProps {
+    id?: string
     className?: string
     value: string | Record<string, string>
     language: string
@@ -60,7 +61,11 @@ function SingleCodeViewerView(props: SingleCodeViewerViewProps) {
         refTimeout.current = 0
     }
     return (
-        <div className={getClassNames(props)} onDoubleClick={handleDoubleClick}>
+        <div
+            className={getClassNames(props)}
+            onDoubleClick={handleDoubleClick}
+            id={props.id}
+        >
             <pre>
                 <code
                     ref={refCode}
@@ -94,7 +99,7 @@ function MultiCodeViewerView(props: MultiCodeViewerViewProps) {
     return (
         <>
             {captions.map((caption, index) => (
-                <details key={caption} open={index === 0}>
+                <details key={caption} open={index === 0} id={props.id}>
                     <summary>{caption}</summary>
                     <SingleCodeViewerView
                         value={props.value[caption]}
