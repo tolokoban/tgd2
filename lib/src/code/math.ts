@@ -82,7 +82,7 @@ export function tgdCodeFunction_float01ToVec3(
 ): TgdCodeFunctions {
     const { name = "float01ToVec3" } = options
     return {
-        [name]: `vec3 float01ToVec3(in float value) {
+        [name]: `vec3 ${name}(in float value) {
     int z = int(float(0xFFFFFF) * value);
     float r = float(z & 0xFF) / 255.0;
     z >>= 8;
@@ -90,6 +90,20 @@ export function tgdCodeFunction_float01ToVec3(
     z >>= 8;
     float b = float(z & 0xFF) / 255.0;
     return vec3(r, g, b);
+}`,
+    }
+}
+
+export function tgdCodeFunction_vec3ToFloat01(
+    options: Partial<{ name: string }> = {}
+): TgdCodeFunctions {
+    const { name = "vec3ToFloat01" } = options
+    return {
+        [name]: `float ${name}(in vec3 value) {
+    float r = value.r;
+    float g = value.g;
+    float b = value.b;
+    return (b * 256.0 * 256.0 + g * 256.0 + r) * 0.000015199185323666652;
 }`,
     }
 }

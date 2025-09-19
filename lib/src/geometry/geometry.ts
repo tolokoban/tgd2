@@ -56,7 +56,7 @@ export class TgdGeometry {
     public readonly attUV: string
     public readonly count: number
     public readonly elements?: Readonly<TgdTypeArrayForElements>
-    public readonly drawMode: WebglDrawMode | number
+    public readonly drawMode: number
 
     protected _dataset: TgdDataset
     protected _elementsType: number
@@ -93,7 +93,10 @@ export class TgdGeometry {
         } = options
         this.name = name
         this._dataset = dataset
-        this.drawMode = drawMode
+        this.drawMode =
+            typeof drawMode === "number"
+                ? drawMode
+                : WebGL2RenderingContext[drawMode]
         const { elements } = options
         this.elements = elements
         this._elementsType = elements
@@ -127,10 +130,7 @@ export class TgdGeometry {
 
     public computeNormals() {
         let normals: TgdVec3[] = []
-        if (
-            this.drawMode === WebGL2RenderingContext.TRIANGLES ||
-            this.drawMode === "TRIANGLES"
-        ) {
+        if (this.drawMode === WebGL2RenderingContext.TRIANGLES) {
             normals = this.computeNormalsForTrianglesDrawMode()
         } else {
             console.error(

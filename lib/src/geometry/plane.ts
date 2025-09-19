@@ -15,7 +15,7 @@ export class TgdGeometryPlane extends TgdGeometry {
         sizeX = 1,
         sizeY = 1,
         vecX = [1, 0, 0],
-        vecY = [0, 0, 1],
+        vecY = [0, 1, 0],
     }: TgdGeometryPlaneOptions = {}) {
         const vec = (x: number, y: number): ArrayNumber3 => {
             const sx = x * sizeX

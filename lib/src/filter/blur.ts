@@ -67,14 +67,16 @@ export class TgdFilterBlur extends TgdFilter {
                 uniInverseHeight: "float",
             },
             setUniforms: ({ program }) => {
-                program.uniform1f(
-                    "uniInverseWidth",
-                    1 / program.gl.drawingBufferWidth
-                )
-                program.uniform1f(
-                    "uniInverseHeight",
-                    1 / program.gl.drawingBufferHeight
-                )
+                const { gl } = program
+                // eslint-disable-next-line unicorn/no-unreadable-array-destructuring
+                const [, , width, height] = gl.getParameter(gl.VIEWPORT) as [
+                    number,
+                    number,
+                    number,
+                    number,
+                ]
+                program.uniform1f("uniInverseWidth", 1 / width)
+                program.uniform1f("uniInverseHeight", 1 / height)
                 program.uniform1f("uniStrength", this.strength)
             },
         })

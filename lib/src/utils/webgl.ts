@@ -1,5 +1,5 @@
 import { TgdTypeArrayForElements } from "@tgd/types"
-import { isNumber, isString } from "@tgd/types/guards"
+import { isNumber } from "@tgd/types/guards"
 
 /**
  * drawElements() can be used with 8, 16 or 32 unsinged ints arrays.
@@ -22,6 +22,20 @@ export function webglElementTypeFromTypedArray(
     throw new Error(
         "[webglElementTypeFromDataView] drawElements() and drawElementsInstanced() can only be fed with Uint8Array, Uint16Array or Uint32Array!"
     )
+}
+
+/**
+ * @returns A type array that uses the less possible space in memory.
+ *
+ * For instance, if `arr` has no value above 255, we can return `Uint8Array`
+ * because a byte will suffice to store each value.
+ */
+export function webglElementTypeArrayFromNumberArray(arr: number[]) {
+    let max = 0
+    for (const val of arr) max = Math.max(max, val)
+    if (max <= 0xff) return new Uint8Array(arr)
+    if (max <= 0xffff) return new Uint16Array(arr)
+    return new Uint32Array(arr)
 }
 
 export function webglTypedArrayFromBufferSource(

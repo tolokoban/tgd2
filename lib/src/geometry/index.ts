@@ -1,5 +1,6 @@
 export * from "./box"
 export * from "./geometry"
 export * from "./gltf"
+export * from "./grid"
 export * from "./plane"
 export * from "./tools"

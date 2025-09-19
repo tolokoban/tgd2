@@ -512,6 +512,13 @@ export class TgdDataGlb {
 
         const accessor = gltf.accessors?.[attribute]
         if (!accessor) {
+            console.log("🚀 [gltf] attribute =", attribute) // @FIXME: Remove this line written on 2025-09-17 at 17:47
+            console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-09-17 at 17:46
+            console.log(
+                "🚀 [gltf] this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes =",
+                this.getMesh(meshIndexOrName).primitives[primitiveIndex]
+                    .attributes
+            ) // @FIXME: Remove this line written on 2025-09-17 at 17:51
             throw new Error(
                 `No attribute "${
                     primitiveAttribName ?? attribName

@@ -51,12 +51,13 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
             POSITION: "vec3",
             NORMAL: "vec3",
         }
-        if (asset.getMeshPrimitive().attributes.TEXCOORD_0) {
+        const primitive = asset.getMeshPrimitive()
+        if (primitive.attributes.TEXCOORD_0) {
             attributes.TEXCOORD_0 = "vec2"
         }
         const dataset = new TgdDataset(attributes)
         asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
-        if (asset.getMeshPrimitive().attributes.NORMAL) {
+        if (primitive.attributes.NORMAL) {
             asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
         } else {
             // It seems to be impossible to retrieve normals.
@@ -64,7 +65,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
             console.warn("No normals found! We will apply smooth shading.")
             computeNormals = true
         }
-        if (asset.getMeshPrimitive().attributes.TEXCOORD_0) {
+        if (primitive.attributes.TEXCOORD_0) {
             asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
         }
         super(context, {
