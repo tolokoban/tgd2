@@ -60,7 +60,7 @@
     gap: 1em;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .5s;
+    transition: opacity 0.5s;
 }
 
 .hgIjhDQIuBCJEQ4ZgLXp > .Ia9jfUO3OevcIh2fV6R6.dZYZScZBbWV2Pm3ftXcG {
@@ -80,5 +80,19 @@
 .Ia9jfUO3OevcIh2fV6R6 > div:hover {
     background-color: var(--theme-color-secondary-5);
     color: var(--theme-color-on-secondary-5);
+}
+
+.J6dIEMXVMCzdFWF9UHio {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 1em;
+    font-family: monospace;
+    white-space: pre-wrap;
+    background-color: #800;
+    color: #fffd;
 }
 
