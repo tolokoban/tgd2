@@ -77,7 +77,7 @@ export class TgdProgram {
             `  return prg`,
             `}`,
         ]
-        return lines.map(line => `${indent}${line}`).join("\n")
+        return lines.map((line) => `${indent}${line}`).join("\n")
     }
 
     hasAttribute(name: string): boolean {
@@ -320,5 +320,5 @@ function logCode(
         }
     }
     console.log(codeLines.join("\n"), ...styles)
-    return hasError ? output.join("\n") : ""
+    return hasError ? output.join("\n") : "No error."
 }

@@ -1,14 +1,15 @@
 import { TgdVec3, TgdVec4 } from "@tgd/math"
-import { TgdMaterial } from "./material"
+import { TgdMaterial, TgdMaterialOptions } from "./material"
 import { TgdLight } from "@tgd/light"
 import { TgdProgram } from "@tgd/program"
 
-export type TgdMaterialFaceOrientationOptions = Partial<{
-    light: TgdLight
-    ambient: TgdLight
-    specularExponent: number
-    specularIntensity: number
-}>
+export interface TgdMaterialFaceOrientationOptions
+    extends Partial<TgdMaterialOptions> {
+    light?: TgdLight
+    ambient?: TgdLight
+    specularExponent?: number
+    specularIntensity?: number
+}
 
 /**
  * This material is useful to debug meshes.
@@ -52,7 +53,9 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
                 `);`,
                 `return color;`,
             ],
-            vertexShaderCode: ["varNormal = mat3(uniTransfoMatrix) * normal;"],
+            vertexShaderCode: () => [
+                `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
+            ],
             setUniforms: (program: TgdProgram): void => {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)

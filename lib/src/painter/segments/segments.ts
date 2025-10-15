@@ -3,14 +3,10 @@ import { TgdPainter } from "@tgd/painter/painter"
 import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 
-import VERT from "./segments.vert"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreatePalette } from "@tgd/utils"
 import { TgdCamera } from "@tgd/camera"
-import { TgdVec3 } from "@tgd/math"
-import { TgdGeometry } from "@tgd/geometry"
-import { TgdPainterMesh } from "../mesh"
 import { TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
 import { makeCapsule } from "./capsule"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
@@ -82,6 +78,8 @@ export class TgdPainterSegments extends TgdPainter {
         const geometry = makeCapsule(roundness)
         const material = options.material ?? new TgdMaterialFaceOrientation()
         this.material = material
+        material.attPosition = geometry.attPosition
+        material.attNormal = geometry.attNormal
         this.minRadius = minRadius
         if (roundness > 127) {
             throw new Error("[TgdPainterSegments] Max roundness is 127!")

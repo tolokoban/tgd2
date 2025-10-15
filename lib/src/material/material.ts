@@ -25,10 +25,10 @@ export interface TgdMaterialOptions {
     attUV: string
     varyings: { [name: string]: WebglAttributeType }
     uniforms: { [name: string]: WebglUniformType }
-    fragmentShaderCode: TgdCodeBloc
-    extraFragmentShaderFunctions: TgdCodeFunctions
-    vertexShaderCode: TgdCodeBloc
-    extraVertexShaderFunctions: TgdCodeFunctions
+    fragmentShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
+    extraFragmentShaderFunctions: TgdCodeFunctions | (() => TgdCodeFunctions)
+    vertexShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
+    extraVertexShaderFunctions: TgdCodeFunctions | (() => TgdCodeFunctions)
     /**
      * Body of the function `vec4 getPosition(vec4 pos)` of the vertex shader.
      *
@@ -36,7 +36,7 @@ export interface TgdMaterialOptions {
      * Yo can use this code to apply any transformation on the vertex position
      * before convertion to screen space.
      */
-    vertexShaderCodeForGetPosition: TgdCodeBloc
+    vertexShaderCodeForGetPosition: TgdCodeBloc | (() => TgdCodeBloc)
     /**
      * If this function is defined, it will be called at each frame.
      * Most of the time, it is used tu update the uniforms.
@@ -66,19 +66,45 @@ export class TgdMaterial {
 
     public readonly uniforms: { [name: string]: WebglUniformType }
 
+    private readonly _fragmentShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
+
     /**
      * The code of a `vec4 applyMaterial()` function.
      */
-    readonly fragmentShaderCode: TgdCodeBloc
+    get fragmentShaderCode(): TgdCodeBloc {
+        if (typeof this._fragmentShaderCode === "function")
+            return this._fragmentShaderCode()
+        return this._fragmentShaderCode
+    }
 
-    readonly extraFragmentShaderFunctions: TgdCodeFunctions
+    readonly extraFragmentShaderFunctions:
+        | TgdCodeFunctions
+        | (() => TgdCodeFunctions)
+
+    private readonly _vertexShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
 
     /**
      * The code of a `void applyMaterial(position, normal, uv)` function.
      */
-    readonly vertexShaderCode: TgdCodeBloc
+    get vertexShaderCode() {
+        if (typeof this._vertexShaderCode === "function")
+            return this._vertexShaderCode()
+        return this._vertexShaderCode
+    }
 
-    readonly extraVertexShaderFunctions: TgdCodeFunctions
+    private readonly _extraVertexShaderFunctions:
+        | TgdCodeFunctions
+        | (() => TgdCodeFunctions)
+
+    get extraVertexShaderFunctions() {
+        if (typeof this._extraVertexShaderFunctions === "function")
+            return this._extraVertexShaderFunctions()
+        return this._extraVertexShaderFunctions
+    }
+
+    private readonly _vertexShaderCodeForGetPosition?:
+        | TgdCodeBloc
+        | (() => TgdCodeBloc)
 
     /**
      * Body of the function `vec4 getPosition(vec4 pos)` of the vertex shader.
@@ -87,7 +113,11 @@ export class TgdMaterial {
      * Yo can use this code to apply any transformation on the vertex position
      * before convertion to screen space.
      */
-    vertexShaderCodeForGetPosition?: TgdCodeBloc
+    get vertexShaderCodeForGetPosition() {
+        if (typeof this._vertexShaderCodeForGetPosition === "function")
+            return this._vertexShaderCodeForGetPosition()
+        return this._vertexShaderCodeForGetPosition
+    }
 
     readonly setUniforms:
         | undefined
@@ -124,11 +154,11 @@ export class TgdMaterial {
         this.attUV = attUV
         this.varyings = varyings
         this.uniforms = uniforms
-        this.fragmentShaderCode = fragmentShaderCode
+        this._fragmentShaderCode = fragmentShaderCode
         this.extraFragmentShaderFunctions = extraFragmentShaderFunctions
-        this.vertexShaderCode = vertexShaderCode
-        this.extraVertexShaderFunctions = extraVertexShaderFunctions
-        this.vertexShaderCodeForGetPosition = vertexShaderCodeForGetPosition
+        this._vertexShaderCode = vertexShaderCode
+        this._extraVertexShaderFunctions = extraVertexShaderFunctions
+        this._vertexShaderCodeForGetPosition = vertexShaderCodeForGetPosition
         this.setUniforms = setUniforms
         this.state = state
     }
