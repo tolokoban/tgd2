@@ -13,8 +13,13 @@ import View from "@/components/demo/Tgd"
 
 function init(context: TgdContext) {
     // #begin
-    new TgdControllerCameraOrbit(context, { inertiaOrbit: 1000 })
     context.camera.transfo.distance = 50
+    new TgdControllerCameraOrbit(context, {
+        inertiaOrbit: 1000,
+        maxDistance: 50,
+        minDistance: 5,
+        speedZoom: 50,
+    })
     const clear = new TgdPainterClear(context, {
         color: [0.3, 0.3, 0.3, 1],
         depth: 1,

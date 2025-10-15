@@ -21,11 +21,12 @@ export interface TgdControllerCameraOrbitZoomRequest
 }
 
 export interface TgdControllerCameraOrbitOptions {
-    minZoom: number
-    maxZoom: number
     minDistance: number
     maxDistance: number
     speedOrbit: number
+    /**
+     * Units of zoom per second.
+     */
     speedZoom: number
     speedPanning: number
     /**
@@ -167,6 +168,8 @@ export class TgdControllerCameraOrbit {
 
     private readonly tmpQuat = new TgdQuat()
 
+    private lastPointerEventTimestamp = 0
+
     constructor(
         private readonly context: {
             camera: TgdCamera
@@ -178,8 +181,6 @@ export class TgdControllerCameraOrbit {
         },
         {
             geo,
-            minZoom = 1e-3,
-            maxZoom = Infinity,
             minDistance = 0,
             maxDistance = Infinity,
             speedZoom = 1,
@@ -218,8 +219,6 @@ export class TgdControllerCameraOrbit {
         this.inertiaZoom = inertiaZoom
         this.inertiaPanning = inertiaPanning
         this.fixedTarget = fixedTarget
-        this.minZoom = minZoom
-        this.maxZoom = maxZoom
         this.minDistance = minDistance
         this.maxDistance = maxDistance
         this.onZoomRequest = onZoomRequest
@@ -269,6 +268,7 @@ export class TgdControllerCameraOrbit {
     }
 
     private readonly handleMove = (event: TgdInputPointerEventMove) => {
+        this.lastPointerEventTimestamp = event.current.t
         if (!this.enabled || this.animOrbit) return
 
         this.actualMove(event)
@@ -434,9 +434,10 @@ export class TgdControllerCameraOrbit {
 
     private readonly handleZoom = (event: TgdInputPointerEventZoom) => {
         if (
-            !this.enabled ||
-            this.speedZoom === 0 ||
-            !this.onZoomRequest({
+            this.lastPointerEventTimestamp > 0 &&
+            this.enabled &&
+            this.speedZoom > 0 &&
+            this.onZoomRequest({
                 altKey: event.altKey,
                 ctrlKey: event.ctrlKey,
                 metaKey: event.metaKey,
@@ -444,26 +445,29 @@ export class TgdControllerCameraOrbit {
                 x: event.current.x,
                 y: event.current.y,
             })
-        )
-            return
-
-        const { context } = this
-        const { camera } = context
-        let speed = 0.1 * this.speedZoom
-        if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
-        const dz = -event.direction * speed
-        camera.transfo.distance = tgdCalcClamp(
-            camera.transfo.distance + dz,
-            this.minDistance,
-            this.maxDistance
-        )
-        // camera.zoom = tgdCalcClamp(
-        //     camera.zoom * (1 + dz),
-        //     this.minZoom,
-        //     this.maxZoom
-        // )
-        event.preventDefault()
-        this.fireZoomChange()
+        ) {
+            const { context } = this
+            const { camera } = context
+            // Msec since last mouse event
+            const time = 16e-3 // We assume 60 FPS
+            let speed = this.speedZoom * time
+            if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
+            else if (this.context.inputs.keyboard.isDown("Control")) speed *= 10
+            const deltaDistance = -event.direction * speed
+            console.log(
+                "🚀 [orbit] speed, event.direction =",
+                speed,
+                event.direction
+            ) // @FIXME: Remove this line written on 2025-10-15 at 11:50
+            camera.transfo.distance = tgdCalcClamp(
+                camera.transfo.distance + deltaDistance,
+                this.minDistance,
+                this.maxDistance
+            )
+            event.preventDefault()
+            this.fireZoomChange()
+        }
+        this.lastPointerEventTimestamp = event.current.t
     }
 
     private fireZoomChange() {
