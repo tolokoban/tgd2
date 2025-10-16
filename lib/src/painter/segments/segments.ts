@@ -116,8 +116,12 @@ export class TgdPainterSegments extends TgdPainter {
                 attUV0: "vec2",
                 attUV1: "vec2",
             },
-            varying: material.varyings,
+            varying: {
+                ...material.varyings,
+                varNormal: "vec3",
+            },
             functions: {
+                ...material.extraVertexShaderFunctions,
                 applyMaterial: [
                     "void applyMaterial() {",
                     [material.vertexShaderCode],
@@ -167,6 +171,7 @@ export class TgdPainterSegments extends TgdPainter {
             outputs: { FragColor: "vec4" },
             varying: material.varyings,
             functions: {
+                ...material.extraFragmentShaderFunctions,
                 applyMaterial: [
                     "vec4 applyMaterial() {",
                     [material.fragmentShaderCode],
