@@ -7,7 +7,7 @@ export class TgdInputs {
     private _keyboard: TgdInputKeyboard | null = null
     private _pointer: TgdInputPointer | null = null
 
-    constructor(private readonly canvas: HTMLCanvasElement) {}
+    constructor(private readonly canvas?: HTMLCanvasElement | undefined) {}
 
     get keyboard(): TgdInputKeyboard {
         if (!this._keyboard) {

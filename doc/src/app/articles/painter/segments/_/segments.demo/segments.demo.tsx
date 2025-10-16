@@ -10,7 +10,6 @@ import {
     TgdPainterSegmentsData,
     TgdPainterState,
     TgdTexture2D,
-    TgdVec3,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
@@ -47,7 +46,7 @@ function init(context: TgdContext) {
         data.add(nodes[i - 1], nodes[i], uv0, uv1)
     }
     const palette = new TgdTexture2D(context).loadBitmap(
-        tgdCanvasCreatePalette(["#bbb", "#07f", "#70f"])
+        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
     )
     const segments = new TgdPainterSegments(context, {
         makeDataset: data.makeDataset,
@@ -64,8 +63,24 @@ function init(context: TgdContext) {
     context.add(clear, state)
     context.paint()
     // #end
+    context.inputs.pointer.eventHover.addListener((event) => {
+        const { x, y } = event.current
+        const [R, G, B] = context.readPixel(x, y)
+        console.log(
+            `%c(${R}, ${G}, ${B})]`,
+            `color:#777;background:rgb(${R},${G},${B})`
+        )
+    })
 }
 
 export default function Demo() {
-    return <View onReady={init} gizmo />
+    return (
+        <View
+            onReady={init}
+            gizmo
+            options={{
+                preserveDrawingBuffer: true,
+            }}
+        />
+    )
 }

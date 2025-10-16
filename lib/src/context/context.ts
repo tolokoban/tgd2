@@ -1,7 +1,7 @@
 import { TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdInputs } from "@tgd/input"
 import { TgdPainterGroup } from "../painter/group"
-import { tgdCanvasCreate, webglLookup } from "../utils"
+import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
 import { TgdEvent } from "../event"
@@ -98,13 +98,15 @@ export class TgdContext extends TgdPainterGroup {
     // Number of seconds while we have been in pause.
     private pauseAccumulation = 0
     private readonly animationManager = new TgdManagerAnimation()
+    // Used to store result of gl.readPixels() for one pixel.
+    private readonly readPixelColor = new Uint8Array(4)
 
     /**
      * @param canvas The canvas to which attach a WebGL2 context.
      * @see {@link TgdContextOptions}
      */
     constructor(
-        public readonly canvas: HTMLCanvasElement,
+        public readonly canvas: HTMLCanvasElement | OffscreenCanvas,
         private readonly options: TgdContextOptions = {}
     ) {
         super()
@@ -124,11 +126,17 @@ export class TgdContext extends TgdPainterGroup {
         ) as number
         this.gl = gl
         this.observer = new ResizeObserver(() => {
-            const width = canvas.clientWidth * this.resolution
-            const height = canvas.clientHeight * this.resolution
+            const width = isOffscreen(canvas)
+                ? canvas.width
+                : canvas.clientWidth * this.resolution
+            const height = isOffscreen(canvas)
+                ? canvas.width
+                : canvas.clientHeight * this.resolution
             const { onResize } = options
             if (onResize) {
-                onResize(this, canvas.clientWidth, canvas.clientHeight)
+                if (!isOffscreen(canvas)) {
+                    onResize(this, canvas.clientWidth, canvas.clientHeight)
+                }
             } else {
                 canvas.width = width
                 canvas.height = height
@@ -136,12 +144,16 @@ export class TgdContext extends TgdPainterGroup {
             gl.viewport(0, 0, canvas.width, canvas.height)
             this.paint()
         })
-        this.observer.observe(canvas)
-        this.inputs = new TgdInputs(canvas)
+        if (isOffscreen(canvas)) {
+            this.inputs = new TgdInputs()
+        } else {
+            this.observer.observe(canvas)
+            this.inputs = new TgdInputs(canvas)
+            // Prevent system gestures.
+            canvas.style.touchAction = "none"
+        }
         if (options.camera) this._camera = options.camera
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
-        // Prevent system gestures.
-        canvas.style.touchAction = "none"
         this.stateReset()
     }
 
@@ -264,19 +276,27 @@ export class TgdContext extends TgdPainterGroup {
 
     takeSnapshot(): Promise<HTMLImageElement> {
         const { canvas } = this
-        return new Promise(resolve => {
+        const img = new Image()
+        return new Promise((resolve) => {
+            const blobToImage = (blob: Blob | null) => {
+                if (!blob) {
+                    resolve(img)
+                    return
+                }
+                const url = URL.createObjectURL(blob)
+                img.src = url
+                // eslint-disable-next-line unicorn/prefer-add-event-listener
+                img.onload = () => resolve(img)
+            }
             this.doSnapshot = () => {
-                canvas.toBlob(blob => {
-                    const img = new Image()
-                    if (!blob) {
-                        resolve(img)
-                        return
-                    }
-                    const url = URL.createObjectURL(blob)
-                    img.src = url
-                    // eslint-disable-next-line unicorn/prefer-add-event-listener
-                    img.onload = () => resolve(img)
-                })
+                if (isOffscreen(canvas)) {
+                    canvas
+                        .convertToBlob()
+                        .then(blobToImage)
+                        .catch(() => resolve(img))
+                } else {
+                    canvas.toBlob(blobToImage)
+                }
             }
         })
     }
@@ -352,9 +372,37 @@ export class TgdContext extends TgdPainterGroup {
         }
     }
 
+    /**
+     * Read the color of a pixel as a Uint8Array of size 4.
+     *
+     * Don't forget to use `preserveDrawingBuffer: true` in the creation options
+     * of the WebGL context.
+     *
+     * @param xScreen From -1 (left) to +1 (right)
+     * @param yScreen From -1 (bottom) to +1 (top)
+     * @returns The color of a pixel
+     */
+    readPixel(xScreen: number, yScreen: number): Readonly<Uint8Array> {
+        const { gl } = this
+        const pixelX = Math.round(0.5 * (xScreen + 1) * gl.drawingBufferWidth)
+        const pixelY = Math.round(0.5 * (yScreen + 1) * gl.drawingBufferHeight)
+        gl.readPixels(
+            pixelX,
+            pixelY,
+            1, // width
+            1, // height
+            gl.RGBA, // format
+            gl.UNSIGNED_BYTE, // type
+            this.readPixelColor
+        )
+        return this.readPixelColor
+    }
+
     delete() {
         this.pause()
-        this.observer.unobserve(this.canvas)
+        if (!isOffscreen(this.canvas)) {
+            this.observer.unobserve(this.canvas)
+        }
         super.delete()
     }
 
@@ -421,4 +469,10 @@ export class TgdContext extends TgdPainterGroup {
 
         return gl
     }
+}
+
+function isOffscreen(
+    canvas: HTMLCanvasElement | OffscreenCanvas
+): canvas is OffscreenCanvas {
+    return canvas instanceof OffscreenCanvas
 }

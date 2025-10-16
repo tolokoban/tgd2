@@ -1,64 +1,66 @@
-import { TgdEvent } from "@tgd/event";
+import { TgdEvent } from "@tgd/event"
 
 export interface TgdInputPointerEventFinger {
-  x: number;
-  y: number;
-  t: number;
-  fingersCount: number;
+    x: number
+    y: number
+    t: number
+    fingersCount: number
 }
 
 export interface TgdInputPointerModifierKeys {
-  altKey: boolean;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  shiftKey: boolean;
+    altKey: boolean
+    ctrlKey: boolean
+    metaKey: boolean
+    shiftKey: boolean
 }
 
 export interface TgdInputPointerEventZoom extends TgdInputPointerModifierKeys {
-  current: TgdInputPointerEventFinger;
-  direction: number;
-  preventDefault: () => void;
+    current: TgdInputPointerEventFinger
+    direction: number
+    preventDefault: () => void
 }
 
 export interface TgdInputPointerEventTap extends TgdInputPointerModifierKeys {
-  x: number;
-  y: number;
-  t: number;
-  fingersCount: number;
+    x: number
+    y: number
+    t: number
+    fingersCount: number
 }
 
 export interface TgdInputPointerEventMove extends TgdInputPointerModifierKeys {
-  current: TgdInputPointerEventFinger;
-  previous: TgdInputPointerEventFinger;
-  start: TgdInputPointerEventFinger;
+    current: TgdInputPointerEventFinger
+    previous: TgdInputPointerEventFinger
+    start: TgdInputPointerEventFinger
 }
 
 export interface TgdInputPointer {
-  readonly eventTap: TgdEvent<Readonly<TgdInputPointerEventTap>>;
+    readonly eventTap: TgdEvent<Readonly<TgdInputPointerEventTap>>
 
-  readonly eventMoveStart: TgdEvent<Readonly<TgdInputPointerEventMove>>;
+    readonly eventMoveStart: TgdEvent<Readonly<TgdInputPointerEventMove>>
 
-  readonly eventMove: TgdEvent<Readonly<TgdInputPointerEventMove>>;
+    readonly eventMove: TgdEvent<Readonly<TgdInputPointerEventMove>>
 
-  readonly eventMoveEnd: TgdEvent<Readonly<TgdInputPointerEventMove>>;
+    readonly eventHover: TgdEvent<Readonly<TgdInputPointerEventMove>>
 
-  readonly eventZoom: TgdEvent<Readonly<TgdInputPointerEventZoom>>;
+    readonly eventMoveEnd: TgdEvent<Readonly<TgdInputPointerEventMove>>
 
-  readonly x: number;
+    readonly eventZoom: TgdEvent<Readonly<TgdInputPointerEventZoom>>
 
-  readonly y: number;
+    readonly x: number
 
-  readonly speedX: number;
+    readonly y: number
 
-  readonly speedY: number;
+    readonly speedX: number
 
-  /**
-   * This is a tap only of the pointer touched for less that
-   * `tapDelay` milliseconds.
-   */
-  tapDelay: number;
+    readonly speedY: number
 
-  isTouching(
-    hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean,
-  ): boolean;
+    /**
+     * This is a tap only of the pointer touched for less that
+     * `tapDelay` milliseconds.
+     */
+    tapDelay: number
+
+    isTouching(
+        hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean
+    ): boolean
 }
