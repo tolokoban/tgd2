@@ -1,11 +1,15 @@
 import {
+    ArrayNumber2,
     ArrayNumber4,
+    tgdCanvasCreatePalette,
     TgdContext,
     TgdControllerCameraOrbit,
+    TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterSegments,
     TgdPainterSegmentsData,
     TgdPainterState,
+    TgdTexture2D,
     TgdVec3,
     webglPresetDepth,
 } from "@tolokoban/tgd"
@@ -38,12 +42,20 @@ function init(context: TgdContext) {
         nodes.push([x, y, z, thickness])
     }
     for (let i = 1; i < nodes.length; i++) {
-        data.add(nodes[i - 1], nodes[i])
+        const uv0: ArrayNumber2 = [(i - 0.5) / (nodes.length + 1), 0]
+        const uv1: ArrayNumber2 = [(i + 0.5) / (nodes.length + 1), 0]
+        data.add(nodes[i - 1], nodes[i], uv0, uv1)
     }
+    const palette = new TgdTexture2D(context).loadBitmap(
+        tgdCanvasCreatePalette(["#bbb", "#07f", "#70f"])
+    )
     const segments = new TgdPainterSegments(context, {
         makeDataset: data.makeDataset,
         roundness: 6,
         minRadius: 4,
+        material: new TgdMaterialDiffuse({
+            color: palette,
+        }),
     })
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,

@@ -80,6 +80,7 @@ export class TgdPainterSegments extends TgdPainter {
         this.material = material
         material.attPosition = geometry.attPosition
         material.attNormal = geometry.attNormal
+        material.attUV = "((attUV0 + attUV1) * .5)"
         this.minRadius = minRadius
         if (roundness > 127) {
             throw new Error("[TgdPainterSegments] Max roundness is 127!")

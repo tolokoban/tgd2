@@ -2,7 +2,8 @@ import { TgdMaterial } from "./material"
 
 /**
  * This material is to be used along with `TgdPainterBackgroundWithDepth`.
- * It will only convert the distance to the camera (float between 0.0 and 1.0) into the color channels R, G and B.
+ * It will only convert the distance to the camera (float between 0.0 and 1.0)
+ * into the color channels R, G and B.
  * @see TgdPainterBackgroundWithDepth
  */
 export class TgdMaterialDepth extends TgdMaterial {
