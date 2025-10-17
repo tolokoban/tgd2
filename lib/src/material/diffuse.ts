@@ -12,6 +12,7 @@ export type TgdMaterialDiffuseOptions = Partial<{
     ambient: TgdLight
     specularExponent: number
     specularIntensity: number
+    lockLightsToCamera: boolean
 }>
 
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
@@ -41,13 +42,16 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             uniModelViewMatrix: "mat4",
         }
         const fragmentShaderCode: TgdCodeBloc = [
-            "vec3 normal = normalize(varNormal);",
+            `vec3 normal = ${options.lockLightsToCamera ? "mat3(uniModelViewMatrix) * " : ""}normalize(varNormal);`,
             `float light = 1.0 - dot(normal, uniLightDir);`,
+            options.lockLightsToCamera
+                ? "light = max(0.0, light - 1.0);"
+                : "light *= .5;",
             hasTexture
                 ? `vec4 color = texture(texDiffuse, varUV);`
                 : `vec4 color = vec4(${color.join(", ")});`,
-            `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
-            `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
+            `vec3 reflection = ${options.lockLightsToCamera ? "" : "mat3(uniModelViewMatrix) * "}reflect(uniLightDir, normal);`,
+            `float spec = max(0.0, reflection.z);`,
             `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
             `color = vec4(`,
             `  color.rgb * (`,

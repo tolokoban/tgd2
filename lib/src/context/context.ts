@@ -74,7 +74,7 @@ export class TgdContext extends TgdPainterGroup {
      */
     private doSnapshot: null | (() => void) = null
     private _camera: TgdCamera = new TgdCameraPerspective({
-        transfo: { distance: 15 },
+        transfo: { distance: 10 },
         far: 100,
         near: 0.1,
         fovy: Math.PI / 8,

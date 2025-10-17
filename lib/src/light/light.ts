@@ -1,7 +1,8 @@
 import { TgdVec3, TgdVec4 } from "@tgd/math"
+import { ArrayNumber4 } from "@tgd/types"
 
 export interface TgdLightOptions {
-    color: TgdVec4
+    color: TgdVec4 | ArrayNumber4
     direction: TgdVec3
 }
 
@@ -14,7 +15,9 @@ export class TgdLight {
     private readonly _direction = new TgdVec3()
 
     constructor(options: Partial<TgdLightOptions> = {}) {
-        this.color = options.color ?? new TgdVec4(0.8, 0.8, 0.8, 1)
+        this.color = options.color
+            ? new TgdVec4(options.color)
+            : new TgdVec4(0.8, 0.8, 0.8, 1)
         this.direction = options.direction ?? new TgdVec3(0, 0, -1)
     }
 

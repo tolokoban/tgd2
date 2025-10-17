@@ -8,6 +8,7 @@ export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
     onExit?(time: number, delay: number): void
     name?: string
+    children?: TgdPainter[]
 }
 
 /**
@@ -21,15 +22,37 @@ export class TgdPainterGroup extends TgdPainter {
 
     private readonly logics: Array<(time: number, delay: number) => void> = []
 
+    constructor()
+    constructor(painters?: TgdPainter[], options?: TgdPainterGroupOptions)
+    constructor(options?: TgdPainterGroupOptions)
     constructor(
-        painters: TgdPainter[] = [],
-        { onEnter, onExit, name }: TgdPainterGroupOptions = {}
+        arg1?: TgdPainter[] | TgdPainterGroupOptions,
+        arg2?: TgdPainterGroupOptions
     ) {
         super()
-        this.onEnter = onEnter
-        this.onExit = onExit
-        this.painters = [...painters]
-        this.name = name ?? `Group/${this.name}`
+        this.painters = []
+        if (Array.isArray(arg1)) {
+            for (const painter of arg1) this.painters.push(painter)
+        } else if (arg1) {
+            this.onEnter = arg1.onEnter
+            this.onExit = arg1.onExit
+            this.name = arg1.name ?? `Group/${this.name}`
+            if (arg1.children) {
+                for (const painter of arg1.children) this.painters.push(painter)
+            }
+        }
+        if (arg2) {
+            this.onEnter = arg2.onEnter
+            this.onExit = arg2.onExit
+            this.name = arg2.name ?? `Group/${this.name}`
+            if (arg2.children) {
+                for (const painter of arg2.children) {
+                    if (!this.painters.includes(painter)) {
+                        this.painters.push(painter)
+                    }
+                }
+            }
+        }
     }
 
     forEachChild(callback: (child: TgdPainter, index: number) => void) {
@@ -118,7 +141,7 @@ export class TgdPainterGroup extends TgdPainter {
     get hierarchy(): TgdDebugPainterHierarchy {
         return {
             [this.active ? this.name : `${this.name} (Inactive)`]:
-                this.painters.map(painter => painter.hierarchy),
+                this.painters.map((painter) => painter.hierarchy),
         }
     }
 
