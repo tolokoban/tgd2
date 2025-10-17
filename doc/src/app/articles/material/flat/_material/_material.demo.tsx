@@ -1,13 +1,11 @@
 import {
     TgdContext,
     TgdControllerCameraOrbit,
-    TgdMaterialFaceOrientation,
     TgdMaterialFlat,
-    TgdMaterialGhost,
     TgdPainterClear,
     TgdPainterMeshGltf,
     TgdPainterState,
-    webglPresetBlend,
+    tgdRandom3,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
@@ -15,7 +13,9 @@ import SuzaneURL from "@/assets/mesh/suzanne.glb"
 
 function init(ctx: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
-    const material = new TgdMaterialFlat()
+    const material = new TgdMaterialFlat({
+        color: [...tgdRandom3(), 1],
+    })
     const mesh = new TgdPainterMeshGltf(ctx, {
         asset: assets.glb.suzane,
         material,

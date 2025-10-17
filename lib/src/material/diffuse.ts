@@ -60,14 +60,16 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         const varyings: { [name: string]: WebglAttributeType } = {
             varNormal: "vec3",
         }
+        if (hasTexture) {
+            varyings.varUV = "vec2"
+            uniforms.texDiffuse = "sampler2D"
+        }
         const vertexShaderCode = () => {
             const code: TgdCodeBloc = [
                 `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
             ]
             if (hasTexture) {
                 code.push(`varUV = ${this.attUV};`)
-                varyings.varUV = "vec2"
-                uniforms.texDiffuse = "sampler2D"
             }
             return code
         }
