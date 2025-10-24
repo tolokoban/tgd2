@@ -8,7 +8,7 @@ import {
     TgdPainterMeshGltf,
     TgdPainterState,
     TgdPainterScissor,
-    tgdRandom3,
+    tgdCalcRandom3,
     webglPresetDepth,
     tgdCalcClamp,
 } from "@tolokoban/tgd"
@@ -25,7 +25,7 @@ import {
 
 function init(context: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
-    const color: ArrayNumber4 = [...tgdRandom3(), 1]
+    const color: ArrayNumber4 = [...tgdCalcRandom3(), 1]
     const material1 = new TgdMaterialDiffuse({
         color,
         ambient: new TgdLight({

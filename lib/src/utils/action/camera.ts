@@ -1,6 +1,6 @@
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdTransfo } from "@tgd/math"
-import { tgdCalcMix } from "../math"
+import { tgdCalcMix } from "../../math/math"
 import { tgdActionCreateTransfoInterpolation } from "./transfo"
 
 export function tgdActionCreateCameraInterpolation(

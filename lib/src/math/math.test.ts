@@ -1,4 +1,5 @@
-import { tgdCalcModulo, tgdCalcRandom } from "./math"
+import { tgdCalcModulo } from "./math"
+import { tgdCalcRandom } from "./random"
 
 describe(`tgdCalc*()`, () => {
     describe(`tgdCalcModulo()`, () => {

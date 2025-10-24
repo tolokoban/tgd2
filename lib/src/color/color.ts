@@ -1,4 +1,4 @@
-import { tgdCalcClamp, tgdCalcModulo } from "@tgd/utils"
+import { tgdCalcClamp, tgdCalcModulo } from "@tgd/math"
 
 export class TgdColor {
     static fromHSL(H: number, S: number, L: number): TgdColor {
@@ -8,6 +8,54 @@ export class TgdColor {
         color.L = L
         color.hsl2rgb()
         return color
+    }
+
+    static fromPaletteLinear(
+        factor: number,
+        palette: Array<string | TgdColor>
+    ): TgdColor {
+        if (palette.length === 0) return new TgdColor()
+
+        const index = tgdCalcClamp(factor * palette.length, 0, 1)
+        const index0 = Math.floor(index)
+        const index1 = Math.min(index0 + 1, palette.length)
+        return TgdColor.fromMix(
+            index - index0,
+            palette[index0],
+            palette[index1]
+        )
+    }
+
+    static fromPaletteClosest(
+        factor: number,
+        palette: Array<string | TgdColor>
+    ): TgdColor {
+        if (palette.length === 0) return new TgdColor()
+
+        const index = tgdCalcClamp(factor * palette.length, 0, 1)
+        const index0 = Math.floor(index)
+        const index1 = Math.min(index0 + 1, palette.length)
+        const color = index - index0 < 0.5 ? palette[index0] : palette[index1]
+        return typeof color === "string" ? new TgdColor(color) : color
+    }
+
+    static fromMix(
+        factor: number,
+        color0: string | TgdColor,
+        color1: string | TgdColor
+    ): TgdColor {
+        const factorA = 1 - factor
+        const factorB = factor
+        const colorA =
+            typeof color0 === "string" ? new TgdColor(color0) : color0
+        const colorB =
+            typeof color1 === "string" ? new TgdColor(color1) : color1
+        return new TgdColor(
+            factorA * colorA.R + factorB * colorB.R,
+            factorA * colorA.G + factorB * colorB.G,
+            factorA * colorA.B + factorB * colorB.B,
+            factorA * colorA.A + factorB * colorB.A
+        )
     }
 
     /** Red [0..1] */
@@ -31,6 +79,10 @@ export class TgdColor {
     /** Lumimance [0..1] */
     private _L: number = 1
 
+    constructor()
+    constructor(cssColor: string)
+    constructor(r: number, g: number, b: number)
+    constructor(r: number, g: number, b: number, a: number)
     constructor(r: number | string = 0, g = 0, b = 0, a = 1) {
         if (typeof r === "string") {
             this.parse(r)
@@ -91,7 +143,7 @@ export class TgdColor {
         this._L = tgdCalcClamp(v, 0, 1)
     }
 
-    parse(color: string) {
+    parse(color: string): this {
         const context = getContext()
         context.clearRect(0, 0, 1, 1)
         context.fillStyle = color
@@ -103,6 +155,7 @@ export class TgdColor {
         this.G = G * w
         this.B = B * w
         this.A = A * w
+        return this
     }
 
     toString() {

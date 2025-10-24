@@ -1,5 +1,5 @@
 import { ArrayNumber2 } from ".."
-import { tgdCalcMix } from "../utils/math"
+import { tgdCalcMix } from "./math"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
 
@@ -155,7 +155,7 @@ export class TgdVec2 extends Float32Array {
 
     debug(caption = "vec2") {
         const { x, y } = this
-        const out: string[] = [x, y].map(n => n.toFixed(6))
+        const out: string[] = [x, y].map((n) => n.toFixed(6))
         console.log(
             `${caption}:   `,
             out.join(" | "),

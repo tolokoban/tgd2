@@ -1,5 +1,5 @@
 import { TgdTransfo, TgdTransfoOptions } from "@tgd/math"
-import { tgdCalcMix } from "../math"
+import { tgdCalcMix } from "../../math/math"
 
 export function tgdActionCreateTransfoInterpolation(
     transfo: TgdTransfo,

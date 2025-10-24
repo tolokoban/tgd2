@@ -1,4 +1,4 @@
-import { tgdCalcDegToRad } from "@tgd/utils"
+import { tgdCalcDegToRad } from "@tgd/math"
 import { TgdVec2 } from "../math"
 import { TgdFilter } from "./filter"
 

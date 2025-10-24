@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix"
 import { ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
-import { tgdCalcMix } from "../utils/math"
+import { tgdCalcMix } from "./math"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec4 } from "./vec4"
@@ -284,7 +284,7 @@ export class TgdVec3 extends Float32Array {
 
     debug(caption = "vec3") {
         const { x, y, z } = this
-        const out: string[] = [x, y, z].map(n => n.toFixed(6))
+        const out: string[] = [x, y, z].map((n) => n.toFixed(6))
         console.log(
             `${caption}:   `,
             out.join(" | "),

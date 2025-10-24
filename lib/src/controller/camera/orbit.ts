@@ -3,7 +3,7 @@ import {
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutQuad,
 } from "@tgd/utils"
-import { tgdCalcClamp } from "@tgd/utils/math"
+import { tgdCalcClamp } from "@tgd/math/math"
 import {
     TgdInputPointerEventMove,
     TgdInputPointerModifierKeys,

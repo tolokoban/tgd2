@@ -1,6 +1,6 @@
 import { TgdVec2, TgdVec3, TgdVec4 } from "../../math"
 import { ArrayNumber2, ArrayNumber3, ArrayNumber4 } from "../../types"
-import { tgdCalcMix } from "../math"
+import { tgdCalcMix } from "../../math/math"
 
 /**
  * Create an action that will interpolate from one vector to another.
