@@ -15,8 +15,14 @@ export class TgdColor {
         palette: Array<string | TgdColor>
     ): TgdColor {
         if (palette.length === 0) return new TgdColor()
+        if (palette.length === 1) {
+            const [firstColor] = palette
+            return typeof firstColor === "string"
+                ? new TgdColor(firstColor)
+                : firstColor
+        }
 
-        const index = tgdCalcClamp(factor * palette.length, 0, 1)
+        const index = tgdCalcClamp(factor, 0, 1) * (palette.length - 1)
         const index0 = Math.floor(index)
         const index1 = Math.min(index0 + 1, palette.length)
         return TgdColor.fromMix(
@@ -31,8 +37,14 @@ export class TgdColor {
         palette: Array<string | TgdColor>
     ): TgdColor {
         if (palette.length === 0) return new TgdColor()
+        if (palette.length === 1) {
+            const [firstColor] = palette
+            return typeof firstColor === "string"
+                ? new TgdColor(firstColor)
+                : firstColor
+        }
 
-        const index = tgdCalcClamp(factor * palette.length, 0, 1)
+        const index = tgdCalcClamp(factor, 0, 1) * (palette.length - 1)
         const index0 = Math.floor(index)
         const index1 = Math.min(index0 + 1, palette.length)
         const color = index - index0 < 0.5 ? palette[index0] : palette[index1]
