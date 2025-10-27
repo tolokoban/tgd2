@@ -21,6 +21,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/animation/basic": ["/articles/animation/basic"],
     "/articles/animation/chain": ["/articles/animation/chain"],
     "/articles/animation/transfo": ["/articles/animation/transfo"],
+    "/articles/camera": ["/articles/camera"],
     "/articles/context": ["/articles/context"],
     "/articles/context/painters": ["/articles/context/painters"],
     "/articles/context/play-pause": ["/articles/context/play-pause"],

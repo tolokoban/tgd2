@@ -141,7 +141,6 @@ export class TgdContext extends TgdPainterGroup {
                 canvas.width = width
                 canvas.height = height
             }
-            gl.viewport(0, 0, canvas.width, canvas.height)
             this.paint()
         })
         if (isOffscreen(canvas)) {
@@ -354,6 +353,7 @@ export class TgdContext extends TgdPainterGroup {
             this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
             this._aspectRatioInverse = 1 / this._aspectRatio
 
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
             super.paint(timeInSec, delayInSec)
             if (
                 this.paintingIsQueued ||
