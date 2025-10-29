@@ -5,6 +5,7 @@ import {
     TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterialDiffuse,
+    TgdMaterialGhost,
     TgdPainterClear,
     TgdPainterSegments,
     TgdPainterSegmentsData,
@@ -52,9 +53,10 @@ function init(context: TgdContext) {
         makeDataset: data.makeDataset,
         roundness: 6,
         minRadius: 4,
-        material: new TgdMaterialDiffuse({
-            color: palette,
-        }),
+        // material: new TgdMaterialDiffuse({
+        //     color: palette,
+        // }),
+        material: new TgdMaterialGhost(),
     })
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,

@@ -184,7 +184,6 @@ export class TgdPainterSegments extends TgdPainter {
             vert,
             frag,
         })
-        prg.debug()
         this.prg = prg
         // this.painter = new TgdPainterMesh(context, {
         //     geometry,
