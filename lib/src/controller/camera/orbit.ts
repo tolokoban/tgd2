@@ -454,11 +454,6 @@ export class TgdControllerCameraOrbit {
             if (this.context.inputs.keyboard.isDown("Shift")) speed *= 0.1
             else if (this.context.inputs.keyboard.isDown("Control")) speed *= 10
             const deltaDistance = -event.direction * speed
-            console.log(
-                "🚀 [orbit] speed, event.direction =",
-                speed,
-                event.direction
-            ) // @FIXME: Remove this line written on 2025-10-15 at 11:50
             camera.transfo.distance = tgdCalcClamp(
                 camera.transfo.distance + deltaDistance,
                 this.minDistance,
