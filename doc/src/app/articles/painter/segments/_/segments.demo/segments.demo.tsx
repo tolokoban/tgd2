@@ -20,9 +20,9 @@ function init(context: TgdContext) {
     context.camera.transfo.distance = 50
     new TgdControllerCameraOrbit(context, {
         inertiaOrbit: 1000,
-        maxDistance: 50,
-        minDistance: 5,
-        speedZoom: 50,
+        maxZoom: 2,
+        minZoom: 0.5,
+        speedZoom: 1,
     })
     const clear = new TgdPainterClear(context, {
         color: [0.3, 0.3, 0.3, 1],
@@ -53,10 +53,10 @@ function init(context: TgdContext) {
         makeDataset: data.makeDataset,
         roundness: 6,
         minRadius: 4,
-        // material: new TgdMaterialDiffuse({
-        //     color: palette,
-        // }),
-        material: new TgdMaterialGhost(),
+        material: new TgdMaterialDiffuse({
+            color: palette,
+            lockLightsToCamera: true,
+        }),
     })
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,

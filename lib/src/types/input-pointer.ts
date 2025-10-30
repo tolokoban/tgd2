@@ -16,7 +16,7 @@ export interface TgdInputPointerModifierKeys {
 
 export interface TgdInputPointerEventZoom extends TgdInputPointerModifierKeys {
     current: TgdInputPointerEventFinger
-    direction: number
+    direction: -1 | 1
     preventDefault: () => void
 }
 
