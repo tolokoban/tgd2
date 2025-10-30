@@ -255,7 +255,7 @@ export class TgdControllerCameraOrbit {
 
         this._zoom = newZoom
         this.context.camera.spaceHeightAtTarget =
-            newZoom * this.spaceHeightAtTargetForZoom1
+            this.spaceHeightAtTargetForZoom1 / newZoom
     }
 
     get enabled() {
@@ -470,7 +470,6 @@ export class TgdControllerCameraOrbit {
             this.enabled &&
             this.speedZoom > 0
         ) {
-            const { context } = this
             // Msec since last mouse event
             const time = 16e-3 // We assume 60 FPS
             let speed = this.speedZoom * time
@@ -478,7 +477,7 @@ export class TgdControllerCameraOrbit {
             else if (this.context.inputs.keyboard.isDown("Control")) speed *= 10
             const factor = 1 + speed
             const zoom = tgdCalcClamp(
-                this.zoom * (event.direction > 0 ? factor : 1 / factor),
+                this.zoom * (event.direction < 0 ? factor : 1 / factor),
                 this.minZoom,
                 this.maxZoom
             )
