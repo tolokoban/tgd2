@@ -281,7 +281,7 @@ export class TgdControllerCameraOrbit {
             onAction?: (t: number) => void
             onEnd?: () => void
             delay?: number
-        }
+        } = {}
     ) {
         const { context } = this
         this.disableForSomeTime(animDuration)
