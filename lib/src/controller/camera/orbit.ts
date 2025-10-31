@@ -237,11 +237,7 @@ export class TgdControllerCameraOrbit {
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
         if (debug) {
-            context.inputs.keyboard.eventKeyPress.addListener((event) => {
-                if (event.key === "?") {
-                    console.log(this.context.camera.toCode())
-                }
-            })
+            context.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
         }
         this.resetZoom(zoom)
     }
@@ -295,8 +291,12 @@ export class TgdControllerCameraOrbit {
 
     detach() {
         const { inputs } = this.context
+        inputs.keyboard.eventKeyPress.removeListener(this.handleDebug)
+        inputs.pointer.eventMoveStart.removeListener(this.handleMoveStart)
+        inputs.pointer.eventMoveEnd.removeListener(this.handleMoveEnd)
         inputs.pointer.eventMove.removeListener(this.handleMove)
         inputs.pointer.eventZoom.removeListener(this.handleZoom)
+        this.eventChange.removeAllListeners()
     }
 
     private readonly handleMove = (event: TgdInputPointerEventMove) => {
@@ -504,6 +504,12 @@ export class TgdControllerCameraOrbit {
     private fireZoomChange() {
         this.context.paint()
         this.eventChange.dispatch(this.context.camera)
+    }
+
+    private readonly handleDebug = (event: { key: string }) => {
+        if (event.key === "?") {
+            console.log(this.context.camera.toCode())
+        }
     }
 }
 

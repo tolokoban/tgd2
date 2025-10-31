@@ -399,6 +399,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     delete() {
+        this.eventPaint.removeAllListeners()
         this.pause()
         if (!isOffscreen(this.canvas)) {
             this.observer.unobserve(this.canvas)

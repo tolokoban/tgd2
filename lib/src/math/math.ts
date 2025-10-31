@@ -1,4 +1,6 @@
-export function tgdCalcClamp(value: number, min: number, max: number): number {
+export function tgdCalcClamp(value: number, a: number, b: number): number {
+    const min = Math.min(a, b)
+    const max = Math.max(a, b)
     if (value < min) return min
     if (value > max) return max
     return value

@@ -12,6 +12,10 @@ export class TgdEvent<T> {
     dispatch(value: T) {
         for (const listener of this.listeners) listener(value)
     }
+
+    removeAllListeners() {
+        this.listeners.clear()
+    }
 }
 
 type Listener<T> = (value: T) => void
