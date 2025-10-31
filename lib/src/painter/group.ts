@@ -3,6 +3,7 @@ import {
     TgdDebugPainterHierarchy as TgdDebugPainterHierarchy,
     TgdPainter,
 } from "./painter"
+import { TgdConsole } from "@tgd/debug"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
@@ -146,17 +147,25 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     debugHierarchy(caption?: string) {
-        console.log(caption ?? this.name)
-        this.recursiveDebug(this.hierarchy)
+        const cons = new TgdConsole({
+            text: caption ?? this.name,
+            style: { bold: true },
+        }).add()
+        this.recursiveDebug(cons, this.hierarchy)
+        cons.debug()
     }
 
-    private recursiveDebug(h: TgdDebugPainterHierarchy, indent = "") {
-        const indent2 = `${indent}  `
+    private recursiveDebug(
+        cons: TgdConsole,
+        h: TgdDebugPainterHierarchy,
+        indent = 0
+    ) {
         for (const key of Object.keys(h)) {
-            console.log(`${indent}${key}`)
+            cons.add("| ".repeat(indent), { color: "#777" }).add(key).add()
             const value = h[key]
             if (value) {
-                for (const child of value) this.recursiveDebug(child, indent2)
+                for (const child of value)
+                    this.recursiveDebug(cons, child, indent + 1)
             }
         }
     }

@@ -269,16 +269,35 @@ export class TgdControllerCameraOrbit {
         this._zoom = zoomForCurrentCameraState
     }
 
-    reset(animDuration: number, easingFunction?: (x: number) => number) {
+    reset(
+        animDuration: number,
+        {
+            easingFunction,
+            onEnd,
+            onAction,
+            delay = 0,
+        }: {
+            easingFunction?: (x: number) => number
+            onAction?: (t: number) => void
+            onEnd?: () => void
+            delay?: number
+        }
+    ) {
         const { context } = this
         this.disableForSomeTime(animDuration)
+        const action = tgdActionCreateCameraInterpolation(
+            context.camera,
+            this.cameraInitialState
+        )
         context.animSchedule({
-            action: tgdActionCreateCameraInterpolation(
-                context.camera,
-                this.cameraInitialState
-            ),
+            action: (t: number) => {
+                action(t)
+                onAction?.(t)
+            },
             duration: animDuration,
             easingFunction,
+            onEnd,
+            delay,
         })
     }
 
