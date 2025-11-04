@@ -112,7 +112,7 @@ function makeMeshPainters(
         excludeByMaterialName,
         includeOnlyMaterialNames,
     } = options
-    const mesh = data.getMesh(meshIndexOrName)
+    const mesh = data.getMeshOrThrow(meshIndexOrName)
     const targets: TgdPainterMeshGltf[] = []
     for (
         let primitiveIndex = 0;

@@ -281,6 +281,26 @@ export class TgdDataGlb {
 
     getMesh(
         meshIndexOrName: TgdFormatGltfMesh | number | string = 0
+    ): TgdFormatGltfMesh | undefined {
+        if (
+            typeof meshIndexOrName !== "number" &&
+            typeof meshIndexOrName !== "string"
+        )
+            return meshIndexOrName
+
+        const mesh =
+            typeof meshIndexOrName === "number"
+                ? this.json.meshes?.[meshIndexOrName]
+                : (this.json.meshes ?? []).find(
+                      (item) => item.name === meshIndexOrName
+                  )
+        if (!mesh) return undefined
+
+        return mesh
+    }
+
+    getMeshOrThrow(
+        meshIndexOrName: TgdFormatGltfMesh | number | string = 0
     ): TgdFormatGltfMesh {
         if (
             typeof meshIndexOrName !== "number" &&
@@ -296,7 +316,11 @@ export class TgdDataGlb {
                   )
         if (!mesh) {
             throw new Error(
-                `Asset has no mesh with index/name ${JSON.stringify(meshIndexOrName)}!`
+                `Asset has no mesh with index/name ${JSON.stringify(
+                    meshIndexOrName
+                )}!\nAvailable names are: ${(this.json.meshes ?? [])
+                    .map((mesh) => mesh.name)
+                    .join(", ")}.`
             )
         }
 
@@ -502,9 +526,8 @@ export class TgdDataGlb {
     ) {
         const { json: gltf } = this
         const attribute =
-            this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes[
-                primitiveAttribName ?? attribName
-            ] ?? -1
+            this.getMeshOrThrow(meshIndexOrName).primitives[primitiveIndex]
+                .attributes[primitiveAttribName ?? attribName] ?? -1
         if (!isNumber(attribute)) {
             dataset.set(attribName, attribute.value, {
                 byteStride: attribute.size * 4,
@@ -520,7 +543,7 @@ export class TgdDataGlb {
             console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-09-17 at 17:46
             console.log(
                 "🚀 [gltf] this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes =",
-                this.getMesh(meshIndexOrName).primitives[primitiveIndex]
+                this.getMeshOrThrow(meshIndexOrName).primitives[primitiveIndex]
                     .attributes
             ) // @FIXME: Remove this line written on 2025-09-17 at 17:51
             throw new Error(
