@@ -79,7 +79,7 @@ export function ViewActionNode(props: ViewActionNodeProps) {
                         {isNumber(node.mesh) && (
                             <ViewActionNodeMesh
                                 data={props.data}
-                                meshIndex={node.mesh}
+                                meshIndexOrName={node.mesh}
                             />
                         )}
                     </ViewTab>

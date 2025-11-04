@@ -100,10 +100,10 @@ function makeNodePainter(
 }
 
 function makeMeshPainters(
-    meshIndex: number | undefined,
+    meshIndexOrName: number | string | undefined,
     options: MakeMeshGlbPainterOptions
 ): TgdInterfaceTransformable[] {
-    if (!isNumber(meshIndex)) return []
+    if (!isNumber(meshIndexOrName)) return []
 
     const {
         data,
@@ -112,14 +112,14 @@ function makeMeshPainters(
         excludeByMaterialName,
         includeOnlyMaterialNames,
     } = options
-    const mesh = data.getMesh(meshIndex)
+    const mesh = data.getMesh(meshIndexOrName)
     const targets: TgdPainterMeshGltf[] = []
     for (
         let primitiveIndex = 0;
         primitiveIndex < mesh.primitives.length;
         primitiveIndex++
     ) {
-        const primitive = data.getMeshPrimitive(meshIndex, primitiveIndex)
+        const primitive = data.getMeshPrimitive(meshIndexOrName, primitiveIndex)
         const material = isNumber(primitive.material)
             ? data.getMaterial(primitive.material)
             : null
@@ -148,7 +148,7 @@ function makeMeshPainters(
         const target = new TgdPainterMeshGltf(context, {
             name: `${mesh.name}/${material?.name ?? ""}`,
             asset: data,
-            meshIndex,
+            meshIndexOrName: meshIndexOrName,
             primitiveIndex,
             material: materialFactory,
         })

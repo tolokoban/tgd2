@@ -13,7 +13,7 @@ import { TgdMaterialCameraLight } from "@tgd/material/camera-light"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdDataGlb
-    meshIndex?: number
+    meshIndexOrName?: number | string
     primitiveIndex?: number
     name?: string
     material?:
@@ -37,11 +37,16 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
     ) {
         const {
             asset,
-            meshIndex = 0,
+            meshIndexOrName = 0,
             primitiveIndex = 0,
             material: materialFactory = makeMaterial,
         } = options
-        const color = figureColor(asset, meshIndex, primitiveIndex, context)
+        const color = figureColor(
+            asset,
+            meshIndexOrName,
+            primitiveIndex,
+            context
+        )
         const material =
             materialFactory instanceof TgdMaterial
                 ? materialFactory
@@ -56,9 +61,9 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
             attributes.TEXCOORD_0 = "vec2"
         }
         const dataset = new TgdDataset(attributes)
-        asset.setAttrib(dataset, "POSITION", meshIndex, primitiveIndex)
+        asset.setAttrib(dataset, "POSITION", meshIndexOrName, primitiveIndex)
         if (primitive.attributes.NORMAL) {
-            asset.setAttrib(dataset, "NORMAL", meshIndex, primitiveIndex)
+            asset.setAttrib(dataset, "NORMAL", meshIndexOrName, primitiveIndex)
         } else {
             // It seems to be impossible to retrieve normals.
             // We will compute them with a smooth shading.
@@ -66,13 +71,18 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
             computeNormals = true
         }
         if (primitive.attributes.TEXCOORD_0) {
-            asset.setAttrib(dataset, "TEXCOORD_0", meshIndex, primitiveIndex)
+            asset.setAttrib(
+                dataset,
+                "TEXCOORD_0",
+                meshIndexOrName,
+                primitiveIndex
+            )
         }
         super(context, {
             geometry: new TgdGeometry({
                 dataset,
                 elements: asset.getMeshPrimitiveIndices(
-                    meshIndex,
+                    meshIndexOrName,
                     primitiveIndex
                 ),
                 drawMode: "TRIANGLES",
@@ -88,11 +98,11 @@ const DEFAULT_COLOR = new TgdVec4(0.9, 0.5, 0.1, 1)
 
 function figureColor(
     asset: TgdDataGlb,
-    meshIndex: number,
+    meshIndexOrName: number | string,
     primitiveIndex: number,
     context: { gl: WebGL2RenderingContext; paint?: () => void }
 ): TgdVec4 | TgdTexture2D {
-    const primitive = asset.getMeshPrimitive(meshIndex, primitiveIndex)
+    const primitive = asset.getMeshPrimitive(meshIndexOrName, primitiveIndex)
     const materialIndex = primitive.material ?? -1
     if (materialIndex === -1) return DEFAULT_COLOR
 

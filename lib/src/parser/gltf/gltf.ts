@@ -314,7 +314,11 @@ export class TgdDataGlb {
                 : meshIndexOrName
         if (!mesh) {
             throw new Error(
-                `Asset has no mesh with index/name ${JSON.stringify(meshIndexOrName)}!`
+                `Asset has no mesh with index/name ${JSON.stringify(
+                    meshIndexOrName
+                )}!\nAvailable names are: ${(this.json.meshes ?? [])
+                    .map((mesh) => mesh.name)
+                    .join(", ")}.`
             )
         }
         const primitive = mesh.primitives[primitiveIndex]
