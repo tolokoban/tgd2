@@ -9,6 +9,7 @@ import { tgdColorMakeHueWheel } from "@tgd/color"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 
 export interface TgdPainterPointsCloudOptions {
+    name?: string
     /**
      * Flatten array of points:
      * `[ x1, y1, z1, radius1, x2, y2, z2, radius2, ... ]`
@@ -33,6 +34,7 @@ export interface TgdPainterPointsCloudOptions {
      * Default to 0.
      */
     minSizeInPixels?: number
+    mustDeleteTexture?: boolean
     texture?: TgdTexture2D
 }
 
@@ -54,24 +56,31 @@ export class TgdPainterPointsCloud extends TgdPainter {
         options: TgdPainterPointsCloudOptions
     ) {
         super()
+        this.name = options.name ?? this.name
         this.radiusMultiplier = options.radiusMultiplier ?? 1
         this.minSizeInPixels = options.minSizeInPixels ?? 0
         this.dataPoint = options.dataPoint
         if ((this.dataPoint.length & 3) !== 0) {
             throw new Error(
-                "dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${dataPoint.length}"
+                `dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${this.dataPoint.length}`
             )
         }
         this.dataUV =
             options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
         if (this.dataPoint.length !== this.dataUV.length * 2) {
-            throw new Error(
-                "dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${dataPoint.length}\ndataPoint.length === ${dataUV.length}"
+            const message = `dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${this.dataPoint.length}, \ndataUV.length === ${this.dataUV.length}`
+            console.error("[TgdPainterPointsCloud]", message)
+            console.error("[TgdPainterPointsCloud] options =", options)
+            console.error(
+                "[TgdPainterPointsCloud] this.dataPoint =",
+                this.dataPoint
             )
+            console.error("[TgdPainterPointsCloud] this.dataUV =", this.dataUV)
+            throw new Error(message)
         }
         if (options.texture) {
             this.texture = options.texture
-            this.textureMustBeDeleted = false
+            this.textureMustBeDeleted = options.mustDeleteTexture ?? false
         } else {
             this.texture = new TgdTexture2D(context).loadBitmap(
                 tgdCanvasCreateGradientHorizontal(

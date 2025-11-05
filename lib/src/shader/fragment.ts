@@ -53,7 +53,6 @@ export class TgdShaderFragment {
         this.varying = varying
         this.functions = functions
         this.mainCode = mainCode
-        console.log("🚀 [TgdFragmentShader] TgdFragmentShader=", options) // @FIXME: Remove this line written on 2025-11-05 at 11:49
     }
 
     get code() {
