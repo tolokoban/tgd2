@@ -26,7 +26,8 @@ export interface TgdMaterialOptions {
     varyings: { [name: string]: WebglAttributeType }
     uniforms: { [name: string]: WebglUniformType }
     /**
-     * The default output variable for color is `out vec4 FragColor`.
+     * This is the body of the function `void applyMaterial()` and
+     * it must return the color of the current fragment as a `vec4`.
      */
     fragmentShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
     extraFragmentShaderFunctions: TgdCodeFunctions | (() => TgdCodeFunctions)
@@ -49,9 +50,15 @@ export interface TgdMaterialOptions {
      * You may need specific CULL, BLEND, DEPTH, ...
      */
     state: Partial<TgdPainterStateOptions>
+    /**
+     * If `true`, then the mesh will output the resulting shaders codes
+     * in the console.
+     */
+    debug: boolean
 }
 
 export class TgdMaterial {
+    public debug = false
     public attPosition: string
     public attNormal: string
     public attUV: string
@@ -80,9 +87,15 @@ export class TgdMaterial {
         return this._fragmentShaderCode
     }
 
-    readonly extraFragmentShaderFunctions:
+    private readonly _extraFragmentShaderFunctions:
         | TgdCodeFunctions
         | (() => TgdCodeFunctions)
+
+    get extraFragmentShaderFunctions() {
+        if (typeof this._extraFragmentShaderFunctions === "function")
+            return this._extraFragmentShaderFunctions()
+        return this._extraFragmentShaderFunctions
+    }
 
     private readonly _vertexShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
 
@@ -151,14 +164,16 @@ export class TgdMaterial {
         vertexShaderCodeForGetPosition = "return pos;",
         setUniforms,
         state = {},
+        debug = false,
     }: Partial<TgdMaterialOptions>) {
+        this.debug = debug
         this.attPosition = attPosition
         this.attNormal = attNormal
         this.attUV = attUV
         this.varyings = varyings
         this.uniforms = uniforms
         this._fragmentShaderCode = fragmentShaderCode
-        this.extraFragmentShaderFunctions = extraFragmentShaderFunctions
+        this._extraFragmentShaderFunctions = extraFragmentShaderFunctions
         this._vertexShaderCode = vertexShaderCode
         this._extraVertexShaderFunctions = extraVertexShaderFunctions
         this._vertexShaderCodeForGetPosition = vertexShaderCodeForGetPosition

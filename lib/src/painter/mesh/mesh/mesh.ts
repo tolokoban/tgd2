@@ -89,7 +89,7 @@ export class TgdPainterMesh
                 `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;`,
                 `applyMaterial(position.xyz, ${geometry.attNormal}.xyz, ${geometry.attUV}.xy);`,
             ],
-        }).code
+        })
         const frag = new TgdShaderFragment({
             uniforms: material.uniforms,
             outputs: { FragColor: "vec4" },
@@ -103,10 +103,14 @@ export class TgdPainterMesh
                 ],
             },
             mainCode: [`FragColor = applyMaterial();`],
-        }).code
+        })
+        if (material.debug) {
+            vert.debug()
+            frag.debug()
+        }
         const prg = new TgdProgram(context.gl, {
-            vert,
-            frag,
+            vert: vert.code,
+            frag: frag.code,
         })
         this.prg = prg
         this.vao = new TgdVertexArray(

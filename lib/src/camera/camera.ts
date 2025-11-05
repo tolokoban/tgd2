@@ -127,6 +127,29 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.setSpaceHeightAtTarget((v * this.screenHeight) / this.screenWidth)
     }
 
+    /**
+     * Adapt the camera position so that a rectangle of `width` and `height`,
+     * centered at the camera target, can be the biggest without being cut.
+     * @param width width in space units.
+     * @param height height in space units.
+     */
+    fitSpaceAtTarget(width: number, height: number, cover = false) {
+        const ratio = width / height
+        if (cover) {
+            if (this._screenAspectRatio < ratio) {
+                this.spaceHeightAtTarget = height
+            } else {
+                this.spaceWidthAtTarget = width
+            }
+        } else {
+            if (this._screenAspectRatio > ratio) {
+                this.spaceHeightAtTarget = height
+            } else {
+                this.spaceWidthAtTarget = width
+            }
+        }
+    }
+
     from(camera: TgdCamera): this {
         const { zoom, screenWidth, screenHeight } = camera
         this.transfo.from(camera.transfo)

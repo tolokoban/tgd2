@@ -1,4 +1,4 @@
-import { WebglAttributeType, WebglUniformType } from ".."
+import { TgdConsole, WebglAttributeType, WebglUniformType } from ".."
 import {
     TgdCodeBloc,
     TgdCodeFunctions,
@@ -9,7 +9,7 @@ import {
 } from "./code"
 
 /**
- * Helper to wirte the code of a fragment Shader.
+ * Helper to write the code of a fragment Shader.
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderFragment {
@@ -27,29 +27,33 @@ export class TgdShaderFragment {
     public functions: TgdCodeFunctions | TgdCodeBloc
     public mainCode: TgdCodeBloc
 
-    constructor({
-        precision = "highp",
-        uniforms = {},
-        outputs = {
-            FragColor: "vec4",
-        },
-        varying = {},
-        functions = {},
-        mainCode = ["FragColor = vec4(1, 0.667, 0, 1);"],
-    }: Partial<{
-        precision: "lowp" | "mediump" | "highp"
-        uniforms: TgdCodeVariables<WebglUniformType>
-        outputs: TgdCodeVariables<WebglAttributeType>
-        varying: TgdCodeVariables<WebglAttributeType>
-        functions: TgdCodeFunctions | TgdCodeBloc
-        mainCode: TgdCodeBloc
-    }> = {}) {
+    constructor(
+        options: Partial<{
+            precision: "lowp" | "mediump" | "highp"
+            uniforms: TgdCodeVariables<WebglUniformType>
+            outputs: TgdCodeVariables<WebglAttributeType>
+            varying: TgdCodeVariables<WebglAttributeType>
+            functions: TgdCodeFunctions | TgdCodeBloc
+            mainCode: TgdCodeBloc
+        }> = {}
+    ) {
+        const {
+            precision = "highp",
+            uniforms = {},
+            outputs = {
+                FragColor: "vec4",
+            },
+            varying = {},
+            functions = {},
+            mainCode = ["FragColor = vec4(1, 0.667, 0, 1);"],
+        } = options
         this.precision = precision
         this.uniforms = uniforms
         this.outputs = outputs
         this.varying = varying
         this.functions = functions
         this.mainCode = mainCode
+        console.log("🚀 [TgdFragmentShader] TgdFragmentShader=", options) // @FIXME: Remove this line written on 2025-11-05 at 11:49
     }
 
     get code() {
@@ -65,5 +69,21 @@ export class TgdShaderFragment {
             this.mainCode,
             "}",
         ])
+    }
+
+    debug(caption = "Vertex shader") {
+        console.log(caption)
+        const { code } = this
+        const out = new TgdConsole(
+            {
+                text: caption,
+                style: {
+                    bold: true,
+                    color: "#6bf",
+                },
+            },
+            code
+        )
+        out.debug()
     }
 }

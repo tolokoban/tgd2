@@ -1,4 +1,4 @@
-import { WebglAttributeType, WebglUniformType } from ".."
+import { TgdConsole, WebglAttributeType, WebglUniformType } from ".."
 import {
     TgdCodeBloc,
     TgdCodeFunctions,
@@ -61,5 +61,21 @@ export class TgdShaderVertex {
             this.mainCode,
             "}",
         ])
+    }
+
+    debug(caption = "Vertex shader") {
+        console.log(caption)
+        const { code } = this
+        const out = new TgdConsole(
+            {
+                text: caption,
+                style: {
+                    bold: true,
+                    color: "#6bf",
+                },
+            },
+            code
+        )
+        out.debug()
     }
 }

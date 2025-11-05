@@ -16,9 +16,12 @@ interface TgdConsoleStyle {
 export class TgdConsole {
     private readonly items: TgdConsoleInternalItem[] = []
 
-    constructor(...items: TgdConsoleItem[]) {
+    constructor(...items: (TgdConsoleItem | string)[]) {
         this.clear()
-        for (const item of items) this.add(item.text, item.style)
+        for (const item of items) {
+            if (typeof item === "string") this.add(item)
+            else this.add(item.text, item.style)
+        }
     }
 
     clear() {

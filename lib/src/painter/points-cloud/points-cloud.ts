@@ -59,14 +59,14 @@ export class TgdPainterPointsCloud extends TgdPainter {
         this.dataPoint = options.dataPoint
         if ((this.dataPoint.length & 3) !== 0) {
             throw new Error(
-                "dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!"
+                "dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${dataPoint.length}"
             )
         }
         this.dataUV =
             options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
         if (this.dataPoint.length !== this.dataUV.length * 2) {
             throw new Error(
-                "dataUV must be half of the size of dataPoint: [u, v, ...]!"
+                "dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${dataPoint.length}\ndataPoint.length === ${dataUV.length}"
             )
         }
         if (options.texture) {
