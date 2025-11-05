@@ -25,6 +25,9 @@ export interface TgdMaterialOptions {
     attUV: string
     varyings: { [name: string]: WebglAttributeType }
     uniforms: { [name: string]: WebglUniformType }
+    /**
+     * The default output variable for color is `out vec4 FragColor`.
+     */
     fragmentShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
     extraFragmentShaderFunctions: TgdCodeFunctions | (() => TgdCodeFunctions)
     vertexShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
