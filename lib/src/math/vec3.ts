@@ -1,9 +1,10 @@
 import { vec3 } from "gl-matrix"
-import { ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
+import { ArrayNumber2, ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
 import { tgdCalcMix } from "./math"
 import { TgdMat3 } from "./mat3"
 import { TgdMat4 } from "./mat4"
 import { TgdVec4 } from "./vec4"
+import { TgdVec2 } from "./vec2"
 
 export class TgdVec3 extends Float32Array {
     static X: Readonly<TgdVec3> = new TgdVec3(1, 0, 0)
@@ -244,6 +245,21 @@ export class TgdVec3 extends Float32Array {
         this[0] *= factor
         this[1] *= factor
         this[2] *= factor
+        return this
+    }
+
+    scale2(factor: TgdVec2 | ArrayNumber2): this {
+        const [x, y] = factor
+        this[0] *= x
+        this[1] *= y
+        return this
+    }
+
+    scale3(factor: TgdVec3 | ArrayNumber3): this {
+        const [x, y, z] = factor
+        this[0] *= x
+        this[1] *= y
+        this[2] *= z
         return this
     }
 

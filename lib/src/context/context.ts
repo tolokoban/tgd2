@@ -210,6 +210,15 @@ export class TgdContext extends TgdPainterGroup {
         this.animationManager.cancel(animation)
     }
 
+    animCancelArray(animations: TgdAnimation[]) {
+        for (const animation of animations)
+            this.animationManager.cancel(animation)
+    }
+
+    animDebug(caption?: string) {
+        this.animationManager.debug(caption)
+    }
+
     get width() {
         return this.gl.drawingBufferWidth
     }

@@ -1,5 +1,6 @@
-import { ArrayNumber3, ArrayNumber4 } from "../types"
+import { ArrayNumber2, ArrayNumber3, ArrayNumber4 } from "../types"
 import { TgdMat4 } from "./mat4"
+import { TgdVec2 } from "./vec2"
 import { TgdVec3 } from "./vec3"
 
 export class TgdVec4 extends Float32Array {
@@ -198,6 +199,30 @@ export class TgdVec4 extends Float32Array {
         return this
     }
 
+    scale2(factor: TgdVec2 | ArrayNumber2): this {
+        const [x, y] = factor
+        this[0] *= x
+        this[1] *= y
+        return this
+    }
+
+    scale3(factor: TgdVec3 | ArrayNumber3): this {
+        const [x, y, z] = factor
+        this[0] *= x
+        this[1] *= y
+        this[2] *= z
+        return this
+    }
+
+    scale4(factor: TgdVec4 | ArrayNumber4): this {
+        const [x, y, z, w] = factor
+        this[0] *= x
+        this[1] *= y
+        this[2] *= z
+        this[3] *= w
+        return this
+    }
+
     dot(vec: TgdVec4 | ArrayNumber4): number {
         return (
             this[0] * vec[0] +
@@ -224,7 +249,7 @@ export class TgdVec4 extends Float32Array {
 
     debug(caption = "vec4") {
         const { x, y, z, w } = this
-        const out: string[] = [x, y, z, w].map(n => n.toFixed(6))
+        const out: string[] = [x, y, z, w].map((n) => n.toFixed(6))
         console.log(
             `${caption}:   `,
             out.join(" | "),
