@@ -9,14 +9,15 @@ import {
     tgdLoadImage,
     tgdLoadText,
     TgdDataGlb,
+    TgdControllerCameraOrbitOptions,
+    TgdControllerCameraOrbit,
 } from "@tolokoban/tgd"
 import {
     IconFullscreen,
     IconOrientation,
+    IconPin,
     IconSnapshot,
     Theme,
-    ViewButton,
-    ViewPanel,
 } from "@tolokoban/ui"
 
 import Spinner from "../../Spinner"
@@ -43,6 +44,7 @@ interface TgdProps {
     noBorder?: boolean
     gizmo?: boolean
     assets?: Partial<AssetsToLoad>
+    controller?: Partial<TgdControllerCameraOrbitOptions>
     children?: React.ReactNode
 }
 export default function Tgd({
@@ -54,6 +56,7 @@ export default function Tgd({
     height = "480px",
     noBorder = false,
     assets,
+    controller,
     children,
 }: TgdProps) {
     const [error, setError] = React.useState<string | null>(null)
@@ -63,6 +66,7 @@ export default function Tgd({
     const refCanvas = React.useRef<HTMLCanvasElement | null>(null)
     const refGizmo = React.useRef<TgdCanvasGizmo | null>(null)
     const refScreen = React.useRef<HTMLDivElement | null>(null)
+    const refOrbiter = React.useRef<TgdControllerCameraOrbit | null>(null)
     const [loading, setLoading] = React.useState(true)
     let aspectRatio = "auto"
     if (width.endsWith("px") && height.endsWith("px")) {
@@ -84,6 +88,29 @@ export default function Tgd({
         loadAssets(assets)
             .then((loadedAssets: Assets) => {
                 try {
+                    if (controller) {
+                        const orbiter = new TgdControllerCameraOrbit(context, {
+                            inertiaOrbit: 1000,
+                            inertiaZoom: 500,
+                            inertiaPanning: 500,
+                            ...controller,
+                        })
+                        refOrbiter.current = orbiter
+                        context.inputs.pointer.eventTapMultiple.addListener(
+                            (evt) => {
+                                console.log(
+                                    "🚀 [tgd] evt.tapsCount =",
+                                    evt.tapsCount
+                                ) // @FIXME: Remove this line written on 2025-11-10 at 13:36
+                                evt.preventTap()
+                                if (evt.tapsCount === 2) {
+                                    orbiter.reset(
+                                        (controller.inertiaOrbit ?? 500) * 1e-3
+                                    )
+                                }
+                            }
+                        )
+                    }
                     onReady(context, loadedAssets)
                     context.paint()
                 } catch (ex) {
@@ -139,6 +166,14 @@ export default function Tgd({
             a.click()
             window.setTimeout(() => document.body.removeChild(a), 30000)
         })
+    }
+    const handleSetCameraRestPosition = () => {
+        const orbiter = refOrbiter.current
+        const context = refContext.current
+        if (!context || !orbiter) return
+
+        orbiter.cameraInitialState = context.camera.getCurrentState()
+        orbiter.resetZoom()
     }
     React.useEffect(() => {
         const canvas = refCanvas.current
@@ -196,6 +231,11 @@ export default function Tgd({
                         <IconFullscreen onClick={handleFullscreen} />
                     </div>
                 )}
+                {controller && (
+                    <div>
+                        <IconPin onClick={handleSetCameraRestPosition} />
+                    </div>
+                )}
             </div>
             <div className={styles.relative}>
                 <div
@@ -228,14 +268,6 @@ export default function Tgd({
                 </div>
                 {children}
             </div>
-        </div>
-    )
-}
-
-function CanvasScreen() {
-    return (
-        <div>
-            <canvas></canvas>
         </div>
     )
 }

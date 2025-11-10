@@ -5,6 +5,7 @@ import {
     TgdInputPointerEventFinger,
     TgdInputPointerEventTap,
     TgdInputPointerEventZoom,
+    TgdInputPointerEventTapMultiple,
 } from "@tgd/types"
 import { TgdUtilCyclicBuffer } from "@tgd/utils"
 
@@ -12,6 +13,9 @@ const MOUSE_BUTTON_RIGHT = 2
 
 export class TgdInputPointerImpl implements TgdInputPointer {
     readonly eventTap = new TgdEvent<Readonly<TgdInputPointerEventTap>>()
+    readonly eventTapMultiple = new TgdEvent<
+        Readonly<TgdInputPointerEventTapMultiple>
+    >()
     readonly eventMoveStart = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
     readonly eventMove = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
     readonly eventHover = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
@@ -49,6 +53,11 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         t: 0,
         fingersCount: 1,
     }
+    /**
+     * To manage multi taps.
+     */
+    private lastTap: TgdInputPointerEventFinger | null = null
+    private tapsCount = 0
     /**
      * If not null, the pointer is touching.
      */
@@ -172,11 +181,40 @@ export class TgdInputPointerImpl implements TgdInputPointer {
         this.pointerEvent = null
         // Tap event.
         if (event.timeStamp - this.start.t < this.tapDelay) {
-            this.eventTap.dispatch({
-                ...this.start,
-                ...this.controlKeys,
-            })
+            let tapEventEnabled = true
+            if (this.isMultiTap(this.start)) {
+                this.tapsCount++
+                this.eventTapMultiple.dispatch({
+                    tapsCount: this.tapsCount,
+                    ...this.start,
+                    ...this.controlKeys,
+                    preventTap: () => {
+                        tapEventEnabled = false
+                    },
+                })
+            } else {
+                this.tapsCount = 1
+            }
+            if (tapEventEnabled) {
+                this.eventTap.dispatch({
+                    ...this.start,
+                    ...this.controlKeys,
+                })
+            }
+            this.lastTap = structuredClone(this.start)
         }
+    }
+
+    private isMultiTap(tap: TgdInputPointerEventFinger) {
+        const { lastTap } = this
+        if (!lastTap) return false
+
+        if (tap.t - lastTap.t > this.tapDelay) return false
+
+        if (tap.fingersCount !== lastTap.fingersCount) return false
+
+        console.log("isMultipleTap === true")
+        return true
     }
 
     private getPoint(

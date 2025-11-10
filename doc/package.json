@@ -1,5 +1,5 @@
 {
-    "version": "2.0.60",
+    "version": "2.0.61",
     "private": true,
     "homepage": "https://tolokoban.github.io/tgd2",
     "type": "module",
@@ -18,7 +18,7 @@
         "@tolokoban/react-state": "^0.5.2",
         "@tolokoban/tgd": "file:..",
         "@tolokoban/type-guards": "^0.8.3",
-        "@tolokoban/ui": "^0.23.4",
+        "@tolokoban/ui": "^0.24.1",
         "colord": "^2.9.3",
         "highlight.js": "^11.11.1",
         "prismjs": "^1.30.0",

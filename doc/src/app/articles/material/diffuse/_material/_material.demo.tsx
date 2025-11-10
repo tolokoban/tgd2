@@ -73,9 +73,6 @@ function init(context: TgdContext, assets: Assets) {
         })
     )
     context.paint()
-    new TgdControllerCameraOrbit(context, {
-        inertiaOrbit: 2000,
-    })
     return {
         specularExponent(value: number) {
             material1.specularExponent = value
@@ -122,6 +119,9 @@ export default function Demo() {
                     },
                 }}
                 gizmo
+                controller={{
+                    inertiaOrbit: 1000,
+                }}
             >
                 <ViewSlider
                     value={split}

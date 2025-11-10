@@ -13,6 +13,7 @@ import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
 import { TgdInputs } from "@tgd/input"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -94,6 +95,11 @@ export interface TgdControllerCameraOrbitOptions {
         minLng: number
     }>
     /**
+     * The position where the `reset()` method will bring you.
+     * If undefined, the context camera state will be used.
+     */
+    cameraInitialState?: Readonly<TgdCameraState>
+    /**
      * If `debug` is set, the special hotkey `?` will drop the
      * current camera status to the console.
      */
@@ -106,6 +112,8 @@ export class TgdControllerCameraOrbit {
     public readonly id = `TgdControllerCameraOrbit-${TgdControllerCameraOrbit.counter++}`
 
     public readonly eventChange = new TgdEvent<TgdCamera>()
+
+    public readonly debug: boolean
 
     public minZoom = 1e-3
 
@@ -129,6 +137,14 @@ export class TgdControllerCameraOrbit {
      */
     public fixedTarget = false
 
+    public cameraInitialState: Readonly<TgdCameraState> = {
+        distance: 10,
+        orientation: new TgdQuat(),
+        position: new TgdVec3(),
+        spaceHeightAtTarget: 10,
+        zoom: 1,
+    }
+
     /**
      * Zooming can be done by the mouse wheel.
      * In this case, we may want to prevent it when the
@@ -147,7 +163,7 @@ export class TgdControllerCameraOrbit {
     /**
      * The camera will only move if `enabled === true`.
      */
-    public _enabled = true
+    private _enabled = true
 
     private animOrbit: TgdAnimation | null = null
 
@@ -166,8 +182,6 @@ export class TgdControllerCameraOrbit {
      */
     private disabledUntil = 0
 
-    private readonly cameraInitialState: TgdCameraState
-
     private readonly geo?: {
         lat: number
         lng: number
@@ -181,15 +195,10 @@ export class TgdControllerCameraOrbit {
 
     private lastPointerEventTimestamp = 0
 
+    private _context: TgdContext | null = null
+
     constructor(
-        private readonly context: {
-            camera: TgdCamera
-            inputs: TgdInputs
-            time: number
-            animSchedule(...animations: TgdAnimation[]): TgdAnimation[]
-            animCancel(animation: TgdAnimation): void
-            paint(): void
-        },
+        context: TgdContext,
         {
             geo,
             zoom = 1,
@@ -204,6 +213,7 @@ export class TgdControllerCameraOrbit {
             fixedTarget = false,
             debug = false,
             onZoomRequest = alwaysTrue,
+            cameraInitialState,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
         this.geo = undefined
@@ -218,7 +228,9 @@ export class TgdControllerCameraOrbit {
                 ...geo,
             }
         }
-        this.cameraInitialState = context.camera.getCurrentState()
+        this.debug = debug
+        this.cameraInitialState =
+            cameraInitialState ?? context.camera.getCurrentState()
         const { inputs } = context
         inputs.pointer.eventMoveStart.addListener(this.handleMoveStart)
         inputs.pointer.eventMoveEnd.addListener(this.handleMoveEnd)
@@ -236,10 +248,23 @@ export class TgdControllerCameraOrbit {
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
-        if (debug) {
-            context.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
-        }
+        this.context = context
         this.resetZoom(zoom)
+    }
+
+    get context() {
+        return this._context as TgdContext
+    }
+    set context(value: TgdContext) {
+        if (this._context) {
+            this._context.inputs.keyboard.eventKeyPress.removeListener(
+                this.handleDebug
+            )
+        }
+        this._context = value
+        if (this.debug) {
+            value.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
+        }
     }
 
     get zoom() {

@@ -27,6 +27,15 @@ export interface TgdInputPointerEventTap extends TgdInputPointerModifierKeys {
     fingersCount: number
 }
 
+export interface TgdInputPointerEventTapMultiple
+    extends TgdInputPointerEventTap {
+    tapsCount: number
+    /**
+     * You can call this function if you don't want the TapMultipleEvent to also generate a TapEvent.
+     */
+    preventTap: () => void
+}
+
 export interface TgdInputPointerEventMove extends TgdInputPointerModifierKeys {
     current: TgdInputPointerEventFinger
     previous: TgdInputPointerEventFinger
@@ -35,6 +44,10 @@ export interface TgdInputPointerEventMove extends TgdInputPointerModifierKeys {
 
 export interface TgdInputPointer {
     readonly eventTap: TgdEvent<Readonly<TgdInputPointerEventTap>>
+
+    readonly eventTapMultiple: TgdEvent<
+        Readonly<TgdInputPointerEventTapMultiple>
+    >
 
     readonly eventMoveStart: TgdEvent<Readonly<TgdInputPointerEventMove>>
 
