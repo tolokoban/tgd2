@@ -67,6 +67,14 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         }
     }
 
+    setCurrentState(state: Readonly<TgdCameraState>) {
+        this.transfo.distance = state.distance
+        this.transfo.orientation = state.orientation.clone()
+        this.spaceHeightAtTarget = state.spaceHeightAtTarget
+        this.transfo.position = state.position.clone()
+        this.zoom = state.zoom
+    }
+
     get near() {
         return this._near
     }
