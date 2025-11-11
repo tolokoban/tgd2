@@ -36,6 +36,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/material/ghost": ["/articles/material/ghost"],
     "/articles/material/hull": ["/articles/material/hull"],
     "/articles/material/normal-map": ["/articles/material/normal-map"],
+    "/articles/material/principled": ["/articles/material/principled"],
     "/articles/math": ["/articles/math"],
     "/articles/math/fractal": ["/articles/math/fractal"],
     "/articles/math/fractal/pascal-triangle": ["/articles/math/fractal/pascal-triangle"],

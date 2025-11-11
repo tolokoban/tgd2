@@ -27,8 +27,8 @@ const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
 const DEFAULT_AMBIENT = new TgdVec3(0.8, 0.8, 0.8)
 
 export class TgdMaterialPrincipled extends TgdMaterial {
-    public specularExponent = 20
-    public specularIntensity = 1
+    public specularExponent = 2.2
+    public specularIntensity = 2
 
     private textureColor: TgdTexture2D | null = null
     private mustDeleteTextureColor = false
@@ -37,19 +37,32 @@ export class TgdMaterialPrincipled extends TgdMaterial {
 
     constructor(private readonly options: TgdMaterialPrincipledOptions = {}) {
         const uniforms: { [name: string]: WebglUniformType } = {
+            uniTransfoMatrix: "mat4",
             uniSpecularExponent: "float",
             uniSpecularIntensity: "float",
             texColor: "sampler2D",
             texAmbient: "samplerCube",
             uniCameraPosition: "vec3",
         }
-        const fragmentShaderCode: TgdCodeBloc = [`return color;`]
+        const fragmentShaderCode: TgdCodeBloc = [
+            `vec3 N = normalize(varNormal);`,
+            `vec3 L = normalize(varPosition.xyz - uniCameraPosition);`,
+            `vec3 R = reflect(L, N);`,
+            `vec3 color = texture(texAmbient, R).rgb;`,
+            `color = pow(color, vec3(uniSpecularExponent));`,
+            `color *= uniSpecularIntensity;`,
+            `return vec4(color, 1) * texture(texColor, varUV);`,
+        ]
         const varyings: { [name: string]: WebglAttributeType } = {
+            varUV: "vec2",
             varNormal: "vec3",
+            varPosition: "vec4",
         }
         const vertexShaderCode = () => {
             const code: TgdCodeBloc = [
+                `varUV = ${this.attUV};`,
                 `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
+                `varPosition = uniTransfoMatrix * ${this.attPosition};`,
             ]
             return code
         }
@@ -107,6 +120,11 @@ export class TgdMaterialPrincipled extends TgdMaterial {
                     "uniCameraPosition",
                     camera.transfo.actualPosition
                 )
+                program.uniform1f("uniSpecularExponent", this.specularExponent)
+                program.uniform1f(
+                    "uniSpecularIntensity",
+                    this.specularIntensity
+                )
             },
         })
 
@@ -121,6 +139,12 @@ export class TgdMaterialPrincipled extends TgdMaterial {
         }
         if (typeof options.specularIntensity === "number") {
             this.specularIntensity = options.specularIntensity
+        }
+        if (options.color instanceof TgdTexture2D) {
+            this.textureColor = options.color
+        }
+        if (options.ambientColor instanceof TgdTextureCube) {
+            this.textureAmbient = options.ambientColor
         }
     }
 }
