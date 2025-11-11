@@ -90,6 +90,7 @@ export default function Tgd({
                 try {
                     if (controller) {
                         const orbiter = new TgdControllerCameraOrbit(context, {
+                            debug: true,
                             inertiaOrbit: 1000,
                             inertiaZoom: 500,
                             inertiaPanning: 500,

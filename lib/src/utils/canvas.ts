@@ -1,5 +1,6 @@
 import { TgdColor } from "@tgd/color"
-import { isString } from "@tgd/types/guards"
+import { TgdVec3, TgdVec4 } from "@tgd/math"
+import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
 /**
  * Helper to get a canvas with the given size.
@@ -54,14 +55,25 @@ export function tgdCanvasFromImage(img: HTMLImageElement): HTMLCanvasElement {
  * const canvas = tgdCanvasCreatePalette(["#000", "#fff"], 5, 5)
  * ```
  */
-export function tgdCanvasCreatePalette(colors: string[], colums = 0, rows = 0) {
+export function tgdCanvasCreatePalette(
+    colors: (
+        | string
+        | TgdColor
+        | ArrayNumber4
+        | TgdVec4
+        | ArrayNumber3
+        | TgdVec3
+    )[],
+    colums = 0,
+    rows = 0
+) {
     const width = colums > 0 ? colums : colors.length
     const height = rows > 0 ? rows : Math.ceil(colors.length / width)
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
     let colorIndex = 0
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            ctx.fillStyle = colors[colorIndex % colors.length]
+            ctx.fillStyle = colorToString(colors[colorIndex % colors.length])
             ctx.fillRect(x, y, 1, 1)
             colorIndex++
         }
@@ -72,24 +84,34 @@ export function tgdCanvasCreatePalette(colors: string[], colums = 0, rows = 0) {
 export function tgdCanvasCreateFill(
     width: number,
     height: number,
-    fillColor: string | TgdColor = "#000"
+    fillColor:
+        | string
+        | TgdColor
+        | ArrayNumber4
+        | TgdVec4
+        | ArrayNumber3
+        | TgdVec3 = "#000"
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-    ctx.fillStyle = isString(fillColor) ? fillColor : fillColor.toString()
+    ctx.fillStyle = colorToString(fillColor)
     ctx.fillRect(0, 0, width, height)
     return canvas
 }
 
 export function tgdCanvasCreateGradientHorizontal(
     size: number,
-    colors: Array<string | TgdColor>
+    colors: Array<
+        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
+    >
 ) {
     return tgdCanvasCreateGradient(size, 1, 1, 0, colors)
 }
 
 export function tgdCanvasCreateCreateGradientvertical(
     size: number,
-    colors: Array<string | TgdColor>
+    colors: Array<
+        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
+    >
 ) {
     return tgdCanvasCreateGradient(1, size, 0, 1, colors)
 }
@@ -107,7 +129,9 @@ export function tgdCanvasCreateGradient(
     height: number,
     directionX: number,
     directionY: number,
-    colors: Array<string | TgdColor>
+    colors: Array<
+        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
+    >
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
     const gradient = ctx.createLinearGradient(
@@ -118,10 +142,21 @@ export function tgdCanvasCreateGradient(
     )
     for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
         const color = colors[colorIndex]
-        const cssColor = isString(color) ? color : color.toString()
+        const cssColor = colorToString(color)
         gradient.addColorStop(colorIndex / (colors.length - 1), cssColor)
     }
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, width, height)
     return canvas
+}
+
+function colorToString(
+    color: string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
+): string {
+    if (typeof color === "string") return color
+
+    if (color instanceof TgdColor) return color.toString()
+
+    const [r, g, b, a] = color
+    return new TgdColor(r, b, g, a ?? 1).toString()
 }

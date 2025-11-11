@@ -80,7 +80,6 @@ export class TgdTexture2D {
     constructor(
         public readonly context: {
             gl: WebGL2RenderingContext
-            paint?: () => void
         },
         storage?: Partial<TgdTexture2DStorage>
     ) {
@@ -212,7 +211,7 @@ gl.texStorage2D(
         }
 
         if (!isWebglImage(bmp)) {
-            bmp.then(data => this.loadBitmap(data)).catch(error =>
+            bmp.then((data) => this.loadBitmap(data)).catch((error) =>
                 console.error("Unable to load texture BMP:", error)
             )
             return this
@@ -260,7 +259,6 @@ gl.texStorage2D(
             )
         }
         this.unbind()
-        this.context.paint?.()
         options.onLoad?.()
         this.eventChange.dispatch(this)
         return this

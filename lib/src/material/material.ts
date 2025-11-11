@@ -1,11 +1,19 @@
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import {
+    TgdCamera,
     TgdPainterState,
     TgdPainterStateOptions,
     WebglAttributeType,
     WebglUniformType,
 } from ".."
 import { TgdProgram } from "@tgd/program"
+
+export interface TgdMaterialContext {
+    camera: TgdCamera
+    program: TgdProgram
+    time: number
+    delay: number
+}
 
 export interface TgdMaterialOptions {
     /**
@@ -45,11 +53,15 @@ export interface TgdMaterialOptions {
      * If this function is defined, it will be called at each frame.
      * Most of the time, it is used tu update the uniforms.
      */
-    setUniforms(program: TgdProgram, time: number, delay: number): void
+    setUniforms(materialContext: TgdMaterialContext): void
     /**
      * You may need specific CULL, BLEND, DEPTH, ...
      */
     state: Partial<TgdPainterStateOptions>
+    /**
+     * Cleanup function.
+     */
+    delete: () => void
     /**
      * If `true`, then the mesh will output the resulting shaders codes
      * in the console.
@@ -137,7 +149,7 @@ export class TgdMaterial {
 
     readonly setUniforms:
         | undefined
-        | ((program: TgdProgram, time: number, delay: number) => void)
+        | ((materialContext: TgdMaterialContext) => void)
 
     protected readonly state: Partial<TgdPainterStateOptions>
 
@@ -150,6 +162,8 @@ export class TgdMaterial {
             action
         )
     }
+
+    public readonly delete: () => void
 
     constructor({
         attPosition = "POSITION",
@@ -165,7 +179,9 @@ export class TgdMaterial {
         setUniforms,
         state = {},
         debug = false,
+        delete: deleteFunction = () => {},
     }: Partial<TgdMaterialOptions>) {
+        this.delete = deleteFunction
         this.debug = debug
         this.attPosition = attPosition
         this.attNormal = attNormal

@@ -87,7 +87,7 @@ export class TgdMaterialToon extends TgdMaterial {
                 `);`,
                 `return color;`,
             ],
-            setUniforms: (program: TgdProgram): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform1f("uniShades", this.shades)
                 program.uniform1f("uniShadesInverse", 1 / this.shades)
                 program.uniform3fv("uniLightDir", this.light.direction)

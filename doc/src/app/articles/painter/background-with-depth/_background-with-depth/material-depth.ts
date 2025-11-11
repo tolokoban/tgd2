@@ -20,11 +20,7 @@ export class MaterialDepth extends TgdMaterial {
                 ");",
                 "return vec4(vec3(light), 1);",
             ],
-            setUniforms: (
-                program: TgdProgram,
-                _time: number,
-                _delay: number
-            ): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform1f("uniMin", this.min)
                 program.uniform1f("uniMax", this.max)
             },

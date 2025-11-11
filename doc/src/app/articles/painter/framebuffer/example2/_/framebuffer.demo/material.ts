@@ -1,3 +1,4 @@
+import { isNumber } from "@tolokoban/type-guards"
 import { TgdMaterial, TgdProgram, TgdTexture2D } from "@tolokoban/tgd"
 
 export class Material extends TgdMaterial {
@@ -30,7 +31,13 @@ export class Material extends TgdMaterial {
                 `return mix(color1, color2, max(alpha, beta));`,
             ],
             vertexShaderCode: ["varUV = TEXCOORD_0;"],
-            setUniforms: (program: TgdProgram, time: number): void => {
+            setUniforms: ({
+                program,
+                time,
+            }: {
+                program: TgdProgram
+                time: number
+            }): void => {
                 const { texture } = this
                 if (texture) texture.activate(0, program, "texDiffuse")
                 program.uniform1f("uniTime", time * 1e-3)

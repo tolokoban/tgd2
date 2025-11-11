@@ -72,7 +72,7 @@ export class TgdMaterialCameraLight extends TgdMaterial {
                 ");",
                 "return color;",
             ],
-            setUniforms: (program: TgdProgram) => {
+            setUniforms: ({ program }: { program: TgdProgram }) => {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)

@@ -83,7 +83,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             varyings,
             vertexShaderCode,
             fragmentShaderCode,
-            setUniforms: (program: TgdProgram): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)

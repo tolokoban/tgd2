@@ -140,7 +140,7 @@ class MaterialHole extends TgdMaterial {
                 "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
                 "varUV = TEXCOORD_0;",
             ],
-            setUniforms: (program: TgdProgram): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform3fv("uniLightDir", this.lightDirection)
 
                 this.options.abedo.activate(0, program, "texAbedo")

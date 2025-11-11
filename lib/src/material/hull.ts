@@ -44,7 +44,7 @@ export class TgdMaterialHull extends TgdMaterial {
                 "gl_Position.xy += n.xy;",
                 "gl_Position.z += size * uniZ;",
             ],
-            setUniforms: (program: TgdProgram): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform4fv("uniColor", this.color)
                 program.uniform1f("uniExpansion", this.thickness * 0.01)
                 program.uniform1f("uniZ", this.zShift)

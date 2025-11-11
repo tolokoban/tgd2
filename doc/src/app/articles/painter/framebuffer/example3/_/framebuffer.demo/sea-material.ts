@@ -38,7 +38,7 @@ export class SeaMaterial extends TgdMaterial {
                 `float specular = clamp(varNormal.z, 0.0, 1.0) * .3;`,
                 "return vec4(result + vec3(specular), 1.0);",
             ],
-            setUniforms: (program: TgdProgram, _time: number): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 const { texture, context } = this
                 if (texture) texture.activate(0, program, "texDiffuse")
                 program.uniform2f(

@@ -56,7 +56,7 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
             vertexShaderCode: () => [
                 `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
             ],
-            setUniforms: (program: TgdProgram): void => {
+            setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)

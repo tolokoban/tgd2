@@ -12,7 +12,6 @@ import {
 import { TgdEvent } from "@tgd/event"
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
-import { TgdInputs } from "@tgd/input"
 import { TgdContext } from "@tgd/context"
 
 export interface TgdControllerCameraOrbitZoomRequest
@@ -26,6 +25,7 @@ export interface TgdControllerCameraOrbitZoomRequest
 }
 
 export interface TgdControllerCameraOrbitOptions {
+    name?: string
     zoom: number
     minZoom: number
     maxZoom: number
@@ -109,7 +109,9 @@ export interface TgdControllerCameraOrbitOptions {
 export class TgdControllerCameraOrbit {
     private static counter = 0
 
-    public readonly id = `TgdControllerCameraOrbit-${TgdControllerCameraOrbit.counter++}`
+    public readonly name: string
+
+    public readonly id = `TgdControllerCameraOrbit#${TgdControllerCameraOrbit.counter++}`
 
     public readonly eventChange = new TgdEvent<TgdCamera>()
 
@@ -200,6 +202,7 @@ export class TgdControllerCameraOrbit {
     constructor(
         context: TgdContext,
         {
+            name,
             geo,
             zoom = 1,
             minZoom = 1e-3,
@@ -216,6 +219,7 @@ export class TgdControllerCameraOrbit {
             cameraInitialState,
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
+        this.name = name ?? this.id
         this.geo = undefined
         if (geo) {
             this.geo = {
@@ -552,6 +556,7 @@ export class TgdControllerCameraOrbit {
 
     private readonly handleDebug = (event: { key: string }) => {
         if (event.key === "?") {
+            this.context.camera.debug(this.name)
             console.log(this.context.camera.toCode())
         }
     }

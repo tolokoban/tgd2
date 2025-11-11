@@ -10,7 +10,6 @@ export class TgdTextureCube {
     constructor(
         public readonly context: {
             gl: WebGL2RenderingContext
-            paint: () => void
         },
         options: TgdTextureCubeOptions
     ) {
@@ -64,7 +63,13 @@ export class TgdTextureCube {
         program.uniform1i(uniformName, unit)
     }
 
-    private loadImage(target: number, image: WebglImage) {
+    private loadImage(
+        target: number | keyof typeof TARGETS,
+        image: WebglImage
+    ) {
+        if (typeof target === "string") {
+            target = TARGETS[target]
+        }
         const { width, height } = image
         if (width !== height) {
             throw new Error(
@@ -85,4 +90,13 @@ export class TgdTextureCube {
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, image instanceof Image)
         gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
     }
+}
+
+const TARGETS = {
+    posX: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_X,
+    posY: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Y,
+    posZ: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Z,
+    negX: WebGL2RenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_X,
+    negY: WebGL2RenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+    negZ: WebGL2RenderingContext.TEXTURE_CUBE_MAP_NEGATIVE_Z,
 }

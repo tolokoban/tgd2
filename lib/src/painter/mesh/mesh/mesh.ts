@@ -165,7 +165,7 @@ export class TgdPainterMesh
             this
         const { gl, camera } = context
         prg.use()
-        material.setUniforms?.(prg, time, delay)
+        material.setUniforms?.({ camera, program: prg, time, delay })
         prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
