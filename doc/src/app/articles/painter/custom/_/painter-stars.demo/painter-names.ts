@@ -80,19 +80,19 @@ export class PainterNames extends TgdPainter {
     }
 }
 
+/**
+ * The stars names are drawn in a canvas which is used as a texture.
+ */
 function makeCanvasForNames(): {
     canvas: HTMLCanvasElement
     attLatLng: number[]
     attUV: number[]
 } {
     const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    if (!ctx) throw Error("Unable to get Context 2D!")
+    const context = canvas.getContext("2d")
+    if (!context) throw new Error("Unable to get Context 2D!")
 
-    assertType<Record<string, [number, number]>>(names, [
-        "map",
-        ["array", "number", { min: 2, max: 2 }],
-    ])
+    assertType(names, ["map", ["array", "number", { min: 2, max: 2 }]])
     const attLatLng: number[] = []
     const attUV: number[] = []
     const w = 2048
@@ -100,14 +100,14 @@ function makeCanvasForNames(): {
     const space = 8
     canvas.width = w
     canvas.height = h
-    ctx.clearRect(0, 0, w, h)
-    ctx.font = "30px sans-serif"
-    ctx.textBaseline = "middle"
-    ctx.fillStyle = "#0f0"
+    context.clearRect(0, 0, w, h)
+    context.font = "30px sans-serif"
+    context.textBaseline = "middle"
+    context.fillStyle = "#0f0"
     let x = 1
     let y = 16
-    for (const name of Object.keys(names)) {
-        const measure = ctx.measureText(name)
+    for (const name of Object.keys(names) as Array<keyof typeof names>) {
+        const measure = context.measureText(name)
         if (x + measure.width > w - space) {
             x = 1
             y += 32
@@ -117,7 +117,7 @@ function makeCanvasForNames(): {
 
         attLatLng.push(...coords)
         attUV.push(x / w, (y - 16) / h, (measure.width + space / 2) / w)
-        ctx.fillText(name, x, y)
+        context.fillText(name, x, y)
         x += measure.width + space
     }
     return { canvas, attLatLng, attUV }

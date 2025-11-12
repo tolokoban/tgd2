@@ -16,17 +16,15 @@ export type ViewLightsProps = {
     onAction?(action: Action): void
 }
 
-export function ViewLights({
-    className,
-    data,
-    onAction,
-}: ViewLightsProps): JSX.Element {
+export function ViewLights({ className, data, onAction }: ViewLightsProps) {
     const lights = figureLights(data)
     return (
-        <Expander className={$.join(className, Styles.images)} title="Lights" icon={IconLightOff}>
-        </Expander>
+        <Expander
+            className={$.join(className, Styles.images)}
+            title="Lights"
+            icon={IconLightOff}
+        ></Expander>
     )
 }
 
 function figureLights(data: TgdDataGlb) {}
-

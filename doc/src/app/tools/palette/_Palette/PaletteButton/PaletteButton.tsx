@@ -17,7 +17,7 @@ export type ViewPaletteButtonProps = CommonProps & {
     d: ArrayNumber3
 }
 
-export function ViewPaletteButton(props: ViewPaletteButtonProps): JSX.Element {
+export function ViewPaletteButton(props: ViewPaletteButtonProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }

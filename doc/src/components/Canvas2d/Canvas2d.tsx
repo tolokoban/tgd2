@@ -10,7 +10,7 @@ export type ViewCanvas2dProps = CommonProps & {
     factory(): HTMLCanvasElement
 }
 
-export function ViewCanvas2d(props: ViewCanvas2dProps): JSX.Element {
+export function ViewCanvas2d(props: ViewCanvas2dProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }

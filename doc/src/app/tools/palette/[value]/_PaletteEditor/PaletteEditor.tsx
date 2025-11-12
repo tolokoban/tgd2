@@ -21,7 +21,7 @@ const $ = Theme.classNames
 
 export type ViewPaletteEditorProps = CommonProps & PaletteDefinition
 
-export function ViewPaletteEditor(props: ViewPaletteEditorProps): JSX.Element {
+export function ViewPaletteEditor(props: ViewPaletteEditorProps) {
     const [value, setValue] = React.useState<PaletteDefinition>(props)
     const style: React.CSSProperties = {
         ...styleCommon(props),

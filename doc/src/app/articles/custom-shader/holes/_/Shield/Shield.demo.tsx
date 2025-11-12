@@ -1,7 +1,6 @@
 import * as React from "react"
 import {
     tgdCanvasCreateWithContext2D,
-    TgdCodeBloc,
     TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterial,
@@ -13,17 +12,15 @@ import {
     TgdTexture2D,
     TgdVec3,
     TgdVec4,
-    WebglAttributeType,
     webglPresetBlend,
     webglPresetDepth,
-    WebglUniformType,
 } from "@tolokoban/tgd"
 
 import View, { Assets } from "@/components/demo/Tgd"
 import AssetGlb from "../assets/shield.glb"
 import AssetBackground from "../assets/background.png"
 
-export default function ViewShield(): JSX.Element {
+export default function ViewShield() {
     return (
         <View
             onReady={init}

@@ -14,9 +14,7 @@ export type ViewActionNodeTransfoProps = CommonProps & {
     node: TgdFormatGltfNode
 }
 
-export function ViewActionNodeTransfo(
-    props: ViewActionNodeTransfoProps
-): JSX.Element {
+export function ViewActionNodeTransfo(props: ViewActionNodeTransfoProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }

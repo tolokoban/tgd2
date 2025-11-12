@@ -41,9 +41,9 @@ const Page17 = React.lazy(() => import("./articles/material/diffuse/page.mdx"))
 const Page18 = React.lazy(() => import("./articles/material/face-orientation/page.mdx"))
 const Page19 = React.lazy(() => import("./articles/material/flat/page.mdx"))
 const Page20 = React.lazy(() => import("./articles/material/ghost/page.mdx"))
-const Page21 = React.lazy(() => import("./articles/material/hull/page.mdx"))
-const Page22 = React.lazy(() => import("./articles/material/normal-map/page.mdx"))
-const Page23 = React.lazy(() => import("./articles/material/principled/page.mdx"))
+const Page21 = React.lazy(() => import("./articles/material/global/page.mdx"))
+const Page22 = React.lazy(() => import("./articles/material/hull/page.mdx"))
+const Page23 = React.lazy(() => import("./articles/material/normal-map/page.mdx"))
 const Page26 = React.lazy(() => import("./articles/math/fractal/pascal-triangle/page.mdx"))
 const Page27 = React.lazy(() => import("./articles/mesh/page.mdx"))
 const Page28 = React.lazy(() => import("./articles/mesh/marching-cubes/page.mdx"))
@@ -199,9 +199,9 @@ export default function App({ lang }: { lang?: string }) {
                     <Route path="/articles/material/face-orientation" Page={pg18} fallback={fb0} context={context}/>
                     <Route path="/articles/material/flat" Page={pg19} fallback={fb0} context={context}/>
                     <Route path="/articles/material/ghost" Page={pg20} fallback={fb0} context={context}/>
-                    <Route path="/articles/material/hull" Page={pg21} fallback={fb0} context={context}/>
-                    <Route path="/articles/material/normal-map" Page={pg22} fallback={fb0} context={context}/>
-                    <Route path="/articles/material/principled" Page={pg23} fallback={fb0} context={context}/>
+                    <Route path="/articles/material/global" Page={pg21} fallback={fb0} context={context}/>
+                    <Route path="/articles/material/hull" Page={pg22} fallback={fb0} context={context}/>
+                    <Route path="/articles/material/normal-map" Page={pg23} fallback={fb0} context={context}/>
                 </Route>
                 <Route path="/articles/math" fallback={fb0} context={context}>
                     <Route path="/articles/math/fractal" fallback={fb0} context={context}>

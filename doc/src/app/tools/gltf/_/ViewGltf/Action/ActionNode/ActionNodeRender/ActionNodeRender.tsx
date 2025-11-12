@@ -31,7 +31,7 @@ export type ViewActionNodeRenderProps = {
 export function ViewActionNodeRender({
     data,
     node,
-}: ViewActionNodeRenderProps): JSX.Element {
+}: ViewActionNodeRenderProps) {
     const handleReady = useReadyHandler(data, node)
     return (
         <div className={Styles.actionNodeRender}>

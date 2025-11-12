@@ -32,7 +32,7 @@ import { useGlslFunctions } from "./functions"
 
 const $ = Theme.classNames
 
-export function ViewFilter(): JSX.Element {
+export function ViewFilter() {
     const library = useGlslFunctions()
     const functions = React.useMemo(() => {
         let code: TgdCodeFunctions = {}

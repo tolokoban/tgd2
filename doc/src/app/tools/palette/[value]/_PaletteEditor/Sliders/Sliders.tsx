@@ -19,7 +19,7 @@ export type ViewSlidersProps = CommonProps & {
     onChange(value: ArrayNumber3): void
 }
 
-export function ViewSliders(props: ViewSlidersProps): JSX.Element {
+export function ViewSliders(props: ViewSlidersProps) {
     const [lock, setLock] = React.useState(false)
     const style: React.CSSProperties = {
         ...styleCommon(props),

@@ -22,7 +22,7 @@ export function ViewActionNodeMesh({
     className,
     data,
     meshIndexOrName: meshIndex,
-}: ViewActionNodeMeshProps): JSX.Element {
+}: ViewActionNodeMeshProps) {
     const mesh = data.getMesh(meshIndex)
     if (!mesh)
         return <ViewError>No mesh found with index #{meshIndex}!</ViewError>

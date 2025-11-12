@@ -15,9 +15,7 @@ export type ViewPalettePreviewDiskProps = CommonProps & {
     d: ArrayNumber3
 }
 
-export function ViewPalettePreviewDisk(
-    props: ViewPalettePreviewDiskProps
-): JSX.Element {
+export function ViewPalettePreviewDisk(props: ViewPalettePreviewDiskProps) {
     const painter = usePainter()
     const style: React.CSSProperties = {
         ...styleCommon(props),

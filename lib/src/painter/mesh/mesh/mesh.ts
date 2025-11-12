@@ -25,7 +25,7 @@ export class TgdPainterMesh
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
-    private readonly prg: TgdProgram
+    private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
     private readonly elementsType: number
     private readonly count: number
@@ -112,7 +112,7 @@ export class TgdPainterMesh
             vert: vert.code,
             frag: frag.code,
         })
-        this.prg = prg
+        this.program = prg
         this.vao = new TgdVertexArray(
             context.gl,
             prg,
@@ -125,7 +125,7 @@ export class TgdPainterMesh
     }
 
     debug(caption?: string) {
-        this.prg.debug(caption ?? this.name)
+        this.program.debug(caption ?? this.name)
         this.geometry.debug(caption ?? this.name)
     }
 
@@ -161,14 +161,21 @@ export class TgdPainterMesh
     }
 
     public readonly paint = (time: number, delay: number) => {
-        const { context, prg, geometry, material, drawMode, count, transfo } =
-            this
+        const {
+            context,
+            program,
+            geometry,
+            material,
+            drawMode,
+            count,
+            transfo,
+        } = this
         const { gl, camera } = context
-        prg.use()
-        material.setUniforms?.({ camera, program: prg, time, delay })
-        prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
-        prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
-        prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        program.use()
+        material.setUniforms?.({ camera, program, time, delay })
+        program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
+        program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
+        program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         material.applyState(gl, () => {
             this.vao.bind()
             if (geometry.elements) {

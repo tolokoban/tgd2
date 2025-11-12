@@ -6,10 +6,10 @@ import {
     TgdPainterState,
     tgdCalcRandom3,
     webglPresetDepth,
-    TgdMaterialPrincipled,
     TgdTextureCube,
     TgdPainterLogic,
     TgdPainterSkybox,
+    TgdMaterialGlobal,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 import React from "react"
@@ -35,7 +35,7 @@ function init(context: TgdContext, assets: Assets) {
         imageNegY: assets.image.negY,
         imageNegZ: assets.image.negZ,
     })
-    const material = new TgdMaterialPrincipled({
+    const material = new TgdMaterialGlobal({
         color,
         ambientColor: skybox,
     })

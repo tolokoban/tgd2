@@ -13,7 +13,7 @@ import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreateFill } from "@tgd/utils"
 import { TgdCamera } from "@tgd/camera"
 
-export type TgdMaterialPrincipledOptions = Partial<{
+export type TgdMaterialGlobalOptions = Partial<{
     color: TgdVec4 | ArrayNumber4 | TgdTexture2D
     lights: TgdLight[]
     ambientColor: TgdVec3 | ArrayNumber3 | TgdTextureCube
@@ -26,7 +26,7 @@ export type TgdMaterialPrincipledOptions = Partial<{
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
 const DEFAULT_AMBIENT = new TgdVec3(0.8, 0.8, 0.8)
 
-export class TgdMaterialPrincipled extends TgdMaterial {
+export class TgdMaterialGlobal extends TgdMaterial {
     public specularExponent = 2.2
     public specularIntensity = 2
 
@@ -35,7 +35,7 @@ export class TgdMaterialPrincipled extends TgdMaterial {
     private textureAmbient: TgdTextureCube | null = null
     private mustDeleteTextureAmbient = false
 
-    constructor(private readonly options: TgdMaterialPrincipledOptions = {}) {
+    constructor(private readonly options: TgdMaterialGlobalOptions = {}) {
         const uniforms: { [name: string]: WebglUniformType } = {
             uniTransfoMatrix: "mat4",
             uniSpecularExponent: "float",

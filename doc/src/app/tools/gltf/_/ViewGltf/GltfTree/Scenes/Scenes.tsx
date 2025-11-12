@@ -16,7 +16,7 @@ export type ViewScenesProps = {
     onAction?(action: Action): void
 }
 
-export function ViewScenes(props: ViewScenesProps): JSX.Element {
+export function ViewScenes(props: ViewScenesProps) {
     const { scenes } = props.data.json
     if (!scenes) return <p>No scenes.</p>
 

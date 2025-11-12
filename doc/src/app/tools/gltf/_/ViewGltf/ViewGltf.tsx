@@ -22,7 +22,7 @@ export type ViewViewGltfProps = {
     className?: string
 }
 
-export function ViewGLTF(props: ViewViewGltfProps): JSX.Element {
+export function ViewGLTF(props: ViewViewGltfProps) {
     const [action, setAction] = React.useState<Action>({ type: "verbatim" })
     const [data, load] = useData()
     React.useState<TgdDataGlb | null>(null)

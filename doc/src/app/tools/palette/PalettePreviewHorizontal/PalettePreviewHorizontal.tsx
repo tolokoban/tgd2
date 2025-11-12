@@ -17,7 +17,7 @@ export type ViewPalettePreviewHorizontalProps = CommonProps & {
 
 export function ViewPalettePreviewHorizontal(
     props: ViewPalettePreviewHorizontalProps
-): JSX.Element {
+) {
     const painter = usePainter()
     const style: React.CSSProperties = {
         ...styleCommon(props),

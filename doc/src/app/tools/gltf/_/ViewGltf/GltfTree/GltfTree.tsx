@@ -25,7 +25,7 @@ export type ViewGltfTreeProps = CommonProps & {
     onAction(action: Action): void
 }
 
-export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
+export function ViewGltfTree(props: ViewGltfTreeProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
@@ -33,18 +33,18 @@ export function ViewGltfTree(props: ViewGltfTreeProps): JSX.Element {
 
     return (
         <div className={$.join(props.className, Styles.gltfTree)} style={style}>
-                <ViewButton
-                    variant="text"
-                    color="secondary-5"
-                    fullwidth
-                    onClick={go({ type: "verbatim" })}
-                >
-                    Show verbatim content
-                </ViewButton>
-                <ViewScenes data={props.data} onAction={props.onAction} />
-                <ViewNodes data={props.data} onAction={props.onAction} />
-                <ViewImages data={props.data} onAction={props.onAction} />
-                <ViewLights data={props.data} onAction={props.onAction} />
+            <ViewButton
+                variant="text"
+                color="secondary-5"
+                fullwidth
+                onClick={go({ type: "verbatim" })}
+            >
+                Show verbatim content
+            </ViewButton>
+            <ViewScenes data={props.data} onAction={props.onAction} />
+            <ViewNodes data={props.data} onAction={props.onAction} />
+            <ViewImages data={props.data} onAction={props.onAction} />
+            <ViewLights data={props.data} onAction={props.onAction} />
             <hr />
             <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html">
                 GLTF 2.0 Specification

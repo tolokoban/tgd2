@@ -11,7 +11,7 @@ const $ = Theme.classNames
 
 export type ViewPaletteProps = CommonProps & {}
 
-export function ViewPalette(props: ViewPaletteProps): JSX.Element {
+export function ViewPalette(props: ViewPaletteProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }

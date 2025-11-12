@@ -15,7 +15,7 @@ export type ViewNodesProps = {
     onAction?(action: Action): void
 }
 
-export function ViewNodes(props: ViewNodesProps): JSX.Element {
+export function ViewNodes(props: ViewNodesProps) {
     const { nodes } = props.data.json
     if (!nodes) return <p>No nodes.</p>
 

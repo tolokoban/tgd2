@@ -24,13 +24,13 @@ export type ViewExpanderProps = CommonProps & {
     children?: React.ReactNode
 }
 
-export function Expander(props: ViewExpanderProps): JSX.Element {
+export function Expander(props: ViewExpanderProps) {
     const [open, setOpen] = React.useState(false)
     const style: React.CSSProperties = {
         ...styleCommon(props),
         ...props.style,
     }
-    const handleToggle = (event: React.MouseEvent<HTMLDetailsElement>) => {
+    const handleToggle = (event: React.ToggleEvent<HTMLDetailsElement>) => {
         event.preventDefault()
         event.stopPropagation()
         setOpen(!open)
@@ -45,7 +45,7 @@ export function Expander(props: ViewExpanderProps): JSX.Element {
             onClick={
                 props.children
                     ? undefined
-                    : event => {
+                    : (event) => {
                           event.preventDefault()
                           event.stopPropagation()
                           props.onClick?.()

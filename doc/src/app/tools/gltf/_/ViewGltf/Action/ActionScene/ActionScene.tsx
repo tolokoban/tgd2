@@ -29,10 +29,7 @@ const $ = Theme.classNames
 
 export type ViewActionSceneProps = { data: TgdDataGlb; index: number }
 
-export function ViewActionScene({
-    data,
-    index,
-}: ViewActionSceneProps): JSX.Element {
+export function ViewActionScene({ data, index }: ViewActionSceneProps) {
     const scene = data.json.scenes?.[index]
     const handleReady = useReadyHandler(data, scene)
 

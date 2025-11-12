@@ -24,7 +24,7 @@ export function ViewScene({
     title,
     index,
     onAction,
-}: ViewSceneProps): JSX.Element {
+}: ViewSceneProps) {
     return (
         <Expander
             title={title}

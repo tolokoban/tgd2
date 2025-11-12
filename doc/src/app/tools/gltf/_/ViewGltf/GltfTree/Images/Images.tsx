@@ -16,11 +16,7 @@ export type ViewImagesProps = {
     onAction?(action: Action): void
 }
 
-export function ViewImages({
-    className,
-    data,
-    onAction,
-}: ViewImagesProps): JSX.Element {
+export function ViewImages({ className, data, onAction }: ViewImagesProps) {
     return (
         <Expander
             className={$.join(className, Styles.images)}

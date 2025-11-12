@@ -54,8 +54,8 @@ export function ViewActionNode(props: ViewActionNodeProps) {
                     <b>{node.name ?? <em>anonymous</em>}</b>
                 </div>
             </ViewPanel>
-            <ViewPanel style={style}>
-                <ViewTabs fullsize>
+            <ViewPanel style={style} color="neutral-1">
+                <ViewTabs fullsize color="neutral-3" colorAccent="primary-3">
                     <ViewTab key="render" label="3D View">
                         {!isTypeCamera(node) && (
                             <ViewActionNodeRender

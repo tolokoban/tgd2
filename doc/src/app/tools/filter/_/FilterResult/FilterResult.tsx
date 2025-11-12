@@ -21,7 +21,7 @@ export type ViewFilterResultProps = CommonProps & {
     functions: string
 }
 
-export function ViewFilterResult(props: ViewFilterResultProps): JSX.Element {
+export function ViewFilterResult(props: ViewFilterResultProps) {
     const ref = React.useRef<HTMLDivElement | null>(null)
     const [error, setError] = React.useState<string | null>(null)
     const refManager = React.useRef<FilterManager | null>(null)

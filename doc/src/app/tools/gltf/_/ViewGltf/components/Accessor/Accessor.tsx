@@ -22,7 +22,7 @@ export type ViewAccessorProps = CommonProps & {
     index: number
 }
 
-export function ViewAccessor(props: ViewAccessorProps): JSX.Element {
+export function ViewAccessor(props: ViewAccessorProps) {
     const refDialog = React.useRef<HTMLDialogElement | null>(null)
     const [open, setOpen] = React.useState(false)
     React.useEffect(() => {

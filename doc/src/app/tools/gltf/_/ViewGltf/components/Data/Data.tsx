@@ -26,7 +26,7 @@ export function ViewData({
     type,
     componentType,
     onClose,
-}: ViewDataProps): JSX.Element {
+}: ViewDataProps) {
     const view = createView(buffer, componentType)
     const columns = range(resolveColumns(type))
     const rows = range(Math.ceil(view.length / columns.length))

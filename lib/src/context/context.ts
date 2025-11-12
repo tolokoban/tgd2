@@ -66,6 +66,7 @@ export class TgdContext extends TgdPainterGroup {
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
     public readonly eventPaint = new TgdEvent<TgdContext>()
+    public readonly eventWebGLContextLost = new TgdEvent<TgdContext>()
     public resolution = 1
 
     /**
@@ -107,12 +108,19 @@ export class TgdContext extends TgdPainterGroup {
      */
     constructor(
         public readonly canvas: HTMLCanvasElement | OffscreenCanvas,
-        private readonly options: TgdContextOptions = {}
+        public readonly options: Readonly<TgdContextOptions> = {}
     ) {
         super()
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
+        gl.canvas.addEventListener("webglcontextlost", (evt) => {
+            console.error(
+                "[TgdContext] WebGL context has been lost!",
+                evt instanceof WebGLContextEvent ? evt.statusMessage : evt
+            )
+            this.eventWebGLContextLost.dispatch(this)
+        })
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
         this.resolution = options.resolution ?? 1
         if (options.enableTextureFloatStorage) {

@@ -17,7 +17,7 @@ export type ViewActionProps = CommonProps & {
     action: Action
 }
 
-export function ViewAction(props: ViewActionProps): JSX.Element {
+export function ViewAction(props: ViewActionProps) {
     const style: React.CSSProperties = {
         ...styleCommon(props),
     }
