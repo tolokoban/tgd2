@@ -26,6 +26,10 @@ export interface TgdMaterialOptions {
      * Default to `NORMAL`.
      */
     attNormal: string
+    /** Name of the vec3 atribute holding the tangent.
+     * Default to `CUSTOM_ATTRIBUTE_3`
+     */
+    attTangent: string
     /**
      * Name of the vec2 attribute holding the texture coordinates (UV).
      * Default to `TEXCOORD_0`
@@ -73,6 +77,7 @@ export class TgdMaterial {
     public debug = false
     public attPosition: string
     public attNormal: string
+    public attTangent: string
     public attUV: string
 
     /**
@@ -168,6 +173,7 @@ export class TgdMaterial {
     constructor({
         attPosition = "POSITION",
         attNormal = "NORMAL",
+        attTangent = "CUSTOM_ATTRIBUTE_3",
         attUV = "TEXCOORD_0",
         varyings = {},
         uniforms = {},
@@ -185,6 +191,7 @@ export class TgdMaterial {
         this.debug = debug
         this.attPosition = attPosition
         this.attNormal = attNormal
+        this.attTangent = attTangent
         this.attUV = attUV
         this.varyings = varyings
         this.uniforms = uniforms
