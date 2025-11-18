@@ -580,6 +580,7 @@ export class TgdContext extends TgdPainterGroup {
         }
         this.stateReset()
         return gl
+
     }
 
     stateReset() {
