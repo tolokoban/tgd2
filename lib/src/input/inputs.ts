@@ -1,7 +1,5 @@
-import { TgdInputKeyboardImpl } from "@tgd/input/keyboard"
-import { TgdInputPointerImpl } from "@tgd/input/pointer"
-import { TgdInputKeyboard } from "@tgd/types/input-keyboard"
-import { TgdInputPointer } from "@tgd/types/input-pointer"
+import { TgdInputKeyboard } from "./keyboard"
+import { TgdInputPointer } from "./pointer"
 
 export class TgdInputs {
     private _keyboard: TgdInputKeyboard | null = null
@@ -11,14 +9,14 @@ export class TgdInputs {
 
     get keyboard(): TgdInputKeyboard {
         if (!this._keyboard) {
-            this._keyboard = new TgdInputKeyboardImpl()
+            this._keyboard = new TgdInputKeyboard()
         }
         return this._keyboard
     }
 
     get pointer(): TgdInputPointer {
         if (!this._pointer) {
-            this._pointer = new TgdInputPointerImpl(this.canvas)
+            this._pointer = new TgdInputPointer(this.canvas)
         }
         return this._pointer
     }

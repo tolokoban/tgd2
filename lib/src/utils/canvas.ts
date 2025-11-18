@@ -153,10 +153,25 @@ export function tgdCanvasCreateGradient(
 function colorToString(
     color: string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
 ): string {
-    if (typeof color === "string") return color
+    try {
+        if (typeof color === "string") return color
 
-    if (color instanceof TgdColor) return color.toString()
+        if (color instanceof TgdColor) return color.toString()
 
-    const [r, g, b, a] = color
-    return new TgdColor(r, b, g, a ?? 1).toString()
+        if (Array.isArray(color)) {
+            const [r, g, b, a] = color
+            return new TgdColor(r, b, g, a ?? 1).toString()
+        }
+
+        return new TgdColor(
+            color.x,
+            color.y,
+            color.z,
+            color instanceof TgdVec4 ? color.w : 1
+        ).toString()
+    } catch {
+        console.error("[Tgd::colorToString] Invalid color argument:", color)
+        console.info("[Tgd::colorToString] We will use purple (#F0F).")
+        return "#f0f"
+    }
 }

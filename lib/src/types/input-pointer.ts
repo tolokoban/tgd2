@@ -41,39 +41,3 @@ export interface TgdInputPointerEventMove extends TgdInputPointerModifierKeys {
     previous: TgdInputPointerEventFinger
     start: TgdInputPointerEventFinger
 }
-
-export interface TgdInputPointer {
-    readonly eventTap: TgdEvent<Readonly<TgdInputPointerEventTap>>
-
-    readonly eventTapMultiple: TgdEvent<
-        Readonly<TgdInputPointerEventTapMultiple>
-    >
-
-    readonly eventMoveStart: TgdEvent<Readonly<TgdInputPointerEventMove>>
-
-    readonly eventMove: TgdEvent<Readonly<TgdInputPointerEventMove>>
-
-    readonly eventHover: TgdEvent<Readonly<TgdInputPointerEventMove>>
-
-    readonly eventMoveEnd: TgdEvent<Readonly<TgdInputPointerEventMove>>
-
-    readonly eventZoom: TgdEvent<Readonly<TgdInputPointerEventZoom>>
-
-    readonly x: number
-
-    readonly y: number
-
-    readonly speedX: number
-
-    readonly speedY: number
-
-    /**
-     * This is a tap only of the pointer touched for less that
-     * `tapDelay` milliseconds.
-     */
-    tapDelay: number
-
-    isTouching(
-        hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean
-    ): boolean
-}

@@ -1,6 +1,5 @@
 import { TgdEvent } from "@tgd/event"
 import {
-    TgdInputPointer,
     TgdInputPointerEventMove,
     TgdInputPointerEventFinger,
     TgdInputPointerEventTap,
@@ -11,7 +10,7 @@ import { TgdUtilCyclicBuffer } from "@tgd/utils"
 
 const MOUSE_BUTTON_RIGHT = 2
 
-export class TgdInputPointerImpl implements TgdInputPointer {
+export class TgdInputPointer {
     readonly eventTap = new TgdEvent<Readonly<TgdInputPointerEventTap>>()
     readonly eventTapMultiple = new TgdEvent<
         Readonly<TgdInputPointerEventTapMultiple>

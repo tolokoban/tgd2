@@ -5,6 +5,7 @@ import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
 import { TgdEvent } from "../event"
+import { TgdConsole } from "@tgd/debug"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -33,8 +34,21 @@ export type TgdContextOptions = WebGLContextAttributes & {
     camera?: TgdCamera
     enableTextureFloatStorage?: boolean
     /**
-     * Size of a pixel. If under 1, you will start to have  pixelated render.
+     * Function to initialize the context.
+     *
+     * If defined, it will be automatically called at the end of the construction process
+     * and after a WebGL context restore.
+     */
+    initialize?: (context: TgdContext) => void
+    /**
+     * Size of a pixel.
+     *  - Use values over 1.0 for retina screens.
+     *  - Under 1, you will start to have pixelated render.
+     *
      * Defaut to 1.
+     *
+     * If you give a null or negative value, `globalThis.devicePixelRatio`
+     * will be used.
      */
     resolution?: number
 }
@@ -60,15 +74,37 @@ export type TgdContextOptions = WebGLContextAttributes & {
 export class TgdContext extends TgdPainterGroup {
     private static incrementalId = 1
 
+    /**
+     * Ratio of the resolution in physical pixels to the resolution in CSS pixels
+     * for the current display device.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
+     */
+    public static get devicePixelRatio() {
+        return globalThis.devicePixelRatio ?? 1
+    }
+
     public readonly name: string
-    public readonly gl: WebGL2RenderingContext
     public readonly inputs: TgdInputs
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
     public readonly eventPaint = new TgdEvent<TgdContext>()
+    /**
+     * When the browser decides to destroy the context.
+     * @see https://wikis.khronos.org/webgl/HandlingContextLost
+     */
     public readonly eventWebGLContextLost = new TgdEvent<TgdContext>()
+    /**
+     * At the point that setupWebGLStateAndResources is called the browser
+     * has reset all state to the default WebGL state and all previously
+     * allocated resources are invalid. So, you need to re-create textures,
+     * buffers, framebuffers, renderbuffers, shaders, programs,
+     * and setup your state (clearColor, blendFunc, depthFunc, etc...)
+     * @see https://wikis.khronos.org/webgl/HandlingContextLost
+     */
+    public readonly eventWebGLContextRestored = new TgdEvent<TgdContext>()
     public resolution = 1
 
+    private _gl: WebGL2RenderingContext | null = null
     /**
      * If this function is set, it will be called once at the end of the next repaint.
      * This is useful for snapshots.
@@ -101,6 +137,8 @@ export class TgdContext extends TgdPainterGroup {
     private readonly animationManager = new TgdManagerAnimation()
     // Used to store result of gl.readPixels() for one pixel.
     private readonly readPixelColor = new Uint8Array(4)
+    // Function to call after WebGL context restore.
+    private readonly initialize?: (context: TgdContext) => void
 
     /**
      * @param canvas The canvas to which attach a WebGL2 context.
@@ -111,18 +149,59 @@ export class TgdContext extends TgdPainterGroup {
         public readonly options: Readonly<TgdContextOptions> = {}
     ) {
         super()
-        const gl = canvas.getContext("webgl2", options)
-        if (!gl) throw new Error("Unable to create a WebGL2 context!")
-
-        gl.canvas.addEventListener("webglcontextlost", (evt) => {
-            console.error(
-                "[TgdContext] WebGL context has been lost!",
-                evt instanceof WebGLContextEvent ? evt.statusMessage : evt
-            )
-            this.eventWebGLContextLost.dispatch(this)
-        })
+        const gl = this.createWebGLContext()
+        this.initialize = options.initialize
+        canvas.addEventListener(
+            "webglcontextlost",
+            (evt) => {
+                TgdConsole.debug(
+                    {
+                        text: "[TgdContext]",
+                        style: {
+                            color: "#fffe",
+                            background: "#a00",
+                        },
+                    },
+                    ` WebGL context has been lost! ${
+                        evt instanceof WebGLContextEvent
+                            ? evt.statusMessage
+                            : evt
+                    }`
+                )
+                // @see https://wikis.khronos.org/webgl/HandlingContextLost
+                evt.preventDefault()
+                this.delete({ preserveContextLostEvents: true })
+                this.eventWebGLContextLost.dispatch(this)
+            },
+            false
+        )
+        canvas.addEventListener(
+            "webglcontextrestored",
+            () => {
+                TgdConsole.debug(
+                    {
+                        text: "[TgdContext]",
+                        style: {
+                            color: "#000e",
+                            background: "#0f0",
+                        },
+                    },
+                    " WebGL context has been restored"
+                )
+                const { initialize } = this
+                if (initialize) {
+                    this.createWebGLContext()
+                    initialize(this)
+                }
+                this.eventWebGLContextRestored.dispatch(this)
+            },
+            false
+        )
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
         this.resolution = options.resolution ?? 1
+        if (this.resolution <= 0) {
+            this.resolution = TgdContext.devicePixelRatio ?? 1
+        }
         if (options.enableTextureFloatStorage) {
             gl.getExtension("EXT_color_buffer_float")
         }
@@ -132,7 +211,7 @@ export class TgdContext extends TgdPainterGroup {
         this.implementationColorReadType = gl.getParameter(
             gl.IMPLEMENTATION_COLOR_READ_TYPE
         ) as number
-        this.gl = gl
+        this._gl = gl
         this.observer = new ResizeObserver(() => {
             const width = isOffscreen(canvas)
                 ? canvas.width
@@ -164,6 +243,15 @@ export class TgdContext extends TgdPainterGroup {
         this.stateReset()
     }
 
+    get gl(): WebGL2RenderingContext {
+        if (!this._gl) {
+            throw new Error(
+                `[TgdContext] This context has been deleted: ${this.name}!`
+            )
+        }
+        return this._gl
+    }
+
     get fps() {
         return this._fps
     }
@@ -193,7 +281,7 @@ export class TgdContext extends TgdPainterGroup {
     checkError(caption: string, action?: () => void) {
         const { gl } = this
         const error = gl.getError()
-        if (error !== gl.NO_ERROR) {
+        if (error !== gl.NO_ERROR && error != gl.CONTEXT_LOST_WEBGL) {
             console.error(`WebGL Error in ${caption}:`, webglLookup(error))
             action?.()
             return true
@@ -262,6 +350,7 @@ export class TgdContext extends TgdPainterGroup {
             this.paintingIsOngoing = false
             this.paintingIsQueued = false
             globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+            this.requestAnimationFrame = -1
         }
         this.isPlaying = value
     }
@@ -288,6 +377,8 @@ export class TgdContext extends TgdPainterGroup {
     pause() {
         this.playing = false
         this.pauseTime = this.time
+        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+        this.requestAnimationFrame = -1
     }
 
     takeSnapshot(): Promise<HTMLImageElement> {
@@ -323,6 +414,20 @@ export class TgdContext extends TgdPainterGroup {
             if (gl[key as keyof WebGL2RenderingContext] === value) return key
         }
         return `Unknown gl[${value}]`
+    }
+
+    /**
+     * Helper to test a context lost situation.
+     * @param restorationDelayInMilliseconds Time, in milliseconds, before the context is restored.
+     */
+    loseContext(restorationDelayInMilliseconds: number = 1000) {
+        const ext = this.gl.getExtension("WEBGL_lose_context")
+        if (ext) {
+            ext.loseContext()
+            globalThis.setTimeout(() => {
+                ext.restoreContext()
+            }, restorationDelayInMilliseconds)
+        }
     }
 
     /**
@@ -415,13 +520,66 @@ export class TgdContext extends TgdPainterGroup {
         return this.readPixelColor
     }
 
-    delete() {
+    delete({
+        preserveContextLostEvents = false,
+    }: {
+        preserveContextLostEvents?: boolean
+    } = {}) {
         this.eventPaint.removeAllListeners()
+        if (!preserveContextLostEvents) {
+            this.eventWebGLContextLost.removeAllListeners()
+            this.eventWebGLContextRestored.removeAllListeners()
+        }
+        this.inputs.keyboard.detach()
+        this.inputs.pointer.detach()
         this.pause()
         if (!isOffscreen(this.canvas)) {
             this.observer.unobserve(this.canvas)
         }
         super.delete()
+        this._gl = null
+    }
+
+    private readonly createWebGLContext = () => {
+        const { canvas, options } = this
+        const gl = canvas.getContext("webgl2", options)
+        if (!gl) throw new Error("Unable to create a WebGL2 context!")
+
+        this._gl = gl
+        gl.canvas.addEventListener(
+            "webglcontextlost",
+            (evt) => {
+                // @see https://wikis.khronos.org/webgl/HandlingContextLost
+                evt.preventDefault()
+                console.error(
+                    "[TgdContext] WebGL context has been lost!",
+                    evt instanceof WebGLContextEvent ? evt.statusMessage : evt
+                )
+                this.pause()
+                super.delete()
+                this.eventWebGLContextLost.dispatch(this)
+            },
+            false
+        )
+        gl.canvas.addEventListener(
+            "webglcontextrestored",
+            () => {
+                console.info("[TgdContext] WebGL context has been restored.")
+                this.initialize?.(this)
+                this.eventWebGLContextRestored.dispatch(this)
+            },
+            false
+        )
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+        this.resolution = options.resolution ?? 1
+        if (this.resolution <= 0) {
+            this.resolution = TgdContext.devicePixelRatio ?? 1
+        }
+        if (options.enableTextureFloatStorage) {
+            gl.getExtension("EXT_color_buffer_float")
+        }
+        this.stateReset()
+        return gl
     }
 
     stateReset() {

@@ -38,7 +38,10 @@ export class TgdProgram {
             gl.transformFeedbackVaryings(prg, varyings, bufferMode)
         }
         gl.linkProgram(prg)
-        if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+        if (
+            !gl.getProgramParameter(prg, gl.LINK_STATUS) &&
+            !gl.isContextLost()
+        ) {
             const info = gl.getProgramInfoLog(prg) ?? ""
             console.error(info)
             const errorLines = getErrorLines(info)
@@ -239,16 +242,19 @@ export class TgdProgram {
         return shader
     }
 
-    private getUniformsLocations() {
+    private getUniformsLocations(): { [name: string]: WebGLUniformLocation } {
         const { gl, program } = this
         const count: unknown = gl.getProgramParameter(
             program,
             gl.ACTIVE_UNIFORMS
         )
-        if (typeof count !== "number")
+        if (typeof count !== "number") {
+            if (gl.isContextLost()) return {}
+
             throw new Error(
                 "Unable to get the number of uniforms in a WebGLProgram!"
             )
+        }
 
         const uniforms: { [name: string]: WebGLUniformLocation } = {}
         for (let index = 0; index < count; index++) {

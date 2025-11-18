@@ -1,7 +1,6 @@
-import { TgdInputKeyboard } from "@tgd/types/input-keyboard"
 import { TgdEvent } from "../event"
 
-export class TgdInputKeyboardImpl implements TgdInputKeyboard {
+export class TgdInputKeyboard {
     public readonly eventKeyPress = new TgdEvent<KeyboardEvent>()
 
     private readonly keysDown = new Set<string>()

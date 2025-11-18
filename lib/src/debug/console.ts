@@ -10,10 +10,31 @@ interface TgdConsoleItem {
 
 interface TgdConsoleStyle {
     color: string
+    background: string
     bold: boolean
 }
 
 export class TgdConsole {
+    static log(...items: (TgdConsoleItem | string)[]) {
+        new TgdConsole(...items).log()
+    }
+
+    static info(...items: (TgdConsoleItem | string)[]) {
+        new TgdConsole(...items).info()
+    }
+
+    static debug(...items: (TgdConsoleItem | string)[]) {
+        new TgdConsole(...items).debug()
+    }
+
+    static warn(...items: (TgdConsoleItem | string)[]) {
+        new TgdConsole(...items).warn()
+    }
+
+    static error(...items: (TgdConsoleItem | string)[]) {
+        new TgdConsole(...items).error()
+    }
+
     private readonly items: TgdConsoleInternalItem[] = []
 
     constructor(...items: (TgdConsoleItem | string)[]) {
@@ -33,11 +54,15 @@ export class TgdConsole {
 
     add(
         text: string = "\n",
-        { color = "#fff", bold = false }: Partial<TgdConsoleStyle> = {}
+        {
+            color = "currentColor",
+            background = "transparent",
+            bold = false,
+        }: Partial<TgdConsoleStyle> = {}
     ): this {
         this.items.push({
             text: `%c${text}`,
-            style: `color:${color};font-weight:${bold ? "bold" : "normal"};`,
+            style: `color:${color};background:${background};font-weight:${bold ? "bold" : "normal"};`,
         })
         return this
     }
@@ -55,11 +80,19 @@ export class TgdConsole {
     }
 
     warn() {
-        console.warn(...this.args)
+        console.warn(
+            ...this.args.map(
+                setDefaultStyle({ color: "#fff", background: "#990" })
+            )
+        )
     }
 
     error() {
-        console.error(...this.args)
+        console.error(
+            ...this.args.map(
+                setDefaultStyle({ color: "#fff", background: "#a00" })
+            )
+        )
     }
 
     private get args(): string[] {
@@ -67,5 +100,19 @@ export class TgdConsole {
             this.items.map(({ text }) => text).join(""),
             ...this.items.map(({ style }) => style),
         ]
+    }
+}
+
+function setDefaultStyle(defaultStyle: Partial<TgdConsoleStyle>) {
+    return (item: TgdConsoleItem | string) => {
+        if (typeof item === "string") return item
+
+        return {
+            text: item.text,
+            style: {
+                ...defaultStyle,
+                ...item.style,
+            },
+        }
     }
 }
