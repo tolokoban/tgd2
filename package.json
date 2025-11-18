@@ -14,8 +14,9 @@
         "doc": "cd lib && npm run doc && cd ../doc && npm run deploy",
         "test": "cd lib && npm test",
         "build": "cd lib && npm run build && cd ../doc && npm run build",
-        "predeploy": "npm run ci && cd doc && npm run deploy",
+        "predeploy": "npm run ci && cd doc",
         "deploy": "npm run ci && npm publish --access=public",
+        "deploy:lib": "cd lib && npm install && npm run build && cd .. && npm publish --access=public",
         "minor": "npm version minor --no-git-tag-version && cd lib && npm version minor --no-git-tag-version && cd ../doc && npm version minor --no-git-tag-version",
         "patch": "npm version patch --no-git-tag-version && cd lib && npm version patch --no-git-tag-version && cd ../doc && npm version patch --no-git-tag-version"
     },
