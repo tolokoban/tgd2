@@ -1,5 +1,6 @@
 export * from "./animation"
 export * from "./arrays"
+export * from "./buffer"
 export * from "./elements"
 export * from "./gltf"
 export * from "./input-pointer"

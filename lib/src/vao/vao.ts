@@ -22,7 +22,7 @@ export class TgdVertexArray {
         if (!program || !datasets) return
 
         gl.bindVertexArray(vao)
-        this.drawBuffers = datasets.map(dataset => {
+        this.drawBuffers = datasets.map((dataset) => {
             const buffer = new TgdBuffer(gl, {
                 data: dataset.data,
                 target: dataset.target,
@@ -127,7 +127,7 @@ export class TgdVertexArray {
                 )
             }
         lines.push("  return vao", "}")
-        return lines.map(line => `${indent}${line}`).join("\n")
+        return lines.map((line) => `${indent}${line}`).join("\n")
     }
 
     debug(caption = "TgdVertexArray") {

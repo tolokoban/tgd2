@@ -38,7 +38,7 @@ export async function tgdWasmCompile<T>(
         console.log(text.join(" "))
     }
     const instance = await WebAssembly.instantiate(
-        new WebAssembly.Module(binary),
+        new WebAssembly.Module(binary as BufferSource),
         importObject
     )
     const { exports } = instance

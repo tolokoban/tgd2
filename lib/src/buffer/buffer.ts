@@ -1,3 +1,5 @@
+import { TgdTypeArrayForElements, TgdTypeArrayOrBuffer } from "@tgd/types"
+
 export type TgdBufferOptionTarget =
     | "ARRAY_BUFFER"
     | "ELEMENT_ARRAY_BUFFER"
@@ -20,7 +22,7 @@ export type TgdBufferOptionUsage =
     | "STREAM_COPY"
 
 export interface TgdBufferOptions {
-    data: BufferSource
+    data: TgdTypeArrayOrBuffer
     target: TgdBufferOptionTarget
     usage: TgdBufferOptionUsage
 }
@@ -57,7 +59,9 @@ export class TgdBuffer {
         gl.bindBuffer(gl[this._target], buffer)
     }
 
-    bufferData(options: Partial<TgdBufferOptions> & { data: BufferSource }) {
+    bufferData(
+        options: Partial<TgdBufferOptions> & { data: TgdTypeArrayOrBuffer }
+    ) {
         const { gl } = this
         this._usage = options.usage ?? this._usage
         this._target = options.target ?? this._target
