@@ -91,7 +91,8 @@ export class TgdManagerAnimation {
     debug(caption = "Animations") {
         const output = new TgdConsole({
             text: `${caption} (count: ${this.animations.size})\n`,
-            style: { bold: true, color: "#fa0" },
+            bold: true,
+            color: "#fa0",
         })
         for (const anim of this.animations.values()) {
             output.add(anim.name).add(" ")

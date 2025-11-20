@@ -3,12 +3,9 @@ interface TgdConsoleInternalItem {
     style: string
 }
 
-interface TgdConsoleItem {
-    text: string
-    style?: Partial<TgdConsoleStyle>
-}
+export type TgdConsoleItem = Partial<TgdConsoleStyle> & { text: string }
 
-interface TgdConsoleStyle {
+export interface TgdConsoleStyle {
     color: string
     background: string
     bold: boolean
@@ -41,7 +38,7 @@ export class TgdConsole {
         this.clear()
         for (const item of items) {
             if (typeof item === "string") this.add(item)
-            else this.add(item.text, item.style)
+            else this.add(item.text, item)
         }
     }
 
@@ -105,13 +102,17 @@ export class TgdConsole {
 
 function setDefaultStyle(defaultStyle: Partial<TgdConsoleStyle>) {
     return (item: TgdConsoleItem | string) => {
-        if (typeof item === "string") return item
+        if (typeof item === "string")
+            return {
+                text: item,
+                style: defaultStyle,
+            }
 
         return {
             text: item.text,
             style: {
                 ...defaultStyle,
-                ...item.style,
+                ...item,
             },
         }
     }

@@ -69,10 +69,8 @@ export class TgdShaderVertex {
         const out = new TgdConsole(
             {
                 text: caption,
-                style: {
-                    bold: true,
-                    color: "#6bf",
-                },
+                bold: true,
+                color: "#6bf",
             },
             code
         )

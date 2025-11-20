@@ -10,11 +10,13 @@ export abstract class TgdPainter {
 
     private static counter = 0
 
+    public readonly id = TgdPainter.counter++
+
     /**
      * This attribute has no other purpose than debugging.
      * Its value is not used by Tgd.
      */
-    public name: string = `Painter/${TgdPainter.counter++}`
+    public name: string = `Painter/${this.id}`
 
     public active: boolean = true
 

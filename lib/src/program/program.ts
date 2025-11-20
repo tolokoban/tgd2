@@ -1,3 +1,4 @@
+import { TgdConsole, TgdConsoleItem } from "@tgd/debug"
 import { TgdMat2, TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
 import { tgdCodeStringify } from "@tgd/shader/code"
 import { TgdProgramOptions } from "@tgd/types"
@@ -8,8 +9,11 @@ import { TgdProgramOptions } from "@tgd/types"
  * the uniforms.
  */
 export class TgdProgram {
+    private static id = 1
+
     /** Access to the real WebGLProgram object. */
     public readonly program: WebGLProgram
+    public readonly name: string
 
     private readonly shaders: WebGLShader[]
     private readonly uniformsLocations: { [name: string]: WebGLUniformLocation }
@@ -21,6 +25,7 @@ export class TgdProgram {
         const prg = gl.createProgram()
         if (!prg) throw new Error("Unable to create WebGLProgram!")
 
+        this.name = options.name ?? `TgdProgram#${TgdProgram.id++}`
         const vert = tgdCodeStringify(options.vert)
         const vertShader = this.createShader("VERTEX_SHADER", vert)
         gl.attachShader(prg, vertShader)
@@ -38,6 +43,7 @@ export class TgdProgram {
             gl.transformFeedbackVaryings(prg, varyings, bufferMode)
         }
         gl.linkProgram(prg)
+        gl.validateProgram(prg)
         if (
             !gl.getProgramParameter(prg, gl.LINK_STATUS) &&
             !gl.isContextLost()
@@ -58,6 +64,7 @@ export class TgdProgram {
         gl.deleteShader(vertShader)
         gl.detachShader(prg, fragShader)
         gl.deleteShader(fragShader)
+        console.log("NEW ", this.name)
     }
 
     toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
@@ -213,14 +220,43 @@ export class TgdProgram {
     }
 
     delete() {
+        console.log("DELETE ", this.name)
         const { gl } = this
         for (const shader of this.shaders) gl.deleteShader(shader)
         gl.deleteProgram(this.program)
     }
 
-    debug(caption = "TgdProgram") {
-        console.log(caption)
+    debug(caption?: string) {
+        const { gl, program } = this
+        console.log(caption ?? this.name)
         const { options: code } = this
+        const contextLost = gl.isContextLost()
+        const items: (string | TgdConsoleItem)[] = [
+            { text: "Context lost: " },
+            {
+                text: contextLost ? "TRUE" : "FALSE",
+                color: contextLost ? "#0F0" : "#f00",
+            },
+            "\n",
+        ]
+        const params: Array<[number, string]> = [
+            [gl.DELETE_STATUS, "Flagged for deletion"],
+            [gl.LINK_STATUS, "Last link operation was successful"],
+            [gl.VALIDATE_STATUS, "Last validation operation was successful"],
+            [gl.ATTACHED_SHADERS, "Number of attached shaders"],
+            [gl.ACTIVE_ATTRIBUTES, "Number of active attribute variables"],
+            [gl.ACTIVE_UNIFORMS, "Number of active uniforms"],
+        ]
+        for (const [id, label] of params) {
+            items.push(`${label}: `)
+            const param = gl.getProgramParameter(program, id)
+            if (param === true) items.push({ text: "TRUE", color: "#0f0" })
+            else if (param === false)
+                items.push({ text: "FALSE", color: "#f00" })
+            else items.push({ text: JSON.stringify(param), color: "#09f" })
+            items.push("\n")
+        }
+        TgdConsole.debug(...items)
         logCode("Vertex Shader", tgdCodeStringify(code.vert))
         logCode("Fragment Shader", tgdCodeStringify(code.frag))
     }
@@ -257,17 +293,20 @@ export class TgdProgram {
         }
 
         const uniforms: { [name: string]: WebGLUniformLocation } = {}
+
         for (let index = 0; index < count; index++) {
             const uniform = gl.getActiveUniform(program, index)
             if (!uniform) continue
 
             const location = gl.getUniformLocation(program, uniform.name)
-            if (location === null)
-                throw new Error(
-                    `Unable to get location for uniform "${uniform.name}"!`
-                )
-
-            uniforms[uniform.name] = location
+            if (location === null) {
+                // this.debug()
+                // console.warn(
+                //     `Unable to get location for uniform "${uniform.name}" (size: ${uniform.size}, type: ${uniform.type})!`
+                // )
+            } else {
+                uniforms[uniform.name] = location
+            }
         }
         return uniforms
     }

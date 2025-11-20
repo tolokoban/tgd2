@@ -74,6 +74,7 @@ export class TgdPainterSegments extends TgdPainter {
         }
     ) {
         super()
+        this.name = `TgdPainter#${this.id}`
         const { roundness = 3, minRadius = 1, makeDataset } = options
         const geometry = makeCapsule(roundness)
         const material = options.material ?? new TgdMaterialFaceOrientation()
@@ -181,14 +182,11 @@ export class TgdPainterSegments extends TgdPainter {
             mainCode: [`FragColor = applyMaterial();`],
         }).code
         const prg = new TgdProgram(context.gl, {
+            name: `TgdPainterSegments/TgdProgram#${this.id}`,
             vert,
             frag,
         })
         this.prg = prg
-        // this.painter = new TgdPainterMesh(context, {
-        //     geometry,
-        //     material: new TgdMaterialFaceOrientation(),
-        // })
         const instance = makeDataset()
         this.vao = new TgdVertexArray(
             context.gl,
@@ -203,7 +201,6 @@ export class TgdPainterSegments extends TgdPainter {
     delete(): void {
         this.vao.delete()
         this.prg.delete()
-        // this.painter.delete()
     }
 
     paint(time: number, delay: number): void {

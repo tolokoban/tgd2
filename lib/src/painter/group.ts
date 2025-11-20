@@ -149,7 +149,7 @@ export class TgdPainterGroup extends TgdPainter {
     debugHierarchy(caption?: string) {
         const cons = new TgdConsole({
             text: caption ?? this.name,
-            style: { bold: true },
+            bold: true,
         }).add()
         this.recursiveDebug(cons, this.hierarchy)
         cons.debug()

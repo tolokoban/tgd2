@@ -157,10 +157,8 @@ export class TgdContext extends TgdPainterGroup {
                 TgdConsole.debug(
                     {
                         text: "[TgdContext]",
-                        style: {
-                            color: "#fffe",
-                            background: "#a00",
-                        },
+                        color: "#fffe",
+                        background: "#a00",
                     },
                     ` WebGL context has been lost! ${
                         evt instanceof WebGLContextEvent
@@ -181,10 +179,8 @@ export class TgdContext extends TgdPainterGroup {
                 TgdConsole.debug(
                     {
                         text: "[TgdContext]",
-                        style: {
-                            color: "#000e",
-                            background: "#0f0",
-                        },
+                        color: "#000e",
+                        background: "#0f0",
                     },
                     " WebGL context has been restored"
                 )
@@ -580,7 +576,6 @@ export class TgdContext extends TgdPainterGroup {
         }
         this.stateReset()
         return gl
-
     }
 
     stateReset() {
