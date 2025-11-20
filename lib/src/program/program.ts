@@ -64,7 +64,6 @@ export class TgdProgram {
         gl.deleteShader(vertShader)
         gl.detachShader(prg, fragShader)
         gl.deleteShader(fragShader)
-        console.log("NEW ", this.name)
     }
 
     toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
@@ -220,7 +219,6 @@ export class TgdProgram {
     }
 
     delete() {
-        console.log("DELETE ", this.name)
         const { gl } = this
         for (const shader of this.shaders) gl.deleteShader(shader)
         gl.deleteProgram(this.program)
