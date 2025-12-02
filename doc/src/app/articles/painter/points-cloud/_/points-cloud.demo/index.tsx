@@ -1,0 +1,25 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./points-cloud.demo"
+
+const FOCUS = {"Detail #1":"    context.camera.transfo.distance = 5\n    new TgdControllerCameraOrbit(context, {\n        inertiaOrbit: 1000,\n        maxZoom: 5,\n        minZoom: 0.5,\n        speedZoom: 1,\n    })\n    const clear = new TgdPainterClear(context, {\n        color: [0.1, 0.2, 0.3, 1],\n        depth: 1,\n    })\n    const dataset = new TgdDataset({\n        POSITION: \"vec4\",\n    })\n    const monkey = assets.glb.monkey\n    monkey.setAttrib(dataset, \"POSITION\")\n    const { set } = dataset.getAttribAccessor(\"POSITION\")\n    const count = dataset.count\n    const radius = 0.13\n    for (let i = 0; i < count; i++) {\n        set(radius, i, 3)\n    }\n    const texture = new TgdTexture2D(context).loadBitmap(\n        tgdCanvasCreatePalette([\"#f74\"])\n    )\n    const state = new TgdPainterState(context, {\n        depth: webglPresetDepth.less,\n        children: [\n            new TgdPainterPointsCloud(context, {\n                dataPoint: new Float32Array(dataset.data),\n                texture,\n            }),\n        ],\n    })\n    context.add(clear, state)\n    context.paint()"}
+const FULL = "import {\n    tgdCanvasCreatePalette,\n    TgdContext,\n    TgdControllerCameraOrbit,\n    TgdDataset,\n    TgdPainterClear,\n    TgdPainterPointsCloud,\n    TgdPainterState,\n    TgdTexture2D,\n    webglPresetDepth,\n} from \"@tolokoban/tgd\"\nimport View, { Assets } from \"@/components/demo/Tgd\"\n\nimport MonkeyURL from \"@/assets/mesh/high-res-monkey.glb\"\n\nfunction init(context: TgdContext, assets: Assets) {\n    context.camera.transfo.distance = 5\n    new TgdControllerCameraOrbit(context, {\n        inertiaOrbit: 1000,\n        maxZoom: 5,\n        minZoom: 0.5,\n        speedZoom: 1,\n    })\n    const clear = new TgdPainterClear(context, {\n        color: [0.1, 0.2, 0.3, 1],\n        depth: 1,\n    })\n    const dataset = new TgdDataset({\n        POSITION: \"vec4\",\n    })\n    const monkey = assets.glb.monkey\n    monkey.setAttrib(dataset, \"POSITION\")\n    const { set } = dataset.getAttribAccessor(\"POSITION\")\n    const count = dataset.count\n    const radius = 0.13\n    for (let i = 0; i < count; i++) {\n        set(radius, i, 3)\n    }\n    const texture = new TgdTexture2D(context).loadBitmap(\n        tgdCanvasCreatePalette([\"#f74\"])\n    )\n    const state = new TgdPainterState(context, {\n        depth: webglPresetDepth.less,\n        children: [\n            new TgdPainterPointsCloud(context, {\n                dataPoint: new Float32Array(dataset.data),\n                texture,\n            }),\n        ],\n    })\n    context.add(clear, state)\n    context.paint()\n}\n\nexport default function Demo() {\n    return (\n        <View\n            onReady={init}\n            gizmo\n            options={{\n                preserveDrawingBuffer: true,\n            }}\n            assets={{\n                glb: { monkey: MonkeyURL },\n            }}\n        />\n    )\n}\n"
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
+}

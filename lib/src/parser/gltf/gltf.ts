@@ -496,6 +496,7 @@ export class TgdDataGlb {
             byteOffset,
             byteOffset + bufferView.byteLength
         )
+        console.log("🐞 [gltf@499] data =", data) // @FIXME: Remove this line written on 2025-12-02 at 10:47
         const view = figureOutView(
             data,
             convertTypeToNumber(

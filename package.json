@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.68",
+    "version": "2.0.69",
     "description": "ToloGameDev library for WebGL2",
     "homepage": "https://tolokoban.github.io/tgd2",
     "main": "./lib/dist/index.js",

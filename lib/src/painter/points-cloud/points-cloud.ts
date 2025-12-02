@@ -6,7 +6,7 @@ import { TgdVertexArray } from "@tgd/vao"
 import { TgdContext } from "@tgd/context"
 import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
 import { tgdColorMakeHueWheel } from "@tgd/color"
-import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdCodeBloc, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 
 export interface TgdPainterPointsCloudOptions {
     name?: string
@@ -36,9 +36,44 @@ export interface TgdPainterPointsCloudOptions {
     minSizeInPixels?: number
     mustDeleteTexture?: boolean
     texture?: TgdTexture2D
+    /**
+     * The content of a fragment shader function tht takes
+     * `vec4 color` as argument and must return a `vec4` color.
+     *
+     * You can also use `TgdPainterPointsCloud.fragCode*()` static functions
+     * to provide preset functions.
+     */
+    fragCode?: TgdCodeBloc
 }
 
 export class TgdPainterPointsCloud extends TgdPainter {
+    /**
+     * Draw spheres with simple diffuse/specular material.
+     */
+    static fragCodeSphere(
+        options: Partial<{
+            specularExponent: number
+            specularIntensity: number
+            shadowThickness: number
+            shadowIntensity: number
+        }> = {}
+    ): TgdCodeBloc {
+        const {
+            specularExponent = 10,
+            specularIntensity = 0.33,
+            shadowThickness = 0.5,
+            shadowIntensity = 0.1,
+        } = options
+        return [
+            "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
+            "float len = 1.0 - dot(coords, coords);",
+            "if (len < 0.0) discard;",
+            `float light = smoothstep(0.0, ${shadowThickness.toFixed(6)}, len) * ${shadowIntensity} + ${(1 - shadowIntensity).toFixed(6)};`,
+            `float spec = pow(len, ${specularExponent.toFixed(6)}) * ${specularIntensity.toFixed(6)};`,
+            "return color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
+        ]
+    }
+
     public readonly count: number
     public texture: TgdTexture2D
     public radiusMultiplier = 1
@@ -92,7 +127,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
         }
         this.count = this.dataUV.length >> 1
         this.dataset = this.createDataset()
-        this.program = this.createProgram()
+        this.program = this.createProgram(options.fragCode)
         this.vao = new TgdVertexArray(context.gl, this.program, [this.dataset])
     }
 
@@ -135,7 +170,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
         return dataset
     }
 
-    private createProgram(): TgdProgram {
+    private createProgram(render?: TgdCodeBloc): TgdProgram {
         const vert = new TgdShaderVertex({
             uniforms: {
                 uniMinSizeInPixels: "float",
@@ -170,14 +205,24 @@ export class TgdPainterPointsCloud extends TgdPainter {
                 varUV: "vec2",
             },
             outputs: { FragColor: "vec4" },
+            functions: {
+                render: [
+                    "vec4 render(vec4 color) {",
+                    render ?? TgdPainterPointsCloud.fragCodeSphere(),
+                    // [
+                    //     "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
+                    //     "float len = 1.0 - dot(coords, coords);",
+                    //     "if (len < 0.0) discard;",
+                    //     "float light = smoothstep(0.0, 0.75, len) * .1 + .9;",
+                    //     "float spec = pow(len, 6.0) * .5;",
+                    //     "return color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
+                    // ],
+                    "}",
+                ],
+            },
             mainCode: [
-                "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
-                "float len = 1.0 - dot(coords, coords);",
-                "if (len < 0.0) discard;",
                 "vec4 color = texture(uniTexture, varUV);",
-                "float light = smoothstep(0.0, 0.5, len);",
-                "float spec = pow(len, 2.0) * .5;",
-                "FragColor = color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
+                "FragColor = render(color);",
             ],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
