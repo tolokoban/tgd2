@@ -34,6 +34,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/material/face-orientation": ["/articles/material/face-orientation"],
     "/articles/material/flat": ["/articles/material/flat"],
     "/articles/material/ghost": ["/articles/material/ghost"],
+    "/articles/material/glass": ["/articles/material/glass"],
     "/articles/material/global": ["/articles/material/global"],
     "/articles/material/hull": ["/articles/material/hull"],
     "/articles/material/normal-map": ["/articles/material/normal-map"],
