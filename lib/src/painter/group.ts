@@ -4,6 +4,7 @@ import {
     TgdPainter,
 } from "./painter"
 import { TgdConsole } from "@tgd/debug"
+import { TgdLogic } from "@tgd/context"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
@@ -16,6 +17,10 @@ export type TgdPainterGroupOptions = {
  * Group several painters together.
  */
 export class TgdPainterGroup extends TgdPainter {
+    /**
+     * the logic will be executed at the beginning of `paint()`.
+     */
+    public readonly logic = new TgdLogic()
     public active = true
     public onEnter: TgdPainterFunction | undefined
     public onExit: TgdPainterFunction | undefined
@@ -100,33 +105,13 @@ export class TgdPainterGroup extends TgdPainter {
             painter.delete()
         }
         this.painters.splice(0)
-        this.logicClear()
-    }
-
-    logicAdd(logic?: (time: number, delay: number) => void) {
-        if (logic) {
-            this.logicRemove(logic)
-            this.logics.push(logic)
-        }
-    }
-
-    logicRemove(logic?: (time: number, delay: number) => void) {
-        if (!logic) return
-
-        const { logics } = this
-        const index = logics.indexOf(logic)
-        if (index === -1) return
-
-        logics.splice(index, 1)
-    }
-
-    logicClear() {
-        this.logics.splice(0)
+        this.logic.clear()
     }
 
     paint(time: number, delay: number): void {
         if (!this.active) return
 
+        this.logic.exec(time, delay)
         this.onEnter?.(time, delay)
         for (const painter of this.painters) {
             if (painter.active) {

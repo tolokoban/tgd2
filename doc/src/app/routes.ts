@@ -84,6 +84,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/utils": ["/articles/utils"],
     "/articles/utils/loaders": ["/articles/utils/loaders"],
     "/articles/utils/loaders/tgdLoadImageFromElement": ["/articles/utils/loaders/tgdLoadImageFromElement"],
+    "/quick-start": ["/quick-start"],
     "/tools": ["/tools"],
     "/tools/filter": ["/tools/filter"],
     "/tools/gltf": ["/tools/gltf"],

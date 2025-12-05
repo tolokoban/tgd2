@@ -1,0 +1,250 @@
+import Demo from "./_demo"
+import Demo1 from "./_demo/demo-1"
+import Demo2 from "./_demo/demo-2"
+import DemoGLB from "./_demo/demo-glb"
+
+# Quick start
+
+> Note: All the code that follows is written in [Typescript](https://www.typescriptlang.org/).
+
+## Hello world!
+
+In this tutorial, we want to animate a spinnig cube like this:
+
+<Demo />
+
+Let's install the library:
+
+```sh
+npm install --save @tolokoban/tgd
+```
+
+The first think you need is to create a [TgdContext]((docs/classes/TgdContext.html)):
+
+```ts
+import { TgdContext } from "@tolokoban/tgd"
+
+function init(context: TgdContext) {
+    // We will fill this function later...
+}
+
+function createContext(canvas: HTMLCanvasElement | null) {
+    if (!canvas) return
+
+    const context = new TgdContext(canvas)
+    init(context)
+
+    // Return a cleanup function
+    return () => context.delete()
+}
+```
+
+If you need more control, the `TgdContext` constructor accepts a second argument of type [TgdContextOptions](docs/classes/TgdContextOptions.html).
+
+So, now that we have a context, let's **paint** something.
+
+TGD works with **Painters**. They are classes starting with `TgdPainter*`.
+They will be executed for each frame of the animation, and in the order you add them to the context.
+
+A simple one, but useful one, is [`TgdPainterClear`](docs/classes/TgdPainterClear.html).
+It will clear the screen with a defined color (dark blue in oour example) and set the depth-buffer to 1,
+which is the far plane of the camera. The depth-buffer is needed if you deal with 3D objects.
+
+```ts
+import { TgdContext, TgdPainterClear } from "@tolokoban/tgd"
+
+function init(context: TgdContext) {
+    const clear = new TgdPainterClear(context, {
+        // Set all pixels a dark blue.
+        color: [0.1, 0.2, 0.3, 1],
+        // Z-buffer initialized to 1 for every pixel.
+        depth: 1,
+    })
+    context.add(clear)
+    // Paint on the canvas.
+    context.paint()
+}
+```
+
+Now, you can call `createContext()` with the canvas of you choice to see the result.
+
+If you are using React, here is a way of binding the context to a component:
+
+```tsx
+export function MyComponentWithWebGL() {
+    return <canvas ref={createContext} style={{ width: "100%", height: "100%" }}></canvas>
+}
+```
+
+Now, let's paint a cube. For this, we will use [`TgdPainterMesh`](docs/classes/TgdPainterMesh.html).
+
+```ts
+import {
+    TgdContext,
+    TgdPainterClear,
+    TgdPainterMesh,
+} from "@tolokoban/tgd"
+
+
+function init(context: TgdContext) {
+    const clear = new TgdPainterClear(context, {
+        color: [0.1, 0.2, 0.3, 1],
+        depth: 1,
+    })
+    const mesh = new TgdContextMesh(context)
+    context.add(clear, mesh)
+    // Paint on the canvas.
+    context.paint()
+}
+```
+
+<Demo1 />
+
+Oh! But what's this? By looking to a cube from its front side, one would expect to see a perfect square.
+But we can see some borders now. Why is that?
+
+The fact is that **TGD** (like WebGL) is not a 3D library. It's just a **painting** library,
+and if you need something for the 3D, you have to say it explicitly.
+
+The borders that we see here, are the side faces that are painted before the front one.
+In 3D, the depth-buffer is what will fix this. We already reset it with `TgdPainterClear`,
+but we need now to tell WebGL to use it.
+This is done with a multipurpose painter that acts as a group of painters: [`TgdPainterState`](docs/classes/TgdPainterState).
+So, instead of adding `mesh` to the context, you will add it to `state` which in turn will be added to the context:
+
+```ts
+function init(context: TgdContext) {
+    const clear = new TgdPainterClear(context, {
+        color: [0.1, 0.2, 0.3, 1],
+        depth: 1,
+    })
+    const mesh = new TgdPainterMesh(context)
+    const state = new TgdPainterState(context, {
+        // This preset will only paint a pixel if its depth is less
+        // than the last painted one (in the same position).
+        depth: webglPresetDepth.less,
+    })
+    // Add the mesh to this state.
+    state.add(mesh)
+    context.add(clear, state)
+    context.paint()
+}
+```
+
+<Demo2 />
+
+Much better!
+Now, we just need to animate the rotation of the cube.
+
+For now, we add a logic function that will be called before the mesh in painted:
+
+```ts
+mesh.logic.add((time) => {
+    mesh.transfo.setEulerRotation(100 * time, -37 * time, 0)
+})
+```
+
+But wait! If you just test it now, the cube won't rotate.
+
+That's because we used `context.paint()` which will only paint the canvas once.
+To paint for every frame, we need to do this instead: `context.play()`.
+
+Here is the full code:
+
+```tsx
+import {
+    TgdContext,
+    TgdPainterClear,
+    TgdPainterMesh,
+    TgdPainterState,
+    webglPresetDepth,
+} from "@tolokoban/tgd"
+
+function init(context: TgdContext) {
+    const clear = new TgdPainterClear(context, {
+        color: [0.1, 0.2, 0.3, 1],
+        depth: 1,
+    })
+    const mesh = new TgdPainterMesh(context)
+    mesh.logic.add((time) => {
+        mesh.transfo.setEulerRotation(100 * time, -37 * time, 0)
+    })
+    const state = new TgdPainterState(context, {
+        depth: webglPresetDepth.less,
+    })
+    state.add(mesh)
+    context.add(clear, state)
+    context.play()
+}
+
+function createContext(canvas: HTMLCanvasElement | null) {
+    if (!canvas) return
+
+    const context = new TgdContext(canvas)
+    init(context)
+
+    // Return a cleanup function
+    return () => context.delete()
+}
+
+export default function () {
+    return <canvas ref={createContext} width={300} height={300}></canvas>
+}
+```
+
+## Loading assets
+
+We can use more complex 3D objects stored in [GLB](https://www.khronos.org/gltf/) files:
+
+<DemoGLB />
+
+To display a GLTF mesh, we will use [`TgdPainterMeshGltf`](docs/classes/TgdPainterMeshGltf.html)
+intead of the more generic `TgdPainterMesh`.
+
+```ts
+const mesh = new TgdPainterMeshGltf(context, {
+    asset,
+})
+```
+
+And to load the asset asynchronously, TGD provides the function [`tgdLoadGlb`]().
+
+```ts
+tgdLoadGlb(SuzanneURL).then((asset) => {
+    if (!asset) return
+
+})
+```
+
+If the GLB file is big and/or your network connection is poor, you will see en empty background
+for some time, then the mesh will appear and start rotating.
+To reduce the file size of your GLB files, try to use Draco compression.
+
+
+Here is the ful code of `init()`:
+
+```ts
+function init(context: TgdContext) {
+    const clear = new TgdPainterClear(context, {
+        color: [0.1, 0.2, 0.3, 1],
+        depth: 1,
+    })
+    const state = new TgdPainterState(context, {
+        depth: webglPresetDepth.less,
+    })
+    context.add(clear, state)
+    context.play()
+    // Loading asset
+    tgdLoadGlb(SuzanneURL).then((asset) => {
+        if (!asset) return
+
+        const mesh = new TgdPainterMeshGltf(context, {
+            asset,
+        })
+        mesh.logic.add((time) => {
+            mesh.transfo.setEulerRotation(100 * time, -37 * time, 0)
+        })
+        state.add(mesh)
+    })
+}
+```

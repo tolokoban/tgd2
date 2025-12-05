@@ -73,7 +73,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     if (framebuffer.textureColor0) sea.texture = framebuffer.textureColor0
     context.add(framebuffer, clear, meshOpaque, sea)
-    context.logicAdd((time) => {
+    context.logic.add((time) => {
         sea.y = Math.sin(time * 0.4) * 0.5
     })
     context.play()

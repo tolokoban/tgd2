@@ -8,6 +8,7 @@ import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdPainter } from "../../painter"
 import { TgdCamera } from "@tgd/camera"
+import { TgdLogic } from "@tgd/context"
 
 export interface TgdPainterMeshOptions {
     transfo?: Partial<TgdTransfoOptions> | TgdTransfo
@@ -22,6 +23,10 @@ export class TgdPainterMesh
     extends TgdPainter
     implements TgdInterfaceTransformable
 {
+    /**
+     * the logic will be executed at the beginning of `paint()`.
+     */
+    public readonly logic = new TgdLogic()
     public readonly transfo = new TgdTransfo()
     public readonly material: TgdMaterial
 
@@ -171,6 +176,7 @@ export class TgdPainterMesh
             transfo,
         } = this
         const { gl, camera } = context
+        this.logic.exec(time, delay)
         program.use()
         material.setUniforms?.({ camera, program, time, delay })
         program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
