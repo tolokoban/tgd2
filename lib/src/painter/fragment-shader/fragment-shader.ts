@@ -8,7 +8,18 @@ import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdProgram } from "@tgd/program"
 
 export interface TgdPainterFragmentShaderOptions {
-    shader: TgdShaderFragment | string
+    /**
+     * The fragment shader have access to these uniforms and varyings:
+     *
+     * ```glsl
+     * uniform float uniAspectRatio;        // Screen W/H
+     * uniform float uniAspectRatioInverse; // Screen H/W
+     * uniform float uniTime;               // Time in seconds.
+     * in vec2 varUV;
+     * in vec2 varPoint;
+     * ```
+     */
+    shader: TgdShaderFragment
     flipY?: boolean
     name?: string
     /**
@@ -40,6 +51,7 @@ export class TgdPainterFragmentShader extends TgdPainter {
                 uniZ: "float",
             },
             varying: {
+                varPoint: "vec2",
                 varUV: "vec2",
             },
             mainCode: [
@@ -50,7 +62,12 @@ export class TgdPainterFragmentShader extends TgdPainter {
             ],
         }).code
         const { shader } = options
-        const frag = typeof shader === "string" ? shader : shader.code
+        shader.varying.varUV = "vec2"
+        shader.varying.varPoint = "vec2"
+        shader.uniforms.uniTime = "float"
+        shader.uniforms.uniAspectRatio = "float"
+        shader.uniforms.uniAspectRatioInverse = "float"
+        const frag = shader.code
         const prg = new TgdProgram(context.gl, { vert, frag })
         const vao = createVAO(context, prg, options.flipY ? -1 : +1)
         this.program = prg
@@ -67,6 +84,9 @@ export class TgdPainterFragmentShader extends TgdPainter {
         const { vao, program, context, options } = this
         const { gl } = context
         program.use()
+        program.uniform1f("uniTime", time)
+        program.uniform1f("uniAspectRatio", context.aspectRatio)
+        program.uniform1f("uniAspectRatioInverse", context.aspectRatioInverse)
         options.setUniforms?.({ context, program, time, delay })
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)

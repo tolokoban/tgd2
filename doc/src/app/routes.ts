@@ -55,6 +55,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/filter/chromatic-aberration": ["/articles/painter/filter/chromatic-aberration"],
     "/articles/painter/filter/custom": ["/articles/painter/filter/custom"],
     "/articles/painter/filter/hue": ["/articles/painter/filter/hue"],
+    "/articles/painter/fragment-shader": ["/articles/painter/fragment-shader"],
     "/articles/painter/framebuffer": ["/articles/painter/framebuffer"],
     "/articles/painter/framebuffer/example0": ["/articles/painter/framebuffer/example0"],
     "/articles/painter/framebuffer/example0/01": ["/articles/painter/framebuffer/example0/01"],

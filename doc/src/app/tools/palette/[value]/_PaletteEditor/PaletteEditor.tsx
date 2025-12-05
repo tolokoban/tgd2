@@ -124,13 +124,12 @@ export function ViewPaletteEditor(props: ViewPaletteEditorProps) {
                     />
                     <CodeViewerView
                         language="ts"
-                        value={`{
-    name: "",
-    a: [${arr(a)}],
-    b: [${arr(b)}],
-    c: [${arr(c)}],
-    d: [${arr(d)}],
-}`}
+                        value={`tgdCodeFunction_palette({
+    a: [${arr(a)}, 1],
+    b: [${arr(b)}, 1],
+    c: [${arr(c)}, 1],
+    d: [${arr(d)}, 1],
+})`}
                     />
                 </ViewTab>
             </ViewTabs>

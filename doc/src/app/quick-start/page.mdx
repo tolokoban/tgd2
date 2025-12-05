@@ -19,7 +19,7 @@ Let's install the library:
 npm install --save @tolokoban/tgd
 ```
 
-The first think you need is to create a [TgdContext]((docs/classes/TgdContext.html)):
+The first think you need is to create a [TgdContext](docs/classes/TgdContext.html):
 
 ```ts
 import { TgdContext } from "@tolokoban/tgd"
@@ -39,7 +39,7 @@ function createContext(canvas: HTMLCanvasElement | null) {
 }
 ```
 
-If you need more control, the `TgdContext` constructor accepts a second argument of type [TgdContextOptions](docs/classes/TgdContextOptions.html).
+If you need more control, the `TgdContext` constructor accepts a second argument of type [TgdContextOptions](docs/types/TgdContextOptions.html).
 
 So, now that we have a context, let's **paint** something.
 
@@ -207,7 +207,7 @@ const mesh = new TgdPainterMeshGltf(context, {
 })
 ```
 
-And to load the asset asynchronously, TGD provides the function [`tgdLoadGlb`]().
+And to load the asset asynchronously, TGD provides the function [`tgdLoadGlb`](docs/functions/tgdLoadGlb.html).
 
 ```ts
 tgdLoadGlb(SuzanneURL).then((asset) => {

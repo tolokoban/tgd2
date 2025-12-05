@@ -75,7 +75,7 @@ export class TgdShaderFragment {
         const { code } = this
         const out = new TgdConsole(
             {
-                text: caption,
+                text: caption.trim() + "\n",
                 bold: true,
                 color: "#6bf",
             },
