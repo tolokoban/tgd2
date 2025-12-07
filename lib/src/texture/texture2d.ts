@@ -197,7 +197,12 @@ gl.texStorage2D(
     }
 
     loadBitmap(
-        bmp: string | WebglImage | null | Promise<WebglImage | null>,
+        bmp:
+            | string
+            | WebglImage
+            | null
+            | Promise<WebglImage | null>
+            | undefined,
         options: {
             level?: number
             generateMipmap?: boolean
