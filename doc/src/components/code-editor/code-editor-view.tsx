@@ -9,10 +9,12 @@ import "./code-editor-view.css"
 export interface CodeEditorViewProps {
     className?: string
     value: string
-    onChange(value: string): void
+    onChange?(value: string): void
     language: string
     disabled?: boolean
 }
+
+const VOID_FUNC = () => {}
 
 export default function CodeEditorView(props: CodeEditorViewProps) {
     return (
@@ -20,7 +22,7 @@ export default function CodeEditorView(props: CodeEditorViewProps) {
             <Editor
                 disabled={props.disabled}
                 value={props.value}
-                onValueChange={props.onChange}
+                onValueChange={props.onChange ?? VOID_FUNC}
                 highlight={(code) =>
                     Prism.highlight(
                         code,

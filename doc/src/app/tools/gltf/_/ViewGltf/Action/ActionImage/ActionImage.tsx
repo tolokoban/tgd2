@@ -8,6 +8,7 @@ import {
     type TgdDataGlb,
     TgdTexture2D,
     type TgdFormatGltfImage,
+    tgdCodeStringify,
 } from "@tolokoban/tgd"
 import Tgd, { type Assets } from "@/components/demo/Tgd"
 import ViewError from "@/components/Error"
@@ -17,6 +18,7 @@ import LightURL from "./checkboard-light.jpg"
 import DarkURL from "./checkboard-dark.jpg"
 
 import Styles from "./ActionImage.module.css"
+import CodeEditorView from "@/components/code-editor"
 
 const $ = Theme.classNames
 
@@ -98,6 +100,25 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
                     )}
                 </div>
             </header>
+            <details>
+                <summary>Code</summary>
+                <div>
+                    <CodeEditorView
+                        language="ts"
+                        disabled
+                        value={tgdCodeStringify([
+                            `function getTexture(asset: TgdDataGlb, context: TgdContext) {`,
+                            [
+                                `return new TgdTexture2D(context)`,
+                                [
+                                    `.loadBitmap(asset.getImageAsHTMLElement(${JSON.stringify(imageDef?.name ?? index)}))`,
+                                ],
+                            ],
+                            "}",
+                        ])}
+                    />
+                </div>
+            </details>
         </div>
     )
 }

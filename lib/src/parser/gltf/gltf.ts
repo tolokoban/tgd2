@@ -194,12 +194,32 @@ export class TgdDataGlb {
         return this.json.images ?? []
     }
 
-    getImage(imageIndex: number): TgdFormatGltfImage | undefined {
-        return this.json.images?.[imageIndex]
+    getImage(
+        imageIndexOrName: number | string
+    ): TgdFormatGltfImage | undefined {
+        const { images } = this.json
+        if (!images) return
+
+        if (typeof imageIndexOrName === "number")
+            return images?.[imageIndexOrName]
+
+        return images.find((img) => img.name === imageIndexOrName)
     }
 
-    getImageAsHTMLElement(imageIndex: number) {
-        return this.images[imageIndex] ?? EMPTY_IMAGE
+    getImageAsHTMLElement(imageIndexOrName: number | string) {
+        const { images } = this.json
+        if (!images) return
+
+        if (typeof imageIndexOrName === "number") {
+            return this.images[imageIndexOrName] ?? EMPTY_IMAGE
+        }
+
+        for (let i = 0; i < images.length; i++) {
+            if (images[i].name === imageIndexOrName) return this.images[i]
+        }
+        throw new Error(
+            `There is no image with name "${imageIndexOrName}" in this GLB file!\nPossible names are: ${images.map((img) => img.name).join(", ")}.`
+        )
     }
 
     getScenes(): TgdFormatGltfScene[] {
