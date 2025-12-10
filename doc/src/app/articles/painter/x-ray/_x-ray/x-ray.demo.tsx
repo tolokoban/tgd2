@@ -5,7 +5,6 @@ import {
     TgdPainterXRay,
     TgdPainterClear,
     TgdPainterState,
-    webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
@@ -44,6 +43,17 @@ function init(context: TgdContext, assets: Assets) {
         inertiaOrbit: 2000,
     })
     // #end
+    return (uniforms: Record<string, number>) => {
+        const exponent1 = uniforms.exponent1 ?? 1.2
+        const intensity1 = uniforms.intensity1 ?? 4
+        brain.exponent = exponent1
+        brain.intensity = intensity1
+        const exponent2 = uniforms.exponent2 ?? 5
+        const intensity2 = uniforms.intensity2 ?? 20
+        suzanne.exponent = exponent2
+        suzanne.intensity = intensity2
+        context.paint()
+    }
 }
 
 export default function Demo() {
@@ -54,6 +64,32 @@ export default function Demo() {
                 glb: {
                     brain: BrainURL,
                     suzanne: SuzanneURL,
+                },
+            }}
+            settings={{
+                exponent1: {
+                    label: "exponent (brain)",
+                    value: 1.2,
+                    min: -20,
+                    max: 20,
+                },
+                intensity1: {
+                    label: "intentity (brain)",
+                    value: 4,
+                    min: 0,
+                    max: 20,
+                },
+                exponent2: {
+                    label: "exponent (monkey)",
+                    value: 5,
+                    min: -20,
+                    max: 20,
+                },
+                intensity2: {
+                    label: "intentity (monkey)",
+                    value: 20,
+                    min: 0,
+                    max: 20,
                 },
             }}
         />

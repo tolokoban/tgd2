@@ -1,7 +1,6 @@
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import {
     TgdCamera,
-    TgdLogic,
     TgdPainterState,
     TgdPainterStateOptions,
     WebglAttributeType,
