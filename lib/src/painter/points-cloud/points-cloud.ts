@@ -1,3 +1,4 @@
+import { WebglStencilOptions } from "./../../utils/state/stencil"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdPainter } from "../painter"
 import { TgdDataset } from "@tgd/dataset"
@@ -37,13 +38,43 @@ export interface TgdPainterPointsCloudOptions {
     mustDeleteTexture?: boolean
     texture?: TgdTexture2D
     /**
-     * The content of a fragment shader function tht takes
+     * The content of a fragment shader function that takes
      * `vec4 color` as argument and must return a `vec4` color.
+     *
+     * The following uniforms are available:
+     *
+     * ```glsl
+     * uniform float uniSpecularExponent;
+     * uniform float uniSpecularIntensity;
+     * uniform float uniShadowThickness;
+     * uniform float uniShadowIntensity;
+     * uniform float uniLight;
+     * ```
      *
      * You can also use `TgdPainterPointsCloud.fragCode*()` static functions
      * to provide preset functions.
      */
     fragCode?: TgdCodeBloc
+    /**
+     * Default to 10
+     */
+    specularExponent?: number
+    /**
+     * Default to 0.33
+     */
+    specularIntensity?: number
+    /**
+     * Default to 0.5
+     */
+    shadowIntensity?: number
+    /**
+     * Default to 1
+     */
+    shadowThickness?: number
+    /**
+     * Default to 1
+     */
+    light?: number
 }
 
 export class TgdPainterPointsCloud extends TgdPainter {
@@ -101,6 +132,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
         this.name = options.name ?? this.name
         this.radiusMultiplier = options.radiusMultiplier ?? 1
         this.minSizeInPixels = options.minSizeInPixels ?? 0
+        this.specularExponent = options.specularExponent ?? 10
+        this.specularIntensity = options.specularIntensity ?? 0.33
+        this.shadowIntensity = options.shadowIntensity ?? 0.5
+        this.shadowThickness = options.shadowThickness ?? 1
+        this.light = options.light ?? 1
         this.dataPoint = options.dataPoint
         if ((this.dataPoint.length & 3) !== 0) {
             throw new Error(
@@ -188,11 +224,6 @@ export class TgdPainterPointsCloud extends TgdPainter {
                 uniMinSizeInPixels: "float",
                 uniRadiusMultiplier: "float",
                 uniHalfScreenHeightInPixels: "float",
-                uniSpecularExponent: "float",
-                uniSpecularIntensity: "float",
-                uniShadowIntensity: "float",
-                uniShadowThickness: "float",
-                uniLight: "float",
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
             },
@@ -217,6 +248,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
         const frag = new TgdShaderFragment({
             uniforms: {
                 uniTexture: "sampler2D",
+                uniSpecularExponent: "float",
+                uniSpecularIntensity: "float",
+                uniShadowIntensity: "float",
+                uniShadowThickness: "float",
+                uniLight: "float",
             },
             varying: {
                 varUV: "vec2",
@@ -230,10 +266,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
                         "float len = 1.0 - dot(coords, coords);",
                         "if (len < 0.0) discard;",
                         "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
-                        `float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1 - uniShadowIntensity);`,
+                        `float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1.0 - uniShadowIntensity);`,
                         `float spec = pow(len, uniSpecularExponent) * uniSpecularIntensity;`,
                         "return color * vec4(vec3(light * uniLight), 1.0) + vec4(vec3(spec), 0.0);",
                     ],
+                    "}",
                 ],
             },
             mainCode: [
