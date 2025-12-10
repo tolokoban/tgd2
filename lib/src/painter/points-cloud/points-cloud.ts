@@ -68,6 +68,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
             "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
             "float len = 1.0 - dot(coords, coords);",
             "if (len < 0.0) discard;",
+            "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
             `float light = smoothstep(0.0, ${shadowThickness.toFixed(6)}, len) * ${shadowIntensity} + ${(1 - shadowIntensity).toFixed(6)};`,
             `float spec = pow(len, ${specularExponent.toFixed(6)}) * ${specularIntensity.toFixed(6)};`,
             "return color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
@@ -78,6 +79,12 @@ export class TgdPainterPointsCloud extends TgdPainter {
     public texture: TgdTexture2D
     public radiusMultiplier = 1
     public minSizeInPixels = 0
+
+    public specularExponent = 10
+    public specularIntensity = 0.33
+    public shadowIntensity = 0.5
+    public shadowThickness = 1
+    public light = 1
 
     private readonly dataPoint: Float32Array
     private readonly dataUV: Float32Array
@@ -153,6 +160,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
         program.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         program.uniform1f("uniMinSizeInPixels", minSizeInPixels)
         program.uniform1f("uniHalfScreenHeightInPixels", context.height * 0.5)
+        program.uniform1f("uniSpecularExponent", this.specularExponent)
+        program.uniform1f("uniSpecularIntensity", this.specularIntensity)
+        program.uniform1f("uniShadowIntensity", this.shadowIntensity)
+        program.uniform1f("uniShadowThickness", this.shadowThickness)
+        program.uniform1f("uniLight", this.light)
         program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
@@ -176,6 +188,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
                 uniMinSizeInPixels: "float",
                 uniRadiusMultiplier: "float",
                 uniHalfScreenHeightInPixels: "float",
+                uniSpecularExponent: "float",
+                uniSpecularIntensity: "float",
+                uniShadowIntensity: "float",
+                uniShadowThickness: "float",
+                uniLight: "float",
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
             },
@@ -208,16 +225,15 @@ export class TgdPainterPointsCloud extends TgdPainter {
             functions: {
                 render: [
                     "vec4 render(vec4 color) {",
-                    render ?? TgdPainterPointsCloud.fragCodeSphere(),
-                    // [
-                    //     "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
-                    //     "float len = 1.0 - dot(coords, coords);",
-                    //     "if (len < 0.0) discard;",
-                    //     "float light = smoothstep(0.0, 0.75, len) * .1 + .9;",
-                    //     "float spec = pow(len, 6.0) * .5;",
-                    //     "return color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
-                    // ],
-                    "}",
+                    render ?? [
+                        "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
+                        "float len = 1.0 - dot(coords, coords);",
+                        "if (len < 0.0) discard;",
+                        "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
+                        `float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1 - uniShadowIntensity);`,
+                        `float spec = pow(len, uniSpecularExponent) * uniSpecularIntensity;`,
+                        "return color * vec4(vec3(light * uniLight), 1.0) + vec4(vec3(spec), 0.0);",
+                    ],
                 ],
             },
             mainCode: [
