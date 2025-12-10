@@ -1,4 +1,3 @@
-import { WebglStencilOptions } from "./../../utils/state/stencil"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdPainter } from "../painter"
 import { TgdDataset } from "@tgd/dataset"
@@ -87,22 +86,43 @@ export class TgdPainterPointsCloud extends TgdPainter {
             specularIntensity: number
             shadowThickness: number
             shadowIntensity: number
+            light: number
         }> = {}
     ): TgdCodeBloc {
         const {
-            specularExponent = 10,
-            specularIntensity = 0.33,
-            shadowThickness = 0.5,
-            shadowIntensity = 0.1,
+            specularExponent,
+            specularIntensity,
+            shadowThickness,
+            shadowIntensity,
+            light,
         } = options
+        const SpE =
+            typeof specularExponent === "number"
+                ? specularExponent.toFixed(6)
+                : "uniSpecularExponent"
+        const SpI =
+            typeof specularIntensity === "number"
+                ? specularIntensity.toFixed(6)
+                : "uniSpecularIntensity"
+        const ShT =
+            typeof shadowThickness === "number"
+                ? shadowThickness.toFixed(6)
+                : "uniShadowThickness"
+        const ShI =
+            typeof shadowIntensity === "number"
+                ? shadowIntensity.toFixed(6)
+                : "uniShadowIntensity"
+        const L = typeof light === "number" ? light.toFixed(6) : "uniLight"
         return [
             "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
             "float len = 1.0 - dot(coords, coords);",
             "if (len < 0.0) discard;",
             "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
-            `float light = smoothstep(0.0, ${shadowThickness.toFixed(6)}, len) * ${shadowIntensity} + ${(1 - shadowIntensity).toFixed(6)};`,
-            `float spec = pow(len, ${specularExponent.toFixed(6)}) * ${specularIntensity.toFixed(6)};`,
-            "return color * vec4(vec3(light), 1.0) + vec4(vec3(spec), 0.0);",
+            `float light = smoothstep(0.0, ${ShT}, len) * ${ShI} + (1.0 - ${ShI});`,
+            specularIntensity
+                ? `float spec = pow(len, ${SpE}) * ${SpI};`
+                : "// No specular.",
+            `return color * vec4(vec3(light * ${L}), 1.0) + vec4(vec3(spec), 0.0);`,
         ]
     }
 

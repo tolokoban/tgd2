@@ -21,7 +21,6 @@ function init(ctx: TgdContext) {
         )
     })
     const data = new Uint8Array(table.buffer)
-    console.log("🚀 [TBL] data = ", data) // @FIXME: Remove this line written on 2025-02-04 at 16:49
     const texture = new TgdTexture2D(ctx, { flipY: true })
         .setParams({
             magFilter: "NEAREST",
@@ -51,12 +50,12 @@ function makeRGB(...lines: string[]) {
     const code = lines.join("")
     const data: number[] = []
     for (const line of lines) {
-        line.split("").map(digit => data.push(...(COLORS[digit] ?? [])))
+        line.split("").map((digit) => data.push(...(COLORS[digit] ?? [])))
         let size = line.length * "RGB".length
         while (size % 4 !== 0) {
             data.push(0)
             size++
         }
     }
-    return new Uint8Array(data.map(v => Math.floor(255 * v)))
+    return new Uint8Array(data.map((v) => Math.floor(255 * v)))
 }

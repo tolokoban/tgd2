@@ -48,7 +48,6 @@ export function ViewFilter() {
         DEFAULT_FRAGMENT_SHADER,
         "Filter/FragmentShader"
     )
-    console.log("🚀 [Filter] library =", library) // @FIXME: Remove this line written on 2025-07-15 at 15:45
     console.log(functions)
 
     return (

@@ -9,7 +9,7 @@ import {
 import View from "@/components/demo/Tgd"
 
 // #begin
-function init(context: TgdContext): TgdContext {
+function init(context: TgdContext) {
     const shader = new TgdShaderFragment({
         functions: {
             ...tgdCodeFunction_palette({
@@ -30,7 +30,6 @@ function init(context: TgdContext): TgdContext {
     shader.debug()
     context.add(new TgdPainterFragmentShader(context, { shader }))
     context.play()
-    return context
 }
 // #end
 

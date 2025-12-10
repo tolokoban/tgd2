@@ -32,8 +32,7 @@ export default function DemoContainer() {
 }
 
 function init(context: TgdContext) {
-    document.addEventListener("keydown", evt => {
-        console.log("🚀 [index] evt.key = ", evt.key) // @FIXME: Remove this line written on 2024-02-16 at 16:02
+    document.addEventListener("keydown", (evt) => {
         switch (evt.key) {
             case "0":
                 context.camera.transfo.orientation.face("+X+Y+Z")
@@ -100,7 +99,7 @@ function init(context: TgdContext) {
         easingFunction: tgdEasingFunctionOutBack,
     }
     context.animSchedule(anim)
-    context.inputs.keyboard.eventKeyPress.addListener(evt => {
+    context.inputs.keyboard.eventKeyPress.addListener((evt) => {
         if (evt.key !== " ") return
 
         context.animCancel(anim)

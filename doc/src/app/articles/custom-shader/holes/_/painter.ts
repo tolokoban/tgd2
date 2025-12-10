@@ -24,8 +24,6 @@ export class ShieldPainter extends TgdPainterMesh {
             geometry,
             material,
         })
-        console.log("🚀 [painter] geometry = ", geometry) // @FIXME: Remove this line written on 2024-11-06 at 12:20
-        console.log("🚀 [painter] abedo = ", abedo) // @FIXME: Remove this line written on 2024-11-06 at 12:45
         this.texAbedo = texAbedo
     }
 

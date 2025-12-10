@@ -23,6 +23,7 @@ import {
 import Spinner from "../../Spinner"
 
 import styles from "./tgd.module.css"
+import { Settings, SettingsDefinitions } from "@/components/settings"
 
 export interface Assets {
     image: Record<string, HTMLImageElement>
@@ -35,10 +36,13 @@ type AssetsToLoad = {
     [key in keyof Assets]: Record<string, string>
 }
 
-interface TgdProps {
+interface TgdProps<T extends SettingsDefinitions> {
     className?: string
     options?: WebGLContextAttributes
-    onReady(scene: TgdContext, assets: Assets): void
+    onReady(
+        scene: TgdContext,
+        assets: Assets
+    ): void | undefined | ((settings: Record<keyof T, number>) => void)
     width?: string
     height?: string
     noBorder?: boolean
@@ -46,8 +50,9 @@ interface TgdProps {
     assets?: Partial<AssetsToLoad>
     controller?: Partial<TgdControllerCameraOrbitOptions>
     children?: React.ReactNode
+    settings?: T
 }
-export default function Tgd({
+export default function Tgd<T extends SettingsDefinitions>({
     className,
     options,
     onReady,
@@ -57,8 +62,30 @@ export default function Tgd({
     noBorder = false,
     assets,
     controller,
+    settings,
     children,
-}: TgdProps) {
+}: TgdProps<T>) {
+    const refUpdateSettings = React.useRef<
+        void | null | ((settings: Record<keyof T, number>) => void)
+    >(null)
+    const [settingValues, setSettingValues] = React.useState(settings)
+    const reduceSettings = (): Record<keyof T, number> => {
+        if (!settingValues) return {} as Record<keyof T, number>
+        const values: Record<string, number> = {}
+        for (const key of Object.keys(settingValues)) {
+            values[key] = settingValues[key].value
+        }
+        return values as Record<keyof T, number>
+    }
+    React.useEffect(() => {
+        if (settingValues) {
+            const values: Record<string, number> = {}
+            for (const key of Object.keys(settingValues)) {
+                values[key] = settingValues[key].value
+            }
+            refUpdateSettings.current?.(reduceSettings())
+        }
+    }, [settingValues])
     const [error, setError] = React.useState<string | null>(null)
     const [landscape, setLandscape] = React.useState(true)
     const [fullscreenAvailable, setFullscreenAvailable] = React.useState(false)
@@ -112,7 +139,8 @@ export default function Tgd({
                             }
                         )
                     }
-                    onReady(context, loadedAssets)
+                    refUpdateSettings.current = onReady(context, loadedAssets)
+                    refUpdateSettings.current?.(reduceSettings())
                     context.paint()
                 } catch (ex) {
                     setError(
@@ -208,6 +236,12 @@ export default function Tgd({
                 {gizmo && (
                     <canvas className={styles.gizmo} ref={mountGizmo}></canvas>
                 )}
+                {settingValues && (
+                    <Settings<T>
+                        values={settingValues}
+                        onChange={setSettingValues}
+                    />
+                )}
                 {error && <div className={styles.error}>{error}</div>}
             </div>
         )
@@ -257,6 +291,12 @@ export default function Tgd({
                             ref={mountGizmo}
                         ></canvas>
                     )}
+                    {settingValues && (
+                        <Settings<T>
+                            values={settingValues}
+                            onChange={setSettingValues}
+                        />
+                    )}
                     {error && <div className={styles.error}>{error}</div>}
                 </div>
                 <div
@@ -279,7 +319,6 @@ async function loadAssets({
     text,
     image,
 }: Partial<AssetsToLoad> = {}): Promise<Assets> {
-    console.log("🚀 [Tgd] glb, data, text, image = ", glb, data, text, image) // @FIXME: Remove this line written on 2024-11-08 at 14:33
     const assets: Assets = {
         glb: {},
         data: {},

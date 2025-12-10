@@ -86,7 +86,6 @@ export class FilterManager {
             context.play()
             this.onError(null)
         } catch (ex) {
-            console.log("🚀 [manager] ex = ", ex) // @FIXME: Remove this line written on 2024-11-12 at 15:15
             this.onError(ex instanceof Error ? ex.message : JSON.stringify(ex))
         }
     }

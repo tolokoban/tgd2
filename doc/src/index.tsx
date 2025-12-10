@@ -101,7 +101,6 @@ async function test() {
         exports: ["test"],
     }
     const codeBloc = wasm_module(module)
-    console.log("🚀 [index] codeBloc =", codeBloc) // @FIXME: Remove this line written on 2025-05-31 at 18:38
     const code = tgdCodeStringify(codeBloc)
     console.log(code)
     const bundle = await tgdWasmCompile(assertTestFunction, module)

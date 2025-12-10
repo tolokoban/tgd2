@@ -20,13 +20,13 @@ import vert from "./painter-stars.vert"
 import frag from "./painter-stars.frag"
 
 // #begin
-function init(ctx: TgdContext): TgdContext {
+function init(ctx: TgdContext) {
     new TgdControllerCameraOrbit(ctx, {
         inertiaOrbit: 1000,
     })
     ctx.add(new TgdPainterClear(ctx, { color: [0, 0, 0, 1] }))
     ctx.paint()
-    tgdLoadArrayBuffer(dataURL).then(buff => {
+    tgdLoadArrayBuffer(dataURL).then((buff) => {
         if (!buff) return
 
         const data = new Float32Array(buff)
@@ -39,7 +39,6 @@ function init(ctx: TgdContext): TgdContext {
         )
         ctx.paint()
     })
-    return ctx
 }
 // #end
 
@@ -65,7 +64,10 @@ export class PainterStars extends TgdPainter {
      *
      * @param data A sequence of 4 floats: longitude, latitude, brightness and color.
      */
-    constructor(private readonly context: TgdContext, data: Float32Array) {
+    constructor(
+        private readonly context: TgdContext,
+        data: Float32Array
+    ) {
         super()
         this.count = data.length >> 2
         this.prg = new TgdProgram(context.gl, {

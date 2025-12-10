@@ -56,7 +56,6 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                 return
             }
 
-            console.log("🚀 [ActionScene] context =", context) // @FIXME: Remove this line written on 2025-05-14 at 11:04
             const scenePainter = new TgdPainterNode({
                 children: (scene.nodes ?? [])
                     .filter((nodeIndex) => {

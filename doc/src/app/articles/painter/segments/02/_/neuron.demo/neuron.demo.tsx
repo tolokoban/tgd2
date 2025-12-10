@@ -16,12 +16,10 @@ function init(context: TgdContext, assets: Assets) {
     try {
         // #begin
         const { data, center, bbox } = makeSegmentsData(assets.text.swc)
-        console.log("🚀 [neuron.demo] bbox, center =", bbox, center) // @FIXME: Remove this line written on 2025-04-01 at 15:53
         context.camera.transfo.position = center
         context.camera.transfo.distance = Math.max(bbox.x, bbox.y, bbox.z)
         context.camera.far = 10 * context.camera.transfo.distance
         context.camera.near = 1e-3
-        console.log("🚀 [neuron.demo] context.camera.far =", context.camera.far) // @FIXME: Remove this line written on 2025-04-01 at 15:53
         new TgdControllerCameraOrbit(context, {
             inertiaOrbit: 1000,
             speedZoom: context.camera.transfo.distance * 0.1,

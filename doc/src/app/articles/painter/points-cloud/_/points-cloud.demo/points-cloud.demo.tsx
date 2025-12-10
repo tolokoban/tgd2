@@ -40,18 +40,25 @@ function init(context: TgdContext, assets: Assets) {
     const texture = new TgdTexture2D(context).loadBitmap(
         tgdCanvasCreatePalette(["#f74"])
     )
+    const cloud = new TgdPainterPointsCloud(context, {
+        dataPoint: new Float32Array(dataset.data),
+        texture,
+    })
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
-        children: [
-            new TgdPainterPointsCloud(context, {
-                dataPoint: new Float32Array(dataset.data),
-                texture,
-            }),
-        ],
+        children: [cloud],
     })
     context.add(clear, state)
     context.paint()
     // #end
+    return (settings: Record<string, number>) => {
+        cloud.shadowIntensity = settings.shadowIntensity
+        cloud.shadowThickness = settings.shadowThickness
+        cloud.specularExponent = settings.specularExponent
+        cloud.specularIntensity = settings.specularIntensity
+        cloud.light = settings.light
+        context.paint()
+    }
 }
 
 export default function Demo() {
@@ -64,6 +71,32 @@ export default function Demo() {
             }}
             assets={{
                 glb: { monkey: MonkeyURL },
+            }}
+            settings={{
+                shadowIntensity: {
+                    label: "shadowIntensity",
+                    value: 0.5,
+                },
+                shadowThickness: {
+                    label: "shadowThickness",
+                    value: 1,
+                    min: 0,
+                    max: 2,
+                },
+                specularExponent: {
+                    label: "specularExponent",
+                    value: 10,
+                    min: -20,
+                    max: 20,
+                },
+                specularIntensity: {
+                    label: "specularIntensity",
+                    value: 0.33,
+                },
+                light: {
+                    label: "light",
+                    value: 1,
+                },
             }}
         />
     )

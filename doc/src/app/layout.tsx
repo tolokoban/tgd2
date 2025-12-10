@@ -6,8 +6,6 @@ import { RoutePath } from "./types"
 
 import Style from "./layout.module.css"
 
-console.log("🚀 [layout] Style = ", Style) // @FIXME: Remove this line written on 2024-10-01 at 22:27
-
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <ModalProvider>

@@ -57,7 +57,6 @@ function init(context: TgdContext) {
             setTimeout(loadImage, 500)
             return
         }
-        console.log("🚀 [element.demo] elem =", elem) // @FIXME: Remove this line written on 2025-09-17 at 09:13
         console.log(elem.innerHTML)
         tgdLoadImageFromElement(elem).then((img) => {
             document.body.appendChild(img)

@@ -27,7 +27,7 @@ export default function Page() {
     const [caseNumber, setCaseNumber] = useLocalStorageState(
         0,
         "volume-to-mesh/caseNumber",
-        value => tgdCalcClamp(Math.floor(ensureNumber(value, 0)), 0, 255)
+        (value) => tgdCalcClamp(Math.floor(ensureNumber(value, 0)), 0, 255)
     )
     const [triangles, setTriangles] = React.useState("")
     const key = `volume-to-mesh/triangles/${caseNumber}`
@@ -66,7 +66,11 @@ export default function Page() {
                 the space between red and blue corners.
             </p>
             <p>A voxel has 8 corners, so we have 256 configurations.</p>
-            <View onReady={context => (manager.context = context)} />
+            <View
+                onReady={(context) => {
+                    manager.context = context
+                }}
+            />
             <ViewSlider
                 className={styles.flex1}
                 wide
@@ -116,7 +120,7 @@ function handleReset() {
     const configurations = tgdDataMarchingCubesConfigurations()
     for (let i = 0; i < configurations.length; i++) {
         const config = configurations[i]
-        const code = config.map(i => "ABCDEFGHIJKL".charAt(i)).join("")
+        const code = config.map((i) => "ABCDEFGHIJKL".charAt(i)).join("")
         globalThis.localStorage.setItem(`volume-to-mesh/triangles/${i}`, code)
     }
     location.reload()
