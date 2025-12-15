@@ -10,6 +10,9 @@ import View from "@/components/demo/Tgd"
 
 // #begin
 function init(context: TgdContext) {
+    const uniforms = {
+        uniExponent: 0.5,
+    }
     const shader = new TgdShaderFragment({
         functions: {
             ...tgdCodeFunction_palette({
@@ -20,19 +23,46 @@ function init(context: TgdContext) {
             }),
             ...tgdCodeFunction_fbm({ octaves: 4, G: 0.5 }),
         },
+        uniforms: {
+            uniExponent: "float",
+        },
         mainCode: [
             "float scale = 2.0 + 1.5 * sin(uniTime * .23);",
             "float index = fbm(vec3(scale * varUV + vec2(uniTime * .2, 0.0), uniTime * .1));",
-            "float light = pow(dot(index, index), 0.15);",
-            "FragColor = palette(index) * vec4(vec3(light), 1.0);",
+            "vec4 color = palette(index);",
+            "float light = pow(dot(color, color), uniExponent);",
+            "FragColor = color * vec4(vec3(light), 1.0);",
         ],
     })
     shader.debug()
-    context.add(new TgdPainterFragmentShader(context, { shader }))
+    context.add(
+        new TgdPainterFragmentShader(context, {
+            shader,
+            setUniforms: ({ program }) => {
+                program.uniform1f("uniExponent", uniforms.uniExponent)
+            },
+        })
+    )
     context.play()
+    return (settings: Record<string, number>) => {
+        uniforms.uniExponent = settings.uniExponent
+    }
 }
 // #end
 
 export default function Demo() {
-    return <View onReady={init} />
+    return (
+        <View
+            onReady={init}
+            settings={{
+                uniExponent: {
+                    label: "uniExponent",
+                    min: -10,
+                    max: 10,
+                    step: 0.02,
+                    value: 0.5,
+                },
+            }}
+        />
+    )
 }
