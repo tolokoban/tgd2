@@ -1,11 +1,13 @@
 import {
-    TgdQuat,
-    TgdVec3,
     TgdMat4,
+    type TgdQuat,
     TgdTransfo,
-    TgdTransfoOptions,
+    type TgdTransfoOptions,
+    type TgdVec3,
+    TgdVec4,
 } from "@tgd/math"
-import { TgdInterfaceTransformable } from "../interface"
+import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
+import type { TgdInterfaceTransformable } from "../interface"
 
 export interface TgdCameraOptions {
     near?: number
@@ -22,6 +24,15 @@ export interface TgdCameraState {
     zoom: number
     orientation: TgdQuat
     position: TgdVec3
+}
+
+export enum TgdCameraVisibility {
+    /** Whole object outsie of view */
+    NONE = 0,
+    /** A part of the object in the view` */
+    PARTIAL = 1,
+    /** The object is entirely in the view */
+    FULL = 2,
 }
 
 export abstract class TgdCamera implements TgdInterfaceTransformable {
@@ -42,7 +53,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     protected dirtyProjectionInverse = true
 
     protected _near = 1e-3
-    protected _far = Infinity
+    protected _far = Number.POSITIVE_INFINITY
 
     // transformation
     private readonly _matrixModelView = new TgdMat4()
@@ -175,6 +186,69 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         return this
     }
 
+    apply(point: ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4): TgdVec4 {
+        return new TgdVec4(point)
+            .applyMatrix(this.matrixModelView)
+            .applyMatrix(this.matrixProjection)
+    }
+
+    /**
+     * Useful for LOD. If an object takes a small space on the screen,
+     * we can display its low res version.
+     * @returns The surface of the bounding square in screen space of a space bbox.
+     */
+    computeBoundingBoxVisibleSurface(
+        bbox: Readonly<{
+            min: Readonly<ArrayNumber3 | TgdVec3>
+            max: Readonly<ArrayNumber3 | TgdVec3>
+        }>
+    ): number {
+        const [x0, y0, z0] = bbox.min
+        const [x1, y1, z1] = bbox.max
+        const points: ArrayNumber3[] = [
+            [x0, y0, z0],
+            [x0, y0, z1],
+            [x0, y1, z0],
+            [x0, y1, z1],
+            [x1, y0, z0],
+            [x1, y0, z1],
+            [x1, y1, z0],
+            [x1, y1, z1],
+        ]
+        let left = 0
+        let right = 0
+        let top = 0
+        let bottom = 0
+        let minX = +Number.MAX_VALUE
+        let maxX = -Number.MAX_VALUE
+        let minY = +Number.MAX_VALUE
+        let maxY = -Number.MAX_VALUE
+        for (const point of points) {
+            const [xx, yy, , ww] = this.apply(point)
+            const x = xx / ww
+            const y = yy / ww
+            maxX = Math.max(maxX, x)
+            minX = Math.min(minX, x)
+            maxY = Math.max(maxY, y)
+            minY = Math.min(minY, y)
+            if (x < -1) left++
+            else if (x > +1) right++
+            if (y < -1) top++
+            else if (y > +1) bottom++
+        }
+        if (left === 8 || right === 8 || top === 8 || bottom === 8) {
+            return 0
+        }
+        console.log(
+            "🐞 [camera@242] minX, maxX, minY, maxY =",
+            minX,
+            maxX,
+            minY,
+            maxY
+        ) // @FIXME: Remove this line written on 2026-01-13 at 18:06
+        return (maxX - minX) * (maxY - minY)
+    }
+
     /**
      * @param screenX -1 is the left edge, 0 id the center and +1 is the right edge.
      * @param screenY -1 is the bottom edge, 0 id the center and +1 is the top edge.
@@ -228,11 +302,11 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         console.log("TgdCamera", name)
         console.log("    Distance:", this.transfo.distance)
         console.log("    Zoom:", this.zoom)
-        this.transfo.orientation.debug(`   Orientation`)
-        this.transfo.position.debug(`    Target`)
-        this.transfo.actualPosition.debug(`    Actual position`)
-        this.matrixModelView.debug(`    MatrixModelView`)
-        this.matrixProjection.debug(`    MatrixProjection`)
+        this.transfo.orientation.debug("   Orientation")
+        this.transfo.position.debug("    Target")
+        this.transfo.actualPosition.debug("    Actual position")
+        this.matrixModelView.debug("    MatrixModelView")
+        this.matrixProjection.debug("    MatrixProjection")
     }
 
     protected abstract getSpaceHeightAtTarget(): number

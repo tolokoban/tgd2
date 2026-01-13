@@ -1,14 +1,14 @@
-import { TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
-import { TgdMaterial, TgdMaterialNormals } from "@tgd/material"
-import { TgdTransfo, TgdTransfoOptions, TgdVec3 } from "@tgd/math"
+import type { TgdCamera } from "@tgd/camera"
+import { TgdLogic } from "@tgd/context"
+import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
+import type { TgdInterfaceTransformable } from "@tgd/interface"
+import { type TgdMaterial, TgdMaterialNormals } from "@tgd/material"
+import { TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import { TgdVertexArray } from "@tgd/vao"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
-import { TgdInterfaceTransformable } from "@tgd/interface"
+import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../../painter"
-import { TgdCamera } from "@tgd/camera"
-import { TgdLogic } from "@tgd/context"
 
 export interface TgdPainterMeshOptions {
     transfo?: Partial<TgdTransfoOptions> | TgdTransfo
@@ -84,14 +84,14 @@ export class TgdPainterMesh
                     "}",
                 ],
                 applyMaterial: [
-                    `void applyMaterial(vec3 position, vec3 normal, vec2 uv) {`,
+                    "void applyMaterial(vec3 position, vec3 normal, vec2 uv) {",
                     [material.vertexShaderCode],
                     "}",
                 ],
             },
             mainCode: [
                 `vec4 position = getPosition(${geometry.attPosition});`,
-                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;`,
+                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
                 `applyMaterial(position.xyz, ${geometry.attNormal}.xyz, ${geometry.attUV}.xy);`,
             ],
         })
@@ -107,7 +107,7 @@ export class TgdPainterMesh
                     "}",
                 ],
             },
-            mainCode: [`FragColor = applyMaterial();`],
+            mainCode: ["FragColor = applyMaterial();"],
         })
         if (material.debug) {
             vert.debug()
