@@ -1,5 +1,5 @@
 import {
-    ArrayNumber3,
+    type ArrayNumber3,
     TgdContext,
     TgdPainterFragmentShader,
     TgdShaderFragment,

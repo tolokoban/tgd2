@@ -1,10 +1,7 @@
-import { TgdPainterFunction } from "@tgd/types/painter"
-import {
-    TgdDebugPainterHierarchy as TgdDebugPainterHierarchy,
-    TgdPainter,
-} from "./painter"
-import { TgdConsole } from "@tgd/debug"
 import { TgdLogic } from "@tgd/context"
+import { TgdConsole } from "@tgd/debug"
+import type { TgdPainterFunction } from "@tgd/types/painter"
+import { type TgdDebugPainterHierarchy, TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delay: number): void
@@ -93,18 +90,33 @@ export class TgdPainterGroup extends TgdPainter {
         }
     }
 
-    removeAll() {
-        for (const painter of this.painters) {
-            painter.delete()
+    removeWithoutDeleting(...painters: TgdPainter[]) {
+        for (const painter of painters) {
+            const index = this.painters.indexOf(painter)
+            if (index === -1) continue
+
+            this.painters.splice(index, 1)
+        }
+    }
+
+    /**
+     * Remove all the painters from this group.
+     *
+     * @param deleteRemovedPainters By default, when a painter is removed,
+     * its `delete()` function is called. You can prevent this by setting
+     * `deleteRemovedPainters === false`.
+     */
+    removeAll(deleteRemovedPainters = true) {
+        if (deleteRemovedPainters) {
+            for (const painter of this.painters) {
+                painter.delete()
+            }
         }
         this.painters.splice(0)
     }
 
     delete(): void {
-        for (const painter of this.painters) {
-            painter.delete()
-        }
-        this.painters.splice(0)
+        this.removeAll()
         this.logic.clear()
     }
 

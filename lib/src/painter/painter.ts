@@ -16,9 +16,9 @@ export abstract class TgdPainter {
      * This attribute has no other purpose than debugging.
      * Its value is not used by Tgd.
      */
-    public name: string = `Painter/${this.id}`
+    public name = `Painter/${this.id}`
 
-    public active: boolean = true
+    public active = true
 
     abstract delete(): void
 
@@ -28,5 +28,11 @@ export abstract class TgdPainter {
         return {
             [this.active ? this.name : `${this.name} (Inactive)`]: null,
         }
+    }
+
+    debug(caption?: string) {
+        console.debug(
+            caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`
+        )
     }
 }

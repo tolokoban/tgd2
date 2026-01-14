@@ -1,4 +1,4 @@
-import { type TgdCamera, TgdCameraVisibility } from "@tgd/camera"
+import type { TgdCamera } from "@tgd/camera"
 import type { TgdVec3 } from "@tgd/math"
 import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
@@ -29,10 +29,9 @@ function recursiveListBBoxes(
     level: number
 ) {
     const visibility = camera.computeBoundingBoxVisibleSurface(bbox)
-    console.log("🐞 [octree@32] visibility =", visibility) // @FIXME: Remove this line written on 2026-01-13 at 18:04
     if (visibility < 1e-8) return
 
-    if (visibility > 1) {
+    if (visibility < 1 || level >= levels) {
         result.push([x, y, z, level])
         return
     }

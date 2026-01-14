@@ -1,8 +1,8 @@
 import {
-    TgdContext,
+    type TgdContext,
+    type TgdDataGlb,
     TgdMaterialNormals,
     TgdPainterMesh,
-    TgdDataGlb,
     TgdTexture2D,
 } from "@tolokoban/tgd"
 

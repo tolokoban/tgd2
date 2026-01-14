@@ -1,5 +1,5 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,
@@ -45,23 +45,17 @@ export default class Painter extends TgdPainter {
             attRadius: "float",
         })
         // prettier-ignore
-        dataset.set("attPos", new Float32Array([
-            -1, -1,
-            -1, +1,
-            +1, -1,
-            +1, +1,
-            +1, 0,
-            -1, 0,
-            0, +1,
-            0, -1,
-            0, 0,
-        ]))
+        dataset.set(
+			"attPos",
+			new Float32Array([
+				-1, -1, -1, +1, +1, -1, +1, +1, +1, 0, -1, 0, 0, +1, 0, -1, 0, 0,
+			]),
+		)
         // prettier-ignore
-        dataset.set("attRadius", new Float32Array([
-            .25, .25, .25, .25,
-            .5, .5, .5, .5,
-            1
-        ]))
+        dataset.set(
+			"attRadius",
+			new Float32Array([0.25, 0.25, 0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 1]),
+		)
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 

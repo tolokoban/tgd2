@@ -1,7 +1,8 @@
-import { TgdMat4, TgdQuat, TgdVec3 } from "@tgd/math"
-import { TgdPainter } from "../painter"
-import { TgdTransfo, TgdTransfoOptions } from "../../math/transfo"
-import { TgdInterfaceTransformablePainter } from "../../interface"
+import { TgdConsole } from "@tgd/debug"
+import { TgdMat4, type TgdQuat, type TgdVec3 } from "@tgd/math"
+import type { TgdInterfaceTransformablePainter } from "../../interface"
+import { TgdTransfo, type TgdTransfoOptions } from "../../math/transfo"
+import { type TgdDebugPainterHierarchy, TgdPainter } from "../painter"
 
 export interface TgdPainterNodeOptions {
     name?: string
@@ -141,38 +142,51 @@ export class TgdPainterNode extends TgdPainter {
     }
 
     debug(caption = "TgdPainterNode") {
-        console.log(caption)
-        actualDebug(this)
+        const out = new TgdConsole({ text: `${caption.trim()}\n`, bold: true })
+        actualDebug(out, this)
+        out.debug()
+    }
+
+    get hierarchy(): TgdDebugPainterHierarchy {
+        return {
+            [this.active ? this.name : `${this.name} (Inactive)`]: [
+                ...this.targets.map((target, index) => ({
+                    [target.name ?? `target#${index}`]: null,
+                })),
+                ...this.nodes.map((painter) => painter.hierarchy),
+            ],
+        }
     }
 }
 
-function actualDebug(node: TgdPainterNode, indent = "| ") {
-    console.log(
+function actualDebug(out: TgdConsole, node: TgdPainterNode, indent = "| ") {
+    out.add(
         `${indent}${node.name}  [${format(node.transfo.orientation)}] (${format(
             node.transfo.position
-        )})`
+        )})\n`,
+        { bold: true }
     )
     const targets = node.getTargets()
     if (targets.length > 0) {
         if (targets.length === 1) {
-            console.log(`${indent}  Target: ${targets[0].name ?? "..."}`)
+            out.add(`${indent}  Target: ${targets[0].name ?? "..."}\n`)
         } else {
-            console.log(`${indent}  Targets (${targets.length})`)
+            out.add(`${indent}  Targets (${targets.length})\n`)
             for (const target of targets) {
-                console.log(`${indent}    ${target.name ?? "..."}`)
+                out.add(`${indent}    ${target.name ?? "..."}\n`)
             }
         }
     }
     const nodes = node.getNodes()
     if (nodes.length > 0) {
-        console.log(`${indent}  Nodes (${nodes.length})`)
+        out.add(`${indent}  Nodes (${nodes.length})`)
         for (const child of nodes) {
-            actualDebug(child, `${indent}  | `)
+            actualDebug(out, child, `${indent}  | `)
         }
     }
 }
 
 function format(vec: TgdQuat | TgdVec3): string {
-    const list: string[] = [...vec].map(v => v.toFixed(3))
+    const list: string[] = [...vec].map((v) => v.toFixed(3))
     return list.join(", ")
 }

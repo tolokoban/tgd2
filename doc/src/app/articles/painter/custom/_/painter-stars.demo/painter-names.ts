@@ -1,6 +1,6 @@
 import {
     TgdCameraPerspective,
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,
@@ -10,8 +10,8 @@ import {
 import { assertType } from "@tolokoban/type-guards"
 
 import names from "../names.json"
-import vert from "./painter-names.vert"
 import frag from "./painter-names.frag"
+import vert from "./painter-names.vert"
 
 export class PainterNames extends TgdPainter {
     private readonly prg: TgdProgram

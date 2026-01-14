@@ -1,20 +1,20 @@
 import {
-    tgdCalcDegToRad,
     TgdCameraPerspective,
-    TgdContext,
+    type TgdContext,
     TgdControllerCameraOrbit,
     TgdPainterAxes,
     TgdPainterClear,
     TgdPainterState,
+    tgdCalcDegToRad,
     webglPresetBlend,
     webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
 import React from "react"
-import { PainterCube } from "./painter-cube"
-import { PainterMidPoints } from "./mid-points"
 import { PainterCorners } from "./corners"
+import { PainterMidPoints } from "./mid-points"
+import { PainterCube } from "./painter-cube"
 import { PainterTriangles } from "./triangles"
 import { PainterWireframe } from "./wireframe"
 

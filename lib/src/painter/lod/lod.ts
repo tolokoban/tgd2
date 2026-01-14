@@ -1,12 +1,11 @@
 import type { TgdContext } from "@tgd/context"
-import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
 import type { TgdMaterial } from "@tgd/material"
 import { type TgdMat4, TgdTransfo } from "@tgd/math"
 import type { ArrayNumber3 } from "@tgd/types"
 import { TgdPainterGroup } from "../group"
-import { TgdPainterMesh } from "../mesh"
 import { TgdPainter } from "../painter"
+import { OctreeCache } from "./cache"
 import { listBBoxes } from "./octree"
 
 export interface TgdPainterLODOptions {
@@ -15,6 +14,13 @@ export interface TgdPainterLODOptions {
         min: Readonly<ArrayNumber3>
         max: Readonly<ArrayNumber3>
     }>
+    /**
+     * If `true`, we will cache the result of `factory()` and never
+     * call it twice with the same `x, y, z, level` arguments.
+     *
+     * Default to `false`
+     */
+    cacheMeshes?: boolean
     /**
      * Maximum number of octree subdivisions.
      *
@@ -38,10 +44,7 @@ export interface TgdPainterLODOptions {
         y: number,
         z: number,
         level: number
-    ): Promise<Readonly<{
-        geometry: TgdGeometry
-        material?: TgdMaterial
-    }> | null>
+    ): Promise<Readonly<TgdPainter> | null>
 }
 
 export class TgdPainterLOD
@@ -52,18 +55,15 @@ export class TgdPainterLOD
 
     private readonly group = new TgdPainterGroup()
 
-    private readonly cube: TgdPainterMesh
+    private readonly cache = new OctreeCache<
+        Promise<Readonly<TgdPainter> | null>
+    >()
 
     constructor(
         public readonly context: TgdContext,
         private readonly options: TgdPainterLODOptions
     ) {
         super()
-        this.cube = new TgdPainterMesh(context, {
-            geometry: new TgdGeometryBox({
-                center: [-1, 0, 0],
-            }),
-        })
     }
 
     delete(): void {
@@ -73,17 +73,34 @@ export class TgdPainterLOD
     paint(time: number, delay: number): void {
         const { group, context, options } = this
         group.paint(time, delay)
-        group.removeAll()
+        group.removeAll(false)
         const candidates = listBBoxes(
             context.camera,
             options.bbox,
             options.subdivisions
         )
         for (const [x, y, z, level] of candidates) {
-            options.factory(x, y, z, level).then((meshOptions) => {
-                group.add(new TgdPainterMesh(context, meshOptions ?? undefined))
+            const promise = this.getMeshPromise(x, y, z, level)
+            promise.then((mesh) => {
+                if (mesh) {
+                    group.add(mesh)
+                    this.context.paint()
+                }
             })
         }
-        console.log("🐞 [lod@72] candidates =", candidates) // @FIXME: Remove this line written on 2026-01-13 at 16:00
+    }
+
+    private getMeshPromise(
+        x: number,
+        y: number,
+        z: number,
+        level: number
+    ): Promise<Readonly<TgdPainter> | null> {
+        const fromCache = this.cache.get(x, y, z, level)
+        if (fromCache) return fromCache
+
+        const promise = this.options.factory(x, y, z, level)
+        this.cache.set(x, y, z, level, promise)
+        return promise
     }
 }

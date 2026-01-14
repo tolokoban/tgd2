@@ -1,10 +1,10 @@
 import {
-    TgdContext,
-    TgdGeometry,
+    type TgdContext,
+    type TgdGeometry,
     TgdPainter,
     TgdParserMeshWavefront,
     TgdProgram,
-    TgdTexture2D,
+    type TgdTexture2D,
     TgdVec3,
     TgdVertexArray,
     webglElementTypeFromTypedArray,

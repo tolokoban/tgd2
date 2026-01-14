@@ -1,10 +1,11 @@
+/* eslint-disable unicorn/prefer-modern-math-apis */
 import { vec3 } from "gl-matrix"
-import { ArrayNumber2, ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
+import type { ArrayNumber2, ArrayNumber3, ArrayNumber4, TgdQuat } from ".."
+import type { TgdMat3 } from "./mat3"
+import type { TgdMat4 } from "./mat4"
 import { tgdCalcMix } from "./math"
-import { TgdMat3 } from "./mat3"
-import { TgdMat4 } from "./mat4"
-import { TgdVec4 } from "./vec4"
-import { TgdVec2 } from "./vec2"
+import type { TgdVec2 } from "./vec2"
+import type { TgdVec4 } from "./vec4"
 
 export class TgdVec3 extends Float32Array {
     static X: Readonly<TgdVec3> = new TgdVec3(1, 0, 0)
@@ -35,7 +36,7 @@ export class TgdVec3 extends Float32Array {
         const x = to.x - from.x
         const y = to.y - from.y
         const z = to.z - from.z
-        return Math.hypot(x, y, z)
+        return Math.sqrt(x * x + y * y + z * z)
     }
 
     static center(points: Array<TgdVec3 | ArrayNumber3>): TgdVec3 {
@@ -56,8 +57,8 @@ export class TgdVec3 extends Float32Array {
     constructor(x: number, y: number, z: number)
     constructor(
         x: number | Readonly<TgdVec3 | ArrayNumber3> = 0,
-        y: number = 0,
-        z: number = 0
+        y = 0,
+        z = 0
     ) {
         super(3)
         if (typeof x !== "number") {
@@ -172,7 +173,7 @@ export class TgdVec3 extends Float32Array {
         )
     }
 
-    reset(x: number = 0, y: number = 0, z: number = 0): this {
+    reset(x = 0, y = 0, z = 0): this {
         this[0] = x
         this[1] = y
         this[2] = z
@@ -268,7 +269,9 @@ export class TgdVec3 extends Float32Array {
     }
 
     get size() {
-        return Math.hypot(this[0], this[1], this[2])
+        return Math.sqrt(
+            this[0] * this[0] + this[1] * this[1] + this[2] * this[2]
+        )
     }
 
     normalize(): this {
@@ -305,7 +308,7 @@ export class TgdVec3 extends Float32Array {
             `${caption}:   `,
             out.join(" | "),
             "   length:",
-            Math.hypot(x, y, z)
+            Math.sqrt(x * x + y * y + z * z)
         )
     }
 }

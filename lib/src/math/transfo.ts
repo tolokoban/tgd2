@@ -1,9 +1,9 @@
 import { mat4, quat } from "gl-matrix"
-import { ArrayNumber16, ArrayNumber3, ArrayNumber4 } from "../types"
+import type { ArrayNumber3, ArrayNumber4, ArrayNumber16 } from "../types"
 import { TgdMat4 } from "./mat4"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
-import { TgdVec4 } from "./vec4"
+import type { TgdVec4 } from "./vec4"
 
 export interface TgdTransfoOptions {
     distance: number
@@ -15,11 +15,23 @@ export interface TgdTransfoOptions {
 export class TgdTransfo {
     // prettier-ignore
     private readonly _matrix = new TgdMat4(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1,
-    )
+		1,
+		0,
+		0,
+		0,
+		0,
+		1,
+		0,
+		0,
+		0,
+		0,
+		1,
+		0,
+		0,
+		0,
+		0,
+		1,
+	)
     private readonly _position = new TgdVec3(0, 0, 0)
     private readonly _orientation = new TgdQuat(0, 0, 0, 1)
     private readonly _scale = new TgdVec3(1, 1, 1)
@@ -153,14 +165,16 @@ export class TgdTransfo {
         this.updateMatrix()
         this._position.from(value)
     }
+    setPosition(x: number, y: number, z: number): this
+    setPosition(position: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4): this
     setPosition(
         x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        y: number,
-        z: number
+        y?: number,
+        z?: number
     ): this {
         this.updateMatrix()
         if (typeof x === "number") {
-            this._position.reset(x, y, z)
+            this._position.reset(x, y ?? 0, z ?? 0)
         } else {
             this._position.reset(x[0], x[1], x[2])
         }

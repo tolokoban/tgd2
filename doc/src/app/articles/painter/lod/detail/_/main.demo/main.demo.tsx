@@ -1,7 +1,6 @@
 import {
 	type ArrayNumber3,
 	type ArrayNumber4,
-	TgdCameraPerspective,
 	type TgdContext,
 	TgdControllerCameraOrbit,
 	TgdGeometrySphereIco,
@@ -12,7 +11,6 @@ import {
 	TgdPainterNode,
 	TgdPainterState,
 	TgdTransfo,
-	tgdCalcDegToRad,
 	tgdColorMakeHueWheel,
 	webglPresetDepth,
 } from "@tolokoban/tgd"
@@ -21,10 +19,6 @@ import View, { Assets } from "@/components/demo/Tgd"
 
 // #begin
 function init(context: TgdContext) {
-	if (context.camera instanceof TgdCameraPerspective) {
-		context.camera.fovy = tgdCalcDegToRad(60)
-		context.camera.spaceHeightAtTarget = 6
-	}
 	const clear = new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1] })
 	const bbox: {
 		min: Readonly<ArrayNumber3>
@@ -36,7 +30,7 @@ function init(context: TgdContext) {
 	const [minX, minY, minZ] = bbox.min
 	const [maxX, maxY, maxZ] = bbox.max
 	const COLORS: ArrayNumber4[] = tgdColorMakeHueWheel({
-		steps: 12,
+		steps: 10,
 	}).map((color) => [color.R, color.G, color.B, 1] as ArrayNumber4)
 	const levels = [0, 1, 2, 3, 4, 5]
 	const materials = levels.map(
@@ -52,7 +46,7 @@ function init(context: TgdContext) {
 				name: `Sphere(${level})`,
 				geometry: new TgdGeometrySphereIco({
 					subdivisions: level,
-					radius: 0.4,
+					radius: 0.5,
 				}),
 				material: materials[level],
 			}),
@@ -77,6 +71,7 @@ function init(context: TgdContext) {
 				children: [spheres[level]],
 				transfo,
 			})
+			node.debug()
 			return node
 		},
 		subdivisions: 5,

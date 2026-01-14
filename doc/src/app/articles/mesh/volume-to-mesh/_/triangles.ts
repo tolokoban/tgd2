@@ -1,5 +1,5 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,

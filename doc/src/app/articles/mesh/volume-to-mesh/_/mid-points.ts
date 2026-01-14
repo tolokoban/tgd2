@@ -1,6 +1,5 @@
 import {
-    tgdCanvasCreateWithContext2D,
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,
@@ -8,6 +7,7 @@ import {
     TgdShaderVertex,
     TgdTexture2D,
     TgdVertexArray,
+    tgdCanvasCreateWithContext2D,
 } from "@tolokoban/tgd"
 import { caseNumberToColors, cubeEdges, cubeMidPoints } from "./geometry"
 

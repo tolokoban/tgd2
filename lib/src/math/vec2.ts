@@ -1,7 +1,8 @@
-import { ArrayNumber2 } from ".."
+/* eslint-disable unicorn/prefer-modern-math-apis */
+import type { ArrayNumber2 } from ".."
 import { tgdCalcMix } from "./math"
-import { TgdVec3 } from "./vec3"
-import { TgdVec4 } from "./vec4"
+import type { TgdVec3 } from "./vec3"
+import type { TgdVec4 } from "./vec4"
 
 export class TgdVec2 extends Float32Array {
     static fromMix(
@@ -21,17 +22,14 @@ export class TgdVec2 extends Float32Array {
     ): number {
         const x = to.x - from.x
         const y = to.y - from.y
-        return Math.hypot(x, y)
+        return Math.sqrt(x * x + y * y)
     }
 
     constructor()
     constructor(x: Readonly<TgdVec2 | ArrayNumber2>)
     constructor(x: number)
     constructor(x: number, y: number)
-    constructor(
-        x: number | Readonly<TgdVec2 | ArrayNumber2> = 0,
-        y: number = 0
-    ) {
+    constructor(x: number | Readonly<TgdVec2 | ArrayNumber2> = 0, y = 0) {
         super(2)
         if (typeof x !== "number") {
             this.x = x[0]
@@ -134,7 +132,7 @@ export class TgdVec2 extends Float32Array {
     }
 
     get size() {
-        return Math.hypot(this[0], this[1])
+        return Math.sqrt(this[0] * this[0] + this[1] * this[1])
     }
 
     normalize(): this {
@@ -160,7 +158,7 @@ export class TgdVec2 extends Float32Array {
             `${caption}:   `,
             out.join(" | "),
             "   length:",
-            Math.hypot(x, y)
+            Math.sqrt(x * x + y * y)
         )
     }
 }

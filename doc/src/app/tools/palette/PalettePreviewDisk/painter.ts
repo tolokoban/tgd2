@@ -1,9 +1,9 @@
 import {
-    ArrayNumber3,
-    tgdCodeFunction_uv2polar,
+    type ArrayNumber3,
     TgdContext,
     TgdPainterFragmentShader,
     TgdShaderFragment,
+    tgdCodeFunction_uv2polar,
 } from "@tolokoban/tgd"
 
 export class PalettePreviewDiskPainter {

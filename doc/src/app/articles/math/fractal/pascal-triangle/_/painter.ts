@@ -1,5 +1,5 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,
@@ -38,17 +38,9 @@ export class PainterTriangle extends TgdPainter {
             attUV: "vec2",
         })
         // prettier-ignore
-        dataset.set("attPosition", new Float32Array([
-             0, +1,
-            +x, -1,
-            -x, -1,
-        ]))
+        dataset.set("attPosition", new Float32Array([0, +1, +x, -1, -x, -1]))
         // prettier-ignore
-        dataset.set("attUV", new Float32Array([
-            0, 0,
-            1, 1,
-            0, 1,
-        ]))
+        dataset.set("attUV", new Float32Array([0, 0, 1, 1, 0, 1]))
         this.prg = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({
                 attributes: {

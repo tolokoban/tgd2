@@ -1,11 +1,11 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdGeometryBox,
     TgdPainter,
     TgdPainterMesh,
     TgdPainterNode,
     TgdPainterState,
-    TgdTexture2D,
+    type TgdTexture2D,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 import { SeaMaterial } from "./sea-material"

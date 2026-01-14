@@ -1,9 +1,9 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdDataset,
     TgdPainter,
     TgdProgram,
-    TgdTexture2D,
+    type TgdTexture2D,
     TgdVertexArray,
 } from "@tolokoban/tgd"
 
@@ -43,12 +43,7 @@ export class Painter extends TgdPainter {
             attPoint: "vec2",
         })
         // prettier-ignore
-        ds.set("attPoint", new Float32Array([
-            -1, +1,
-            +1, +1,
-            -1, -1,
-            +1, -1
-        ]))
+        ds.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]))
         this.vao = new TgdVertexArray(context.gl, this.prg, [ds])
     }
 

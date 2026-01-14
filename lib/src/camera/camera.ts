@@ -26,15 +26,6 @@ export interface TgdCameraState {
     position: TgdVec3
 }
 
-export enum TgdCameraVisibility {
-    /** Whole object outsie of view */
-    NONE = 0,
-    /** A part of the object in the view` */
-    PARTIAL = 1,
-    /** The object is entirely in the view */
-    FULL = 2,
-}
-
 export abstract class TgdCamera implements TgdInterfaceTransformable {
     private static incrementalId = 1
 
@@ -239,13 +230,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         if (left === 8 || right === 8 || top === 8 || bottom === 8) {
             return 0
         }
-        console.log(
-            "🐞 [camera@242] minX, maxX, minY, maxY =",
-            minX,
-            maxX,
-            minY,
-            maxY
-        ) // @FIXME: Remove this line written on 2026-01-13 at 18:06
         return (maxX - minX) * (maxY - minY)
     }
 

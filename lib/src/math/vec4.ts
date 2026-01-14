@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-modern-math-apis */
 import type { ArrayNumber2, ArrayNumber3, ArrayNumber4 } from "../types"
 import type { TgdMat4 } from "./mat4"
 import type { TgdVec2 } from "./vec2"
@@ -232,7 +233,12 @@ export class TgdVec4 extends Float32Array {
     }
 
     get size() {
-        return Math.hypot(this[0], this[1], this[2], this[3])
+        return Math.sqrt(
+            this[0] * this[0] +
+                this[1] * this[1] +
+                this[2] * this[2] +
+                this[3] * this[3]
+        )
     }
 
     normalize(): this {

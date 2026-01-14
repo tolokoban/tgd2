@@ -50,4 +50,23 @@
             height: calc(100% - 1em);
         }
     }
+
+    table {
+        display: inline-table;
+        border-collapse: collapse;
+        background-color: var(--theme-color-neutral-5);
+        color: var(--theme-color-on-neutral-5);
+        width: fit-content;
+
+        td,
+        th {
+            border: 1px solid var(--theme-color-neutral-1);
+            padding: 0.25em 0.5em;
+        }
+
+        th {
+            background-color: var(--theme-color-primary-5);
+            color: var(--theme-color-on-primary-5);
+        }
+    }
 }
