@@ -1,18 +1,18 @@
+import { TgdCamera, TgdCameraState } from "@tgd/camera"
+import { TgdContext } from "@tgd/context"
+import { TgdEvent } from "@tgd/event"
+import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
+import { tgdCalcClamp } from "@tgd/math/math"
+import {
+    TgdInputPointerEventMove,
+    TgdInputPointerEventZoom,
+    TgdInputPointerModifierKeys,
+} from "@tgd/types"
 import { TgdAnimation } from "@tgd/types/animation"
 import {
     tgdActionCreateCameraInterpolation,
     tgdEasingFunctionOutQuad,
 } from "@tgd/utils"
-import { tgdCalcClamp } from "@tgd/math/math"
-import {
-    TgdInputPointerEventMove,
-    TgdInputPointerModifierKeys,
-    TgdInputPointerEventZoom,
-} from "@tgd/types"
-import { TgdEvent } from "@tgd/event"
-import { TgdCamera, TgdCameraState } from "@tgd/camera"
-import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
-import { TgdContext } from "@tgd/context"
 
 export interface TgdControllerCameraOrbitZoomRequest
     extends TgdInputPointerModifierKeys {
@@ -98,7 +98,7 @@ export interface TgdControllerCameraOrbitOptions {
      * The position where the `reset()` method will bring you.
      * If undefined, the context camera state will be used.
      */
-    cameraInitialState?: Readonly<TgdCameraState>
+    cameraInitialState?: Readonly<Partial<TgdCameraState>>
     /**
      * If `debug` is set, the special hotkey `?` will drop the
      * current camera status to the console.
@@ -233,8 +233,10 @@ export class TgdControllerCameraOrbit {
             }
         }
         this.debug = debug
-        this.cameraInitialState =
-            cameraInitialState ?? context.camera.getCurrentState()
+        this.cameraInitialState = {
+            ...context.camera.getCurrentState(),
+            ...cameraInitialState,
+        }
         const { inputs } = context
         inputs.pointer.eventMoveStart.addListener(this.handleMoveStart)
         inputs.pointer.eventMoveEnd.addListener(this.handleMoveEnd)

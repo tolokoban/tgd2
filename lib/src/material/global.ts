@@ -1,17 +1,17 @@
+import { TgdCamera } from "@tgd/camera"
+import { TgdLight } from "@tgd/light"
+import { TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdProgram } from "@tgd/program"
+import { TgdCodeBloc } from "@tgd/shader/code"
+import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
 import {
     ArrayNumber3,
     ArrayNumber4,
     WebglAttributeType,
     WebglUniformType,
 } from "@tgd/types"
-import { TgdVec3, TgdVec4 } from "@tgd/math"
-import { TgdMaterial } from "./material"
-import { TgdCodeBloc } from "@tgd/shader/code"
-import { TgdLight } from "@tgd/light"
-import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
-import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreateFill } from "@tgd/utils"
-import { TgdCamera } from "@tgd/camera"
+import { TgdMaterial } from "./material"
 
 export type TgdMaterialGlobalOptions = Partial<{
     color: TgdVec4 | ArrayNumber4 | TgdTexture2D
@@ -45,13 +45,13 @@ export class TgdMaterialGlobal extends TgdMaterial {
             uniCameraPosition: "vec3",
         }
         const fragmentShaderCode: TgdCodeBloc = [
-            `vec3 N = normalize(varNormal);`,
-            `vec3 L = normalize(varPosition.xyz - uniCameraPosition);`,
-            `vec3 R = reflect(L, N);`,
-            `vec3 color = texture(texAmbient, R).rgb;`,
-            `color = pow(color, vec3(uniSpecularExponent));`,
-            `color *= uniSpecularIntensity;`,
-            `return vec4(color, 1) * texture(texColor, varUV);`,
+            "vec3 N = normalize(varNormal);",
+            "vec3 L = normalize(varPosition.xyz - uniCameraPosition);",
+            "vec3 R = reflect(L, N);",
+            "vec3 color = texture(texAmbient, R).rgb;",
+            "color = pow(color, vec3(uniSpecularExponent));",
+            "color *= uniSpecularIntensity;",
+            "return vec4(color, 1) * texture(texColor, varUV);",
         ]
         const varyings: { [name: string]: WebglAttributeType } = {
             varUV: "vec2",

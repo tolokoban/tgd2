@@ -9,6 +9,7 @@ import {
 	TgdPainterClear,
 	TgdPainterLOD,
 	TgdPainterMesh,
+	TgdPainterMeshGltf,
 	TgdPainterNode,
 	TgdPainterState,
 	TgdTransfo,
@@ -19,13 +20,18 @@ import {
 
 import View, { Assets } from "@/components/demo/Tgd"
 
+import BoxURL from "./box.glb"
+
 // #begin
-function init(context: TgdContext) {
-	if (context.camera instanceof TgdCameraPerspective) {
-		context.camera.fovy = tgdCalcDegToRad(60)
-		context.camera.spaceHeightAtTarget = 6
+function init(context: TgdContext, assets: Assets) {
+	const { camera } = context
+	if (camera instanceof TgdCameraPerspective) {
+		camera.fovy = tgdCalcDegToRad(60)
+		camera.spaceHeightAtTarget = 6
 	}
-	const clear = new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1] })
+	camera.near = 1e-2
+	camera.far = 1e2
+	const clear = new TgdPainterClear(context, { color: [0.3, 0.3, 0.3, 1] })
 	const bbox: {
 		min: Readonly<ArrayNumber3>
 		max: Readonly<ArrayNumber3>
@@ -36,7 +42,7 @@ function init(context: TgdContext) {
 	const [minX, minY, minZ] = bbox.min
 	const [maxX, maxY, maxZ] = bbox.max
 	const COLORS: ArrayNumber4[] = tgdColorMakeHueWheel({
-		steps: 12,
+		steps: 8,
 	}).map((color) => [color.R, color.G, color.B, 1] as ArrayNumber4)
 	const levels = [0, 1, 2, 3, 4, 5]
 	const materials = levels.map(
@@ -46,19 +52,14 @@ function init(context: TgdContext) {
 				color: COLORS[i],
 			}),
 	)
-	const spheres = levels.map(
-		(level) =>
-			new TgdPainterMesh(context, {
-				name: `Sphere(${level})`,
-				geometry: new TgdGeometrySphereIco({
-					subdivisions: level,
-					radius: 0.4,
-				}),
-				material: materials[level],
+	const boxes = [0, 1, 2, 3, 4, 5].map(
+		(i) =>
+			new TgdPainterMeshGltf(context, {
+				asset: assets.glb.box,
+				material: materials[i],
 			}),
 	)
 	const lod = new TgdPainterLOD(context, {
-		cacheMeshes: true,
 		bbox,
 		async factory(x: number, y: number, z: number, level: number) {
 			const size = 2 ** -level
@@ -74,7 +75,7 @@ function init(context: TgdContext) {
 			transfo.setPosition(center).setScale(sizeX, sizeY, sizeZ)
 			const node = new TgdPainterNode({
 				name: `(${x}, ${y}, ${z})/${level}`,
-				children: [spheres[level]],
+				children: [boxes[level]],
 				transfo,
 			})
 			return node
@@ -97,5 +98,13 @@ function init(context: TgdContext) {
 // #end
 
 export default function Demo() {
-	return <View onReady={init} gizmo />
+	return (
+		<View
+			onReady={init}
+			gizmo
+			assets={{
+				glb: { box: BoxURL },
+			}}
+		/>
+	)
 }

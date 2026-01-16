@@ -160,7 +160,7 @@ function colorToString(
 
         if (Array.isArray(color)) {
             const [r, g, b, a] = color
-            return new TgdColor(r, b, g, a ?? 1).toString()
+            return new TgdColor(r, g, b, a ?? 1).toString()
         }
 
         return new TgdColor(

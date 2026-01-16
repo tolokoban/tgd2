@@ -1,6 +1,5 @@
 import type { TgdContext } from "@tgd/context"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
-import type { TgdMaterial } from "@tgd/material"
 import { type TgdMat4, TgdTransfo } from "@tgd/math"
 import type { ArrayNumber3 } from "@tgd/types"
 import { TgdPainterGroup } from "../group"
@@ -9,18 +8,19 @@ import { OctreeCache } from "./cache"
 import { listBBoxes } from "./octree"
 
 export interface TgdPainterLODOptions {
-    material?: TgdMaterial
     bbox: Readonly<{
         min: Readonly<ArrayNumber3>
         max: Readonly<ArrayNumber3>
     }>
     /**
-     * If `true`, we will cache the result of `factory()` and never
-     * call it twice with the same `x, y, z, level` arguments.
+     * This is a precentage of the size of the screen.
+     * If the containing square of a LOD block has a surface
+     * greater than `surfaceThreshold`, it will be splited in
+     * 8 sub blocks.
      *
-     * Default to `false`
+     * Default to .25
      */
-    cacheMeshes?: boolean
+    surfaceThreshold?: number
     /**
      * Maximum number of octree subdivisions.
      *
@@ -37,7 +37,11 @@ export interface TgdPainterLODOptions {
     /**
      * `x`, `y` and `z` are integers between 0 and 2**`level` - `.
      *
-     * @returns `null` if this bbox is empty
+     * This method will be called by TgdPainterLOD to create painters,
+     * so it's TgdPainterLOD responsability to delete them.
+     * This is done by calling `TgdPainterLOD.delete()` method.
+     *
+     * @returns `null` if this block is empty
      */
     factory(
         x: number,
@@ -54,10 +58,11 @@ export class TgdPainterLOD
     public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
 
     private readonly group = new TgdPainterGroup()
-
     private readonly cache = new OctreeCache<
         Promise<Readonly<TgdPainter> | null>
     >()
+    private readonly paintersToDelete = new Set<TgdPainter>()
+    private isComputingOctree = false
 
     constructor(
         public readonly context: TgdContext,
@@ -67,26 +72,51 @@ export class TgdPainterLOD
     }
 
     delete(): void {
+        for (const painter of this.paintersToDelete.values()) {
+            painter.delete()
+        }
+        this.paintersToDelete.clear()
         this.group.delete()
     }
 
     paint(time: number, delay: number): void {
-        const { group, context, options } = this
-        group.paint(time, delay)
-        group.removeAll(false)
-        const candidates = listBBoxes(
-            context.camera,
-            options.bbox,
-            options.subdivisions
-        )
-        for (const [x, y, z, level] of candidates) {
-            const promise = this.getMeshPromise(x, y, z, level)
-            promise.then((mesh) => {
-                if (mesh) {
-                    group.add(mesh)
-                    this.context.paint()
+        this.group.paint(time, delay)
+        this.computeOctree()
+    }
+
+    private async computeOctree() {
+        if (this.isComputingOctree) return
+
+        this.isComputingOctree = true
+        try {
+            const { group, context, options } = this
+            const candidates = listBBoxes(
+                context.camera,
+                options.bbox,
+                options.subdivisions,
+                options.surfaceThreshold ?? 0.25
+            )
+            const promises: Promise<Readonly<TgdPainter> | null>[] = []
+            for (const [x, y, z, level] of candidates) {
+                promises.push(this.getMeshPromise(x, y, z, level))
+            }
+            const results = await Promise.allSettled(promises)
+            group.removeAll(false)
+            let count = 0
+            for (const result of results) {
+                if (result.status === "fulfilled") {
+                    const painter = result.value
+                    if (painter) {
+                        group.add(painter)
+                        this.paintersToDelete.add(painter)
+                        count++
+                    }
                 }
-            })
+            }
+            console.log("Meshes count:", count)
+            this.context.paint()
+        } finally {
+            this.isComputingOctree = false
         }
     }
 
