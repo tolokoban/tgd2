@@ -1,9 +1,11 @@
 import bpy
 import bmesh
 from mathutils import Vector
-
-import bpy
+import json
 import os
+
+global_count = 0
+global_levels = 0
 
 def compute_bbox(obj):
     x_min = 1e12
@@ -82,7 +84,7 @@ def save_mesh_as_glb(obj):
     
     # 3. Construct the full export path
     filename = f"{obj.name}.glb"
-    export_path = os.path.join(directory, filename)
+    export_path = os.path.join(directory, "Octree", filename)
 
     # 4. Handle selection for export
     bpy.ops.object.select_all(action='DESELECT')
@@ -94,7 +96,7 @@ def save_mesh_as_glb(obj):
         filepath=export_path,
         export_format='GLB',
         use_selection=True,
-        export_yup=True,
+        export_yup=False,
         export_normals=True,
         export_materials='NONE',
         export_draco_mesh_compression_enable=True,
@@ -196,18 +198,41 @@ def slice_x(obj_parent, bbox, levels, level):
         slice_y(obj_parent, bbox, levels, 0)    
     
 def slice(obj, levels):
+    global_count = 0
+    global_levels = 0
     bbox = compute_bbox(obj)
     obj.name = "Octree"
     slice_x(obj, bbox, levels, 0)
 
-# --- Main Execution ---
-active_obj = bpy.context.active_object
+def go():
+    # --- Main Execution ---
+    active_obj = bpy.context.active_object
 
-if active_obj and active_obj.type == 'MESH':
-    obj = active_obj.copy()
-    obj.data = active_obj.data.copy()
-    obj.name = "Octree"
-    bpy.context.collection.objects.link(obj)
-    slice(obj, 1)
-else:
-    print("No active object!")
+    if active_obj and active_obj.type == 'MESH':
+        bbox = compute_bbox(active_obj)
+        blend_filepath = bpy.data.filepath
+        if not blend_filepath:
+            print("Error: Save your Blender file first to define a directory!")
+            return
+        directory = os.path.dirname(blend_filepath)
+        root = os.path.join(directory, "Octree")
+        if not os.path.exists(root):
+            os.mkdir(root)
+        target_path = os.path.join(root, "Octree.json")
+        with open(target_path, 'w') as f:
+            json.dump({
+              "bbox": {
+                "min": bbox[0],
+                "max": bbox[1]
+              }
+            }, f, indent=4)    
+    
+        obj = active_obj.copy()
+        obj.data = active_obj.data.copy()
+        obj.name = "Octree"
+        bpy.context.collection.objects.link(obj)
+        slice(obj, 4)
+    else:
+        print("Error: No active object!")
+        
+go()

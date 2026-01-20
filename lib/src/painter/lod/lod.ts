@@ -102,18 +102,15 @@ export class TgdPainterLOD
             }
             const results = await Promise.allSettled(promises)
             group.removeAll(false)
-            let count = 0
             for (const result of results) {
                 if (result.status === "fulfilled") {
                     const painter = result.value
                     if (painter) {
                         group.add(painter)
                         this.paintersToDelete.add(painter)
-                        count++
                     }
                 }
             }
-            console.log("Meshes count:", count)
             this.context.paint()
         } finally {
             this.isComputingOctree = false

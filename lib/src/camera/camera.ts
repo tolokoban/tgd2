@@ -26,7 +26,7 @@ export interface TgdCameraState {
     position: TgdVec3
 }
 
-let lastText = ""
+const lastText = ""
 
 export abstract class TgdCamera implements TgdInterfaceTransformable {
     private static incrementalId = 1
@@ -250,13 +250,13 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
             near === N ||
             far === N
         ) {
-            const text = JSON.stringify(bbox)
-            if (text !== lastText) {
-                lastText = text
-                console.log(text)
-                console.log("🐞 [camera@257] bbox =", bbox) // @FIXME: Remove this line written on 2026-01-20 at 13:41
-                console.log("🐞 [camera@258] debug =", debug) // @FIXME: Remove this line written on 2026-01-20 at 13:41
-            }
+            // const text = JSON.stringify(bbox)
+            // if (text !== lastText) {
+            //     lastText = text
+            //     console.log(text)
+            //     console.log("🐞 [camera@257] bbox =", bbox) // @FIXME: Remove this line written on 2026-01-20 at 13:41
+            //     console.log("🐞 [camera@258] debug =", debug) // @FIXME: Remove this line written on 2026-01-20 at 13:41
+            // }
             return 0
         }
         return (maxX - minX) * (maxY - minY)

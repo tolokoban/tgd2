@@ -1,3 +1,10 @@
+// import NegX from "@/assets/cubemap/sky/negX.webp"
+// import NegY from "@/assets/cubemap/sky/negY.webp"
+// import NegZ from "@/assets/cubemap/sky/negZ.webp"
+// import PosX from "@/assets/cubemap/sky/posX.webp"
+// import PosY from "@/assets/cubemap/sky/posY.webp"
+// import PosZ from "@/assets/cubemap/sky/posZ.webp"
+import View, { type Assets } from "@/components/demo/Tgd"
 import {
 	type ArrayNumber3,
 	type ArrayNumber4,
@@ -7,6 +14,7 @@ import {
 	TgdMaterialDiffuse,
 	TgdMaterialGlobal,
 	TgdPainterClear,
+	TgdPainterDebugPoint,
 	TgdPainterLOD,
 	TgdPainterMesh,
 	TgdPainterMeshGltf,
@@ -19,24 +27,12 @@ import {
 	webglPresetCull,
 	webglPresetDepth,
 } from "@tolokoban/tgd"
-// import NegX from "@/assets/cubemap/sky/negX.webp"
-// import NegY from "@/assets/cubemap/sky/negY.webp"
-// import NegZ from "@/assets/cubemap/sky/negZ.webp"
-// import PosX from "@/assets/cubemap/sky/posX.webp"
-// import PosY from "@/assets/cubemap/sky/posY.webp"
-// import PosZ from "@/assets/cubemap/sky/posZ.webp"
-import View, { type Assets } from "@/components/demo/Tgd"
+import { OctreeInfo } from "./info"
+
+const MAX_ZOOM = 12
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
-	// const skybox = new TgdTextureCube(context, {
-	// 	imagePosX: assets.image.posX,
-	// 	imagePosY: assets.image.posY,
-	// 	imagePosZ: assets.image.posZ,
-	// 	imageNegX: assets.image.negX,
-	// 	imageNegY: assets.image.negY,
-	// 	imageNegZ: assets.image.negZ,
-	// })
 	const COLORS: ArrayNumber4[] = tgdColorMakeHueWheel({
 		steps: 6,
 	}).map((color) => [color.R, color.G, color.B, 1] as ArrayNumber4)
@@ -46,37 +42,30 @@ function init(context: TgdContext, assets: Assets) {
 				color: COLORS[level],
 				lockLightsToCamera: true,
 			}),
-		// new TgdMaterialGlobal({
-		// 	color: COLORS[level],
-		// 	ambientColor: skybox,
-		// }),
 	)
 	const clear = new TgdPainterClear(context, { color: [0.3, 0.3, 0.3, 1] })
-	const bbox: {
-		min: Readonly<ArrayNumber3>
-		max: Readonly<ArrayNumber3>
-	} = {
-		// min: [946129, 297586, 658353],
-		// max: [1443983, 795439, 1156206],
-		min: [1015737.875, 700261.5625, -795438.875],
-		max: [1374369.125, 1114297.5, -297585.53125],
-	}
+	const { bbox } = OctreeInfo
 	const vecMin = new TgdVec3(bbox.min)
 	const vecMax = new TgdVec3(bbox.max)
 	const vecDim = new TgdVec3(vecMax).subtract(vecMin)
 	const radius = Math.max(vecDim.x, vecDim.y, vecDim.z)
 	const center = new TgdVec3(vecMax).add(vecMin).scale(0.5)
 	context.camera.transfo.position = center
-	center.debug()
-	context.camera.transfo.setPosition(1280000, 940000, -440000)
+	context.camera.transfo.setPosition(0, 0, 0)
 	context.camera.transfo.distance = vecDim.z * 3
 	context.camera.near = 1
 	context.camera.far = vecDim.z * 6
-
+	const availableFiles = new Set<string>(OctreeInfo.files.split(","))
 	const lod = new TgdPainterLOD(context, {
 		bbox,
 		async factory(x: number, y: number, z: number, level: number) {
-			const asset: TgdDataGlb | null = await loadGLB(x, y, z, level)
+			const asset: TgdDataGlb | null = await loadGLB(
+				x,
+				y,
+				z,
+				level,
+				availableFiles,
+			)
 			if (!asset) return null
 
 			return new TgdPainterMeshGltf(context, {
@@ -84,16 +73,9 @@ function init(context: TgdContext, assets: Assets) {
 				material: materials[level],
 			})
 		},
-		subdivisions: 3,
-		surfaceThreshold: 0.8,
+		subdivisions: 4,
+		surfaceThreshold: 1,
 	})
-	const sphere = new TgdPainterMesh(context, {
-		geometry: new TgdGeometrySphereIco({
-			radius: 1e4,
-			subdivisions: 2,
-		}),
-	})
-	sphere.transfo.position = context.camera.transfo.position
 	context.add(
 		clear,
 		new TgdPainterState(context, {
@@ -101,14 +83,6 @@ function init(context: TgdContext, assets: Assets) {
 			depth: webglPresetDepth.less,
 			cull: webglPresetCull.back,
 		}),
-		// new TgdPainterLogic((time) => {
-		// 	const { transfo } = context.camera
-		// 	transfo.setEulerRotation(
-		// 		Math.sin(time) * 30,
-		// 		Math.sin(time * 1.182) * 40,
-		// 		0,
-		// 	)
-		// }),
 	)
 	context.paint()
 	return (settings: { zoom: number }) => {
@@ -116,12 +90,13 @@ function init(context: TgdContext, assets: Assets) {
 		camera.transfo.distance = tgdCalcMapRange(
 			settings.zoom,
 			1,
-			10,
+			MAX_ZOOM,
 			radius * 3,
-			radius * 0.3,
+			(radius * 3) / MAX_ZOOM,
 		)
-		camera.near = camera.transfo.distance - radius
+		camera.near = Math.max(1, camera.transfo.distance - radius)
 		camera.far = camera.transfo.distance + radius
+		console.log("🐞 [main.demo@126] camera =", camera.near, camera.far) // @FIXME: Remove this line written on 2026-01-20 at 21:43
 	}
 }
 // #end
@@ -142,7 +117,7 @@ export default function Demo() {
 					label: "Zoom",
 					value: 1,
 					min: 1,
-					max: 10,
+					max: MAX_ZOOM,
 				},
 			}}
 		/>
@@ -158,14 +133,15 @@ async function loadGLB(
 	y: number,
 	z: number,
 	level: number,
+	availableFiles: Set<string>,
 ): Promise<TgdDataGlb | null> {
+	const id = `${toBin(x, level)}${toBin(y, level)}${toBin(z, level)}`
+	if (!availableFiles.has(id)) return null
+
 	const url =
 		level === 0
 			? "./assets/neuron/Octree.glb"
-			: `./assets/neuron/Octree${toBin(x, level)}${toBin(y, level)}${toBin(
-					z,
-					level,
-				)}.glb`
+			: `./assets/neuron/Octree${id}.glb`
 	console.log("Loading LOD block:", url)
 	const asset = await tgdLoadGlb(url)
 	return asset
