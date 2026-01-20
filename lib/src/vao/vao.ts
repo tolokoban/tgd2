@@ -1,7 +1,7 @@
 import { TgdBuffer } from "@tgd/buffer"
-import { TgdDataset } from "@tgd/dataset"
-import { TgdProgram } from "@tgd/program"
-import { TgdTypeArrayForElements } from "@tgd/types"
+import type { TgdDataset } from "@tgd/dataset"
+import type { TgdProgram } from "@tgd/program"
+import type { TgdTypeArrayForElements } from "@tgd/types"
 
 export class TgdVertexArray {
     public readonly vao: WebGLVertexArrayObject
@@ -109,7 +109,7 @@ export class TgdVertexArray {
     toCode({ indent = "" }: Partial<{ indent: string }> = {}) {
         const lines: string[] = [
             "function createVAO(",
-            `  gl: WebGL2RenderingContext,`,
+            "  gl: WebGL2RenderingContext,",
             `  prg: WebGLProgram${this.datasets
                 ?.map((_ds, index) => `, data${index}: ArrayBuffer`)
                 .join("")}`,

@@ -1,6 +1,9 @@
 import type { TgdCamera } from "@tgd/camera"
+import { TgdConsole } from "@tgd/debug"
 import type { TgdVec3 } from "@tgd/math"
 import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
+
+const debugListBBox = TgdConsole.memo()
 
 export function listBBoxes(
     camera: TgdCamera,
@@ -23,8 +26,13 @@ export function listBBoxes(
         0,
         surfaceThreshold
     )
+    debugListBBox(result.length, (out) =>
+        out.add(result.map((item) => JSON.stringify(item)).join("\n")).debug()
+    )
     return result
 }
+
+let lastText = ""
 
 function recursiveListBBoxes(
     result: ArrayNumber4[],
@@ -42,6 +50,19 @@ function recursiveListBBoxes(
 ) {
     const visibility = camera.computeBoundingBoxVisibleSurface(bbox)
     if (visibility < 1e-12) {
+        const text = JSON.stringify(bbox)
+        if (lastText !== text) {
+            lastText = text
+            console.log("🐞 [octree@47] bbox =", bbox) // @FIXME: Remove this line written on 2026-01-20 at 13:55
+            console.log(
+                "🐞 [octree@51] x, y, z, level, levels =",
+                x,
+                y,
+                z,
+                level,
+                levels
+            ) // @FIXME: Remove this line written on 2026-01-20 at 13:57
+        }
         return
     }
 

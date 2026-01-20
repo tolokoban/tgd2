@@ -12,6 +12,24 @@ export interface TgdConsoleStyle {
 }
 
 export class TgdConsole {
+    /**
+     * Return a function that will log only if a value has changed.
+     */
+    static memo(defaultLogger?: (out: TgdConsole) => void) {
+        let previousValue: unknown = null
+        const out = new TgdConsole()
+        return (value: unknown, logger?: (out: TgdConsole) => void) => {
+            if (value === previousValue) return
+
+            previousValue = value
+            const simpleLogger = (o: TgdConsole) => {
+                o.add(JSON.stringify(value)).debug()
+            }
+            out.clear()
+            ;(logger ?? defaultLogger ?? simpleLogger)(out)
+        }
+    }
+
     static log(...items: (TgdConsoleItem | string)[]) {
         new TgdConsole(...items).log()
     }
@@ -50,7 +68,7 @@ export class TgdConsole {
     }
 
     add(
-        text: string = "\n",
+        text = "\n",
         {
             color = "currentColor",
             background = "transparent",
@@ -62,6 +80,10 @@ export class TgdConsole {
             style: `color:${color};background:${background};font-weight:${bold ? "bold" : "normal"};`,
         })
         return this
+    }
+
+    nl() {
+        return this.add()
     }
 
     log() {

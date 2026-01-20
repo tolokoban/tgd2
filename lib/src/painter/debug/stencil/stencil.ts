@@ -1,12 +1,11 @@
-import { TgdContext } from "@tgd/context"
-import { TgdPainter } from "../../painter"
-import { webglStencilGet, webglStencilSet } from "@tgd/utils"
-import { TgdProgram } from "@tgd/program"
-import { TgdVertexArray } from "@tgd/vao"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
-
-import VERT from "./stencil.vert"
+import { TgdProgram } from "@tgd/program"
+import { webglStencilGet, webglStencilSet } from "@tgd/utils"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdPainter } from "../../painter"
 import FRAG from "./stencil.frag"
+import VERT from "./stencil.vert"
 
 export class TgdPainterDebugStencil extends TgdPainter {
     private readonly program: TgdProgram

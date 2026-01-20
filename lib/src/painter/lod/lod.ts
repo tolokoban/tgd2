@@ -133,4 +133,10 @@ export class TgdPainterLOD
         this.cache.set(x, y, z, level, promise)
         return promise
     }
+
+    debug(caption?: string) {
+        console.debug(
+            caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`
+        )
+    }
 }

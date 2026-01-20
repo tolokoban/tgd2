@@ -18,7 +18,7 @@ import {
 	webglPresetDepth,
 } from "@tolokoban/tgd"
 
-import View, { Assets } from "@/components/demo/Tgd"
+import View, { type Assets } from "@/components/demo/Tgd"
 
 import BoxURL from "./box.glb"
 

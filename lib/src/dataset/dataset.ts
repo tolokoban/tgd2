@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import { TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
-import { TgdProgram } from "@tgd/program"
+import type { TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
+import type { TgdProgram } from "@tgd/program"
 
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
 
@@ -13,7 +13,7 @@ export interface TgdDatasetOptions {
 export type TgdDatasetTypeRecord = Record<string, TgdDatasetType>
 
 export class TgdDataset {
-    private stride: number = 0
+    private stride = 0
     private definitions: Record<string, AttributeInternalRepresentation> = {}
     private _data = new ArrayBuffer(0)
     private _count = 0
@@ -50,10 +50,11 @@ export class TgdDataset {
                 bytesPerElement: Float32Array.BYTES_PER_ELEMENT,
                 divisor,
                 getter(view: DataView, byteOffset: number) {
-                    if (byteOffset >= view.byteLength) {
-                        byteOffset %= view.byteLength
-                    }
-                    return view.getFloat32(byteOffset, true)
+                    const offset =
+                        byteOffset >= view.byteLength
+                            ? byteOffset % view.byteLength
+                            : byteOffset
+                    return view.getFloat32(offset, true)
                 },
                 setter(view: DataView, byteOffset: number, value: number) {
                     view.setFloat32(byteOffset, value, true)
@@ -110,13 +111,12 @@ export class TgdDataset {
             },
             this.options
         )
-        // eslint-disable-next-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
-        const newDataset = this
-        newDataset.count = oldDataset.count
+
+        this.count = oldDataset.count
         for (const attribName of oldDataset.attributesNames) {
             try {
                 const { get } = oldDataset.getAttribAccessor(attribName)
-                const { set } = newDataset.getAttribAccessor(attribName)
+                const { set } = this.getAttribAccessor(attribName)
                 for (let index = 0; index < oldDataset.count; index++) {
                     const definition = this.getDef(attribName)
                     for (let dim = 0; dim < definition.dimension; dim++) {
@@ -157,6 +157,17 @@ export class TgdDataset {
      */
     get data(): Readonly<ArrayBuffer> {
         return this._data
+    }
+    /**
+     * Dataset does not own any GL Buffer.
+     * So setting its data won't change anything in WebGL.
+     * You can use a `TgdVertexArray` for this.
+     */
+    set data(arrayBuffer: Readonly<ArrayBuffer>) {
+        if (this._data === arrayBuffer) return
+
+        this._data = arrayBuffer
+        this.count = Math.floor(arrayBuffer.byteLength / this.stride)
     }
 
     /** Get number of attributes. */
@@ -228,7 +239,7 @@ export class TgdDataset {
             byteOffset = 0,
             byteStride,
             first = 0,
-            count = Infinity,
+            count = Number.POSITIVE_INFINITY,
             targetFirst = 0,
         }: Partial<{
             /**
@@ -304,7 +315,7 @@ export class TgdDataset {
                 )}" not found in this DataSet!\nAvailable names are: ${Object.keys(
                     this.definitions
                 )
-                    .map(name => JSON.stringify(name))
+                    .map((name) => JSON.stringify(name))
                     .join(", ")}.`
             )
         return definition
@@ -348,20 +359,20 @@ export class TgdDataset {
             lines.push(
                 `const ${att} = gl.getAttribLocation(prg, "${name}")`,
                 `gl.enableVertexAttribArray(${att})`,
-                `gl.vertexAttribPointer(`,
+                "gl.vertexAttribPointer(",
                 `  ${att},`,
                 `  ${definition.dimension},  // Dimension`,
-                `  gl.FLOAT,`,
-                `  false,`,
+                "  gl.FLOAT,",
+                "  false,",
                 `  ${this.stride},   // Stride`,
                 `  ${offsetDestination}   // Offset`,
-                `)`,
+                ")",
                 `gl.vertexAttribDivisor(${att}, ${definition.divisor})`
             )
             const bytes = definition.dimension * definition.bytesPerElement
             offsetDestination += bytes
         }
-        return lines.map(line => `${indent}${line}`).join("\n")
+        return lines.map((line) => `${indent}${line}`).join("\n")
     }
 
     debug(caption = "Dataset") {
@@ -385,7 +396,7 @@ export class TgdDataset {
                 `${definition.byteOffset}`,
             ])
         }
-        const sizes: number[] = [0, 1, 2].map(index =>
+        const sizes: number[] = [0, 1, 2].map((index) =>
             rows.reduce(
                 (previous, current) =>
                     Math.max(previous, current[index].length),

@@ -5,6 +5,8 @@ import {
 	type TgdDataGlb,
 	TgdMaterialGlobal,
 	TgdPainterClear,
+	TgdPainterDebugPoint,
+	TgdPainterGroup,
 	TgdPainterLOD,
 	TgdPainterLogic,
 	TgdPainterMeshGltf,
@@ -13,6 +15,7 @@ import {
 	tgdCalcMix,
 	tgdColorMakeHueWheel,
 	tgdLoadGlb,
+	webglPresetCull,
 	webglPresetDepth,
 } from "@tolokoban/tgd"
 
@@ -23,6 +26,7 @@ import PosX from "@/assets/cubemap/sky/posX.webp"
 import PosY from "@/assets/cubemap/sky/posY.webp"
 import PosZ from "@/assets/cubemap/sky/posZ.webp"
 import View, { type Assets } from "@/components/demo/Tgd"
+import { WireCube } from "./wire-cube"
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
@@ -39,7 +43,7 @@ function init(context: TgdContext, assets: Assets) {
 		imageNegZ: assets.image.negZ,
 	})
 	const COLORS: ArrayNumber4[] = tgdColorMakeHueWheel({
-		steps: 6,
+		steps: 8,
 	}).map((color) => [color.R, color.G, color.B, 1] as ArrayNumber4)
 	const materials = [0, 1, 2, 3, 4, 5].map(
 		(level) =>
@@ -67,31 +71,72 @@ function init(context: TgdContext, assets: Assets) {
 				material: materials[level],
 			})
 		},
-		subdivisions: 3,
-		surfaceThreshold: 0.8,
+		subdivisions: 1,
+		// subdivisions: 3,
+		// surfaceThreshold: 0.8,
 	})
+	const points = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+		const point = new TgdPainterDebugPoint(context)
+		const [R, G, B, A] = COLORS[i]
+		point.color.x = R
+		point.color.y = G
+		point.color.z = B
+		point.color.w = A
+		return point
+	})
+	const group = new TgdPainterGroup(points)
+	const wireCube = new WireCube(context)
+	group.add(wireCube)
 	context.add(
 		clear,
 		new TgdPainterState(context, {
-			children: [lod],
+			children: [lod, group],
 			depth: webglPresetDepth.less,
+			cull: webglPresetCull.back,
 		}),
-		// new TgdPainterLogic((time) => {
-		// 	const { transfo } = context.camera
-		// 	transfo.setEulerRotation(
-		// 		Math.sin(time) * 30,
-		// 		Math.sin(time * 1.182) * 40,
-		// 		0,
-		// 	)
-		// }),
+		new TgdPainterLogic((time) => {
+			// const { transfo } = context.camera
+			// transfo.setEulerRotation(
+			// 	Math.sin(time) * 30,
+			// 	Math.sin(time * 1.182) * 40,
+			// 	0,
+			// )
+			const bbox = {
+				min: [0.000025000000000052758, -1.39747, 0.251035],
+				max: [1.312, -0.08548500000000003, 1.563],
+			}
+			const [x0, y0, z0] = bbox.min
+			const [x1, y1, z1] = bbox.max
+			const corners: ArrayNumber3[] = [
+				[x0, y0, z0],
+				[x0, y1, z0],
+				[x1, y0, z0],
+				[x1, y1, z0],
+				[x0, y0, z1],
+				[x0, y1, z1],
+				[x1, y0, z1],
+				[x1, y1, z1],
+			]
+			let ptr = 0
+			for (let i = 0; i < 8; i++) {
+				const [x, y, z, w] = context.camera.apply(corners[i])
+				const painter = points[i]
+				painter.x = x
+				painter.y = y
+				painter.z = z
+				painter.w = w
+				const { data } = wireCube
+				data[ptr++] = x
+				data[ptr++] = y
+				data[ptr++] = z
+				data[ptr++] = w
+			}
+		}),
 	)
-	context.inputs.pointer.eventTapMultiple.addListener(() => {
-		context.animSchedule({
-			action(alpha) {
-				context.camera.transfo.distance = tgdCalcMix(14, 2, alpha)
-			},
-			duration: 2,
-		})
+	context.inputs.keyboard.eventKeyPress.addListener((evt) => {
+		if (evt.key === "d") {
+			lod.debug()
+		}
 	})
 	context.paint()
 }

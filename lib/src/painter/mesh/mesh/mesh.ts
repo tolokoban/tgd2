@@ -195,5 +195,6 @@ export class TgdPainterMesh
 
     delete(): void {
         this.vao.delete()
+        this.program.delete()
     }
 }
