@@ -187,6 +187,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
      * Useful for LOD. If an object takes a small space on the screen,
      * we can display its low res version.
      * @returns The surface of the bounding square in screen space of a space bbox.
+     * Or 0 if the bounding box is out of the frustrum.
      */
     computeBoundingBoxVisibleSurface(
         bbox: Readonly<{
@@ -196,28 +197,37 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     ): number {
         const [x0, y0, z0] = bbox.min
         const [x1, y1, z1] = bbox.max
+        /**
+         * We use the inside tetrahedron to only compute
+         * 4 points instead of 8.
+         */
         const points: ArrayNumber3[] = [
             [x0, y0, z0],
-            [x0, y0, z1],
-            [x0, y1, z0],
-            [x0, y1, z1],
-            [x1, y0, z0],
-            [x1, y0, z1],
+            // [x0, y1, z0],
+            // [x1, y0, z0],
             [x1, y1, z0],
-            [x1, y1, z1],
+            // [x0, y0, z1],
+            [x0, y1, z1],
+            [x1, y0, z1],
+            // [x1, y1, z1],
         ]
         let left = 0
         let right = 0
         let top = 0
         let bottom = 0
+        let near = 0
+        let far = 0
         let minX = +Number.MAX_VALUE
         let maxX = -Number.MAX_VALUE
         let minY = +Number.MAX_VALUE
         let maxY = -Number.MAX_VALUE
+        const debug = []
         for (const point of points) {
-            const [xx, yy, , ww] = this.apply(point)
+            const [xx, yy, zz, ww] = this.apply(point)
             const x = xx / ww
             const y = yy / ww
+            const z = zz / ww
+            debug.push([point, x, y, z])
             maxX = Math.max(maxX, x)
             minX = Math.min(minX, x)
             maxY = Math.max(maxY, y)
@@ -226,8 +236,18 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
             else if (x > +1) right++
             if (y < -1) top++
             else if (y > +1) bottom++
+            if (z < 0) near++
+            else if (z > 1) far--
         }
-        if (left === 8 || right === 8 || top === 8 || bottom === 8) {
+        const N = points.length
+        if (
+            left === N ||
+            right === N ||
+            top === N ||
+            bottom === N ||
+            near === N ||
+            far === N
+        ) {
             return 0
         }
         return (maxX - minX) * (maxY - minY)

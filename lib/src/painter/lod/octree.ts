@@ -41,7 +41,9 @@ function recursiveListBBoxes(
     surfaceThreshold: number
 ) {
     const visibility = camera.computeBoundingBoxVisibleSurface(bbox)
-    if (visibility < 1e-8) return
+    if (visibility < 1e-12) {
+        return
+    }
 
     if (visibility < surfaceThreshold * 4 || level >= levels) {
         result.push([x, y, z, level])

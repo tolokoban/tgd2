@@ -10,3 +10,4 @@ lib/test_coverage/
 .vscode/
 **/public/docs/
 test_coverage/
+.DS_Store

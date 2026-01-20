@@ -2,8 +2,7 @@ import {
 	type ArrayNumber3,
 	type ArrayNumber4,
 	type TgdContext,
-	TgdControllerCameraOrbit,
-	TgdDataGlb,
+	type TgdDataGlb,
 	TgdMaterialGlobal,
 	TgdPainterClear,
 	TgdPainterLOD,
@@ -12,7 +11,7 @@ import {
 	TgdPainterState,
 	TgdTextureCube,
 	tgdCalcMix,
-	tgdCalcRandom3,
+	tgdColorMakeHueWheel,
 	tgdLoadGlb,
 	webglPresetDepth,
 } from "@tolokoban/tgd"
@@ -23,14 +22,14 @@ import NegZ from "@/assets/cubemap/sky/negZ.webp"
 import PosX from "@/assets/cubemap/sky/posX.webp"
 import PosY from "@/assets/cubemap/sky/posY.webp"
 import PosZ from "@/assets/cubemap/sky/posZ.webp"
-import View, { Assets } from "@/components/demo/Tgd"
+import View, { type Assets } from "@/components/demo/Tgd"
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
 	context.camera.transfo.distance = 14
 	context.camera.near = 1e-2
 	context.camera.far = 20
-	const color: ArrayNumber4 = [0.9, 0.6, 0.1, 1]
+	const color: ArrayNumber4 = [0.9, 0.5, 0.1, 1]
 	const skybox = new TgdTextureCube(context, {
 		imagePosX: assets.image.posX,
 		imagePosY: assets.image.posY,
@@ -39,10 +38,16 @@ function init(context: TgdContext, assets: Assets) {
 		imageNegY: assets.image.negY,
 		imageNegZ: assets.image.negZ,
 	})
-	const material = new TgdMaterialGlobal({
-		color,
-		ambientColor: skybox,
-	})
+	const COLORS: ArrayNumber4[] = tgdColorMakeHueWheel({
+		steps: 6,
+	}).map((color) => [color.R, color.G, color.B, 1] as ArrayNumber4)
+	const materials = [0, 1, 2, 3, 4, 5].map(
+		(level) =>
+			new TgdMaterialGlobal({
+				color: COLORS[level],
+				ambientColor: skybox,
+			}),
+	)
 	const clear = new TgdPainterClear(context, { color: [0.3, 0.3, 0.3, 1] })
 	const bbox: {
 		min: Readonly<ArrayNumber3>
@@ -59,7 +64,7 @@ function init(context: TgdContext, assets: Assets) {
 
 			return new TgdPainterMeshGltf(context, {
 				asset,
-				material,
+				material: materials[level],
 			})
 		},
 		subdivisions: 3,
@@ -71,19 +76,19 @@ function init(context: TgdContext, assets: Assets) {
 			children: [lod],
 			depth: webglPresetDepth.less,
 		}),
-		new TgdPainterLogic((time) => {
-			const { transfo } = context.camera
-			transfo.setEulerRotation(
-				Math.sin(time) * 30,
-				Math.sin(time * 1.182) * 40,
-				0,
-			)
-		}),
+		// new TgdPainterLogic((time) => {
+		// 	const { transfo } = context.camera
+		// 	transfo.setEulerRotation(
+		// 		Math.sin(time) * 30,
+		// 		Math.sin(time * 1.182) * 40,
+		// 		0,
+		// 	)
+		// }),
 	)
-	context.inputs.pointer.eventTap.addListener(() => {
+	context.inputs.pointer.eventTapMultiple.addListener(() => {
 		context.animSchedule({
 			action(alpha) {
-				context.camera.transfo.distance = tgdCalcMix(14, 4, alpha)
+				context.camera.transfo.distance = tgdCalcMix(14, 2, alpha)
 			},
 			duration: 2,
 		})
@@ -111,8 +116,6 @@ export default function Demo() {
 				inertiaOrbit: 1000,
 				inertiaZoom: 1000,
 				speedZoom: 0.8,
-				minZoom: 1,
-				maxZoom: 2.8,
 			}}
 		/>
 	)
@@ -134,7 +137,7 @@ async function loadGLB(
 			: `./assets/lod/Octree${toBin(x, level)}${toBin(y, level)}${toBin(
 					z,
 					level,
-			  )}.glb`
+				)}.glb`
 	console.log("Loading LOD block:", url)
 	const asset = await tgdLoadGlb(url)
 	return asset
