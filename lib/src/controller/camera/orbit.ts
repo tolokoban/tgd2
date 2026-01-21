@@ -220,6 +220,7 @@ export class TgdControllerCameraOrbit {
         }: Partial<TgdControllerCameraOrbitOptions> = {}
     ) {
         this.name = name ?? this.id
+        this.context = context
         this.geo = undefined
         if (geo) {
             this.geo = {
@@ -254,7 +255,6 @@ export class TgdControllerCameraOrbit {
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
-        this.context = context
         this.resetZoom(zoom)
     }
 

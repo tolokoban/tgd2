@@ -1,3 +1,4 @@
+import { Settings, type SettingsDefinitions } from "@/components/settings"
 import {
 	TgdCanvasGizmo,
 	TgdContext,
@@ -19,7 +20,6 @@ import {
 	Theme,
 } from "@tolokoban/ui"
 import React from "react"
-import { Settings, type SettingsDefinitions } from "@/components/settings"
 import Spinner from "../../Spinner"
 import styles from "./tgd.module.css"
 
@@ -97,9 +97,9 @@ export default function Tgd<T extends SettingsDefinitions>({
 	const [loading, setLoading] = React.useState(true)
 	let aspectRatio = "auto"
 	if (width.endsWith("px") && height.endsWith("px")) {
-		aspectRatio = `${width.substring(
-			width.length - 2,
-		)} / ${height.substring(height.length - 2)}`
+		aspectRatio = `${width.substring(width.length - 2)} / ${height.substring(
+			height.length - 2,
+		)}`
 	}
 	const mountCanvas = (canvas: HTMLCanvasElement) => {
 		if (!canvas) return
@@ -137,6 +137,7 @@ export default function Tgd<T extends SettingsDefinitions>({
 					context.paint()
 				} catch (ex) {
 					setError(ex instanceof Error ? ex.message : JSON.stringify(ex))
+					console.error(ex)
 				}
 				setLoading(false)
 			})

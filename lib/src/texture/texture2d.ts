@@ -1,13 +1,15 @@
 import { TgdEvent } from "@tgd/event"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdProgram } from "@tgd/program"
-import { isWebglImage, WebglImage, WebglTexParameter } from "@tgd/types"
+import { WebglImage, WebglTexParameter, isWebglImage } from "@tgd/types"
+import { isString } from "@tgd/types/guards"
 import { webglLookup } from "@tgd/utils"
 import {
     WebglTextureInternalFormat,
     WebglTextureParameters,
     webglTextureParametersSet,
 } from "@tgd/webgl"
+import { LoadBmpOptions, isLoadBmpOptions } from "./types"
 
 interface TgdTexture2DStorage {
     width: number
@@ -58,6 +60,12 @@ interface TgdTexture2DStorage {
         | "DEPTH_COMPONENT32F"
 }
 
+export interface TgdTexture2DOptions {
+    storage?: Partial<TgdTexture2DStorage>
+    params?: WebglTextureParameters
+    load?: WebglImage | string | LoadBmpOptions
+}
+
 export class TgdTexture2D {
     public name: string
     public readonly gl: WebGL2RenderingContext
@@ -81,8 +89,9 @@ export class TgdTexture2D {
         public readonly context: {
             gl: WebGL2RenderingContext
         },
-        storage?: Partial<TgdTexture2DStorage>
+        options: TgdTexture2DOptions = {}
     ) {
+        const { storage, params, load } = options
         const { gl } = context
         this.gl = gl
         this.name = `Texture2D/${TgdTexture2D.counter++}`
@@ -97,10 +106,16 @@ export class TgdTexture2D {
         }
         const width = storage?.width
         const height = storage?.height
-        if (typeof width == "number" && typeof height === "number") {
+        if (typeof width === "number" && typeof height === "number") {
             this.resize(width, height)
         } else {
             this.createTexture()
+        }
+        if (params) this.setParams(params)
+        if (isWebglImage(load) || isString(load)) {
+            this.loadBitmap(load)
+        } else if (isLoadBmpOptions(load)) {
+            this.loadBitmap(load.bmp, load)
         }
     }
 

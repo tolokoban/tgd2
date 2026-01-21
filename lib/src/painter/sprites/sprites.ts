@@ -1,18 +1,30 @@
+/* eslint-disable unicorn/no-array-callback-reference */
 import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
+import { TgdConsole } from "@tgd/debug"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
-import { TgdTransfo } from "@tgd/math"
+import { TgdTransfo, TgdVec2 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../painter"
+import { AccessorProxy } from "./accessor"
 import { Sprite } from "./sprite"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
 
+export type { TgdSprite } from "./types"
+export type TgdPainterSpritesAtlas = AtlasItem[]
+
 export interface TgdPainterSpritesOptions {
     texture: TgdTexture2D
-    atlas: AtlasItem[]
+    atlas: TgdPainterSpritesAtlas
+    /**
+     * The biggest square contained in the atlas has a size of `atlasUnit`.
+     *
+     * Default: 1
+     */
+    atlasUnit?: number
     /**
      * If there is not enough space when adding a sprite,
      * the capacity will be doubled.
@@ -21,6 +33,8 @@ export interface TgdPainterSpritesOptions {
      */
     initialCapacity?: number
 }
+
+const DEBUG_COL_SIZE = 8
 
 export class TgdPainterSprites
     extends TgdPainter
@@ -38,13 +52,14 @@ export class TgdPainterSprites
      * The capacity can be get with `this.dataset.count`.
      */
     private _count = 0
-    private readonly attPosition: Accessor
-    private readonly attCos: Accessor
-    private readonly attSin: Accessor
-    private readonly attScale: Accessor
-    private readonly attUV: Accessor
-    private readonly attSize: Accessor
-    private readonly attOrigin: Accessor
+    private readonly attPosition = new AccessorProxy("attPosition")
+    private readonly attCos = new AccessorProxy("attCos")
+    private readonly attSin = new AccessorProxy("attSin")
+    private readonly attScale = new AccessorProxy("attScale")
+    private readonly attUV = new AccessorProxy("attUV")
+    private readonly attSize = new AccessorProxy("attSize")
+    private readonly attOrigin = new AccessorProxy("attOrigin")
+    private readonly uniAtlasRatio = new TgdVec2(1, 1)
     private dirty = true
 
     constructor(
@@ -52,13 +67,23 @@ export class TgdPainterSprites
         private readonly options: TgdPainterSpritesOptions
     ) {
         super()
-        this.texture = options.texture
+        const { texture } = options
+        this.texture = texture
+        if (texture.width > texture.height) {
+            this.uniAtlasRatio.x = texture.width / texture.height
+            this.uniAtlasRatio.y = 1
+        } else {
+            this.uniAtlasRatio.x = 1
+            this.uniAtlasRatio.y = texture.height / texture.width
+        }
+        this.uniAtlasRatio.scale(options.atlasUnit ?? 1)
         const prg = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({
                 uniforms: {
                     uniTransfoMatrix: "mat4",
                     uniModelViewMatrix: "mat4",
                     uniProjectionMatrix: "mat4",
+                    uniAtlasRatio: "vec2",
                 },
                 attributes: {
                     attPosition: "vec3",
@@ -74,11 +99,20 @@ export class TgdPainterSprites
                     varUV: "vec2",
                 },
                 mainCode: [
-                    "varUV = attUV + attSize * attCorners.zw;",
-                    "vec4 position = vec4((attCorners.xy - attOrigin) * attScale, 0.0, 1.0);",
-                    "// Rotation... TODO",
+                    "varUV = attUV.xy + attSize * attCorners.zw;",
+                    "vec4 position = vec4((attCorners.xy - attOrigin) * attScale * attSize * uniAtlasRatio, 0.0, 1.0);",
+                    "mat4 rotation = mat4(",
+                    [
+                        "attCos, attSin, 0, 0,",
+                        "-attSin, attCos, 0, 0,",
+                        "0, 0, 1, 0,",
+                        "0, 0, 0, 1",
+                    ],
+                    ");",
+                    "position = rotation * position;",
                     "position += vec4(attPosition, 0.0);",
                     "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
+                    "gl_PointSize = 32.0;",
                 ],
             }).code,
             frag: new TgdShaderFragment({
@@ -93,21 +127,30 @@ export class TgdPainterSprites
                     "vec4 color = texture(uniTexture, varUV);",
                     `if (color.a < ${1 / 0xff}) discard;`,
                     "FragColor = color;",
+                    // "vec4 GREEN = vec4(0, 1, 0, 1);",
+                    // "vec4 RED = vec4(1, 0, 0, 1);",
+                    // "if (varCorners.x == 0.0) FragColor = GREEN;",
+                    // "else FragColor = RED;",
+                    // "FragColor.a = 1.0;",
                 ],
             }).code,
         })
         this.prg = prg
+        prg.debug()
         const datasetFrame = new TgdDataset({
             /**
              * (x, y, u, v)
              */
-            attCorner: "vec4",
+            attCorners: "vec4",
         })
         // prettier-ignore
         datasetFrame.set(
-			"arrCorner",
+			"attCorners",
 			new Float32Array([
-				-1, -1, 0, 1, +1, -1, 1, 1, -1, +1, 0, 0, +1, +1, 1, 0,
+				-1, -1, 0, 1, 
+                +1, -1, 1, 1, 
+                -1, +1, 0, 0, 
+                +1, +1, 1, 0,
 			]),
 		)
         const datasetInstances = new TgdDataset(
@@ -118,6 +161,7 @@ export class TgdPainterSprites
                 attScale: "vec2",
                 attUV: "vec3",
                 attSize: "vec2",
+                attOrigin: "vec2",
             },
             {
                 divisor: 1,
@@ -131,13 +175,7 @@ export class TgdPainterSprites
             datasetFrame,
         ])
         this.vao = vao
-        this.attPosition = datasetInstances.getAttribAccessor("attPosition")
-        this.attCos = datasetInstances.getAttribAccessor("attCos")
-        this.attSin = datasetInstances.getAttribAccessor("attSin")
-        this.attScale = datasetInstances.getAttribAccessor("attScale")
-        this.attUV = datasetInstances.getAttribAccessor("attUV")
-        this.attSize = datasetInstances.getAttribAccessor("attSize")
-        this.attOrigin = datasetInstances.getAttribAccessor("attOrigin")
+        this.updateAccessors()
     }
 
     get count() {
@@ -145,10 +183,19 @@ export class TgdPainterSprites
     }
     private set count(value: number) {
         this._count = value
-        while (value > this.datasetInstances.count) {
-            this.datasetInstances.count =
-                2 * Math.max(1, this.datasetInstances.count)
+        while (value > this.capacity) {
+            this.capacity = 2 * Math.max(1, this.capacity)
+            this.updateAccessors()
         }
+    }
+
+    get capacity() {
+        return this.datasetInstances.count
+    }
+    private set capacity(value: number) {
+        if (this.datasetInstances.count === value) return
+
+        this.datasetInstances.count = value
     }
 
     spriteCreate(data: Partial<TgdSprite> = {}): TgdSprite {
@@ -196,11 +243,76 @@ export class TgdPainterSprites
         const { gl, camera } = context
         prg.use()
         texture.activate(0, prg, "uniTexture")
+        prg.uniform2fv("uniAtlasRatio", this.uniAtlasRatio)
         prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, datasetInstances.count)
+        // gl.drawArraysInstanced(gl.POINTS, 0, 4, datasetInstances.count)
         vao.unbind()
     }
+
+    debug(caption?: string) {
+        const out = new TgdConsole({ text: caption ?? this.name, bold: true })
+        out.nl()
+        out.add("count: ").add(`${this.count}`, { color: "yellow" }).nl()
+        out.add("capacity: ").add(`${this.capacity}`, { color: "yellow" }).nl()
+        const spc = " ".repeat(DEBUG_COL_SIZE)
+        const head = (value: string) =>
+            value.slice(0, DEBUG_COL_SIZE).padStart(DEBUG_COL_SIZE, " ")
+        const fields: Record<string, [Accessor, number]> = {
+            position: [this.attPosition, 3],
+            scale: [this.attScale, 2],
+            uv: [this.attUV, 3],
+            size: [this.attSize, 2],
+            origin: [this.attOrigin, 2],
+            cos: [this.attCos, 1],
+            sin: [this.attSin, 1],
+        }
+        const columns = Object.keys(fields)
+        const hr = `${columns.map(() => "-".repeat(DEBUG_COL_SIZE)).join("|")}|\n`
+        if (this.count > 0) {
+            out.add(hr)
+                .add(columns.map(head).join("|"), {
+                    bold: true,
+                })
+                .add("|")
+                .nl()
+                .add(hr)
+            for (let index = 0; index < this.count; index++) {
+                for (let dim = 0; dim < 3; dim++) {
+                    for (const [accessor, maxDim] of Object.values(fields)) {
+                        if (dim < maxDim) {
+                            out.add(pad(accessor, index, dim))
+                        } else {
+                            out.add(spc)
+                        }
+                        out.add("|")
+                    }
+                    out.nl()
+                }
+                out.add(hr)
+            }
+        }
+        out.debug()
+        this.transfo.debug("Transfo")
+    }
+
+    private updateAccessors() {
+        const { datasetInstances } = this
+        this.attPosition.dataset = datasetInstances
+        this.attCos.dataset = datasetInstances
+        this.attSin.dataset = datasetInstances
+        this.attScale.dataset = datasetInstances
+        this.attUV.dataset = datasetInstances
+        this.attSize.dataset = datasetInstances
+        this.attOrigin.dataset = datasetInstances
+    }
+}
+
+function pad(accessor: Accessor, index: number, dimension = 0): string {
+    return `${accessor.get(index, dimension)}`
+        .slice(0, DEBUG_COL_SIZE)
+        .padStart(DEBUG_COL_SIZE, " ")
 }

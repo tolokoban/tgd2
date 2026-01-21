@@ -18,20 +18,21 @@ export class PainterTriangle extends TgdPainter {
     constructor(private readonly context: TgdContext) {
         super()
         this.texture = new TgdTexture2D(context, {
-            width: 2048,
-            height: 2048,
-            internalFormat: "R8",
-        })
-            .setParams({
-                magFilter: "NEAREST",
-                minFilter: "LINEAR",
-            })
-            .loadData(this.data, {
+            storage: {
                 width: 2048,
                 height: 2048,
-                format: "RED",
                 internalFormat: "R8",
-            })
+            },
+            params: {
+                magFilter: "NEAREST",
+                minFilter: "LINEAR",
+            },
+        }).loadData(this.data, {
+            width: 2048,
+            height: 2048,
+            format: "RED",
+            internalFormat: "R8",
+        })
         const x = 1 / (2 * Math.sqrt(3))
         const dataset = new TgdDataset({
             attPosition: "vec2",

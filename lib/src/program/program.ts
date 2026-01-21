@@ -1,5 +1,5 @@
 import { TgdConsole, TgdConsoleItem } from "@tgd/debug"
-import { TgdMat2, TgdMat3, TgdMat4, TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdMat2, TgdMat3, TgdMat4, TgdVec2, TgdVec3, TgdVec4 } from "@tgd/math"
 import { tgdCodeStringify } from "@tgd/shader/code"
 import { TgdProgramOptions } from "@tgd/types"
 
@@ -132,6 +132,11 @@ export class TgdProgram {
     uniform2f(name: string, x: number, y: number) {
         const { gl } = this
         gl.uniform2f(this.getUniformLocation(name), x, y)
+    }
+
+    uniform2fv(name: string, vec2: TgdVec2) {
+        const { gl } = this
+        gl.uniform2fv(this.getUniformLocation(name), vec2)
     }
 
     uniform3f(name: string, x: number, y: number, z: number) {
