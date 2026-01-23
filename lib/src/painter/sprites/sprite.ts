@@ -4,7 +4,7 @@ export class Sprite implements TgdSprite {
     public offset = 0
 
     private _index = 0
-    private _angle = 0
+    private _angle = Number.MAX_SAFE_INTEGER
 
     constructor(
         private readonly atlas: AtlasItem[],

@@ -112,7 +112,7 @@ export class TgdPainterSprites
                     "position = rotation * position;",
                     "position += vec4(attPosition, 0.0);",
                     "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
-                    "gl_PointSize = 32.0;",
+                    "gl_PointSize = 16.0;",
                 ],
             }).code,
             frag: new TgdShaderFragment({
@@ -127,6 +127,8 @@ export class TgdPainterSprites
                     "vec4 color = texture(uniTexture, varUV);",
                     `if (color.a < ${1 / 0xff}) discard;`,
                     "FragColor = color;",
+                    "FragColor.a = 1.0;",
+                    // "FragColor = mix(FragColor, vec4(1,1,1,1), .5);",
                     // "vec4 GREEN = vec4(0, 1, 0, 1);",
                     // "vec4 RED = vec4(1, 0, 0, 1);",
                     // "if (varCorners.x == 0.0) FragColor = GREEN;",
@@ -136,7 +138,6 @@ export class TgdPainterSprites
             }).code,
         })
         this.prg = prg
-        prg.debug()
         const datasetFrame = new TgdDataset({
             /**
              * (x, y, u, v)
@@ -156,12 +157,12 @@ export class TgdPainterSprites
         const datasetInstances = new TgdDataset(
             {
                 attPosition: "vec3",
-                attCos: "float",
-                attSin: "float",
                 attScale: "vec2",
                 attUV: "vec3",
                 attSize: "vec2",
                 attOrigin: "vec2",
+                attCos: "float",
+                attSin: "float",
             },
             {
                 divisor: 1,
@@ -230,6 +231,7 @@ export class TgdPainterSprites
     }
 
     delete(): void {
+        console.debug("[TgdPainterSprite] Delete", this.name)
         this.prg.delete()
         this.vao.delete()
     }
@@ -254,6 +256,8 @@ export class TgdPainterSprites
     }
 
     debug(caption?: string) {
+        // this.prg.debug()
+        this.transfo.debug("Transfo")
         const out = new TgdConsole({ text: caption ?? this.name, bold: true })
         out.nl()
         out.add("count: ").add(`${this.count}`, { color: "yellow" }).nl()
@@ -296,7 +300,6 @@ export class TgdPainterSprites
             }
         }
         out.debug()
-        this.transfo.debug("Transfo")
     }
 
     private updateAccessors() {
