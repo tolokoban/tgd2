@@ -1,4 +1,4 @@
-export class TgdEvent<T> {
+export class TgdEvent<T = void> {
     private readonly listeners = new Set<Listener<T>>()
 
     addListener(listener: Listener<T>) {

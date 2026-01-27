@@ -131,6 +131,10 @@ export class TgdVec2 extends Float32Array {
         return this[0] * vec[0] + this[1] * vec[1]
     }
 
+    cross(vec: Readonly<TgdVec2 | TgdVec3 | TgdVec4 | ArrayNumber2>): number {
+        return this[0] * vec[1] - this[1] * vec[0]
+    }
+
     get size() {
         return Math.sqrt(this[0] * this[0] + this[1] * this[1])
     }
