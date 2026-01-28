@@ -149,6 +149,34 @@ export class TgdDataset {
         return ds
     }
 
+    copyAttributes({
+        fromIndex,
+        toIndex,
+        toDataset = this,
+    }: {
+        fromIndex: number
+        toIndex: number
+        toDataset?: TgdDataset
+    }) {
+        const { stride } = this
+        if (stride !== toDataset.stride) {
+            console.error("Failed to copy attributes between datasets!")
+            this.debug("From:")
+            toDataset.debug("To:")
+            throw new Error(
+                `[TgdDataset.copyAttributes] Unable to copy attributes from a dataset with stride ${stride} to one with stride ${toDataset.stride}!`
+            )
+        }
+        const fromData = this._data
+        const fromOffset = fromIndex * stride
+        const fromArray = new Uint8Array(fromData)
+        const toData = toDataset._data
+        const toOffset = toIndex * stride
+        const toArray = new Uint8Array(toData)
+        const size = stride
+        toArray.set(fromArray.subarray(fromOffset, fromOffset + size), toOffset)
+    }
+
     /**
      * Warning!
      *

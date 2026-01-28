@@ -12,6 +12,7 @@ import { TgdPainter } from "../painter"
 import { AccessorProxy } from "./accessor"
 import { Sprite } from "./sprite"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
+import { isNumber } from "@tgd/types/guards"
 
 export type { TgdSprite } from "./types"
 export type TgdPainterSpritesAtlas = AtlasItem[]
@@ -52,6 +53,8 @@ export class TgdPainterSprites
      * The capacity can be get with `this.dataset.count`.
      */
     private _count = 0
+    private readonly sprites: Sprite[] = []
+    private readonly spriteIndexes = new Map<Sprite, number>()
     private readonly attPosition = new AccessorProxy("attPosition")
     private readonly attCos = new AccessorProxy("attCos")
     private readonly attSin = new AccessorProxy("attSin")
@@ -128,12 +131,6 @@ export class TgdPainterSprites
                     `if (color.a < ${1 / 0xff}) discard;`,
                     "FragColor = color;",
                     "FragColor.a = 1.0;",
-                    // "FragColor = mix(FragColor, vec4(1,1,1,1), .5);",
-                    // "vec4 GREEN = vec4(0, 1, 0, 1);",
-                    // "vec4 RED = vec4(1, 0, 0, 1);",
-                    // "if (varCorners.x == 0.0) FragColor = GREEN;",
-                    // "else FragColor = RED;",
-                    // "FragColor.a = 1.0;",
                 ],
             }).code,
         })
@@ -223,21 +220,58 @@ export class TgdPainterSprites
         sprite.x = data.x ?? 0
         sprite.y = data.y ?? 0
         sprite.z = data.z ?? 0
+        this.sprites[offset] = sprite
+        this.spriteIndexes.set(sprite, offset)
+        this.paint()
         return sprite
     }
 
-    spriteDelete(sprite: TgdSprite) {
-        throw new Error("Not implemented yet!")
+    spriteDelete(sprite: TgdSprite | Sprite) {
+        if (!(sprite instanceof Sprite)) {
+            console.error(
+                "[TgdPainterSprites.spriteDelete] Not a sprite!",
+                sprite
+            )
+            return false
+        }
+
+        const index = this.spriteIndexes.get(sprite)
+        if (!isNumber(index)) return false
+
+        const lastIndex = this.sprites.length - 1
+        if (lastIndex !== index) {
+            // We need to fill the hole of this deleted sprite
+            // with the last sprite of the list.
+            const lastSprite = this.sprites[lastIndex]
+            if (!lastSprite) {
+                throw new Error(
+                    "[TgdPainterSprites.spriteDelete] There is no last sprite!"
+                )
+            }
+            this.datasetInstances.copyAttributes({
+                fromIndex: lastIndex,
+                toIndex: index,
+            })
+            this.spriteIndexes.set(lastSprite, index)
+            this.sprites[index] = lastSprite
+            lastSprite.offset = index
+        }
+        this.sprites.pop()
+        this.count--
+        this.spriteIndexes.delete(sprite)
+        this.dirty = true
+        this.paint()
+        return true
     }
 
     delete(): void {
-        console.debug("[TgdPainterSprite] Delete", this.name)
         this.prg.delete()
         this.vao.delete()
     }
 
     paint(): void {
-        const { context, datasetInstances, vao, prg, transfo, texture } = this
+        const { context, datasetInstances, vao, prg, transfo, texture, count } =
+            this
         if (this.dirty) {
             this.dirty = false
             vao.updateDataset(datasetInstances)
@@ -250,7 +284,7 @@ export class TgdPainterSprites
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
-        gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, datasetInstances.count)
+        gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count)
         // gl.drawArraysInstanced(gl.POINTS, 0, 4, datasetInstances.count)
         vao.unbind()
     }
@@ -300,6 +334,7 @@ export class TgdPainterSprites
             }
         }
         out.debug()
+        console.log("Sprites list:", this.sprites)
     }
 
     private updateAccessors() {

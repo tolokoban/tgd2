@@ -1,0 +1,25 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./bricks.demo"
+
+const FOCUS = {"Detail #1":"function init(context: TgdContext, assets: Assets) {\n\tconst clear = new TgdPainterClear(context, {\n\t\tcolor: [0.3, 0.3, 0.3, 1],\n\t\tdepth: 1,\n\t})\n\tconst texture = new TgdTexture2D(context, {\n\t\tload: assets.image.sprites,\n\t})\n\tconst cell = (col: number, row: number) => ({\n\t\tx: col / 2,\n\t\ty: row / 4,\n\t\twidth: 1 / 2,\n\t\theight: 1 / 4,\n\t})\n\tconst atlas: TgdPainterSpritesAtlas = []\n\tfor (let col = 0; col < 2; col++) {\n\t\tfor (let row = 0; row < 3; row++) {\n\t\t\tatlas.push(cell(col, row))\n\t\t}\n\t}\n\tconst spritesPainter = new TgdPainterSprites(context, {\n\t\ttexture,\n\t\tatlas,\n\t\tatlasUnit: 2,\n\t})\n\tconst bricks = new Map<string, TgdSprite>()\n\tconst click = (x: number, y: number) => {\n\t\tconst { aspectRatio } = context\n\t\tx *= aspectRatio > 1 ? aspectRatio : 1\n\t\tif (x < -1 || x > 1) return\n\n\t\ty *= aspectRatio > 1 ? 1 : aspectRatio\n\t\tif (y < -1 || y > 1) return\n\n\t\tx = Math.floor(x * 2) * 2 + 1\n\t\ty = Math.floor(y * 4) + 0.5\n\t\tconst key = `${x}/${y}`\n\t\tconst currentBrick = bricks.get(key)\n\t\tif (currentBrick) {\n\t\t\tif (currentBrick.index < 4) currentBrick.index++\n\t\t\telse {\n                console.log(\n                    \"Delete:\", currentBrick\n                )\n\t\t\t\tspritesPainter.spriteDelete(currentBrick)\n\t\t\t\tbricks.delete(key)\n\t\t\t}\n\t\t} else {\n\t\t\tconst brick = spritesPainter.spriteCreate({ x, y })\n\t\t\tbricks.set(key, brick)\n\t\t}\n\t\tcontext.paint()\n\t}\n\tcontext.inputs.pointer.eventTap.addListener((evt) => click(evt.x, evt.y))\n\tcontext.add(\n\t\tclear,\n\t\tnew TgdPainterState(context, {\n\t\t\tdepth: webglPresetDepth.less,\n\t\t\tblend: webglPresetBlend.alpha,\n\t\t\tchildren: [spritesPainter],\n\t\t}),\n\t\tnew TgdPainterLogic(() => {\n\t\t\tcontext.camera.fitSpaceAtTarget(8, 8)\n\t\t}),\n\t)\n\tcontext.paint()\n}"}
+const FULL = "import {\n\ttype TgdContext,\n\tTgdPainterClear,\n\tTgdPainterLogic,\n\tTgdPainterSprites,\n\tTgdPainterSpritesAtlas,\n\tTgdPainterState,\n\tTgdSprite,\n\tTgdTexture2D,\n\twebglPresetBlend,\n\twebglPresetDepth,\n} from \"@tolokoban/tgd\"\n\nimport View, { type Assets } from \"@/components/demo/Tgd\"\n\nimport BricksURL from \"./bricks.webp\"\n\nfunction init(context: TgdContext, assets: Assets) {\n\tconst clear = new TgdPainterClear(context, {\n\t\tcolor: [0.3, 0.3, 0.3, 1],\n\t\tdepth: 1,\n\t})\n\tconst texture = new TgdTexture2D(context, {\n\t\tload: assets.image.sprites,\n\t})\n\tconst cell = (col: number, row: number) => ({\n\t\tx: col / 2,\n\t\ty: row / 4,\n\t\twidth: 1 / 2,\n\t\theight: 1 / 4,\n\t})\n\tconst atlas: TgdPainterSpritesAtlas = []\n\tfor (let col = 0; col < 2; col++) {\n\t\tfor (let row = 0; row < 3; row++) {\n\t\t\tatlas.push(cell(col, row))\n\t\t}\n\t}\n\tconst spritesPainter = new TgdPainterSprites(context, {\n\t\ttexture,\n\t\tatlas,\n\t\tatlasUnit: 2,\n\t})\n\tconst bricks = new Map<string, TgdSprite>()\n\tconst click = (x: number, y: number) => {\n\t\tconst { aspectRatio } = context\n\t\tx *= aspectRatio > 1 ? aspectRatio : 1\n\t\tif (x < -1 || x > 1) return\n\n\t\ty *= aspectRatio > 1 ? 1 : aspectRatio\n\t\tif (y < -1 || y > 1) return\n\n\t\tx = Math.floor(x * 2) * 2 + 1\n\t\ty = Math.floor(y * 4) + 0.5\n\t\tconst key = `${x}/${y}`\n\t\tconst currentBrick = bricks.get(key)\n\t\tif (currentBrick) {\n\t\t\tif (currentBrick.index < 4) currentBrick.index++\n\t\t\telse {\n                console.log(\n                    \"Delete:\", currentBrick\n                )\n\t\t\t\tspritesPainter.spriteDelete(currentBrick)\n\t\t\t\tbricks.delete(key)\n\t\t\t}\n\t\t} else {\n\t\t\tconst brick = spritesPainter.spriteCreate({ x, y })\n\t\t\tbricks.set(key, brick)\n\t\t}\n\t\tcontext.paint()\n\t}\n\tcontext.inputs.pointer.eventTap.addListener((evt) => click(evt.x, evt.y))\n\tcontext.add(\n\t\tclear,\n\t\tnew TgdPainterState(context, {\n\t\t\tdepth: webglPresetDepth.less,\n\t\t\tblend: webglPresetBlend.alpha,\n\t\t\tchildren: [spritesPainter],\n\t\t}),\n\t\tnew TgdPainterLogic(() => {\n\t\t\tcontext.camera.fitSpaceAtTarget(8, 8)\n\t\t}),\n\t)\n\tcontext.paint()\n}\n\nexport default function Demo() {\n\treturn (\n\t\t<View\n\t\t\tonReady={init}\n\t\t\tassets={{\n\t\t\t\timage: { sprites: BricksURL },\n\t\t\t}}\n\t\t/>\n\t)\n}\n"
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
+}
