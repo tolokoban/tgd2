@@ -47,19 +47,10 @@ export class TgdManagerAnimation {
     }
 
     paint(time: number): boolean {
-        console.log(
-            "🐞 [animation-manager@50] this.animations.size =",
-            this.animations.size
-        ) // @FIXME: Remove this line written on 2026-01-30 at 21:16
         if (this.animations.size === 0) return false
 
         this.time = time
-        console.log(
-            "🐞 [animation-manager@53] this.animations.values() =",
-            this.animations.values()
-        ) // @FIXME: Remove this line written on 2026-01-30 at 21:13
         for (const anim of this.animations.values()) {
-            console.log("🐞 [animation-manager@58] anim =", anim) // @FIXME: Remove this line written on 2026-01-30 at 21:13
             if (anim.start < 0) {
                 // Initialize animation.
                 anim.start = time + anim.delay
