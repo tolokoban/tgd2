@@ -75,3 +75,14 @@ export function tgdCalcModulo(value: number, min: number, max: number) {
 
     return value
 }
+
+export function tgdCalcModuloDiscrete(
+    value: number,
+    size: number,
+    count: number
+) {
+    if (size === 0) return 0
+
+    const alpha = tgdCalcModulo(value, 0, size)
+    return Math.floor((count * alpha) / size)
+}

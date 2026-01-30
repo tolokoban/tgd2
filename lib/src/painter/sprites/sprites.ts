@@ -130,7 +130,7 @@ export class TgdPainterSprites
                     "vec4 color = texture(uniTexture, varUV);",
                     `if (color.a < ${1 / 0xff}) discard;`,
                     "FragColor = color;",
-                    "FragColor.a = 1.0;",
+                    // "FragColor.a = 1.0;",
                 ],
             }).code,
         })
@@ -194,6 +194,15 @@ export class TgdPainterSprites
         if (this.datasetInstances.count === value) return
 
         this.datasetInstances.count = value
+    }
+
+    /**
+     * Delete all sprites.
+     */
+    clear() {
+        this.count = 0
+        this.sprites.splice(0)
+        this.spriteIndexes.clear()
     }
 
     spriteCreate(data: Partial<TgdSprite> = {}): TgdSprite {

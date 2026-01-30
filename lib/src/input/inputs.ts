@@ -1,7 +1,10 @@
+import { TgdInputGamepad } from "./gamepad"
 import { TgdInputKeyboard } from "./keyboard"
 import { TgdInputPointer } from "./pointer"
 
 export class TgdInputs {
+    public readonly gamepad = new TgdInputGamepad()
+
     private _keyboard: TgdInputKeyboard | null = null
     private _pointer: TgdInputPointer | null = null
 
