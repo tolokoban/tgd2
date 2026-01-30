@@ -231,7 +231,7 @@ export class TgdPainterSprites
         sprite.z = data.z ?? 0
         this.sprites[offset] = sprite
         this.spriteIndexes.set(sprite, offset)
-        this.paint()
+        this.context.paint()
         return sprite
     }
 
@@ -269,7 +269,7 @@ export class TgdPainterSprites
         this.count--
         this.spriteIndexes.delete(sprite)
         this.dirty = true
-        this.paint()
+        this.context.paint()
         return true
     }
 

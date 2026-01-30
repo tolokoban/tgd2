@@ -263,7 +263,10 @@ export class TgdContext extends TgdPainterGroup {
     set camera(camera: TgdCamera) {
         if (camera === this._camera) return
 
+        const { gl } = this
         this._camera = camera
+        camera.screenWidth = gl.drawingBufferWidth
+        camera.screenHeight = gl.drawingBufferHeight
         this.paint()
     }
 
@@ -474,8 +477,8 @@ export class TgdContext extends TgdPainterGroup {
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
             super.paint(timeInSec, delayInSec)
             if (
-                this.paintingIsQueued ||
                 this.animationManager.paint(timeInSec) ||
+                this.paintingIsQueued ||
                 this.isPlaying
             ) {
                 this.paintingIsOngoing = false
