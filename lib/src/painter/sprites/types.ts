@@ -11,6 +11,10 @@ export interface TgdSprite {
     index: number
 }
 
+export interface TgdSpriteHue extends TgdSprite {
+    hue: number
+}
+
 export interface AtlasItem {
     x: number
     y: number

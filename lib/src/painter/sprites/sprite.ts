@@ -3,19 +3,19 @@ import type { Accessor, AtlasItem, TgdSprite } from "./types"
 export class Sprite implements TgdSprite {
     public offset = 0
 
-    private _index = 0
-    private _angle = Number.MAX_SAFE_INTEGER
+    protected _index = 0
+    protected _angle = Number.MAX_SAFE_INTEGER
 
     constructor(
-        private readonly atlas: AtlasItem[],
-        private readonly raiseDirtyFlag: () => void,
-        private readonly attPosition: Accessor,
-        private readonly attCos: Accessor,
-        private readonly attSin: Accessor,
-        private readonly attScale: Accessor,
-        private readonly attUV: Accessor,
-        private readonly attSize: Accessor,
-        private readonly attOrigin: Accessor
+        protected readonly atlas: AtlasItem[],
+        protected readonly raiseDirtyFlag: () => void,
+        protected readonly attPosition: Accessor,
+        protected readonly attCos: Accessor,
+        protected readonly attSin: Accessor,
+        protected readonly attScale: Accessor,
+        protected readonly attUV: Accessor,
+        protected readonly attSize: Accessor,
+        protected readonly attOrigin: Accessor
     ) {}
 
     get index() {

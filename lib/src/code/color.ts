@@ -1,5 +1,5 @@
 import { TgdCodeFunctions } from "@tgd/shader"
-import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
+import { ArrayNumber4 } from "@tgd/types"
 
 /**
  * Fast hue shifting for colors.

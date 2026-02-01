@@ -1,11 +1,16 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 import type { TgdContext } from "@tgd/context"
-import { TgdDataset } from "@tgd/dataset"
+import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdConsole } from "@tgd/debug"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdTransfo, TgdVec2 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import {
+    TgdCodeBloc,
+    TgdCodeFunctions,
+    TgdShaderFragment,
+    TgdShaderVertex,
+} from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../painter"
@@ -13,6 +18,7 @@ import { AccessorProxy } from "./accessor"
 import { Sprite } from "./sprite"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
 import { isNumber } from "@tgd/types/guards"
+import { WebglAttributeType } from "@tgd/types"
 
 export type { TgdSprite } from "./types"
 export type TgdPainterSpritesAtlas = AtlasItem[]
@@ -33,6 +39,16 @@ export interface TgdPainterSpritesOptions {
      * Default: 1
      */
     initialCapacity?: number
+    attributes?: TgdDatasetTypeRecord
+    varyings?: { [name: string]: WebglAttributeType }
+    vert?: {
+        functions?: TgdCodeFunctions | (() => TgdCodeFunctions)
+        code?: TgdCodeBloc | (() => TgdCodeBloc)
+    }
+    frag?: {
+        functions?: TgdCodeFunctions | (() => TgdCodeFunctions)
+        code?: TgdCodeBloc | (() => TgdCodeBloc)
+    }
 }
 
 const DEBUG_COL_SIZE = 8
@@ -44,32 +60,36 @@ export class TgdPainterSprites
     public readonly transfo = new TgdTransfo()
     public readonly texture: TgdTexture2D
 
-    private readonly datasetInstances: TgdDataset
-    private readonly prg: TgdProgram
-    private readonly vao: TgdVertexArray
+    protected readonly datasetInstances: TgdDataset
+    protected readonly prg: TgdProgram
+    protected readonly vao: TgdVertexArray
     /**
      * Number of actual sprites.
      *
      * The capacity can be get with `this.dataset.count`.
      */
-    private _count = 0
-    private readonly sprites: Sprite[] = []
-    private readonly spriteIndexes = new Map<Sprite, number>()
-    private readonly attPosition = new AccessorProxy("attPosition")
-    private readonly attCos = new AccessorProxy("attCos")
-    private readonly attSin = new AccessorProxy("attSin")
-    private readonly attScale = new AccessorProxy("attScale")
-    private readonly attUV = new AccessorProxy("attUV")
-    private readonly attSize = new AccessorProxy("attSize")
-    private readonly attOrigin = new AccessorProxy("attOrigin")
-    private readonly uniAtlasRatio = new TgdVec2(1, 1)
-    private dirty = true
+    protected _count = 0
+    protected readonly sprites: Sprite[] = []
+    protected readonly spriteIndexes = new Map<Sprite, number>()
+    protected readonly attPosition = new AccessorProxy("attPosition")
+    protected readonly attCos = new AccessorProxy("attCos")
+    protected readonly attSin = new AccessorProxy("attSin")
+    protected readonly attScale = new AccessorProxy("attScale")
+    protected readonly attUV = new AccessorProxy("attUV")
+    protected readonly attSize = new AccessorProxy("attSize")
+    protected readonly attOrigin = new AccessorProxy("attOrigin")
+    protected readonly attributes: Record<string, AccessorProxy> = {}
+    protected readonly uniAtlasRatio = new TgdVec2(1, 1)
+    protected dirty = true
 
     constructor(
-        private readonly context: TgdContext,
-        private readonly options: TgdPainterSpritesOptions
+        protected readonly context: TgdContext,
+        protected readonly options: TgdPainterSpritesOptions
     ) {
         super()
+        for (const attribName of Object.keys(options.attributes ?? {})) {
+            this.attributes[attribName] = new AccessorProxy(attribName)
+        }
         const { texture } = options
         this.texture = texture
         if (texture.width > texture.height) {
@@ -89,6 +109,7 @@ export class TgdPainterSprites
                     uniAtlasRatio: "vec2",
                 },
                 attributes: {
+                    ...options.attributes,
                     attPosition: "vec3",
                     attCos: "float",
                     attSin: "float",
@@ -99,8 +120,10 @@ export class TgdPainterSprites
                     attCorners: "vec4",
                 },
                 varying: {
+                    ...options.varyings,
                     varUV: "vec2",
                 },
+                functions: extract(options.vert?.functions),
                 mainCode: [
                     "varUV = attUV.xy + attSize * attCorners.zw;",
                     "vec4 position = vec4((attCorners.xy - attOrigin) * attScale * attSize * uniAtlasRatio, 0.0, 1.0);",
@@ -115,22 +138,26 @@ export class TgdPainterSprites
                     "position = rotation * position;",
                     "position += vec4(attPosition, 0.0);",
                     "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
-                    "gl_PointSize = 16.0;",
+                    extract(options.vert?.code) ?? "",
                 ],
             }).code,
             frag: new TgdShaderFragment({
                 uniforms: {
                     uniTexture: "sampler2D",
                 },
-                varying: { varUV: "vec2" },
+                functions: extract(options.frag?.functions),
+                varying: {
+                    ...options.varyings,
+                    varUV: "vec2",
+                },
                 outputs: {
                     FragColor: "vec4",
                 },
                 mainCode: [
                     "vec4 color = texture(uniTexture, varUV);",
                     `if (color.a < ${1 / 0xff}) discard;`,
+                    extract(options.frag?.code) ?? "",
                     "FragColor = color;",
-                    // "FragColor.a = 1.0;",
                 ],
             }).code,
         })
@@ -153,6 +180,7 @@ export class TgdPainterSprites
 		)
         const datasetInstances = new TgdDataset(
             {
+                ...options.attributes,
                 attPosition: "vec3",
                 attScale: "vec2",
                 attUV: "vec3",
@@ -179,7 +207,7 @@ export class TgdPainterSprites
     get count() {
         return this._count
     }
-    private set count(value: number) {
+    protected set count(value: number) {
         this._count = value
         while (value > this.capacity) {
             this.capacity = 2 * Math.max(1, this.capacity)
@@ -190,7 +218,7 @@ export class TgdPainterSprites
     get capacity() {
         return this.datasetInstances.count
     }
-    private set capacity(value: number) {
+    protected set capacity(value: number) {
         if (this.datasetInstances.count === value) return
 
         this.datasetInstances.count = value
@@ -346,7 +374,7 @@ export class TgdPainterSprites
         console.log("Sprites list:", this.sprites)
     }
 
-    private updateAccessors() {
+    protected updateAccessors() {
         const { datasetInstances } = this
         this.attPosition.dataset = datasetInstances
         this.attCos.dataset = datasetInstances
@@ -362,4 +390,10 @@ function pad(accessor: Accessor, index: number, dimension = 0): string {
     return `${accessor.get(index, dimension)}`
         .slice(0, DEBUG_COL_SIZE)
         .padStart(DEBUG_COL_SIZE, " ")
+}
+
+function extract<T>(arg: T | (() => T) | null | undefined): T | undefined {
+    if (arg === null || arg === undefined) return undefined
+    if (typeof arg !== "function") return arg
+    return (arg as () => T)()
 }
