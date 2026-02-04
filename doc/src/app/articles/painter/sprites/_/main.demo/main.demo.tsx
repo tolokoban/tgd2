@@ -62,14 +62,14 @@ function init(context: TgdContext, assets: Assets) {
     for (let x = -7; x < 8; x++) {
         for (let y = -3; y < 4; y += 2) {
             for (let z = 0; z < 1; z += 0.1) {
-                const sprite1 = spritesPainter1.spriteCreate({});
+                const sprite1 = spritesPainter1.add({});
                 sprite1.x = x;
                 sprite1.y = y;
                 sprite1.z = -z * 100;
                 if (tgdCalcRandom() < 0.5) sprite1.scaleX = -1;
                 sprite1.index = Math.floor(tgdCalcRandom(0, 40));
                 sprites.push(sprite1);
-                const sprite2 = spritesPainter2.spriteCreate({});
+                const sprite2 = spritesPainter2.add({});
                 sprite2.x = x;
                 sprite2.y = y;
                 sprite2.z = -z * 100 - 100;

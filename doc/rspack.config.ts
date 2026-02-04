@@ -9,33 +9,35 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeHighlightCodeLines from "rehype-highlight-code-lines"
 import highlightJs from "highlight.js"
 import WebpackShellPluginNext from "webpack-shell-plugin-next"
-import Rspack from "@rspack/core"
+import * as Rspack from "@rspack/core"
 import path from "path"
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-export default (env) => {
-    if (typeof Package.port !== "number") {
-        // Define a random port number for dev server.
-        Package.port = 1204 + Math.floor(Math.random() * (0xffff - 1024))
-        FS.writeFileSync(
-            Path.resolve(__dirname, "package.json"),
-            JSON.stringify(Package, null, "    ")
-        )
-        console.log("A random port has been set for dev server:", Package.port)
-    }
+if (typeof Package.port !== "number") {
+    // Define a random port number for dev server.
+    Package.port = 1204 + Math.floor(Math.random() * (0xffff - 1024))
+    FS.writeFileSync(
+        Path.resolve(__dirname, "package.json"),
+        JSON.stringify(Package, null, "    ")
+    )
+    console.log("A random port has been set for dev server:", Package.port)
+}
 
-    const isProdMode = env.WEBPACK_BUILD === true
-    if (isProdMode) {
-        console.log("+-----------------+")
-        console.log("| Production Mode |")
-        console.log("+-----------------+")
-    }
+/**
+ *
+ * @param {*} env
+ * @returns {Rspack.}
+ */
+export default function (
+    env: Record<string, string | undefined>,
+    argv: Record<string, unknown>
+): Rspack.Configuration {
+    const isProdMode = process.env.NODE_ENV === "production"
+
     return {
         cache: false,
-        // cache: {
-        //     type: "memory",
-        // },
+        lazyCompilation: false,
         output: {
             filename: "scr/[name].[contenthash].js",
             path: Path.resolve(__dirname, "build"),
@@ -68,10 +70,9 @@ export default (env) => {
                 progress: true,
             },
             hot: true,
-            // Open WebBrowser.
             open: true,
             host: "0.0.0.0",
-            port: env.PORT || Package.port,
+            port: env.PORT ? parseInt(env.PORT, 10) : Package.port,
             server: "http",
         },
         stats: {
@@ -88,17 +89,7 @@ export default (env) => {
                     parallel: false,
                 },
             }),
-            // // List of the needed files for later caching.
-            // new WebpackManifestPlugin({
-            //     filter: (file) => {
-            //         if (file.name.endsWith(".map")) return false
-            //         if (file.name.endsWith(".ts")) return false
-            //         return true
-            //     },
-            // }),
             new CleanWebpackPlugin({
-                // We don't want to remove the "index.html" file
-                // after the incremental build triggered by watch.
                 cleanStaleWebpackAssets: false,
             }),
             new Rspack.CopyRspackPlugin({
@@ -127,8 +118,7 @@ export default (env) => {
             hints: "warning",
             maxAssetSize: 300000,
             maxEntrypointSize: 200000,
-            assetFilter: (filename) => {
-                // PNG are just fallbacks for WEBP images.
+            assetFilter: (filename: string): boolean => {
                 if (filename.endsWith(".png")) return false
                 if (filename.endsWith(".map")) return false
                 return true
@@ -150,7 +140,6 @@ export default (env) => {
                     },
                 },
             },
-            // Prevent "libs.[contenthash].js" from changing its hash if not needed.
             moduleIds: "deterministic",
         },
         module: {
@@ -167,17 +156,8 @@ export default (env) => {
                     ],
                     exclude: /node_modules/,
                 },
-                // {
-                //     test: /\.tsx?$/,
-                //     loader: "esbuild-loader",
-                //     options: {
-                //       loader: "tsx", // Or 'ts' if you don't need tsx
-                //       target: "es2015",
-                //     },
-                // },
                 {
                     test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
-                    // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset",
                     generator: {
                         filename: "img/[name].[hash][ext][query]",
@@ -185,7 +165,6 @@ export default (env) => {
                 },
                 {
                     test: /\.(bin|glb|dat|swc)$/i,
-                    // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset",
                     generator: {
                         filename: "bin/[name].[hash][ext][query]",
@@ -193,7 +172,6 @@ export default (env) => {
                 },
                 {
                     test: /\.(eot|ttf|woff|woff2)$/i,
-                    // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset/resource",
                     generator: {
                         filename: "fnt/[name].[hash][ext][query]",
@@ -201,7 +179,6 @@ export default (env) => {
                 },
                 {
                     test: /\.(vert|frag|obj)$/i,
-                    // More information here https://webpack.js.org/guides/asset-modules/
                     type: "asset/source",
                 },
                 {
@@ -236,7 +213,6 @@ export default (env) => {
                         { loader: "builtin:swc-loader", options: {} },
                         {
                             loader: "@mdx-js/loader",
-                            /** @type {import('@mdx-js/loader').Options} */
                             options: {
                                 rehypePlugins: [
                                     [

@@ -63,11 +63,11 @@ function init(context: TgdContext, assets: Assets) {
                     "Delete:",
                     currentBrick,
                 );
-                spritesPainter.spriteDelete(currentBrick);
+                spritesPainter.remove(currentBrick);
                 bricks.delete(key);
             }
         } else {
-            const brick = spritesPainter.spriteCreate({
+            const brick = spritesPainter.add({
                 x,
                 y,
                 hue: Math.random() * .8,

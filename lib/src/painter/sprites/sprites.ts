@@ -18,6 +18,7 @@ import { AccessorProxy } from "./accessor"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
 import { isNumber } from "@tgd/types/guards"
 import { WebglAttributeType } from "@tgd/types"
+import { TgdPainterSpritesAbstract } from "./sprites-abstract"
 
 export type { TgdSprite } from "./types"
 export type TgdPainterSpritesAtlas = AtlasItem[]
@@ -60,10 +61,9 @@ const DEBUG_COL_SIZE = 8
 
 type Sprite<T extends TgdSprite> = T & { _offset: number }
 
-export class TgdPainterSprites<T extends TgdSprite = TgdSprite>
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterSprites<
+    T extends TgdSprite = TgdSprite,
+> extends TgdPainterSpritesAbstract<TgdSprite, T> {
     public readonly transfo = new TgdTransfo()
     public readonly texture: TgdTexture2D
 
@@ -257,7 +257,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite>
         this.spriteIndexes.clear()
     }
 
-    spriteCreate(data: Omit<T, keyof TgdSprite> & Partial<Omit<T, "id">>): T {
+    add(data: Omit<T, keyof TgdSprite> & Partial<Omit<T, "id">>): T {
         const offset = this.count
         this.count++
         const info: T = {
@@ -362,7 +362,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite>
         )
     }
 
-    spriteDelete(sprite: { id: number }) {
+    remove(sprite: { id: number }) {
         const index = this.spriteIndexes.get(sprite.id)
         if (!isNumber(index)) return false
 

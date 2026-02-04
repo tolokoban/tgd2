@@ -198,6 +198,10 @@ export class TgdPainterSegments extends TgdPainter {
         this.instanceCount = instance.count
     }
 
+    getBuffer() {
+        return this.vao.getBuffer(1)
+    }
+
     delete(): void {
         this.vao.delete()
         this.prg.delete()
@@ -269,26 +273,44 @@ export class TgdPainterSegmentsData {
         this._count++
     }
 
-    readonly makeDataset = (): InstanceDataset => {
+    /**
+     * You can rename the attributes if you need to use
+     * them in another Painter.
+     */
+    readonly makeDataset = ({
+        attXYZR0 = "attXYZR0",
+        attUV0 = "attUV0",
+        attInfluence0 = "attInfluence0",
+        attXYZR1 = "attXYZR1",
+        attUV1 = "attUV1",
+        attInfluence1 = "attInfluence1",
+    }: Partial<{
+        attXYZR0: string
+        attUV0: string
+        attInfluence0: string
+        attXYZR1: string
+        attUV1: string
+        attInfluence1: string
+    }> = {}): InstanceDataset => {
         const dataset = new TgdDataset(
             {
-                attXYZR0: "vec4",
-                attUV0: "vec2",
-                attInfluence0: "float",
-                attXYZR1: "vec4",
-                attUV1: "vec2",
-                attInfluence1: "float",
+                [attXYZR0]: "vec4",
+                [attUV0]: "vec2",
+                [attInfluence0]: "float",
+                [attXYZR1]: "vec4",
+                [attUV1]: "vec2",
+                [attInfluence1]: "float",
             },
             {
                 divisor: 1,
             }
         )
-        dataset.set("attXYZR0", new Float32Array(this.attXYZR0))
-        dataset.set("attUV0", new Float32Array(this.attUV0))
-        dataset.set("attInfluence0", new Float32Array(this.attInfluence0))
-        dataset.set("attXYZR1", new Float32Array(this.attXYZR1))
-        dataset.set("attUV1", new Float32Array(this.attUV1))
-        dataset.set("attInfluence1", new Float32Array(this.attInfluence1))
+        dataset.set(attXYZR0, new Float32Array(this.attXYZR0))
+        dataset.set(attUV0, new Float32Array(this.attUV0))
+        dataset.set(attInfluence0, new Float32Array(this.attInfluence0))
+        dataset.set(attXYZR1, new Float32Array(this.attXYZR1))
+        dataset.set(attUV1, new Float32Array(this.attUV1))
+        dataset.set(attInfluence1, new Float32Array(this.attInfluence1))
         return dataset
     }
 }

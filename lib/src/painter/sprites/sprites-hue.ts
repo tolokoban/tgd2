@@ -1,17 +1,15 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 import type { TgdContext } from "@tgd/context"
-import type { TgdInterfaceTransformable } from "@tgd/interface"
 import type { TgdSprite, TgdSpriteHue } from "./types"
 import { TgdPainterSprites, TgdPainterSpritesOptions } from "./sprites"
 import { tgdCodeFunction_shiftHue } from "@tgd/code"
-import { TgdPainter } from "../painter"
+import { TgdPainterSpritesAbstract } from "./sprites-abstract"
 
 export type { TgdSpriteHue } from "./types"
 
-export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue>
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterSpritesHue<
+    T extends TgdSpriteHue = TgdSpriteHue,
+> extends TgdPainterSpritesAbstract<TgdSpriteHue, T> {
     private readonly parent: TgdPainterSprites<T>
 
     constructor(context: TgdContext, options: TgdPainterSpritesOptions) {
@@ -39,6 +37,14 @@ export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue>
         })
     }
 
+    get count() {
+        return this.parent.count
+    }
+
+    get capacity() {
+        return this.parent.capacity
+    }
+
     list(): ReadonlyArray<T> {
         return this.parent.list()
     }
@@ -51,24 +57,25 @@ export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue>
         return this.parent.filter(test)
     }
 
-    get transfo() {
-        return this.parent.transfo
+    /**
+     * Delete all sprites.
+     */
+    clear() {
+        this.parent.clear()
     }
 
-    spriteCreate(
-        data: Omit<T, keyof TgdSpriteHue> & Partial<Omit<T, "id">>
-    ): T {
+    add(data: Omit<T, keyof TgdSpriteHue> & Partial<Omit<T, "id">>): T {
         const info = {
             hue: 0,
             ...data,
         } as Omit<T, keyof TgdSprite> & Partial<Omit<T, "id">>
-        const sprite = this.parent.spriteCreate(info)
+        const sprite = this.parent.add(info)
         sprite.hue = info.hue
         return sprite
     }
 
-    spriteDelete(sprite: { id: number }) {
-        this.parent.spriteDelete(sprite)
+    remove(sprite: { id: number }) {
+        this.parent.remove(sprite)
     }
 
     // protected updateAccessors() {
@@ -80,7 +87,11 @@ export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue>
         this.parent.delete()
     }
 
-    paint(_time: number, _delta: number): void {
+    paint(): void {
         this.parent.paint()
+    }
+
+    debug(caption?: string) {
+        this.parent.debug(caption)
     }
 }
