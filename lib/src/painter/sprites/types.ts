@@ -1,4 +1,5 @@
 export interface TgdSprite {
+    readonly id: number
     x: number
     y: number
     z: number

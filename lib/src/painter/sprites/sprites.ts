@@ -15,7 +15,6 @@ import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../painter"
 import { AccessorProxy } from "./accessor"
-import { Sprite } from "./sprite"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
 import { isNumber } from "@tgd/types/guards"
 import { WebglAttributeType } from "@tgd/types"
@@ -40,6 +39,12 @@ export interface TgdPainterSpritesOptions {
      */
     initialCapacity?: number
     attributes?: TgdDatasetTypeRecord
+    attributesSetter?(
+        attributes: Record<keyof TgdDatasetTypeRecord, AccessorProxy>,
+        key: string | symbol,
+        value: unknown,
+        offset: number
+    ): void
     varyings?: { [name: string]: WebglAttributeType }
     vert?: {
         functions?: TgdCodeFunctions | (() => TgdCodeFunctions)
@@ -53,7 +58,9 @@ export interface TgdPainterSpritesOptions {
 
 const DEBUG_COL_SIZE = 8
 
-export class TgdPainterSprites
+type Sprite<T extends TgdSprite> = T & { _offset: number }
+
+export class TgdPainterSprites<T extends TgdSprite = TgdSprite>
     extends TgdPainter
     implements TgdInterfaceTransformable
 {
@@ -69,8 +76,11 @@ export class TgdPainterSprites
      * The capacity can be get with `this.dataset.count`.
      */
     protected _count = 0
-    protected readonly sprites: Sprite[] = []
-    protected readonly spriteIndexes = new Map<Sprite, number>()
+    protected readonly sprites: Sprite<T>[] = []
+    /**
+     * Map[id] = index in array `sprites`
+     */
+    protected readonly spriteIndexes = new Map<number, number>()
     protected readonly attPosition = new AccessorProxy("attPosition")
     protected readonly attCos = new AccessorProxy("attCos")
     protected readonly attSin = new AccessorProxy("attSin")
@@ -81,6 +91,8 @@ export class TgdPainterSprites
     protected readonly attributes: Record<string, AccessorProxy> = {}
     protected readonly uniAtlasRatio = new TgdVec2(1, 1)
     protected dirty = true
+
+    private static id = 1
 
     constructor(
         protected readonly context: TgdContext,
@@ -170,9 +182,9 @@ export class TgdPainterSprites
         })
         // prettier-ignore
         datasetFrame.set(
-			"attCorners",
+            "attCorners",
 			new Float32Array([
-				-1, -1, 0, 1, 
+                -1, -1, 0, 1, 
                 +1, -1, 1, 1, 
                 -1, +1, 0, 0, 
                 +1, +1, 1, 0,
@@ -204,6 +216,18 @@ export class TgdPainterSprites
         this.updateAccessors()
     }
 
+    list(): ReadonlyArray<T> {
+        return [...this.sprites]
+    }
+
+    forEach(callback: (sprite: T) => void) {
+        for (const sprite of this.sprites) callback(sprite)
+    }
+
+    filter(test: (sprite: T) => boolean): ReadonlyArray<T> {
+        return this.sprites.filter(test)
+    }
+
     get count() {
         return this._count
     }
@@ -233,46 +257,113 @@ export class TgdPainterSprites
         this.spriteIndexes.clear()
     }
 
-    spriteCreate(data: Partial<TgdSprite> = {}): TgdSprite {
+    spriteCreate(data: Omit<T, keyof TgdSprite> & Partial<Omit<T, "id">>): T {
         const offset = this.count
         this.count++
-        const sprite = new Sprite(
-            this.options.atlas,
-            () => {
+        const info: T = {
+            id: TgdPainterSprites.id++,
+            index: 0,
+            x: 0,
+            y: 0,
+            z: 0,
+            angle: 0,
+            scaleX: 1,
+            scaleY: 1,
+            ...data,
+        } as T
+        const props = {
+            id: info.id,
+            offset,
+            atlas: this.options.atlas,
+        }
+        const sprite = new Proxy(info, {
+            set: (obj: T, key: string | symbol, value) => {
+                if (key === "_offset") {
+                    props.offset = value
+                    this.dirty = true
+                    return true
+                }
+                this.interceptSetter(key, value, props)
+                obj[key as keyof T] = value
                 this.dirty = true
+                return true
             },
-            this.attPosition,
-            this.attCos,
-            this.attSin,
-            this.attScale,
-            this.attUV,
-            this.attSize,
-            this.attOrigin
-        )
-        sprite.offset = offset
-        sprite.angle = data.angle ?? 0
-        sprite.index = data.index ?? 0
-        sprite.scaleX = data.scaleX ?? 1
-        sprite.scaleY = data.scaleY ?? 1
-        sprite.x = data.x ?? 0
-        sprite.y = data.y ?? 0
-        sprite.z = data.z ?? 0
+            get: (obj: T, prop: string | symbol) => {
+                if (prop === "_offset") return props.offset
+                return obj[prop as keyof T]
+            },
+        }) as Sprite<T>
+        this.initialize(sprite, info)
         this.sprites[offset] = sprite
-        this.spriteIndexes.set(sprite, offset)
+        this.spriteIndexes.set(sprite.id, offset)
         this.context.paint()
         return sprite
     }
 
-    spriteDelete(sprite: TgdSprite | Sprite) {
-        if (!(sprite instanceof Sprite)) {
-            console.error(
-                "[TgdPainterSprites.spriteDelete] Not a sprite!",
-                sprite
-            )
-            return false
-        }
+    protected initialize(sprite: T, info: T) {
+        sprite.angle = info.angle
+        sprite.index = info.index
+        sprite.scaleX = info.scaleX
+        sprite.scaleY = info.scaleY
+        sprite.x = info.x
+        sprite.y = info.y
+        sprite.z = info.z
+    }
 
-        const index = this.spriteIndexes.get(sprite)
+    protected interceptSetter(
+        key: string | symbol,
+        value: unknown,
+        {
+            offset,
+            atlas,
+        }: { id: number; offset: number; atlas: TgdPainterSpritesAtlas }
+    ): boolean {
+        switch (key) {
+            case "index": {
+                const item = atlas[value as number]
+                this.attUV.set(item.x, offset, 0)
+                this.attUV.set(item.y, offset, 1)
+                this.attUV.set(item.z ?? 0, offset, 2)
+                this.attSize.set(item.width, offset, 0)
+                this.attSize.set(item.height, offset, 1)
+                this.attOrigin.set(item.originX ?? 0, offset, 0)
+                this.attOrigin.set(item.originY ?? 0, offset, 1)
+                return true
+            }
+            case "x":
+                this.attPosition.set(value as number, offset, 0)
+                return true
+            case "y":
+                this.attPosition.set(value as number, offset, 1)
+                return true
+            case "z":
+                this.attPosition.set(value as number, offset, 2)
+                return true
+            case "angle": {
+                const angle = value as number
+                this.attCos.set(Math.cos(angle), offset)
+                this.attSin.set(Math.sin(angle), offset)
+                return true
+            }
+            case "scaleX":
+                this.attScale.set(value as number, offset, 0)
+                return true
+            case "scaleY":
+                this.attScale.set(value as number, offset, 1)
+                return true
+        }
+        return (
+            this.options.attributesSetter?.(
+                this.attributes,
+                key,
+                value,
+                offset
+            ) ?? false
+        )
+    }
+
+    spriteDelete(sprite: { id: number }) {
+        const index = this.spriteIndexes.get(sprite.id)
         if (!isNumber(index)) return false
 
         const lastIndex = this.sprites.length - 1
@@ -289,13 +380,13 @@ export class TgdPainterSprites
                 fromIndex: lastIndex,
                 toIndex: index,
             })
-            this.spriteIndexes.set(lastSprite, index)
+            this.spriteIndexes.set(lastSprite.id, index)
             this.sprites[index] = lastSprite
-            lastSprite.offset = index
+            lastSprite._offset = index
         }
         this.sprites.pop()
         this.count--
-        this.spriteIndexes.delete(sprite)
+        this.spriteIndexes.delete(sprite.id)
         this.dirty = true
         this.context.paint()
         return true
@@ -322,12 +413,10 @@ export class TgdPainterSprites
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count)
-        // gl.drawArraysInstanced(gl.POINTS, 0, 4, datasetInstances.count)
         vao.unbind()
     }
 
     debug(caption?: string) {
-        // this.prg.debug()
         this.transfo.debug("Transfo")
         const out = new TgdConsole({ text: caption ?? this.name, bold: true })
         out.nl()
@@ -383,6 +472,9 @@ export class TgdPainterSprites
         this.attUV.dataset = datasetInstances
         this.attSize.dataset = datasetInstances
         this.attOrigin.dataset = datasetInstances
+        for (const attribute of Object.values(this.attributes)) {
+            attribute.dataset = datasetInstances
+        }
     }
 }
 

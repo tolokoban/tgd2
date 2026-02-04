@@ -1,23 +1,30 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 import type { TgdContext } from "@tgd/context"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
-import { AccessorProxy } from "./accessor"
-import type { TgdSpriteHue } from "./types"
+import type { TgdSprite, TgdSpriteHue } from "./types"
 import { TgdPainterSprites, TgdPainterSpritesOptions } from "./sprites"
 import { tgdCodeFunction_shiftHue } from "@tgd/code"
-import { SpriteHue } from "./sprite-hue"
+import { TgdPainter } from "../painter"
 
 export type { TgdSpriteHue } from "./types"
 
-export class TgdPainterSpritesHue
-    extends TgdPainterSprites
+export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue>
+    extends TgdPainter
     implements TgdInterfaceTransformable
 {
+    private readonly parent: TgdPainterSprites<T>
+
     constructor(context: TgdContext, options: TgdPainterSpritesOptions) {
-        super(context, {
+        super()
+        this.parent = new TgdPainterSprites<T>(context, {
             ...options,
             attributes: {
                 attHue: "float",
+            },
+            attributesSetter(attributes, key, value, offset) {
+                if (key !== "hue" || typeof value !== "number") return
+
+                attributes.attHue.set(value, offset)
             },
             varyings: {
                 varHue: "float",
@@ -32,40 +39,48 @@ export class TgdPainterSpritesHue
         })
     }
 
-    spriteCreate(data: Partial<TgdSpriteHue> = {}): TgdSpriteHue {
-        const offset = this.count
-        this.count++
-        const sprite = new SpriteHue(
-            this.options.atlas,
-            () => {
-                this.dirty = true
-            },
-            this.attPosition,
-            this.attCos,
-            this.attSin,
-            this.attScale,
-            this.attUV,
-            this.attSize,
-            this.attOrigin,
-            this.attributes.attHue
-        )
-        sprite.offset = offset
-        sprite.angle = data.angle ?? 0
-        sprite.index = data.index ?? 0
-        sprite.scaleX = data.scaleX ?? 1
-        sprite.scaleY = data.scaleY ?? 1
-        sprite.x = data.x ?? 0
-        sprite.y = data.y ?? 0
-        sprite.z = data.z ?? 0
-        sprite.hue = data.hue ?? 0
-        this.sprites[offset] = sprite
-        this.spriteIndexes.set(sprite, offset)
-        this.context.paint()
+    list(): ReadonlyArray<T> {
+        return this.parent.list()
+    }
+
+    forEach(callback: (sprite: T) => void) {
+        this.parent.forEach(callback)
+    }
+
+    filter(test: (sprite: T) => boolean): ReadonlyArray<T> {
+        return this.parent.filter(test)
+    }
+
+    get transfo() {
+        return this.parent.transfo
+    }
+
+    spriteCreate(
+        data: Omit<T, keyof TgdSpriteHue> & Partial<Omit<T, "id">>
+    ): T {
+        const info = {
+            hue: 0,
+            ...data,
+        } as Omit<T, keyof TgdSprite> & Partial<Omit<T, "id">>
+        const sprite = this.parent.spriteCreate(info)
+        sprite.hue = info.hue
         return sprite
     }
 
-    protected updateAccessors() {
-        super.updateAccessors()
-        this.attributes.attHue.dataset = this.datasetInstances
+    spriteDelete(sprite: { id: number }) {
+        this.parent.spriteDelete(sprite)
+    }
+
+    // protected updateAccessors() {
+    //     super.updateAccessors()
+    //     this.attributes.attHue.dataset = this.datasetInstances
+    // }
+
+    delete(): void {
+        this.parent.delete()
+    }
+
+    paint(_time: number, _delta: number): void {
+        this.parent.paint()
     }
 }
