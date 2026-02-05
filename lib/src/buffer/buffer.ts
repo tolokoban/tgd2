@@ -37,21 +37,16 @@ export class TgdBuffer {
     constructor(
         public readonly gl: WebGL2RenderingContext,
         options: Partial<TgdBufferOptions> = {}
-        // options: Partial<TgdBufferOptions> | TgdDataset = {}
     ) {
         const buffer = gl.createBuffer()
         if (!buffer) throw new Error("Unable to create WebGLBuffer!")
 
         this._target = options?.target ?? "ARRAY_BUFFER"
         this._usage = options?.usage ?? "STATIC_DRAW"
-        // const { target, usage, data } = resolveOptions(options)
-        // this._target = target
-        // this._usage = usage
         this.buffer = buffer
         const { data } = options
         if (data) {
             this.bufferData({ ...options, data })
-            // this.bufferData({ target, usage, data })
         }
     }
 
@@ -78,21 +73,5 @@ export class TgdBuffer {
     delete() {
         const { gl, buffer } = this
         gl.deleteBuffer(buffer)
-    }
-}
-
-function resolveOptions(
-    options: Partial<TgdBufferOptions> | TgdDataset
-): TgdBufferOptions {
-    if (options instanceof TgdDataset) {
-        return {
-            data: options.data,
-            target: options.target,
-            usage: options.usage,
-        }
-    }
-    return {
-        target: "ARRAY_BUFFER",
-        usage: "STATIC_DRAW",
     }
 }

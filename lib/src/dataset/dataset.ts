@@ -124,7 +124,29 @@ export class TgdDataset {
         return this
     }
 
-    addAttributes(attributesDefinition: TgdDatasetTypeRecord) {
+    renameAttributes(newNames: string[]): this {
+        const { definitions } = this
+        const oldNames = Object.keys(definitions)
+        if (oldNames.length !== newNames.length) {
+            throw new Error(
+                `[TgdDataset] This dataset has ${
+                    oldNames.length
+                } attributes, but ${newNames.length} new names were given!`
+            )
+        }
+        const newDefinitions: Record<string, AttributeInternalRepresentation> =
+            {}
+        let index = 0
+        for (const oldName of oldNames) {
+            const newName = newNames[index]
+            newDefinitions[newName] = definitions[oldName]
+            index++
+        }
+        this.definitions = newDefinitions
+        return this
+    }
+
+    addAttributes(attributesDefinition: TgdDatasetTypeRecord): this {
         const oldDataset = this.clone()
         for (const key of Object.keys(attributesDefinition)) {
             const oldType = this.attributesDefinition[key]
@@ -142,7 +164,6 @@ export class TgdDataset {
             },
             this.options
         )
-
         this.count = oldDataset.count
         for (const attribName of oldDataset.attributesNames) {
             try {
@@ -164,6 +185,7 @@ export class TgdDataset {
                 )
             }
         }
+        return this
     }
 
     clone(): TgdDataset {

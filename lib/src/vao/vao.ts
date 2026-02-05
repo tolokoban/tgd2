@@ -28,11 +28,6 @@ export class TgdVertexArray {
 
         gl.bindVertexArray(vao)
         this.drawBuffers = datasets.map((dataset) => {
-            // const buffer = new TgdBuffer(gl, {
-            //     data: dataset.data,
-            //     target: dataset.target,
-            //     usage: dataset.usage,
-            // })
             const buffer = resolveBuffer(gl, dataset, this.buffersToDelete)
             buffer.bind()
             dataset.defineAttributes(gl, program)
@@ -47,7 +42,6 @@ export class TgdVertexArray {
             this.elemBuffer = buffer
         }
         gl.bindVertexArray(null)
-        this.debug()
     }
 
     share() {
@@ -185,6 +179,9 @@ function resolveBuffer(
             target: dataset.target,
             usage: dataset.usage,
         })
-    if (!dataset.buffer) buffersToDelete.add(buffer)
+    if (!dataset.buffer) {
+        // Delete only buffers created here.
+        buffersToDelete.add(buffer)
+    }
     return buffer
 }

@@ -1,6 +1,5 @@
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
-import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
@@ -16,12 +15,9 @@ import {
     TgdBufferOptionUsage,
 } from "@tgd/buffer"
 
-type DatasetOption =
-    | TgdPainterSegments
-    | InstanceDataset
-    | (() => InstanceDataset)
+type DatasetOption = TgdDataset | (() => TgdDataset)
 
-export type TgdPainterSegmentsOptions = {
+export type TgdPainterSegmentsMorphingOptions = {
     /**
      * Number of faces around the cylinder.
      * Min is 3.
@@ -40,7 +36,7 @@ export type TgdPainterSegmentsOptions = {
      * If a `TgdPainterSegments` is given, then the
      * data will be shared between the painters.
      */
-    dataset: DatasetOption
+    datasetsPairs: [DatasetOption, DatasetOption][]
 }
 
 /**
@@ -64,8 +60,8 @@ export type TgdPainterSegmentsOptions = {
  * )
  * ```
  */
-export class TgdPainterSegments extends TgdPainter {
-    static createDataset({
+export class TgdPainterSegmentsMorphing extends TgdPainter {
+    private static createDataset({
         attXYZR0 = "attXYZR0",
         attUV0 = "attUV0",
         attInfluence0 = "attInfluence0",
@@ -112,8 +108,13 @@ export class TgdPainterSegments extends TgdPainter {
     public radiusConstant = 1
     public radiusSwitch = 0
     public instanceCount = 0
+    /**
+     * Mix between two datasets of a pair.
+     * 0.0 for the first one, 1.0 for the second one.
+     */
+    public mix = 0
 
-    private readonly vao: TgdVertexArray
+    private readonly vaos: TgdVertexArray[]
     private readonly prg: TgdProgram
     private readonly vertexCount: number
     private readonly material: TgdMaterial
@@ -125,17 +126,23 @@ export class TgdPainterSegments extends TgdPainter {
             gl: WebGL2RenderingContext
             camera: TgdCamera
         },
-        options: TgdPainterSegmentsOptions
+        options: TgdPainterSegmentsMorphingOptions
     ) {
         super()
         this.name = `TgdPainterSegments#${this.id}`
-        const { roundness = 3, minRadius = 1, dataset } = options
+        const { roundness = 3, minRadius = 1, datasetsPairs } = options
+        if (datasetsPairs.length === 0) {
+            throw new Error(
+                '[TgdPainterSegmentsMorphing] "datasetsPairs" must contain at least one pair of datasets!'
+            )
+        }
         const geometry = makeCapsule(roundness)
         const material = options.material ?? new TgdMaterialFaceOrientation()
         this.material = material
         material.attPosition = geometry.attPosition
         material.attNormal = geometry.attNormal
-        material.attUV = "((attUV0 + attUV1) * .5)"
+        material.attUV =
+            "((mix(attUV0_A, attUV0_B, uniMix) + mix(attUV1_A, attUV1_B, uniMix)) * .5)"
         this.minRadius = minRadius
         if (roundness > 127) {
             throw new Error("[TgdPainterSegments] Max roundness is 127!")
@@ -156,6 +163,7 @@ export class TgdPainterSegments extends TgdPainter {
             )
         const vert = new TgdShaderVertex({
             uniforms: {
+                uniMix: "float",
                 uniTransfoMatrix: "mat4",
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
@@ -166,10 +174,14 @@ export class TgdPainterSegments extends TgdPainter {
                 [geometry.attPosition]: "vec3",
                 [geometry.attNormal]: "vec3",
                 attTip: "float",
-                attXYZR0: "vec4",
-                attXYZR1: "vec4",
-                attUV0: "vec2",
-                attUV1: "vec2",
+                attXYZR0_A: "vec4",
+                attXYZR0_B: "vec4",
+                attXYZR1_A: "vec4",
+                attXYZR1_B: "vec4",
+                attUV0_A: "vec2",
+                attUV0_B: "vec2",
+                attUV1_A: "vec2",
+                attUV1_B: "vec2",
             },
             varying: {
                 ...material.varyings,
@@ -189,6 +201,10 @@ export class TgdPainterSegments extends TgdPainter {
                 ],
             },
             mainCode: [
+                "vec4 attXYZR0 = mix(attXYZR0_A, attXYZR0_B, uniMix);",
+                "vec4 attXYZR1 = mix(attXYZR1_A, attXYZR1_B, uniMix);",
+                "vec2 attUV0 = mix(attUV0_A, attUV0_B, uniMix);",
+                "vec2 attUV1 = mix(attUV1_A, attUV1_B, uniMix);",
                 `vec3 normal = NORMAL;`,
                 `vec3 pos = POSITION;`,
                 `vec4 xyzr = mix(attXYZR0, attXYZR1, attTip);`,
@@ -241,47 +257,44 @@ export class TgdPainterSegments extends TgdPainter {
             frag,
         })
         this.prg = prg
-        if (dataset instanceof TgdPainterSegments) {
-            if (dataset.vao.gl !== context.gl) {
+        this.vaos = datasetsPairs.map(([A, B]) => {
+            console.log("Before Dataset A")
+            const datasetA = extract(A).renameAttributes([
+                "attXYZR0_A",
+                "attUV0_A",
+                "attInfluence0_A",
+                "attXYZR1_A",
+                "attUV1_A",
+                "attInfluence1_A",
+            ])
+            // datasetA.debug("Dataset A")
+            const datasetB = extract(B).renameAttributes([
+                "attXYZR0_B",
+                "attUV0_B",
+                "attInfluence0_B",
+                "attXYZR1_B",
+                "attUV1_B",
+                "attInfluence1_B",
+            ])
+            if (datasetA.count !== datasetB.count) {
                 throw new Error(
-                    "[TgdPainterSegments] You cannot share a VAO accross different contexts!"
+                    `[TgdPainterSegmentsMorphing] Datasets of a pair must have the same count, but we got ${datasetA.count} ≠ ${datasetB.count}!`
                 )
             }
-            this.vao = dataset.vao
-            this.vao.share()
-            this.instanceCount = dataset.instanceCount
-        } else if (dataset) {
-            const instance = extract(dataset)
-            instance.addAttributes({
-                attXYZR0: "vec4",
-                attUV0: "vec2",
-                attInfluence0: "float",
-                attXYZR1: "vec4",
-                attUV1: "vec2",
-                attInfluence1: "float",
-            })
-            this.vao = new TgdVertexArray(
+            const vao = new TgdVertexArray(
                 context.gl,
                 prg,
-                [geometry.dataset, instance],
+                [geometry.dataset, datasetA, datasetB],
                 geometry.elements
             )
-            this.instanceCount = instance.count
-        } else {
-            console.error("[TgdPainterSegments] options =", options) // @FIXME: Remove this line written on 2026-02-04 at 19:53
-            throw new Error(
-                "option `dataset` of TgdPainterSegments is undefined!"
-            )
-        }
+            this.instanceCount = datasetA.count
+            return vao
+        })
         this.vertexCount = geometry.elements?.length ?? 0
     }
 
-    getBuffer() {
-        return this.vao.getBuffer(1)
-    }
-
     delete(): void {
-        this.vao.delete()
+        for (const vao of this.vaos) vao.delete()
         this.prg.delete()
     }
 
@@ -291,6 +304,7 @@ export class TgdPainterSegments extends TgdPainter {
         gl.disable(gl.DITHER)
         prg.use()
         this.material.setUniforms?.({ program: prg, camera, time, delay })
+        prg.uniform1f("uniMix", this.mix)
         prg.uniform1f(
             "uniMinRadius",
             (this.minRadius * 2) / gl.drawingBufferHeight
@@ -310,81 +324,9 @@ export class TgdPainterSegments extends TgdPainter {
             vao.unbind()
         })
     }
-}
 
-type InstanceDataset = TgdDataset
-
-export class TgdPainterSegmentsData {
-    private _count = 0
-    private readonly attXYZR0: number[] = []
-    private readonly attUV0: number[] = []
-    private readonly attInfluence0: number[] = []
-    private readonly attXYZR1: number[] = []
-    private readonly attUV1: number[] = []
-    private readonly attInfluence1: number[] = []
-
-    get count() {
-        return this._count
-    }
-
-    /**
-     * @param XYZR0 (x,y,z) and radius of point A.
-     * @param XYZR1 (x,y,z) and radius of point B.
-     * @param UV0 Texture coordinates for point A.
-     * @param UV1 Texture coordinates for point B.
-     * @param radiusMultiplierInfluence0 If you put 0, the radius won't change regardless to the currently applied radius multiplicator.
-     * @param radiusMultiplierInfluence1
-     */
-    add(
-        XYZR0: ArrayNumber4,
-        XYZR1: ArrayNumber4,
-        UV0: ArrayNumber2 = [0, 0],
-        UV1: ArrayNumber2 = [0, 0],
-        radiusMultiplierInfluence0 = 1,
-        radiusMultiplierInfluence1 = 1
-    ) {
-        this.attXYZR0.push(...XYZR0)
-        this.attUV0.push(...UV0)
-        this.attInfluence0.push(radiusMultiplierInfluence0)
-        this.attXYZR1.push(...XYZR1)
-        this.attUV1.push(...UV1)
-        this.attInfluence1.push(radiusMultiplierInfluence1)
-        this._count++
-    }
-
-    /**
-     * You can rename the attributes if you need to use
-     * them in another Painter.
-     */
-    readonly makeDataset = (
-        args: Partial<{
-            attXYZR0: string
-            attUV0: string
-            attInfluence0: string
-            attXYZR1: string
-            attUV1: string
-            attInfluence1: string
-            buffer: TgdBuffer
-            target: TgdBufferOptionTarget
-            usage: TgdBufferOptionUsage
-        }> = {}
-    ): InstanceDataset => {
-        const dataset = TgdPainterSegments.createDataset(args)
-        const {
-            attXYZR0 = "attXYZR0",
-            attUV0 = "attUV0",
-            attInfluence0 = "attInfluence0",
-            attXYZR1 = "attXYZR1",
-            attUV1 = "attUV1",
-            attInfluence1 = "attInfluence1",
-        } = args
-        dataset.set(attXYZR0, new Float32Array(this.attXYZR0))
-        dataset.set(attUV0, new Float32Array(this.attUV0))
-        dataset.set(attInfluence0, new Float32Array(this.attInfluence0))
-        dataset.set(attXYZR1, new Float32Array(this.attXYZR1))
-        dataset.set(attUV1, new Float32Array(this.attUV1))
-        dataset.set(attInfluence1, new Float32Array(this.attInfluence1))
-        return dataset
+    private get vao() {
+        return this.vaos[0] as TgdVertexArray
     }
 }
 
