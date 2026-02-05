@@ -8,6 +8,11 @@ export class TgdVertexArray {
 
     private readonly drawBuffers: TgdBuffer[] = []
     private readonly elemBuffer: TgdBuffer | null = null
+    private readonly buffersToDelete = new Set<TgdBuffer>()
+    /**
+     * Number of owners that share this VAO.
+     */
+    private ownersCount = 1
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
@@ -28,6 +33,7 @@ export class TgdVertexArray {
                 target: dataset.target,
                 usage: dataset.usage,
             })
+            // const buffer = resolveBuffer(gl, dataset, this.buffersToDelete)
             buffer.bind()
             dataset.defineAttributes(gl, program)
             return buffer
@@ -41,6 +47,11 @@ export class TgdVertexArray {
             this.elemBuffer = buffer
         }
         gl.bindVertexArray(null)
+        this.debug()
+    }
+
+    share() {
+        this.ownersCount++
     }
 
     /**
@@ -150,9 +161,30 @@ export class TgdVertexArray {
     }
 
     delete() {
+        this.ownersCount--
+        if (this.ownersCount > 0) return
+
         const { gl, vao, drawBuffers, elemBuffer } = this
         gl.deleteVertexArray(vao)
-        for (const buff of drawBuffers) buff.delete()
+        for (const buff of drawBuffers) {
+            if (this.buffersToDelete.has(buff)) buff.delete()
+        }
         if (elemBuffer) elemBuffer.delete()
     }
+}
+
+function resolveBuffer(
+    gl: WebGL2RenderingContext,
+    dataset: Readonly<TgdDataset>,
+    buffersToDelete: Set<TgdBuffer>
+): TgdBuffer {
+    const buffer =
+        dataset.buffer ??
+        new TgdBuffer(gl, {
+            data: dataset.data,
+            target: dataset.target,
+            usage: dataset.usage,
+        })
+    if (!dataset.buffer) buffersToDelete.add(buffer)
+    return buffer
 }

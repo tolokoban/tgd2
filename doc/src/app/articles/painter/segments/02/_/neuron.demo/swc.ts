@@ -21,9 +21,11 @@ export function makeSegmentsData(swc: string): {
         const items = line.split(/\s+/)
         if (items.length < 7) continue
 
-        const [index, type, x, y, z, radius, parent] = items.map(s => Number(s))
+        const [index, type, x, y, z, radius, parent] = items.map((s) =>
+            Number(s)
+        )
         const B: Point = {
-            xyzr: [x, y, z, radius],
+            xyzr: [x, y, z, radius * 0.2],
             uv: [normalizeType(type), 0],
             influence: index === 0 ? 0 : 1,
             parent,

@@ -1,5 +1,9 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import type { TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
+import type {
+    TgdBuffer,
+    TgdBufferOptionTarget,
+    TgdBufferOptionUsage,
+} from "@tgd/buffer"
 import type { TgdProgram } from "@tgd/program"
 
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
@@ -8,6 +12,12 @@ export interface TgdDatasetOptions {
     divisor: number
     target: TgdBufferOptionTarget
     usage: TgdBufferOptionUsage
+    /**
+     * When passing a Dataset to a VAO, you can use
+     * this prop to tell the VAO to use this buffer
+     * instead of creating a new one.
+     */
+    buffer?: TgdBuffer
 }
 
 export type TgdDatasetTypeRecord = Record<string, TgdDatasetType>
@@ -18,6 +28,7 @@ export class TgdDataset {
     private _data = new ArrayBuffer(0)
     private _count = 0
 
+    public readonly buffer: TgdBuffer | undefined
     public target: TgdBufferOptionTarget
     public usage: TgdBufferOptionUsage
 
@@ -25,6 +36,7 @@ export class TgdDataset {
         private readonly attributesDefinition: TgdDatasetTypeRecord,
         private readonly options: Partial<TgdDatasetOptions> = {}
     ) {
+        this.buffer = options.buffer
         this.target = options.target ?? "ARRAY_BUFFER"
         this.usage = options.usage ?? "STATIC_DRAW"
         this.initialize(attributesDefinition, options)
@@ -66,6 +78,25 @@ export class TgdDataset {
         this.definitions = definitions
         this.stride = stride
         this._data = resize(this._data, this.count * this.stride)
+    }
+
+    assertAttributes(attributesDefinition: TgdDatasetTypeRecord) {
+        if (
+            JSON.stringify(attributesDefinition) !==
+            JSON.stringify(this.attributesDefinition)
+        ) {
+            throw new Error(
+                `This TgdDataset was expected to have these attributes:\n${JSON.stringify(
+                    attributesDefinition,
+                    null,
+                    2
+                )}\nbut it has these attributes instead:\n${JSON.stringify(
+                    this.attributesDefinition,
+                    null,
+                    2
+                )}`
+            )
+        }
     }
 
     /**

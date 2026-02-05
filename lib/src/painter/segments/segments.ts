@@ -2,7 +2,6 @@ import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
 import { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
-
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 import { tgdCanvasCreatePalette } from "@tgd/utils"
@@ -10,6 +9,12 @@ import { TgdCamera } from "@tgd/camera"
 import { TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
 import { makeCapsule } from "./capsule"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdTransfo } from "@tgd/math"
+import {
+    TgdBuffer,
+    TgdBufferOptionTarget,
+    TgdBufferOptionUsage,
+} from "@tgd/buffer"
 
 export type TgdPainterSegmentsOptions = {
     /**
@@ -17,15 +22,20 @@ export type TgdPainterSegmentsOptions = {
      * Min is 3.
      * Default to **3**.
      */
-    roundness: number
+    roundness?: number
     /**
      * With orthographic camera, this is a value in pixels.
      */
-    minRadius: number
+    minRadius?: number
     /**
      * Material to apply to the resulting mesh.
      */
     material?: TgdMaterial
+    /**
+     * If a `TgdPainterSegments` is given, then the
+     * data will be shared between the painters.
+     */
+    dataset: TgdPainterSegments | InstanceDataset | (() => InstanceDataset)
 }
 
 /**
@@ -50,16 +60,57 @@ export type TgdPainterSegmentsOptions = {
  * ```
  */
 export class TgdPainterSegments extends TgdPainter {
+    static createDataset({
+        attXYZR0 = "attXYZR0",
+        attUV0 = "attUV0",
+        attInfluence0 = "attInfluence0",
+        attXYZR1 = "attXYZR1",
+        attUV1 = "attUV1",
+        attInfluence1 = "attInfluence1",
+        buffer,
+        usage,
+        target,
+    }: Partial<{
+        attXYZR0: string
+        attUV0: string
+        attInfluence0: string
+        attXYZR1: string
+        attUV1: string
+        attInfluence1: string
+        buffer: TgdBuffer
+        target: TgdBufferOptionTarget
+        usage: TgdBufferOptionUsage
+    }> = {}) {
+        const dataset = new TgdDataset(
+            {
+                [attXYZR0]: "vec4",
+                [attUV0]: "vec2",
+                [attInfluence0]: "float",
+                [attXYZR1]: "vec4",
+                [attUV1]: "vec2",
+                [attInfluence1]: "float",
+            },
+            {
+                divisor: 1,
+                buffer,
+                usage,
+                target,
+            }
+        )
+        return dataset
+    }
+
+    public readonly transfo = new TgdTransfo()
     public colorTexture: TgdTexture2D
     public minRadius: number = 1
     public radiusMultiplier = 1
     public radiusConstant = 1
     public radiusSwitch = 0
+    public instanceCount = 0
 
     private readonly vao: TgdVertexArray
     private readonly prg: TgdProgram
     private readonly vertexCount: number
-    private readonly instanceCount: number
     private readonly material: TgdMaterial
 
     // private readonly painter: TgdPainter
@@ -69,13 +120,11 @@ export class TgdPainterSegments extends TgdPainter {
             gl: WebGL2RenderingContext
             camera: TgdCamera
         },
-        options: Partial<TgdPainterSegmentsOptions> & {
-            makeDataset: () => InstanceDataset
-        }
+        options: TgdPainterSegmentsOptions
     ) {
         super()
-        this.name = `TgdPainter#${this.id}`
-        const { roundness = 3, minRadius = 1, makeDataset } = options
+        this.name = `TgdPainterSegments#${this.id}`
+        const { roundness = 3, minRadius = 1, dataset } = options
         const geometry = makeCapsule(roundness)
         const material = options.material ?? new TgdMaterialFaceOrientation()
         this.material = material
@@ -142,7 +191,7 @@ export class TgdPainterSegments extends TgdPainter {
                 `float radius = max(`,
                 [
                     `xyzr.w,`,
-                    `uniMinRadius * (uniProjectionMatrix * uniModelViewMatrix * vec4(center, 1)).w`,
+                    `uniMinRadius * (uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(center, 1)).w`,
                 ],
                 `);`,
                 `vec3 dir = attXYZR1.xyz - attXYZR0.xyz;`,
@@ -162,7 +211,7 @@ export class TgdPainterSegments extends TgdPainter {
                     `normal = mat * normal;`,
                 ],
                 `}`,
-                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * vec4(pos, 1);`,
+                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(pos, 1);`,
                 "applyMaterial();",
                 "varNormal = normal;",
             ],
@@ -187,15 +236,39 @@ export class TgdPainterSegments extends TgdPainter {
             frag,
         })
         this.prg = prg
-        const instance = makeDataset()
-        this.vao = new TgdVertexArray(
-            context.gl,
-            prg,
-            [geometry.dataset, instance],
-            geometry.elements
-        )
+        if (dataset instanceof TgdPainterSegments) {
+            if (dataset.vao.gl !== context.gl) {
+                throw new Error(
+                    "[TgdPainterSegments] You cannot share a VAO accross different contexts!"
+                )
+            }
+            this.vao = dataset.vao
+            this.vao.share()
+            this.instanceCount = dataset.instanceCount
+        } else if (dataset) {
+            const instance = extract(dataset)
+            instance.addAttributes({
+                attXYZR0: "vec4",
+                attUV0: "vec2",
+                attInfluence0: "float",
+                attXYZR1: "vec4",
+                attUV1: "vec2",
+                attInfluence1: "float",
+            })
+            this.vao = new TgdVertexArray(
+                context.gl,
+                prg,
+                [geometry.dataset, instance],
+                geometry.elements
+            )
+            this.instanceCount = instance.count
+        } else {
+            console.error("[TgdPainterSegments] options =", options) // @FIXME: Remove this line written on 2026-02-04 at 19:53
+            throw new Error(
+                "option `dataset` of TgdPainterSegments is undefined!"
+            )
+        }
         this.vertexCount = geometry.elements?.length ?? 0
-        this.instanceCount = instance.count
     }
 
     getBuffer() {
@@ -217,6 +290,7 @@ export class TgdPainterSegments extends TgdPainter {
             "uniMinRadius",
             (this.minRadius * 2) / gl.drawingBufferHeight
         )
+        prg.uniformMatrix4fv("uniTransfoMatrix", this.transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         material.applyState(gl, () => {
@@ -277,34 +351,28 @@ export class TgdPainterSegmentsData {
      * You can rename the attributes if you need to use
      * them in another Painter.
      */
-    readonly makeDataset = ({
-        attXYZR0 = "attXYZR0",
-        attUV0 = "attUV0",
-        attInfluence0 = "attInfluence0",
-        attXYZR1 = "attXYZR1",
-        attUV1 = "attUV1",
-        attInfluence1 = "attInfluence1",
-    }: Partial<{
-        attXYZR0: string
-        attUV0: string
-        attInfluence0: string
-        attXYZR1: string
-        attUV1: string
-        attInfluence1: string
-    }> = {}): InstanceDataset => {
-        const dataset = new TgdDataset(
-            {
-                [attXYZR0]: "vec4",
-                [attUV0]: "vec2",
-                [attInfluence0]: "float",
-                [attXYZR1]: "vec4",
-                [attUV1]: "vec2",
-                [attInfluence1]: "float",
-            },
-            {
-                divisor: 1,
-            }
-        )
+    readonly makeDataset = (
+        args: Partial<{
+            attXYZR0: string
+            attUV0: string
+            attInfluence0: string
+            attXYZR1: string
+            attUV1: string
+            attInfluence1: string
+            buffer: TgdBuffer
+            target: TgdBufferOptionTarget
+            usage: TgdBufferOptionUsage
+        }> = {}
+    ): InstanceDataset => {
+        const dataset = TgdPainterSegments.createDataset(args)
+        const {
+            attXYZR0 = "attXYZR0",
+            attUV0 = "attUV0",
+            attInfluence0 = "attInfluence0",
+            attXYZR1 = "attXYZR1",
+            attUV1 = "attUV1",
+            attInfluence1 = "attInfluence1",
+        } = args
         dataset.set(attXYZR0, new Float32Array(this.attXYZR0))
         dataset.set(attUV0, new Float32Array(this.attUV0))
         dataset.set(attInfluence0, new Float32Array(this.attInfluence0))
@@ -313,4 +381,9 @@ export class TgdPainterSegmentsData {
         dataset.set(attInfluence1, new Float32Array(this.attInfluence1))
         return dataset
     }
+}
+
+function extract<T>(arg: T | (() => T)): T {
+    if (typeof arg === "function") return (arg as () => T)()
+    return arg
 }
