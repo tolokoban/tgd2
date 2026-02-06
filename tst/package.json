@@ -1,0 +1,29 @@
+{
+    "name": "tgd2-anti-regressor",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "build/index.html",
+    "window": {
+        "title": "TGD2 Anti-Regressor",
+        "width": 1280,
+        "height": 720,
+        "min_width": 800,
+        "min_height": 600
+    },
+    "scripts": {
+        "build": "rspack --mode=production",
+        "dev": "rspack --mode=development --watch",
+        "start": "npm run build && nw ."
+    },
+    "devDependencies": {
+        "@rspack/cli": "^1.6.4",
+        "@rspack/core": "^1.6.4",
+        "@types/node": "^25.2.0",
+        "clean-webpack-plugin": "^4.0.0",
+        "css-loader": "^6.11.0",
+        "nw": "^0.95.0",
+        "ts-loader": "^9.5.4",
+        "typescript": "5.9.3"
+    }
+}

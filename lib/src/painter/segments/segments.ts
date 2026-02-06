@@ -327,6 +327,28 @@ export class TgdPainterSegmentsData {
         return this._count
     }
 
+    getXYZR0(index: number): ArrayNumber4 {
+        const arr = this.attXYZR0
+        const offset = index * 4
+        return [
+            arr[offset + 0] ?? 0,
+            arr[offset + 1] ?? 0,
+            arr[offset + 2] ?? 0,
+            arr[offset + 3] ?? 0,
+        ]
+    }
+
+    getXYZR1(index: number): ArrayNumber4 {
+        const arr = this.attXYZR1
+        const offset = index * 4
+        return [
+            arr[offset + 0] ?? 0,
+            arr[offset + 1] ?? 0,
+            arr[offset + 2] ?? 0,
+            arr[offset + 3] ?? 0,
+        ]
+    }
+
     /**
      * @param XYZR0 (x,y,z) and radius of point A.
      * @param XYZR1 (x,y,z) and radius of point B.

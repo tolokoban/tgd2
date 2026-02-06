@@ -61,46 +61,6 @@ export type TgdPainterSegmentsMorphingOptions = {
  * ```
  */
 export class TgdPainterSegmentsMorphing extends TgdPainter {
-    private static createDataset({
-        attXYZR0 = "attXYZR0",
-        attUV0 = "attUV0",
-        attInfluence0 = "attInfluence0",
-        attXYZR1 = "attXYZR1",
-        attUV1 = "attUV1",
-        attInfluence1 = "attInfluence1",
-        buffer,
-        usage,
-        target,
-    }: Partial<{
-        attXYZR0: string
-        attUV0: string
-        attInfluence0: string
-        attXYZR1: string
-        attUV1: string
-        attInfluence1: string
-        buffer: TgdBuffer
-        target: TgdBufferOptionTarget
-        usage: TgdBufferOptionUsage
-    }> = {}) {
-        const dataset = new TgdDataset(
-            {
-                [attXYZR0]: "vec4",
-                [attUV0]: "vec2",
-                [attInfluence0]: "float",
-                [attXYZR1]: "vec4",
-                [attUV1]: "vec2",
-                [attInfluence1]: "float",
-            },
-            {
-                divisor: 1,
-                buffer,
-                usage,
-                target,
-            }
-        )
-        return dataset
-    }
-
     public readonly transfo = new TgdTransfo()
     public colorTexture: TgdTexture2D
     public minRadius: number = 1
@@ -258,7 +218,6 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
         })
         this.prg = prg
         this.vaos = datasetsPairs.map(([A, B]) => {
-            console.log("Before Dataset A")
             const datasetA = extract(A).renameAttributes([
                 "attXYZR0_A",
                 "attUV0_A",
@@ -267,7 +226,6 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
                 "attUV1_A",
                 "attInfluence1_A",
             ])
-            // datasetA.debug("Dataset A")
             const datasetB = extract(B).renameAttributes([
                 "attXYZR0_B",
                 "attUV0_B",
