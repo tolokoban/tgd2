@@ -1,4 +1,3 @@
-import { TgdContext } from "@tgd/context"
 import { TgdProgram } from "@tgd/program"
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import { WebglUniformType } from "@tgd/types"
@@ -59,7 +58,7 @@ export interface TgdFilterOptions {
 }
 
 export interface TgdFilterSerUniformsParameters {
-    context: TgdContext
+    context: { gl: WebGL2RenderingContext }
     program: TgdProgram
     time: number
     delay: number

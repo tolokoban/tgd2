@@ -4,7 +4,7 @@
 }
 
 .Tgd canvas {
-    box-shadow: 0 0.25em 0.5em #fff1;
+    border: 1px solid #fff;
     max-width: 100vw;
     max-height: 100vh;
 }

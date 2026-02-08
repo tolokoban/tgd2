@@ -1,4 +1,3 @@
-import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
 import { TgdVertexArray } from "@tgd/vao"
@@ -33,7 +32,7 @@ export class TgdPainterFilter extends TgdPainter {
     private texturesHeight = -1
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: { gl: WebGL2RenderingContext },
         options: TgdPainterFilterOptions
     ) {
         super()
@@ -46,7 +45,7 @@ export class TgdPainterFilter extends TgdPainter {
             )
         }
 
-        const programs = filters.map(filter => {
+        const programs = filters.map((filter) => {
             const vert = new TgdShaderVertex({
                 attributes: {
                     attPoint: "vec2",
@@ -80,7 +79,7 @@ export class TgdPainterFilter extends TgdPainter {
             }).code
             return new TgdProgram(context.gl, { vert, frag })
         })
-        const vaos = programs.map(program =>
+        const vaos = programs.map((program) =>
             createVAO(context, program, options.flipY ? -1 : +1)
         )
         this.program = programs.pop() as TgdProgram
@@ -216,7 +215,7 @@ function paintOneFilter(
     filter: TgdFilter,
     texture: WebGLTexture,
     z: number,
-    context: TgdContext
+    context: { gl: WebGL2RenderingContext }
 ) {
     const { gl } = program
     program.use()
@@ -229,7 +228,11 @@ function paintOneFilter(
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 }
 
-function createVAO(context: TgdContext, program: TgdProgram, flipY = +1) {
+function createVAO(
+    context: { gl: WebGL2RenderingContext },
+    program: TgdProgram,
+    flipY = +1
+) {
     const dataset = new TgdDataset({
         attPoint: "vec2",
         attUV: "vec2",

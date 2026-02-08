@@ -10,6 +10,8 @@ import {
     webglTextureParametersSet,
 } from "@tgd/webgl"
 import { LoadBmpOptions, isLoadBmpOptions } from "./types"
+import { TgdFilter } from "@tgd/filter"
+import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 
 interface TgdTexture2DStorage {
     width: number
@@ -64,6 +66,7 @@ export interface TgdTexture2DOptions {
     storage?: Partial<TgdTexture2DStorage>
     params?: WebglTextureParameters
     load?: WebglImage | string | LoadBmpOptions
+    filter?: TgdFilter
 }
 
 export class TgdTexture2D {
@@ -89,7 +92,7 @@ export class TgdTexture2D {
         public readonly context: {
             gl: WebGL2RenderingContext
         },
-        options: TgdTexture2DOptions = {}
+        private readonly options: TgdTexture2DOptions = {}
     ) {
         const { storage, params, load } = options
         const { gl } = context
@@ -117,6 +120,15 @@ export class TgdTexture2D {
         } else if (isLoadBmpOptions(load)) {
             this.loadBitmap(load.bmp, load)
         }
+    }
+
+    get internalFormat() {
+        return this.storage.internalFormat
+    }
+    private set internalFormat(
+        internalFormat: TgdTexture2DStorage["internalFormat"]
+    ) {
+        this.storage.internalFormat = internalFormat
     }
 
     delete() {
@@ -231,6 +243,7 @@ gl.texStorage2D(
         }
 
         if (!isWebglImage(bmp)) {
+            // This is a Promise
             bmp.then((data) => this.loadBitmap(data)).catch((error) =>
                 console.error("Unable to load texture BMP:", error)
             )
@@ -278,9 +291,43 @@ gl.texStorage2D(
                 )}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`
             )
         }
+        const { filter } = this.options
+        if (filter) this.applyFilter(filter)
         this.unbind()
         options.onLoad?.()
         this.eventChange.dispatch(this)
+        return this
+    }
+
+    applyFilter(filter: TgdFilter) {
+        if (this.width < 1 || this.height < 1) {
+            throw new Error(
+                `[TgdTexture2D.applyFilter] Current size is invalie (${this.width}, ${this.height})! Maybe the texture is not loaded yet.`
+            )
+        }
+        const output = new TgdTexture2D(this.context, {
+            params: { ...this.params },
+            storage: {
+                internalFormat: "RGBA8",
+                width: this.width,
+                height: this.height,
+            },
+        })
+        const painter = new TgdPainterFilter(this.context, {
+            filters: [filter],
+            flipY: true,
+            texture: this,
+        })
+        const framebuffer = new TgdPainterFramebuffer(this.context, {
+            textureColor0: output,
+            depthBuffer: false,
+            children: [painter],
+        })
+        framebuffer.paint(0, 0)
+        this.gl.deleteTexture(this._texture)
+        this._texture = output.glTexture
+        this.bind()
+        this.setParams(this.params)
         return this
     }
 

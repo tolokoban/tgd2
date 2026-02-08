@@ -1,5 +1,4 @@
 import { TgdPainterFunction } from "@tgd/types/painter"
-import { TgdContext } from "../context"
 import { TgdPainterGroup } from "./group"
 import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
 import { TgdPainter } from "./painter"
@@ -61,7 +60,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private readonly drawBuffers: number[]
 
     constructor(
-        private readonly context: TgdContext,
+        private readonly context: { gl: WebGL2RenderingContext },
         private readonly options: Partial<TgdPainterFramebufferOptions>
     ) {
         super(options.children)
@@ -203,15 +202,15 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         const { context, options } = this
         const { gl } = context
         const { viewportMatchingScale = 1 } = options
-        this.width = Math.round(context.width * viewportMatchingScale)
-        this.height = Math.round(context.height * viewportMatchingScale)
+        this.width = Math.round(gl.drawingBufferWidth * viewportMatchingScale)
+        this.height = Math.round(gl.drawingBufferHeight * viewportMatchingScale)
         this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         gl.viewport(0, 0, this.width, this.height)
         gl.drawBuffers(this.drawBuffers)
         super.paint(time, delay)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-        gl.viewport(0, 0, context.width, context.height)
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
     }
 
     delete() {
