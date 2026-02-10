@@ -1,25 +1,42 @@
-import { TgdTexture2D } from "@tgd/texture"
-import { TgdPainter } from "../painter"
+import { tgdColorMakeHueWheel } from "@tgd/color"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdProgram } from "@tgd/program"
-import { TgdVertexArray } from "@tgd/vao"
-import { TgdContext } from "@tgd/context"
+import {
+    type TgdCodeBloc,
+    TgdShaderFragment,
+    TgdShaderVertex,
+} from "@tgd/shader"
+import { TgdTexture2D } from "@tgd/texture"
 import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
-import { tgdColorMakeHueWheel } from "@tgd/color"
-import { TgdCodeBloc, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdPainter } from "../painter"
 
-export interface TgdPainterPointsCloudOptions {
-    name?: string
+interface TgdPainterPointsCloudMorphingData {
     /**
      * Flatten array of points:
      * `[ x1, y1, z1, radius1, x2, y2, z2, radius2, ... ]`
      */
-    dataPoint: Float32Array
+    point: Float32Array
     /**
      * Flatten array of UVs:
      * `[ u1, v1, u2, v2, ... ]`
      */
-    dataUV?: Float32Array
+    uv?: Float32Array
+}
+
+export interface TgdPainterPointsCloudMorphingOptions {
+    name?: string
+    data: [
+        TgdPainterPointsCloudMorphingData,
+        TgdPainterPointsCloudMorphingData,
+    ][]
+    /**
+     * Mix between two point clouds.
+     *
+     * Default to `0.0`.
+     */
+    mix?: number
     /**
      * Multiply the radius of each point by this value.
      *
@@ -75,7 +92,7 @@ export interface TgdPainterPointsCloudOptions {
     light?: number
 }
 
-export class TgdPainterPointsCloud extends TgdPainter {
+export class TgdPainterPointsCloudMorphing extends TgdPainter {
     /**
      * Draw spheres with simple diffuse/specular material.
      */
@@ -125,7 +142,10 @@ export class TgdPainterPointsCloud extends TgdPainter {
         ]
     }
 
-    public readonly count: number
+    /**
+     * Mixing between two clouds: 0.0 (firts) and 1.0 (second).
+     */
+    public mix = 0
     public texture: TgdTexture2D
     public radiusMultiplier = 1
     public minSizeInPixels = 0
@@ -136,19 +156,19 @@ export class TgdPainterPointsCloud extends TgdPainter {
     public shadowThickness = 1
     public light = 1
 
-    private readonly dataPoint: Float32Array
-    private readonly dataUV: Float32Array
     private readonly textureMustBeDeleted: boolean
-    private readonly dataset: TgdDataset
+    private readonly datasets: TgdDataset[] = []
     private readonly program: TgdProgram
-    private readonly vao: TgdVertexArray
+    private readonly vaos: TgdVertexArray[]
+    private readonly counts: number[]
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterPointsCloudOptions
+        options: TgdPainterPointsCloudMorphingOptions
     ) {
         super()
         this.name = options.name ?? this.name
+        this.mix = options.mix ?? 0
         this.radiusMultiplier = options.radiusMultiplier ?? 1
         this.minSizeInPixels = options.minSizeInPixels ?? 0
         this.specularExponent = options.specularExponent ?? 10
@@ -156,25 +176,6 @@ export class TgdPainterPointsCloud extends TgdPainter {
         this.shadowIntensity = options.shadowIntensity ?? 0.5
         this.shadowThickness = options.shadowThickness ?? 1
         this.light = options.light ?? 1
-        this.dataPoint = options.dataPoint
-        if ((this.dataPoint.length & 3) !== 0) {
-            throw new Error(
-                `dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${this.dataPoint.length}`
-            )
-        }
-        this.dataUV =
-            options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
-        if (this.dataPoint.length !== this.dataUV.length * 2) {
-            const message = `dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${this.dataPoint.length}, \ndataUV.length === ${this.dataUV.length}`
-            console.error("[TgdPainterPointsCloud]", message)
-            console.error("[TgdPainterPointsCloud] options =", options)
-            console.error(
-                "[TgdPainterPointsCloud] this.dataPoint =",
-                this.dataPoint
-            )
-            console.error("[TgdPainterPointsCloud] this.dataUV =", this.dataUV)
-            throw new Error(message)
-        }
         if (options.texture) {
             this.texture = options.texture
             this.textureMustBeDeleted = false
@@ -187,10 +188,22 @@ export class TgdPainterPointsCloud extends TgdPainter {
             )
             this.textureMustBeDeleted = true
         }
-        this.count = this.dataUV.length >> 1
-        this.dataset = this.createDataset()
+        if (options.data.length === 0) {
+            throw new Error(
+                "[TgdPainterPointsCloud] options.data must not be empty!"
+            )
+        }
+        this.counts = options.data.map(([{ point }]) => point.length >> 2)
         this.program = this.createProgram(options.fragCode)
-        this.vao = new TgdVertexArray(context.gl, this.program, [this.dataset])
+        this.vaos = options.data.map(([dataA, dataB]) => {
+            const datasetA = this.createDataset(dataA, "A")
+            const datasetB = this.createDataset(dataB, "B")
+            this.datasets.push(datasetA, datasetB)
+            return new TgdVertexArray(context.gl, this.program, [
+                datasetA,
+                datasetB,
+            ])
+        })
     }
 
     delete(): void {
@@ -212,6 +225,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
         const { gl, camera } = context
         program.use()
         texture.activate(0, program, "uniTexture")
+        program.uniform1f("uniMix", this.mix)
         program.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         program.uniform1f("uniMinSizeInPixels", minSizeInPixels)
         program.uniform1f("uniHalfScreenHeightInPixels", context.height * 0.5)
@@ -227,19 +241,52 @@ export class TgdPainterPointsCloud extends TgdPainter {
         vao.unbind()
     }
 
-    private createDataset() {
+    private createDataset(
+        data: TgdPainterPointsCloudMorphingData,
+        suffix: string
+    ) {
+        const { point } = data
+        if (point.length % 4 !== 0) {
+            throw new Error(
+                `[TgdPainterPointsCloud] point.length must be a multiple of 4! Current value: ${point.length}`
+            )
+        }
+        const uv = data.uv ?? new Float32Array(point.length / 2)
+        if (uv.length % 2 !== 0) {
+            throw new Error(
+                `[TgdPainterPointsCloud] uv.length must be a multiple of 2! Current value: ${uv.length}`
+            )
+        }
+        if (point.length !== uv.length * 2) {
+            throw new Error(
+                `[TgdPainterPointsCloud] point.length must be twice the size of uv.length! point.length === ${point.length}, uv.length === ${uv.length}`
+            )
+        }
+        const attPoint = `attPoint_${suffix}`
+        const attUV = `attUV_${suffix}`
         const dataset = new TgdDataset({
-            attPoint: "vec4",
-            attUV: "vec2",
+            [attPoint]: "vec4",
+            [attUV]: "vec2",
         })
-        dataset.set("attPoint", this.dataPoint)
-        dataset.set("attUV", this.dataUV)
+        dataset.set(attPoint, point)
+        dataset.set(attUV, uv)
         return dataset
+    }
+
+    get count() {
+        const [count] = this.counts
+        return count
+    }
+
+    private get vao() {
+        const [vao] = this.vaos
+        return vao
     }
 
     private createProgram(render?: TgdCodeBloc): TgdProgram {
         const vert = new TgdShaderVertex({
             uniforms: {
+                uniMix: "float",
                 uniMinSizeInPixels: "float",
                 uniRadiusMultiplier: "float",
                 uniHalfScreenHeightInPixels: "float",
@@ -247,13 +294,17 @@ export class TgdPainterPointsCloud extends TgdPainter {
                 uniProjectionMatrix: "mat4",
             },
             attributes: {
-                attPoint: "vec4",
-                attUV: "vec2",
+                attPoint_A: "vec4",
+                attUV_A: "vec2",
+                attPoint_B: "vec4",
+                attUV_B: "vec2",
             },
             varying: {
                 varUV: "vec2",
             },
             mainCode: [
+                "vec4 attPoint = mix(attPoint_A, attPoint_B, uniMix);",
+                "vec2 attUV = mix(attUV_A, attUV_B, uniMix);",
                 "varUV = attUV;",
                 "float radius = attPoint.w;",
                 "vec4 point = vec4(attPoint.xyz, 1.0);",
@@ -285,8 +336,8 @@ export class TgdPainterPointsCloud extends TgdPainter {
                         "float len = 1.0 - dot(coords, coords);",
                         "if (len < 0.0) discard;",
                         "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
-                        `float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1.0 - uniShadowIntensity);`,
-                        `float spec = pow(len, uniSpecularExponent) * uniSpecularIntensity;`,
+                        "float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1.0 - uniShadowIntensity);",
+                        "float spec = pow(len, uniSpecularExponent) * uniSpecularIntensity;",
                         "return color * vec4(vec3(light * uniLight), 1.0) + vec4(vec3(spec), 0.0);",
                     ],
                     "}",

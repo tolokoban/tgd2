@@ -1,11 +1,11 @@
-import { TgdConsole, WebglAttributeType, WebglUniformType } from ".."
+import { TgdConsole, type WebglAttributeType, type WebglUniformType } from ".."
 import {
-    TgdCodeBloc,
-    TgdCodeFunctions,
-    TgdCodeVariables,
     expandFunctions,
-    tgdCodeStringify,
     expandVariables,
+    type TgdCodeBloc,
+    type TgdCodeFunctions,
+    type TgdCodeVariables,
+    tgdCodeStringify,
 } from "./code"
 
 /**
@@ -26,6 +26,12 @@ export class TgdShaderFragment {
      */
     public functions: TgdCodeFunctions | TgdCodeBloc
     public mainCode: TgdCodeBloc
+    /**
+     * Thinkg that you put at the beginnig of your shader.
+     *
+     * Example: `layout(origin_upper_left) in vec4 gl_FragCoord;`
+     */
+    public header: TgdCodeBloc
 
     constructor(
         options: Partial<{
@@ -35,6 +41,7 @@ export class TgdShaderFragment {
             varying: TgdCodeVariables<WebglAttributeType>
             functions: TgdCodeFunctions | TgdCodeBloc
             mainCode: TgdCodeBloc
+            header: TgdCodeBloc
         }> = {}
     ) {
         const {
@@ -46,6 +53,7 @@ export class TgdShaderFragment {
             varying = {},
             functions = {},
             mainCode = ["FragColor = vec4(1, 0.667, 0, 1);"],
+            header = [],
         } = options
         this.precision = precision
         this.uniforms = uniforms
@@ -53,18 +61,20 @@ export class TgdShaderFragment {
         this.varying = varying
         this.functions = functions
         this.mainCode = mainCode
+        this.header = header
     }
 
     get code() {
         return tgdCodeStringify([
-            `#version 300 es`,
+            "#version 300 es",
             `precision ${this.precision} float;`,
+            ...(Array.isArray(this.header) ? this.header : [this.header]),
             ...expandVariables(this.uniforms, "uniform"),
             ...expandVariables(this.varying, "in"),
             ...expandVariables(this.outputs, "out"),
             ...expandFunctions(this.functions),
             "",
-            `void main() {`,
+            "void main() {",
             this.mainCode,
             "}",
         ])

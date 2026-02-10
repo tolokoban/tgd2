@@ -1,12 +1,12 @@
-import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
+import type { TgdProgram } from "@tgd/program"
+import type { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import {
-    TgdCamera,
+    type TgdCamera,
     TgdPainterState,
-    TgdPainterStateOptions,
-    WebglAttributeType,
-    WebglUniformType,
+    type TgdPainterStateOptions,
+    type WebglAttributeType,
+    type WebglUniformType,
 } from ".."
-import { TgdProgram } from "@tgd/program"
 
 export interface TgdMaterialContext {
     camera: TgdCamera
@@ -37,6 +37,10 @@ export interface TgdMaterialOptions {
     attUV: string
     varyings: { [name: string]: WebglAttributeType }
     uniforms: { [name: string]: WebglUniformType }
+    /**
+     * Example: `layout(origin_upper_left) in vec4 gl_FragCoord;`
+     */
+    fragmentShaderHeader?: TgdCodeBloc | (() => TgdCodeBloc)
     /**
      * This is the body of the function `void applyMaterial()` and
      * it must return the color of the current fragment as a `vec4`.
@@ -95,6 +99,8 @@ export class TgdMaterial {
 
     private readonly _fragmentShaderCode: TgdCodeBloc | (() => TgdCodeBloc)
 
+    private readonly _fragmentShaderHeader: TgdCodeBloc | (() => TgdCodeBloc)
+
     /**
      * The code of a `vec4 applyMaterial()` function.
      */
@@ -102,6 +108,12 @@ export class TgdMaterial {
         if (typeof this._fragmentShaderCode === "function")
             return this._fragmentShaderCode()
         return this._fragmentShaderCode
+    }
+
+    get fragmentShaderHeader(): TgdCodeBloc {
+        if (typeof this._fragmentShaderHeader === "function")
+            return this._fragmentShaderHeader()
+        return this._fragmentShaderHeader
     }
 
     private readonly _extraFragmentShaderFunctions:
@@ -178,6 +190,7 @@ export class TgdMaterial {
         varyings = {},
         uniforms = {},
         fragmentShaderCode = ["return vec4(1, .666, .1, 1);"],
+        fragmentShaderHeader = [],
         extraFragmentShaderFunctions = {},
         vertexShaderCode = [],
         extraVertexShaderFunctions = {},
@@ -196,6 +209,7 @@ export class TgdMaterial {
         this.varyings = varyings
         this.uniforms = uniforms
         this._fragmentShaderCode = fragmentShaderCode
+        this._fragmentShaderHeader = fragmentShaderHeader
         this._extraFragmentShaderFunctions = extraFragmentShaderFunctions
         this._vertexShaderCode = vertexShaderCode
         this._extraVertexShaderFunctions = extraVertexShaderFunctions

@@ -1,7 +1,7 @@
-import { TgdVec3, TgdVec4 } from "@tgd/math"
-import { TgdMaterial, TgdMaterialOptions } from "./material"
 import { TgdLight } from "@tgd/light"
-import { TgdProgram } from "@tgd/program"
+import { TgdVec3, TgdVec4 } from "@tgd/math"
+import type { TgdProgram } from "@tgd/program"
+import { TgdMaterial, type TgdMaterialOptions } from "./material"
 
 export interface TgdMaterialFaceOrientationOptions
     extends Partial<TgdMaterialOptions> {
@@ -41,17 +41,17 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
             },
             fragmentShaderCode: [
                 "vec3 normal = mat3(uniModelViewMatrix) * normalize(varNormal);",
-                `float light = 1.0 - dot(normal, uniLightDir);`,
-                `vec4 color = vec4(0.8 * (gl_FrontFacing ? vec3(0, .5, 1) : vec3(1, 0, 0)), 1.0);`,
-                `float spec = max(0.0, reflect(uniLightDir, normal).z);`,
-                `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
-                `color = vec4(`,
-                `  color.rgb * (`,
-                `    uniAmbient + uniLight * light`,
-                `  ) + vec3(spec),`,
-                `  1.0`,
-                `);`,
-                `return color;`,
+                "float light = 1.0 - dot(normal, uniLightDir);",
+                "vec4 color = vec4(0.8 * (gl_FrontFacing ? vec3(0, .5, 1) : vec3(1, 0, 0)), 1.0);",
+                "float spec = max(0.0, reflect(uniLightDir, normal).z);",
+                "spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;",
+                "color = vec4(",
+                "  color.rgb * (",
+                "    uniAmbient + uniLight * light",
+                "  ) + vec3(spec),",
+                "  1.0",
+                ");",
+                "return color;",
             ],
             vertexShaderCode: () => [
                 `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,

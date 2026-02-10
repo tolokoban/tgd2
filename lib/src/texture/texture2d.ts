@@ -1,17 +1,21 @@
 import { TgdEvent } from "@tgd/event"
+import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
-import { TgdProgram } from "@tgd/program"
-import { WebglImage, WebglTexParameter, isWebglImage } from "@tgd/types"
+import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
+import type { TgdProgram } from "@tgd/program"
+import {
+    isWebglImage,
+    type WebglImage,
+    type WebglTexParameter,
+} from "@tgd/types"
 import { isString } from "@tgd/types/guards"
 import { webglLookup } from "@tgd/utils"
 import {
-    WebglTextureInternalFormat,
-    WebglTextureParameters,
+    type WebglTextureInternalFormat,
+    type WebglTextureParameters,
     webglTextureParametersSet,
 } from "@tgd/webgl"
-import { LoadBmpOptions, isLoadBmpOptions } from "./types"
-import { TgdFilter } from "@tgd/filter"
-import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
+import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 
 interface TgdTexture2DStorage {
     width: number
@@ -244,7 +248,9 @@ gl.texStorage2D(
 
         if (!isWebglImage(bmp)) {
             // This is a Promise
-            bmp.then((data) => this.loadBitmap(data)).catch((error) =>
+            bmp.then((data) => {
+                this.loadBitmap(data)
+            }).catch((error) =>
                 console.error("Unable to load texture BMP:", error)
             )
             return this
@@ -561,9 +567,7 @@ function printArray(
     data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike>
 ) {
     if (data.length > 10) {
-        return `[${data.slice(0, 10).join(", ")}, ...] (${
-            data.length
-        } elements)`
+        return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
     }
     return JSON.stringify(data)
 }

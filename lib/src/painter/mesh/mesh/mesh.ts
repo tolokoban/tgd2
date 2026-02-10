@@ -96,6 +96,7 @@ export class TgdPainterMesh
             ],
         })
         const frag = new TgdShaderFragment({
+            header: material.fragmentShaderHeader,
             uniforms: material.uniforms,
             outputs: { FragColor: "vec4" },
             varying: material.varyings,

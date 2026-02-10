@@ -1,13 +1,12 @@
-import { TgdPainterFunction } from "@tgd/types/painter"
-import { TgdContext } from "../context"
-import { TgdPainterGroup } from "./group"
+import type { TgdTexture2D } from "@tgd/texture"
+import type { TgdPainterFunction } from "@tgd/types/painter"
 import {
     webglCreateFramebuffer,
     webglLookup,
     webglRenderbufferStorageMultisample,
 } from "@tgd/utils"
-import { TgdPainter } from "./painter"
-import { TgdTexture2D } from "@tgd/texture"
+import { TgdPainterGroup } from "./group"
+import type { TgdPainter } from "./painter"
 
 export interface TgdPainterFramebufferWithAntiAliasingOptions {
     /**
@@ -28,8 +27,8 @@ export interface TgdPainterFramebufferWithAntiAliasingOptions {
      * If defined, the framebuffer will automatically match the
      * current viewport size multiplied by `viewportMatchingScale`.
      *
-     * for instance, if `viewportMatchingScale === 0.5` and the viewport
-     * id (640, 480), then the framebuffer will have a size of
+     * For instance, if `viewportMatchingScale === 0.5` and the viewport
+     * is (640, 480), then the framebuffer will have a size of
      * (320, 240).
      *
      * Default to `1`.
