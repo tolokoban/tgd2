@@ -2,6 +2,7 @@ import { TgdDataset, TgdDatasetType, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
 import { TgdVec3 } from "@tgd/math"
 import { webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
+import { TgdBoundingBox } from ".."
 
 interface TgdGeometryOptionsCommon {
     name?: string
@@ -65,8 +66,15 @@ export class TgdGeometry {
 
     public static make(options: TgdGeometryOptions2) {
         const definition: TgdDatasetTypeRecord = {}
-        const { count, drawMode, elements, attPosition, attNormal, attUV } =
-            options
+        const {
+            count,
+            drawMode,
+            elements,
+            attPosition,
+            attNormal,
+            attUV,
+            computeNormalsIfMissing,
+        } = options
         definition[attPosition.name] = attPosition.type ?? "vec3"
         if (attNormal) definition[attNormal.name] = attNormal.type ?? "vec3"
         if (attUV) definition[attUV.name] = attUV.type ?? "vec2"
@@ -79,6 +87,7 @@ export class TgdGeometry {
             count,
             drawMode,
             elements,
+            computeNormalsIfMissing,
         })
     }
 
@@ -124,11 +133,16 @@ export class TgdGeometry {
         return this._elementsType
     }
 
+    /**
+     * Return the index of a vertex.
+     * If no elements array has been defined, we return `index` verbatim.
+     * Otherwise, we use this elements array.
+     */
     public getElement(index: number): number {
-        return this.elements?.[index] ?? -1
+        return this.elements?.[index] ?? index
     }
 
-    public computeNormals() {
+    public computeNormals(): this {
         let normals: TgdVec3[] = []
         if (this.drawMode === WebGL2RenderingContext.TRIANGLES) {
             normals = this.computeNormalsForTrianglesDrawMode()
@@ -137,7 +151,7 @@ export class TgdGeometry {
                 "We don't know how to compute normals for this draw mode:",
                 this.drawMode
             )
-            return
+            return this
         }
         const attNormalName = this.attNormal
         this.dataset.addAttributes({
@@ -148,6 +162,19 @@ export class TgdGeometry {
             values.push(nx, ny, nz)
         }
         this.dataset.set(attNormalName, new Float32Array(values))
+        return this
+    }
+
+    public computeBoundingBox(): TgdBoundingBox {
+        const bbox = new TgdBoundingBox()
+        const { get } = this.dataset.getAttribAccessor(this.attPosition)
+        for (let index = 0; index < this.count; index++) {
+            const x = get(index, 0)
+            const y = get(index, 1)
+            const z = get(index, 2)
+            bbox.addPoint(x, y, z)
+        }
+        return bbox
     }
 
     private computeNormalsForTrianglesDrawMode() {

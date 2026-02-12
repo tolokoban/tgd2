@@ -1,5 +1,5 @@
 {
-    "version": "2.0.85",
+    "version": "2.0.86",
     "private": true,
     "homepage": "https://tolokoban.github.io/tgd2",
     "type": "module",
@@ -11,7 +11,7 @@
         "routes": "build-react-routes ./src/app/",
         "demo": "tsx ./scripts/demo/index.ts ./src/app",
         "generate": "npm run routes && npm run demo",
-        "lint": "eslint --config eslint.config.ts"
+        "lint": "oxlint src/"
     },
     "dependencies": {
         "@mdx-js/react": "^3.1.1",
@@ -21,6 +21,7 @@
         "@tolokoban/ui": "^0.25.3",
         "colord": "^2.9.3",
         "highlight.js": "^11.11.1",
+        "oxlint": "^1.46.0",
         "prismjs": "^1.30.0",
         "react": "19.2.4",
         "react-dom": "19.2.4",
@@ -41,10 +42,6 @@
         "build-react-routes": "^0.10.8",
         "clean-webpack-plugin": "^4.0.0",
         "css-loader": "^6.11.0",
-        "esbuild-loader": "^4.4.2",
-        "eslint-plugin-import": "^2.32.0",
-        "eslint-plugin-react": "^7.37.5",
-        "eslint-plugin-unicorn": "^62.0.0",
         "gh-pages": "^6.3.0",
         "globals": "^17.3.0",
         "install": "^0.13.0",

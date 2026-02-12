@@ -8,7 +8,6 @@ import {
     TgdTexture2D,
     TgdVertexArray,
     tgdCanvasCreatePalette,
-    tgdCanvasCreateWithContext2D,
 } from "@tolokoban/tgd"
 import { caseNumberToColors, cubeVertices } from "./geometry"
 

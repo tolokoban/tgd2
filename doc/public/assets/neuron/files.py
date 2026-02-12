@@ -12,9 +12,9 @@ def human_size(size):
     else:
         return f" {ceil(size / 1024)} Kb"
 
-def main():
+def main(subfolder, extension):
     # Get the directory where the script is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), subfolder)
     json_path = os.path.join(script_dir, "Octree.json")
     md_path = os.path.join(script_dir, "Octree.md")
 
@@ -22,20 +22,19 @@ def main():
     levels = []
     for i in range(10):
         levels.append([])
-    levels[0].append(os.path.getsize(os.path.join(script_dir, "Octree.glb")))
+    # levels[0].append(os.path.getsize(os.path.join(script_dir, "Octree.glb")))
+    levels[0].append(0)
     colors = ["red", "yellow", "green", "cyan", "blue"]
     max_level = 0
-    print(levels)
-    
     try:
         for filename in os.listdir(script_dir):
-            if filename.lower().endswith(".glb"):
+            if filename.lower().endswith(f".{extension}"):
                 name_without_ext = os.path.splitext(filename)[0]
                 # Keep only '0' and '1'
                 filtered_name = "".join(char for char in name_without_ext if char in "01")
-                if filtered_name:
+                if filtered_name:                    
                     results.append(filtered_name)
-                    size = os.path.getsize(filename)
+                    size = os.path.getsize(os.path.join(script_dir, filename))
                     level = int(len(filtered_name) / 3)
                     max_level = max(max_level, level)
                     levels[level].append(size)
@@ -46,8 +45,8 @@ def main():
 
         # 2. Open and parse Octree.json
         if not os.path.exists(json_path):
-            print(f"Error: {json_path} not found.", file=sys.stderr)
-            return
+            with open(json_path, 'w') as f:
+                json.dump({"bbox": {"min": [0,0,0], "max": [0,0,0]}}, f)
 
         with open(json_path, 'r') as f:
             data = json.load(f)
@@ -85,4 +84,5 @@ def main():
         print(f"An error occurred: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
-    main()
+    # main("01", "glb")    
+    main("02", "bin")

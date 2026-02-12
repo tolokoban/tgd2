@@ -75,6 +75,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/lod": ["/articles/painter/lod"],
     "/articles/painter/lod/detail": ["/articles/painter/lod/detail"],
     "/articles/painter/lod/neuron": ["/articles/painter/lod/neuron"],
+    "/articles/painter/lod/neuron-test": ["/articles/painter/lod/neuron-test"],
     "/articles/painter/logic": ["/articles/painter/logic"],
     "/articles/painter/node": ["/articles/painter/node"],
     "/articles/painter/points-cloud": ["/articles/painter/points-cloud"],

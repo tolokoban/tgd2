@@ -7,15 +7,17 @@
 import View, { type Assets } from "@/components/demo/Tgd";
 import {
     type ArrayNumber4,
+    TgdBoundingBox,
     tgdCalcMapRange,
     tgdColorMakeHueWheel,
     type TgdContext,
-    type TgdDataGlb,
-    tgdLoadGlb,
+    TgdGeometry,
+    tgdLoadArrayBuffer,
     TgdMaterialDiffuse,
+    TgdMaterialFaceOrientation,
     TgdPainterClear,
     TgdPainterLOD,
-    TgdPainterMeshGltf,
+    TgdPainterMesh,
     TgdPainterState,
     TgdVec3,
     webglPresetCull,
@@ -23,7 +25,7 @@ import {
 } from "@tolokoban/tgd";
 import { OctreeInfo } from "./info";
 
-const MAX_ZOOM = 15;
+const MAX_ZOOM = 12;
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
@@ -38,33 +40,38 @@ function init(context: TgdContext, assets: Assets) {
             }),
     );
     const clear = new TgdPainterClear(context, { color: [0.3, 0.3, 0.3, 1] });
-    const { bbox } = OctreeInfo;
+    const bbox = new TgdBoundingBox(OctreeInfo.bbox.min, OctreeInfo.bbox.max)
+        .makeContainingCube();
+    bbox.debug();
     const vecMin = new TgdVec3(bbox.min);
     const vecMax = new TgdVec3(bbox.max);
     const vecDim = new TgdVec3(vecMax).subtract(vecMin);
     const radius = Math.max(vecDim.x, vecDim.y, vecDim.z);
     const center = new TgdVec3(vecMax).add(vecMin).scale(0.5);
-    context.camera.transfo.position = center;
-    context.camera.transfo.setPosition(0, 0, 0);
-    context.camera.transfo.distance = vecDim.z * 3;
-    context.camera.near = 1;
-    context.camera.far = vecDim.z * 6;
+    const { camera } = context;
+    camera.transfo.position = center;
+    camera.near = 1;
+    camera.far = radius * 1;
+    camera.fitSpaceAtTarget(radius, radius);
     const availableFiles = new Set<string>(OctreeInfo.files.split(","));
     const lod = new TgdPainterLOD(context, {
         bbox,
         async factory(x: number, y: number, z: number, level: number) {
-            const asset: TgdDataGlb | null = await loadGLB(
+            const geometry: TgdGeometry | null = await loadGeometry(
                 x,
                 y,
                 z,
                 level,
                 availableFiles,
             );
-            if (!asset) return null;
+            if (!geometry) return null;
 
-            return new TgdPainterMeshGltf(context, {
-                asset,
-                material: materials[level],
+            return new TgdPainterMesh(context, {
+                geometry,
+                material: new TgdMaterialDiffuse({
+                    color: [Math.random(), Math.random(), Math.random(), 1],
+                    lockLightsToCamera: true,
+                }), // materials[level], // new TgdMaterialFaceOrientation()
             });
         },
         subdivisions: 4,
@@ -75,7 +82,7 @@ function init(context: TgdContext, assets: Assets) {
         new TgdPainterState(context, {
             children: [lod],
             depth: webglPresetDepth.less,
-            cull: webglPresetCull.back,
+            // cull: webglPresetCull.back,
         }),
     );
     context.paint();
@@ -90,7 +97,6 @@ function init(context: TgdContext, assets: Assets) {
         );
         camera.near = Math.max(1, camera.transfo.distance - radius);
         camera.far = camera.transfo.distance + radius;
-        console.log("🐞 [main.demo@126] camera =", camera.near, camera.far); // @FIXME: Remove this line written on 2026-01-20 at 21:43
     };
 }
 // #end
@@ -122,20 +128,31 @@ function toBin(value: number, level: number): string {
     return value.toString(2).padStart(level, "0");
 }
 
-async function loadGLB(
+async function loadGeometry(
     x: number,
     y: number,
     z: number,
     level: number,
     availableFiles: Set<string>,
-): Promise<TgdDataGlb | null> {
+): Promise<TgdGeometry | null> {
     const id = `${toBin(x, level)}${toBin(y, level)}${toBin(z, level)}`;
     if (!availableFiles.has(id)) return null;
 
     const url = level === 0
-        ? "./assets/neuron/01/Octree.glb"
-        : `./assets/neuron/01/Octree${id}.glb`;
+        ? "./assets/neuron/02/0.bin"
+        : `./assets/neuron/02/${id}.bin`;
     console.log("Loading LOD block:", url);
-    const asset = await tgdLoadGlb(url);
-    return asset;
+    const buffer = await tgdLoadArrayBuffer(url);
+    if (!buffer) throw new Error(`Unable to load ${url}!`);
+
+    const data = new Float32Array(buffer.slice(4));
+    const geometry = TgdGeometry.make({
+        attPosition: {
+            data,
+            name: "POSITION",
+        },
+        drawMode: "TRIANGLES",
+        computeNormalsIfMissing: true,
+    });
+    return geometry;
 }
