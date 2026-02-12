@@ -255,21 +255,23 @@ export class TgdControllerCameraOrbit {
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
-        this.resetZoom(zoom)
+        this._zoom = zoom
+        context.camera.zoom = zoom
     }
 
     get context() {
         return this._context as TgdContext
     }
-    set context(value: TgdContext) {
+    set context(context: TgdContext) {
         if (this._context) {
             this._context.inputs.keyboard.eventKeyPress.removeListener(
                 this.handleDebug
             )
         }
-        this._context = value
+        this._context = context
+        this._zoom = context.camera.zoom
         if (this.debug) {
-            value.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
+            context.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
         }
     }
 
@@ -281,8 +283,9 @@ export class TgdControllerCameraOrbit {
         if (newZoom === this._zoom) return
 
         this._zoom = newZoom
-        this.context.camera.spaceHeightAtTarget =
-            this.spaceHeightAtTargetForZoom1 / newZoom
+        this.context.camera.zoom = newZoom
+        // this.context.camera.spaceHeightAtTarget =
+        //     this.spaceHeightAtTargetForZoom1 / newZoom
     }
 
     get enabled() {
@@ -290,14 +293,6 @@ export class TgdControllerCameraOrbit {
     }
     set enabled(value: boolean) {
         this._enabled = value
-    }
-
-    resetZoom(zoomForCurrentCameraState = 1) {
-        if (zoomForCurrentCameraState <= 0) return
-
-        this.spaceHeightAtTargetForZoom1 =
-            this.context.camera.spaceHeightAtTarget / zoomForCurrentCameraState
-        this._zoom = zoomForCurrentCameraState
     }
 
     reset(

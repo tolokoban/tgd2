@@ -121,8 +121,9 @@ export class TgdGeometry {
     debug(caption?: string) {
         const label = `[${caption ?? this.name}]`
         this.dataset.debug(`${label} Dataset`)
-        console.log(`${label} Count:`, this.count)
-        console.log(`${label} DrawMode:`, webglLookup(this.drawMode))
+        console.debug(`${label} Count:`, this.count)
+        console.debug(`${label} DrawMode:`, webglLookup(this.drawMode))
+        console.debug(this.computeBoundingBox())
     }
 
     get dataset(): Readonly<TgdDataset> {

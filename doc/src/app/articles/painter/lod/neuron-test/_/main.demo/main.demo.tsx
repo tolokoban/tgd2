@@ -11,16 +11,15 @@ import {
     tgdCalcMapRange,
     tgdColorMakeHueWheel,
     type TgdContext,
+    TgdDataset,
     TgdGeometry,
     tgdLoadArrayBuffer,
     TgdMaterialDiffuse,
-    TgdMaterialFaceOrientation,
     TgdPainterClear,
     TgdPainterLOD,
     TgdPainterMesh,
     TgdPainterState,
     TgdVec3,
-    webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd";
 import { OctreeInfo } from "./info";
@@ -145,14 +144,19 @@ async function loadGeometry(
     const buffer = await tgdLoadArrayBuffer(url);
     if (!buffer) throw new Error(`Unable to load ${url}!`);
 
-    const data = new Float32Array(buffer.slice(4));
-    const geometry = TgdGeometry.make({
-        attPosition: {
-            data,
-            name: "POSITION",
-        },
-        drawMode: "TRIANGLES",
-        computeNormalsIfMissing: true,
+    console.debug(new Float32Array(buffer));
+    const data = buffer.slice(4);
+    const dataset = new TgdDataset({
+        POSITION: "vec3",
+        NORMAL: "vec3",
+    }, {
+        data,
     });
+    const geometry = new TgdGeometry({
+        dataset,
+        attPosition: "POSITION",
+        attNormal: "NORMAL",
+    });
+    geometry.debug();
     return geometry;
 }

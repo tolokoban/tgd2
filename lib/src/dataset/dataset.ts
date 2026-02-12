@@ -12,6 +12,7 @@ export interface TgdDatasetOptions {
     divisor: number
     target: TgdBufferOptionTarget
     usage: TgdBufferOptionUsage
+    data?: ArrayBuffer
     /**
      * When passing a Dataset to a VAO, you can use
      * this prop to tell the VAO to use this buffer
@@ -25,7 +26,7 @@ export type TgdDatasetTypeRecord = Record<string, TgdDatasetType>
 export class TgdDataset {
     private stride = 0
     private definitions: Record<string, AttributeInternalRepresentation> = {}
-    private _data = new ArrayBuffer(0)
+    private _data
     private _count = 0
 
     public readonly buffer: TgdBuffer | undefined
@@ -39,6 +40,7 @@ export class TgdDataset {
         this.buffer = options.buffer
         this.target = options.target ?? "ARRAY_BUFFER"
         this.usage = options.usage ?? "STATIC_DRAW"
+        this._data = options.data ?? new ArrayBuffer(0)
         this.initialize(attributesDefinition, options)
     }
 
@@ -77,7 +79,17 @@ export class TgdDataset {
         }
         this.definitions = definitions
         this.stride = stride
-        this._data = resize(this._data, this.count * this.stride)
+        if (options.data) {
+            if (options.data.byteLength % stride !== 0) {
+                console.error(options)
+                throw new Error(
+                    `[TgdDataset] Invalid size for data: ${options.data.byteLength}, must be a multiple of ${stride} (stride)!`
+                )
+            }
+            this._count = options.data.byteLength / stride
+        } else {
+            this._data = resize(this._data, this.count * this.stride)
+        }
     }
 
     assertAttributes(attributesDefinition: TgdDatasetTypeRecord) {
@@ -527,10 +539,14 @@ interface AttributeInternalRepresentation {
 }
 
 function resizeFast(buff: ArrayBuffer, newSize?: number): ArrayBuffer {
+    if (buff.byteLength === (newSize ?? 0)) return buff
+
     return buff.transfer(newSize)
 }
 
 function resizeSlow(inBuff: ArrayBuffer, newSize?: number): ArrayBuffer {
+    if (inBuff.byteLength === (newSize ?? 0)) return inBuff
+
     const outBuff = new ArrayBuffer(newSize ?? inBuff.byteLength)
     new Uint8Array(outBuff).set(new Uint8Array(inBuff))
     return outBuff
