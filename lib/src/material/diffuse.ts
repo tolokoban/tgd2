@@ -22,17 +22,17 @@ export class TgdMaterialDiffuse extends TgdMaterial {
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 20
     public specularIntensity = 1
+    public readonly texture: TgdTexture2D | null
 
-    private readonly texture: TgdTexture2D | null
     private readonly lightColor = new TgdVec3()
     private readonly ambientColor = new TgdVec3()
 
     constructor(options: TgdMaterialDiffuseOptions = {}) {
-        const color =
+        const colorOrTexture =
             options.color instanceof TgdTexture2D
                 ? options.color
                 : new TgdVec4(options.color ?? DEFAULT_COLOR)
-        const hasTexture = !(color instanceof TgdVec4)
+        const hasTexture = colorOrTexture instanceof TgdTexture2D
         const uniforms: { [name: string]: WebglUniformType } = {
             uniLight: "vec3",
             uniLightDir: "vec3",
@@ -49,7 +49,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
                 : "light *= .5;",
             hasTexture
                 ? `vec4 color = texture(texDiffuse, varUV);`
-                : `vec4 color = vec4(${color.join(", ")});`,
+                : `vec4 color = vec4(${colorOrTexture.join(", ")});`,
             `vec3 reflection = ${options.lockLightsToCamera ? "" : "mat3(uniModelViewMatrix) * "}reflect(uniLightDir, normal);`,
             `float spec = max(0.0, reflection.z);`,
             `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
@@ -102,7 +102,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             },
         })
 
-        this.texture = hasTexture ? color : null
+        this.texture = hasTexture ? colorOrTexture : null
         if (options.light) {
             this.light = options.light
         }

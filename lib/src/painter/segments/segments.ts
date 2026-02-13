@@ -106,7 +106,6 @@ export class TgdPainterSegments extends TgdPainter {
     }
 
     public readonly transfo = new TgdTransfo()
-    public colorTexture: TgdTexture2D
     public minRadius: number = 1
     public radiusMultiplier = 1
     public radiusConstant = 1
@@ -117,8 +116,6 @@ export class TgdPainterSegments extends TgdPainter {
     private readonly prg: TgdProgram
     private readonly vertexCount: number
     private readonly material: TgdMaterial
-
-    // private readonly painter: TgdPainter
 
     constructor(
         protected readonly context: {
@@ -143,17 +140,6 @@ export class TgdPainterSegments extends TgdPainter {
         if (roundness < 0) {
             throw new Error("[TgdPainterSegments] Min roundness is 0!")
         }
-        this.colorTexture = new TgdTexture2D(context)
-            .setParams({
-                magFilter: "NEAREST",
-                minFilter: "NEAREST",
-                wrapR: "CLAMP_TO_EDGE",
-                wrapS: "CLAMP_TO_EDGE",
-                wrapT: "CLAMP_TO_EDGE",
-            })
-            .loadBitmap(
-                tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
-            )
         const vert = new TgdShaderVertex({
             uniforms: {
                 uniTransfoMatrix: "mat4",
