@@ -1,4 +1,4 @@
-import { ArrayNumber3 } from "./types"
+import type { ArrayNumber3 } from "./types"
 
 export class TgdBoundingBox {
     private xMin = Number.POSITIVE_INFINITY
