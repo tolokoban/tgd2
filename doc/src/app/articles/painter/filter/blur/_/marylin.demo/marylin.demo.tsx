@@ -1,5 +1,5 @@
 import {
-    TgdContext,
+    type TgdContext,
     TgdFilterBlur,
     tgdLoadImage,
     TgdPainterFilter,
@@ -7,11 +7,9 @@ import {
     TgdTexture2D,
 } from "@tolokoban/tgd";
 import { ViewSlider, ViewTooltip } from "@tolokoban/ui";
-
-import View, { Assets } from "@/components/demo/Tgd";
-
-import BackgroundURL from "../../../marylin.webp";
 import React from "react";
+import View, { type Assets } from "@/components/demo/Tgd";
+import BackgroundURL from "../../../marylin.webp";
 
 function init(context: TgdContext) {
     // #begin

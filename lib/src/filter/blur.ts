@@ -31,7 +31,7 @@ export class TgdFilterBlur extends TgdFilter {
 			const weight = size - s
 			total += weight
 			lines.push(
-				`s = ${s + 1.4} * dir;`,
+				`s = ${(s + 1.4).toFixed(6)} * dir;`,
 				`f = ${weight.toFixed(1)};`,
 				"color += f * texture(uniTexture, varUV + s);",
 				"color += f * texture(uniTexture, varUV - s);",
@@ -40,7 +40,7 @@ export class TgdFilterBlur extends TgdFilter {
 		if (size & 1) {
 			// Size is odd (not even).
 			lines.push(
-				`s = ${size} * dir;`,
+				`s = ${size.toFixed(1)} * dir;`,
 				"color += texture(uniTexture, varUV + s);",
 				"color += texture(uniTexture, varUV - s);",
 			)

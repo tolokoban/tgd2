@@ -1,8 +1,8 @@
 import {
-    ArrayNumber2,
-    ArrayNumber4,
+    type ArrayNumber2,
+    type ArrayNumber4,
     tgdCanvasCreatePalette,
-    TgdContext,
+    type TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterialDiffuse,
     TgdPainterClear,
@@ -51,7 +51,7 @@ function init(context: TgdContext) {
     const nodes2: ArrayNumber4[] = [];
     for (let step = -width; step < width; step++) {
         const ang = step * 0.25;
-        const r = radius * Math.cos((step * Math.PI * 0.5) / width) * .5;
+        const r = radius * Math.cos((step * Math.PI * 0.5) / width) * 0.5;
         const x = r * Math.cos(ang);
         const y = step * 0.3;
         const z = r * Math.sin(ang);
@@ -79,7 +79,8 @@ function init(context: TgdContext) {
     const segments2 = new TgdPainterSegmentsMorphing(context, {
         datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
         roundness: 32,
-        minRadius: 4,
+        minRadius: 1,
+        radiusMultiplier: 1.2,
         material: new TgdMaterialDiffuse({
             color: palette,
             lockLightsToCamera: true,

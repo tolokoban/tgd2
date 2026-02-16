@@ -1,0 +1,126 @@
+import {
+    type ArrayNumber4,
+    tgdCalcMapRange,
+    tgdCalcModulo,
+    type TgdContext,
+    TgdFilterBlur,
+    TgdFilterHueRotation,
+    TgdFilterVerbatim,
+    TgdLight,
+    TgdMaterialDiffuse,
+    TgdPainterBackground,
+    TgdPainterClear,
+    TgdPainterFilter,
+    TgdPainterFramebuffer,
+    TgdPainterFramebufferWithAntiAliasing,
+    TgdPainterGroup,
+    TgdPainterLogic,
+    TgdPainterMeshGltf,
+    TgdPainterMix,
+    TgdPainterState,
+    TgdTexture2D,
+    webglPresetBlend,
+    webglPresetDepth,
+} from "@tolokoban/tgd";
+import SuzaneURL from "@/assets/mesh/suzanne.glb";
+import View, { type Assets } from "@/components/demo/Tgd";
+
+function init(context: TgdContext, assets: Assets) {
+    // #begin
+    const { camera } = context;
+    camera.fitSpaceAtTarget(3, 3);
+    const color: ArrayNumber4 = [0.9, 0.3, 0.7, 1];
+    const material = new TgdMaterialDiffuse({
+        color,
+        ambient: new TgdLight({
+            color: [0.8, 0.8, 0.8, 0],
+        }),
+        lockLightsToCamera: true,
+    });
+    const mesh = new TgdPainterMeshGltf(context, {
+        asset: assets.glb.suzane,
+        material,
+    });
+    const main = new TgdPainterGroup([
+        new TgdPainterClear(context, {
+            color: [0, 0, 0, 1],
+            depth: 1,
+        }),
+        new TgdPainterState(context, {
+            depth: webglPresetDepth.less,
+            blend: webglPresetBlend.off,
+            children: [mesh],
+        }),
+    ]);
+    const framebuffer1 = new TgdPainterFramebufferWithAntiAliasing(context, {
+        children: [main],
+        depthBuffer: true,
+        textureColor0: new TgdTexture2D(context, {
+            params: {
+                minFilter: "LINEAR",
+                magFilter: "LINEAR",
+                wrapR: "CLAMP_TO_EDGE",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+            },
+        }),
+    });
+    const size = 32;
+    const strength = 1;
+    const filters = new TgdPainterFilter(context, {
+        texture: framebuffer1.textureColor0,
+        filters: [
+            new TgdFilterBlur({ direction: 0, size, strength }),
+            new TgdFilterBlur({ direction: 90, size, strength }),
+            new TgdFilterHueRotation({ hueShiftInDegrees: 90 }),
+        ],
+        flipY: true,
+    });
+    const framebuffer2 = new TgdPainterFramebuffer(context, {
+        children: [filters],
+        depthBuffer: false,
+        textureColor0: new TgdTexture2D(context, {
+            params: {
+                minFilter: "LINEAR",
+                magFilter: "LINEAR",
+                wrapR: "CLAMP_TO_EDGE",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+            },
+        }),
+        viewportMatchingScale: 0.25,
+    });
+    const mixer = new TgdPainterMix(context, {
+        texture1: framebuffer1.textureColor0,
+        texture2: framebuffer2.textureColor0,
+        strength: 0,
+    });
+    context.add(
+        framebuffer1,
+        framebuffer2,
+        mixer,
+        new TgdPainterLogic((time) => {
+            const t = tgdCalcModulo(time, 0, 2);
+            const d = Math.abs(t - 1);
+            mixer.strength = tgdCalcMapRange(d, 0.3, 0, 0, 2, true) ** 2;
+        }),
+    );
+    context.play();
+    // #end
+}
+
+export default function Demo() {
+    return (
+        <View
+            onReady={init}
+            assets={{
+                glb: {
+                    suzane: SuzaneURL,
+                },
+            }}
+            controller={{
+                inertiaOrbit: 1000,
+            }}
+        />
+    );
+}
