@@ -14,6 +14,7 @@ import {
     TgdBufferOptionTarget,
     TgdBufferOptionUsage,
 } from "@tgd/buffer"
+import { WebglParams } from "@tgd/context/webgl-params"
 
 type DatasetOption = TgdDataset | (() => TgdDataset)
 
@@ -84,6 +85,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
     constructor(
         protected readonly context: {
             gl: WebGL2RenderingContext
+            webglParams: WebglParams
             camera: TgdCamera
         },
         options: TgdPainterSegmentsMorphingOptions
@@ -270,7 +272,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
         prg.uniformMatrix4fv("uniTransfoMatrix", this.transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        material.applyState(gl, () => {
+        material.applyState(this.context, () => {
             vao.bind()
             gl.drawElementsInstanced(
                 gl.TRIANGLES,

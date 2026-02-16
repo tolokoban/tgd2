@@ -1,3 +1,4 @@
+import { WebglParams } from "@tgd/context/webgl-params"
 import { debug, highlightEnum } from "@tgd/debug/debug"
 import { WebglEnumBlendEquation, WebglEnumBlendFunction } from "@tgd/types"
 
@@ -53,13 +54,13 @@ export const webglPresetBlend: Readonly<
 }
 
 export function webglBlendSet(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     blend: WebglBlendOptions
 ) {
-    if (blend.enabled) gl.enable(gl.BLEND)
-    else gl.disable(gl.BLEND)
-    gl.blendEquationSeparate(blend.equationColor, blend.equationAlpha)
-    gl.blendFuncSeparate(
+    const p = context.webglParams
+    p.blend = blend.enabled
+    p.setBlendEquationSeparate(blend.equationColor, blend.equationAlpha)
+    p.setBlendFuncSeparate(
         blend.functionColorSrc,
         blend.functionColorDst,
         blend.functionAlphaSrc,
@@ -67,38 +68,41 @@ export function webglBlendSet(
     )
 }
 
-export function webglBlendGet(gl: WebGL2RenderingContext): WebglBlendOptions {
+export function webglBlendGet(context: {
+    webglParams: WebglParams
+}): WebglBlendOptions {
+    const p = context.webglParams
     return {
-        enabled: Boolean(gl.getParameter(gl.BLEND)),
-        equationAlpha: gl.getParameter(gl.BLEND_EQUATION_ALPHA) as number,
-        equationColor: gl.getParameter(gl.BLEND_EQUATION_RGB) as number,
-        functionAlphaDst: gl.getParameter(gl.BLEND_DST_ALPHA) as number,
-        functionAlphaSrc: gl.getParameter(gl.BLEND_SRC_ALPHA) as number,
-        functionColorDst: gl.getParameter(gl.BLEND_DST_RGB) as number,
-        functionColorSrc: gl.getParameter(gl.BLEND_SRC_ALPHA) as number,
+        enabled: p.blend,
+        equationAlpha: p.blendEquationAlpha,
+        equationColor: p.blendEquationRGB,
+        functionAlphaDst: p.blendDstAlpha,
+        functionAlphaSrc: p.blendSrcAlpha,
+        functionColorDst: p.blendDstRGB,
+        functionColorSrc: p.blendSrcRGB,
     }
 }
 
 export function webglBlendExec(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     blend: WebglBlendOptions,
     action: () => void
 ) {
-    const currentState = webglBlendGet(gl)
-    webglBlendSet(gl, blend)
+    const currentState = webglBlendGet(context)
+    webglBlendSet(context, blend)
     try {
         action()
     } finally {
-        webglBlendSet(gl, currentState)
+        webglBlendSet(context, currentState)
     }
 }
 
 export function webglDebugBlend(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     caption = "Blend enabled:"
 ) {
     console.log(caption)
-    const blend = webglBlendGet(gl)
+    const blend = webglBlendGet(context)
     debug([
         [caption, blend.enabled, "\n"],
         [

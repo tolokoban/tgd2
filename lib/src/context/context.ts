@@ -6,6 +6,7 @@ import { TgdManagerAnimation } from "./animation/animation-manager"
 import { TgdAnimation } from "../types/animation"
 import { TgdEvent } from "../event"
 import { TgdConsole } from "@tgd/debug"
+import { WebglParams } from "./webgl-params"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -85,6 +86,7 @@ export class TgdContext extends TgdPainterGroup {
 
     public readonly name: string
     public readonly inputs: TgdInputs
+    public readonly webglParams: WebglParams
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
     public readonly eventPaint = new TgdEvent<TgdContext>()
@@ -237,6 +239,7 @@ export class TgdContext extends TgdPainterGroup {
         if (options.camera) this._camera = options.camera
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
         this.stateReset()
+        this.webglParams = new WebglParams(gl)
     }
 
     get gl(): WebGL2RenderingContext {

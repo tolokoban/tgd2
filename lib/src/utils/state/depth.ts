@@ -1,3 +1,4 @@
+import { WebglParams } from "@tgd/context/webgl-params"
 import { debug, highlightEnum } from "@tgd/debug/debug"
 import { WebglEnumDepthFunction } from "@tgd/types/webgl"
 
@@ -73,47 +74,50 @@ export const webglPresetDepth: Readonly<
 }
 
 export function webglDepthSet(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     depth: WebglDepthOptions
 ) {
-    if (depth.enabled) gl.enable(gl.DEPTH_TEST)
-    else gl.disable(gl.DEPTH_TEST)
-    gl.depthFunc(depth.func)
-    gl.depthMask(depth.mask)
-    gl.depthRange(depth.rangeMin, depth.rangeMax)
+    const p = context.webglParams
+    p.depthTest = depth.enabled
+    p.depthFunc = depth.func
+    p.depthWriteMask = depth.mask
+    p.depthRange = [depth.rangeMin, depth.rangeMax]
 }
 
-export function webglDepthGet(gl: WebGL2RenderingContext): WebglDepthOptions {
-    const [rangeMin, rangeMax] = gl.getParameter(gl.DEPTH_RANGE) as Float32Array
+export function webglDepthGet(context: {
+    webglParams: WebglParams
+}): WebglDepthOptions {
+    const p = context.webglParams
+    const [rangeMin, rangeMax] = p.depthRange
     return {
-        enabled: Boolean(gl.getParameter(gl.DEPTH_TEST)),
-        func: Number(gl.getParameter(gl.DEPTH_FUNC)),
-        mask: Boolean(gl.getParameter(gl.DEPTH_WRITEMASK)),
+        enabled: p.depthTest,
+        func: p.depthFunc,
+        mask: p.depthWriteMask,
         rangeMin,
         rangeMax,
     }
 }
 
 export function webglDepthExec(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     depth: WebglDepthOptions,
     action: () => void
 ) {
-    const currentState = webglDepthGet(gl)
-    webglDepthSet(gl, depth)
+    const currentState = webglDepthGet(context)
+    webglDepthSet(context, depth)
     try {
         action()
     } finally {
-        webglDepthSet(gl, currentState)
+        webglDepthSet(context, currentState)
     }
 }
 
 export function webglDebugDepth(
-    gl: WebGL2RenderingContext,
+    context: { webglParams: WebglParams },
     caption = "Depth enabled:"
 ) {
     console.log(caption)
-    const depth = webglDepthGet(gl)
+    const depth = webglDepthGet(context)
     debug([
         [caption, depth.enabled, "\n"],
         [

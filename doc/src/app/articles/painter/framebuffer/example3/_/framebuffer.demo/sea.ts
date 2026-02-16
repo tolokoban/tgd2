@@ -45,17 +45,14 @@ export class PainterSea extends TgdPainter {
 
     paint(time: number, delay: number): void {
         const { context, sea } = this
-        TgdPainterState.do(
-            {
-                gl: context.gl,
-                depth: webglPresetDepth.less,
-            },
-            () => {
+        TgdPainterState.do(context, {
+            depth: webglPresetDepth.less,
+            action: () => {
                 sea.transfo
                     .orbitAroundZ(delay * 0.8521)
                     .orbitAroundX(delay * 0.3764)
                 sea.paint(time, delay)
-            }
-        )
+            },
+        })
     }
 }

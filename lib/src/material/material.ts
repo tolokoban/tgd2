@@ -7,6 +7,7 @@ import {
     type WebglAttributeType,
     type WebglUniformType,
 } from ".."
+import { WebglParams } from "@tgd/context/webgl-params"
 
 export interface TgdMaterialContext {
     camera: TgdCamera
@@ -170,14 +171,14 @@ export class TgdMaterial {
 
     protected readonly state: Partial<TgdPainterStateOptions>
 
-    public applyState(gl: WebGL2RenderingContext, action: () => void) {
-        TgdPainterState.do(
-            {
-                gl,
-                ...this.state,
-            },
-            action
-        )
+    public applyState(
+        context: { gl: WebGL2RenderingContext; webglParams: WebglParams },
+        action: () => void
+    ) {
+        TgdPainterState.do(context, {
+            ...this.state,
+            action,
+        })
     }
 
     public readonly delete: () => void

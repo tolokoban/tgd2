@@ -1,3 +1,4 @@
+import { WebglParams } from "./../../../context/webgl-params"
 import type { TgdCamera } from "@tgd/camera"
 import { TgdLogic } from "@tgd/context"
 import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
@@ -42,6 +43,7 @@ export class TgdPainterMesh
     constructor(
         protected readonly context: {
             gl: WebGL2RenderingContext
+            webglParams: WebglParams
             camera: TgdCamera
             paint?: () => void
         },
@@ -183,7 +185,7 @@ export class TgdPainterMesh
         program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
-        material.applyState(gl, () => {
+        material.applyState(this.context, () => {
             this.vao.bind()
             if (geometry.elements) {
                 gl.drawElements(drawMode, count, this.elementsType, 0)

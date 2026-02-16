@@ -16,6 +16,7 @@ import {
 } from "@tgd/utils/state"
 import { TgdPainterFunction } from "@tgd/types/painter"
 import { webglLookup } from "@tgd/utils"
+import { WebglParams } from "@tgd/context/webgl-params"
 
 export interface TgdPainterStateOptions {
     children: TgdPainter[]
@@ -37,13 +38,13 @@ export interface TgdPainterStateOptions {
 
 export class TgdPainterState extends TgdPainterGroup {
     public static do(
+        context: { gl: WebGL2RenderingContext; webglParams: WebglParams },
         options: Omit<
             Partial<TgdPainterStateOptions>,
             "children" | "onEnter" | "onExit"
         > & {
-            gl: WebGL2RenderingContext
-        },
-        action: () => void
+            action: () => void
+        }
     ) {
         const self = {
             color: {
@@ -55,24 +56,24 @@ export class TgdPainterState extends TgdPainterGroup {
         }
         const { onEnterActions, onExitActions } = prepareActions(
             self,
-            options.gl,
+            context,
             options
         )
-        for (const action of onEnterActions) action()
-        action()
-        for (const action of onExitActions) action()
+        for (const actionEnter of onEnterActions) actionEnter()
+        options.action()
+        for (const actionExit of onExitActions) actionExit()
     }
 
-    public static debug(gl: WebGL2RenderingContext) {
-        const depth = webglDepthGet(gl)
+    public static debug(context: { webglParams: WebglParams }) {
+        const depth = webglDepthGet(context)
         console.log("Depth:", {
             enabled: depth.enabled,
             func: webglLookup(depth.func),
             mask: depth.mask,
             range: [depth.rangeMin, depth.rangeMax],
         })
-        console.log("Cull:", webglCullGet(gl))
-        console.log("Blend:", webglBlendGet(gl))
+        // console.log("Cull:", webglCullGet(context))
+        // console.log("Blend:", webglBlendGet(context))
     }
 
     readonly color = {
@@ -83,14 +84,13 @@ export class TgdPainterState extends TgdPainterGroup {
     }
 
     constructor(
-        context: { gl: WebGL2RenderingContext },
+        context: { gl: WebGL2RenderingContext; webglParams: WebglParams },
         options: Partial<TgdPainterStateOptions> = {}
     ) {
         super(options.children)
-        const { gl } = context
         const { onEnterActions, onExitActions } = prepareActions(
             this,
-            gl,
+            context,
             options
         )
         this.onEnter = (time, delay) => {
@@ -117,9 +117,10 @@ function prepareActions(
     self: {
         color: { red: boolean; green: boolean; blue: boolean; alpha: boolean }
     },
-    gl: WebGL2RenderingContext,
+    context: { gl: WebGL2RenderingContext; webglParams: WebglParams },
     options: Partial<TgdPainterStateOptions>
 ) {
+    const { gl } = context
     const { color, blend, depth, cull, stencil } = options
     const onEnterActions: Array<() => void> = []
     const onExitActions: Array<() => void> = []
@@ -140,7 +141,7 @@ function prepareActions(
                 boolean,
                 boolean,
                 boolean,
-                boolean
+                boolean,
             ]
             gl.colorMask(
                 self.color.red,
@@ -156,21 +157,21 @@ function prepareActions(
     if (blend) {
         let savedBlend: WebglBlendOptions
         onEnterActions.push(() => {
-            savedBlend = webglBlendGet(gl)
-            webglBlendSet(gl, blend)
+            savedBlend = webglBlendGet(context)
+            webglBlendSet(context, blend)
         })
         onExitActions.push(() => {
-            if (savedBlend) webglBlendSet(gl, savedBlend)
+            if (savedBlend) webglBlendSet(context, savedBlend)
         })
     }
     if (depth) {
         let savedDepth: WebglDepthOptions
         onEnterActions.push(() => {
-            savedDepth = webglDepthGet(gl)
-            webglDepthSet(gl, depth)
+            savedDepth = webglDepthGet(context)
+            webglDepthSet(context, depth)
         })
         onExitActions.push(() => {
-            if (savedDepth) webglDepthSet(gl, savedDepth)
+            if (savedDepth) webglDepthSet(context, savedDepth)
         })
     }
     if (cull) {

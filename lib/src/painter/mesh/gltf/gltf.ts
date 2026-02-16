@@ -10,6 +10,7 @@ import { TgdTexture2D } from "@tgd/texture"
 import { TgdCamera } from "@tgd/camera"
 import { TgdFormatGltfMaterial } from "@tgd/types"
 import { TgdMaterialCameraLight } from "@tgd/material/camera-light"
+import { WebglParams } from "@tgd/context/webgl-params"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdDataGlb
@@ -30,6 +31,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
     constructor(
         context: {
             gl: WebGL2RenderingContext
+            webglParams: WebglParams
             camera: TgdCamera
             paint?: () => void
         },

@@ -9,6 +9,7 @@ import { TgdPainterClear } from "../clear"
 import { TgdPainterBackground } from "./background"
 import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
 import { TgdCamera } from "@tgd/camera"
+import { WebglParams } from "@tgd/context/webgl-params"
 // import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
@@ -30,6 +31,7 @@ export class TgdPainterXRay extends TgdPainter {
     constructor(
         private readonly context: {
             gl: WebGL2RenderingContext
+            webglParams: WebglParams
             width: Readonly<number>
             height: Readonly<number>
             camera: TgdCamera
@@ -84,16 +86,13 @@ export class TgdPainterXRay extends TgdPainter {
         material.exponent = this.exponent
         material.intensity = this.intensity
         painterFB.paint(time, delay)
-        TgdPainterState.do(
-            {
-                gl: context.gl,
-                blend: webglPresetBlend.add,
-                depth: webglPresetDepth.off,
-                cull: webglPresetCull.off,
-            },
-            () => {
+        TgdPainterState.do(context, {
+            blend: webglPresetBlend.add,
+            depth: webglPresetDepth.off,
+            cull: webglPresetCull.off,
+            action: () => {
                 painterBackground.paint()
-            }
-        )
+            },
+        })
     }
 }

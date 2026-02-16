@@ -9,6 +9,7 @@ import VERT from "./background.vert"
 import FRAG from "./background.frag"
 import { TgdPainterState } from "../state"
 import { webglPresetCull, webglPresetDepth } from "@tgd/utils"
+import { WebglParams } from "@tgd/context/webgl-params"
 
 export interface TgdPainterBackgroundOptions {
     texture: TgdTexture2D
@@ -53,7 +54,10 @@ export class TgdPainterBackground extends TgdPainter {
     public mode: "cover" | "contain" = "cover"
 
     constructor(
-        private readonly context: { gl: WebGL2RenderingContext },
+        private readonly context: {
+            gl: WebGL2RenderingContext
+            webglParams: WebglParams
+        },
         {
             texture,
             x = 0,
@@ -117,18 +121,15 @@ export class TgdPainterBackground extends TgdPainter {
         program.uniform1f("uniZoom", 1 / zoom)
         program.uniform1f("uniZ", z)
         texture?.activate(0, program, "uniTexture")
-        TgdPainterState.do(
-            {
-                gl,
-                cull: webglPresetCull.off,
-                depth: webglPresetDepth.off,
-            },
-            () => {
+        TgdPainterState.do(this.context, {
+            cull: webglPresetCull.off,
+            depth: webglPresetDepth.off,
+            action: () => {
                 vao.bind()
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
                 vao.unbind()
-            }
-        )
+            },
+        })
         gl.disable(gl.CULL_FACE)
     }
 
