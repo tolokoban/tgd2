@@ -1,9 +1,5 @@
 import {
-    tgdCalcRandom,
-    TgdContext,
-    TgdFilterBlur,
-    TgdFilterChromaticAberration,
-    TgdFilterHueRotation,
+    type TgdContext,
     tgdLoadImage,
     TgdPainterBackground,
     TgdTexture2D,
@@ -18,11 +14,6 @@ function init(ctx: TgdContext, mode: "cover" | "contain") {
     tgdLoadImage(BackgroundURL).then((bmp) => {
         if (bmp) {
             texture.loadBitmap(bmp);
-            texture.applyFilter(
-                new TgdFilterHueRotation({
-                    hueShiftInDegrees: tgdCalcRandom(360),
-                }),
-            );
             ctx.paint();
         }
     });

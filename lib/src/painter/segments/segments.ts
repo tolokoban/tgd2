@@ -283,7 +283,7 @@ export class TgdPainterSegments extends TgdPainter {
 		const { gl, camera } = context
 		gl.disable(gl.DITHER)
 		prg.use()
-		this.material.setUniforms?.({ program: prg, camera, time, delay })
+		this.material.setUniforms?.({ program: prg, context, time, delay })
 		prg.uniform1f("uniMinRadius", (this.minRadius * 2) / gl.drawingBufferHeight)
 		prg.uniform1f("uniRadiusMultiplier", this.radiusMultiplier)
 		prg.uniformMatrix4fv("uniTransfoMatrix", this.transfo.matrix)

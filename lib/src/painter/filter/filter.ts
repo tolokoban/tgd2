@@ -1,5 +1,6 @@
+import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset } from "@tgd/dataset/dataset"
-import type { TgdFilter } from "@tgd/filter"
+import { type TgdFilter, TgdFilterVerbatim } from "@tgd/filter"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
@@ -28,23 +29,22 @@ export class TgdPainterFilter extends TgdPainter {
 	private readonly framebuffers: [TgdPainterFramebuffer, TgdPainterFramebuffer]
 	private readonly textures: [TgdTexture2D, TgdTexture2D]
 	private inputTexture: TgdTexture2D | undefined = undefined
-	private texturesWith = -1
-	private texturesHeight = -1
 	private filterIndex = 0
 
 	constructor(
-		private readonly context: { gl: WebGL2RenderingContext },
+		private readonly context: {
+			gl: WebGL2RenderingContext
+			webglParams: WebglParams
+		},
 		options: TgdPainterFilterOptions,
 	) {
 		super()
 		this.z = options.z ?? 0.999999
 		this.texture = options.texture
 		this.flipY = options.flipY ?? false
-		const filters = options.filters ?? []
+		const filters = [...(options.filters ?? [])]
 		if (filters.length === 0) {
-			throw new Error(
-				"[TgdPainterFilter] filters is expected to have at least one element!",
-			)
+			filters.push(new TgdFilterVerbatim())
 		}
 
 		const programs = filters.map((filter) => {
@@ -69,8 +69,8 @@ export class TgdPainterFilter extends TgdPainter {
 			}).code
 			const frag = new TgdShaderFragment({
 				uniforms: {
-					uniWidth: "float",
-					uniHeight: "float",
+					uniSize: "vec2",
+					uniPixel: "vec2",
 					uniTexture: "sampler2D",
 					...filter.uniforms,
 				},
@@ -163,9 +163,12 @@ export class TgdPainterFilter extends TgdPainter {
 		const vao = this.vaos[index]
 		const { context } = this
 		const { gl } = context
+		const { width, height } = inputTexture
 		program.use()
 		program.uniform1f("uniZ", this.z)
 		program.uniform1f("uniFlipY", flip)
+		program.uniform2f("uniSize", width, height)
+		program.uniform2f("uniPixel", 1 / width, 1 / height)
 		filter.setUniforms({ context, program, time, delay })
 		inputTexture.activate(0, program, "uniTexture")
 		vao.bind()

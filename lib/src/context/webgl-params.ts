@@ -14,7 +14,17 @@ export class WebglParams {
 	private _depthWriteMask: boolean
 	private _depthRange: ArrayNumber2
 
+	private _viewport: Int32Array
+
+	private _cullFace: boolean
+	private _cullFaceMode: number
+
 	constructor(public readonly gl: WebGL2RenderingContext) {
+		this._viewport = gl.getParameter(gl.VIEWPORT)
+
+		this._cullFace = Boolean(gl.getParameter(gl.CULL_FACE))
+		this._cullFaceMode = Number(gl.getParameter(gl.CULL_FACE_MODE))
+
 		this._blend = Boolean(gl.getParameter(gl.BLEND))
 		this._blendEquationAlpha = Number(gl.getParameter(gl.BLEND_EQUATION_ALPHA))
 		this._blendEquationRGB = Number(gl.getParameter(gl.BLEND_EQUATION_RGB))
@@ -30,6 +40,41 @@ export class WebglParams {
 			gl.DEPTH_RANGE,
 		) as Float32Array
 		this._depthRange = [depthRangeMin, depthRangeMax]
+	}
+
+	get viewport() {
+		return this._viewport
+	}
+	set viewport(viewport: Int32Array) {
+		this._viewport = viewport
+		const [x, y, w, h] = viewport
+		this.gl.viewport(x, y, w, h)
+	}
+
+	get cullFace() {
+		return this._cullFace
+	}
+	set cullFace(enabled: boolean) {
+		this._cullFace = enabled
+		const { gl } = this
+		if (enabled) gl.enable(gl.CULL_FACE)
+		else gl.disable(gl.CULL_FACE)
+	}
+
+	get cullFaceMode() {
+		return this._cullFaceMode
+	}
+	set cullFaceMode(mode: number) {
+		this._cullFaceMode = mode
+		this.gl.cullFace(mode)
+	}
+
+	setViewport(x: number, y: number, width: number, height: number) {
+		this.viewport[0] = x
+		this.viewport[1] = y
+		this.viewport[2] = width
+		this.viewport[3] = height
+		this.gl.viewport(x, y, width, height)
 	}
 
 	get blend() {

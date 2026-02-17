@@ -1,4 +1,5 @@
 import type { WebglParams } from "@tgd/context/webgl-params"
+import type { ArrayNumber4 } from "@tgd/types"
 import type { TgdPainterFunction } from "@tgd/types/painter"
 import { webglLookup } from "@tgd/utils"
 import {
@@ -25,6 +26,7 @@ export interface TgdPainterStateOptions {
 	depth: WebglDepthOptions
 	cull: WebglCullOptions
 	stencil: WebglStencilOptions
+	viewport: ArrayNumber4 | Int32Array
 	name: string
 	/**
 	 * Function to execute before painting.
@@ -121,7 +123,7 @@ function prepareActions(
 	options: Partial<TgdPainterStateOptions>,
 ) {
 	const { gl } = context
-	const { color, blend, depth, cull, stencil } = options
+	const { color, blend, depth, cull, stencil, viewport } = options
 	const onEnterActions: Array<() => void> = []
 	const onExitActions: Array<() => void> = []
 	const colorMask: undefined | [boolean, boolean, boolean, boolean] =
@@ -131,6 +133,7 @@ function prepareActions(
 	self.color.green = green
 	self.color.blue = blue
 	self.color.alpha = alpha
+	const p = context.webglParams
 	if (Array.isArray(colorMask)) {
 		let savedColorMask: [boolean, boolean, boolean, boolean] | null | undefined
 		onEnterActions.push(() => {
@@ -149,6 +152,17 @@ function prepareActions(
 		})
 		onExitActions.push(() => {
 			gl.colorMask(...(savedColorMask ?? [true, true, true, true]))
+		})
+	}
+	if (viewport) {
+		let savedViewport: Int32Array
+		onEnterActions.push(() => {
+			savedViewport = p.viewport
+			const [x, y, w, h] = viewport
+			p.setViewport(x, y, w, h)
+		})
+		onExitActions.push(() => {
+			if (savedViewport) p.viewport = savedViewport
 		})
 	}
 	if (blend) {
@@ -174,11 +188,11 @@ function prepareActions(
 	if (cull) {
 		let savedCull: WebglCullOptions
 		onEnterActions.push(() => {
-			savedCull = webglCullGet(gl)
-			webglCullSet(gl, cull)
+			savedCull = webglCullGet(context)
+			webglCullSet(context, cull)
 		})
 		onExitActions.push(() => {
-			if (savedCull) webglCullSet(gl, savedCull)
+			if (savedCull) webglCullSet(context, savedCull)
 		})
 	}
 	if (stencil) {
