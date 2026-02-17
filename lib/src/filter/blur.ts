@@ -49,11 +49,8 @@ export class TgdFilterBlur extends TgdFilter {
 		total = total + total + size + 1
 		super({
 			fragmentShaderCode: [
-				"vec2 dir = uniStrength * vec2(",
-				[
-					`uniInverseWidth * ${sx.toFixed(9)},`,
-					`uniInverseHeight * ${sy.toFixed(9)}`,
-				],
+				"vec2 dir = uniStrength * uniPixel * vec2(",
+				[`${sx.toFixed(9)},`, `${sy.toFixed(9)}`],
 				");",
 				`vec4 color = ${(size + 1).toFixed(1)} * texture(uniTexture, varUV);`,
 				...lines,
@@ -65,16 +62,6 @@ export class TgdFilterBlur extends TgdFilter {
 				uniInverseHeight: "float",
 			},
 			setUniforms: ({ program }) => {
-				const { gl } = program
-				// eslint-disable-next-line unicorn/no-unreadable-array-destructuring
-				const [, , width, height] = gl.getParameter(gl.VIEWPORT) as [
-					number,
-					number,
-					number,
-					number,
-				]
-				program.uniform1f("uniInverseWidth", 1 / width)
-				program.uniform1f("uniInverseHeight", 1 / height)
 				program.uniform1f("uniStrength", this.strength)
 			},
 		})

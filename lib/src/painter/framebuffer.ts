@@ -5,6 +5,7 @@ import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
 
 export interface TgdPainterFramebufferOptions {
+	name?: string
 	/**
 	 * Do we need a depth buffer?
 	 * Default to `true`.
@@ -69,7 +70,10 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
 		private readonly context: { gl: WebGL2RenderingContext },
 		private readonly options: Partial<TgdPainterFramebufferOptions>,
 	) {
-		super(options.children)
+		super({
+			name: options.name,
+			children: options.children,
+		})
 		this.size = options.size
 		const { textureColor0, textureColor1, textureColor2, textureColor3 } =
 			options

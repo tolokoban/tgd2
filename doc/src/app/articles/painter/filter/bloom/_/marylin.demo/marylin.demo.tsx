@@ -8,6 +8,7 @@ import {
     TgdFilterVerbatim,
     TgdLight,
     TgdMaterialDiffuse,
+    TgdMaterialFlat,
     TgdPainterBackground,
     TgdPainterClear,
     TgdPainterFilter,
@@ -30,30 +31,28 @@ function init(context: TgdContext, assets: Assets) {
     const { camera } = context;
     camera.fitSpaceAtTarget(3, 3);
     const color: ArrayNumber4 = [0.9, 0.3, 0.7, 1];
-    const material = new TgdMaterialDiffuse({
-        color,
-        ambient: new TgdLight({
-            color: [0.8, 0.8, 0.8, 0],
-        }),
-        lockLightsToCamera: true,
-    });
     const mesh = new TgdPainterMeshGltf(context, {
         asset: assets.glb.suzane,
-        material,
+        material: new TgdMaterialDiffuse({
+            color,
+            ambient: new TgdLight({
+                color: [0.8, 0.8, 0.8, 0],
+            }),
+            lockLightsToCamera: true,
+        }),
     });
-    const main = new TgdPainterGroup([
-        new TgdPainterClear(context, {
-            color: [0, 0, 0, 1],
-            depth: 1,
-        }),
-        new TgdPainterState(context, {
-            depth: webglPresetDepth.less,
-            blend: webglPresetBlend.off,
-            children: [mesh],
-        }),
-    ]);
     const framebuffer1 = new TgdPainterFramebufferWithAntiAliasing(context, {
-        children: [main],
+        children: [
+            new TgdPainterClear(context, {
+                color: [0, 0, 0, 1],
+                depth: 1,
+            }),
+            new TgdPainterState(context, {
+                depth: webglPresetDepth.less,
+                blend: webglPresetBlend.off,
+                children: [mesh],
+            }),
+        ],
         depthBuffer: true,
         textureColor0: new TgdTexture2D(context, {
             params: {
@@ -65,18 +64,48 @@ function init(context: TgdContext, assets: Assets) {
             },
         }),
     });
+    const meshFlat = new TgdPainterMeshGltf(context, {
+        asset: assets.glb.suzane,
+        material: new TgdMaterialFlat({
+            color,
+        }),
+    });
+    const framebuffer2 = new TgdPainterFramebufferWithAntiAliasing(context, {
+        children: [
+            new TgdPainterClear(context, {
+                color: [0, 0, 0, 1],
+                depth: 1,
+            }),
+            new TgdPainterState(context, {
+                depth: webglPresetDepth.less,
+                blend: webglPresetBlend.off,
+                children: [meshFlat],
+            }),
+        ],
+        depthBuffer: true,
+        textureColor0: new TgdTexture2D(context, {
+            params: {
+                minFilter: "LINEAR",
+                magFilter: "LINEAR",
+                wrapR: "CLAMP_TO_EDGE",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+            },
+        }),
+    });
+    const hue = new TgdFilterHueRotation();
     const size = 32;
     const strength = 1;
     const filters = new TgdPainterFilter(context, {
-        texture: framebuffer1.textureColor0,
+        texture: framebuffer2.textureColor0,
         filters: [
             new TgdFilterBlur({ direction: 0, size, strength }),
             new TgdFilterBlur({ direction: 90, size, strength }),
-            new TgdFilterHueRotation({ hueShiftInDegrees: 90 }),
+            hue,
         ],
         flipY: true,
     });
-    const framebuffer2 = new TgdPainterFramebuffer(context, {
+    const framebuffer3 = new TgdPainterFramebuffer(context, {
         children: [filters],
         depthBuffer: false,
         textureColor0: new TgdTexture2D(context, {
@@ -92,17 +121,19 @@ function init(context: TgdContext, assets: Assets) {
     });
     const mixer = new TgdPainterMix(context, {
         texture1: framebuffer1.textureColor0,
-        texture2: framebuffer2.textureColor0,
+        texture2: framebuffer3.textureColor0,
         strength: 0,
     });
     context.add(
         framebuffer1,
         framebuffer2,
+        framebuffer3,
         mixer,
         new TgdPainterLogic((time) => {
             const t = tgdCalcModulo(time, 0, 2);
             const d = Math.abs(t - 1);
-            mixer.strength = tgdCalcMapRange(d, 0.3, 0, 0, 2, true) ** 2;
+            mixer.strength = tgdCalcMapRange(d, 0.3, 0, 0, 1, true) ** 2;
+            hue.hueShiftInDegrees = time * 30;
         }),
     );
     context.play();
