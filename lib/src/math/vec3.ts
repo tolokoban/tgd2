@@ -291,6 +291,18 @@ export class TgdVec3 extends Float32Array {
         return this
     }
 
+    fromCross(
+        vec1: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>,
+        vec2: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>
+    ): this {
+        const [x1, y1, z1] = vec1
+        const [x2, y2, z2] = vec2
+        this[0] = y1 * z2 - y2 * z1
+        this[1] = z1 * x2 - z2 * x1
+        this[2] = x1 * y2 - x2 * y1
+        return this
+    }
+
     /**
      * Set random values between -0.5 and +0.5 to each coordinate.
      */
