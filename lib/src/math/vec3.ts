@@ -32,10 +32,15 @@ export class TgdVec3 extends Float32Array {
         return new TgdVec3(x, y, z)
     }
 
-    static distance(from: TgdVec3 | TgdVec4, to: TgdVec3 | TgdVec4): number {
-        const x = to.x - from.x
-        const y = to.y - from.y
-        const z = to.z - from.z
+    static distance(
+        from: TgdVec3 | TgdVec4 | ArrayNumber3,
+        to: TgdVec3 | TgdVec4 | ArrayNumber3
+    ): number {
+        const [x1, y1, z1] = from
+        const [x2, y2, z2] = to
+        const x = x2 - x1
+        const y = y2 - y1
+        const z = z2 - z1
         return Math.sqrt(x * x + y * y + z * z)
     }
 
