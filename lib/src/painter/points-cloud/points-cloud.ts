@@ -214,7 +214,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
         texture.activate(0, program, "uniTexture")
         program.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         program.uniform1f("uniMinSizeInPixels", minSizeInPixels)
-        program.uniform1f("uniHalfScreenHeightInPixels", context.height * 0.5)
+        program.uniform1f("uniScreenHeightInPixels", context.height)
         program.uniform1f("uniSpecularExponent", this.specularExponent)
         program.uniform1f("uniSpecularIntensity", this.specularIntensity)
         program.uniform1f("uniShadowIntensity", this.shadowIntensity)
@@ -242,7 +242,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
             uniforms: {
                 uniMinSizeInPixels: "float",
                 uniRadiusMultiplier: "float",
-                uniHalfScreenHeightInPixels: "float",
+                uniScreenHeightInPixels: "float",
                 uniModelViewMatrix: "mat4",
                 uniProjectionMatrix: "mat4",
             },
@@ -256,11 +256,13 @@ export class TgdPainterPointsCloud extends TgdPainter {
             mainCode: [
                 "varUV = attUV;",
                 "float radius = attPoint.w;",
-                "vec4 point = vec4(attPoint.xyz, 1.0);",
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * point;",
+                "vec4 point = uniModelViewMatrix * vec4(attPoint.xyz, 1.0);",
+                "vec4 shift = point + vec4(0, uniRadiusMultiplier * radius, 0, 0);",
+                "gl_Position = uniProjectionMatrix * point;",
+                "vec4 screenShift = uniProjectionMatrix * shift;",
                 "gl_PointSize = max(",
                 "  uniMinSizeInPixels,",
-                "  uniRadiusMultiplier * radius * uniHalfScreenHeightInPixels / gl_Position.w",
+                "  abs(screenShift.y - gl_Position.y) * uniScreenHeightInPixels / gl_Position.w",
                 ");",
             ],
         }).code
