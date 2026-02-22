@@ -321,6 +321,8 @@ export class TgdPainterSprites<
         switch (key) {
             case "index": {
                 const item = atlas[value as number]
+                if (!item) return false
+                
                 this.attUV.set(item.x, offset, 0)
                 this.attUV.set(item.y, offset, 1)
                 this.attUV.set(item.z ?? 0, offset, 2)
