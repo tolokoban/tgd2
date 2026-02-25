@@ -46,6 +46,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/mesh/material/hull": ["/articles/mesh/material/hull"],
     "/articles/mesh/material/mask": ["/articles/mesh/material/mask"],
     "/articles/mesh/material/normal-map": ["/articles/mesh/material/normal-map"],
+    "/articles/mesh/material/solid": ["/articles/mesh/material/solid"],
     "/articles/mesh/volume-to-mesh": ["/articles/mesh/volume-to-mesh"],
     "/articles/painter": ["/articles/painter"],
     "/articles/painter/background": ["/articles/painter/background"],
