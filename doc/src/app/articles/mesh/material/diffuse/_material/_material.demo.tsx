@@ -108,12 +108,12 @@ function init(context: TgdContext, assets: Assets) {
     return {
         specularExponent(value: number) {
             material1.specularExponent = value
-            // material2.specularExponent = value
+            material2.specularExponent = value
             context.paint()
         },
         specularIntensity(value: number) {
             material1.specularIntensity = value
-            // material2.specularIntensity = value
+            material2.specularIntensity = value
             context.paint()
         },
         split(value: number) {
@@ -130,9 +130,9 @@ function init(context: TgdContext, assets: Assets) {
 function makeRing(context: TgdContext, material: TgdMaterial) {
     const data = new TgdPainterSegmentsData()
     const count = 16
-    const y = 0
+    const y = -0.5
     const r = 0.2
-    const R = 2
+    const R = 1
     for (let i = 0; i < count; i++) {
         const x0 = R * Math.cos((i * Math.PI * 2) / count)
         const z0 = R * Math.sin((i * Math.PI * 2) / count)

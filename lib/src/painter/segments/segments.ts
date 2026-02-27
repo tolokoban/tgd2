@@ -139,7 +139,7 @@ export class TgdPainterSegments extends TgdPainter {
         const material = options.material ?? new TgdMaterialFaceOrientation()
         this.material = material
         material.attPosition = geometry.attPosition
-        material.attNormal = geometry.attNormal
+        material.attNormal = "normal"  // geometry.attNormal
         material.attUV = "((attUV0 + attUV1) * .5)"
         this.minRadius = minRadius
         if (roundness > 127) {
@@ -199,6 +199,7 @@ export class TgdPainterSegments extends TgdPainter {
                 "float radius = max(",
                 ["xyzr.w * uniRadiusMultiplier,", "minRadiusInCameraUnit"],
                 ");",
+                // "varColor = radius <= xyzr.w * uniRadiusMultiplier ? GRN : RED;",
                 // "float radius = xyzr.w;",
                 "vec3 dir = attXYZR1.xyz - attXYZR0.xyz;",
                 "float len = length(dir);",
@@ -215,6 +216,7 @@ export class TgdPainterSegments extends TgdPainter {
                     "mat3 mat = mat3(X, Y, Z);",
                     "pos *= radius;",
                     "pos = mat * pos + center.xyz;",
+                    // "normal = mat3(uniTransfoMatrix) * mat * normal;",
                     "normal = mat * normal;",
                     // "varColor = yUp ? vec3(0, 1, 0) : vec3(1, 0, 0);"
                 ],
@@ -232,11 +234,11 @@ export class TgdPainterSegments extends TgdPainter {
                 ...material.extraFragmentShaderFunctions,
                 applyMaterial: [
                     "vec4 applyMaterial() {",
-                    [
-                        "float light = 1.0 - pow(abs(varNormal.z), 2.0);",
-                        "return vec4(light * varColor, 1);",
-                    ],
-                    // [material.fragmentShaderCode],
+                    // [
+                    //     "float light = 1.0 - pow(abs(varNormal.z), 2.0);",
+                    //     "return vec4(light * varColor, 1);",
+                    // ],
+                    [material.fragmentShaderCode],
                     "}",
                 ],
             },

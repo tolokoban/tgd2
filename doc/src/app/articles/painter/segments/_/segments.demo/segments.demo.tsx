@@ -53,12 +53,13 @@ function init(context: TgdContext) {
     const segments1 = new TgdPainterSegments(context, {
         dataset: data1.makeDataset,
         roundness: 16,
-        minRadius: 64,
+        minRadius: 2,
         material: new TgdMaterialDiffuse({
             color: palette,
             lockLightsToCamera: true,
         }),
     })
+    segments1.debug()
     segments1.transfo.orbitAroundX(Math.random() * 360)
     segments1.transfo.orbitAroundZ(Math.random() * 360)
     const state = new TgdPainterState(context, {
