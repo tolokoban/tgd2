@@ -104,7 +104,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 		const material = options.material ?? new TgdMaterialFaceOrientation()
 		this.material = material
 		material.attPosition = geometry.attPosition
-		material.attNormal = geometry.attNormal
+		material.attNormal = "normal"
 		material.attUV =
 			"((mix(attUV0_A, attUV0_B, uniMix) + mix(attUV1_A, attUV1_B, uniMix)) * .5)"
 		this.minRadius = minRadius
@@ -131,12 +131,13 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 				uniTransfoMatrix: "mat4",
 				uniModelViewMatrix: "mat4",
 				uniProjectionMatrix: "mat4",
-				uniMinRadius: "float",
+                uniPixelPerScreenUnit: "float",
+                uniMinRadiusInPixel: "float",
 				uniRadiusMultiplier: "float",
 				...material.uniforms,
 			},
 			attributes: {
-				[geometry.attPosition]: "vec3",
+				[geometry.attPosition]: "vec4",
 				[geometry.attNormal]: "vec3",
 				attTip: "float",
 				attXYZR0_A: "vec4",
@@ -150,36 +151,36 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 			},
 			varying: {
 				...material.varyings,
-				// varNormal: "vec3",
 			},
 			functions: {
 				...material.extraVertexShaderFunctions,
-				applyMaterial: [
-					"void applyMaterial() {",
-					[material.vertexShaderCode],
-					"}",
-				],
-				getPosition: [
-					"vec4 getPosition(vec4 pos) {",
-					[material.vertexShaderCodeForGetPosition ?? "return pos;"],
-					"}",
-				],
+                getPosition: [
+                    "vec4 getPosition(vec4 pos) {",
+                    [material.vertexShaderCodeForGetPosition ?? "return pos;"],
+                    "}",
+                ],
+                applyMaterial: [
+                    "void applyMaterial(vec3 position, vec3 normal, vec2 uv) {",
+                    [material.vertexShaderCode],
+                    "}",
+                ],
 			},
 			mainCode: [
 				"vec4 attXYZR0 = mix(attXYZR0_A, attXYZR0_B, uniMix);",
 				"vec4 attXYZR1 = mix(attXYZR1_A, attXYZR1_B, uniMix);",
 				"vec2 attUV0 = mix(attUV0_A, attUV0_B, uniMix);",
 				"vec2 attUV1 = mix(attUV1_A, attUV1_B, uniMix);",
-				"vec3 normal = NORMAL;",
-				"vec3 pos = POSITION;",
+                `vec3 normal = ${geometry.attNormal};`,
+                `vec3 pos = getPosition(${geometry.attPosition}).xyz;`,
 				"vec4 xyzr = mix(attXYZR0, attXYZR1, attTip);",
 				"vec3 center = xyzr.xyz;",
-				"float radius = max(",
-				[
-					"xyzr.w * uniRadiusMultiplier,",
-					"uniMinRadius * (uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(center, 1)).w",
-				],
-				");",
+                "vec4 centerInCameraSpace = uniModelViewMatrix * uniTransfoMatrix * vec4(center, 1);",
+                "vec4 centerInScreenSpace = uniProjectionMatrix * centerInCameraSpace;",
+                "float screenUnitPerCameraUnit = (uniProjectionMatrix * vec4(0, 1, centerInCameraSpace.z, 1)).y / centerInScreenSpace.w;",
+                "float minRadiusInCameraUnit = uniMinRadiusInPixel / (uniPixelPerScreenUnit * screenUnitPerCameraUnit);",
+                "float radius = max(",
+                ["xyzr.w * uniRadiusMultiplier,", "minRadiusInCameraUnit"],
+                ");",
 				"vec3 dir = attXYZR1.xyz - attXYZR0.xyz;",
 				"float len = length(dir);",
 				"if (len == 0.0) {",
@@ -187,22 +188,23 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 				"} else {",
 				[
 					"// Full capsule",
-					"vec3 Z = dir / len;",
-					"vec3 v = abs(Z.z) > 0.9 ? vec3(1,0,0) : vec3(0,0,1);",
-					"vec3 Y = cross(v, Z);",
-					"vec3 X = cross(Y, Z);",
-					"mat3 mat = mat3(X, Y, Z);",
-					"pos *= radius;",
-					"pos = mat * pos + center.xyz;",
-					"normal = mat * normal;",
+                    "vec3 Z = dir / len;",
+                    "bool yUp = abs(Z.y) < 0.9;",
+                    "vec3 fakeY = yUp ? vec3(0,1,0) : vec3(0,0,1);",
+                    "vec3 X = cross(fakeY, Z);",
+                    "vec3 Y = cross(Z, X);",
+                    "mat3 mat = mat3(X, Y, Z);",
+                    "pos *= radius;",
+                    "pos = mat * pos + center.xyz;",
+                    "normal = mat * normal;",
 				],
 				"}",
-				"gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(pos, 1);",
-				"applyMaterial();",
-				"varNormal = normal;",
+                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(pos, 1);",
+                `applyMaterial(pos, normal, ${material.attUV}.xy);`,
 			],
 		}).code
 		const frag = new TgdShaderFragment({
+                        header: material.fragmentShaderHeader,
 			uniforms: material.uniforms,
 			outputs: { FragColor: "vec4" },
 			varying: material.varyings,
@@ -268,8 +270,9 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 		prg.use()
 		this.material.setUniforms?.({ program: prg, context, time, delay })
 		prg.uniform1f("uniMix", this.mix)
-		prg.uniform1f("uniRadiusMultiplier", this.radiusMultiplier)
-		prg.uniform1f("uniMinRadius", (this.minRadius * 2) / gl.drawingBufferHeight)
+        prg.uniform1f("uniPixelPerScreenUnit", gl.drawingBufferHeight)
+        prg.uniform1f("uniMinRadiusInPixel", this.minRadius)
+        prg.uniform1f("uniRadiusMultiplier", this.radiusMultiplier)
 		prg.uniformMatrix4fv("uniTransfoMatrix", this.transfo.matrix)
 		prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
 		prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)

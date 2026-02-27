@@ -169,7 +169,6 @@ export class TgdPainterSegments extends TgdPainter {
             },
             varying: {
                 ...material.varyings,
-                varColor: "vec3",
             },
             functions: {
                 ...material.extraVertexShaderFunctions,
@@ -185,9 +184,6 @@ export class TgdPainterSegments extends TgdPainter {
                 ],
             },            
             mainCode: [
-                "vec3 RED = vec3(1, 0, 0);",
-                "vec3 GRN = vec3(0, 1, 0);",
-                "varColor = vec3(.8, .8, .8);",
                 `vec3 normal = ${geometry.attNormal};`,
                 `vec3 pos = getPosition(${geometry.attPosition}).xyz;`,
                 "vec4 xyzr = mix(attXYZR0, attXYZR1, attTip);",
@@ -199,8 +195,6 @@ export class TgdPainterSegments extends TgdPainter {
                 "float radius = max(",
                 ["xyzr.w * uniRadiusMultiplier,", "minRadiusInCameraUnit"],
                 ");",
-                // "varColor = radius <= xyzr.w * uniRadiusMultiplier ? GRN : RED;",
-                // "float radius = xyzr.w;",
                 "vec3 dir = attXYZR1.xyz - attXYZR0.xyz;",
                 "float len = length(dir);",
                 "if (len == 0.0) {",
@@ -216,9 +210,7 @@ export class TgdPainterSegments extends TgdPainter {
                     "mat3 mat = mat3(X, Y, Z);",
                     "pos *= radius;",
                     "pos = mat * pos + center.xyz;",
-                    // "normal = mat3(uniTransfoMatrix) * mat * normal;",
                     "normal = mat * normal;",
-                    // "varColor = yUp ? vec3(0, 1, 0) : vec3(1, 0, 0);"
                 ],
                 "}",
                 "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * vec4(pos, 1);",
@@ -229,15 +221,11 @@ export class TgdPainterSegments extends TgdPainter {
             header: material.fragmentShaderHeader,
             uniforms: material.uniforms,
             outputs: { FragColor: "vec4" },
-            varying: { ...material.varyings, varColor: "vec3" },
+            varying: { ...material.varyings },
             functions: {
                 ...material.extraFragmentShaderFunctions,
                 applyMaterial: [
                     "vec4 applyMaterial() {",
-                    // [
-                    //     "float light = 1.0 - pow(abs(varNormal.z), 2.0);",
-                    //     "return vec4(light * varColor, 1);",
-                    // ],
                     [material.fragmentShaderCode],
                     "}",
                 ],

@@ -142,16 +142,16 @@ function makeRing(context: TgdContext, material: TgdMaterial) {
         const u1 = (i + 1) / count
         data.add([x0, y, z0, r], [x1, y, z1, r], [u0, u0], [u1, u1])
     }
-    return new TgdPainterSegments(context, {
-        roundness: 5,
-        material,
-        dataset: data.makeDataset(),
-    })
-    // return new TgdPainterSegmentsMorphing(context, {
+    // return new TgdPainterSegments(context, {
     //     roundness: 5,
     //     material,
-    //     datasetsPairs: [[data.makeDataset(), data.makeDataset()]],
+    //     dataset: data.makeDataset(),
     // })
+    return new TgdPainterSegmentsMorphing(context, {
+        roundness: 5,
+        material,
+        datasetsPairs: [[data.makeDataset(), data.makeDataset()]],
+    })
 }
 
 export default function Demo() {
