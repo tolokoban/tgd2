@@ -11,6 +11,15 @@ import {
     tgdCalcRandom3,
     webglPresetDepth,
     tgdCalcClamp,
+    TgdPainterLogic,
+    TgdPainterNode,
+    TgdMaterial,
+    TgdPainterSegmentsData,
+    TgdPainterSegments,
+    webglPresetCull,
+    TgdMaterialFaceOrientation,
+    TgdMaterialNormals,
+    TgdPainterSegmentsMorphing,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
@@ -36,6 +45,10 @@ function init(context: TgdContext, assets: Assets) {
         asset: assets.glb.suzane,
         material: material1,
     })
+    const ring1 = makeRing(context, material1)
+    const node1 = new TgdPainterNode({
+        children: [mesh1, ring1],
+    })
     const material2 = new TgdMaterialDiffuse({
         color,
         lockLightsToCamera: true,
@@ -43,20 +56,25 @@ function init(context: TgdContext, assets: Assets) {
             color: [0.8, 0.8, 0.8, 0],
         }),
     })
+    // const material2 = new TgdMaterialNormals()
     const mesh2 = new TgdPainterMeshGltf(context, {
         asset: assets.glb.suzane,
         material: material2,
     })
+    const ring2 = makeRing(context, material2)
+    const node2 = new TgdPainterNode({
+        children: [mesh2, ring2],
+    })
     // #end
     const scissor1 = new TgdPainterScissor(context, {
-        children: [mesh1],
+        children: [node1],
         x: 0,
         y: 0,
         width: 0.5,
         height: 1,
     })
     const scissor2 = new TgdPainterScissor(context, {
-        children: [mesh2],
+        children: [node2],
         x: 0.5,
         y: 0,
         width: 0.5,
@@ -69,19 +87,33 @@ function init(context: TgdContext, assets: Assets) {
         }),
         new TgdPainterState(context, {
             depth: webglPresetDepth.less,
+            cull: webglPresetCull.back,
             children: [scissor1, scissor2],
+        }),
+        new TgdPainterLogic((time, delta) => {
+            const speed = 0.1
+            const angX = delta * 0.49541 * speed
+            const angY = delta * 0.31789 * speed
+            const angZ = delta * 0.57892 * speed
+            node1.transfo.orbitAroundX(angX)
+            node1.transfo.orbitAroundY(angY)
+            node1.transfo.orbitAroundZ(angZ)
+            node2.transfo.orbitAroundX(angX)
+            node2.transfo.orbitAroundY(angY)
+            node2.transfo.orbitAroundZ(angZ)
         })
     )
-    context.paint()
+    ring2.debug()
+    context.play()
     return {
         specularExponent(value: number) {
             material1.specularExponent = value
-            material2.specularExponent = value
+            // material2.specularExponent = value
             context.paint()
         },
         specularIntensity(value: number) {
             material1.specularIntensity = value
-            material2.specularIntensity = value
+            // material2.specularIntensity = value
             context.paint()
         },
         split(value: number) {
@@ -95,6 +127,33 @@ function init(context: TgdContext, assets: Assets) {
     }
 }
 
+function makeRing(context: TgdContext, material: TgdMaterial) {
+    const data = new TgdPainterSegmentsData()
+    const count = 16
+    const y = 0
+    const r = 0.2
+    const R = 2
+    for (let i = 0; i < count; i++) {
+        const x0 = R * Math.cos((i * Math.PI * 2) / count)
+        const z0 = R * Math.sin((i * Math.PI * 2) / count)
+        const x1 = R * Math.cos(((i + 1) * Math.PI * 2) / count)
+        const z1 = R * Math.sin(((i + 1) * Math.PI * 2) / count)
+        const u0 = i / count
+        const u1 = (i + 1) / count
+        data.add([x0, y, z0, r], [x1, y, z1, r], [u0, u0], [u1, u1])
+    }
+    return new TgdPainterSegments(context, {
+        roundness: 5,
+        material,
+        dataset: data.makeDataset(),
+    })
+    // return new TgdPainterSegmentsMorphing(context, {
+    //     roundness: 5,
+    //     material,
+    //     datasetsPairs: [[data.makeDataset(), data.makeDataset()]],
+    // })
+}
+
 export default function Demo() {
     const ref = React.useRef<ReturnType<typeof init> | null>(null)
     const srv = ref.current
@@ -106,7 +165,7 @@ export default function Demo() {
         1,
         srv?.specularIntensity
     )
-    const [split, setSplit] = useFloat(0.5, srv?.split)
+    const [split, setSplit] = useFloat(0.1, srv?.split)
     return (
         <div>
             <View

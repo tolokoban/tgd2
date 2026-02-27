@@ -150,7 +150,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 			},
 			varying: {
 				...material.varyings,
-				varNormal: "vec3",
+				// varNormal: "vec3",
 			},
 			functions: {
 				...material.extraVertexShaderFunctions,
@@ -188,7 +188,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
 				[
 					"// Full capsule",
 					"vec3 Z = dir / len;",
-					"vec3 v = abs(Z.z) > 0.7 ? vec3(1,0,0) : vec3(0,0,1);",
+					"vec3 v = abs(Z.z) > 0.9 ? vec3(1,0,0) : vec3(0,0,1);",
 					"vec3 Y = cross(v, Z);",
 					"vec3 X = cross(Y, Z);",
 					"mat3 mat = mat3(X, Y, Z);",

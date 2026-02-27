@@ -47,26 +47,49 @@ function init(context: TgdContext) {
         const uv1: ArrayNumber2 = [(i + 0.5) / (nodes1.length + 1), 0]
         data1.add(nodes1[i - 1], nodes1[i], uv0, uv1)
     }
+    const data2 = new TgdPainterSegmentsData()
+    const nodes2: ArrayNumber4[] = []
+    for (let step = -width; step < width; step++) {
+        const ang = step * 0.25
+        const r = radius * Math.cos((step * Math.PI * 0.5) / width) * 0.5
+        const x = r * Math.cos(ang)
+        const y = step * 0.3
+        const z = r * Math.sin(ang)
+        const thickness = Math.max(0, 1.0 - Math.abs(step) / (width - 1))
+        nodes2.push([x, y, z, thickness])
+    }
+    for (let i = 1; i < nodes2.length; i++) {
+        const uv0: ArrayNumber2 = [(i - 0.5) / (nodes2.length + 1), 0]
+        const uv1: ArrayNumber2 = [(i + 0.5) / (nodes2.length + 1), 0]
+        data2.add(nodes2[i - 1], nodes2[i], uv0, uv1)
+    }
     const palette = new TgdTexture2D(context).loadBitmap(
         tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
     )
-    const segments1 = new TgdPainterSegments(context, {
-        dataset: data1.makeDataset,
-        roundness: 16,
-        minRadius: 64,
+    const segments2 = new TgdPainterSegmentsMorphing(context, {
+        datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
+        roundness: 32,
+        minRadius: 1,
+        radiusMultiplier: 1.2,
         material: new TgdMaterialDiffuse({
             color: palette,
             lockLightsToCamera: true,
         }),
     })
-    segments1.transfo.orbitAroundX(Math.random() * 360)
-    segments1.transfo.orbitAroundZ(Math.random() * 360)
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
-        children: [segments1],
+        children: [segments2],
     })
-    context.add(clear, state)
-    context.paint()
+    context.add(
+        clear,
+        state,
+        new TgdPainterLogic((time, delta) => {
+            segments2.mix = Math.abs(Math.sin(time))
+            segments2.transfo.orbitAroundX(delta * 0.315481)
+            segments2.transfo.orbitAroundZ(delta * 0.2)
+        })
+    )
+    context.play()
     // #end
     context.inputs.pointer.eventHover.addListener((event) => {
         const { x, y } = event.current
