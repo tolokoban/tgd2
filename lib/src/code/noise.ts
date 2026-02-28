@@ -1,3 +1,4 @@
+import { tseslint } from "typescript-eslint"
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader"
 import { isNumber } from "@tgd/types/guards"
 import {
@@ -52,6 +53,13 @@ export function tgdCodeFunction_fbm(
     return functions
 }
 
+/**
+ * ```ts
+ * float perlinNoise( in vec2 p );
+ * float perlinNoise( in vec3 p );
+ * float perlinNoise( in vec4 p );
+ * ```
+ */
 export function tgdCodeFunction_perlinNoise(
     options: Partial<{
         name: string
