@@ -33,6 +33,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/math/fractal/pascal-triangle": ["/articles/math/fractal/pascal-triangle"],
     "/articles/mesh": ["/articles/mesh"],
     "/articles/mesh/geometry": ["/articles/mesh/geometry"],
+    "/articles/mesh/geometry/box": ["/articles/mesh/geometry/box"],
     "/articles/mesh/geometry/sphere-ico": ["/articles/mesh/geometry/sphere-ico"],
     "/articles/mesh/marching-cubes": ["/articles/mesh/marching-cubes"],
     "/articles/mesh/material": ["/articles/mesh/material"],

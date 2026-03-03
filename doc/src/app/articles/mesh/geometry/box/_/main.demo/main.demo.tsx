@@ -1,8 +1,7 @@
 import {
 	type TgdContext,
 	TgdControllerCameraOrbit,
-	TgdGeometrySphereIco,
-	TgdMaterialDiffuse,
+	TgdGeometryBox,
 	TgdMaterialFaceOrientation,
 	TgdPainterClear,
 	TgdPainterMesh,
@@ -16,27 +15,20 @@ import View from "@/components/demo/Tgd"
 function init(context: TgdContext) {
 	const clear = new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1] })
 	const material = new TgdMaterialFaceOrientation()
-	const meshes = [0, 1, 2, 3].map(
-		(subdivisions) =>
-			new TgdPainterMesh(context, {
-				geometry: new TgdGeometrySphereIco({
-					center: [
-						(subdivisions % 2) - 0.5,
-						Math.floor(subdivisions / 2) - 0.5,
-						0,
-					],
-					subdivisions,
-					radius: 0.5,
-				}),
-				material,
-			}),
-	)
+	const mesh = new TgdPainterMesh(context, {
+		geometry: new TgdGeometryBox({
+			center: [-0.5, 0, 0],
+			sizeX: 3,
+			sizeY: 2,
+			sizeZ: 1,
+		}),
+		material,
+	})
 	context.add(
 		clear,
 		new TgdPainterState(context, {
-			children: meshes,
-			depth: "less",
-			cull: "back",
+			children: [mesh],
+			depth: webglPresetDepth.less,
 		}),
 	)
 	context.paint()

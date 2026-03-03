@@ -1,4 +1,4 @@
-import * as React from "react"
+import type { TgdDataGlb } from "@tolokoban/tgd"
 
 import {
     IconImport,
@@ -7,12 +7,11 @@ import {
     ViewPanel,
     ViewStrip,
 } from "@tolokoban/ui"
-import { TgdDataGlb } from "@tolokoban/tgd"
-
+import * as React from "react"
+import { ViewAction } from "./Action"
 import { ViewGltfTree } from "./GltfTree"
 import { useData } from "./hooks"
-import { Action } from "./types"
-import { ViewAction } from "./Action"
+import type { Action } from "./types"
 
 import Styles from "./ViewGltf.module.css"
 

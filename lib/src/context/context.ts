@@ -83,13 +83,19 @@ export class TgdContext extends TgdPainterGroup {
 	public static get devicePixelRatio() {
 		return globalThis.devicePixelRatio ?? 1
 	}
-
 	public readonly name: string
 	public readonly inputs: TgdInputs
 	public readonly webglParams: WebglParams
 	public readonly implementationColorReadFormat: number
 	public readonly implementationColorReadType: number
+	/**
+	 * Dispatched when everything has been painted.
+	 */
 	public readonly eventPaint = new TgdEvent<TgdContext>()
+	/**
+	 * Dispatched before anything is painted.
+	 */
+	public readonly eventPaintEnter = new TgdEvent<TgdContext>()
 	/**
 	 * When the browser decides to destroy the context.
 	 * @see https://wikis.khronos.org/webgl/HandlingContextLost
@@ -465,6 +471,7 @@ export class TgdContext extends TgdPainterGroup {
 				// the pause is like a frozen time.
 				timeInSec -= this.pauseAccumulation
 			}
+			this.eventPaintEnter.dispatch(this)
 			const { gl, webglParams } = this
 			const delayInSec = timeInSec - this.lastTimeInSec
 			this._fps = Math.round(1 / delayInSec)

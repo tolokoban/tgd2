@@ -13,19 +13,29 @@ import {
 	webglCullSet,
 	webglDepthGet,
 	webglDepthSet,
+	webglPresetBlend,
+	webglPresetCull,
+	webglPresetDepth,
+	webglPresetStencil,
 	webglStencilGet,
 	webglStencilSet,
 } from "@tgd/utils/state"
 import { TgdPainterGroup } from "../group"
 import type { TgdPainter } from "../painter"
 
+type Keys<T2, T1> =
+	| {
+			[K in keyof T1]: T1[K] extends T2 ? K : never
+	  }[keyof T1]
+	| T2
+
 export interface TgdPainterStateOptions {
 	children: TgdPainter[]
 	color: boolean | [boolean, boolean, boolean, boolean]
-	blend: WebglBlendOptions
-	depth: WebglDepthOptions
-	cull: WebglCullOptions
-	stencil: WebglStencilOptions
+	blend: Keys<WebglBlendOptions, typeof webglPresetBlend>
+	depth: Keys<WebglDepthOptions, typeof webglPresetDepth>
+	cull: Keys<WebglCullOptions, typeof webglPresetCull>
+	stencil: Keys<WebglStencilOptions, typeof webglPresetStencil>
 	viewport: ArrayNumber4 | Int32Array
 	name: string
 	/**
@@ -123,7 +133,11 @@ function prepareActions(
 	options: Partial<TgdPainterStateOptions>,
 ) {
 	const { gl } = context
-	const { color, blend, depth, cull, stencil, viewport } = options
+	const { color, viewport } = options
+	const blend = resolveBlend(options.blend)
+	const cull = resolveCull(options.cull)
+	const depth = resolveDepth(options.depth)
+	const stencil = resolveStencil(options.stencil)
 	const onEnterActions: Array<() => void> = []
 	const onExitActions: Array<() => void> = []
 	const colorMask: undefined | [boolean, boolean, boolean, boolean] =
@@ -206,4 +220,40 @@ function prepareActions(
 		})
 	}
 	return { onEnterActions, onExitActions }
+}
+
+function resolveBlend(
+	blend: Keys<WebglBlendOptions, typeof webglPresetBlend> | undefined,
+): WebglBlendOptions | undefined {
+	if (typeof blend === "string") {
+		return webglPresetBlend[blend]
+	}
+	return blend
+}
+
+function resolveCull(
+	stencil: Keys<WebglCullOptions, typeof webglPresetCull> | undefined,
+): WebglCullOptions | undefined {
+	if (typeof stencil === "string") {
+		return webglPresetCull[stencil]
+	}
+	return stencil
+}
+
+function resolveDepth(
+	depth: Keys<WebglDepthOptions, typeof webglPresetDepth> | undefined,
+): WebglDepthOptions | undefined {
+	if (typeof depth === "string") {
+		return webglPresetDepth[depth]
+	}
+	return depth
+}
+
+function resolveStencil(
+	stencil: Keys<WebglStencilOptions, typeof webglPresetStencil> | undefined,
+): WebglStencilOptions | undefined {
+	if (typeof stencil === "string") {
+		return webglPresetStencil[stencil]
+	}
+	return stencil
 }

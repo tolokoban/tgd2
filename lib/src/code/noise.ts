@@ -1,11 +1,10 @@
-import { tseslint } from "typescript-eslint"
-import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader"
+import type { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader"
 import { isNumber } from "@tgd/types/guards"
 import {
-    tgdCodeFunction_mod289,
-    tgdCodeFunction_permute,
-    tgdCodeFunction_quintic,
-    tgdCodeFunction_taylorInvSqrt,
+	tgdCodeFunction_mod289,
+	tgdCodeFunction_permute,
+	tgdCodeFunction_quintic,
+	tgdCodeFunction_taylorInvSqrt,
 } from "./math"
 
 /**
@@ -19,23 +18,23 @@ import {
  * @see https://iquilezles.org/articles/fbm/
  */
 export function tgdCodeFunction_fbm(
-    options: Partial<{
-        name: string
-        octaves: number
-        noise: string
-        G: number
-    }> = {}
+	options: Partial<{
+		name: string
+		octaves: number
+		noise: string
+		G: number
+	}> = {},
 ): TgdCodeFunctions {
-    const { name = "fbm", octaves = 8, noise = "perlinNoise", G } = options
-    const hasG = isNumber(G)
-    const functions: Record<string, TgdCodeBloc> = {
-        ...tgdCodeFunction_perlinNoise(),
-        ...tgdCodeFunction_permute(),
-        ...tgdCodeFunction_quintic(),
-    }
-    for (const type of ["vec2", "vec3", "vec4"]) {
-        functions[`${name}:${type}`] =
-            `float ${name}( in ${type} x${hasG ? "" : ", in float G"} )
+	const { name = "fbm", octaves = 8, noise = "perlinNoise", G } = options
+	const hasG = isNumber(G)
+	const functions: Record<string, TgdCodeBloc> = {
+		...tgdCodeFunction_perlinNoise(),
+		...tgdCodeFunction_permute(),
+		...tgdCodeFunction_quintic(),
+	}
+	for (const type of ["vec2", "vec3", "vec4"]) {
+		functions[`${name}:${type}`] =
+			`float ${name}( in ${type} x${hasG ? "" : ", in float G"} )
 {   ${hasG ? `\nfloat G = ${G.toFixed(9)};` : ""}
     float f = 1.0;
     float a = 1.0;
@@ -49,8 +48,8 @@ export function tgdCodeFunction_fbm(
     return t;
 }
 `
-    }
-    return functions
+	}
+	return functions
 }
 
 /**
@@ -61,17 +60,17 @@ export function tgdCodeFunction_fbm(
  * ```
  */
 export function tgdCodeFunction_perlinNoise(
-    options: Partial<{
-        name: string
-    }> = {}
+	options: Partial<{
+		name: string
+	}> = {},
 ): TgdCodeFunctions {
-    const { name = "perlinNoise" } = options
-    return {
-        ...tgdCodeFunction_mod289(),
-        ...tgdCodeFunction_permute(),
-        ...tgdCodeFunction_quintic(),
-        ...tgdCodeFunction_taylorInvSqrt(),
-        [`${name}:vec2`]: `float ${name}( in vec2 P )
+	const { name = "perlinNoise" } = options
+	return {
+		...tgdCodeFunction_mod289(),
+		...tgdCodeFunction_permute(),
+		...tgdCodeFunction_quintic(),
+		...tgdCodeFunction_taylorInvSqrt(),
+		[`${name}:vec2`]: `float ${name}( in vec2 P )
 {
     vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
     vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
@@ -110,7 +109,7 @@ export function tgdCodeFunction_perlinNoise(
     return 2.3 * n_xy;
 }
 `,
-        [`${name}:vec3`]: `float ${name}( in vec3 P)
+		[`${name}:vec3`]: `float ${name}( in vec3 P)
 {
     vec3 Pi0 = floor(P); // Integer part, modulo period
     vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1, mod period
@@ -179,7 +178,7 @@ export function tgdCodeFunction_perlinNoise(
     return 2.2 * n_xyz;
 }
 `,
-        [`${name}:vec4`]: `float ${name}( in vec4 P )
+		[`${name}:vec4`]: `float ${name}( in vec4 P )
 {
     vec4 Pi0 = floor(P); // Integer part modulo rep
     vec4 Pi1 = Pi0 + 1.0; // Integer part + 1 mod rep
@@ -313,5 +312,5 @@ export function tgdCodeFunction_perlinNoise(
     return 2.2 * n_xyzw;
 }
 `,
-    }
+	}
 }
