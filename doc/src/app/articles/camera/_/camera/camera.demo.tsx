@@ -115,6 +115,7 @@ export default function Demo() {
                 gizmo
                 controller={{
                     inertiaOrbit: 1000,
+                    inertiaPanning: 1000
                 }}>
                 <ViewSlider value={split} onChange={setSplit} min={0} max={1} step={1e-2} />
                 <ViewPanel fullwidth display="flex" justifyContent="space-between" alignItems="center">

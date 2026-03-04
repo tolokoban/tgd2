@@ -96,6 +96,12 @@ export interface TgdControllerCameraOrbitOptions {
     debug?: boolean
 }
 
+enum GestureEnum {
+    None = 0,
+    Orbit = 1,
+    Pan = 2,
+}
+
 export class TgdControllerCameraOrbit {
     private static counter = 0
 
@@ -139,7 +145,7 @@ export class TgdControllerCameraOrbit {
      * The camera will only move if `enabled === true`.
      */
     private _enabled = true
-    private animOrbit: TgdAnimation | null = null
+    private animGestureInertia: TgdAnimation | null = null
     /**
      * This is the space height at target for zoom == 1.0
      *
@@ -163,6 +169,7 @@ export class TgdControllerCameraOrbit {
     private readonly tmpQuat = new TgdQuat()
     private lastPointerEventTimestamp = 0
     private _context: TgdContext | null = null
+    private currentGesture: GestureEnum = GestureEnum.None
 
     constructor(
         context: TgdContext,
@@ -303,7 +310,7 @@ export class TgdControllerCameraOrbit {
 
     private readonly handleMove = (event: TgdInputPointerEventMove) => {
         this.lastPointerEventTimestamp = event.current.t
-        if (!this.enabled || this.animOrbit) return
+        if (!this.enabled || this.animGestureInertia) return
 
         this.actualMove(event)
     }
@@ -315,10 +322,11 @@ export class TgdControllerCameraOrbit {
         const { context } = this
         const { keyboard } = context.inputs
         if (event.altKey || event.current.fingersCount === 2) {
+            this.currentGesture = GestureEnum.Pan
             return this.handlePan(event)
         }
-        if (!event.buttonLeft) return
 
+        this.currentGesture = GestureEnum.Orbit
         if (this.geo) {
             const speed = keyboard.isDown("Shift") ? 0.2 : 2
             const lngDelta = keyboard.isDown("x") ? 0 : speed * (event.previous.x - event.current.x)
@@ -375,27 +383,27 @@ export class TgdControllerCameraOrbit {
     private readonly handleMoveStart = () => {
         if (!this.enabled) return
 
-        const { animOrbit, context } = this
+        const { animGestureInertia: animOrbit, context } = this
         if (animOrbit) {
             context.animCancel(animOrbit)
-            this.animOrbit = null
+            this.animGestureInertia = null
         }
     }
 
     private readonly handleMoveEnd = (event: TgdInputPointerEventMove) => {
         if (!this.enabled) return
 
-        const { context, inertiaOrbit } = this
-        if (inertiaOrbit > 0) {
+        const { context, inertiaOrbit, inertiaPanning, currentGesture } = this
+        if (this.animGestureInertia) context.animCancel(this.animGestureInertia)
+        if (currentGesture === GestureEnum.Orbit && inertiaOrbit > 0) {
             const inverseDeltaTime = 1 / (event.current.t - event.previous.t)
             const speedX = inverseDeltaTime * (event.current.x - event.previous.x)
             const speedY = inverseDeltaTime * (event.current.y - event.previous.y)
             const currentEvent = structuredClone(event)
             currentEvent.current.t = Date.now()
             currentEvent.buttons = 1
-            currentEvent.buttonLeft = true
-            if (this.animOrbit) context.animCancel(this.animOrbit)
-            this.animOrbit = {
+            currentEvent.altKey = false
+            this.animGestureInertia = {
                 duration: inertiaOrbit * 1e-3,
                 action: (alpha) => {
                     currentEvent.previous.t = currentEvent.current.t
@@ -412,8 +420,36 @@ export class TgdControllerCameraOrbit {
                 },
                 easingFunction: tgdEasingFunctionOutQuad,
             }
-            context.animSchedule(this.animOrbit)
+            context.animSchedule(this.animGestureInertia)
         }
+        if (currentGesture === GestureEnum.Pan && inertiaPanning > 0) {
+            const inverseDeltaTime = 1 / (event.current.t - event.previous.t)
+            const speedX = inverseDeltaTime * (event.current.x - event.previous.x)
+            const speedY = inverseDeltaTime * (event.current.y - event.previous.y)
+            const currentEvent = structuredClone(event)
+            currentEvent.current.t = Date.now()
+            currentEvent.buttons = 2
+            currentEvent.altKey = true
+            this.animGestureInertia = {
+                duration: inertiaPanning * 1e-3,
+                action: (alpha) => {
+                    currentEvent.previous.t = currentEvent.current.t
+                    currentEvent.previous.x = currentEvent.current.x
+                    currentEvent.previous.y = currentEvent.current.y
+                    currentEvent.previous.fingersCount = currentEvent.current.fingersCount
+                    currentEvent.current.t = Date.now()
+                    const deltaTime = currentEvent.current.t - currentEvent.previous.t
+                    const strength = 1 - alpha
+                    const factor = strength * deltaTime
+                    currentEvent.current.x += factor * speedX
+                    currentEvent.current.y += factor * speedY
+                    this.actualMove(currentEvent)
+                },
+                easingFunction: tgdEasingFunctionOutQuad,
+            }
+            context.animSchedule(this.animGestureInertia)
+        }
+        this.currentGesture = GestureEnum.None
     }
 
     private handlePan(event: TgdInputPointerEventMove) {
