@@ -33,10 +33,7 @@ function init(ctx: TgdContext) {
                         new TgdPainterMesh(ctx, {
                             geometry: new TgdGeometryBox(),
                             material: new TgdMaterialDiffuse({
-                                color: new TgdTexture2D(ctx).loadBitmap(
-                                    WoodURL,
-                                    { generateMipmap: true }
-                                ),
+                                color: new TgdTexture2D(ctx).loadBitmap(WoodURL, { generateMipmap: true }),
                             }),
                         }),
                     ],
@@ -62,19 +59,13 @@ function init(ctx: TgdContext) {
                 box.transfo.orientation.reset()
                 const s = 0.95
                 box.transfo.setScale(s, s, s)
-                box.transfo.orbitAroundX(
-                    (Math.abs(Math.sin(time)) * Math.PI * 2) / boxes.length
-                )
+                box.transfo.orbitAroundX((Math.abs(Math.sin(time)) * Math.PI * 2) / boxes.length)
                 box.transfo.orbitAroundY(
-                    (Math.sin(time * 1.1287) *
-                        Math.PI *
-                        3 *
-                        (1 + Math.cos(time * 0.37243))) /
-                        boxes.length
+                    (Math.sin(time * 1.1287) * Math.PI * 3 * (1 + Math.cos(time * 0.37243))) / boxes.length,
                 )
             }
             root.transfo.orbitAroundY(time * 0.5)
-        })
+        }),
     )
     ctx.play()
     // #end

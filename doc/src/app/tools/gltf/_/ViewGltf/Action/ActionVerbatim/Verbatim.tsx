@@ -20,8 +20,7 @@ export function ViewActionVerbatim(props: ViewVerbatimProps) {
             overflow="auto"
             fullsize
             color="neutral-1"
-            padding="S"
-        >
+            padding="S">
             <ViewJson value={props.data} />
         </ViewPanel>
     )

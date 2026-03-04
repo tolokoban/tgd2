@@ -20,14 +20,7 @@ export function ViewPalette(props: ViewPaletteProps) {
             <h1>Palette function: f(t) = a + b ⋅ cos( 2π(c⋅t+d) )</h1>
             <div className={Styles.palettes}>
                 {PALETTES.map(({ name, a, b, c, d }) => (
-                    <ViewPaletteButton
-                        key={name}
-                        name={name}
-                        a={a}
-                        b={b}
-                        c={c}
-                        d={d}
-                    />
+                    <ViewPaletteButton key={name} name={name} a={a} b={b} c={c} d={d} />
                 ))}
             </div>
             <p>Click a palette to edit</p>

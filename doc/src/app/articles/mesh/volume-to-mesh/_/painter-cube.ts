@@ -20,12 +20,7 @@ export class PainterCube extends TgdPainter {
         this.program = this.createProgram()
         // prettier-ignore
         const elements = cubeEdges
-        this.vao = new TgdVertexArray(
-            context.gl,
-            this.program,
-            [this.dataset],
-            elements
-        )
+        this.vao = new TgdVertexArray(context.gl, this.program, [this.dataset], elements)
     }
 
     delete(): void {

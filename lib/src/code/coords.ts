@@ -5,7 +5,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
  * Requires uniform `uniAspectRatio`.
  */
 export function tgdCodeFunction_uv2xy(
-    options: Partial<{ name: string; uniAspectRatio: string }> = {}
+    options: Partial<{ name: string; uniAspectRatio: string }> = {},
 ): TgdCodeFunctions {
     const { name = "uv2xy", uniAspectRatio = "uniAspectRatio" } = options
     return {
@@ -21,10 +21,9 @@ export function tgdCodeFunction_uv2xy(
  * Requires uniform `uniAspectRatioInverse`.
  */
 export function tgdCodeFunction_xy2uv(
-    options: Partial<{ name: string; uniAspectRatioInverse: string }> = {}
+    options: Partial<{ name: string; uniAspectRatioInverse: string }> = {},
 ): TgdCodeFunctions {
-    const { name = "xy2uv", uniAspectRatioInverse = "uniAspectRatioInverse" } =
-        options
+    const { name = "xy2uv", uniAspectRatioInverse = "uniAspectRatioInverse" } = options
     return {
         [name]: `vec2 ${name}(vec2 xy) {
     return (0.5 * xy * vec2(${uniAspectRatioInverse}, 1.0)) + vec2(0.5);
@@ -41,7 +40,7 @@ export function tgdCodeFunction_xy2uv(
 export function tgdCodeFunction_xy2polar(
     options: {
         name?: string
-    } = {}
+    } = {},
 ): TgdCodeFunctions {
     const { name = "xy2polar" } = options
     return {
@@ -62,7 +61,7 @@ export function tgdCodeFunction_xy2polar(
 export function tgdCodeFunction_polar2xy(
     options: {
         name?: string
-    } = {}
+    } = {},
 ): TgdCodeFunctions {
     const { name = "polar2xy" } = options
     return {
@@ -84,12 +83,9 @@ export function tgdCodeFunction_polar2xy(
  * @see tgdCodeFunction_xy2polar
  */
 export function tgdCodeFunction_polar2uv(
-    options: Partial<{ name: string; uniAspectRatioInverse: string }> = {}
+    options: Partial<{ name: string; uniAspectRatioInverse: string }> = {},
 ): TgdCodeFunctions {
-    const {
-        name = "polar2uv",
-        uniAspectRatioInverse = "uniAspectRatioInverse",
-    } = options
+    const { name = "polar2uv", uniAspectRatioInverse = "uniAspectRatioInverse" } = options
     return {
         [name]: `vec2 ${name}(vec2 polar) {
     float r = polar.x;
@@ -110,7 +106,7 @@ export function tgdCodeFunction_polar2uv(
  * * y: the angle
  */
 export function tgdCodeFunction_uv2polar(
-    options: Partial<{ name: string; uniAspectRatio: string }> = {}
+    options: Partial<{ name: string; uniAspectRatio: string }> = {},
 ): TgdCodeFunctions {
     const { name = "uv2polar", uniAspectRatio = "uniAspectRatio" } = options
     return {

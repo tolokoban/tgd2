@@ -1,12 +1,6 @@
 import { dot, dot2, scale, sign, subtract, Vec3 } from "./_common"
 
-export function tgdSdfCapsule(
-    p: Vec3,
-    a: Vec3,
-    b: Vec3,
-    r1: number,
-    r2: number
-) {
+export function tgdSdfCapsule(p: Vec3, a: Vec3, b: Vec3, r1: number, r2: number) {
     // sampling independent computations (only depend on shape)
     const ba = subtract(b, a)
     const l2 = dot(ba, ba)

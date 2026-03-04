@@ -54,7 +54,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
 
     constructor(
         private readonly context: TgdContext,
-        { background, children }: TgdPainterBackgroundWithDepthOptions
+        { background, children }: TgdPainterBackgroundWithDepthOptions,
     ) {
         super()
         const { gl } = context
@@ -97,10 +97,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
             attPoint: "vec2",
             attUV: "vec2",
         })
-        dataset.set(
-            "attPoint",
-            new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
-        )
+        dataset.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]))
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
@@ -113,14 +110,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
     }
 
     paint(time: number, delay: number): void {
-        const {
-            context,
-            vao,
-            program,
-            textureDepth,
-            textureColor,
-            framebuffer,
-        } = this
+        const { context, vao, program, textureDepth, textureColor, framebuffer } = this
         const { gl, width, height } = context
 
         if (width !== this.lastWidth || height !== this.lastHeight) {
@@ -146,8 +136,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
 
     private getScale() {
         const { textureColor, context } = this
-        const { drawingBufferWidth: width, drawingBufferHeight: height } =
-            context.gl
+        const { drawingBufferWidth: width, drawingBufferHeight: height } = context.gl
         const ratioTexture = textureColor.width / textureColor.height
         const ratioScreen = width / height
         return ratioScreen / ratioTexture

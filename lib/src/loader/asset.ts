@@ -6,7 +6,7 @@ export async function tgdLoadAssets<GLB extends string, IMG extends string>(
     urls: Partial<{
         glb: Record<GLB, string>
         img: Record<IMG, string>
-    }>
+    }>,
 ): Promise<{
     glb: Record<GLB, TgdDataGlb>
     img: Record<IMG, HTMLImageElement>
@@ -24,7 +24,7 @@ export async function tgdLoadAssets<GLB extends string, IMG extends string>(
 function getPromisedLoaders<N extends string, V>(
     loader: (url: string) => Promise<V | null>,
     urls: Record<N, string> | undefined,
-    target: Record<N, V>
+    target: Record<N, V>,
 ) {
     return Object.keys(urls ?? {}).map(
         (name) =>
@@ -48,6 +48,6 @@ function getPromisedLoaders<N extends string, V>(
                         console.error("Unable to load URL", url)
                         resolve()
                     })
-            })
+            }),
     )
 }

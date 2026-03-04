@@ -16,8 +16,7 @@ export default class ReferenceMap<KeyType, ValueType> {
         if (count.has(key)) {
             count.set(key, 1 + (count.get(key) ?? 0))
             const currentValue = map.get(key)
-            if (!currentValue)
-                throw new Error("[CountMap] Map should not be empty!")
+            if (!currentValue) throw new Error("[CountMap] Map should not be empty!")
             return currentValue
         }
 

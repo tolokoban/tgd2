@@ -12,9 +12,7 @@ export class TgdMaterialNormalMap extends TgdMaterial {
                 "color *= 0.5;",
                 "return vec4(color, 1.0);",
             ],
-            vertexShaderCode: [
-                "varNormal = mat3(uniModelViewMatrix) * mat3(uniTransfoMatrix) * normal;",
-            ],
+            vertexShaderCode: ["varNormal = mat3(uniModelViewMatrix) * mat3(uniTransfoMatrix) * normal;"],
         })
     }
 }

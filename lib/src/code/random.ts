@@ -6,7 +6,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
 export function tgdCodeFunction_random(
     options: {
         name?: string
-    } = {}
+    } = {},
 ): TgdCodeFunctions {
     const { name = "random" } = options
     return {

@@ -1,4 +1,3 @@
- 
 import { TgdCodeBloc } from "@tgd/shader"
 
 export type WasmModule = {

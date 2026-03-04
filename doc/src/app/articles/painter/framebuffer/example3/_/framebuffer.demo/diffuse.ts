@@ -33,9 +33,7 @@ export class MaterialDiffuse extends TgdMaterial {
 
     constructor(options: MaterialDiffuseOptions = {}) {
         const color =
-            options.color instanceof TgdTexture2D
-                ? options.color
-                : new TgdVec4(options.color ?? DEFAULT_COLOR)
+            options.color instanceof TgdTexture2D ? options.color : new TgdVec4(options.color ?? DEFAULT_COLOR)
         const hasTexture = !(color instanceof TgdVec4)
         const uniforms: { [name: string]: WebglUniformType } = {
             uniLight: "vec3",
@@ -66,9 +64,7 @@ export class MaterialDiffuse extends TgdMaterial {
             fragmentShaderCode: [
                 "vec3 normal = normalize(varNormal);",
                 `float light = 1.0 - dot(normal, uniLightDir);`,
-                hasTexture
-                    ? `vec4 color = texture(texDiffuse, varUV);`
-                    : `vec4 color = vec4(${color.join(", ")});`,
+                hasTexture ? `vec4 color = texture(texDiffuse, varUV);` : `vec4 color = vec4(${color.join(", ")});`,
                 `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
                 `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
                 `spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;`,
@@ -84,15 +80,10 @@ export class MaterialDiffuse extends TgdMaterial {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)
-                this.ambientColor
-                    .from(this.ambient.color)
-                    .scale(this.ambient.color.w)
+                this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
                 program.uniform3fv("uniAmbient", this.ambientColor)
                 program.uniform1f("uniSpecularExponent", this.specularExponent)
-                program.uniform1f(
-                    "uniSpecularIntensity",
-                    this.specularIntensity
-                )
+                program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
                 const { texture } = this
                 if (texture) texture.activate(0, program, "texDiffuse")

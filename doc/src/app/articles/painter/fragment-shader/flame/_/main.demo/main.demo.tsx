@@ -35,7 +35,7 @@ function init(context: TgdContext, assets: Assets) {
             setUniforms: ({ program }) => {
                 texture.activate(0, program, "uniTexture")
             },
-        })
+        }),
     )
     context.play()
     return (settings: Record<string, number>) => {

@@ -17,16 +17,14 @@ export default function Spinner({ className }: SpinnerProps) {
             width="100%"
             version="1.1"
             viewBox="-200 -200 400 400"
-            preserveAspectRatio="xMidYMid"
-        >
+            preserveAspectRatio="xMidYMid">
             <defs>
                 <path
                     id="anim"
                     d="M100,0 A100 100 0 1 1 0 -100"
                     fill="none"
                     strokeDasharray="300 1000"
-                    strokeDashoffset="0"
-                >
+                    strokeDashoffset="0">
                     <animateTransform
                         attributeName="transform"
                         attributeType="XML"
@@ -36,12 +34,7 @@ export default function Spinner({ className }: SpinnerProps) {
                         dur=".83s"
                         repeatCount="indefinite"
                     />
-                    <animate
-                        attributeName="stroke-dashoffset"
-                        values="0;280;0"
-                        dur="1.1s"
-                        repeatCount="indefinite"
-                    />
+                    <animate attributeName="stroke-dashoffset" values="0;280;0" dur="1.1s" repeatCount="indefinite" />
                 </path>
             </defs>
             <g strokeLinecap="round" strokeLinejoin="round">

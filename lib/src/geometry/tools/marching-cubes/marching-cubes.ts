@@ -33,17 +33,12 @@ export interface MakeGeometryFromVolumeOptions {
     smoothingLevel?: number
 }
 
-export function tgdMakePointsCloudFromVolume(
-    options: MakeGeometryFromVolumeOptions,
-    radiusMultiplier = 1
-) {
+export function tgdMakePointsCloudFromVolume(options: MakeGeometryFromVolumeOptions, radiusMultiplier = 1) {
     const helper = new VolumeHelper(options)
     return helper.getPointsCloud(radiusMultiplier)
 }
 
-export function tgdMakeGeometryFromVolume(
-    options: MakeGeometryFromVolumeOptions
-): TgdGeometry {
+export function tgdMakeGeometryFromVolume(options: MakeGeometryFromVolumeOptions): TgdGeometry {
     const { attPosition = "POSITION" } = options
     const helper = new VolumeHelper(options)
     const { points, elements } = helper.getMesh()
@@ -66,10 +61,7 @@ export function tgdMakeGeometryFromVolume(
     return geometry
 }
 
-function tgdGeometrySmoothVertices(
-    positions: Float32Array,
-    elements: TgdTypeArrayForElements
-): Float32Array {
+function tgdGeometrySmoothVertices(positions: Float32Array, elements: TgdTypeArrayForElements): Float32Array {
     const smoothedPositions = new Float32Array(positions.length)
     const weights = new Float32Array(positions.length / 3)
     for (let k = 0; k < elements.length; k += 3) {
@@ -134,9 +126,7 @@ class VolumeHelper {
     constructor(private readonly options: MakeGeometryFromVolumeOptions) {
         let { voxelSize } = options
         if (voxelSize <= 0) {
-            throw new Error(
-                `We cannot do marching cube with voxels so small: ${voxelSize}`
-            )
+            throw new Error(`We cannot do marching cube with voxels so small: ${voxelSize}`)
         }
         const time0 = Date.now()
         this.configurations = tgdDataMarchingCubesConfigurations()
@@ -174,20 +164,11 @@ class VolumeHelper {
         const time0 = Date.now()
         const { voxelSize } = this.options
         const points: number[] = []
-        this.march(
-            (
-                xi: number,
-                yi: number,
-                zi: number,
-                x: number,
-                y: number,
-                z: number
-            ) => {
-                if (this.isInside(xi, yi, zi)) {
-                    points.push(x, y, z, voxelSize * radiusMultiplier)
-                }
+        this.march((xi: number, yi: number, zi: number, x: number, y: number, z: number) => {
+            if (this.isInside(xi, yi, zi)) {
+                points.push(x, y, z, voxelSize * radiusMultiplier)
             }
-        )
+        })
         console.log("PontsCould: ", Date.now() - time0, "ms")
         return new Float32Array(points)
     }
@@ -205,8 +186,7 @@ class VolumeHelper {
                 const y = cornerY + voxelSize * yi
                 for (let zi = 0; zi < dimZ; zi++) {
                     const z = cornerZ + voxelSize * zi
-                    const config =
-                        this.configurations[this.getConfigIndex(xi, yi, zi)]
+                    const config = this.configurations[this.getConfigIndex(xi, yi, zi)]
                     for (let i = 0; i < config.length; i += 3) {
                         const a = config[i + 0]
                         const b = config[i + 1]
@@ -217,36 +197,21 @@ class VolumeHelper {
                         const xa = x + xam * voxelSize
                         const ya = y + yam * voxelSize
                         const za = z + zam * voxelSize
-                        this.addPointElement(
-                            xa,
-                            ya,
-                            za,
-                            key(xi + xam, yi + yam, zi + zam)
-                        )
+                        this.addPointElement(xa, ya, za, key(xi + xam, yi + yam, zi + zam))
                         const xbm = midPoints[b * 3 + 0]
                         const ybm = midPoints[b * 3 + 1]
                         const zbm = midPoints[b * 3 + 2]
                         const xb = x + xbm * voxelSize
                         const yb = y + ybm * voxelSize
                         const zb = z + zbm * voxelSize
-                        this.addPointElement(
-                            xb,
-                            yb,
-                            zb,
-                            key(xi + xbm, yi + ybm, zi + zbm)
-                        )
+                        this.addPointElement(xb, yb, zb, key(xi + xbm, yi + ybm, zi + zbm))
                         const xcm = midPoints[c * 3 + 0]
                         const ycm = midPoints[c * 3 + 1]
                         const zcm = midPoints[c * 3 + 2]
                         const xc = x + xcm * voxelSize
                         const yc = y + ycm * voxelSize
                         const zc = z + zcm * voxelSize
-                        this.addPointElement(
-                            xc,
-                            yc,
-                            zc,
-                            key(xi + xcm, yi + ycm, zi + zcm)
-                        )
+                        this.addPointElement(xc, yc, zc, key(xi + xcm, yi + ycm, zi + zcm))
                     }
                 }
             }
@@ -285,16 +250,7 @@ class VolumeHelper {
         return configIndex
     }
 
-    private march(
-        func: (
-            xi: number,
-            yi: number,
-            zi: number,
-            x: number,
-            y: number,
-            z: number
-        ) => void
-    ) {
+    private march(func: (xi: number, yi: number, zi: number, x: number, y: number, z: number) => void) {
         console.log("------------------------------------------------------")
         const { dimX, dimY, dimZ, options } = this
         const { voxelSize, bboxCorner } = options

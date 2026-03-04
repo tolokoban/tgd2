@@ -43,30 +43,20 @@ export interface TgdPainterLODOptions {
      *
      * @returns `null` if this block is empty
      */
-    factory(
-        x: number,
-        y: number,
-        z: number,
-        level: number
-    ): Promise<Readonly<TgdPainter> | null>
+    factory(x: number, y: number, z: number, level: number): Promise<Readonly<TgdPainter> | null>
 }
 
-export class TgdPainterLOD
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformable {
     public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
 
     private readonly group = new TgdPainterGroup()
-    private readonly cache = new OctreeCache<
-        Promise<Readonly<TgdPainter> | null>
-    >()
+    private readonly cache = new OctreeCache<Promise<Readonly<TgdPainter> | null>>()
     private readonly paintersToDelete = new Set<TgdPainter>()
     private isComputingOctree = false
 
     constructor(
         public readonly context: TgdContext,
-        private readonly options: TgdPainterLODOptions
+        private readonly options: TgdPainterLODOptions,
     ) {
         super()
     }
@@ -94,7 +84,7 @@ export class TgdPainterLOD
                 context.camera,
                 options.bbox,
                 options.subdivisions,
-                options.surfaceThreshold ?? 0.25
+                options.surfaceThreshold ?? 0.25,
             )
             const promises: Promise<Readonly<TgdPainter> | null>[] = []
             for (const [x, y, z, level] of candidates) {
@@ -117,12 +107,7 @@ export class TgdPainterLOD
         }
     }
 
-    private getMeshPromise(
-        x: number,
-        y: number,
-        z: number,
-        level: number
-    ): Promise<Readonly<TgdPainter> | null> {
+    private getMeshPromise(x: number, y: number, z: number, level: number): Promise<Readonly<TgdPainter> | null> {
         const fromCache = this.cache.get(x, y, z, level)
         if (fromCache) return fromCache
 
@@ -132,8 +117,6 @@ export class TgdPainterLOD
     }
 
     debug(caption?: string) {
-        console.debug(
-            caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`
-        )
+        console.debug(caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`)
     }
 }

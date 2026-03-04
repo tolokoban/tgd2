@@ -5,10 +5,7 @@ import type { TgdSprite } from "./types"
 
 export type { TgdSprite } from "./types"
 
-export abstract class TgdPainterSpritesAbstract<
-        Base extends TgdSprite,
-        Type extends Base,
-    >
+export abstract class TgdPainterSpritesAbstract<Base extends TgdSprite, Type extends Base>
     extends TgdPainter
     implements TgdInterfaceTransformable
 {

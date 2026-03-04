@@ -1,13 +1,6 @@
 import * as React from "react"
 import { ArrayNumber3 } from "@tolokoban/tgd"
-import {
-    Theme,
-    CommonProps,
-    styleCommon,
-    ViewSlider,
-    IconLockOpen,
-    IconLockClose,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, ViewSlider, IconLockOpen, IconLockClose } from "@tolokoban/ui"
 
 import Styles from "./Sliders.module.css"
 
@@ -39,13 +32,7 @@ export function ViewSliders(props: ViewSlidersProps) {
                     <IconLockOpen onClick={() => setLock(true)} />
                 )}
             </header>
-            {lock && (
-                <Slider
-                    label="*"
-                    value={(red + green + blue) / 3}
-                    onChange={(v) => props.onChange([v, v, v])}
-                />
-            )}
+            {lock && <Slider label="*" value={(red + green + blue) / 3} onChange={(v) => props.onChange([v, v, v])} />}
             {!lock && (
                 <>
                     <Slider label="R" value={red} onChange={setRed} />
@@ -57,26 +44,11 @@ export function ViewSliders(props: ViewSlidersProps) {
     )
 }
 
-function Slider({
-    label,
-    value,
-    onChange,
-}: {
-    label: string
-    value: number
-    onChange(value: number): void
-}) {
+function Slider({ label, value, onChange }: { label: string; value: number; onChange(value: number): void }) {
     return (
         <div className={Styles.slider}>
             <label>{label}</label>
-            <ViewSlider
-                min={0}
-                max={1}
-                step={0.01}
-                text={value.toFixed(2)}
-                value={value}
-                onChange={onChange}
-            />
+            <ViewSlider min={0} max={1} step={0.01} text={value.toFixed(2)} value={value} onChange={onChange} />
         </div>
     )
 }

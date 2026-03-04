@@ -12,10 +12,10 @@ The Painter should paint the stars visible from earth with naked eyes. We use
 `gl.POINTS` of different colors, size and brightness. The attribute is a `vec4`
 vector with:
 
--   `x`: longitude (from 0.0 to 2 PI)
--   `y`: latitude (from -PI / 2 to +PI / 2)
--   `z`: brightness (from 0.02 to 2.0)
--   `w`: color (from 0.0 to 1.0, 0.0 is red and cold and 1.0 is blue and hot)
+- `x`: longitude (from 0.0 to 2 PI)
+- `y`: latitude (from -PI / 2 to +PI / 2)
+- `z`: brightness (from 0.02 to 2.0)
+- `w`: color (from 0.0 to 1.0, 0.0 is red and cold and 1.0 is blue and hot)
 
 We start by creating a class that extends `TgdPainter`:
 
@@ -30,7 +30,10 @@ export class PainterStars extends TgdPainter {
      *
      * @param data A sequence of 4 floats: longitude, latitude, brightness and color.
      */
-    constructor(private readonly context: TgdContext, data: Float32Array) {
+    constructor(
+        private readonly context: TgdContext,
+        data: Float32Array,
+    ) {
         super()
         this.count = data.length / 4
     }
@@ -115,7 +118,7 @@ this.prg = context.programs.create(
         vert,
         frag,
     },
-    "PainterStars"
+    "PainterStars",
 )
 ```
 

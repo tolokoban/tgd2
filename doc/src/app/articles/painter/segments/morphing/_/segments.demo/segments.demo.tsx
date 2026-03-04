@@ -64,7 +64,7 @@ function init(context: TgdContext) {
         data2.add(nodes2[i - 1], nodes2[i], uv0, uv1)
     }
     const palette = new TgdTexture2D(context).loadBitmap(
-        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
+        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
     )
     const segments2 = new TgdPainterSegmentsMorphing(context, {
         datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
@@ -87,17 +87,14 @@ function init(context: TgdContext) {
             segments2.mix = Math.abs(Math.sin(time))
             segments2.transfo.orbitAroundX(delta * 0.315481)
             segments2.transfo.orbitAroundZ(delta * 0.2)
-        })
+        }),
     )
     context.play()
     // #end
     context.inputs.pointer.eventHover.addListener((event) => {
         const { x, y } = event.current
         const [R, G, B] = context.readPixel(x, y)
-        console.log(
-            `%c(${R}, ${G}, ${B})]`,
-            `color:#777;background:rgb(${R},${G},${B})`
-        )
+        console.log(`%c(${R}, ${G}, ${B})]`, `color:#777;background:rgb(${R},${G},${B})`)
     })
 }
 

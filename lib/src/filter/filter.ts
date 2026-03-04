@@ -26,20 +26,14 @@ export class TgdFilter {
      * The code of a `vec4 applyColor()` function.
      * Must return a `vec4` color.
      */
-    public readonly fragmentShaderCode: TgdCodeBloc = [
-        "vec4 color = texture(uniTexture, varUV);",
-        "return color;",
-    ]
+    public readonly fragmentShaderCode: TgdCodeBloc = ["vec4 color = texture(uniTexture, varUV);", "return color;"]
 
     public readonly extraFunctions: TgdCodeFunctions | TgdCodeBloc = {}
 
-    public readonly setUniforms = (
-        _parameters: TgdFilterSerUniformsParameters
-    ): void => {}
+    public readonly setUniforms = (_parameters: TgdFilterSerUniformsParameters): void => {}
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
-        const { uniforms, fragmentShaderCode, extraFunctions, setUniforms } =
-            options
+        const { uniforms, fragmentShaderCode, extraFunctions, setUniforms } = options
         if (uniforms) this.uniforms = uniforms
         if (fragmentShaderCode) this.fragmentShaderCode = fragmentShaderCode
         if (extraFunctions) this.extraFunctions = extraFunctions

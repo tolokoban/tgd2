@@ -7,9 +7,10 @@ import { TgdPainterSpritesAbstract } from "./sprites-abstract"
 
 export type { TgdSpriteHue } from "./types"
 
-export class TgdPainterSpritesHue<
-    T extends TgdSpriteHue = TgdSpriteHue,
-> extends TgdPainterSpritesAbstract<TgdSpriteHue, T> {
+export class TgdPainterSpritesHue<T extends TgdSpriteHue = TgdSpriteHue> extends TgdPainterSpritesAbstract<
+    TgdSpriteHue,
+    T
+> {
     private readonly parent: TgdPainterSprites<T>
 
     constructor(context: TgdContext, options: TgdPainterSpritesOptions) {

@@ -13,14 +13,12 @@ export function tgdComputeBoundingBox3D(
     dataset: Readonly<TgdDataset>,
     attPositionName = "POSITION",
     minVector?: TgdVec3,
-    maxVector?: TgdVec3
+    maxVector?: TgdVec3,
 ): {
     min: Readonly<TgdVec3>
     max: Readonly<TgdVec3>
 } {
-    const { get } = dataset
-        .assertAttribType(attPositionName, "vec3", "vec4")
-        .getAttribAccessor(attPositionName)
+    const { get } = dataset.assertAttribType(attPositionName, "vec3", "vec4").getAttribAccessor(attPositionName)
     const min = minVector ?? new TgdVec3()
     min.reset(get(0, 0), get(0, 1), get(0, 2))
     const max = maxVector ?? new TgdVec3()

@@ -18,11 +18,7 @@ export interface TgdGeometrySphereIcoOptions {
 }
 
 export class TgdGeometrySphereIco extends TgdGeometry {
-    constructor({
-        center = [0, 0, 0],
-        radius = 1,
-        subdivisions = 2,
-    }: TgdGeometrySphereIcoOptions = {}) {
+    constructor({ center = [0, 0, 0], radius = 1, subdivisions = 2 }: TgdGeometrySphereIcoOptions = {}) {
         const dataset = new TgdDataset({
             POSITION: "vec3",
             NORMAL: "vec3",
@@ -49,7 +45,7 @@ function createIcosahedron(
     normals: number[],
     elements: number[],
     center: ArrayNumber3 | ArrayNumber4 | TgdVec3 | TgdVec4,
-    radius: number
+    radius: number,
 ) {
     const [cx, cy, cz] = center
     normals.push(
@@ -88,14 +84,10 @@ function createIcosahedron(
         -0,
         -0,
         1,
-        -0
+        -0,
     )
     for (let i = 0; i < normals.length; i += 3) {
-        positions.push(
-            normals[i + 0] * radius + cx,
-            normals[i + 1] * radius + cy,
-            normals[i + 2] * radius + cz
-        )
+        positions.push(normals[i + 0] * radius + cx, normals[i + 1] * radius + cy, normals[i + 2] * radius + cz)
     }
     // prettier-ignore
     elements.push(
@@ -130,7 +122,7 @@ function subdivide(
     normals: number[],
     elements: number[],
     center: ArrayNumber3 | ArrayNumber4 | TgdVec3 | TgdVec4,
-    radius: number
+    radius: number,
 ) {
     const [cx, cy, cz] = center
     const newElements: number[] = []
@@ -169,11 +161,7 @@ function subdivide(
     elements.push(...newElements)
 }
 
-function averageNormal(
-    normals: number[],
-    i0: number,
-    i1: number
-): ArrayNumber3 {
+function averageNormal(normals: number[], i0: number, i1: number): ArrayNumber3 {
     const x = normals[i0 * 3 + 0] + normals[i1 * 3 + 0]
     const y = normals[i0 * 3 + 1] + normals[i1 * 3 + 1]
     const z = normals[i0 * 3 + 2] + normals[i1 * 3 + 2]

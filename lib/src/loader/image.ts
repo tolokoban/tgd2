@@ -16,9 +16,7 @@ export function tgdLoadImage(url: string): Promise<HTMLImageElement | null> {
     })
 }
 
-export function tgdLoadImageFromArrayBuffer(
-    buffer: ArrayBuffer
-): Promise<HTMLImageElement | null> {
+export function tgdLoadImageFromArrayBuffer(buffer: ArrayBuffer): Promise<HTMLImageElement | null> {
     return new Promise((resolve) => {
         const blob = new Blob([buffer])
         const url = URL.createObjectURL(blob)
@@ -36,12 +34,8 @@ export function tgdLoadImageFromArrayBuffer(
     })
 }
 
-export function tgdLoadImages(
-    urls: string[]
-): Promise<Array<HTMLImageElement | null>> {
-    return Promise.all<HTMLImageElement | null>(
-        urls.map((url) => tgdLoadImage(url))
-    )
+export function tgdLoadImages(urls: string[]): Promise<Array<HTMLImageElement | null>> {
+    return Promise.all<HTMLImageElement | null>(urls.map((url) => tgdLoadImage(url)))
 }
 
 /**
@@ -54,9 +48,7 @@ export function tgdLoadImageFromSvg(svg: string): Promise<HTMLImageElement> {
         console.log("🚀 [image] svg =", svg) // @FIXME: Remove this line written on 2025-09-17 at 10:20
         const encoder = new TextEncoder()
         const bytes = encoder.encode(svg)
-        const binString = Array.from(bytes, (byte) =>
-            String.fromCodePoint(byte)
-        ).join("")
+        const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("")
         console.log("🚀 [image] binString =", binString) // @FIXME: Remove this line written on 2025-09-17 at 14:03
         const base64 = btoa(binString)
         console.log("🚀 [image] base64 =", base64) // @FIXME: Remove this line written on 2025-09-17 at 10:20
@@ -81,9 +73,7 @@ export function tgdLoadImageFromSvg(svg: string): Promise<HTMLImageElement> {
     })
 }
 
-export function tgdLoadImageFromElement(
-    element: Element
-): Promise<HTMLImageElement> {
+export function tgdLoadImageFromElement(element: Element): Promise<HTMLImageElement> {
     const width = element.scrollWidth
     const height = element.scrollHeight
     // const html = element.innerHTML
@@ -93,9 +83,7 @@ export function tgdLoadImageFromElement(
 </svg>`)
 }
 
-export async function tgdLoadCanvas(
-    url: string
-): Promise<HTMLCanvasElement | null> {
+export async function tgdLoadCanvas(url: string): Promise<HTMLCanvasElement | null> {
     const img = await tgdLoadImage(url)
     if (!img) return null
 

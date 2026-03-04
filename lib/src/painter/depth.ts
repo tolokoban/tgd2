@@ -26,7 +26,7 @@ export class TgdPainterDepth extends TgdPainter {
             mask = true,
             rangeMin = 0,
             rangeMax = 1,
-        }: Partial<TgdPainterDepthOptions> = {}
+        }: Partial<TgdPainterDepthOptions> = {},
     ) {
         super()
         this.gl = gl

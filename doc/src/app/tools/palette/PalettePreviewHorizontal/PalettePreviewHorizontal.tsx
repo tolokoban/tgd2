@@ -15,9 +15,7 @@ export type ViewPalettePreviewHorizontalProps = CommonProps & {
     d: ArrayNumber3
 }
 
-export function ViewPalettePreviewHorizontal(
-    props: ViewPalettePreviewHorizontalProps
-) {
+export function ViewPalettePreviewHorizontal(props: ViewPalettePreviewHorizontalProps) {
     const painter = usePainter()
     const style: React.CSSProperties = {
         ...styleCommon(props),
@@ -34,8 +32,7 @@ export function ViewPalettePreviewHorizontal(
         <canvas
             ref={painter.setCanvas}
             className={$.join(props.className, Styles.palettePreviewHorizontal)}
-            style={style}
-        ></canvas>
+            style={style}></canvas>
     )
 }
 

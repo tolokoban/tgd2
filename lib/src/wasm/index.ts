@@ -15,10 +15,7 @@ export * from "./module"
 export async function tgdWasmCompile<T>(
     typeGuard: (data: unknown) => asserts data is T,
     module: WasmModule,
-    importObject: Record<
-        string,
-        Record<string, (...args: unknown[]) => unknown>
-    > = {}
+    importObject: Record<string, Record<string, (...args: unknown[]) => unknown>> = {},
 ): Promise<T> {
     console.log("🚀 [index] globalThis =", globalThis) // @FIXME: Remove this line written on 2025-06-03 at 11:41
     console.log("🚀 [index] WAST =", WAST) // @FIXME: Remove this line written on 2025-06-03 at 11:45
@@ -37,10 +34,7 @@ export async function tgdWasmCompile<T>(
         }
         console.log(text.join(" "))
     }
-    const instance = await WebAssembly.instantiate(
-        new WebAssembly.Module(binary as BufferSource),
-        importObject
-    )
+    const instance = await WebAssembly.instantiate(new WebAssembly.Module(binary as BufferSource), importObject)
     const { exports } = instance
     typeGuard(exports)
     return exports as T

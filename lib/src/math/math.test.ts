@@ -3,9 +3,7 @@ import { tgdCalcRandom } from "./random"
 
 describe(`tgdCalc*()`, () => {
     describe(`tgdCalcModulo()`, () => {
-        const cases: Array<
-            [value: number, min: number, max: number, expected: number]
-        > = [
+        const cases: Array<[value: number, min: number, max: number, expected: number]> = [
             [-3, 10, 20, 17],
             [3, 10, 20, 13],
             [13, 10, 20, 13],

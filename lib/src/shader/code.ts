@@ -1,9 +1,7 @@
 import { isString } from "@tgd/types/guards"
 import { WebglAttributeType, WebglUniformType } from ".."
 
-export interface TgdCodeVariables<
-    Type extends WebglAttributeType | WebglUniformType,
-> {
+export interface TgdCodeVariables<Type extends WebglAttributeType | WebglUniformType> {
     [name: string]: Type
 }
 
@@ -43,11 +41,7 @@ export function isCodeBloc(v: unknown): v is TgdCodeBloc {
     return true
 }
 
-export function tgdCodeStringify(
-    code: TgdCodeBloc,
-    indent = "",
-    setOfFunctionNames?: Set<string>
-): string {
+export function tgdCodeStringify(code: TgdCodeBloc, indent = "", setOfFunctionNames?: Set<string>): string {
     if (typeof code === "string") return `${indent}${code}`
 
     if (!code) return ""
@@ -73,26 +67,18 @@ export function tgdCodeStringify(
         .join("\n")
 }
 
-export function expandVariables<
-    Type extends WebglAttributeType | WebglUniformType,
->(
+export function expandVariables<Type extends WebglAttributeType | WebglUniformType>(
     definition: TgdCodeVariables<Type>,
     prefix: string,
-    comment = "----------------------------------------"
+    comment = "----------------------------------------",
 ): TgdCodeBloc[] {
     const names = Object.keys(definition)
     if (names.length === 0) return []
 
-    return [
-        `// ${comment}`,
-        ...names.map((name) => `${prefix} ${definition[name]} ${name};`),
-    ]
+    return [`// ${comment}`, ...names.map((name) => `${prefix} ${definition[name]} ${name};`)]
 }
 
-export function expandFunctions(
-    definition: TgdCodeFunctions | TgdCodeBloc,
-    comment?: string
-): TgdCodeBloc[] {
+export function expandFunctions(definition: TgdCodeFunctions | TgdCodeBloc, comment?: string): TgdCodeBloc[] {
     if (isCodeBloc(definition)) return [definition]
 
     const names = Object.keys(definition)

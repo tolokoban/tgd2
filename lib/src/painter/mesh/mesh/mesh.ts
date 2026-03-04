@@ -20,10 +20,7 @@ export interface TgdPainterMeshOptions {
 
 /**
  */
-export class TgdPainterMesh
-    extends TgdPainter
-    implements TgdInterfaceTransformable
-{
+export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransformable {
     /**
      * the logic will be executed at the beginning of `paint()`.
      */
@@ -47,21 +44,14 @@ export class TgdPainterMesh
             camera: TgdCamera
             paint?: () => void
         },
-        options: TgdPainterMeshOptions = {}
+        options: TgdPainterMeshOptions = {},
     ) {
         super()
-        const {
-            transfo,
-            material = new TgdMaterialNormals(),
-            geometry = new TgdGeometryBox(),
-        } = options
+        const { transfo, material = new TgdMaterialNormals(), geometry = new TgdGeometryBox() } = options
         this.transfo = new TgdTransfo(transfo)
         this.material = material
         this.geometry = geometry
-        this.drawMode =
-            typeof geometry.drawMode === "number"
-                ? geometry.drawMode
-                : context.gl[geometry.drawMode]
+        this.drawMode = typeof geometry.drawMode === "number" ? geometry.drawMode : context.gl[geometry.drawMode]
         material.attPosition = geometry.attPosition
         material.attNormal = geometry.attNormal
         material.attUV = geometry.attUV
@@ -104,11 +94,7 @@ export class TgdPainterMesh
             varying: material.varyings,
             functions: {
                 ...material.extraFragmentShaderFunctions,
-                applyMaterial: [
-                    "vec4 applyMaterial() {",
-                    [material.fragmentShaderCode],
-                    "}",
-                ],
+                applyMaterial: ["vec4 applyMaterial() {", [material.fragmentShaderCode], "}"],
             },
             mainCode: ["FragColor = applyMaterial();"],
         })
@@ -121,12 +107,7 @@ export class TgdPainterMesh
             frag: frag.code,
         })
         this.program = prg
-        this.vao = new TgdVertexArray(
-            context.gl,
-            prg,
-            [geometry.dataset],
-            geometry.elements
-        )
+        this.vao = new TgdVertexArray(context.gl, prg, [geometry.dataset], geometry.elements)
         this.elementsType = geometry.elementsType
         this.count = geometry.count
         this.name = options.name ?? `Mesh/${this.name}`
@@ -169,15 +150,7 @@ export class TgdPainterMesh
     }
 
     public readonly paint = (time: number, delay: number) => {
-        const {
-            context,
-            program,
-            geometry,
-            material,
-            drawMode,
-            count,
-            transfo,
-        } = this
+        const { context, program, geometry, material, drawMode, count, transfo } = this
         const { gl, camera } = context
         this.logic.exec(time, delay)
         program.use()

@@ -142,9 +142,7 @@ export interface TgdFormatGltfMeshPrimitive {
     material?: number
 }
 
-export type TgdFormatGltfMeshPrimitiveAttribute =
-    | number
-    | TgdFormatGltfEmbededData
+export type TgdFormatGltfMeshPrimitiveAttribute = number | TgdFormatGltfEmbededData
 
 export interface TgdFormatGltfEmbededData {
     value: TgdTypeArrayForElements | Float32Array
@@ -194,9 +192,7 @@ export interface TgdFormatGltfNode {
     name?: string
 }
 
-export type TgdFormatGltfCamera =
-    | TgdFormatGltfCameraPerspective
-    | TgdFormatGltfCameraOrthographic
+export type TgdFormatGltfCamera = TgdFormatGltfCameraPerspective | TgdFormatGltfCameraOrthographic
 
 interface TgdFormatGltfCameraCommon {
     type: "perspective" | "orthographic"
@@ -205,8 +201,7 @@ interface TgdFormatGltfCameraCommon {
     extras?: unknown
 }
 
-export interface TgdFormatGltfCameraPerspective
-    extends TgdFormatGltfCameraCommon {
+export interface TgdFormatGltfCameraPerspective extends TgdFormatGltfCameraCommon {
     type: "perspective"
     perspective: {
         aspectRatio?: number
@@ -219,14 +214,11 @@ export interface TgdFormatGltfCameraPerspective
     }
 }
 
-export function isTgdFormatGltfCameraPerspective(
-    data: TgdFormatGltfCamera
-): data is TgdFormatGltfCameraPerspective {
+export function isTgdFormatGltfCameraPerspective(data: TgdFormatGltfCamera): data is TgdFormatGltfCameraPerspective {
     return data.type === "perspective"
 }
 
-export interface TgdFormatGltfCameraOrthographic
-    extends TgdFormatGltfCameraCommon {
+export interface TgdFormatGltfCameraOrthographic extends TgdFormatGltfCameraCommon {
     type: "orthographic"
     orthographic: {
         /** The floating-point horizontal magnification of the view. */
@@ -238,9 +230,7 @@ export interface TgdFormatGltfCameraOrthographic
     }
 }
 
-export function isTgdFormatGltfCameraOrthographic(
-    data: TgdFormatGltfCamera
-): data is TgdFormatGltfCameraOrthographic {
+export function isTgdFormatGltfCameraOrthographic(data: TgdFormatGltfCamera): data is TgdFormatGltfCameraOrthographic {
     return data.type === "orthographic"
 }
 
@@ -259,9 +249,7 @@ export interface TgdFormatGltfImage {
     uri?: string
 }
 
-export function assertTgdFormatGltf(
-    data: unknown
-): asserts data is TgdFormatGltf {
+export function assertTgdFormatGltf(data: unknown): asserts data is TgdFormatGltf {
     const typeAttribute: TypeDef = [
         "|",
         "number",

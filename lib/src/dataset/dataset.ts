@@ -1,9 +1,5 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import type {
-    TgdBuffer,
-    TgdBufferOptionTarget,
-    TgdBufferOptionUsage,
-} from "@tgd/buffer"
+import type { TgdBuffer, TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
 import type { TgdProgram } from "@tgd/program"
 
 export type TgdDatasetType = "float" | "vec2" | "vec3" | "vec4"
@@ -35,7 +31,7 @@ export class TgdDataset {
 
     constructor(
         private readonly attributesDefinition: TgdDatasetTypeRecord,
-        private readonly options: Partial<TgdDatasetOptions> = {}
+        private readonly options: Partial<TgdDatasetOptions> = {},
     ) {
         this.buffer = options.buffer
         this.target = options.target ?? "ARRAY_BUFFER"
@@ -44,10 +40,7 @@ export class TgdDataset {
         this.initialize(attributesDefinition, options)
     }
 
-    private initialize(
-        attributesDefinition: TgdDatasetTypeRecord,
-        options: Partial<TgdDatasetOptions> = {}
-    ) {
+    private initialize(attributesDefinition: TgdDatasetTypeRecord, options: Partial<TgdDatasetOptions> = {}) {
         for (const name of Object.keys(attributesDefinition)) {
             const definition = attributesDefinition[name]
             this.attributesDefinition[name] = definition
@@ -64,10 +57,7 @@ export class TgdDataset {
                 bytesPerElement: Float32Array.BYTES_PER_ELEMENT,
                 divisor,
                 getter(view: DataView, byteOffset: number) {
-                    const offset =
-                        byteOffset >= view.byteLength
-                            ? byteOffset % view.byteLength
-                            : byteOffset
+                    const offset = byteOffset >= view.byteLength ? byteOffset % view.byteLength : byteOffset
                     return view.getFloat32(offset, true)
                 },
                 setter(view: DataView, byteOffset: number, value: number) {
@@ -83,7 +73,7 @@ export class TgdDataset {
             if (options.data.byteLength % stride !== 0) {
                 console.error(options)
                 throw new Error(
-                    `[TgdDataset] Invalid size for data: ${options.data.byteLength}, must be a multiple of ${stride} (stride)!`
+                    `[TgdDataset] Invalid size for data: ${options.data.byteLength}, must be a multiple of ${stride} (stride)!`,
                 )
             }
             this._count = options.data.byteLength / stride
@@ -93,20 +83,13 @@ export class TgdDataset {
     }
 
     assertAttributes(attributesDefinition: TgdDatasetTypeRecord) {
-        if (
-            JSON.stringify(attributesDefinition) !==
-            JSON.stringify(this.attributesDefinition)
-        ) {
+        if (JSON.stringify(attributesDefinition) !== JSON.stringify(this.attributesDefinition)) {
             throw new Error(
                 `This TgdDataset was expected to have these attributes:\n${JSON.stringify(
                     attributesDefinition,
                     null,
-                    2
-                )}\nbut it has these attributes instead:\n${JSON.stringify(
-                    this.attributesDefinition,
-                    null,
-                    2
-                )}`
+                    2,
+                )}\nbut it has these attributes instead:\n${JSON.stringify(this.attributesDefinition, null, 2)}`,
             )
         }
     }
@@ -122,16 +105,12 @@ export class TgdDataset {
         if (!type)
             throw new Error(
                 `Attribute "${attribName}" does not exist! Available names are: ${Object.keys(
-                    this.attributesDefinition
-                ).join(", ")}.`
+                    this.attributesDefinition,
+                ).join(", ")}.`,
             )
 
         if (!types.includes(type)) {
-            throw new Error(
-                `Attribute "${attribName}" is of type "${type}", which is not ${types.join(
-                    " nor "
-                )}!`
-            )
+            throw new Error(`Attribute "${attribName}" is of type "${type}", which is not ${types.join(" nor ")}!`)
         }
         return this
     }
@@ -143,11 +122,10 @@ export class TgdDataset {
             throw new Error(
                 `[TgdDataset] This dataset has ${
                     oldNames.length
-                } attributes, but ${newNames.length} new names were given!`
+                } attributes, but ${newNames.length} new names were given!`,
             )
         }
-        const newDefinitions: Record<string, AttributeInternalRepresentation> =
-            {}
+        const newDefinitions: Record<string, AttributeInternalRepresentation> = {}
         let index = 0
         for (const oldName of oldNames) {
             const newName = newNames[index]
@@ -165,7 +143,7 @@ export class TgdDataset {
             const newType = attributesDefinition[key]
             if (oldType && oldType !== newType) {
                 throw new Error(
-                    `It is not allowed to change the type of attribute "${key}" from "${oldType}" to "${newType}"! Prefer removing the attribute first.`
+                    `It is not allowed to change the type of attribute "${key}" from "${oldType}" to "${newType}"! Prefer removing the attribute first.`,
                 )
             }
         }
@@ -174,7 +152,7 @@ export class TgdDataset {
                 ...this.attributesDefinition,
                 ...attributesDefinition,
             },
-            this.options
+            this.options,
         )
         this.count = oldDataset.count
         for (const attribName of oldDataset.attributesNames) {
@@ -188,23 +166,15 @@ export class TgdDataset {
                     }
                 }
             } catch (error) {
-                const message =
-                    error instanceof Error
-                        ? error.message
-                        : JSON.stringify(error)
-                throw new Error(
-                    `Unable to clone attribute "${attribName}"!\n${message}`
-                )
+                const message = error instanceof Error ? error.message : JSON.stringify(error)
+                throw new Error(`Unable to clone attribute "${attribName}"!\n${message}`)
             }
         }
         return this
     }
 
     clone(): TgdDataset {
-        const ds = new TgdDataset(
-            structuredClone(this.attributesDefinition),
-            this.options
-        )
+        const ds = new TgdDataset(structuredClone(this.attributesDefinition), this.options)
         ds.count = this.count
         const source = new DataView(this._data)
         const definition = new DataView(ds._data)
@@ -229,7 +199,7 @@ export class TgdDataset {
             this.debug("From:")
             toDataset.debug("To:")
             throw new Error(
-                `[TgdDataset.copyAttributes] Unable to copy attributes from a dataset with stride ${stride} to one with stride ${toDataset.stride}!`
+                `[TgdDataset.copyAttributes] Unable to copy attributes from a dataset with stride ${stride} to one with stride ${toDataset.stride}!`,
             )
         }
         const fromData = this._data
@@ -288,17 +258,11 @@ export class TgdDataset {
         const stride = this.stride
         return {
             get(index: number, dimension = 0): number {
-                const byteOffset =
-                    definition.byteOffset +
-                    stride * index +
-                    dimension * definition.bytesPerElement
+                const byteOffset = definition.byteOffset + stride * index + dimension * definition.bytesPerElement
                 return definition.getter(view, byteOffset)
             },
             set(value: number, index: number, dimension = 0): void {
-                const byteOffset =
-                    definition.byteOffset +
-                    stride * index +
-                    dimension * definition.bytesPerElement
+                const byteOffset = definition.byteOffset + stride * index + dimension * definition.bytesPerElement
                 definition.setter(view, byteOffset, value)
             },
         }
@@ -359,13 +323,9 @@ export class TgdDataset {
              * Default to 0.
              */
             targetFirst: number
-        }> = {}
+        }> = {},
     ) {
-        const {
-            bytesPerElement,
-            dimension,
-            byteOffset: attribByteOffset,
-        } = this.getDef(attribName)
+        const { bytesPerElement, dimension, byteOffset: attribByteOffset } = this.getDef(attribName)
         const buffer = value instanceof ArrayBuffer ? value : value.buffer
         const chunkLength = bytesPerElement * dimension
         const sourceStride = byteStride ?? chunkLength
@@ -374,25 +334,15 @@ export class TgdDataset {
         let dstOffset = targetFirst * dstStride + attribByteOffset
         this.count = Math.max(
             this.count,
-            Math.min(
-                count,
-                Math.floor((buffer.byteLength - sourceOffset) / sourceStride)
-            )
+            Math.min(count, Math.floor((buffer.byteLength - sourceOffset) / sourceStride)),
         )
         const sourceStop = buffer.byteLength - sourceStride + 1
         const dstStop = this._data.byteLength + attribByteOffset - dstStride + 1
         const sourceBuffer = new Uint8Array(buffer)
         const dstBuffer = new Uint8Array(this._data)
         let index = 0
-        while (
-            index < count &&
-            sourceOffset < sourceStop &&
-            dstOffset < dstStop
-        ) {
-            dstBuffer.set(
-                sourceBuffer.subarray(sourceOffset, sourceOffset + chunkLength),
-                dstOffset
-            )
+        while (index < count && sourceOffset < sourceStop && dstOffset < dstStop) {
+            dstBuffer.set(sourceBuffer.subarray(sourceOffset, sourceOffset + chunkLength), dstOffset)
             index++
             sourceOffset += sourceStride
             dstOffset += dstStride
@@ -404,12 +354,10 @@ export class TgdDataset {
         if (!definition)
             throw new Error(
                 `[TgdDataset] Attribute "${String(
-                    attribName
-                )}" not found in this DataSet!\nAvailable names are: ${Object.keys(
-                    this.definitions
-                )
+                    attribName,
+                )}" not found in this DataSet!\nAvailable names are: ${Object.keys(this.definitions)
                     .map((name) => JSON.stringify(name))
-                    .join(", ")}.`
+                    .join(", ")}.`,
             )
         return definition
     }
@@ -427,14 +375,7 @@ export class TgdDataset {
             if (prg.hasAttribute(name)) {
                 const att = prg.getAttribLocation(name)
                 gl.enableVertexAttribArray(att)
-                gl.vertexAttribPointer(
-                    att,
-                    definition.dimension,
-                    gl.FLOAT,
-                    false,
-                    this.stride,
-                    offsetDestination
-                )
+                gl.vertexAttribPointer(att, definition.dimension, gl.FLOAT, false, this.stride, offsetDestination)
                 gl.vertexAttribDivisor(att, definition.divisor)
             }
             const bytes = definition.dimension * definition.bytesPerElement
@@ -460,7 +401,7 @@ export class TgdDataset {
                 `  ${this.stride},   // Stride`,
                 `  ${offsetDestination}   // Offset`,
                 ")",
-                `gl.vertexAttribDivisor(${att}, ${definition.divisor})`
+                `gl.vertexAttribDivisor(${att}, ${definition.divisor})`,
             )
             const bytes = definition.dimension * definition.bytesPerElement
             offsetDestination += bytes
@@ -469,39 +410,19 @@ export class TgdDataset {
     }
 
     debug(caption = "Dataset") {
-        console.log(
-            caption,
-            "   count:",
-            this.count,
-            "   target:",
-            this.target,
-            "   usage:",
-            this.usage
-        )
-        const rows: [name: string, type: string, offset: string][] = [
-            ["Name", "type", "offset"],
-        ]
+        console.log(caption, "   count:", this.count, "   target:", this.target, "   usage:", this.usage)
+        const rows: [name: string, type: string, offset: string][] = [["Name", "type", "offset"]]
         for (const attName of Object.keys(this.definitions)) {
             const definition = this.definitions[attName]
-            rows.push([
-                attName,
-                this.attributesDefinition[attName],
-                `${definition.byteOffset}`,
-            ])
+            rows.push([attName, this.attributesDefinition[attName], `${definition.byteOffset}`])
         }
         const sizes: number[] = [0, 1, 2].map((index) =>
-            rows.reduce(
-                (previous, current) =>
-                    Math.max(previous, current[index].length),
-                0
-            )
+            rows.reduce((previous, current) => Math.max(previous, current[index].length), 0),
         )
         for (const [name, type, offset] of rows)
             console.log(
-                `%c${name.padEnd(sizes[0] + 2)}${type.padStart(
-                    sizes[1] + 2
-                )}${offset.padStart(sizes[2] + 2)}`,
-                "font-family:monospace"
+                `%c${name.padEnd(sizes[0] + 2)}${type.padStart(sizes[1] + 2)}${offset.padStart(sizes[2] + 2)}`,
+                "font-family:monospace",
             )
 
         for (const attName of Object.keys(this.definitions)) {
@@ -552,7 +473,4 @@ function resizeSlow(inBuff: ArrayBuffer, newSize?: number): ArrayBuffer {
     return outBuff
 }
 
-const resize =
-    typeof ArrayBuffer.prototype.transfer === "function"
-        ? resizeFast
-        : resizeSlow
+const resize = typeof ArrayBuffer.prototype.transfer === "function" ? resizeFast : resizeSlow

@@ -23,8 +23,7 @@ export class TgdTimeInterval {
         if (delta < this.intervalInSeconds) return
 
         this.intervalInSeconds = Math.max(this.intervalInSeconds, 1 / 60)
-        this.previousTime +=
-            Math.floor(delta / this.intervalInSeconds) * this.intervalInSeconds
+        this.previousTime += Math.floor(delta / this.intervalInSeconds) * this.intervalInSeconds
         this.action?.(time, delay)
     }
 }

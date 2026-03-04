@@ -1,14 +1,6 @@
 import * as React from "react"
 
-import {
-    Theme,
-    CommonProps,
-    styleCommon,
-    ViewPanel,
-    ViewStrip,
-    ViewTabs,
-    ViewTab,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, ViewPanel, ViewStrip, ViewTabs, ViewTab } from "@tolokoban/ui"
 import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { isTypeCamera } from "../../types"
@@ -35,53 +27,31 @@ export function ViewActionNode(props: ViewActionNodeProps) {
     if (!node) return null
 
     return (
-        <ViewStrip
-            orientation="column"
-            template="-1"
-            className={$.join(props.className, Styles.actionNode)}
-            fullsize
-        >
+        <ViewStrip orientation="column" template="-1" className={$.join(props.className, Styles.actionNode)} fullsize>
             <ViewPanel
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 gap="M"
                 color="primary-5"
-                padding="S"
-            >
+                padding="S">
                 <div>
-                    Node #{props.index}:{" "}
-                    <b>{node.name ?? <em>anonymous</em>}</b>
+                    Node #{props.index}: <b>{node.name ?? <em>anonymous</em>}</b>
                 </div>
             </ViewPanel>
             <ViewPanel style={style} color="neutral-1">
                 <ViewTabs fullsize color="neutral-3" colorAccent="primary-3">
                     <ViewTab key="render" label="3D View">
-                        {!isTypeCamera(node) && (
-                            <ViewActionNodeRender
-                                data={props.data}
-                                node={node}
-                            />
-                        )}
+                        {!isTypeCamera(node) && <ViewActionNodeRender data={props.data} node={node} />}
                     </ViewTab>
                     <ViewTab key="camera" label="Camera">
-                        {isTypeCamera(node) && (
-                            <ViewActionNodeCamera
-                                data={props.data}
-                                node={node}
-                            />
-                        )}
+                        {isTypeCamera(node) && <ViewActionNodeCamera data={props.data} node={node} />}
                     </ViewTab>
                     <ViewTab key="transfo" label="Transformation">
                         <ViewActionNodeTransfo node={node} />
                     </ViewTab>
                     <ViewTab key="mesh" label="Mesh">
-                        {isNumber(node.mesh) && (
-                            <ViewActionNodeMesh
-                                data={props.data}
-                                meshIndexOrName={node.mesh}
-                            />
-                        )}
+                        {isNumber(node.mesh) && <ViewActionNodeMesh data={props.data} meshIndexOrName={node.mesh} />}
                     </ViewTab>
                     <ViewTab key="verbatim" label="Verbatim">
                         <pre>{JSON.stringify(node, null, "  ")}</pre>

@@ -16,7 +16,7 @@ type Vec16 = [
     number,
     number,
     number,
-    number
+    number,
 ]
 
 describe("math/mat4.ts", () => {

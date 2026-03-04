@@ -1,9 +1,4 @@
-import {
-    TgdContext,
-    TgdFilter,
-    TgdPainterFilter,
-    TgdTexture2D,
-} from "@tolokoban/tgd"
+import { TgdContext, TgdFilter, TgdPainterFilter, TgdTexture2D } from "@tolokoban/tgd"
 
 import BackgroundURL from "./background.avif"
 
@@ -17,17 +12,15 @@ export class FilterManager {
 
     constructor(
         canvas: HTMLCanvasElement,
-        private readonly onError: (error: string | null) => void
+        private readonly onError: (error: string | null) => void,
     ) {
         const context = new TgdContext(canvas)
         this.context = context
-        const texture = new TgdTexture2D(context)
-            .loadBitmap(BackgroundURL)
-            .setParams({
-                wrapR: "MIRRORED_REPEAT",
-                wrapS: "MIRRORED_REPEAT",
-                wrapT: "MIRRORED_REPEAT",
-            })
+        const texture = new TgdTexture2D(context).loadBitmap(BackgroundURL).setParams({
+            wrapR: "MIRRORED_REPEAT",
+            wrapS: "MIRRORED_REPEAT",
+            wrapT: "MIRRORED_REPEAT",
+        })
         this.texture = texture
         this.destroy = () => {
             texture.delete()
@@ -54,26 +47,11 @@ export class FilterManager {
                         },
                         setUniforms: ({ program, time }) => {
                             program.uniform1f("uniTime", time)
-                            program.uniform1f(
-                                "uniEffectStrength",
-                                this.uniEffectStrength
-                            )
-                            program.uniform1f(
-                                "uniAspectRatio",
-                                context.width / context.height
-                            )
-                            program.uniform1f(
-                                "uniAspectRatioInverse",
-                                context.height / context.width
-                            )
-                            program.uniformMatrix4fv(
-                                "uniModelViewMatrix",
-                                context.camera.matrixModelView
-                            )
-                            program.uniformMatrix4fv(
-                                "uniProjectionMatrix",
-                                context.camera.matrixProjection
-                            )
+                            program.uniform1f("uniEffectStrength", this.uniEffectStrength)
+                            program.uniform1f("uniAspectRatio", context.width / context.height)
+                            program.uniform1f("uniAspectRatioInverse", context.height / context.width)
+                            program.uniformMatrix4fv("uniModelViewMatrix", context.camera.matrixModelView)
+                            program.uniformMatrix4fv("uniProjectionMatrix", context.camera.matrixProjection)
                         },
                     }),
                 ],

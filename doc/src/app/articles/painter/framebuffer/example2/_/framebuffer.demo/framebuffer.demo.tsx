@@ -40,9 +40,7 @@ function init(context: TgdContext, assets: Assets) {
         textureColor0: new TgdTexture2D(context),
     })
     const material = new Material()
-    material.texture = new TgdTexture2D(context).loadBitmap(
-        assets.image.background
-    )
+    material.texture = new TgdTexture2D(context).loadBitmap(assets.image.background)
     const painter = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
         // cull: webglPresetCull.front,
@@ -86,7 +84,7 @@ function init(context: TgdContext, assets: Assets) {
         new TgdPainterLogic((time, delay) => {
             const { camera } = context
             camera.transfo.orbitAroundY(delay)
-        })
+        }),
     )
     context.play()
     // #end

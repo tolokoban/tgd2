@@ -8,10 +8,7 @@ describe(`TgdMat3`, () => {
             const a = new TgdMat3(1, 2, 3, 4, 5, 6, 7, 8, 9)
             const b = new TgdMat3(19, 18, 17, 16, 15, 14, 13, 12, 11)
             a.multiply(b)
-            expectVectorsToBeClose(
-                a,
-                [210, 264, 318, 174, 219, 264, 138, 174, 210]
-            )
+            expectVectorsToBeClose(a, [210, 264, 318, 174, 219, 264, 138, 174, 210])
         })
     })
     describe(`toAxes[X,Y,Z](0)`, () => {

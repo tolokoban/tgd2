@@ -8,5 +8,5 @@ export function padColOfNumbers(values: number[], decimals = 6): string[] {
         max = Math.max(max, txt.length)
         out.push(txt)
     }
-    return out.map(txt => txt.padStart(max, " "))
+    return out.map((txt) => txt.padStart(max, " "))
 }

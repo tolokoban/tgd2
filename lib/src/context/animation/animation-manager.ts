@@ -22,8 +22,7 @@ export class TgdManagerAnimation {
     private readonly animations = new Map<TgdAnimation, Animation>()
 
     schedule(animation: TgdAnimation): TgdAnimation {
-        if (!animation.name)
-            animation.name = `TgdAnimation#${TgdManagerAnimation.counter++}`
+        if (!animation.name) animation.name = `TgdAnimation#${TgdManagerAnimation.counter++}`
         const { action, duration, easingFunction, repeat } = animation
         this.animations.set(animation, {
             name: animation.name,
@@ -31,9 +30,7 @@ export class TgdManagerAnimation {
             delay: animation.delay ?? 0,
             duration: duration,
             inverseDuration: 1 / duration,
-            action: easingFunction
-                ? (alpha: number) => action(easingFunction(alpha))
-                : action,
+            action: easingFunction ? (alpha: number) => action(easingFunction(alpha)) : action,
             loop: 1,
             repeat: repeat ?? 1,
             cancel: () => this.cancel(animation),
@@ -67,7 +64,7 @@ export class TgdManagerAnimation {
                     console.log(
                         "🚀 [animation-manager] time, anim.start + anim.duration =",
                         time,
-                        anim.start + anim.duration
+                        anim.start + anim.duration,
                     ) // @FIXME: Remove this line written on 2025-11-06 at 10:52
                     break
                 }
@@ -106,8 +103,7 @@ export class TgdManagerAnimation {
                         color: "#d00",
                     })
                 } else {
-                    const t =
-                        Math.min(1, anim.inverseDuration * relativeTime) * 100
+                    const t = Math.min(1, anim.inverseDuration * relativeTime) * 100
                     output.add(`Run ${t.toFixed(0)}%`, { color: "#0d0" })
                 }
             }

@@ -2,11 +2,7 @@ import FS from "fs"
 import Path from "path"
 
 const [, prg, source, ...targets] = process.argv
-if (
-    typeof source !== "string" ||
-    !Array.isArray(targets) ||
-    targets.length === 0
-) {
+if (typeof source !== "string" || !Array.isArray(targets) || targets.length === 0) {
     console.log("")
     console.log("Usage: ", prg, "./source ./dest1 ./dest2 ...")
     console.log("")

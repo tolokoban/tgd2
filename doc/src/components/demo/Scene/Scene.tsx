@@ -45,14 +45,7 @@ export default function SceneView({
         observer.observe(canvas)
         return () => observer.unobserve(canvas)
     }, [refContext.current, refCanvas.current])
-    if (noBorder)
-        return (
-            <canvas
-                className={className}
-                style={{ width, height }}
-                ref={mountCanvas}
-            ></canvas>
-        )
+    if (noBorder) return <canvas className={className} style={{ width, height }} ref={mountCanvas}></canvas>
 
     return (
         <div className={Theme.classNames.join(className, Style.Scene)}>

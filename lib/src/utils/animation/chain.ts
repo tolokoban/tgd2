@@ -11,7 +11,7 @@ export function tgdAnimChain(
         repeat: number
         easingFunction(this: void, x: number): number
         onEnd(): void
-    }> = {}
+    }> = {},
 ): TgdAnimation {
     if (animations.length === 0) {
         return {
@@ -38,19 +38,13 @@ export function tgdAnimChain(
                         previousAnimation.onEnd?.()
                     }
                     previousAnimation = animation
-                    const intervalAlpha = computeIntervalAlpha(
-                        t,
-                        begin,
-                        end,
-                        animation.delay
-                    )
+                    const intervalAlpha = computeIntervalAlpha(t, begin, end, animation.delay)
                     if (intervalAlpha < 0 || intervalAlpha > 1) return
 
                     if (previousName !== animation.name) {
                         previousName = animation.name ?? ""
                     }
-                    const easingFunction =
-                        animation.easingFunction ?? tgdEasingFunctionLinear
+                    const easingFunction = animation.easingFunction ?? tgdEasingFunctionLinear
                     animation.action(easingFunction(intervalAlpha))
                     return
                 }
@@ -78,12 +72,7 @@ function computeIntervals(animations: TgdAnimation[]) {
     return { intervals, duration: end }
 }
 
-function computeIntervalAlpha(
-    t: number,
-    begin: number,
-    end: number,
-    delay = 0
-) {
+function computeIntervalAlpha(t: number, begin: number, end: number, delay = 0) {
     const actualBegin = begin + delay
     const duration = end - actualBegin
     return (t - actualBegin) / duration

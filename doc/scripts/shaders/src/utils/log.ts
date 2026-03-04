@@ -1,6 +1,6 @@
 export function logError(...args: unknown[]) {
     const text = args
-        .map(arg => {
+        .map((arg) => {
             if (arg instanceof Error) {
                 if (arg.stack) console.error(arg.stack)
                 return arg.message
@@ -15,7 +15,7 @@ export function logError(...args: unknown[]) {
 
 export function logWarning(...args: unknown[]) {
     const text = args
-        .map(arg => {
+        .map((arg) => {
             if (typeof arg === "string") return arg
             if (typeof arg === "number") return color(`${arg}`, "Yellow")
             return color(stringify(arg), "Yellow")
@@ -26,7 +26,7 @@ export function logWarning(...args: unknown[]) {
 
 export function logDebug(...args: unknown[]) {
     const text = args
-        .map(arg => {
+        .map((arg) => {
             if (typeof arg === "string") return color(arg, "Cyan")
             if (typeof arg === "number") return color(`${arg}`, "Yellow")
             return color(stringify(arg), "LightCyan")
@@ -79,5 +79,5 @@ const COLORS = {
 }
 
 export function color(text: string, ...codes: Array<keyof typeof COLORS>) {
-    return `\x1b[${codes.map(key => COLORS[key]).join(";")}m${text}\x1b[0m`
+    return `\x1b[${codes.map((key) => COLORS[key]).join(";")}m${text}\x1b[0m`
 }

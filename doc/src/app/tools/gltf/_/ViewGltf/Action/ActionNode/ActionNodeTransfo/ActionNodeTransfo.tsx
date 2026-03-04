@@ -30,10 +30,7 @@ export function ViewActionNodeTransfo(props: ViewActionNodeTransfoProps) {
     }
     code.push(`})`)
     return (
-        <div
-            className={$.join(props.className, Styles.actionNodeTransfo)}
-            style={style}
-        >
+        <div className={$.join(props.className, Styles.actionNodeTransfo)} style={style}>
             <CodeViewerView language="ts" value={code.join("\n")} />
         </div>
     )

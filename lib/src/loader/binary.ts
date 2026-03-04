@@ -1,8 +1,6 @@
 import { TgdDataGlb } from "@tgd/parser"
 
-export async function tgdLoadGlb(
-    urlOrFile: string | File
-): Promise<TgdDataGlb | null> {
+export async function tgdLoadGlb(urlOrFile: string | File): Promise<TgdDataGlb | null> {
     try {
         if (urlOrFile instanceof File) {
             const data = await urlOrFile.arrayBuffer()
@@ -11,9 +9,7 @@ export async function tgdLoadGlb(
 
         const resp = await fetch(urlOrFile)
         if (!resp.ok) {
-            throw new Error(
-                `Unable to load GLB from url "${urlOrFile}"!\nError #${resp.status}: ${resp.statusText}`
-            )
+            throw new Error(`Unable to load GLB from url "${urlOrFile}"!\nError #${resp.status}: ${resp.statusText}`)
         }
         const data = await resp.arrayBuffer()
         return TgdDataGlb.parse(data)
@@ -24,9 +20,7 @@ export async function tgdLoadGlb(
     }
 }
 
-export async function tgdLoadArrayBuffer(
-    urlOrFile: string | File
-): Promise<ArrayBuffer | null> {
+export async function tgdLoadArrayBuffer(urlOrFile: string | File): Promise<ArrayBuffer | null> {
     if (urlOrFile instanceof File) {
         return await urlOrFile.arrayBuffer()
     }
@@ -41,9 +35,7 @@ export async function tgdLoadArrayBuffer(
     }
 }
 
-export async function tgdLoadText(
-    urlOrFile: string | File
-): Promise<string | null> {
+export async function tgdLoadText(urlOrFile: string | File): Promise<string | null> {
     if (urlOrFile instanceof File) {
         return await urlOrFile.text()
     }

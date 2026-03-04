@@ -13,9 +13,7 @@ export type ViewVertexShaderCodeEditorProps = CommonProps & {
     disabled?: boolean
 }
 
-export function ViewVertexShaderCodeEditor(
-    props: ViewVertexShaderCodeEditorProps
-) {
+export function ViewVertexShaderCodeEditor(props: ViewVertexShaderCodeEditorProps) {
     return (
         <CodeEditor
             className={$.join(props.className, Styles.vertexshadercodeeditor)}

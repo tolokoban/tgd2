@@ -1,12 +1,6 @@
 import * as React from "react"
 
-import {
-    Theme,
-    CommonProps,
-    ViewPanel,
-    ViewSlider,
-    IconFullscreen,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, ViewPanel, ViewSlider, IconFullscreen } from "@tolokoban/ui"
 import { tgdFullscreenToggle } from "@tolokoban/tgd"
 
 import { FilterManager } from "./manager"
@@ -59,11 +53,7 @@ export function ViewFilterResult(props: ViewFilterResultProps) {
     }, [])
 
     return (
-        <div
-            ref={ref}
-            className={$.join(props.className, Styles.filterresult)}
-            {...props}
-        >
+        <div ref={ref} className={$.join(props.className, Styles.filterresult)} {...props}>
             <ViewPanel
                 color="primary-5"
                 height="2em"
@@ -71,8 +61,7 @@ export function ViewFilterResult(props: ViewFilterResultProps) {
                 justifyContent="space-between"
                 alignItems="center"
                 padding="M"
-                fullwidth
-            >
+                fullwidth>
                 <div>Filter output</div>
                 <IconFullscreen onClick={handleToggleFullscreen} />
             </ViewPanel>
@@ -91,13 +80,7 @@ export function ViewFilterResult(props: ViewFilterResultProps) {
                     })}
                 </pre>
             )}
-            <ViewSlider
-                min={0}
-                max={1}
-                step={0.01}
-                value={uniEffectStrength}
-                onChange={setUniEffectStrength}
-            />
+            <ViewSlider min={0} max={1} step={0.01} value={uniEffectStrength} onChange={setUniEffectStrength} />
         </div>
     )
 }

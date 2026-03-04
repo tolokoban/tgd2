@@ -46,7 +46,7 @@ export class PainterNames extends TgdPainter {
                 attLatLng: "vec2",
                 attUV: "vec3",
             },
-            { divisor: 1 }
+            { divisor: 1 },
         )
         dsInstance.set("attLatLng", new Float32Array(attLatLng))
         dsInstance.set("attUV", new Float32Array(attUV))
@@ -70,10 +70,7 @@ export class PainterNames extends TgdPainter {
         prg.uniform1f("uniAspect", context.width / context.height)
         prg.uniform1f("uniAspectInverse", context.height / context.width)
         prg.uniformMatrix4fv("uniModelViewMatrix", fixedCamera.matrixModelView)
-        prg.uniformMatrix4fv(
-            "uniProjectionMatrix",
-            fixedCamera.matrixProjection
-        )
+        prg.uniformMatrix4fv("uniProjectionMatrix", fixedCamera.matrixProjection)
         texture.activate(0, prg, "uniTexture")
         vao.bind()
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.count)

@@ -4,7 +4,7 @@ import { tgdCalcMix } from "../../math/math"
 export function tgdActionCreateTransfoInterpolation(
     transfo: TgdTransfo,
     transfoAtT0: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>,
-    transfoAtT1: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>
+    transfoAtT1: Readonly<Partial<TgdTransfoOptions>> | Readonly<TgdTransfo>,
 ) {
     const beginTransfo = transfo.clone().from(transfoAtT0)
     const distanceAt0 = beginTransfo.distance

@@ -16,9 +16,7 @@ export interface TgdPainterNodeOptions {
     logic(this: TgdPainterNode, time: number, delay: number): void
 }
 
-export type TgdPainterNodeChild =
-    | TgdPainterNode
-    | TgdInterfaceTransformablePainter
+export type TgdPainterNodeChild = TgdPainterNode | TgdInterfaceTransformablePainter
 
 /**
  * A Node can hold others Nodes or any object providing the
@@ -67,13 +65,7 @@ export class TgdPainterNode extends TgdPainter {
 
     constructor(options: Partial<TgdPainterNodeOptions> = {}) {
         super()
-        const {
-            children = [],
-            transfo,
-            logic,
-            paintTheTargets = true,
-            name = `TgdPainterNode/${this.name}`,
-        } = options
+        const { children = [], transfo, logic, paintTheTargets = true, name = `TgdPainterNode/${this.name}` } = options
         this.paintTheTargets = paintTheTargets
         for (const child of children) this.add(child)
         this.transfo = new TgdTransfo(transfo)
@@ -126,9 +118,7 @@ export class TgdPainterNode extends TgdPainter {
         const fringe: TgdPainterNode[] = [this]
         while (fringe.length > 0) {
             const node = fringe.shift() as TgdPainterNode
-            node.globalMatrix
-                .from(node.parentMatrix)
-                .multiply(node.transfo.matrix)
+            node.globalMatrix.from(node.parentMatrix).multiply(node.transfo.matrix)
             node.logic?.(time, delay)
             for (const target of node.targets) {
                 target.transfo.matrix.from(node.globalMatrix)
@@ -160,12 +150,9 @@ export class TgdPainterNode extends TgdPainter {
 }
 
 function actualDebug(out: TgdConsole, node: TgdPainterNode, indent = "| ") {
-    out.add(
-        `${indent}${node.name}  [${format(node.transfo.orientation)}] (${format(
-            node.transfo.position
-        )})\n`,
-        { bold: true }
-    )
+    out.add(`${indent}${node.name}  [${format(node.transfo.orientation)}] (${format(node.transfo.position)})\n`, {
+        bold: true,
+    })
     const targets = node.getTargets()
     if (targets.length > 0) {
         if (targets.length === 1) {

@@ -37,12 +37,7 @@ export type WebglDrawMode =
     | "TRIANGLE_FAN"
     | "TRIANGLES"
 
-export type WebglImage =
-    | ImageData
-    | HTMLImageElement
-    | HTMLCanvasElement
-    | HTMLVideoElement
-    | ImageBitmap
+export type WebglImage = ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap
 
 export function isWebglImage(data: unknown): data is WebglImage {
     return (
@@ -342,12 +337,7 @@ export enum WebglEnumStencilOperation {
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
  */
-export type WebglTextureInternalFormatForImage =
-    | "RGB"
-    | "RGBA"
-    | "ALPHA"
-    | "LUMINANCE"
-    | "LUMINANCE_ALPHA"
+export type WebglTextureInternalFormatForImage = "RGB" | "RGBA" | "ALPHA" | "LUMINANCE" | "LUMINANCE_ALPHA"
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D

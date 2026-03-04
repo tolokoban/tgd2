@@ -16,23 +16,13 @@ import { TgdMat3 } from "./mat3"
 export class TgdMat2 extends Float32Array {
     constructor()
     constructor(mat: TgdMat2)
-    constructor(
-        column1: TgdVec2 | TgdVec3 | TgdVec4,
-        column2: TgdVec2 | TgdVec3 | TgdVec4
-    )
+    constructor(column1: TgdVec2 | TgdVec3 | TgdVec4, column2: TgdVec2 | TgdVec3 | TgdVec4)
     constructor(m00: number, m10: number, m01: number, m11: number)
     constructor(
-        m00:
-            | number
-            | TgdVec2
-            | TgdVec3
-            | TgdVec4
-            | TgdMat2
-            | TgdMat3
-            | TgdMat4 = 1,
+        m00: number | TgdVec2 | TgdVec3 | TgdVec4 | TgdMat2 | TgdMat3 | TgdMat4 = 1,
         m10: number | TgdVec2 | TgdVec3 | TgdVec4 = 0,
         m01: number = 0,
-        m11: number = 1
+        m11: number = 1,
     ) {
         if (typeof m00 === "number" && typeof m10 === "number") {
             super([m00, m10, m01, m11])
@@ -47,11 +37,7 @@ export class TgdMat2 extends Float32Array {
                 col1.x, col1.y,
                 col2.x, col2.y,
             ])
-        } else if (
-            m00 instanceof TgdMat2 ||
-            m00 instanceof TgdMat3 ||
-            m00 instanceof TgdMat4
-        ) {
+        } else if (m00 instanceof TgdMat2 || m00 instanceof TgdMat3 || m00 instanceof TgdMat4) {
             const mat = m00
             super([mat.m00, mat.m10, mat.m01, mat.m11])
         } else {

@@ -14,14 +14,10 @@ export function PascalTriangle({ rows, modulo }: PascalTriangleProps) {
     const generator = new RowGenerator()
     return (
         <div className={styles.main}>
-            {range(rows).map(row => (
+            {range(rows).map((row) => (
                 <div key={row}>
                     {generator.next().map((value, index) => (
-                        <div
-                            key={index}
-                            style={{ background: colors[value % modulo] }}
-                            title={`${value}`}
-                        >
+                        <div key={index} style={{ background: colors[value % modulo] }} title={`${value}`}>
                             {value}
                         </div>
                     ))}

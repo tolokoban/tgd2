@@ -23,13 +23,7 @@ export default function CodeEditorView(props: CodeEditorViewProps) {
                 disabled={props.disabled}
                 value={props.value}
                 onValueChange={props.onChange ?? VOID_FUNC}
-                highlight={(code) =>
-                    Prism.highlight(
-                        code,
-                        getGrammarForLanguage(props.language),
-                        props.language
-                    )
-                }
+                highlight={(code) => Prism.highlight(code, getGrammarForLanguage(props.language), props.language)}
             />
         </div>
     )

@@ -4,8 +4,7 @@ import { TgdQuat, TgdVec3 } from "@tgd/math"
 
 function expectVector(actual: number[], expected: number[], precision = 5) {
     expect(actual.length).toBe(expected.length)
-    for (const [index, x] of actual.entries())
-        expect(x).toBeCloseTo(expected[index], precision)
+    for (const [index, x] of actual.entries()) expect(x).toBeCloseTo(expected[index], precision)
 }
 describe("math/quat.ts", () => {
     const cases: Array<
@@ -13,7 +12,7 @@ describe("math/quat.ts", () => {
             X: [number, number, number],
             Y: [number, number, number],
             Z: [number, number, number],
-            Q: [number, number, number, number]
+            Q: [number, number, number, number],
         ]
     > = [
         [
@@ -50,9 +49,7 @@ describe("math/quat.ts", () => {
     describe("TgdQuat.fromAxes()", () => {
         const quat = new TgdQuat(0, 0, 0, 0)
         for (const [X, Y, Z, Q] of cases) {
-            it(`should get ${string_(Q)} from ${string_(X)}, ${string_(
-                Y
-            )} and ${string_(Z)}`, () => {
+            it(`should get ${string_(Q)} from ${string_(X)}, ${string_(Y)} and ${string_(Z)}`, () => {
                 const axisX = new TgdVec3(...X)
                 const axisY = new TgdVec3(...Y)
                 const axisZ = new TgdVec3(...Z)
@@ -101,10 +98,10 @@ describe("math/quat.ts", () => {
                 expectVector(gotZ, Z, 5)
             })
         }
-    })    
+    })
 })
 
 function string_(input: Iterable<number>): string {
     const array = [...input]
-    return `[${array.map(n => `${n}`).join(", ")}]`
+    return `[${array.map((n) => `${n}`).join(", ")}]`
 }

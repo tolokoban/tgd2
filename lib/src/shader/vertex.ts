@@ -72,7 +72,7 @@ export class TgdShaderVertex {
                 bold: true,
                 color: "#6bf",
             },
-            code
+            code,
         )
         out.debug()
     }

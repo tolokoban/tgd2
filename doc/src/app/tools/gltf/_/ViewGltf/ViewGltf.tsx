@@ -1,12 +1,6 @@
 import type { TgdDataGlb } from "@tolokoban/tgd"
 
-import {
-    IconImport,
-    Theme,
-    ViewInputFile,
-    ViewPanel,
-    ViewStrip,
-} from "@tolokoban/ui"
+import { IconImport, Theme, ViewInputFile, ViewPanel, ViewStrip } from "@tolokoban/ui"
 import * as React from "react"
 import { ViewAction } from "./Action"
 import { ViewGltfTree } from "./GltfTree"
@@ -38,8 +32,7 @@ export function ViewGLTF(props: ViewViewGltfProps) {
             template="*1"
             orientation="row"
             fullsize
-            gap="8px"
-        >
+            gap="8px">
             <ViewStrip template="*1" orientation="column">
                 <ViewPanel
                     color="primary-5"
@@ -48,20 +41,14 @@ export function ViewGLTF(props: ViewViewGltfProps) {
                     alignItems="center"
                     padding={["S", "M"]}
                     minWidth="300px"
-                    gap="M"
-                >
+                    gap="M">
                     <div>GLB Viewer</div>
                     {data && <em>{Math.floor(data.fileSize / 1024)} Kb</em>}
                     <ViewInputFile accept="glb" onLoad={handleLoad}>
                         <IconImport />
                     </ViewInputFile>
                 </ViewPanel>
-                <ViewPanel
-                    overflow="auto"
-                    minHeight="auto"
-                    color="neutral-5"
-                    padding="S"
-                >
+                <ViewPanel overflow="auto" minHeight="auto" color="neutral-5" padding="S">
                     {!data && <div>Loading...</div>}
                     {data && <ViewGltfTree data={data} onAction={setAction} />}
                 </ViewPanel>

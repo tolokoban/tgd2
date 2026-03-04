@@ -1,9 +1,6 @@
 import { TgdLogger } from "@tgd/log"
 
-export type TgdDebugPainterHierarchy = Record<
-    string,
-    TgdDebugPainterHierarchy[] | null
->
+export type TgdDebugPainterHierarchy = Record<string, TgdDebugPainterHierarchy[] | null>
 
 export abstract class TgdPainter {
     static readonly log = new TgdLogger()
@@ -31,8 +28,6 @@ export abstract class TgdPainter {
     }
 
     debug(caption?: string) {
-        console.debug(
-            caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`
-        )
+        console.debug(caption ?? `${this.name}  (id: ${this.id}, active: ${this.active})`)
     }
 }

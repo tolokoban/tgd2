@@ -84,11 +84,7 @@
             options = options || {}
 
             var dimensions = options.dimensions || [1, 1, 1]
-            var position = options.position || [
-                -dimensions[0] / 2,
-                -dimensions[1] / 2,
-                -dimensions[2] / 2,
-            ]
+            var position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2]
             var x = position[0]
             var y = position[1]
             var z = position[2]
@@ -254,26 +250,11 @@
             for (i = 0, count = positions.length / 3; i < count; i++) {
                 ni = i * 3
 
-                normals[ni] =
-                    parseInt(i / 6, 10) === 1
-                        ? 1
-                        : parseInt(i / 6, 10) === 3
-                        ? -1
-                        : 0
+                normals[ni] = parseInt(i / 6, 10) === 1 ? 1 : parseInt(i / 6, 10) === 3 ? -1 : 0
 
-                normals[ni + 1] =
-                    parseInt(i / 6, 10) === 4
-                        ? 1
-                        : parseInt(i / 6, 10) === 5
-                        ? -1
-                        : 0
+                normals[ni + 1] = parseInt(i / 6, 10) === 4 ? 1 : parseInt(i / 6, 10) === 5 ? -1 : 0
 
-                normals[ni + 2] =
-                    parseInt(i / 6, 10) === 0
-                        ? 1
-                        : parseInt(i / 6, 10) === 2
-                        ? -1
-                        : 0
+                normals[ni + 2] = parseInt(i / 6, 10) === 0 ? 1 : parseInt(i / 6, 10) === 2 ? -1 : 0
             }
 
             return {
@@ -313,15 +294,11 @@
                     x1 = Math.sin(lat_angle) * Math.cos(long_angle)
                     x2 = Math.sin(lat_angle) * Math.cos(long_angle + long_step)
                     x3 = Math.sin(lat_angle + lat_step) * Math.cos(long_angle)
-                    x4 =
-                        Math.sin(lat_angle + lat_step) *
-                        Math.cos(long_angle + long_step)
+                    x4 = Math.sin(lat_angle + lat_step) * Math.cos(long_angle + long_step)
                     z1 = Math.sin(lat_angle) * Math.sin(long_angle)
                     z2 = Math.sin(lat_angle) * Math.sin(long_angle + long_step)
                     z3 = Math.sin(lat_angle + lat_step) * Math.sin(long_angle)
-                    z4 =
-                        Math.sin(lat_angle + lat_step) *
-                        Math.sin(long_angle + long_step)
+                    z4 = Math.sin(lat_angle + lat_step) * Math.sin(long_angle + long_step)
                     u1 = 1 - j / long_bands
                     u2 = 1 - (j + 1) / long_bands
                     v1 = 1 - i / lat_bands
@@ -401,18 +378,8 @@
                 min: vec3.create(),
                 max: vec3.create(),
             }
-            vec3.set(
-                res.min,
-                Number.POSITIVE_INFINITY,
-                Number.POSITIVE_INFINITY,
-                Number.POSITIVE_INFINITY
-            )
-            vec3.set(
-                res.max,
-                Number.NEGATIVE_INFINITY,
-                Number.NEGATIVE_INFINITY,
-                Number.NEGATIVE_INFINITY
-            )
+            vec3.set(res.min, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
+            vec3.set(res.max, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
             for (var i = 0, len = position.length; i < len; i += 3) {
                 res.min[0] = Math.min(position[i], res.min[0])
                 res.max[0] = Math.max(position[i], res.max[0])

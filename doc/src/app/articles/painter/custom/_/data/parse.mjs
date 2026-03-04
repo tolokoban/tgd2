@@ -62,7 +62,7 @@ for (const line of lines) {
             `${bv}`.padStart(10),
             `${temp}`.padStart(10),
             `${magnitude}`.padStart(10),
-            `${brigthness}`.padStart(10)
+            `${brigthness}`.padStart(10),
         )
     starsById.set(id, { latitude, longitude })
     stars.push(latitude, longitude, brigthness, temp)
@@ -76,7 +76,7 @@ console.log(
     Math.ceil(data.byteLength / 1024),
     "Kb, and contain",
     count,
-    "stars."
+    "stars.",
 )
 console.log()
 console.log("Brightness from", minBrightness, "to", maxBrightness)
@@ -87,7 +87,7 @@ const fd = nodeFS.openSync(outputFilename, "w")
 nodeFS.writeSync(fd, data)
 nodeFS.closeSync(fd)
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * @see https://simbad.cds.unistra.fr/guide/sim-url.htx
@@ -97,14 +97,14 @@ async function fetchNames() {
     for (const id of Array.from(ids)) {
         const time = Date.now()
         const resp = await fetch(
-            `https://simbad.cds.unistra.fr/simbad/sim-id?output.format=votable&output.params=ids&Ident=hd${id}`
+            `https://simbad.cds.unistra.fr/simbad/sim-id?output.format=votable&output.params=ids&Ident=hd${id}`,
         )
         const text = await resp.text()
         const start = text.indexOf("\n<TR><TD>") + "\n<TR><TD>".length
         const end = text.indexOf("</TD></TR>", start)
         const items = text.substring(start, end).split("|")
         const result = [id]
-        items.forEach(item => {
+        items.forEach((item) => {
             if (item.startsWith("NAME")) {
                 result.push(item.substring("NAME".length).trim())
             }
@@ -121,9 +121,7 @@ async function fetchNames() {
 }
 
 console.log()
-const content = nodeFS
-    .readFileSync(nodePath.resolve("..", "names.txt"))
-    .toString()
+const content = nodeFS.readFileSync(nodePath.resolve("..", "names.txt")).toString()
 let chars = 0
 /**
  * @type {Record<string, [number, number]>}
@@ -137,18 +135,10 @@ for (const line of content.split("\n")) {
     if (!id) continue
 
     chars += name.length + 1
-    console.log(
-        id,
-        name,
-        Math.round(star.latitude * DEG_PER_RAD),
-        Math.round(star.longitude * DEG_PER_RAD)
-    )
+    console.log(id, name, Math.round(star.latitude * DEG_PER_RAD), Math.round(star.longitude * DEG_PER_RAD))
     positionsPerName[name] = [star.latitude, star.longitude]
 }
 console.log()
 console.log(Math.ceil(Math.sqrt(chars)))
 console.log()
-nodeFS.writeFileSync(
-    nodePath.resolve("../names.json"),
-    JSON.stringify(positionsPerName)
-)
+nodeFS.writeFileSync(nodePath.resolve("../names.json"), JSON.stringify(positionsPerName))

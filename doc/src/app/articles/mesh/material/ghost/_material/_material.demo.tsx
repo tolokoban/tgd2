@@ -28,7 +28,7 @@ function init(ctx: TgdContext, assets: Assets) {
         new TgdPainterState(ctx, {
             depth: webglPresetDepth.less,
             children: [mesh],
-        })
+        }),
     )
     ctx.paint()
     new TgdControllerCameraOrbit(ctx, {

@@ -37,10 +37,7 @@ export function tgdCalcRandom2(a?: number, b?: number): ArrayNumber2 {
 
     const min = typeof b === "number" ? a : 0
     const max = typeof b === "number" ? b : a
-    return [
-        min + Math.random() * (max - min),
-        min + Math.random() * (max - min),
-    ]
+    return [min + Math.random() * (max - min), min + Math.random() * (max - min)]
 }
 
 /**
@@ -56,16 +53,11 @@ export function tgdCalcRandom3(max: number): ArrayNumber3
  */
 export function tgdCalcRandom3(min: number, max: number): ArrayNumber3
 export function tgdCalcRandom3(a?: number, b?: number): ArrayNumber3 {
-    if (typeof a !== "number")
-        return [Math.random(), Math.random(), Math.random()]
+    if (typeof a !== "number") return [Math.random(), Math.random(), Math.random()]
 
     const min = typeof b === "number" ? a : 0
     const max = typeof b === "number" ? b : a
-    return [
-        min + Math.random() * (max - min),
-        min + Math.random() * (max - min),
-        min + Math.random() * (max - min),
-    ]
+    return [min + Math.random() * (max - min), min + Math.random() * (max - min), min + Math.random() * (max - min)]
 }
 
 /**
@@ -81,8 +73,7 @@ export function tgdCalcRandom4(max: number): ArrayNumber4
  */
 export function tgdCalcRandom4(min: number, max: number): ArrayNumber4
 export function tgdCalcRandom4(a?: number, b?: number): ArrayNumber4 {
-    if (typeof a !== "number")
-        return [Math.random(), Math.random(), Math.random(), Math.random()]
+    if (typeof a !== "number") return [Math.random(), Math.random(), Math.random(), Math.random()]
 
     const min = typeof b === "number" ? a : 0
     const max = typeof b === "number" ? b : a

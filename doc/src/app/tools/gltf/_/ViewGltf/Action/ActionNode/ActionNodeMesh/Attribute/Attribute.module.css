@@ -2,5 +2,5 @@
 }
 
 .undefined {
-	color: var(--theme-color-error);
+    color: var(--theme-color-error);
 }

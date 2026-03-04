@@ -15,7 +15,7 @@ export function makeCapsule(roundness: number): TgdGeometry {
     roundness = Math.max(3, roundness)
     const tips: number[] = []
     const offset: number[] = []
-    const elements: number[] = []    
+    const elements: number[] = []
     const angleStepCylinder = makeCylinder(roundness, offset, tips, elements)
     makeTip(roundness, angleStepCylinder, offset, tips, elements)
     const capsule = new TgdDataset({
@@ -115,4 +115,3 @@ function makeCylinder(roundness: number, offset: number[], tips: number[], eleme
     }
     return angleStep
 }
-

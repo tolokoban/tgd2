@@ -24,7 +24,7 @@ export class TgdPainterAxes extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxesOptions> = {}
+        { x = 0, y = 0, z = 0, scale = 1 }: Partial<TgdPainterAxesOptions> = {},
     ) {
         super()
         const prg = new TgdProgram(context.gl, {
@@ -64,7 +64,7 @@ export class TgdPainterAxes extends TgdPainter {
     updateAxes(
         [Xx, Xy, Xz]: TgdVec3 | ArrayNumber3,
         [Yx, Yy, Yz]: TgdVec3 | ArrayNumber3,
-        [Zx, Zy, Zz]: TgdVec3 | ArrayNumber3
+        [Zx, Zy, Zz]: TgdVec3 | ArrayNumber3,
     ) {
         // prettier-ignore
         this.dataset.set("attPos", new Float32Array([

@@ -64,7 +64,7 @@ function init(context: TgdContext, assets: Assets) {
             mesh2.transfo.orbitAroundZ(-delay * 0.471)
             chromaticAberrationFilter.strength = Math.sin(time) * 10
             hueRotationFilter.hueShiftInRadians += delay
-        })
+        }),
     )
     context.play()
 }

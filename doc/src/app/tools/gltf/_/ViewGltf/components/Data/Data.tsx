@@ -20,13 +20,7 @@ export type ViewDataProps = {
     onClose?(): void
 }
 
-export function ViewData({
-    className,
-    buffer,
-    type,
-    componentType,
-    onClose,
-}: ViewDataProps) {
+export function ViewData({ className, buffer, type, componentType, onClose }: ViewDataProps) {
     const view = createView(buffer, componentType)
     const columns = range(resolveColumns(type))
     const rows = range(Math.ceil(view.length / columns.length))
@@ -39,8 +33,7 @@ export function ViewData({
                 justifyContent="space-between"
                 alignItems="center"
                 gap="M"
-                padding="S"
-            >
+                padding="S">
                 <div>
                     Attributes: <b>{rows.length}</b>
                 </div>
@@ -53,17 +46,14 @@ export function ViewData({
                     className={Styles.grid}
                     style={{
                         "--custom-columns": columns.length,
-                    }}
-                >
+                    }}>
                     {rows.slice(0, 100).map((row) => (
                         <>
                             <div key={`${row}`} className={Styles.row}>
                                 {row}
                             </div>
                             {columns.map((col) => (
-                                <div key={`${row}/${col}`}>
-                                    {view[col + row * columns.length]}
-                                </div>
+                                <div key={`${row}/${col}`}>{view[col + row * columns.length]}</div>
                             ))}
                         </>
                     ))}
@@ -88,9 +78,7 @@ function createView(data: ArrayBufferLike, componentType: number) {
         case WebGL2RenderingContext.UNSIGNED_INT:
             return new Uint32Array(data)
         default:
-            throw new Error(
-                `Don't know how to interpret ${webglLookup(componentType)}!`
-            )
+            throw new Error(`Don't know how to interpret ${webglLookup(componentType)}!`)
     }
 }
 

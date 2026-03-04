@@ -99,13 +99,13 @@ function init(context: TgdContext, assets: Assets) {
         framebuffer1,
         framebuffer2,
         screen,
-        new TgdPainterLogic(time => {
+        new TgdPainterLogic((time) => {
             const { camera } = context
             camera.transfo.orbitAroundX(Math.sin(time * 0.005045) * 0.03)
             camera.transfo.orbitAroundY(Math.sin(time * 0.001751) * 0.02)
             filterZoom.translation.x = 0.005 * Math.sin(time * 0.0024581)
             filterZoom.translation.y = 0.005 * Math.sin(time * 0.0037151)
-        })
+        }),
     )
     context.play()
     // #end

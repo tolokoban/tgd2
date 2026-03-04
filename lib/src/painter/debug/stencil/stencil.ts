@@ -21,10 +21,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
         const dataset = new TgdDataset({
             attPoint: "vec2",
         })
-        dataset.set(
-            "attPoint",
-            new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1])
-        )
+        dataset.set("attPoint", new Float32Array([-1, +1, +1, +1, -1, -1, +1, -1]))
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }
 
@@ -34,10 +31,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
         const state = webglStencilGet(gl)
         gl.disable(gl.DEPTH_TEST)
         gl.disable(gl.CULL_FACE)
-        const clear = (
-            [r, g, b]: [r: number, g: number, b: number],
-            value: number
-        ) => {
+        const clear = ([r, g, b]: [r: number, g: number, b: number], value: number) => {
             program.uniform4f("uniColor", r, g, b, 1)
             gl.stencilFunc(gl.EQUAL, value, 0xff)
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)

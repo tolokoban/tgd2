@@ -42,7 +42,7 @@ export class TgdShaderFragment {
             functions: TgdCodeFunctions | TgdCodeBloc
             mainCode: TgdCodeBloc
             header: TgdCodeBloc
-        }> = {}
+        }> = {},
     ) {
         const {
             precision = "highp",
@@ -89,7 +89,7 @@ export class TgdShaderFragment {
                 bold: true,
                 color: "#6bf",
             },
-            code
+            code,
         )
         out.debug()
     }

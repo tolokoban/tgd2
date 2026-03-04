@@ -41,7 +41,7 @@ function init(context: TgdContext) {
             setUniforms: ({ program }) => {
                 program.uniform1f("uniExponent", uniforms.uniExponent)
             },
-        })
+        }),
     )
     context.play()
     return (settings: Record<string, number>) => {

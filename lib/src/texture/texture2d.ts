@@ -4,195 +4,178 @@ import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 import type { TgdProgram } from "@tgd/program"
-import {
-	isWebglImage,
-	type WebglImage,
-	type WebglTexParameter,
-} from "@tgd/types"
+import { isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
 import { webglLookup } from "@tgd/utils"
-import {
-	type WebglTextureInternalFormat,
-	type WebglTextureParameters,
-	webglTextureParametersSet,
-} from "@tgd/webgl"
+import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 
 interface TgdTexture2DStorage {
-	width: number
-	height: number
-	levels: number
-	flipY: boolean
-	/**
-	 * Do we want to use premultiplied alpha?
-	 * Default to `false`.
-	 */
-	premultipliedAlpha: boolean
-	internalFormat:
-		| "R8"
-		| "R16F"
-		| "R32F"
-		| "R8UI"
-		| "RG8"
-		| "RG16F"
-		| "RG32F"
-		| "RG8UI"
-		| "RGB8"
-		| "SRGB8"
-		| "RGB565"
-		| "R11F_G11F_B10F"
-		| "RGB9_E5"
-		| "RGB16F"
-		| "RGB32F"
-		| "RGB8UI"
-		| "RGBA8"
-		| "SRGB8_ALPHA8"
-		| "RGB5_A1"
-		| "RGBA4"
-		| "RGBA16F"
-		| "RGBA32F"
-		| "RGBA8UI"
-		| "COMPRESSED_R11_EAC"
-		| "COMPRESSED_SIGNED_R11_EAC"
-		| "COMPRESSED_RG11_EAC"
-		| "COMPRESSED_SIGNED_RG11_EAC"
-		| "COMPRESSED_RGB8_ETC2"
-		| "COMPRESSED_RGBA8_ETC2_EAC"
-		| "COMPRESSED_SRGB8_ETC2"
-		| "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
-		| "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-		| "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-		| "DEPTH_COMPONENT24"
-		| "DEPTH_COMPONENT16"
-		| "DEPTH_COMPONENT32F"
+    width: number
+    height: number
+    levels: number
+    flipY: boolean
+    /**
+     * Do we want to use premultiplied alpha?
+     * Default to `false`.
+     */
+    premultipliedAlpha: boolean
+    internalFormat:
+        | "R8"
+        | "R16F"
+        | "R32F"
+        | "R8UI"
+        | "RG8"
+        | "RG16F"
+        | "RG32F"
+        | "RG8UI"
+        | "RGB8"
+        | "SRGB8"
+        | "RGB565"
+        | "R11F_G11F_B10F"
+        | "RGB9_E5"
+        | "RGB16F"
+        | "RGB32F"
+        | "RGB8UI"
+        | "RGBA8"
+        | "SRGB8_ALPHA8"
+        | "RGB5_A1"
+        | "RGBA4"
+        | "RGBA16F"
+        | "RGBA32F"
+        | "RGBA8UI"
+        | "COMPRESSED_R11_EAC"
+        | "COMPRESSED_SIGNED_R11_EAC"
+        | "COMPRESSED_RG11_EAC"
+        | "COMPRESSED_SIGNED_RG11_EAC"
+        | "COMPRESSED_RGB8_ETC2"
+        | "COMPRESSED_RGBA8_ETC2_EAC"
+        | "COMPRESSED_SRGB8_ETC2"
+        | "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
+        | "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
+        | "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
+        | "DEPTH_COMPONENT24"
+        | "DEPTH_COMPONENT16"
+        | "DEPTH_COMPONENT32F"
 }
 
 export interface TgdTexture2DOptions {
-	storage?: Partial<TgdTexture2DStorage>
-	params?: WebglTextureParameters
-	load?: WebglImage | string | LoadBmpOptions
-	filter?: TgdFilter
+    storage?: Partial<TgdTexture2DStorage>
+    params?: WebglTextureParameters
+    load?: WebglImage | string | LoadBmpOptions
+    filter?: TgdFilter
 }
 
 export class TgdTexture2D {
-	public name: string
-	public readonly gl: WebGL2RenderingContext
-	public readonly eventChange = new TgdEvent<TgdTexture2D>()
+    public name: string
+    public readonly gl: WebGL2RenderingContext
+    public readonly eventChange = new TgdEvent<TgdTexture2D>()
 
-	private _texture: WebGLTexture | null = null
-	private _width = -1
-	private _height = -1
-	private readonly storage: TgdTexture2DStorage
-	private params: WebglTextureParameters = {
-		magFilter: "LINEAR",
-		minFilter: "LINEAR",
-		wrapS: "REPEAT",
-		wrapT: "REPEAT",
-		wrapR: "REPEAT",
-	}
+    private _texture: WebGLTexture | null = null
+    private _width = -1
+    private _height = -1
+    private readonly storage: TgdTexture2DStorage
+    private params: WebglTextureParameters = {
+        magFilter: "LINEAR",
+        minFilter: "LINEAR",
+        wrapS: "REPEAT",
+        wrapT: "REPEAT",
+        wrapR: "REPEAT",
+    }
 
-	private static counter = 0
+    private static counter = 0
 
-	constructor(
-		public readonly context: {
-			gl: WebGL2RenderingContext
-			webglParams: WebglParams
-		},
-		private readonly options: TgdTexture2DOptions = {},
-	) {
-		const { storage, params, load } = options
-		const { gl } = context
-		this.gl = gl
-		this.name = `Texture2D/${TgdTexture2D.counter++}`
-		this.storage = {
-			width: 0,
-			height: 0,
-			internalFormat: storage?.internalFormat ?? "RGBA8",
-			levels: 1,
-			flipY: false,
-			premultipliedAlpha: false,
-			...storage,
-		}
-		const width = storage?.width
-		const height = storage?.height
-		if (typeof width === "number" && typeof height === "number") {
-			this.resize(width, height)
-		} else {
-			this.createTexture()
-		}
-		if (params) this.setParams(params)
-		if (isWebglImage(load) || isString(load)) {
-			this.loadBitmap(load)
-		} else if (isLoadBmpOptions(load)) {
-			this.loadBitmap(load.bmp, load)
-		}
-	}
+    constructor(
+        public readonly context: {
+            gl: WebGL2RenderingContext
+            webglParams: WebglParams
+        },
+        private readonly options: TgdTexture2DOptions = {},
+    ) {
+        const { storage, params, load } = options
+        const { gl } = context
+        this.gl = gl
+        this.name = `Texture2D/${TgdTexture2D.counter++}`
+        this.storage = {
+            width: 0,
+            height: 0,
+            internalFormat: storage?.internalFormat ?? "RGBA8",
+            levels: 1,
+            flipY: false,
+            premultipliedAlpha: false,
+            ...storage,
+        }
+        const width = storage?.width
+        const height = storage?.height
+        if (typeof width === "number" && typeof height === "number") {
+            this.resize(width, height)
+        } else {
+            this.createTexture()
+        }
+        if (params) this.setParams(params)
+        if (isWebglImage(load) || isString(load)) {
+            this.loadBitmap(load)
+        } else if (isLoadBmpOptions(load)) {
+            this.loadBitmap(load.bmp, load)
+        }
+    }
 
-	get internalFormat() {
-		return this.storage.internalFormat
-	}
-	private set internalFormat(internalFormat: TgdTexture2DStorage["internalFormat"]) {
-		this.storage.internalFormat = internalFormat
-	}
+    get internalFormat() {
+        return this.storage.internalFormat
+    }
+    private set internalFormat(internalFormat: TgdTexture2DStorage["internalFormat"]) {
+        this.storage.internalFormat = internalFormat
+    }
 
-	delete() {
-		if (this._texture) this.gl.deleteTexture(this._texture)
-		this._texture = null
-	}
+    delete() {
+        if (this._texture) this.gl.deleteTexture(this._texture)
+        this._texture = null
+    }
 
-	get width() {
-		return this._width
-	}
+    get width() {
+        return this._width
+    }
 
-	get height() {
-		return this._height
-	}
+    get height() {
+        return this._height
+    }
 
-	private createTexture() {
-		this.delete()
-		const { gl } = this
-		const texture = gl.createTexture()
-		if (!texture) throw new Error("Unable to create a WebGLTexture!")
+    private createTexture() {
+        this.delete()
+        const { gl } = this
+        const texture = gl.createTexture()
+        if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
-		this._texture = texture
-		this.bind()
-		this.setParams(this.params)
-	}
+        this._texture = texture
+        this.bind()
+        this.setParams(this.params)
+    }
 
-	resize(w: number, h: number) {
-		const width = Math.ceil(w)
-		const height = Math.ceil(h)
-		if (width === this.width && height === this.height) return
+    resize(w: number, h: number) {
+        const width = Math.ceil(w)
+        const height = Math.ceil(h)
+        if (width === this.width && height === this.height) return
 
-		const { gl, storage } = this
-		this.createTexture()
-		this._width = width
-		this._height = height
-		storage.width = width
-		storage.height = height
-		const { internalFormat, levels } = this.storage
-		if (internalFormat.startsWith("COMPRESSED_")) {
-			// We need to load an extension for that.
-			const extension = gl.getExtension("WEBGL_compressed_texture_etc")
-			if (!extension)
-				throw new Error(
-					'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!',
-				)
-		}
-		this.bind()
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-		gl.pixelStorei(
-			gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-			this.storage.premultipliedAlpha,
-		)
-		gl.texStorage2D(
-			gl.TEXTURE_2D,
-			levels,
-			(gl as unknown as Record<string, GLenum>)[internalFormat],
-			width,
-			height,
-		)
-		this.checkError(`resize(${width}, ${height})
+        const { gl, storage } = this
+        this.createTexture()
+        this._width = width
+        this._height = height
+        storage.width = width
+        storage.height = height
+        const { internalFormat, levels } = this.storage
+        if (internalFormat.startsWith("COMPRESSED_")) {
+            // We need to load an extension for that.
+            const extension = gl.getExtension("WEBGL_compressed_texture_etc")
+            if (!extension)
+                throw new Error(
+                    'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!',
+                )
+        }
+        this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
+        gl.texStorage2D(gl.TEXTURE_2D, levels, (gl as unknown as Record<string, GLenum>)[internalFormat], width, height)
+        this.checkError(`resize(${width}, ${height})
 gl.texStorage2D(
     gl.TEXTURE_2D,
     ${levels},
@@ -200,370 +183,319 @@ gl.texStorage2D(
     ${width},
     ${height}
 )`)
-		this.unbind()
-	}
+        this.unbind()
+    }
 
-	private checkError(caption: string) {
-		const { gl } = this
-		const error = gl.getError()
-		if (error !== gl.NO_ERROR) {
-			console.error(
-				`[TgdTexture2D::${this.name}] Error in ${caption}:`,
-				webglLookup(error),
-				this,
-			)
-		}
-	}
+    private checkError(caption: string) {
+        const { gl } = this
+        const error = gl.getError()
+        if (error !== gl.NO_ERROR) {
+            console.error(`[TgdTexture2D::${this.name}] Error in ${caption}:`, webglLookup(error), this)
+        }
+    }
 
-	get glTexture(): WebGLTexture {
-		if (this._texture) return this._texture
+    get glTexture(): WebGLTexture {
+        if (this._texture) return this._texture
 
-		throw new Error(`Texture "${this.name}" has been deleted!`)
-	}
+        throw new Error(`Texture "${this.name}" has been deleted!`)
+    }
 
-	bind() {
-		this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture)
-	}
+    bind() {
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.glTexture)
+    }
 
-	unbind() {
-		this.gl.bindTexture(this.gl.TEXTURE_2D, null)
-	}
+    unbind() {
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null)
+    }
 
-	loadBitmap(
-		bmp: string | WebglImage | null | Promise<WebglImage | null> | undefined,
-		options: {
-			level?: number
-			generateMipmap?: boolean
-			onLoad?: () => void
-		} = {},
-	): this {
-		if (!bmp) return this
+    loadBitmap(
+        bmp: string | WebglImage | null | Promise<WebglImage | null> | undefined,
+        options: {
+            level?: number
+            generateMipmap?: boolean
+            onLoad?: () => void
+        } = {},
+    ): this {
+        if (!bmp) return this
 
-		if (typeof bmp === "string") {
-			return this.loadBitmap(tgdLoadImage(bmp), options)
-		}
+        if (typeof bmp === "string") {
+            return this.loadBitmap(tgdLoadImage(bmp), options)
+        }
 
-		if (!isWebglImage(bmp)) {
-			// This is a Promise
-			bmp
-				.then((data) => {
-					this.loadBitmap(data)
-				})
-				.catch((error) => console.error("Unable to load texture BMP:", error))
-			return this
-		}
+        if (!isWebglImage(bmp)) {
+            // This is a Promise
+            bmp.then((data) => {
+                this.loadBitmap(data)
+            }).catch((error) => console.error("Unable to load texture BMP:", error))
+            return this
+        }
 
-		const { storage, gl } = this
-		const { level = 0 } = options
-		this._width = bmp.width
-		this._height = bmp.height
-		this.bind()
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-		gl.pixelStorei(
-			gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-			this.storage.premultipliedAlpha,
-		)
-		gl.texImage2D(
-			gl.TEXTURE_2D,
-			level,
-			(gl as unknown as Record<string, GLenum>)[storage.internalFormat],
-			gl[figureOutCompatibleFormat(storage.internalFormat)] as number,
-			gl.UNSIGNED_BYTE,
-			bmp,
-		)
-		this.checkError(
-			`loadBitmap(${JSON.stringify({
-				width: bmp.width,
-				height: bmp.height,
-			})})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-				storage.internalFormat
-			}, gl.${figureOutCompatibleFormat(
-				storage.internalFormat,
-			)}, gl.UNSIGNED_BYTE, bmp)`,
-		)
-		if (options.generateMipmap) {
-			this.generateMipmap()
-			this.checkError(
-				`loadBitmap(${JSON.stringify({
-					width: bmp.width,
-					height: bmp.height,
-				})})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-					storage.internalFormat
-				}, gl.${figureOutCompatibleFormat(
-					storage.internalFormat,
-				)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
-			)
-		}
-		const { filter } = this.options
-		if (filter) this.applyFilter(filter)
-		this.unbind()
-		options.onLoad?.()
-		this.eventChange.dispatch(this)
-		return this
-	}
+        const { storage, gl } = this
+        const { level = 0 } = options
+        this._width = bmp.width
+        this._height = bmp.height
+        this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            level,
+            (gl as unknown as Record<string, GLenum>)[storage.internalFormat],
+            gl[figureOutCompatibleFormat(storage.internalFormat)] as number,
+            gl.UNSIGNED_BYTE,
+            bmp,
+        )
+        this.checkError(
+            `loadBitmap(${JSON.stringify({
+                width: bmp.width,
+                height: bmp.height,
+            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
+                storage.internalFormat
+            }, gl.${figureOutCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)`,
+        )
+        if (options.generateMipmap) {
+            this.generateMipmap()
+            this.checkError(
+                `loadBitmap(${JSON.stringify({
+                    width: bmp.width,
+                    height: bmp.height,
+                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
+                    storage.internalFormat
+                }, gl.${figureOutCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
+            )
+        }
+        const { filter } = this.options
+        if (filter) this.applyFilter(filter)
+        this.unbind()
+        options.onLoad?.()
+        this.eventChange.dispatch(this)
+        return this
+    }
 
-	applyFilter(filter: TgdFilter) {
-		if (this.width < 1 || this.height < 1) {
-			throw new Error(
-				`[TgdTexture2D.applyFilter] Current size is invalie (${this.width}, ${this.height})! Maybe the texture is not loaded yet.`,
-			)
-		}
-		const output = new TgdTexture2D(this.context, {
-			params: { ...this.params },
-			storage: {
-				internalFormat: "RGBA8",
-				width: this.width,
-				height: this.height,
-			},
-		})
-		const painter = new TgdPainterFilter(this.context, {
-			filters: [filter],
-			flipY: true,
-			texture: this,
-		})
-		const framebuffer = new TgdPainterFramebuffer(this.context, {
-			textureColor0: output,
-			depthBuffer: false,
-			children: [painter],
-			size: this,
-		})
-		framebuffer.paint(0, 0)
-		this.gl.deleteTexture(this._texture)
-		this._texture = output.glTexture
-		this.bind()
-		this.setParams(this.params)
-		return this
-	}
+    applyFilter(filter: TgdFilter) {
+        if (this.width < 1 || this.height < 1) {
+            throw new Error(
+                `[TgdTexture2D.applyFilter] Current size is invalie (${this.width}, ${this.height})! Maybe the texture is not loaded yet.`,
+            )
+        }
+        const output = new TgdTexture2D(this.context, {
+            params: { ...this.params },
+            storage: {
+                internalFormat: "RGBA8",
+                width: this.width,
+                height: this.height,
+            },
+        })
+        const painter = new TgdPainterFilter(this.context, {
+            filters: [filter],
+            flipY: true,
+            texture: this,
+        })
+        const framebuffer = new TgdPainterFramebuffer(this.context, {
+            textureColor0: output,
+            depthBuffer: false,
+            children: [painter],
+            size: this,
+        })
+        framebuffer.paint(0, 0)
+        this.gl.deleteTexture(this._texture)
+        this._texture = output.glTexture
+        this.bind()
+        this.setParams(this.params)
+        return this
+    }
 
-	loadData(
-		data: Uint8Array | Uint8ClampedArray,
-		options: {
-			width: number
-			height: number
-			internalFormat: WebglTextureInternalFormat
-			format:
-				| "RED"
-				| "RG"
-				| "RGB"
-				| "RGBA"
-				| "RED_INTEGER"
-				| "RG_INTEGER"
-				| "RGB_INTEGER"
-				| "RGBA_INTEGER"
-			level?: number
-			offset?: number
-		},
-	) {
-		const {
-			level = 0,
-			width,
-			height,
-			internalFormat = "RGB",
-			format = "RGB",
-			// offset = 0,
-		} = options
-		const { gl } = this
-		this.bind()
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-		gl.pixelStorei(
-			gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-			this.storage.premultipliedAlpha,
-		)
-		gl.texImage2D(
-			gl.TEXTURE_2D,
-			level,
-			gl[internalFormat],
-			width,
-			height,
-			0,
-			gl[format],
-			gl.UNSIGNED_BYTE,
-			data,
-			// offset
-		)
-		this.checkError(`loadData(${printArray(data)}, ${JSON.stringify(options)})`)
-		this.unbind()
-		this.eventChange.dispatch(this)
-		return this
-	}
+    loadData(
+        data: Uint8Array | Uint8ClampedArray,
+        options: {
+            width: number
+            height: number
+            internalFormat: WebglTextureInternalFormat
+            format: "RED" | "RG" | "RGB" | "RGBA" | "RED_INTEGER" | "RG_INTEGER" | "RGB_INTEGER" | "RGBA_INTEGER"
+            level?: number
+            offset?: number
+        },
+    ) {
+        const {
+            level = 0,
+            width,
+            height,
+            internalFormat = "RGB",
+            format = "RGB",
+            // offset = 0,
+        } = options
+        const { gl } = this
+        this.bind()
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            level,
+            gl[internalFormat],
+            width,
+            height,
+            0,
+            gl[format],
+            gl.UNSIGNED_BYTE,
+            data,
+            // offset
+        )
+        this.checkError(`loadData(${printArray(data)}, ${JSON.stringify(options)})`)
+        this.unbind()
+        this.eventChange.dispatch(this)
+        return this
+    }
 
-	/**
-	 *
-	 * @param unit Unit to link the texture to
-	 * @param program The program that owns the uniform to update
-	 * @param uniformName The uniform that holds the texture
-	 */
-	activate(unit: number, program?: TgdProgram, uniformName?: string) {
-		const { gl } = this
-		gl.activeTexture(gl.TEXTURE0 + unit)
-		this.bind()
-		if (program && uniformName) {
-			program.uniform1i(uniformName, unit)
-		}
-		return this
-	}
+    /**
+     *
+     * @param unit Unit to link the texture to
+     * @param program The program that owns the uniform to update
+     * @param uniformName The uniform that holds the texture
+     */
+    activate(unit: number, program?: TgdProgram, uniformName?: string) {
+        const { gl } = this
+        gl.activeTexture(gl.TEXTURE0 + unit)
+        this.bind()
+        if (program && uniformName) {
+            program.uniform1i(uniformName, unit)
+        }
+        return this
+    }
 
-	generateMipmap() {
-		const { gl } = this
-		this.bind()
-		gl.generateMipmap(gl.TEXTURE_2D)
-		this.unbind()
-		return this
-	}
+    generateMipmap() {
+        const { gl } = this
+        this.bind()
+        gl.generateMipmap(gl.TEXTURE_2D)
+        this.unbind()
+        return this
+    }
 
-	setParams(parameters: WebglTextureParameters) {
-		this.bind()
-		webglTextureParametersSet(this.gl, parameters)
-		this.params = {
-			...this.params,
-			...parameters,
-		}
-		this.unbind()
-		return this
-	}
+    setParams(parameters: WebglTextureParameters) {
+        this.bind()
+        webglTextureParametersSet(this.gl, parameters)
+        this.params = {
+            ...this.params,
+            ...parameters,
+        }
+        this.unbind()
+        return this
+    }
 
-	set textureBaseLevel(value: number) {
-		const { gl } = this
-		this.bind()
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, value)
-		this.unbind()
-	}
+    set textureBaseLevel(value: number) {
+        const { gl } = this
+        this.bind()
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, value)
+        this.unbind()
+    }
 
-	get textureBaseLevel(): number {
-		const { gl } = this
-		this.bind()
-		const value = gl.getTexParameter(
-			gl.TEXTURE_2D,
-			gl.TEXTURE_BASE_LEVEL,
-		) as number
-		this.unbind()
-		return value
-	}
+    get textureBaseLevel(): number {
+        const { gl } = this
+        this.bind()
+        const value = gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL) as number
+        this.unbind()
+        return value
+    }
 
-	set textureMaxLevel(value: number) {
-		const { gl } = this
-		this.bind()
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, value)
-		this.unbind()
-	}
+    set textureMaxLevel(value: number) {
+        const { gl } = this
+        this.bind()
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, value)
+        this.unbind()
+    }
 
-	get textureMaxLevel(): number {
-		const { gl } = this
-		this.bind()
-		const value = gl.getTexParameter(
-			gl.TEXTURE_2D,
-			gl.TEXTURE_MAX_LEVEL,
-		) as number
-		this.unbind()
-		return value
-	}
+    get textureMaxLevel(): number {
+        const { gl } = this
+        this.bind()
+        const value = gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL) as number
+        this.unbind()
+        return value
+    }
 
-	getParameter(parameter: WebglTexParameter): number | boolean | null {
-		const { gl } = this
-		this.bind()
-		const value = gl.getTexParameter(gl.TEXTURE_2D, gl[parameter]) as
-			| number
-			| boolean
-			| null
-		this.unbind()
-		return value
-	}
+    getParameter(parameter: WebglTexParameter): number | boolean | null {
+        const { gl } = this
+        this.bind()
+        const value = gl.getTexParameter(gl.TEXTURE_2D, gl[parameter]) as number | boolean | null
+        this.unbind()
+        return value
+    }
 
-	debug(title?: string) {
-		console.log(
-			title ?? this.name ?? "TgdTexture2D",
-			"  ",
-			this.width,
-			"×",
-			this.height,
-		)
-		const parameters: WebglTexParameter[] = [
-			"TEXTURE_MAG_FILTER",
-			"TEXTURE_MIN_FILTER",
-			"TEXTURE_WRAP_R",
-			"TEXTURE_WRAP_S",
-			"TEXTURE_WRAP_T",
-			"TEXTURE_MAX_LEVEL",
-			"TEXTURE_MAX_LOD",
-			"TEXTURE_MIN_LOD",
-			"TEXTURE_BASE_LEVEL",
-			"TEXTURE_COMPARE_FUNC",
-			"TEXTURE_COMPARE_MODE",
-			"TEXTURE_IMMUTABLE_FORMAT",
-			"TEXTURE_IMMUTABLE_LEVELS",
-		]
-		for (const name of parameters) {
-			const value = this.getParameter(name)
-			console.log(
-				">",
-				name,
-				"=",
-				value,
-				typeof value === "number" ? `(${webglLookup(value)})` : " ",
-			)
-		}
-	}
+    debug(title?: string) {
+        console.log(title ?? this.name ?? "TgdTexture2D", "  ", this.width, "×", this.height)
+        const parameters: WebglTexParameter[] = [
+            "TEXTURE_MAG_FILTER",
+            "TEXTURE_MIN_FILTER",
+            "TEXTURE_WRAP_R",
+            "TEXTURE_WRAP_S",
+            "TEXTURE_WRAP_T",
+            "TEXTURE_MAX_LEVEL",
+            "TEXTURE_MAX_LOD",
+            "TEXTURE_MIN_LOD",
+            "TEXTURE_BASE_LEVEL",
+            "TEXTURE_COMPARE_FUNC",
+            "TEXTURE_COMPARE_MODE",
+            "TEXTURE_IMMUTABLE_FORMAT",
+            "TEXTURE_IMMUTABLE_LEVELS",
+        ]
+        for (const name of parameters) {
+            const value = this.getParameter(name)
+            console.log(">", name, "=", value, typeof value === "number" ? `(${webglLookup(value)})` : " ")
+        }
+    }
 }
 
 const COMPATIBLE_FORMATS: Array<[keyof WebGL2RenderingContext, Set<string>]> = [
-	[
-		"RGB",
-		new Set([
-			"RGB",
-			"RGB8",
-			"RGB565",
-			"SRGB8",
-			"RGB8_SNORM",
-			"RGB565",
-			"R11F_G11F_B10F",
-			"RGB9_E5",
-			"RGB16F",
-			"R11F_G11F_B10F",
-			"RGB9_E5",
-			"RGB32F",
-			"RGB16F",
-			"R11F_G11F_B10F",
-			"RGB9_E5",
-		]),
-	],
-	[
-		"RGBA",
-		new Set([
-			"RGBA",
-			"RGBA8",
-			"RGB5_A1",
-			"RGBA4",
-			"SRGB8_ALPHA8",
-			"RGBA8_SNORM",
-			"RGBA4",
-			"RGB5_A1",
-			"RGB10_A2",
-			"RGB5_A1",
-			"RGBA16F",
-			"RGBA32F",
-			"RGBA16F",
-		]),
-	],
-	["RG", new Set(["RG8"])],
-	["RED", new Set(["R8"])],
+    [
+        "RGB",
+        new Set([
+            "RGB",
+            "RGB8",
+            "RGB565",
+            "SRGB8",
+            "RGB8_SNORM",
+            "RGB565",
+            "R11F_G11F_B10F",
+            "RGB9_E5",
+            "RGB16F",
+            "R11F_G11F_B10F",
+            "RGB9_E5",
+            "RGB32F",
+            "RGB16F",
+            "R11F_G11F_B10F",
+            "RGB9_E5",
+        ]),
+    ],
+    [
+        "RGBA",
+        new Set([
+            "RGBA",
+            "RGBA8",
+            "RGB5_A1",
+            "RGBA4",
+            "SRGB8_ALPHA8",
+            "RGBA8_SNORM",
+            "RGBA4",
+            "RGB5_A1",
+            "RGB10_A2",
+            "RGB5_A1",
+            "RGBA16F",
+            "RGBA32F",
+            "RGBA16F",
+        ]),
+    ],
+    ["RG", new Set(["RG8"])],
+    ["RED", new Set(["R8"])],
 ]
 
-function figureOutCompatibleFormat(
-	internalFormat: string,
-): keyof WebGL2RenderingContext {
-	for (const [format, internalFormats] of COMPATIBLE_FORMATS) {
-		if (internalFormats.has(internalFormat)) return format
-	}
-	throw new Error(
-		`There is no compatible format for internalFormat "${internalFormat}" and type "UNSIGNED_BYTE"!`,
-	)
+function figureOutCompatibleFormat(internalFormat: string): keyof WebGL2RenderingContext {
+    for (const [format, internalFormats] of COMPATIBLE_FORMATS) {
+        if (internalFormats.has(internalFormat)) return format
+    }
+    throw new Error(`There is no compatible format for internalFormat "${internalFormat}" and type "UNSIGNED_BYTE"!`)
 }
 
-function printArray(
-	data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike>,
-) {
-	if (data.length > 10) {
-		return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
-	}
-	return JSON.stringify(data)
+function printArray(data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike>) {
+    if (data.length > 10) {
+        return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
+    }
+    return JSON.stringify(data)
 }

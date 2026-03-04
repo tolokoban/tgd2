@@ -32,8 +32,7 @@ export function ViewPalettePreviewDisk(props: ViewPalettePreviewDiskProps) {
         <canvas
             ref={painter.setCanvas}
             className={$.join(props.className, Styles.palettePreviewDisk)}
-            style={style}
-        ></canvas>
+            style={style}></canvas>
     )
 }
 

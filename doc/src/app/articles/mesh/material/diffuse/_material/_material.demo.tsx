@@ -25,12 +25,7 @@ import View, { Assets } from "@/components/demo/Tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
 import React from "react"
 import { useFloat } from "@/utils/hooks/float"
-import {
-    ViewButton,
-    ViewInputNumber,
-    ViewPanel,
-    ViewSlider,
-} from "@tolokoban/ui"
+import { ViewButton, ViewInputNumber, ViewPanel, ViewSlider } from "@tolokoban/ui"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
@@ -101,7 +96,7 @@ function init(context: TgdContext, assets: Assets) {
             node2.transfo.orbitAroundX(angX)
             node2.transfo.orbitAroundY(angY)
             node2.transfo.orbitAroundZ(angZ)
-        })
+        }),
     )
     ring2.debug()
     context.play()
@@ -157,14 +152,8 @@ function makeRing(context: TgdContext, material: TgdMaterial) {
 export default function Demo() {
     const ref = React.useRef<ReturnType<typeof init> | null>(null)
     const srv = ref.current
-    const [specularExponent, setSpecularExponent] = useFloat(
-        20,
-        srv?.specularExponent
-    )
-    const [specularIntensity, setSpecularIntensity] = useFloat(
-        1,
-        srv?.specularIntensity
-    )
+    const [specularExponent, setSpecularExponent] = useFloat(20, srv?.specularExponent)
+    const [specularIntensity, setSpecularIntensity] = useFloat(1, srv?.specularIntensity)
     const [split, setSplit] = useFloat(0.1, srv?.split)
     return (
         <div>
@@ -180,44 +169,24 @@ export default function Demo() {
                 gizmo
                 controller={{
                     inertiaOrbit: 1000,
-                }}
-            >
-                <ViewSlider
-                    value={split}
-                    onChange={setSplit}
-                    min={0}
-                    max={1}
-                    step={1e-2}
-                />
-                <ViewPanel
-                    display="flex"
-                    justifyContent="space-around"
-                    alignItems="center"
-                >
-                    <ViewInputNumber
-                        label="specularExponent"
-                        value={specularExponent}
-                        onChange={setSpecularExponent}
-                    />
+                }}>
+                <ViewSlider value={split} onChange={setSplit} min={0} max={1} step={1e-2} />
+                <ViewPanel display="flex" justifyContent="space-around" alignItems="center">
+                    <ViewInputNumber label="specularExponent" value={specularExponent} onChange={setSpecularExponent} />
                     <ViewInputNumber
                         label="specularIntensity"
                         value={specularIntensity}
                         onChange={setSpecularIntensity}
                     />
                 </ViewPanel>
-                <ViewPanel
-                    display="flex"
-                    justifyContent="space-around"
-                    alignItems="center"
-                >
+                <ViewPanel display="flex" justifyContent="space-around" alignItems="center">
                     <ViewButton
                         variant="text"
                         color="primary-5"
                         onClick={() => {
                             setSpecularExponent(1)
                             setSpecularIntensity(0.5)
-                        }}
-                    >
+                        }}>
                         Brushed Metal
                     </ViewButton>
                     <ViewButton
@@ -226,8 +195,7 @@ export default function Demo() {
                         onClick={() => {
                             setSpecularExponent(0.25)
                             setSpecularIntensity(0.125)
-                        }}
-                    >
+                        }}>
                         Soft Light
                     </ViewButton>
                     <ViewButton
@@ -236,8 +204,7 @@ export default function Demo() {
                         onClick={() => {
                             setSpecularExponent(50)
                             setSpecularIntensity(2)
-                        }}
-                    >
+                        }}>
                         Car Paint
                     </ViewButton>
                     <ViewButton
@@ -245,8 +212,7 @@ export default function Demo() {
                         color="primary-5"
                         onClick={() => {
                             setSpecularIntensity(0)
-                        }}
-                    >
+                        }}>
                         Plastic
                     </ViewButton>
                 </ViewPanel>

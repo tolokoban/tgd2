@@ -60,9 +60,7 @@ export class TgdTransfo {
         return new TgdTransfo(this)
     }
 
-    from(
-        transfo: Readonly<TgdTransfo> | Readonly<Partial<TgdTransfoOptions>>
-    ): this {
+    from(transfo: Readonly<TgdTransfo> | Readonly<Partial<TgdTransfoOptions>>): this {
         this.position = transfo.position ?? this.position
         this.orientation = transfo.orientation ?? this.orientation
         this.scale = transfo.scale ?? this.scale
@@ -109,12 +107,7 @@ export class TgdTransfo {
         if (!this.dirty) return
 
         const m = this._matrix
-        mat4.fromRotationTranslationScale(
-            m,
-            this._orientation,
-            this._position,
-            this._scale
-        )
+        mat4.fromRotationTranslationScale(m, this._orientation, this._position, this._scale)
         const X = this._axisX
         const Y = this._axisY
         const Z = this._axisZ
@@ -167,11 +160,7 @@ export class TgdTransfo {
     }
     setPosition(x: number, y: number, z: number): this
     setPosition(position: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4): this
-    setPosition(
-        x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        y?: number,
-        z?: number
-    ): this {
+    setPosition(x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4, y?: number, z?: number): this {
         this.updateMatrix()
         if (typeof x === "number") {
             this._position.reset(x, y ?? 0, z ?? 0)
@@ -199,11 +188,7 @@ export class TgdTransfo {
         this.updateMatrix()
         this._scale.from(value)
     }
-    setScale(
-        x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        y?: number,
-        z?: number
-    ): this {
+    setScale(x: number | TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4, y?: number, z?: number): this {
         this.updateMatrix()
         if (typeof x === "number") {
             this._scale.reset(x, y ?? x, z ?? y ?? x)
@@ -223,12 +208,7 @@ export class TgdTransfo {
     }
     setOrientation(source: TgdVec4 | ArrayNumber4 | TgdQuat): this
     setOrientation(x: number, y: number, z: number, w: number): this
-    setOrientation(
-        x: number | TgdVec4 | ArrayNumber4 | TgdQuat,
-        y?: number,
-        z?: number,
-        w?: number
-    ): this {
+    setOrientation(x: number | TgdVec4 | ArrayNumber4 | TgdQuat, y?: number, z?: number, w?: number): this {
         if (typeof x === "number") {
             this._orientation.reset(x, y, z, w)
         } else {
@@ -242,17 +222,8 @@ export class TgdTransfo {
      * Reset the orientation by applying an Euler rotation
      * based on angles expressed in __degrees__.
      */
-    setEulerRotation(
-        degreesAroundX: number,
-        degreesAroundY: number,
-        degreesAroundZ: number
-    ): this {
-        quat.fromEuler(
-            this._orientation,
-            degreesAroundX,
-            degreesAroundY,
-            degreesAroundZ
-        )
+    setEulerRotation(degreesAroundX: number, degreesAroundY: number, degreesAroundZ: number): this {
+        quat.fromEuler(this._orientation, degreesAroundX, degreesAroundY, degreesAroundZ)
         this.updateMatrix()
         return this
     }
@@ -276,10 +247,7 @@ export class TgdTransfo {
     }
 
     moveAlongAxes(dx: number, dy: number, dz: number): this {
-        this.position
-            .addWithScale(this.axisX, dx)
-            .addWithScale(this.axisY, dy)
-            .addWithScale(this.axisZ, dz)
+        this.position.addWithScale(this.axisX, dx).addWithScale(this.axisY, dy).addWithScale(this.axisZ, dz)
         this.updateMatrix()
         return this
     }

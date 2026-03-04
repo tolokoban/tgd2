@@ -14,11 +14,7 @@ export class TgdMaterialGhost extends TgdMaterial {
     public exponent: number = 3
     public intensity: number = 3
 
-    constructor({
-        color = DEFAULT_COLOR,
-        exponent = 3,
-        intensity = 3,
-    }: TgdMaterialGhostOptions = {}) {
+    constructor({ color = DEFAULT_COLOR, exponent = 3, intensity = 3 }: TgdMaterialGhostOptions = {}) {
         super({
             uniforms: {
                 uniMaterialGhostExponent: "float",
@@ -34,9 +30,7 @@ export class TgdMaterialGhost extends TgdMaterial {
                 `vec4 color = vec4(${color.join(", ")});`,
                 `return vec4(color.rgb * uniMaterialGhostIntensity, color.a) * light;`,
             ],
-            vertexShaderCode: () => [
-                `varNormal = mat3(uniModelViewMatrix) * ${this.attNormal};`,
-            ],
+            vertexShaderCode: () => [`varNormal = mat3(uniModelViewMatrix) * ${this.attNormal};`],
             varyings: {
                 varNormal: "vec3",
             },

@@ -13,9 +13,7 @@ import BackgroundURL from "./tgd.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = new TgdTexture2D(context).loadBitmap(
-        tgdLoadImage(BackgroundURL)
-    )
+    const texture = new TgdTexture2D(context).loadBitmap(tgdLoadImage(BackgroundURL))
     const filter = new TgdFilterChromaticAberration({
         strength: 1,
     })
@@ -24,12 +22,7 @@ function init(context: TgdContext) {
         texture,
         filters: [filter],
     })
-    context.add(
-        filters,
-        new TgdPainterLogic(
-            time => (filter.strength = 5 * Math.abs(Math.sin(time)))
-        )
-    )
+    context.add(filters, new TgdPainterLogic((time) => (filter.strength = 5 * Math.abs(Math.sin(time)))))
     context.play()
     // #end
 }

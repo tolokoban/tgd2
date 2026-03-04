@@ -5,21 +5,14 @@ import type { TgdVec3 } from "./vec3"
 import type { TgdVec4 } from "./vec4"
 
 export class TgdVec2 extends Float32Array {
-    static fromMix(
-        v1: TgdVec2 | TgdVec3 | TgdVec4,
-        v2: TgdVec2 | TgdVec3 | TgdVec4,
-        a = 0.5
-    ): TgdVec2 {
+    static fromMix(v1: TgdVec2 | TgdVec3 | TgdVec4, v2: TgdVec2 | TgdVec3 | TgdVec4, a = 0.5): TgdVec2 {
         const b = 1 - a
         const x = b * v1.x + a * v2.x
         const y = b * v1.y + a * v2.y
         return new TgdVec2(x, y)
     }
 
-    static distance(
-        from: TgdVec2 | TgdVec3 | TgdVec4,
-        to: TgdVec2 | TgdVec3 | TgdVec4
-    ): number {
+    static distance(from: TgdVec2 | TgdVec3 | TgdVec4, to: TgdVec2 | TgdVec3 | TgdVec4): number {
         const x = to.x - from.x
         const y = to.y - from.y
         return Math.sqrt(x * x + y * y)
@@ -71,11 +64,7 @@ export class TgdVec2 extends Float32Array {
         return this
     }
 
-    fromMix(
-        a: TgdVec2 | TgdVec3 | TgdVec4,
-        b: TgdVec2 | TgdVec3 | TgdVec4,
-        t: number
-    ): this {
+    fromMix(a: TgdVec2 | TgdVec3 | TgdVec4, b: TgdVec2 | TgdVec3 | TgdVec4, t: number): this {
         const [ax, ay] = a
         const [bx, by] = b
         return this.reset(tgdCalcMix(ax, bx, t), tgdCalcMix(ay, by, t))
@@ -158,11 +147,6 @@ export class TgdVec2 extends Float32Array {
     debug(caption = "vec2") {
         const { x, y } = this
         const out: string[] = [x, y].map((n) => n.toFixed(6))
-        console.log(
-            `${caption}:   `,
-            out.join(" | "),
-            "   length:",
-            Math.sqrt(x * x + y * y)
-        )
+        console.log(`${caption}:   `, out.join(" | "), "   length:", Math.sqrt(x * x + y * y))
     }
 }

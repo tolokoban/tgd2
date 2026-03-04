@@ -12,20 +12,10 @@ export function listBBoxes(
         max: Readonly<ArrayNumber3 | TgdVec3>
     }>,
     levels: number,
-    surfaceThreshold: number
+    surfaceThreshold: number,
 ): ArrayNumber4[] {
     const result: ArrayNumber4[] = []
-    recursiveListBBoxes(
-        result,
-        camera,
-        bbox,
-        levels,
-        0,
-        0,
-        0,
-        0,
-        surfaceThreshold
-    )
+    recursiveListBBoxes(result, camera, bbox, levels, 0, 0, 0, 0, surfaceThreshold)
     // debugListBBox(result.length, (out) =>
     //     out.add(result.map((item) => JSON.stringify(item)).join("\n")).debug()
     // )
@@ -46,7 +36,7 @@ function recursiveListBBoxes(
     y: number,
     z: number,
     level: number,
-    surfaceThreshold: number
+    surfaceThreshold: number,
 ) {
     const visibility = camera.computeBoundingBoxVisibleSurface(bbox)
     if (visibility < 1e-12) {
@@ -102,7 +92,7 @@ function recursiveListBBoxes(
                     nextY + Y,
                     nextZ + Z,
                     nextLevel,
-                    surfaceThreshold
+                    surfaceThreshold,
                 )
             }
         }

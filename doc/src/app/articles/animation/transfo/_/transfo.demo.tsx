@@ -25,7 +25,7 @@ function init(ctx: TgdContext, assets: Assets) {
         new TgdPainterState(ctx, {
             depth: webglPresetDepth.lessOrEqual,
             children: [mesh],
-        })
+        }),
     )
     ctx.paint()
     ctx.animSchedule(
@@ -36,9 +36,7 @@ function init(ctx: TgdContext, assets: Assets) {
                     duration: 1,
                     transfo: {
                         distance: 2.9,
-                        position: [
-                            -0.39898496866226196, 0.22825193405151367, 0,
-                        ],
+                        position: [-0.39898496866226196, 0.22825193405151367, 0],
                         orientation: [0, 0, 0, 1],
                         scale: [1, 1, 1],
                     },
@@ -47,13 +45,9 @@ function init(ctx: TgdContext, assets: Assets) {
                     duration: 1,
                     transfo: {
                         distance: 5.1,
-                        position: [
-                            -0.9985308647155762, 0.7087523341178894,
-                            0.3115437924861908,
-                        ],
+                        position: [-0.9985308647155762, 0.7087523341178894, 0.3115437924861908],
                         orientation: [
-                            0.09696336090564728, -0.6652175784111023,
-                            -0.48327139019966125, 0.5608319044113159,
+                            0.09696336090564728, -0.6652175784111023, -0.48327139019966125, 0.5608319044113159,
                         ],
                         scale: [1, 1, 1],
                     },
@@ -64,8 +58,8 @@ function init(ctx: TgdContext, assets: Assets) {
                     easingFunction: tgdEasingFunctionInOutQuint,
                 },
             ],
-            { repeat: Infinity }
-        )
+            { repeat: Infinity },
+        ),
     )
     // #end
 }

@@ -48,7 +48,7 @@ function init(context: TgdContext) {
         data1.add(nodes1[i - 1], nodes1[i], uv0, uv1)
     }
     const palette = new TgdTexture2D(context).loadBitmap(
-        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"])
+        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
     )
     const segments1 = new TgdPainterSegments(context, {
         dataset: data1.makeDataset,
@@ -72,10 +72,7 @@ function init(context: TgdContext) {
     context.inputs.pointer.eventHover.addListener((event) => {
         const { x, y } = event.current
         const [R, G, B] = context.readPixel(x, y)
-        console.log(
-            `%c(${R}, ${G}, ${B})]`,
-            `color:#777;background:rgb(${R},${G},${B})`
-        )
+        console.log(`%c(${R}, ${G}, ${B})]`, `color:#777;background:rgb(${R},${G},${B})`)
     })
 }
 

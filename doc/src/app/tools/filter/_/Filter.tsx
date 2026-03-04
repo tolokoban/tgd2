@@ -1,13 +1,6 @@
 import * as React from "react"
 
-import {
-    Theme,
-    useLocalStorageState,
-    ViewPanel,
-    ViewStrip,
-    ViewTab,
-    ViewTabs,
-} from "@tolokoban/ui"
+import { Theme, useLocalStorageState, ViewPanel, ViewStrip, ViewTab, ViewTabs } from "@tolokoban/ui"
 import {
     tgdCodeConstants,
     tgdCodeFunction_luminance,
@@ -44,10 +37,7 @@ export function ViewFilter() {
         }
         return Object.values(code).join("\n")
     }, [library])
-    const [fragShaderCode, setFragShaderCode] = useLocalStorageState(
-        DEFAULT_FRAGMENT_SHADER,
-        "Filter/FragmentShader"
-    )
+    const [fragShaderCode, setFragShaderCode] = useLocalStorageState(DEFAULT_FRAGMENT_SHADER, "Filter/FragmentShader")
     console.log(functions)
 
     return (
@@ -55,18 +45,12 @@ export function ViewFilter() {
             <ViewTabs>
                 <ViewTab label="Fragment Shader" key="shader">
                     <ViewPanel fullsize overflow="auto">
-                        <ViewVertexShaderCodeEditor
-                            code={fragShaderCode}
-                            onChange={setFragShaderCode}
-                        />
+                        <ViewVertexShaderCodeEditor code={fragShaderCode} onChange={setFragShaderCode} />
                     </ViewPanel>
                 </ViewTab>
                 <ViewTab label="Extra functions" key="functions">
                     <ViewPanel fullsize overflow="auto">
-                        <ViewVertexShaderCodeEditor
-                            code={functions}
-                            disabled={true}
-                        />
+                        <ViewVertexShaderCodeEditor code={functions} disabled={true} />
                     </ViewPanel>
                 </ViewTab>
                 <ViewTab label="Documentation" key="doc">
@@ -75,10 +59,7 @@ export function ViewFilter() {
                     </ViewPanel>
                 </ViewTab>
             </ViewTabs>
-            <ViewFilterResult
-                fragmentShader={fragShaderCode}
-                functions={functions}
-            />
+            <ViewFilterResult fragmentShader={fragShaderCode} functions={functions} />
         </ViewStrip>
     )
 }

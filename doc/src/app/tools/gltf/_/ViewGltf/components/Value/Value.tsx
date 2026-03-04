@@ -23,10 +23,7 @@ export function ViewValue(props: ViewValueProps) {
 
     if (isNumber(value) && lookup) {
         return (
-            <div
-                className={$.join(props.className, Styles.value)}
-                style={style}
-            >
+            <div className={$.join(props.className, Styles.value)} style={style}>
                 {label && <label>{label}:</label>}
                 <div>
                     gl.<b>{webglLookup(value)}</b>

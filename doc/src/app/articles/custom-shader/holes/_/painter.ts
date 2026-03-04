@@ -1,10 +1,4 @@
-import {
-    type TgdContext,
-    type TgdDataGlb,
-    TgdMaterialNormals,
-    TgdPainterMesh,
-    TgdTexture2D,
-} from "@tolokoban/tgd"
+import { type TgdContext, type TgdDataGlb, TgdMaterialNormals, TgdPainterMesh, TgdTexture2D } from "@tolokoban/tgd"
 
 export class ShieldPainter extends TgdPainterMesh {
     private readonly texAbedo: TgdTexture2D

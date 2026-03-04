@@ -13,13 +13,7 @@
         "target": "ES5",
         "outDir": "./dist"
     },
-    "exclude": [
-        "dist",
-        "node_modules",
-        "src/**/*.test.tsx",
-        "src/**/*.stories.tsx",
-        "doc"
-    ],
+    "exclude": ["dist", "node_modules", "src/**/*.test.tsx", "src/**/*.stories.tsx", "doc"],
     "include": ["./src/**/*.ts"],
     "files": ["src/shaders.ts"]
 }

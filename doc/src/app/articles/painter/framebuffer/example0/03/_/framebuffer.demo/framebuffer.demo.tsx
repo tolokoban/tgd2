@@ -46,7 +46,7 @@ function init(context: TgdContext, assets: Assets) {
         filters,
         new TgdPainterLogic((time, delay) => {
             hueRotation.strength = Math.sin(time) * 10
-        })
+        }),
     )
     // #end
     context.play()

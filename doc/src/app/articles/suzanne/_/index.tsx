@@ -50,7 +50,7 @@ function init(context: TgdContext) {
                 2 * Math.random() - 1,
                 2 * Math.random() - 1,
                 2 * Math.random() - 1,
-                2 * Math.random() - 1
+                2 * Math.random() - 1,
             ).normalize(),
         },
         far: 100,

@@ -6,9 +6,7 @@ export class PositionMaterial extends TgdMaterial {
     constructor() {
         super({
             varyings: { varPosition: "vec4" },
-            vertexShaderCode: [
-                `varPosition = uniModelViewMatrix * uniTransfoMatrix * vec4(position, 1);`,
-            ],
+            vertexShaderCode: [`varPosition = uniModelViewMatrix * uniTransfoMatrix * vec4(position, 1);`],
             fragmentShaderCode: [
                 "vec4 G = vec4(0,1,0,1);",
                 "vec4 R = vec4(1, 0, 0, 1);",

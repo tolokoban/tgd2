@@ -17,10 +17,7 @@ export function ViewFileSize(props: ViewFileSizeProps) {
     const [size, unit] = resolveUnit(props.value)
 
     return (
-        <div
-            className={$.join(props.className, Styles.fileSize, Styles[unit])}
-            style={style}
-        >
+        <div className={$.join(props.className, Styles.fileSize, Styles[unit])} style={style}>
             {Math.round(size)} {unit}
         </div>
     )

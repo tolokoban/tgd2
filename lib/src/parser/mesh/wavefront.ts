@@ -79,9 +79,7 @@ export class TgdParserMeshWavefront {
         parse(content, { onVertex, onNormal, onTexture, onFace, onObject })
     }
 
-    makeGeometry({
-        computeNormals,
-    }: { computeNormals?: boolean } = {}): TgdGeometry {
+    makeGeometry({ computeNormals }: { computeNormals?: boolean } = {}): TgdGeometry {
         const options: TgdGeometryOptions2 = {
             attPosition: {
                 name: "POSITION",
@@ -117,10 +115,7 @@ export class TgdParserMeshWavefront {
         const A = new TgdVec3()
         const B = new TgdVec3()
         const C = new TgdVec3()
-        for (const [
-            triangleIndex,
-            normal,
-        ] of this.normalPerTriangle.entries()) {
+        for (const [triangleIndex, normal] of this.normalPerTriangle.entries()) {
             const [v0, v1, v2] = this.verticesPerTriangle[triangleIndex]
             this.readVertexInto(v0, A)
             this.readVertexInto(v1, B).subtract(A)
@@ -128,14 +123,9 @@ export class TgdParserMeshWavefront {
             normal.from(B.cross(C).normalize())
         }
         this.attNormal = []
-        for (
-            let elementIndex = 0;
-            elementIndex < this.elementIndex;
-            elementIndex++
-        ) {
+        for (let elementIndex = 0; elementIndex < this.elementIndex; elementIndex++) {
             const normal = new TgdVec3(0, 0, 0)
-            for (const triIndex of this.trianglesPerVertex[elementIndex])
-                normal.add(this.normalPerTriangle[triIndex])
+            for (const triIndex of this.trianglesPerVertex[elementIndex]) normal.add(this.normalPerTriangle[triIndex])
 
             const [nx, ny, nz] = normal.normalize()
             this.attNormal.push(nx, ny, nz)
@@ -175,13 +165,10 @@ export class TgdParserMeshWavefront {
         this.uvs.push([u, v])
     }
 
-    private readonly onFace = (
-        vertices: TgdParserMeshWavefrontAttributes[]
-    ) => {
-        if (vertices.length !== 3)
-            throw new Error("We can only deal with triangles!")
+    private readonly onFace = (vertices: TgdParserMeshWavefrontAttributes[]) => {
+        if (vertices.length !== 3) throw new Error("We can only deal with triangles!")
 
-        const triangle = vertices.map(vertex => this.getElem(vertex))
+        const triangle = vertices.map((vertex) => this.getElem(vertex))
         this.elements.push(...triangle)
         this.normalPerTriangle.push(new TgdVec3(0, 0, 0))
         this.verticesPerTriangle.push(triangle)
@@ -196,9 +183,7 @@ export class TgdParserMeshWavefront {
      * Return the index of the vertex for the triplet
      * point/normal/uv.
      */
-    private readonly getElem = (
-        triangleSummit: TgdParserMeshWavefrontAttributes
-    ) => {
+    private readonly getElem = (triangleSummit: TgdParserMeshWavefrontAttributes) => {
         const k = this.key(triangleSummit)
         const index = this.mapVertices.get(k) ?? -1
         if (index > -1) return index
@@ -238,16 +223,13 @@ interface TgdParserMeshWavefrontOptions {
             vertex: number
             normal?: number
             uv?: number
-        }>
+        }>,
     ): void
     onObject(name: string): void
     onGroup(name: string): void
 }
 
-function parse(
-    content: string,
-    options: Partial<TgdParserMeshWavefrontOptions> = {}
-): void {
+function parse(content: string, options: Partial<TgdParserMeshWavefrontOptions> = {}): void {
     const { onVertex, onNormal, onTexture, onFace, onObject } = options
     for (const fullLine of forEachLine(content)) {
         const line = fullLine.trimStart()
@@ -260,14 +242,14 @@ function parse(
                     .slice("f ".length)
                     .split(" ")
                     // Warning! We need to remove 1 to the index.
-                    .map(face => {
+                    .map((face) => {
                         const [v, t, n] = face.split("/")
                         return {
                             vertex: Number(v) - 1,
                             normal: n ? Number(n) - 1 : undefined,
                             uv: t ? Number(t) - 1 : undefined,
                         }
-                    })
+                    }),
             )
         } else if (onNormal && line.startsWith("vn ")) {
             const normal = line.slice("vn ".length).split(" ").map(Number)

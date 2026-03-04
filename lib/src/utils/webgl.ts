@@ -9,18 +9,13 @@ import { isNumber } from "@tgd/types/guards"
  *
  * This helper function gives you the type of the array passed as argument.
  */
-export function webglElementTypeFromTypedArray(
-    typedArray: TgdTypeArrayForElements
-): 5121 | 5123 | 5125 {
-    if (typedArray instanceof Uint8Array)
-        return WebGL2RenderingContext.UNSIGNED_BYTE
-    if (typedArray instanceof Uint16Array)
-        return WebGL2RenderingContext.UNSIGNED_SHORT
-    if (typedArray instanceof Uint32Array)
-        return WebGL2RenderingContext.UNSIGNED_INT
+export function webglElementTypeFromTypedArray(typedArray: TgdTypeArrayForElements): 5121 | 5123 | 5125 {
+    if (typedArray instanceof Uint8Array) return WebGL2RenderingContext.UNSIGNED_BYTE
+    if (typedArray instanceof Uint16Array) return WebGL2RenderingContext.UNSIGNED_SHORT
+    if (typedArray instanceof Uint32Array) return WebGL2RenderingContext.UNSIGNED_INT
 
     throw new Error(
-        "[webglElementTypeFromDataView] drawElements() and drawElementsInstanced() can only be fed with Uint8Array, Uint16Array or Uint32Array!"
+        "[webglElementTypeFromDataView] drawElements() and drawElementsInstanced() can only be fed with Uint8Array, Uint16Array or Uint32Array!",
     )
 }
 
@@ -38,12 +33,8 @@ export function webglElementTypeArrayFromNumberArray(arr: number[]) {
     return new Uint32Array(arr)
 }
 
-export function webglTypedArrayFromBufferSource(
-    bufferSource: BufferSource,
-    type: number
-) {
-    const buffer =
-        bufferSource instanceof ArrayBuffer ? bufferSource : bufferSource.buffer
+export function webglTypedArrayFromBufferSource(bufferSource: BufferSource, type: number) {
+    const buffer = bufferSource instanceof ArrayBuffer ? bufferSource : bufferSource.buffer
     switch (type) {
         case 5120: // BYTE
             return new Int8Array(buffer)
@@ -58,17 +49,11 @@ export function webglTypedArrayFromBufferSource(
         case 5126: // FLOAT
             return new Float32Array(buffer)
         default:
-            throw new Error(
-                `Don't know how to create a TypedArray for type "${webglLookup(
-                    type
-                )}"!`
-            )
+            throw new Error(`Don't know how to create a TypedArray for type "${webglLookup(type)}"!`)
     }
 }
 
-export function webglLookup(
-    type: number | keyof WebGL2RenderingContext
-): keyof WebGL2RenderingContext {
+export function webglLookup(type: number | keyof WebGL2RenderingContext): keyof WebGL2RenderingContext {
     if (!isNumber(type)) return type as keyof WebGL2RenderingContext
 
     if (gl) {

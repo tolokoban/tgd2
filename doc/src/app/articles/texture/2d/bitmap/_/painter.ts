@@ -1,11 +1,4 @@
-import {
-    type TgdContext,
-    TgdDataset,
-    TgdPainter,
-    TgdProgram,
-    type TgdTexture2D,
-    TgdVertexArray,
-} from "@tolokoban/tgd"
+import { type TgdContext, TgdDataset, TgdPainter, TgdProgram, type TgdTexture2D, TgdVertexArray } from "@tolokoban/tgd"
 
 export class Painter extends TgdPainter {
     private readonly prg: TgdProgram
@@ -13,7 +6,7 @@ export class Painter extends TgdPainter {
 
     constructor(
         private readonly context: TgdContext,
-        private readonly texture: TgdTexture2D
+        private readonly texture: TgdTexture2D,
     ) {
         super()
         this.prg = new TgdProgram(context.gl, {
@@ -22,10 +15,7 @@ export class Painter extends TgdPainter {
                 "in vec2 attPoint;",
                 "out vec2 varUV;",
                 "void main() {",
-                [
-                    "varUV = attPoint + vec2(0.5);",
-                    "gl_Position = vec4(attPoint, 0.0, 1.0);",
-                ],
+                ["varUV = attPoint + vec2(0.5);", "gl_Position = vec4(attPoint, 0.0, 1.0);"],
                 "}",
             ],
             frag: [

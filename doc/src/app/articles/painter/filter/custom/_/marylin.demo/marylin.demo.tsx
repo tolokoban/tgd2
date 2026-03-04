@@ -13,9 +13,7 @@ import BackgroundURL from "../../../marylin.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = new TgdTexture2D(context).loadBitmap(
-        tgdLoadImage(BackgroundURL)
-    )
+    const texture = new TgdTexture2D(context).loadBitmap(tgdLoadImage(BackgroundURL))
     const filter = new TgdFilter({
         uniforms: {
             uniTime: "float",
@@ -25,10 +23,7 @@ function init(context: TgdContext) {
         setUniforms({ program, time }) {
             program.uniform1f("uniTime", time)
             program.uniform1f("uniAspectRatio", context.aspectRatio)
-            program.uniform1f(
-                "uniAspectRatioInverse",
-                context.aspectRatioInverse
-            )
+            program.uniform1f("uniAspectRatioInverse", context.aspectRatioInverse)
         },
         extraFunctions: {
             ...tgdCodeFunction_uv2polar(),
@@ -46,7 +41,7 @@ function init(context: TgdContext) {
         new TgdPainterFilter(context, {
             texture,
             filters: [filter],
-        })
+        }),
     )
     context.play()
     // #end

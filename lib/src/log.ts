@@ -39,19 +39,9 @@ export class TgdLogger {
         const enabled = gl.getParameter(gl.DEPTH_TEST) as boolean
         if (enabled) {
             console.log("gl.enable( gl.DEPTH_TEST )")
-            console.log(
-                "gl.depthFunc(",
-                this.lookup(gl, gl.getParameter(gl.DEPTH_FUNC)),
-                ")"
-            )
-            console.log(
-                "gl.depthMask(",
-                this.lookup(gl, gl.getParameter(gl.DEPTH_WRITEMASK)),
-                ")"
-            )
-            const [rangeMin, rangeMax] = gl.getParameter(
-                gl.DEPTH_RANGE
-            ) as Float32Array
+            console.log("gl.depthFunc(", this.lookup(gl, gl.getParameter(gl.DEPTH_FUNC)), ")")
+            console.log("gl.depthMask(", this.lookup(gl, gl.getParameter(gl.DEPTH_WRITEMASK)), ")")
+            const [rangeMin, rangeMax] = gl.getParameter(gl.DEPTH_RANGE) as Float32Array
             console.log("gl.depthRange(", rangeMin, ",", rangeMax, ")")
         } else {
             console.log("gl.disable( gl.DEPTH_TEST )")

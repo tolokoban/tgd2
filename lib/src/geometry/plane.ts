@@ -24,11 +24,7 @@ export class TgdGeometryPlane extends TgdGeometry {
         const vec = (x: number, y: number): ArrayNumber3 => {
             const sx = x * sizeX
             const sy = y * sizeY
-            return [
-                sx * vecX[0] + sy * vecY[0],
-                sx * vecX[1] + sy * vecY[1],
-                sx * vecX[2] + sy * vecY[2],
-            ]
+            return [sx * vecX[0] + sy * vecY[0], sx * vecX[1] + sy * vecY[1], sx * vecX[2] + sy * vecY[2]]
         }
         const dataset = new TgdDataset({
             POSITION: "vec3",
@@ -52,9 +48,7 @@ export class TgdGeometryPlane extends TgdGeometry {
             u1, v0,
             u0, v0,
         ]))
-        const [nx, ny, nz] = new TgdVec3(vecX)
-            .normalize()
-            .cross(new TgdVec3(vecY).normalize())
+        const [nx, ny, nz] = new TgdVec3(vecX).normalize().cross(new TgdVec3(vecY).normalize())
 
         // prettier-ignore
         dataset.set("NORMAL", new Float32Array([

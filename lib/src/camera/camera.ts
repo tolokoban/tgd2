@@ -1,11 +1,4 @@
-import {
-    TgdMat4,
-    type TgdQuat,
-    TgdTransfo,
-    type TgdTransfoOptions,
-    type TgdVec3,
-    TgdVec4,
-} from "@tgd/math"
+import { TgdMat4, type TgdQuat, TgdTransfo, type TgdTransfoOptions, type TgdVec3, TgdVec4 } from "@tgd/math"
 import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 import type { TgdInterfaceTransformable } from "../interface"
 
@@ -180,9 +173,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
     }
 
     apply(point: ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4): TgdVec4 {
-        return new TgdVec4(point)
-            .applyMatrix(this.matrixModelView)
-            .applyMatrix(this.matrixProjection)
+        return new TgdVec4(point).applyMatrix(this.matrixModelView).applyMatrix(this.matrixProjection)
     }
 
     /**
@@ -195,7 +186,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         bbox: Readonly<{
             min: Readonly<ArrayNumber3 | TgdVec3>
             max: Readonly<ArrayNumber3 | TgdVec3>
-        }>
+        }>,
     ): number {
         const [x0, y0, z0] = bbox.min
         const [x1, y1, z1] = bbox.max
@@ -242,14 +233,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
             else if (z > 1) far--
         }
         const N = points.length
-        if (
-            left === N ||
-            right === N ||
-            top === N ||
-            bottom === N ||
-            near === N ||
-            far === N
-        ) {
+        if (left === N || right === N || top === N || bottom === N || near === N || far === N) {
             // const text = JSON.stringify(bbox)
             // if (text !== lastText) {
             //     lastText = text
@@ -270,7 +254,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
      */
     abstract castRay(
         screenX: number,
-        screenY: number
+        screenY: number,
     ): Readonly<{
         origin: TgdVec3
         direction: TgdVec3
@@ -302,8 +286,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         if (this._zoom === v) return
 
         this._zoom = v
-        // this.transfo.setScale(v, v, v)
-        this.dirtyModelView = true
+        this._dirtyProjection = true
     }
 
     toCode(caption?: string): string {

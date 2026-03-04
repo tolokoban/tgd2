@@ -20,8 +20,7 @@ export function ViewHeader({ className, index, bufferView }: ViewHeaderProps) {
             justifyContent="space-between"
             gap="M"
             padding="M"
-            color="primary-5"
-        >
+            color="primary-5">
             <div>Buffer View #{index}</div>
             <div>
                 buffer: <b>{bufferView.buffer}</b>

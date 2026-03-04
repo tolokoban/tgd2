@@ -18,13 +18,7 @@ export type ViewSceneProps = {
     onAction?(action: Action): void
 }
 
-export function ViewScene({
-    data,
-    scene,
-    title,
-    index,
-    onAction,
-}: ViewSceneProps) {
+export function ViewScene({ data, scene, title, index, onAction }: ViewSceneProps) {
     return (
         <Expander
             title={title}
@@ -34,15 +28,9 @@ export function ViewScene({
                     index,
                     type: "scene",
                 })
-            }}
-        >
+            }}>
             {(scene.nodes ?? []).map((node, index) => (
-                <ViewNode
-                    key={`node#${index}`}
-                    data={data}
-                    index={index}
-                    onAction={onAction}
-                />
+                <ViewNode key={`node#${index}`} data={data} index={index} onAction={onAction} />
             ))}
         </Expander>
     )

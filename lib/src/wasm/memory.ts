@@ -5,11 +5,7 @@ import { TgdCodeBloc } from "@tgd/shader"
  * in memory.
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Copy)
  */
-export function wasm_memory_copy(
-    from: TgdCodeBloc[],
-    to: TgdCodeBloc[],
-    length: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_memory_copy(from: TgdCodeBloc[], to: TgdCodeBloc[], length: TgdCodeBloc[]): TgdCodeBloc[] {
     return [...to, ...from, ...length, `memory.copy`]
 }
 
@@ -20,7 +16,7 @@ export function wasm_memory_copy(
 export function wasm_memory_fill(
     from: TgdCodeBloc[],
     length: TgdCodeBloc[],
-    fillByte: TgdCodeBloc[] = ["i32.const 0"]
+    fillByte: TgdCodeBloc[] = ["i32.const 0"],
 ): TgdCodeBloc[] {
     return [...from, ...length, ...fillByte, `memory.fill`]
 }

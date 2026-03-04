@@ -9,7 +9,7 @@ const TAU = 2 * Math.PI
 
 export function makeDatasetAndElements(
     branches: TgdPainterTubesBranch[],
-    roundness: number
+    roundness: number,
 ): {
     dataset: TgdDataset
     elements: TgdTypeArrayForElements
@@ -18,28 +18,20 @@ export function makeDatasetAndElements(
     const elements: number[] = []
     const sections: Section[] = []
     for (const branch of branches) branch2section2(sections, branch, roundness)
-    for (const section of sections)
-        addSectionToGeometry(section, vertices, elements)
+    for (const section of sections) addSectionToGeometry(section, vertices, elements)
     return {
         dataset: vertices.dataset,
         elements: resolveElements(elements, vertices.count),
     }
 }
 
-function resolveElements(
-    elements: number[],
-    count: number
-): TgdTypeArrayForElements {
+function resolveElements(elements: number[], count: number): TgdTypeArrayForElements {
     if (count < 0xff) return new Uint8Array(elements)
     if (count < 0xffff) return new Uint16Array(elements)
     return new Uint32Array(elements)
 }
 
-function branch2section2(
-    sections: Section[],
-    branch: TgdPainterTubesBranch,
-    roundness: number
-) {
+function branch2section2(sections: Section[], branch: TgdPainterTubesBranch, roundness: number) {
     const section: Section = {
         roundness: branch.roundness ?? roundness,
         points: [
@@ -73,11 +65,7 @@ function branch2section2(
     }
 }
 
-function addSectionToGeometry(
-    section: Section,
-    vertices: Vertices,
-    elements: number[]
-) {
+function addSectionToGeometry(section: Section, vertices: Vertices, elements: number[]) {
     if (section.points.length === 0) return
 
     if (section.points.length === 1) {
@@ -91,17 +79,11 @@ function addSectionToGeometry(
         const prv = section.points[i - 1]
         const cur = section.points[i]
         const nxt = section.points[i + 1]
-        ellipses.push(
-            new Ellipse(prv, cur, nxt, section.roundness, vertices, elements)
-        )
+        ellipses.push(new Ellipse(prv, cur, nxt, section.roundness, vertices, elements))
     }
 }
 
-function addSphereToGeometry(
-    point: SectionPoint,
-    vertices: Vertices,
-    elements: number[]
-) {
+function addSphereToGeometry(point: SectionPoint, vertices: Vertices, elements: number[]) {
     console.error("[addSphereToGeometry] Function not implemented.")
     return
 }

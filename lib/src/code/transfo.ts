@@ -6,7 +6,7 @@ import { TgdCodeFunctions } from "@tgd/shader"
 export function tgdCodeFunction_rotate2D(
     options: Partial<{
         name: string
-    }> = {}
+    }> = {},
 ): TgdCodeFunctions {
     const { name = "rotate2D" } = options
     return {

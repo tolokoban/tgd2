@@ -1,10 +1,4 @@
-import {
-    ArrayNumber2,
-    ArrayNumber4,
-    TgdPainterSegmentsData,
-    TgdVec3,
-    TgdVec4,
-} from "@tolokoban/tgd"
+import { ArrayNumber2, ArrayNumber4, TgdPainterSegmentsData, TgdVec3, TgdVec4 } from "@tolokoban/tgd"
 
 export function makeSegmentsData(swc: string): {
     data: TgdPainterSegmentsData
@@ -21,9 +15,7 @@ export function makeSegmentsData(swc: string): {
         const items = line.split(/\s+/)
         if (items.length < 7) continue
 
-        const [index, type, x, y, z, radius, parent] = items.map((s) =>
-            Number(s)
-        )
+        const [index, type, x, y, z, radius, parent] = items.map((s) => Number(s))
         const B: Point = {
             xyzr: [x, y, z, radius * 0.2],
             uv: [normalizeType(type), 0],
@@ -35,9 +27,7 @@ export function makeSegmentsData(swc: string): {
         if (A) {
             const [xx, yy, zz] = A.xyzr
             // Computing distance.
-            const distance = Math.sqrt(
-                (x - xx) * (x - xx) + (y - yy) * (y - yy) + (z - zz) * (z - zz)
-            )
+            const distance = Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy) + (z - zz) * (z - zz))
             B.uv[1] = A.uv[1] + distance
             maxDistance = Math.max(maxDistance, B.uv[1])
         } else {

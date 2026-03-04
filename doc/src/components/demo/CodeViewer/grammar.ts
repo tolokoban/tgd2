@@ -333,9 +333,7 @@ const GLSL: Prism.Grammar = {
 
 function makeIdentifiersRX(words: string[]) {
     return {
-        pattern: new RegExp(
-            `(?:[^a-zA-Z0-9_])(${words.join("|")})(?=[^a-zA-Z0-9_])`
-        ),
+        pattern: new RegExp(`(?:[^a-zA-Z0-9_])(${words.join("|")})(?=[^a-zA-Z0-9_])`),
         lookbehind: false,
         greedy: true,
     }

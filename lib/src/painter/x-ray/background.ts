@@ -20,7 +20,7 @@ export class TgdPainterBackground extends TgdPainter {
 
     constructor(
         private readonly context: { gl: WebGL2RenderingContext },
-        { texture }: Partial<TgdPainterBackgroundOptions> = {}
+        { texture }: Partial<TgdPainterBackgroundOptions> = {},
     ) {
         super()
         this.texture = texture
@@ -32,10 +32,7 @@ export class TgdPainterBackground extends TgdPainter {
             attPoint: "vec2",
             attUV: "vec2",
         })
-        dataset.set(
-            "attPoint",
-            new Float32Array([-1, -1, +1, -1, -1, +1, +1, +1])
-        )
+        dataset.set("attPoint", new Float32Array([-1, -1, +1, -1, -1, +1, +1, +1]))
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
     }

@@ -20,7 +20,7 @@ export function tgdAnimChainTransfoInterpolations(
         repeat: number
         easingFunction(this: void, x: number): number
         onEnd(): void
-    }> = {}
+    }> = {},
 ): TgdAnimation {
     const animations: TgdAnimation[] = []
     let previousTransfo: TgdTransfo = transfo
@@ -30,11 +30,7 @@ export function tgdAnimChainTransfoInterpolations(
         animations.push({
             name: `Step#${counter++}`,
             ...step,
-            action: tgdActionCreateTransfoInterpolation(
-                transfo,
-                previousTransfo,
-                nextTransfo
-            ),
+            action: tgdActionCreateTransfoInterpolation(transfo, previousTransfo, nextTransfo),
         })
         previousTransfo = nextTransfo
     }

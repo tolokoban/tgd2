@@ -24,27 +24,17 @@ export function ViewAction(props: ViewActionProps) {
 
     switch (props.action.type) {
         case "scene":
-            return (
-                <ViewActionScene data={props.data} index={props.action.index} />
-            )
+            return <ViewActionScene data={props.data} index={props.action.index} />
         case "verbatim":
             return <ViewActionVerbatim data={props.data} />
         case "node":
-            return (
-                <ViewActionNode data={props.data} index={props.action.index} />
-            )
+            return <ViewActionNode data={props.data} index={props.action.index} />
         case "image":
-            return (
-                <ViewActionImage data={props.data} index={props.action.index} />
-            )
+            return <ViewActionImage data={props.data} index={props.action.index} />
         default:
             return (
-                <div
-                    className={$.join(props.className, Styles.action)}
-                    style={style}
-                >
-                    Don't know what to do with this action:{" "}
-                    <pre>{JSON.stringify(props.action, null, "  ")}</pre>.
+                <div className={$.join(props.className, Styles.action)} style={style}>
+                    Don't know what to do with this action: <pre>{JSON.stringify(props.action, null, "  ")}</pre>.
                 </div>
             )
     }

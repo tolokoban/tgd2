@@ -59,7 +59,7 @@ class VolumeToMeshManager {
             new TgdPainterState(context, {
                 blend: webglPresetBlend.premultipliedAlpha,
                 children: [midPoints, corners, triangles],
-            })
+            }),
         )
         context.add(clear, state)
         context.paint()

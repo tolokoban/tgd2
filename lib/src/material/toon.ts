@@ -35,13 +35,9 @@ export class TgdMaterialToon extends TgdMaterial {
 
     constructor(options: TgdMaterialToonOptions = {}) {
         const color =
-            options.color instanceof TgdTexture2D
-                ? options.color
-                : new TgdVec4(options.color ?? DEFAULT_COLOR)
+            options.color instanceof TgdTexture2D ? options.color : new TgdVec4(options.color ?? DEFAULT_COLOR)
         const hasTexture = !(color instanceof TgdVec4)
-        const vertexShaderCode = [
-            "varNormal = mat3(uniTransfoMatrix) * NORMAL;",
-        ]
+        const vertexShaderCode = ["varNormal = mat3(uniTransfoMatrix) * NORMAL;"]
         const uniforms: { [name: string]: WebglUniformType } = {
             uniShades: "float",
             uniShadesInverse: "float",
@@ -71,9 +67,7 @@ export class TgdMaterialToon extends TgdMaterial {
                 `light *= uniShades;`,
                 `light -= fract(light);`,
                 `light /= uniShadesInverse;`,
-                hasTexture
-                    ? `vec4 color = texture(texDiffuse, varUV);`
-                    : `vec4 color = vec4(${color.join(", ")});`,
+                hasTexture ? `vec4 color = texture(texDiffuse, varUV);` : `vec4 color = vec4(${color.join(", ")});`,
                 `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
                 `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,
                 `float a = 1.0 - uniSpecularSize;`,
@@ -93,19 +87,11 @@ export class TgdMaterialToon extends TgdMaterial {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)
-                this.ambientColor
-                    .from(this.ambient.color)
-                    .scale(this.ambient.color.w)
+                this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
                 program.uniform3fv("uniAmbient", this.ambientColor)
-                program.uniform1f(
-                    "uniSpecularSharpness",
-                    this.specularSharpness
-                )
+                program.uniform1f("uniSpecularSharpness", this.specularSharpness)
                 program.uniform1f("uniSpecularSize", this.specularSize)
-                program.uniform1f(
-                    "uniSpecularIntensity",
-                    this.specularIntensity
-                )
+                program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
                 const { texture } = this
                 if (texture) texture.activate(0, program, "texDiffuse")

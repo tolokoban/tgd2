@@ -15,7 +15,7 @@ export class Vertices {
         ny: number,
         nz: number,
         u: number,
-        v: number
+        v: number,
     ): number {
         const { count } = this
         this._points.push(x, y, z, dx, dy, dz, nx, ny, nz, u, v)
@@ -41,7 +41,7 @@ export class Vertices {
             },
             {
                 data: new Float32Array(this._points).buffer,
-            }
+            },
         )
         return dataset
     }

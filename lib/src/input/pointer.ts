@@ -12,9 +12,7 @@ const MOUSE_BUTTON_RIGHT = 2
 
 export class TgdInputPointer {
     readonly eventTap = new TgdEvent<Readonly<TgdInputPointerEventTap>>()
-    readonly eventTapMultiple = new TgdEvent<
-        Readonly<TgdInputPointerEventTapMultiple>
-    >()
+    readonly eventTapMultiple = new TgdEvent<Readonly<TgdInputPointerEventTapMultiple>>()
     readonly eventMoveStart = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
     readonly eventMove = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
     readonly eventHover = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
@@ -94,9 +92,7 @@ export class TgdInputPointer {
         return t0 < t1 ? (1e3 * (y1 - y0)) / (t1 - t0) : 0
     }
 
-    isTouching(
-        hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean
-    ) {
+    isTouching(hitTest?: (event: Readonly<TgdInputPointerEventFinger>) => boolean) {
         if (!this.pointerEvent) return false
 
         if (!hitTest) return true
@@ -115,9 +111,7 @@ export class TgdInputPointer {
         canvas.removeEventListener("pointerup", this.handlePointerUp)
     }
 
-    private readonly handleContextMenu = (event: {
-        preventDefault: () => void
-    }) => {
+    private readonly handleContextMenu = (event: { preventDefault: () => void }) => {
         event.preventDefault()
     }
 
@@ -125,6 +119,7 @@ export class TgdInputPointer {
         const eventDelta = event.deltaX + event.deltaY + event.deltaZ
         const delta = eventDelta > 0 ? 1 : -1
         this.eventZoom.dispatch({
+            ...resolvePointerButtons(event),
             current: this.getPoint(event),
             direction: delta,
             preventDefault: () => event.preventDefault(),
@@ -142,6 +137,7 @@ export class TgdInputPointer {
         const point = this.getPoint(event)
         this.start = this.current = this.previous = point
         this.eventMoveStart.dispatch({
+            ...resolvePointerButtons(event),
             start: point,
             current: point,
             previous: point,
@@ -157,6 +153,7 @@ export class TgdInputPointer {
         this.previous = this.current
         this.current = point
         const output: TgdInputPointerEventMove = {
+            ...resolvePointerButtons(event),
             start: this.start,
             current: this.current,
             previous: this.previous,
@@ -172,6 +169,7 @@ export class TgdInputPointer {
         event.preventDefault()
         this.current = this.getPoint(event)
         this.eventMoveEnd.dispatch({
+            ...resolvePointerButtons(event),
             start: this.start,
             current: this.current,
             previous: this.previous,
@@ -184,6 +182,7 @@ export class TgdInputPointer {
             if (this.isMultiTap(this.start)) {
                 this.tapsCount++
                 this.eventTapMultiple.dispatch({
+                    ...resolvePointerButtons(event),
                     tapsCount: this.tapsCount,
                     ...this.start,
                     ...this.controlKeys,
@@ -196,6 +195,7 @@ export class TgdInputPointer {
             }
             if (tapEventEnabled) {
                 this.eventTap.dispatch({
+                    ...resolvePointerButtons(event),
                     ...this.start,
                     ...this.controlKeys,
                 })
@@ -216,9 +216,7 @@ export class TgdInputPointer {
         return true
     }
 
-    private getPoint(
-        event: PointerEvent | WheelEvent
-    ): TgdInputPointerEventFinger {
+    private getPoint(event: PointerEvent | WheelEvent): TgdInputPointerEventFinger {
         this.controlKeys = {
             altKey: event.altKey || event.buttons === MOUSE_BUTTON_RIGHT,
             ctrlKey: event.ctrlKey,
@@ -236,5 +234,18 @@ export class TgdInputPointer {
         const x = 2 * ((event.clientX - left) / width - 0.5)
         const y = -2 * ((event.clientY - top) / height - 0.5)
         return { x, y, t: event.timeStamp, fingersCount: 1 }
+    }
+}
+
+export function resolvePointerButtons({ buttons }: { buttons: number }) {
+    const b = (v: number) => Boolean(buttons & v)
+
+    return {
+        buttons,
+        buttonLeft: b(1),
+        buttonRight: b(2),
+        buttonMiddle: b(4),
+        buttonBack: b(8),
+        buttonForward: b(16),
     }
 }

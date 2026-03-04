@@ -22,12 +22,7 @@ export function ViewNodes(props: ViewNodesProps) {
     return (
         <Expander title="Nodes" icon={IconTree}>
             {nodes.map((node, index) => (
-                <ViewNode
-                    key={`#${index}`}
-                    data={props.data}
-                    index={index}
-                    onAction={props.onAction}
-                />
+                <ViewNode key={`#${index}`} data={props.data} index={index} onAction={props.onAction} />
             ))}
         </Expander>
     )

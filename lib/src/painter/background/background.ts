@@ -67,7 +67,7 @@ export class TgdPainterBackground extends TgdPainter {
             scaleX = 1,
             scaleY = 1,
             mode = "cover",
-        }: Partial<TgdPainterBackgroundOptions> = {}
+        }: Partial<TgdPainterBackgroundOptions> = {},
     ) {
         super()
         this.texture = texture
@@ -96,7 +96,7 @@ export class TgdPainterBackground extends TgdPainter {
                 -1 * scaleY,
                 +1 * scaleX,
                 -1 * scaleY,
-            ])
+            ]),
         )
         dataset.set("attUV", new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]))
         this.vao = new TgdVertexArray(context.gl, this.program, [dataset])
@@ -112,10 +112,7 @@ export class TgdPainterBackground extends TgdPainter {
         const { gl } = this.context
         const { vao, program, texture, zoom, x, y, z, mode } = this
         program.use()
-        const { scaleX, scaleY } =
-            mode === "cover"
-                ? this.getScaleForCover()
-                : this.getScaleForContain()
+        const { scaleX, scaleY } = mode === "cover" ? this.getScaleForCover() : this.getScaleForContain()
         program.uniform2f("uniScale", scaleX, scaleY)
         program.uniform2f("uniScroll", x, y)
         program.uniform1f("uniZoom", 1 / zoom)
@@ -137,15 +134,10 @@ export class TgdPainterBackground extends TgdPainter {
         const { texture, context } = this
         if (!texture) return { scaleX: 1, scaleY: 1 }
 
-        const { drawingBufferWidth: width, drawingBufferHeight: height } =
-            context.gl
+        const { drawingBufferWidth: width, drawingBufferHeight: height } = context.gl
         const horizontal = texture.width * height > texture.height * width
-        const scaleX = horizontal
-            ? (texture.width * height) / (width * texture.height)
-            : 1
-        const scaleY = horizontal
-            ? 1
-            : (texture.height * width) / (height * texture.width)
+        const scaleX = horizontal ? (texture.width * height) / (width * texture.height) : 1
+        const scaleY = horizontal ? 1 : (texture.height * width) / (height * texture.width)
         return { scaleX, scaleY }
     }
 
@@ -153,8 +145,7 @@ export class TgdPainterBackground extends TgdPainter {
         const { texture, context } = this
         if (!texture) return { scaleX: 1, scaleY: 1 }
 
-        const { drawingBufferWidth: width, drawingBufferHeight: height } =
-            context.gl
+        const { drawingBufferWidth: width, drawingBufferHeight: height } = context.gl
         const aspectRatio = width / height
         const aspectRatioTexture = texture.width / texture.height
         const sx = width / texture.width

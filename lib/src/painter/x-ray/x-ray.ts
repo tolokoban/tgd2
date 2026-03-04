@@ -37,7 +37,7 @@ export class TgdPainterXRay extends TgdPainter {
             camera: TgdCamera
             paint?: () => void
         },
-        options: TgdPainterXRayOptions
+        options: TgdPainterXRayOptions,
     ) {
         super()
         this.exponent = options.exponent ?? 2

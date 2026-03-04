@@ -9,40 +9,18 @@ import Style from "./layout.module.css"
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <ModalProvider>
-            <ViewStrip
-                className={Style.layout}
-                fullsize
-                color="primary-1"
-                orientation="row"
-                template="*1"
-            >
+            <ViewStrip className={Style.layout} fullsize color="primary-1" orientation="row" template="*1">
                 <aside>
-                    <button
-                        className={classFor("/")}
-                        type="button"
-                        onClick={makeGoto("/")}
-                    >
+                    <button className={classFor("/")} type="button" onClick={makeGoto("/")}>
                         Welcome
                     </button>
-                    <button
-                        className={classFor("/articles")}
-                        type="button"
-                        onClick={makeGoto("/articles")}
-                    >
+                    <button className={classFor("/articles")} type="button" onClick={makeGoto("/articles")}>
                         Examples
                     </button>
-                    <button
-                        className={classFor("/tools")}
-                        type="button"
-                        onClick={makeGoto("/tools")}
-                    >
+                    <button className={classFor("/tools")} type="button" onClick={makeGoto("/tools")}>
                         Tools
                     </button>
-                    <button
-                        className={classFor("/api")}
-                        type="button"
-                        onClick={makeGoto("/api")}
-                    >
+                    <button className={classFor("/api")} type="button" onClick={makeGoto("/api")}>
                         Reference
                     </button>
                     <div>

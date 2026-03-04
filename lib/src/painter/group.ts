@@ -28,10 +28,7 @@ export class TgdPainterGroup extends TgdPainter {
     constructor()
     constructor(painters?: TgdPainter[], options?: TgdPainterGroupOptions)
     constructor(options?: TgdPainterGroupOptions)
-    constructor(
-        arg1?: TgdPainter[] | TgdPainterGroupOptions,
-        arg2?: TgdPainterGroupOptions
-    ) {
+    constructor(arg1?: TgdPainter[] | TgdPainterGroupOptions, arg2?: TgdPainterGroupOptions) {
         super()
         this.painters = []
         if (Array.isArray(arg1)) {
@@ -59,8 +56,7 @@ export class TgdPainterGroup extends TgdPainter {
     }
 
     forEachChild(callback: (child: TgdPainter, index: number) => void) {
-        for (const [index, child] of this.painters.entries())
-            callback(child, index)
+        for (const [index, child] of this.painters.entries()) callback(child, index)
     }
 
     has(painter: TgdPainter): boolean {
@@ -138,8 +134,7 @@ export class TgdPainterGroup extends TgdPainter {
 
     get hierarchy(): TgdDebugPainterHierarchy {
         return {
-            [this.active ? this.name : `${this.name} (Inactive)`]:
-                this.painters.map((painter) => painter.hierarchy),
+            [this.active ? this.name : `${this.name} (Inactive)`]: this.painters.map((painter) => painter.hierarchy),
         }
     }
 
@@ -152,17 +147,12 @@ export class TgdPainterGroup extends TgdPainter {
         cons.debug()
     }
 
-    private recursiveDebug(
-        cons: TgdConsole,
-        h: TgdDebugPainterHierarchy,
-        indent = 0
-    ) {
+    private recursiveDebug(cons: TgdConsole, h: TgdDebugPainterHierarchy, indent = 0) {
         for (const key of Object.keys(h)) {
             cons.add("| ".repeat(indent), { color: "#777" }).add(key).add()
             const value = h[key]
             if (value) {
-                for (const child of value)
-                    this.recursiveDebug(cons, child, indent + 1)
+                for (const child of value) this.recursiveDebug(cons, child, indent + 1)
             }
         }
     }

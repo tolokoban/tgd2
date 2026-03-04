@@ -18,13 +18,7 @@ export type ViewLightsProps = {
 
 export function ViewLights({ className, data, onAction }: ViewLightsProps) {
     const lights = figureLights(data)
-    return (
-        <Expander
-            className={$.join(className, Styles.images)}
-            title="Lights"
-            icon={IconLightOff}
-        ></Expander>
-    )
+    return <Expander className={$.join(className, Styles.images)} title="Lights" icon={IconLightOff}></Expander>
 }
 
 function figureLights(data: TgdDataGlb) {}

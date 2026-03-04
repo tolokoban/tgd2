@@ -27,23 +27,14 @@ export function ViewJson(props: ViewJsonProps) {
 }
 
 function replacer(this: any, _key: string, value: any) {
-    if (value instanceof Uint8Array)
-        return `<<< Uint8Array( ${value.length} ) >>>`
-    if (value instanceof Int8Array)
-        return `<<< Int8Array( ${value.length} ) >>>`
-    if (value instanceof Uint8ClampedArray)
-        return `<<< Uint8ClampedArray( ${value.length} ) >>>`
-    if (value instanceof Uint16Array)
-        return `<<< Uint16Array( ${value.length} ) >>>`
-    if (value instanceof Int16Array)
-        return `<<< Int16Array( ${value.length} ) >>>`
-    if (value instanceof Uint32Array)
-        return `<<< Uint32Array( ${value.length} ) >>>`
-    if (value instanceof Int32Array)
-        return `<<< Int32Array( ${value.length} ) >>>`
-    if (value instanceof Float16Array)
-        return `<<< Float16Array( ${value.length} ) >>>`
-    if (value instanceof Float32Array)
-        return `<<< Float32Array( ${value.length} ) >>>`
+    if (value instanceof Uint8Array) return `<<< Uint8Array( ${value.length} ) >>>`
+    if (value instanceof Int8Array) return `<<< Int8Array( ${value.length} ) >>>`
+    if (value instanceof Uint8ClampedArray) return `<<< Uint8ClampedArray( ${value.length} ) >>>`
+    if (value instanceof Uint16Array) return `<<< Uint16Array( ${value.length} ) >>>`
+    if (value instanceof Int16Array) return `<<< Int16Array( ${value.length} ) >>>`
+    if (value instanceof Uint32Array) return `<<< Uint32Array( ${value.length} ) >>>`
+    if (value instanceof Int32Array) return `<<< Int32Array( ${value.length} ) >>>`
+    if (value instanceof Float16Array) return `<<< Float16Array( ${value.length} ) >>>`
+    if (value instanceof Float32Array) return `<<< Float32Array( ${value.length} ) >>>`
     return value
 }

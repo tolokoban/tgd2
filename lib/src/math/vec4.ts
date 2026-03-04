@@ -13,7 +13,7 @@ export class TgdVec4 extends Float32Array {
     static fromSlerp(
         [x1, y1, z1, w1 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         [x2, y2, z2, w2 = 0]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        a = 0.5
+        a = 0.5,
     ): TgdVec4 {
         const b = 1 - a
         const x = b * x1 + a * x2
@@ -31,12 +31,7 @@ export class TgdVec4 extends Float32Array {
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
 
-    constructor(
-        x?: number | TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3,
-        y?: number,
-        z?: number,
-        w?: number
-    ) {
+    constructor(x?: number | TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3, y?: number, z?: number, w?: number) {
         super(4)
         if (x instanceof TgdVec4) {
             this.x = x.x
@@ -171,9 +166,7 @@ export class TgdVec4 extends Float32Array {
         this[3] = value
     }
 
-    add(
-        ...vectors: (TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3)[]
-    ): TgdVec4 {
+    add(...vectors: (TgdVec4 | TgdVec3 | ArrayNumber4 | ArrayNumber3)[]): TgdVec4 {
         for (const vec of vectors) {
             this[0] += vec[0]
             this[1] += vec[1]
@@ -224,29 +217,15 @@ export class TgdVec4 extends Float32Array {
     }
 
     dot(vec: TgdVec4 | ArrayNumber4): number {
-        return (
-            this[0] * vec[0] +
-            this[1] * vec[1] +
-            this[2] * vec[2] +
-            this[3] * vec[3]
-        )
+        return this[0] * vec[0] + this[1] * vec[1] + this[2] * vec[2] + this[3] * vec[3]
     }
 
     get size() {
-        return Math.sqrt(
-            this[0] * this[0] +
-                this[1] * this[1] +
-                this[2] * this[2] +
-                this[3] * this[3]
-        )
+        return Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2] + this[3] * this[3])
     }
 
     normalize(): this {
-        const squareLength =
-            this[0] * this[0] +
-            this[1] * this[1] +
-            this[2] * this[2] +
-            this[3] * this[3]
+        const squareLength = this[0] * this[0] + this[1] * this[1] + this[2] * this[2] + this[3] * this[3]
         if (squareLength === 0) return this
 
         return this.scale(1 / Math.sqrt(squareLength))
@@ -255,10 +234,6 @@ export class TgdVec4 extends Float32Array {
     debug(caption = "vec4") {
         const { x, y, z, w } = this
         const out: string[] = [x, y, z, w].map((n) => n.toFixed(6))
-        console.log(
-            `${caption}:   `,
-            out.join(" | "),
-            `  (length = ${this.size})`
-        )
+        console.log(`${caption}:   `, out.join(" | "), `  (length = ${this.size})`)
     }
 }

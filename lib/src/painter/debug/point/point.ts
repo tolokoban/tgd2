@@ -25,10 +25,7 @@ export class TgdPainterDebugPoint extends TgdPainter {
                     w: "float",
                     size: "float",
                 },
-                mainCode: [
-                    "gl_Position = vec4(x, y, z, w);",
-                    "gl_PointSize = size;",
-                ],
+                mainCode: ["gl_Position = vec4(x, y, z, w);", "gl_PointSize = size;"],
             }).code,
             frag: new TgdShaderFragment({
                 uniforms: {

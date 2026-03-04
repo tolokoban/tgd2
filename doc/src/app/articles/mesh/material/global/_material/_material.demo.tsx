@@ -64,7 +64,7 @@ function init(context: TgdContext, assets: Assets) {
         }),
         new TgdPainterLogic((time) => {
             mesh.transfo.setEulerRotation(0, -time * 20, 0)
-        })
+        }),
     )
     context.play()
     return {
@@ -82,14 +82,8 @@ function init(context: TgdContext, assets: Assets) {
 export default function Demo() {
     const ref = React.useRef<ReturnType<typeof init> | null>(null)
     const srv = ref.current
-    const [specularExponent, setSpecularExponent] = useFloat(
-        2.2,
-        srv?.specularExponent
-    )
-    const [specularIntensity, setSpecularIntensity] = useFloat(
-        2,
-        srv?.specularIntensity
-    )
+    const [specularExponent, setSpecularExponent] = useFloat(2.2, srv?.specularExponent)
+    const [specularIntensity, setSpecularIntensity] = useFloat(2, srv?.specularIntensity)
     return (
         <div>
             <View
@@ -112,37 +106,23 @@ export default function Demo() {
                 gizmo
                 controller={{
                     inertiaOrbit: 1000,
-                }}
-            >
-                <ViewPanel
-                    display="flex"
-                    justifyContent="space-around"
-                    alignItems="center"
-                >
-                    <ViewInputNumber
-                        label="specularExponent"
-                        value={specularExponent}
-                        onChange={setSpecularExponent}
-                    />
+                }}>
+                <ViewPanel display="flex" justifyContent="space-around" alignItems="center">
+                    <ViewInputNumber label="specularExponent" value={specularExponent} onChange={setSpecularExponent} />
                     <ViewInputNumber
                         label="specularIntensity"
                         value={specularIntensity}
                         onChange={setSpecularIntensity}
                     />
                 </ViewPanel>
-                <ViewPanel
-                    display="flex"
-                    justifyContent="space-around"
-                    alignItems="center"
-                >
+                <ViewPanel display="flex" justifyContent="space-around" alignItems="center">
                     <ViewButton
                         variant="text"
                         color="primary-5"
                         onClick={() => {
                             setSpecularExponent(1)
                             setSpecularIntensity(1)
-                        }}
-                    >
+                        }}>
                         Brushed Metal
                     </ViewButton>
                     <ViewButton
@@ -151,8 +131,7 @@ export default function Demo() {
                         onClick={() => {
                             setSpecularExponent(0.25)
                             setSpecularIntensity(1.5)
-                        }}
-                    >
+                        }}>
                         Soft Light
                     </ViewButton>
                     <ViewButton
@@ -161,8 +140,7 @@ export default function Demo() {
                         onClick={() => {
                             setSpecularExponent(2.2)
                             setSpecularIntensity(2)
-                        }}
-                    >
+                        }}>
                         Car Paint
                     </ViewButton>
                     <ViewButton
@@ -171,8 +149,7 @@ export default function Demo() {
                         onClick={() => {
                             setSpecularExponent(0)
                             setSpecularIntensity(1)
-                        }}
-                    >
+                        }}>
                         Plastic
                     </ViewButton>
                 </ViewPanel>

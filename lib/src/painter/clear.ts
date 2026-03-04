@@ -24,7 +24,7 @@ export class TgdPainterClear extends TgdPainter {
 
     constructor(
         { gl }: { gl: WebGL2RenderingContext },
-        private readonly options: Partial<TgdPainterClearOptions> = {}
+        private readonly options: Partial<TgdPainterClearOptions> = {},
     ) {
         super()
         this.name = options.name ?? `Clear/${this.name}`
@@ -47,9 +47,7 @@ export class TgdPainterClear extends TgdPainter {
             hasAnyOption = true
         }
         if (!hasAnyOption) {
-            throw new Error(
-                "[TgdPainterClear] You must give at least a color or a depth in the constructor!"
-            )
+            throw new Error("[TgdPainterClear] You must give at least a color or a depth in the constructor!")
         }
 
         ;[this.red, this.green, this.blue, this.alpha] = color
@@ -61,17 +59,7 @@ export class TgdPainterClear extends TgdPainter {
     delete(): void {}
 
     paint(): void {
-        const {
-            clearMask,
-            gl,
-            red,
-            green,
-            blue,
-            alpha,
-            depth,
-            stencil,
-            options,
-        } = this
+        const { clearMask, gl, red, green, blue, alpha, depth, stencil, options } = this
         if (options.color) gl.clearColor(red, green, blue, alpha)
         if (typeof options.depth === "number") {
             gl.clearDepth(depth)

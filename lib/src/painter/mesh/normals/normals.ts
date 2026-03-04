@@ -18,7 +18,10 @@ export class TgdPainterMeshNormals extends TgdPainter {
     private readonly elementsType: number
     private readonly elementsCount: number
 
-    constructor(private readonly context: TgdContext, geometry: TgdGeometry) {
+    constructor(
+        private readonly context: TgdContext,
+        geometry: TgdGeometry,
+    ) {
         super()
         const { dataset, count, attNormal, elements } = geometry
         if (!attNormal) {
@@ -31,9 +34,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
         })
         this.prg = prg
         this.vao = new TgdVertexArray(context.gl, prg, [dataset], elements)
-        this.elementsType = elements
-            ? webglElementTypeFromTypedArray(elements)
-            : -1
+        this.elementsType = elements ? webglElementTypeFromTypedArray(elements) : -1
         this.elementsCount = count
     }
 

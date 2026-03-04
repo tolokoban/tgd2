@@ -4,46 +4,46 @@ import type { ArrayNumber3 } from "@tgd/types"
 import { TgdGeometry } from "./geometry"
 
 export interface TgdGeometryBoxOptions {
-	sizeX?: number
-	sizeY?: number
-	sizeZ?: number
-	uvs?: "3x2" | "sameOnEachFace"
-	center?: ArrayNumber3 | TgdVec3 | TgdVec4
+    sizeX?: number
+    sizeY?: number
+    sizeZ?: number
+    uvs?: "3x2" | "sameOnEachFace"
+    center?: ArrayNumber3 | TgdVec3 | TgdVec4
 }
 
 export class TgdGeometryBox extends TgdGeometry {
-	static fromBoundingBox(min: ArrayNumber3, max: ArrayNumber3): TgdGeometryBox {
-		const [minX, minY, minZ] = min
-		const [maxX, maxY, maxZ] = max
-		const sizeX = maxX - minX
-		const sizeY = maxY - minY
-		const sizeZ = maxZ - minZ
-		const geometry = new TgdGeometryBox({
-			sizeX,
-			sizeY,
-			sizeZ,
-			center: [(maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2],
-		})
-		return geometry
-	}
+    static fromBoundingBox(min: ArrayNumber3, max: ArrayNumber3): TgdGeometryBox {
+        const [minX, minY, minZ] = min
+        const [maxX, maxY, maxZ] = max
+        const sizeX = maxX - minX
+        const sizeY = maxY - minY
+        const sizeZ = maxZ - minZ
+        const geometry = new TgdGeometryBox({
+            sizeX,
+            sizeY,
+            sizeZ,
+            center: [(maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2],
+        })
+        return geometry
+    }
 
-	constructor({
-		sizeX = 1,
-		sizeY = 1,
-		sizeZ = 1,
-		uvs = "sameOnEachFace",
-		center = [0, 0, 0],
-	}: TgdGeometryBoxOptions = {}) {
-		const x = sizeX * 0.5
-		const y = sizeY * 0.5
-		const z = sizeZ * 0.5
-		const dataset = new TgdDataset({
-			POSITION: "vec3",
-			NORMAL: "vec3",
-			TEXCOORD_0: "vec2",
-		})
-		// prettier-ignore
-		dataset.set(
+    constructor({
+        sizeX = 1,
+        sizeY = 1,
+        sizeZ = 1,
+        uvs = "sameOnEachFace",
+        center = [0, 0, 0],
+    }: TgdGeometryBoxOptions = {}) {
+        const x = sizeX * 0.5
+        const y = sizeY * 0.5
+        const z = sizeZ * 0.5
+        const dataset = new TgdDataset({
+            POSITION: "vec3",
+            NORMAL: "vec3",
+            TEXCOORD_0: "vec2",
+        })
+        // prettier-ignore
+        dataset.set(
 			"POSITION",
 			new Float32Array([
 				...coords("+x+y+z", center, x, y, z),
@@ -54,17 +54,17 @@ export class TgdGeometryBox extends TgdGeometry {
 				...coords("-z+y+x", center, x, y, z),
 			]),
 		)
-		dataset.set("TEXCOORD_0", new Float32Array(getUVs(uvs)))
-		// prettier-ignore
-		dataset.set(
+        dataset.set("TEXCOORD_0", new Float32Array(getUVs(uvs)))
+        // prettier-ignore
+        dataset.set(
 			"NORMAL",
 			new Float32Array([...XP6, ...YP6, ...ZP6, ...XN6, ...YN6, ...ZN6]),
 		)
-		super({
-			dataset,
-			drawMode: "TRIANGLES",
-		})
-	}
+        super({
+            dataset,
+            drawMode: "TRIANGLES",
+        })
+    }
 }
 
 // prettier-ignore
@@ -78,51 +78,51 @@ const FACE_IJ = [
 ]
 
 function coords(
-	definition: string,
-	center: ArrayNumber3 | TgdVec3 | TgdVec4,
-	...sizes: [number, number, number]
+    definition: string,
+    center: ArrayNumber3 | TgdVec3 | TgdVec4,
+    ...sizes: [number, number, number]
 ): number[] {
-	function index(k: number) {
-		const txt = definition.charAt(k)
-		switch (txt) {
-			case "x":
-				return 0
-			case "y":
-				return 1
-			case "z":
-				return 2
-			default:
-				throw new Error(`Invalid coordinate name at pos ${k}: "${txt}"!`)
-		}
-	}
+    function index(k: number) {
+        const txt = definition.charAt(k)
+        switch (txt) {
+            case "x":
+                return 0
+            case "y":
+                return 1
+            case "z":
+                return 2
+            default:
+                throw new Error(`Invalid coordinate name at pos ${k}: "${txt}"!`)
+        }
+    }
 
-	function sgn(k: number) {
-		const txt = definition.charAt(k)
-		switch (txt) {
-			case "+":
-				return +1
-			case "-":
-				return -1
-			default:
-				throw new Error(`Invalid coordinate sign at pos ${k}: "${txt}"!`)
-		}
-	}
+    function sgn(k: number) {
+        const txt = definition.charAt(k)
+        switch (txt) {
+            case "+":
+                return +1
+            case "-":
+                return -1
+            default:
+                throw new Error(`Invalid coordinate sign at pos ${k}: "${txt}"!`)
+        }
+    }
 
-	const out: number[] = []
-	const sgnC = sgn(0)
-	const indexC = index(1)
-	const sgnI = sgn(2)
-	const indexI = index(3)
-	const sgnJ = sgn(4)
-	const indexJ = index(5)
-	for (const [index, index_] of FACE_IJ) {
-		const row: number[] = []
-		row[indexC] = sizes[indexC] * sgnC + center[indexC]
-		row[indexI] = sizes[indexI] * sgnI * index_ + center[indexI]
-		row[indexJ] = sizes[indexJ] * sgnJ * index + center[indexJ]
-		out.push(...row)
-	}
-	return out
+    const out: number[] = []
+    const sgnC = sgn(0)
+    const indexC = index(1)
+    const sgnI = sgn(2)
+    const indexI = index(3)
+    const sgnJ = sgn(4)
+    const indexJ = index(5)
+    for (const [index, index_] of FACE_IJ) {
+        const row: number[] = []
+        row[indexC] = sizes[indexC] * sgnC + center[indexC]
+        row[indexI] = sizes[indexI] * sgnI * index_ + center[indexI]
+        row[indexJ] = sizes[indexJ] * sgnJ * index + center[indexJ]
+        out.push(...row)
+    }
+    return out
 }
 
 // prettier-ignore
@@ -132,27 +132,18 @@ const W3x2 = 1 / 3
 const H3x2 = 1 / 2
 
 function face3x2(col: 0 | 1 | 2, row: 0 | 1) {
-	const x = W3x2 * col
-	const y = H3x2 * row
-	return FACE_UV.map((v, index) =>
-		index % 2 === 0 ? x + W3x2 * v : y + H3x2 * v,
-	)
+    const x = W3x2 * col
+    const y = H3x2 * row
+    return FACE_UV.map((v, index) => (index % 2 === 0 ? x + W3x2 * v : y + H3x2 * v))
 }
 
 function getUVs(uvs: TgdGeometryBoxOptions["uvs"]): number[] {
-	switch (uvs) {
-		case "sameOnEachFace":
-			return [
-				...FACE_UV,
-				...FACE_UV,
-				...FACE_UV,
-				...FACE_UV,
-				...FACE_UV,
-				...FACE_UV,
-			]
-		default:
-			// prettier-ignore
-			return [
+    switch (uvs) {
+        case "sameOnEachFace":
+            return [...FACE_UV, ...FACE_UV, ...FACE_UV, ...FACE_UV, ...FACE_UV, ...FACE_UV]
+        default:
+            // prettier-ignore
+            return [
 				...face3x2(0, 0),
 				...face3x2(1, 0),
 				...face3x2(2, 0),
@@ -160,7 +151,7 @@ function getUVs(uvs: TgdGeometryBoxOptions["uvs"]): number[] {
 				...face3x2(1, 1),
 				...face3x2(2, 1),
 			]
-	}
+    }
 }
 
 const XP = [1, 0, 0]

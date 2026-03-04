@@ -1,19 +1,10 @@
 import { TgdContext } from "@tgd/context"
 import { TgdMaterial } from "@tgd/material"
 import { TgdTransfoOptions, TgdVec4 } from "@tgd/math"
-import {
-    TgdPainterMeshGltf,
-    TgdPainterNode,
-    TgdPainterNodeChild,
-} from "@tgd/painter"
+import { TgdPainterMeshGltf, TgdPainterNode, TgdPainterNodeChild } from "@tgd/painter"
 import { TgdDataGlb } from "@tgd/parser"
 import { TgdTexture2D } from "@tgd/texture"
-import {
-    TgdFormatGltfMesh,
-    TgdFormatGltfMeshPrimitive,
-    TgdFormatGltfNode,
-    TgdInterfaceTransformable,
-} from "@tgd/types"
+import { TgdFormatGltfMesh, TgdFormatGltfMeshPrimitive, TgdFormatGltfNode, TgdInterfaceTransformable } from "@tgd/types"
 import { isNumber, isString } from "@tgd/types/guards"
 
 interface OverrideMaterialOptions {
@@ -23,7 +14,7 @@ interface OverrideMaterialOptions {
 }
 
 type MaterialOverrider = (
-    options: OverrideMaterialOptions
+    options: OverrideMaterialOptions,
 ) => (this: void, options: { color?: TgdVec4 | TgdTexture2D }) => TgdMaterial
 
 interface MakeMeshGlbPainterOptions {
@@ -61,19 +52,13 @@ export function tgdMakeMeshGlbPainter(options: MakeMeshGlbPainterOptions): {
 /**
  * Retrieve node by index or by name
  */
-function getActualNode(
-    data: TgdDataGlb,
-    node: number | string | TgdFormatGltfNode
-): TgdFormatGltfNode {
+function getActualNode(data: TgdDataGlb, node: number | string | TgdFormatGltfNode): TgdFormatGltfNode {
     if (isNumber(node)) return data.getNode(node)
     if (isString(node)) return data.getNodeByNameOrThrow(node)
     return node
 }
 
-function makeNodePainter(
-    node: TgdFormatGltfNode,
-    options: MakeMeshGlbPainterOptions
-): TgdPainterNode {
+function makeNodePainter(node: TgdFormatGltfNode, options: MakeMeshGlbPainterOptions): TgdPainterNode {
     const transfo: Partial<TgdTransfoOptions> = {}
     if (node.translation) {
         transfo.position = node.translation
@@ -101,41 +86,23 @@ function makeNodePainter(
 
 function makeMeshPainters(
     meshIndexOrName: number | string | undefined,
-    options: MakeMeshGlbPainterOptions
+    options: MakeMeshGlbPainterOptions,
 ): TgdInterfaceTransformable[] {
     if (!isNumber(meshIndexOrName)) return []
 
-    const {
-        data,
-        context,
-        overrideMaterial,
-        excludeByMaterialName,
-        includeOnlyMaterialNames,
-    } = options
+    const { data, context, overrideMaterial, excludeByMaterialName, includeOnlyMaterialNames } = options
     const mesh = data.getMeshOrThrow(meshIndexOrName)
     const targets: TgdPainterMeshGltf[] = []
-    for (
-        let primitiveIndex = 0;
-        primitiveIndex < mesh.primitives.length;
-        primitiveIndex++
-    ) {
+    for (let primitiveIndex = 0; primitiveIndex < mesh.primitives.length; primitiveIndex++) {
         const primitive = data.getMeshPrimitive(meshIndexOrName, primitiveIndex)
-        const material = isNumber(primitive.material)
-            ? data.getMaterial(primitive.material)
-            : null
+        const material = isNumber(primitive.material) ? data.getMaterial(primitive.material) : null
         const materialName = material?.name ?? `#${primitive.material}`
-        if (
-            excludeByMaterialName &&
-            excludeByMaterialName.includes(materialName)
-        ) {
+        if (excludeByMaterialName && excludeByMaterialName.includes(materialName)) {
             // Skipping this primitive because the material has been excluded.
             continue
         }
 
-        if (
-            includeOnlyMaterialNames &&
-            !includeOnlyMaterialNames.includes(materialName)
-        ) {
+        if (includeOnlyMaterialNames && !includeOnlyMaterialNames.includes(materialName)) {
             // If we have an include only list, we skip everything else.
             continue
         }

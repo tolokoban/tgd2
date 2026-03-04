@@ -46,10 +46,7 @@ export class PalettePreviewDiskPainter {
                             `float t = fract(1.0 + (polar.y + ${Math.PI / 2}) * ${0.5 / Math.PI});`,
                             "float light = 1.0 - smoothstep(0.4, 0.42, abs(r - 0.5));",
                             "FragColor = vec4(",
-                            [
-                                `light * (uniA + uniB*cos(${2 * Math.PI}*(uniC * t + uniD))),`,
-                                "1",
-                            ],
+                            [`light * (uniA + uniB*cos(${2 * Math.PI}*(uniC * t + uniD))),`, "1"],
                             ");",
                             "if (t < 0.0) FragColor = vec4(1);",
                         ],
@@ -61,7 +58,7 @@ export class PalettePreviewDiskPainter {
                         program.uniform3f("uniD", ...this.d)
                         program.uniform1f("uniAspectRatio", context.aspectRatio)
                     },
-                })
+                }),
             )
             context.paint()
             this.context = context

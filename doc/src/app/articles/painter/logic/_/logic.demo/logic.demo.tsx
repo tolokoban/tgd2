@@ -4,7 +4,7 @@ import View from "@/components/demo/Tgd"
 function init(ctx: TgdContext) {
     // #begin
     const clear = new TgdPainterClear(ctx, { color: [0, 0, 0, 1] })
-    const logic = new TgdPainterLogic(time => {
+    const logic = new TgdPainterLogic((time) => {
         const a = Math.abs(Math.sin(time))
         clear.red = a
         clear.green = a * 0.677

@@ -29,9 +29,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 
     constructor(options: TgdMaterialDiffuseOptions = {}) {
         const colorOrTexture =
-            options.color instanceof TgdTexture2D
-                ? options.color
-                : new TgdVec4(options.color ?? DEFAULT_COLOR)
+            options.color instanceof TgdTexture2D ? options.color : new TgdVec4(options.color ?? DEFAULT_COLOR)
         const hasTexture = colorOrTexture instanceof TgdTexture2D
         const uniforms: { [name: string]: WebglUniformType } = {
             uniLight: "vec3",
@@ -44,9 +42,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
         const fragmentShaderCode: TgdCodeBloc = [
             `vec3 normal = ${options.lockLightsToCamera ? "mat3(uniModelViewMatrix) * " : ""}normalize(varNormal);`,
             `float light = 1.0 - dot(normal, uniLightDir);`,
-            options.lockLightsToCamera
-                ? "light = max(0.0, light - 1.0);"
-                : "light *= .5;",
+            options.lockLightsToCamera ? "light = max(0.0, light - 1.0);" : "light *= .5;",
             hasTexture
                 ? `vec4 color = texture(texDiffuse, varUV);`
                 : `vec4 color = vec4(${colorOrTexture.join(", ")});`,
@@ -69,9 +65,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
             uniforms.texDiffuse = "sampler2D"
         }
         const vertexShaderCode = () => {
-            const code: TgdCodeBloc = [
-                `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
-            ]
+            const code: TgdCodeBloc = [`varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`]
             if (hasTexture) {
                 code.push(`varUV = ${this.attUV};`)
             }
@@ -87,15 +81,10 @@ export class TgdMaterialDiffuse extends TgdMaterial {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)
-                this.ambientColor
-                    .from(this.ambient.color)
-                    .scale(this.ambient.color.w)
+                this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
                 program.uniform3fv("uniAmbient", this.ambientColor)
                 program.uniform1f("uniSpecularExponent", this.specularExponent)
-                program.uniform1f(
-                    "uniSpecularIntensity",
-                    this.specularIntensity
-                )
+                program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
                 const { texture } = this
                 if (texture) texture.activate(0, program, "texDiffuse")

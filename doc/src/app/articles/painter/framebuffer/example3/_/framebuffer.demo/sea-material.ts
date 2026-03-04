@@ -1,9 +1,4 @@
-import {
-    TgdContext,
-    TgdMaterial,
-    TgdProgram,
-    TgdTexture2D,
-} from "@tolokoban/tgd"
+import { TgdContext, TgdMaterial, TgdProgram, TgdTexture2D } from "@tolokoban/tgd"
 
 export class SeaMaterial extends TgdMaterial {
     public texture: TgdTexture2D | undefined = undefined
@@ -41,11 +36,7 @@ export class SeaMaterial extends TgdMaterial {
             setUniforms: ({ program }: { program: TgdProgram }): void => {
                 const { texture, context } = this
                 if (texture) texture.activate(0, program, "texDiffuse")
-                program.uniform2f(
-                    "uniInverseScreenSize",
-                    1 / context.width,
-                    1 / context.height
-                )
+                program.uniform2f("uniInverseScreenSize", 1 / context.width, 1 / context.height)
             },
         })
     }

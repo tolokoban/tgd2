@@ -28,21 +28,11 @@ export type ViewActionNodeRenderProps = {
     node: TgdFormatGltfNode
 }
 
-export function ViewActionNodeRender({
-    data,
-    node,
-}: ViewActionNodeRenderProps) {
+export function ViewActionNodeRender({ data, node }: ViewActionNodeRenderProps) {
     const handleReady = useReadyHandler(data, node)
     return (
         <div className={Styles.actionNodeRender}>
-            <Tgd
-                key={JSON.stringify(node)}
-                onReady={handleReady}
-                width="100%"
-                height="100%"
-                gizmo
-                noBorder
-            />
+            <Tgd key={JSON.stringify(node)} onReady={handleReady} width="100%" height="100%" gizmo noBorder />
         </div>
     )
 }
@@ -76,7 +66,7 @@ function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
             context.add(clear, state)
             context.paint()
         },
-        [data, node]
+        [data, node],
     )
 }
 
@@ -87,8 +77,7 @@ interface BBox {
 
 function computeBBox(data: TgdDataGlb, node: TgdFormatGltfNode): BBox {
     const bboxes: BBox[] = []
-    if (isNumber(node.mesh))
-        bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
+    if (isNumber(node.mesh)) bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
     for (const nodeIndex of node.children ?? []) {
         const childNode = data.getNode(nodeIndex)
         bboxes.push(computeBBox(data, childNode))
@@ -115,11 +104,7 @@ function computeMeshBBox(data: TgdDataGlb, meshIndex: number): BBox[] {
             const [maxX, maxY, maxZ] = accessor.max
             bboxes.push({
                 center: TgdVec3.newFromMix(accessor.min, accessor.max),
-                radius: Math.max(
-                    Math.abs(maxX - minX),
-                    Math.abs(maxY - minY),
-                    Math.abs(maxZ - minZ)
-                ),
+                radius: Math.max(Math.abs(maxX - minX), Math.abs(maxY - minY), Math.abs(maxZ - minZ)),
             })
         }
     }
@@ -153,10 +138,7 @@ function averageBBoxes(bboxes: BBox[]): BBox {
     const newCenter = new TgdVec3(x, y, z)
     let newRadius = 0
     for (const { center, radius } of bboxes) {
-        newRadius = Math.max(
-            newRadius,
-            radius + TgdVec3.distance(newCenter, new TgdVec3(center))
-        )
+        newRadius = Math.max(newRadius, radius + TgdVec3.distance(newCenter, new TgdVec3(center)))
     }
     return {
         center: newCenter,

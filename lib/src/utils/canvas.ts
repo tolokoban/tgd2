@@ -5,10 +5,7 @@ import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 /**
  * Helper to get a canvas with the given size.
  */
-export function tgdCanvasCreate(
-    width: number,
-    height: number
-): HTMLCanvasElement {
+export function tgdCanvasCreate(width: number, height: number): HTMLCanvasElement {
     const canvas = document.createElement("canvas")
     canvas.width = width
     canvas.height = height
@@ -22,7 +19,7 @@ export function tgdCanvasCreate(
 export function tgdCanvasCreateWithContext2D(
     width: number,
     height: number,
-    settings?: CanvasRenderingContext2DSettings
+    settings?: CanvasRenderingContext2DSettings,
 ): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
     const canvas = document.createElement("canvas")
     canvas.width = width
@@ -56,16 +53,9 @@ export function tgdCanvasFromImage(img: HTMLImageElement): HTMLCanvasElement {
  * ```
  */
 export function tgdCanvasCreatePalette(
-    colors: (
-        | string
-        | TgdColor
-        | ArrayNumber4
-        | TgdVec4
-        | ArrayNumber3
-        | TgdVec3
-    )[],
+    colors: (string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3)[],
     colums = 0,
-    rows = 0
+    rows = 0,
 ) {
     const width = colums > 0 ? colums : colors.length
     const height = rows > 0 ? rows : Math.ceil(colors.length / width)
@@ -84,13 +74,7 @@ export function tgdCanvasCreatePalette(
 export function tgdCanvasCreateFill(
     width: number,
     height: number,
-    fillColor:
-        | string
-        | TgdColor
-        | ArrayNumber4
-        | TgdVec4
-        | ArrayNumber3
-        | TgdVec3 = "#000"
+    fillColor: string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3 = "#000",
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
     ctx.fillStyle = colorToString(fillColor)
@@ -100,18 +84,14 @@ export function tgdCanvasCreateFill(
 
 export function tgdCanvasCreateGradientHorizontal(
     size: number,
-    colors: Array<
-        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
-    >
+    colors: Array<string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3>,
 ) {
     return tgdCanvasCreateGradient(size, 1, 1, 0, colors)
 }
 
 export function tgdCanvasCreateCreateGradientvertical(
     size: number,
-    colors: Array<
-        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
-    >
+    colors: Array<string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3>,
 ) {
     return tgdCanvasCreateGradient(1, size, 0, 1, colors)
 }
@@ -129,17 +109,10 @@ export function tgdCanvasCreateGradient(
     height: number,
     directionX: number,
     directionY: number,
-    colors: Array<
-        string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
-    >
+    colors: Array<string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3>,
 ) {
     const { canvas, ctx } = tgdCanvasCreateWithContext2D(width, height)
-    const gradient = ctx.createLinearGradient(
-        0,
-        0,
-        width * directionX,
-        height * directionY
-    )
+    const gradient = ctx.createLinearGradient(0, 0, width * directionX, height * directionY)
     for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
         const color = colors[colorIndex]
         const cssColor = colorToString(color)
@@ -150,9 +123,7 @@ export function tgdCanvasCreateGradient(
     return canvas
 }
 
-function colorToString(
-    color: string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3
-): string {
+function colorToString(color: string | TgdColor | ArrayNumber4 | TgdVec4 | ArrayNumber3 | TgdVec3): string {
     try {
         if (typeof color === "string") return color
 
@@ -163,12 +134,7 @@ function colorToString(
             return new TgdColor(r, g, b, a ?? 1).toString()
         }
 
-        return new TgdColor(
-            color.x,
-            color.y,
-            color.z,
-            color instanceof TgdVec4 ? color.w : 1
-        ).toString()
+        return new TgdColor(color.x, color.y, color.z, color instanceof TgdVec4 ? color.w : 1).toString()
     } catch {
         console.error("[Tgd::colorToString] Invalid color argument:", color)
         console.info("[Tgd::colorToString] We will use purple (#F0F).")

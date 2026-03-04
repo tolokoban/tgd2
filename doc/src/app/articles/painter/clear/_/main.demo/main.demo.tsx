@@ -1,9 +1,4 @@
-import {
-    tgdActionCreateVec3Interpolation,
-    TgdContext,
-    TgdPainterClear,
-    TgdVec3,
-} from "@tolokoban/tgd"
+import { tgdActionCreateVec3Interpolation, TgdContext, TgdPainterClear, TgdVec3 } from "@tolokoban/tgd"
 
 // #begin
 function init(canvas: HTMLCanvasElement): TgdContext {
@@ -53,7 +48,6 @@ export default function Demo() {
                 width: "320px",
                 height: "240px",
                 background: "#000",
-            }}
-        ></canvas>
+            }}></canvas>
     )
 }

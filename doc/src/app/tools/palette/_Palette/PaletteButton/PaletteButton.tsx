@@ -28,31 +28,14 @@ export function ViewPaletteButton(props: ViewPaletteButtonProps) {
             className={$.join(props.className, Styles.paletteButton)}
             type="button"
             style={style}
-            onClick={handleClick}
-        >
+            onClick={handleClick}>
             <h2>{props.name}</h2>
-            <ViewPalettePreviewHorizontal
-                className={Styles.preview}
-                a={props.a}
-                b={props.b}
-                c={props.c}
-                d={props.d}
-            />
+            <ViewPalettePreviewHorizontal className={Styles.preview} a={props.a} b={props.b} c={props.c} d={props.d} />
         </button>
     )
 }
 
-function editPalette({
-    a,
-    b,
-    c,
-    d,
-}: {
-    a: ArrayNumber3
-    b: ArrayNumber3
-    c: ArrayNumber3
-    d: ArrayNumber3
-}) {
+function editPalette({ a, b, c, d }: { a: ArrayNumber3; b: ArrayNumber3; c: ArrayNumber3; d: ArrayNumber3 }) {
     location.hash = `#/tools/palette/${hex(a)}${hex(b)}${hex(c)}${hex(d)}`
 }
 
@@ -62,7 +45,7 @@ function hex(arr: number[]) {
             Math.round(0xff * v)
                 .toString(16)
                 .toUpperCase()
-                .padStart(2, "0")
+                .padStart(2, "0"),
         )
         .join("")
 }

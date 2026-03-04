@@ -36,14 +36,7 @@ export function ViewActionScene({ data, index }: ViewActionSceneProps) {
     if (!scene) return <p>No scene...</p>
     return (
         <div className={$.join(Styles.actionScene)}>
-            <Tgd
-                key={JSON.stringify(scene)}
-                onReady={handleReady}
-                width="100%"
-                height="100%"
-                gizmo
-                noBorder
-            ></Tgd>
+            <Tgd key={JSON.stringify(scene)} onReady={handleReady} width="100%" height="100%" gizmo noBorder></Tgd>
         </div>
     )
 }
@@ -60,11 +53,7 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                 children: (scene.nodes ?? [])
                     .filter((nodeIndex) => {
                         const node = data.getNode(nodeIndex)
-                        return (
-                            isNumber(node.mesh) ||
-                            (Array.isArray(node.children) &&
-                                node.children.length > 0)
-                        )
+                        return isNumber(node.mesh) || (Array.isArray(node.children) && node.children.length > 0)
                     })
                     .map(
                         (node) =>
@@ -72,14 +61,12 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
                                 data,
                                 node,
                                 context,
-                            }).painter
+                            }).painter,
                     ),
                 name: scene.name ?? "Scene",
             })
             scenePainter.debug()
-            const bboxes = (scene.nodes ?? []).map((nodeIndex) =>
-                computeBBox(data, data.getNode(nodeIndex))
-            )
+            const bboxes = (scene.nodes ?? []).map((nodeIndex) => computeBBox(data, data.getNode(nodeIndex)))
             const bbox = averageBBoxes(bboxes)
             context.camera.transfo.position = bbox.center
             context.camera.transfo.distance = bbox.radius * 2
@@ -100,7 +87,7 @@ function useReadyHandler(data: TgdDataGlb, scene?: TgdFormatGltfScene) {
             context.add(clear, state)
             context.paint()
         },
-        [data, scene]
+        [data, scene],
     )
 }
 
@@ -111,8 +98,7 @@ interface BBox {
 
 function computeBBox(data: TgdDataGlb, node: TgdFormatGltfNode): BBox {
     const bboxes: BBox[] = []
-    if (isNumber(node.mesh))
-        bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
+    if (isNumber(node.mesh)) bboxes.push(averageBBoxes(computeMeshBBox(data, node.mesh)))
     for (const nodeIndex of node.children ?? []) {
         const childNode = data.getNode(nodeIndex)
         bboxes.push(computeBBox(data, childNode))
@@ -139,11 +125,7 @@ function computeMeshBBox(data: TgdDataGlb, meshIndex: number): BBox[] {
             const [maxX, maxY, maxZ] = accessor.max
             bboxes.push({
                 center: TgdVec3.newFromMix(accessor.min, accessor.max),
-                radius: Math.max(
-                    Math.abs(maxX - minX),
-                    Math.abs(maxY - minY),
-                    Math.abs(maxZ - minZ)
-                ),
+                radius: Math.max(Math.abs(maxX - minX), Math.abs(maxY - minY), Math.abs(maxZ - minZ)),
             })
         }
     }
@@ -177,10 +159,7 @@ function averageBBoxes(bboxes: BBox[]): BBox {
     const newCenter = new TgdVec3(x, y, z)
     let newRadius = 0
     for (const { center, radius } of bboxes) {
-        newRadius = Math.max(
-            newRadius,
-            radius + TgdVec3.distance(newCenter, new TgdVec3(center))
-        )
+        newRadius = Math.max(newRadius, radius + TgdVec3.distance(newCenter, new TgdVec3(center)))
     }
     return {
         center: newCenter,

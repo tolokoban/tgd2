@@ -41,13 +41,9 @@ function init(ctx: TgdContext, assets: Assets) {
             depth: webglPresetDepth.less,
             children: [mesh2, mesh],
         }),
-        new TgdPainterLogic(time => {
-            material.zShift = tgdCalcClamp(
-                (1 + Math.sin(time * 0.5)) * 0.05,
-                0,
-                0.25
-            )
-        })
+        new TgdPainterLogic((time) => {
+            material.zShift = tgdCalcClamp((1 + Math.sin(time * 0.5)) * 0.05, 0, 0.25)
+        }),
     )
     ctx.play()
     new TgdControllerCameraOrbit(ctx, {

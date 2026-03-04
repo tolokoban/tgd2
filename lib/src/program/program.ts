@@ -20,7 +20,7 @@ export class TgdProgram {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        private readonly options: TgdProgramOptions
+        private readonly options: TgdProgramOptions,
     ) {
         const prg = gl.createProgram()
         if (!prg) throw new Error("Unable to create WebGLProgram!")
@@ -37,17 +37,12 @@ export class TgdProgram {
             const bufferMode = Array.isArray(transformFeedback)
                 ? gl.INTERLEAVED_ATTRIBS
                 : gl[transformFeedback.bufferMode]
-            const varyings = Array.isArray(transformFeedback)
-                ? transformFeedback
-                : transformFeedback.varyings
+            const varyings = Array.isArray(transformFeedback) ? transformFeedback : transformFeedback.varyings
             gl.transformFeedbackVaryings(prg, varyings, bufferMode)
         }
         gl.linkProgram(prg)
         gl.validateProgram(prg)
-        if (
-            !gl.getProgramParameter(prg, gl.LINK_STATUS) &&
-            !gl.isContextLost()
-        ) {
+        if (!gl.getProgramParameter(prg, gl.LINK_STATUS) && !gl.isContextLost()) {
             const info = gl.getProgramInfoLog(prg) ?? ""
             console.error(info)
             const errorLines = getErrorLines(info)
@@ -71,14 +66,10 @@ export class TgdProgram {
             `function createProgram(gl: WebGL2RenderingContext) {`,
             `  const prg = gl.createProgram()`,
             `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
-            `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(
-                this.options.vert
-            )}\`)`,
+            `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(this.options.vert)}\`)`,
             `  gl.compileShader(vertexShader)`,
             `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
-            `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(
-                this.options.frag
-            )}\`)`,
+            `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(this.options.frag)}\`)`,
             `  gl.compileShader(fragmentShader)`,
             `  gl.attachShader(prg, vertexShader)`,
             `  gl.attachShader(prg, fragmentShader)`,
@@ -108,18 +99,12 @@ export class TgdProgram {
         const { uniformsLocations } = this
         const names = Object.keys(uniformsLocations)
         if (name.length === 0) {
-            console.warn(
-                `Uniform "${name}" has not been found: there is no active uniform in this program!`
-            )
+            console.warn(`Uniform "${name}" has not been found: there is no active uniform in this program!`)
             return 0
         }
         const location = uniformsLocations[name]
         if (!location) {
-            console.warn(
-                `No active uniform found with name "${name}"!\nAvailable names are: ${names.join(
-                    ", "
-                )}.`
-            )
+            console.warn(`No active uniform found with name "${name}"!\nAvailable names are: ${names.join(", ")}.`)
         }
         return location
     }
@@ -254,8 +239,7 @@ export class TgdProgram {
             items.push(`${label}: `)
             const param = gl.getProgramParameter(program, id)
             if (param === true) items.push({ text: "TRUE", color: "#0f0" })
-            else if (param === false)
-                items.push({ text: "FALSE", color: "#f00" })
+            else if (param === false) items.push({ text: "FALSE", color: "#f00" })
             else items.push({ text: JSON.stringify(param), color: "#09f" })
             items.push("\n")
         }
@@ -267,8 +251,7 @@ export class TgdProgram {
     private createShader(type: ShaderType, code: string): WebGLShader {
         const { gl } = this
         const shader = gl.createShader(gl[type])
-        if (!shader)
-            throw new Error(`Unable to create a WebGLShader of type "${type}"!`)
+        if (!shader) throw new Error(`Unable to create a WebGLShader of type "${type}"!`)
 
         gl.shaderSource(shader, code)
         gl.compileShader(shader)
@@ -283,16 +266,11 @@ export class TgdProgram {
 
     private getUniformsLocations(): { [name: string]: WebGLUniformLocation } {
         const { gl, program } = this
-        const count: unknown = gl.getProgramParameter(
-            program,
-            gl.ACTIVE_UNIFORMS
-        )
+        const count: unknown = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS)
         if (typeof count !== "number") {
             if (gl.isContextLost()) return {}
 
-            throw new Error(
-                "Unable to get the number of uniforms in a WebGLProgram!"
-            )
+            throw new Error("Unable to get the number of uniforms in a WebGLProgram!")
         }
 
         const uniforms: { [name: string]: WebGLUniformLocation } = {}
@@ -342,11 +320,7 @@ function style(background: string, bold = false) {
     };margin:0;color:${bold ? "#777" : "#fff"}`
 }
 
-function logCode(
-    title: string,
-    code: string,
-    options?: { lines: number[]; messages: string[] }
-) {
+function logCode(title: string, code: string, options?: { lines: number[]; messages: string[] }) {
     const { lines = [], messages = [] } = options ?? {}
     const output: string[] = [title]
     const codeLines: string[] = [`%c${title}`]

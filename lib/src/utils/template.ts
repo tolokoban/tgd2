@@ -7,10 +7,7 @@
  * ) === "Hello World!"
  * ```
  */
-export function tgdTemplate(
-    content: string,
-    substitutions: Record<string, string>
-): string {
+export function tgdTemplate(content: string, substitutions: Record<string, string>): string {
     let out = content
     for (const key of Object.keys(substitutions)) {
         const value = substitutions[key]

@@ -9,10 +9,7 @@ export function tgdFullscreenTest(element: Element | null): boolean {
     let parent = element.parentElement
     while (parent) {
         if (parent === document.fullscreenElement) {
-            return (
-                root.clientWidth === element.clientWidth &&
-                root.clientHeight === element.clientHeight
-            )
+            return root.clientWidth === element.clientWidth && root.clientHeight === element.clientHeight
         }
         parent = parent.parentElement
     }
@@ -23,17 +20,14 @@ export function tgdFullscreenTest(element: Element | null): boolean {
  * Request for an element to go fullscreen.
  * @returns `true` in case of success.
  */
-export async function tgdFullscreenRequest(
-    element: Element | null,
-    options?: FullscreenOptions
-): Promise<boolean> {
+export async function tgdFullscreenRequest(element: Element | null, options?: FullscreenOptions): Promise<boolean> {
     if (!element) return false
 
     try {
         await element.requestFullscreen(
             options ?? {
                 navigationUI: "hide",
-            }
+            },
         )
         return true
     } catch {
@@ -60,10 +54,7 @@ export async function tgdFullscreenExit(): Promise<boolean> {
  * If `element` is not in fullscreen mode, request it.
  * Otherwise, exit from fullscreen mode.
  */
-export async function tgdFullscreenToggle(
-    element: Element | null,
-    options?: FullscreenOptions
-): Promise<boolean> {
+export async function tgdFullscreenToggle(element: Element | null, options?: FullscreenOptions): Promise<boolean> {
     if (!element) return false
 
     return tgdFullscreenTest(element)
@@ -72,6 +63,6 @@ export async function tgdFullscreenToggle(
               element,
               options ?? {
                   navigationUI: "hide",
-              }
+              },
           )
 }

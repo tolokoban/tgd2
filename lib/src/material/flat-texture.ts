@@ -15,9 +15,7 @@ export class TgdMaterialFlatTexture extends TgdMaterial {
         const uniforms: { [name: string]: WebglUniformType } = {
             uniTexture: "sampler2D",
         }
-        const fragmentShaderCode: TgdCodeBloc = [
-            "return texture(uniTexture, varUV);",
-        ]
+        const fragmentShaderCode: TgdCodeBloc = ["return texture(uniTexture, varUV);"]
         const varyings: { [name: string]: WebglAttributeType } = {
             varUV: "vec2",
         }

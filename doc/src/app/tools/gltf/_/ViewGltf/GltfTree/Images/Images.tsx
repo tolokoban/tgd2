@@ -18,11 +18,7 @@ export type ViewImagesProps = {
 
 export function ViewImages({ className, data, onAction }: ViewImagesProps) {
     return (
-        <Expander
-            className={$.join(className, Styles.images)}
-            icon={IconImage}
-            title="Images"
-        >
+        <Expander className={$.join(className, Styles.images)} icon={IconImage} title="Images">
             {(data.json.images ?? []).map((image, index) => (
                 <Expander
                     key={index}
@@ -32,8 +28,7 @@ export function ViewImages({ className, data, onAction }: ViewImagesProps) {
                             type: "image",
                             index,
                         })
-                    }
-                >
+                    }>
                     <ul>
                         {image.name && (
                             <li>

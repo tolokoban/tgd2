@@ -1,8 +1,4 @@
-import type {
-    TgdBuffer,
-    TgdBufferOptionTarget,
-    TgdBufferOptionUsage,
-} from "@tgd/buffer"
+import type { TgdBuffer, TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
 import type { TgdCamera } from "@tgd/camera"
 import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset } from "@tgd/dataset"
@@ -31,7 +27,7 @@ export class TgdPainterTubes extends TgdPainter {
             webglParams: WebglParams
             camera: TgdCamera
         },
-        options: TgdPainterTubesOptions
+        options: TgdPainterTubesOptions,
     ) {
         super()
         this.name = `TgdPainterTubes#${this.id}`

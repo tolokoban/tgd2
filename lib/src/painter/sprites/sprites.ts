@@ -5,12 +5,7 @@ import { TgdConsole } from "@tgd/debug"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
 import { TgdTransfo, TgdVec2 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import {
-    TgdCodeBloc,
-    TgdCodeFunctions,
-    TgdShaderFragment,
-    TgdShaderVertex,
-} from "@tgd/shader"
+import { TgdCodeBloc, TgdCodeFunctions, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../painter"
@@ -44,7 +39,7 @@ export interface TgdPainterSpritesOptions {
         attributes: Record<keyof TgdDatasetTypeRecord, AccessorProxy>,
         key: string | symbol,
         value: unknown,
-        offset: number
+        offset: number,
     ): void
     varyings?: { [name: string]: WebglAttributeType }
     vert?: {
@@ -61,9 +56,7 @@ const DEBUG_COL_SIZE = 8
 
 type Sprite<T extends TgdSprite> = T & { _offset: number }
 
-export class TgdPainterSprites<
-    T extends TgdSprite = TgdSprite,
-> extends TgdPainterSpritesAbstract<TgdSprite, T> {
+export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPainterSpritesAbstract<TgdSprite, T> {
     public readonly transfo = new TgdTransfo()
     public readonly texture: TgdTexture2D
 
@@ -96,7 +89,7 @@ export class TgdPainterSprites<
 
     constructor(
         protected readonly context: TgdContext,
-        protected readonly options: TgdPainterSpritesOptions
+        protected readonly options: TgdPainterSpritesOptions,
     ) {
         super()
         for (const attribName of Object.keys(options.attributes ?? {})) {
@@ -140,12 +133,7 @@ export class TgdPainterSprites<
                     "varUV = attUV.xy + attSize * attCorners.zw;",
                     "vec4 position = vec4((attCorners.xy - attOrigin) * attScale * attSize * uniAtlasRatio, 0.0, 1.0);",
                     "mat4 rotation = mat4(",
-                    [
-                        "attCos, attSin, 0, 0,",
-                        "-attSin, attCos, 0, 0,",
-                        "0, 0, 1, 0,",
-                        "0, 0, 0, 1",
-                    ],
+                    ["attCos, attSin, 0, 0,", "-attSin, attCos, 0, 0,", "0, 0, 1, 0,", "0, 0, 0, 1"],
                     ");",
                     "position = rotation * position;",
                     "position += vec4(attPosition, 0.0);",
@@ -204,14 +192,11 @@ export class TgdPainterSprites<
             {
                 divisor: 1,
                 usage: "DYNAMIC_DRAW",
-            }
+            },
         )
         datasetInstances.count = options.initialCapacity ?? 1
         this.datasetInstances = datasetInstances
-        const vao = new TgdVertexArray(context.gl, prg, [
-            datasetInstances,
-            datasetFrame,
-        ])
+        const vao = new TgdVertexArray(context.gl, prg, [datasetInstances, datasetFrame])
         this.vao = vao
         this.updateAccessors()
     }
@@ -313,16 +298,13 @@ export class TgdPainterSprites<
     protected interceptSetter(
         key: string | symbol,
         value: unknown,
-        {
-            offset,
-            atlas,
-        }: { id: number; offset: number; atlas: TgdPainterSpritesAtlas }
+        { offset, atlas }: { id: number; offset: number; atlas: TgdPainterSpritesAtlas },
     ): boolean {
         switch (key) {
             case "index": {
                 const item = atlas[value as number]
                 if (!item) return false
-                
+
                 this.attUV.set(item.x, offset, 0)
                 this.attUV.set(item.y, offset, 1)
                 this.attUV.set(item.z ?? 0, offset, 2)
@@ -354,14 +336,7 @@ export class TgdPainterSprites<
                 this.attScale.set(value as number, offset, 1)
                 return true
         }
-        return (
-            this.options.attributesSetter?.(
-                this.attributes,
-                key,
-                value,
-                offset
-            ) ?? false
-        )
+        return this.options.attributesSetter?.(this.attributes, key, value, offset) ?? false
     }
 
     remove(sprite: { id: number }) {
@@ -374,9 +349,7 @@ export class TgdPainterSprites<
             // with the last sprite of the list.
             const lastSprite = this.sprites[lastIndex]
             if (!lastSprite) {
-                throw new Error(
-                    "[TgdPainterSprites.spriteDelete] There is no last sprite!"
-                )
+                throw new Error("[TgdPainterSprites.spriteDelete] There is no last sprite!")
             }
             this.datasetInstances.copyAttributes({
                 fromIndex: lastIndex,
@@ -400,8 +373,7 @@ export class TgdPainterSprites<
     }
 
     paint(): void {
-        const { context, datasetInstances, vao, prg, transfo, texture, count } =
-            this
+        const { context, datasetInstances, vao, prg, transfo, texture, count } = this
         if (this.dirty) {
             this.dirty = false
             vao.updateDataset(datasetInstances)
@@ -425,8 +397,7 @@ export class TgdPainterSprites<
         out.add("count: ").add(`${this.count}`, { color: "yellow" }).nl()
         out.add("capacity: ").add(`${this.capacity}`, { color: "yellow" }).nl()
         const spc = " ".repeat(DEBUG_COL_SIZE)
-        const head = (value: string) =>
-            value.slice(0, DEBUG_COL_SIZE).padStart(DEBUG_COL_SIZE, " ")
+        const head = (value: string) => value.slice(0, DEBUG_COL_SIZE).padStart(DEBUG_COL_SIZE, " ")
         const fields: Record<string, [Accessor, number]> = {
             position: [this.attPosition, 3],
             scale: [this.attScale, 2],
@@ -481,9 +452,7 @@ export class TgdPainterSprites<
 }
 
 function pad(accessor: Accessor, index: number, dimension = 0): string {
-    return `${accessor.get(index, dimension)}`
-        .slice(0, DEBUG_COL_SIZE)
-        .padStart(DEBUG_COL_SIZE, " ")
+    return `${accessor.get(index, dimension)}`.slice(0, DEBUG_COL_SIZE).padStart(DEBUG_COL_SIZE, " ")
 }
 
 function extract<T>(arg: T | (() => T) | null | undefined): T | undefined {

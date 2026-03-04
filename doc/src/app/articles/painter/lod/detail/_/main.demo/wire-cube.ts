@@ -56,7 +56,7 @@ export class WireCube extends TgdPainter {
             },
             {
                 usage: "DYNAMIC_DRAW",
-            }
+            },
         )
         dataset.count = 8
         this.dataset = dataset

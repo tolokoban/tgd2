@@ -69,8 +69,7 @@ function init(context: TgdContext, assets: Assets) {
     const painter = new TgdPainterMeshGltf(context, {
         asset,
         material: ({ color }) => {
-            if (!(color instanceof TgdTexture2D))
-                throw Error("No abedo provided!")
+            if (!(color instanceof TgdTexture2D)) throw Error("No abedo provided!")
 
             return new MaterialHole({ abedo: color, holes })
         },
@@ -92,7 +91,7 @@ function init(context: TgdContext, assets: Assets) {
                 }),
                 painter,
             ],
-        })
+        }),
     )
     context.paint()
     context.canvas.addEventListener("dblclick", () => {
@@ -133,10 +132,7 @@ class MaterialHole extends TgdMaterial {
                 `if (holes.r > 0.99) discard;`,
                 `return vec4(color * light + spec + holes * 0.25, 1.0 - holes.r);`,
             ],
-            vertexShaderCode: [
-                "varNormal = mat3(uniModelViewMatrix) * NORMAL;",
-                "varUV = TEXCOORD_0;",
-            ],
+            vertexShaderCode: ["varNormal = mat3(uniModelViewMatrix) * NORMAL;", "varUV = TEXCOORD_0;"],
             setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform3fv("uniLightDir", this.lightDirection)
 

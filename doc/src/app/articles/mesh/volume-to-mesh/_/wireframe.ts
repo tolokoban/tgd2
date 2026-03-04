@@ -20,12 +20,7 @@ export class PainterWireframe extends TgdPainter {
         this.dataset = this.createDataset()
         this.program = this.createProgram()
         const elements = new Uint8Array()
-        this.vao = new TgdVertexArray(
-            context.gl,
-            this.program,
-            [this.dataset],
-            elements
-        )
+        this.vao = new TgdVertexArray(context.gl, this.program, [this.dataset], elements)
     }
 
     set triangles(value: string) {

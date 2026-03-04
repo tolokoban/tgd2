@@ -11,11 +11,11 @@ import {
     webglPresetBlend,
     webglPresetCull,
     webglPresetDepth,
-} from "@tolokoban/tgd";
-import View, { Assets } from "@/components/demo/Tgd";
+} from "@tolokoban/tgd"
+import View, { Assets } from "@/components/demo/Tgd"
 
-import BackgroundURL from "@/assets/image/dino.webp";
-import SuzanneURL from "@/assets/mesh/suzanne.glb";
+import BackgroundURL from "@/assets/image/dino.webp"
+import SuzanneURL from "@/assets/mesh/suzanne.glb"
 
 function init(ctx: TgdContext, assets: Assets) {
     // #begin
@@ -25,12 +25,12 @@ function init(ctx: TgdContext, assets: Assets) {
         near: 0.01,
         fovy: Math.PI / 4,
         zoom: 1,
-    });
-    ctx.camera = camera;
+    })
+    ctx.camera = camera
     new TgdControllerCameraOrbit(ctx, {
         speedPanning: 0,
         inertiaOrbit: 1000,
-    });
+    })
     ctx.add(
         new TgdPainterClear(ctx, {
             depth: 1,
@@ -48,7 +48,7 @@ function init(ctx: TgdContext, assets: Assets) {
                     asset: assets.glb.suzanne,
                     material: () =>
                         new TgdMaterialHull({
-                            color: [.8, .6, 0.1, 1],
+                            color: [0.8, 0.6, 0.1, 1],
                             expansion: 3,
                         }),
                 }),
@@ -63,8 +63,8 @@ function init(ctx: TgdContext, assets: Assets) {
                 }),
             ],
         }),
-    );
-    ctx.paint();
+    )
+    ctx.paint()
     // #end
 }
 
@@ -82,5 +82,5 @@ export default function Demo() {
                 },
             }}
         />
-    );
+    )
 }

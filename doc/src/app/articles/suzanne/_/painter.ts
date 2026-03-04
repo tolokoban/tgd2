@@ -25,7 +25,7 @@ export default class Painter extends TgdPainter {
     constructor(
         private readonly context: TgdContext,
         meshContent: string,
-        texture: TgdTexture2D
+        texture: TgdTexture2D,
     ) {
         super()
         this.texture = texture
@@ -33,19 +33,14 @@ export default class Painter extends TgdPainter {
             vert: VERT,
             frag: FRAG,
         })
-        const geometry: TgdGeometry = new TgdParserMeshWavefront(
-            meshContent
-        ).makeGeometry({ computeNormals: true })
+        const geometry: TgdGeometry = new TgdParserMeshWavefront(meshContent).makeGeometry({
+            computeNormals: true,
+        })
         const { dataset, elements } = geometry
         if (!elements) throw Error("Missing elements!")
 
         this.type = webglElementTypeFromTypedArray(elements)
-        this.vao = new TgdVertexArray(
-            context.gl,
-            this.program,
-            [dataset],
-            elements
-        )
+        this.vao = new TgdVertexArray(context.gl, this.program, [dataset], elements)
         this.count = dataset.count
     }
 

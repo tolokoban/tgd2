@@ -1,13 +1,5 @@
 import * as React from "react"
-import {
-    Theme,
-    CommonProps,
-    styleCommon,
-    ViewTabs,
-    ViewTab,
-    IconFix,
-    IconShare,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, ViewTabs, ViewTab, IconFix, IconShare } from "@tolokoban/ui"
 
 import CodeViewerView from "@/components/demo/CodeViewer"
 import { ViewSliders } from "./Sliders"
@@ -35,39 +27,12 @@ export function ViewPaletteEditor(props: ViewPaletteEditorProps) {
     }
 
     return (
-        <div
-            className={$.join(props.className, Styles.paletteEditor)}
-            style={style}
-        >
+        <div className={$.join(props.className, Styles.paletteEditor)} style={style}>
             <aside>
-                <ViewPalettePreviewDisk
-                    className={Styles.disk}
-                    a={a}
-                    b={b}
-                    c={c}
-                    d={d}
-                />
-                <ViewPalettePreviewHorizontal
-                    className={Styles.horizontal}
-                    a={a}
-                    b={b}
-                    c={c}
-                    d={d}
-                />
-                <ViewPalettePreviewHorizontal
-                    className={Styles.horizontalA}
-                    a={a}
-                    b={b}
-                    c={c}
-                    d={d}
-                />
-                <ViewPalettePreviewHorizontal
-                    className={Styles.horizontalB}
-                    a={a}
-                    b={b}
-                    c={c}
-                    d={d}
-                />
+                <ViewPalettePreviewDisk className={Styles.disk} a={a} b={b} c={c} d={d} />
+                <ViewPalettePreviewHorizontal className={Styles.horizontal} a={a} b={b} c={c} d={d} />
+                <ViewPalettePreviewHorizontal className={Styles.horizontalA} a={a} b={b} c={c} d={d} />
+                <ViewPalettePreviewHorizontal className={Styles.horizontalB} a={a} b={b} c={c} d={d} />
             </aside>
             <ViewTabs maxHeight="100%">
                 <ViewTab
@@ -78,28 +43,11 @@ export function ViewPaletteEditor(props: ViewPaletteEditorProps) {
                             <div>Config</div>
                         </>
                     }
-                    className={Styles.scroll}
-                >
-                    <ViewSliders
-                        label="Luminance"
-                        value={a}
-                        onChange={(v) => update({ a: v })}
-                    />
-                    <ViewSliders
-                        label="Saturation"
-                        value={b}
-                        onChange={(v) => update({ b: v })}
-                    />
-                    <ViewSliders
-                        label="Spread"
-                        value={c}
-                        onChange={(v) => update({ c: v })}
-                    />
-                    <ViewSliders
-                        label="Shift"
-                        value={d}
-                        onChange={(v) => update({ d: v })}
-                    />
+                    className={Styles.scroll}>
+                    <ViewSliders label="Luminance" value={a} onChange={(v) => update({ a: v })} />
+                    <ViewSliders label="Saturation" value={b} onChange={(v) => update({ b: v })} />
+                    <ViewSliders label="Spread" value={c} onChange={(v) => update({ c: v })} />
+                    <ViewSliders label="Shift" value={d} onChange={(v) => update({ d: v })} />
                 </ViewTab>
                 <ViewTab
                     key="share"
@@ -108,8 +56,7 @@ export function ViewPaletteEditor(props: ViewPaletteEditorProps) {
                             <IconShare />
                             <div>Share</div>
                         </>
-                    }
-                >
+                    }>
                     <CodeViewerView
                         language="glsl"
                         value={`vec3 palette(float t) {

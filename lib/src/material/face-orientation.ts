@@ -3,8 +3,7 @@ import { TgdVec3, TgdVec4 } from "@tgd/math"
 import type { TgdProgram } from "@tgd/program"
 import { TgdMaterial, type TgdMaterialOptions } from "./material"
 
-export interface TgdMaterialFaceOrientationOptions
-    extends Partial<TgdMaterialOptions> {
+export interface TgdMaterialFaceOrientationOptions extends Partial<TgdMaterialOptions> {
     light?: TgdLight
     ambient?: TgdLight
     specularExponent?: number
@@ -53,22 +52,15 @@ export class TgdMaterialFaceOrientation extends TgdMaterial {
                 ");",
                 "return color;",
             ],
-            vertexShaderCode: () => [
-                `varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`,
-            ],
+            vertexShaderCode: () => [`varNormal = mat3(uniTransfoMatrix) * ${this.attNormal};`],
             setUniforms: ({ program }: { program: TgdProgram }): void => {
                 program.uniform3fv("uniLightDir", this.light.direction)
                 this.lightColor.from(this.light.color).scale(this.light.color.w)
                 program.uniform3fv("uniLight", this.lightColor)
-                this.ambientColor
-                    .from(this.ambient.color)
-                    .scale(this.ambient.color.w)
+                this.ambientColor.from(this.ambient.color).scale(this.ambient.color.w)
                 program.uniform3fv("uniAmbient", this.ambientColor)
                 program.uniform1f("uniSpecularExponent", this.specularExponent)
-                program.uniform1f(
-                    "uniSpecularIntensity",
-                    this.specularIntensity
-                )
+                program.uniform1f("uniSpecularIntensity", this.specularIntensity)
             },
         })
 

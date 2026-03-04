@@ -1,9 +1,4 @@
-import {
-    tgdCalcMix,
-    TgdContext,
-    TgdPainterClear,
-    TgdVec4,
-} from "@tolokoban/tgd"
+import { tgdCalcMix, TgdContext, TgdPainterClear, TgdVec4 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
 function init(ctx: TgdContext) {

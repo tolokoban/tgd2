@@ -12,18 +12,14 @@ export class TgdVec3 extends Float32Array {
     static Y: Readonly<TgdVec3> = new TgdVec3(0, 1, 0)
     static Z: Readonly<TgdVec3> = new TgdVec3(0, 0, 1)
 
-    static newFrom([x, y, z]:
-        | TgdVec3
-        | TgdVec4
-        | ArrayNumber3
-        | ArrayNumber4): TgdVec3 {
+    static newFrom([x, y, z]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4): TgdVec3 {
         return new TgdVec3(x, y, z)
     }
 
     static newFromMix(
         [x1, y1, z1]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
         [x2, y2, z2]: TgdVec3 | TgdVec4 | ArrayNumber3 | ArrayNumber4,
-        a = 0.5
+        a = 0.5,
     ): TgdVec3 {
         const b = 1 - a
         const x = b * x1 + a * x2
@@ -32,10 +28,7 @@ export class TgdVec3 extends Float32Array {
         return new TgdVec3(x, y, z)
     }
 
-    static distance(
-        from: TgdVec3 | TgdVec4 | ArrayNumber3,
-        to: TgdVec3 | TgdVec4 | ArrayNumber3
-    ): number {
+    static distance(from: TgdVec3 | TgdVec4 | ArrayNumber3, to: TgdVec3 | TgdVec4 | ArrayNumber3): number {
         const [x1, y1, z1] = from
         const [x2, y2, z2] = to
         const x = x2 - x1
@@ -60,11 +53,7 @@ export class TgdVec3 extends Float32Array {
     constructor(x: number)
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
-    constructor(
-        x: number | Readonly<TgdVec3 | ArrayNumber3> = 0,
-        y = 0,
-        z = 0
-    ) {
+    constructor(x: number | Readonly<TgdVec3 | ArrayNumber3> = 0, y = 0, z = 0) {
         super(3)
         if (typeof x !== "number") {
             this.x = x[0]
@@ -109,10 +98,7 @@ export class TgdVec3 extends Float32Array {
      * __Warning__, for performance reason, `axis` is supposed to be of length 1.
      * Otherwise, the result will be a vector rotated then scaled by the length of `axis`.
      */
-    rotateAround(
-        axis: Readonly<TgdVec3 | ArrayNumber3>,
-        angleInRadians: number
-    ): this {
+    rotateAround(axis: Readonly<TgdVec3 | ArrayNumber3>, angleInRadians: number): this {
         // result := V.cos(a) + (K×V).sin(a) + K(K.V)(1 - cos(a))
         const C = Math.cos(angleInRadians)
         const S = Math.sin(angleInRadians)
@@ -164,18 +150,10 @@ export class TgdVec3 extends Float32Array {
         return this
     }
 
-    fromMix(
-        valueAtT0: TgdVec3 | TgdVec4,
-        valueAtT1: TgdVec3 | TgdVec4,
-        t: number
-    ): this {
+    fromMix(valueAtT0: TgdVec3 | TgdVec4, valueAtT1: TgdVec3 | TgdVec4, t: number): this {
         const [ax, ay, az] = valueAtT0
         const [bx, by, bz] = valueAtT1
-        return this.reset(
-            tgdCalcMix(ax, bx, t),
-            tgdCalcMix(ay, by, t),
-            tgdCalcMix(az, bz, t)
-        )
+        return this.reset(tgdCalcMix(ax, bx, t), tgdCalcMix(ay, by, t), tgdCalcMix(az, bz, t))
     }
 
     reset(x = 0, y = 0, z = 0): this {
@@ -185,10 +163,7 @@ export class TgdVec3 extends Float32Array {
         return this
     }
 
-    distanceToLineSquared(
-        origin: TgdVec3,
-        normalizedDirection: TgdVec3
-    ): number {
+    distanceToLineSquared(origin: TgdVec3, normalizedDirection: TgdVec3): number {
         const [mx, my, mz] = this
         const [ox, oy, oz] = origin
         const [dx, dy, dz] = normalizedDirection
@@ -274,14 +249,11 @@ export class TgdVec3 extends Float32Array {
     }
 
     get size() {
-        return Math.sqrt(
-            this[0] * this[0] + this[1] * this[1] + this[2] * this[2]
-        )
+        return Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2])
     }
 
     normalize(): this {
-        const squareLength =
-            this[0] * this[0] + this[1] * this[1] + this[2] * this[2]
+        const squareLength = this[0] * this[0] + this[1] * this[1] + this[2] * this[2]
         if (squareLength === 0) return this
 
         return this.scale(1 / Math.sqrt(squareLength))
@@ -298,7 +270,7 @@ export class TgdVec3 extends Float32Array {
 
     fromCross(
         vec1: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>,
-        vec2: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>
+        vec2: Readonly<TgdVec3 | TgdVec4 | ArrayNumber3>,
     ): this {
         const [x1, y1, z1] = vec1
         const [x2, y2, z2] = vec2
@@ -321,11 +293,6 @@ export class TgdVec3 extends Float32Array {
     debug(caption = "vec3") {
         const { x, y, z } = this
         const out: string[] = [x, y, z].map((n) => n.toFixed(6))
-        console.log(
-            `${caption}:   `,
-            out.join(" | "),
-            "   length:",
-            Math.sqrt(x * x + y * y + z * z)
-        )
+        console.log(`${caption}:   `, out.join(" | "), "   length:", Math.sqrt(x * x + y * y + z * z))
     }
 }

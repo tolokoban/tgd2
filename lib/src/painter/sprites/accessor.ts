@@ -16,14 +16,9 @@ export class AccessorProxy implements Accessor {
             this.accessor = value.getAttribAccessor(this.attributeName)
         }
     }
-    readonly get = (index: number, dimension?: number | undefined) =>
-        this.accessor?.get(index, dimension) ?? 0
+    readonly get = (index: number, dimension?: number | undefined) => this.accessor?.get(index, dimension) ?? 0
 
-    readonly set = (
-        value: number,
-        index: number,
-        dimension?: number | undefined
-    ) => {
+    readonly set = (value: number, index: number, dimension?: number | undefined) => {
         const { accessor } = this
         if (!accessor) return
 

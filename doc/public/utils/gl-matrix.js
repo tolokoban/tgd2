@@ -26,13 +26,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 ;(function webpackUniversalModuleDefinition(root, factory) {
-    if (typeof exports === "object" && typeof module === "object")
-        module.exports = factory()
+    if (typeof exports === "object" && typeof module === "object") module.exports = factory()
     else if (typeof define === "function" && define.amd) define([], factory)
     else {
         var a = factory()
-        for (var i in a)
-            (typeof exports === "object" ? exports : root)[i] = a[i]
+        for (var i in a) (typeof exports === "object" ? exports : root)[i] = a[i]
     }
 })(this, function () {
     return /******/ (function (modules) {
@@ -43,8 +41,7 @@ THE SOFTWARE. */
         /******/ // The require function
         /******/ function __webpack_require__(moduleId) {
             /******/ // Check if module is in cache
-            /******/ if (installedModules[moduleId])
-                /******/ return installedModules[moduleId].exports
+            /******/ if (installedModules[moduleId]) /******/ return installedModules[moduleId].exports
 
             /******/ // Create a new module (and put it into the cache)
             /******/ var module = (installedModules[moduleId] = {
@@ -55,12 +52,7 @@ THE SOFTWARE. */
             })
 
             /******/ // Execute the module function
-            /******/ modules[moduleId].call(
-                module.exports,
-                module,
-                module.exports,
-                __webpack_require__
-            )
+            /******/ modules[moduleId].call(module.exports, module, module.exports, __webpack_require__)
 
             /******/ // Flag the module as loaded
             /******/ module.loaded = true
@@ -157,16 +149,13 @@ THE SOFTWARE. */
 
                 // Configuration Constants
                 glMatrix.EPSILON = 0.000001
-                glMatrix.ARRAY_TYPE =
-                    typeof Float32Array !== "undefined" ? Float32Array : Array
+                glMatrix.ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array
                 glMatrix.RANDOM = Math.random
                 glMatrix.ENABLE_SIMD = false
 
                 // Capability detection
-                glMatrix.SIMD_AVAILABLE =
-                    glMatrix.ARRAY_TYPE === this.Float32Array && "SIMD" in this
-                glMatrix.USE_SIMD =
-                    glMatrix.ENABLE_SIMD && glMatrix.SIMD_AVAILABLE
+                glMatrix.SIMD_AVAILABLE = glMatrix.ARRAY_TYPE === this.Float32Array && "SIMD" in this
+                glMatrix.USE_SIMD = glMatrix.ENABLE_SIMD && glMatrix.SIMD_AVAILABLE
 
                 /**
                  * Sets the type of array used when creating new vectors and matrices
@@ -198,11 +187,7 @@ THE SOFTWARE. */
                  * @returns {Boolean} True if the numbers are approximately equal, false otherwise.
                  */
                 glMatrix.equals = function (a, b) {
-                    return (
-                        Math.abs(a - b) <=
-                        glMatrix.EPSILON *
-                            Math.max(1.0, Math.abs(a), Math.abs(b))
-                    )
+                    return Math.abs(a - b) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a), Math.abs(b))
                 }
 
                 module.exports = glMatrix
@@ -533,17 +518,7 @@ THE SOFTWARE. */
                  * @returns {String} string representation of the matrix
                  */
                 mat2.str = function (a) {
-                    return (
-                        "mat2(" +
-                        a[0] +
-                        ", " +
-                        a[1] +
-                        ", " +
-                        a[2] +
-                        ", " +
-                        a[3] +
-                        ")"
-                    )
+                    return "mat2(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ")"
                 }
 
                 /**
@@ -553,12 +528,7 @@ THE SOFTWARE. */
                  * @returns {Number} Frobenius norm
                  */
                 mat2.frob = function (a) {
-                    return Math.sqrt(
-                        Math.pow(a[0], 2) +
-                            Math.pow(a[1], 2) +
-                            Math.pow(a[2], 2) +
-                            Math.pow(a[3], 2)
-                    )
+                    return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2))
                 }
 
                 /**
@@ -623,12 +593,7 @@ THE SOFTWARE. */
                  * @returns {Boolean} True if the matrices are equal, false otherwise.
                  */
                 mat2.exactEquals = function (a, b) {
-                    return (
-                        a[0] === b[0] &&
-                        a[1] === b[1] &&
-                        a[2] === b[2] &&
-                        a[3] === b[3]
-                    )
+                    return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3]
                 }
 
                 /**
@@ -648,18 +613,10 @@ THE SOFTWARE. */
                         b2 = b[2],
                         b3 = b[3]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-                        Math.abs(a3 - b3) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a3), Math.abs(b3))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+                        Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3))
                     )
                 }
 
@@ -1080,21 +1037,7 @@ THE SOFTWARE. */
                  * @returns {String} string representation of the matrix
                  */
                 mat2d.str = function (a) {
-                    return (
-                        "mat2d(" +
-                        a[0] +
-                        ", " +
-                        a[1] +
-                        ", " +
-                        a[2] +
-                        ", " +
-                        a[3] +
-                        ", " +
-                        a[4] +
-                        ", " +
-                        a[5] +
-                        ")"
-                    )
+                    return "mat2d(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ")"
                 }
 
                 /**
@@ -1111,7 +1054,7 @@ THE SOFTWARE. */
                             Math.pow(a[3], 2) +
                             Math.pow(a[4], 2) +
                             Math.pow(a[5], 2) +
-                            1
+                            1,
                     )
                 }
 
@@ -1233,24 +1176,12 @@ THE SOFTWARE. */
                         b4 = b[4],
                         b5 = b[5]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-                        Math.abs(a3 - b3) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
-                        Math.abs(a4 - b4) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
-                        Math.abs(a5 - b5) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a5), Math.abs(b5))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+                        Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
+                        Math.abs(a4 - b4) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
+                        Math.abs(a5 - b5) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5))
                     )
                 }
 
@@ -1381,17 +1312,7 @@ THE SOFTWARE. */
                  * @param {Number} m22 Component in column 2, row 2 position (index 8)
                  * @returns {mat3} A new mat3
                  */
-                mat3.fromValues = function (
-                    m00,
-                    m01,
-                    m02,
-                    m10,
-                    m11,
-                    m12,
-                    m20,
-                    m21,
-                    m22
-                ) {
+                mat3.fromValues = function (m00, m01, m02, m10, m11, m12, m20, m21, m22) {
                     var out = new glMatrix.ARRAY_TYPE(9)
                     out[0] = m00
                     out[1] = m01
@@ -1420,18 +1341,7 @@ THE SOFTWARE. */
                  * @param {Number} m22 Component in column 2, row 2 position (index 8)
                  * @returns {mat3} out
                  */
-                mat3.set = function (
-                    out,
-                    m00,
-                    m01,
-                    m02,
-                    m10,
-                    m11,
-                    m12,
-                    m20,
-                    m21,
-                    m22
-                ) {
+                mat3.set = function (out, m00, m01, m02, m10, m11, m12, m20, m21, m22) {
                     out[0] = m00
                     out[1] = m01
                     out[2] = m02
@@ -1585,9 +1495,7 @@ THE SOFTWARE. */
                         a22 = a[8]
 
                     return (
-                        a00 * (a22 * a11 - a12 * a21) +
-                        a01 * (-a22 * a10 + a12 * a20) +
-                        a02 * (a21 * a10 - a11 * a20)
+                        a00 * (a22 * a11 - a12 * a21) + a01 * (-a22 * a10 + a12 * a20) + a02 * (a21 * a10 - a11 * a20)
                     )
                 }
 
@@ -1915,13 +1823,7 @@ THE SOFTWARE. */
                         b10 = a21 * a33 - a23 * a31,
                         b11 = a22 * a33 - a23 * a32,
                         // Calculate the determinant
-                        det =
-                            b00 * b11 -
-                            b01 * b10 +
-                            b02 * b09 +
-                            b03 * b08 -
-                            b04 * b07 +
-                            b05 * b06
+                        det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
 
                     if (!det) {
                         return null
@@ -1989,7 +1891,7 @@ THE SOFTWARE. */
                             Math.pow(a[5], 2) +
                             Math.pow(a[6], 2) +
                             Math.pow(a[7], 2) +
-                            Math.pow(a[8], 2)
+                            Math.pow(a[8], 2),
                     )
                 }
 
@@ -2132,33 +2034,15 @@ THE SOFTWARE. */
                         b7 = b[7],
                         b8 = b[8]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-                        Math.abs(a3 - b3) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
-                        Math.abs(a4 - b4) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
-                        Math.abs(a5 - b5) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
-                        Math.abs(a6 - b6) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
-                        Math.abs(a7 - b7) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a7), Math.abs(b7)) &&
-                        Math.abs(a8 - b8) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a8), Math.abs(b8))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+                        Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
+                        Math.abs(a4 - b4) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
+                        Math.abs(a5 - b5) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
+                        Math.abs(a6 - b6) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
+                        Math.abs(a7 - b7) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7)) &&
+                        Math.abs(a8 - b8) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a8), Math.abs(b8))
                     )
                 }
 
@@ -2316,7 +2200,7 @@ THE SOFTWARE. */
                     m30,
                     m31,
                     m32,
-                    m33
+                    m33,
                 ) {
                     var out = new glMatrix.ARRAY_TYPE(16)
                     out[0] = m00
@@ -2377,7 +2261,7 @@ THE SOFTWARE. */
                     m30,
                     m31,
                     m32,
-                    m33
+                    m33,
                 ) {
                     out[0] = m00
                     out[1] = m01
@@ -2514,9 +2398,7 @@ THE SOFTWARE. */
                  * @param {mat4} a the source matrix
                  * @returns {mat4} out
                  */
-                mat4.transpose = glMatrix.USE_SIMD
-                    ? mat4.SIMD.transpose
-                    : mat4.scalar.transpose
+                mat4.transpose = glMatrix.USE_SIMD ? mat4.SIMD.transpose : mat4.scalar.transpose
 
                 /**
                  * Inverts a mat4 not using SIMD
@@ -2555,13 +2437,7 @@ THE SOFTWARE. */
                         b10 = a21 * a33 - a23 * a31,
                         b11 = a22 * a33 - a23 * a32,
                         // Calculate the determinant
-                        det =
-                            b00 * b11 -
-                            b01 * b10 +
-                            b02 * b09 +
-                            b03 * b08 -
-                            b04 * b07 +
-                            b05 * b06
+                        det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
 
                     if (!det) {
                         return null
@@ -2626,130 +2502,61 @@ THE SOFTWARE. */
                     minor0 = SIMD.Float32x4.mul(row1, tmp1)
                     minor1 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor0
-                    )
-                    minor1 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor1
-                    )
+                    minor0 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row1, tmp1), minor0)
+                    minor1 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor1)
                     minor1 = SIMD.Float32x4.swizzle(minor1, 2, 3, 0, 1)
 
                     tmp1 = SIMD.Float32x4.mul(row1, row2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor0 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor0
-                    )
+                    minor0 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor0)
                     minor3 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        minor0,
-                        SIMD.Float32x4.mul(row3, tmp1)
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor3
-                    )
+                    minor0 = SIMD.Float32x4.sub(minor0, SIMD.Float32x4.mul(row3, tmp1))
+                    minor3 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor3)
                     minor3 = SIMD.Float32x4.swizzle(minor3, 2, 3, 0, 1)
 
-                    tmp1 = SIMD.Float32x4.mul(
-                        SIMD.Float32x4.swizzle(row1, 2, 3, 0, 1),
-                        row3
-                    )
+                    tmp1 = SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(row1, 2, 3, 0, 1), row3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
                     row2 = SIMD.Float32x4.swizzle(row2, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor0
-                    )
+                    minor0 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row2, tmp1), minor0)
                     minor2 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        minor0,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
-                    minor2 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor2
-                    )
+                    minor0 = SIMD.Float32x4.sub(minor0, SIMD.Float32x4.mul(row2, tmp1))
+                    minor2 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor2)
                     minor2 = SIMD.Float32x4.swizzle(minor2, 2, 3, 0, 1)
 
                     tmp1 = SIMD.Float32x4.mul(row0, row1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor2 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor2
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor3
-                    )
+                    minor2 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor2)
+                    minor3 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row2, tmp1), minor3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor2 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor2
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        minor3,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
+                    minor2 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row3, tmp1), minor2)
+                    minor3 = SIMD.Float32x4.sub(minor3, SIMD.Float32x4.mul(row2, tmp1))
 
                     tmp1 = SIMD.Float32x4.mul(row0, row3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor1 = SIMD.Float32x4.sub(
-                        minor1,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
-                    minor2 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor2
-                    )
+                    minor1 = SIMD.Float32x4.sub(minor1, SIMD.Float32x4.mul(row2, tmp1))
+                    minor2 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row1, tmp1), minor2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor1 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor1
-                    )
-                    minor2 = SIMD.Float32x4.sub(
-                        minor2,
-                        SIMD.Float32x4.mul(row1, tmp1)
-                    )
+                    minor1 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row2, tmp1), minor1)
+                    minor2 = SIMD.Float32x4.sub(minor2, SIMD.Float32x4.mul(row1, tmp1))
 
                     tmp1 = SIMD.Float32x4.mul(row0, row2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor1 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor1
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        minor3,
-                        SIMD.Float32x4.mul(row1, tmp1)
-                    )
+                    minor1 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor1)
+                    minor3 = SIMD.Float32x4.sub(minor3, SIMD.Float32x4.mul(row1, tmp1))
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor1 = SIMD.Float32x4.sub(
-                        minor1,
-                        SIMD.Float32x4.mul(row3, tmp1)
-                    )
-                    minor3 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor3
-                    )
+                    minor1 = SIMD.Float32x4.sub(minor1, SIMD.Float32x4.mul(row3, tmp1))
+                    minor3 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row1, tmp1), minor3)
 
                     // Compute matrix determinant
                     det = SIMD.Float32x4.mul(row0, minor0)
-                    det = SIMD.Float32x4.add(
-                        SIMD.Float32x4.swizzle(det, 2, 3, 0, 1),
-                        det
-                    )
-                    det = SIMD.Float32x4.add(
-                        SIMD.Float32x4.swizzle(det, 1, 0, 3, 2),
-                        det
-                    )
+                    det = SIMD.Float32x4.add(SIMD.Float32x4.swizzle(det, 2, 3, 0, 1), det)
+                    det = SIMD.Float32x4.add(SIMD.Float32x4.swizzle(det, 1, 0, 3, 2), det)
                     tmp1 = SIMD.Float32x4.reciprocalApproximation(det)
                     det = SIMD.Float32x4.sub(
                         SIMD.Float32x4.add(tmp1, tmp1),
-                        SIMD.Float32x4.mul(det, SIMD.Float32x4.mul(tmp1, tmp1))
+                        SIMD.Float32x4.mul(det, SIMD.Float32x4.mul(tmp1, tmp1)),
                     )
                     det = SIMD.Float32x4.swizzle(det, 0, 0, 0, 0)
                     if (!det) {
@@ -2757,26 +2564,10 @@ THE SOFTWARE. */
                     }
 
                     // Compute matrix inverse
-                    SIMD.Float32x4.store(
-                        out,
-                        0,
-                        SIMD.Float32x4.mul(det, minor0)
-                    )
-                    SIMD.Float32x4.store(
-                        out,
-                        4,
-                        SIMD.Float32x4.mul(det, minor1)
-                    )
-                    SIMD.Float32x4.store(
-                        out,
-                        8,
-                        SIMD.Float32x4.mul(det, minor2)
-                    )
-                    SIMD.Float32x4.store(
-                        out,
-                        12,
-                        SIMD.Float32x4.mul(det, minor3)
-                    )
+                    SIMD.Float32x4.store(out, 0, SIMD.Float32x4.mul(det, minor0))
+                    SIMD.Float32x4.store(out, 4, SIMD.Float32x4.mul(det, minor1))
+                    SIMD.Float32x4.store(out, 8, SIMD.Float32x4.mul(det, minor2))
+                    SIMD.Float32x4.store(out, 12, SIMD.Float32x4.mul(det, minor3))
                     return out
                 }
 
@@ -2787,9 +2578,7 @@ THE SOFTWARE. */
                  * @param {mat4} a the source matrix
                  * @returns {mat4} out
                  */
-                mat4.invert = glMatrix.USE_SIMD
-                    ? mat4.SIMD.invert
-                    : mat4.scalar.invert
+                mat4.invert = glMatrix.USE_SIMD ? mat4.SIMD.invert : mat4.scalar.invert
 
                 /**
                  * Calculates the adjugate of a mat4 not using SIMD
@@ -2817,18 +2606,14 @@ THE SOFTWARE. */
                         a33 = a[15]
 
                     out[0] =
-                        a11 * (a22 * a33 - a23 * a32) -
-                        a21 * (a12 * a33 - a13 * a32) +
-                        a31 * (a12 * a23 - a13 * a22)
+                        a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22)
                     out[1] = -(
                         a01 * (a22 * a33 - a23 * a32) -
                         a21 * (a02 * a33 - a03 * a32) +
                         a31 * (a02 * a23 - a03 * a22)
                     )
                     out[2] =
-                        a01 * (a12 * a33 - a13 * a32) -
-                        a11 * (a02 * a33 - a03 * a32) +
-                        a31 * (a02 * a13 - a03 * a12)
+                        a01 * (a12 * a33 - a13 * a32) - a11 * (a02 * a33 - a03 * a32) + a31 * (a02 * a13 - a03 * a12)
                     out[3] = -(
                         a01 * (a12 * a23 - a13 * a22) -
                         a11 * (a02 * a23 - a03 * a22) +
@@ -2840,31 +2625,23 @@ THE SOFTWARE. */
                         a30 * (a12 * a23 - a13 * a22)
                     )
                     out[5] =
-                        a00 * (a22 * a33 - a23 * a32) -
-                        a20 * (a02 * a33 - a03 * a32) +
-                        a30 * (a02 * a23 - a03 * a22)
+                        a00 * (a22 * a33 - a23 * a32) - a20 * (a02 * a33 - a03 * a32) + a30 * (a02 * a23 - a03 * a22)
                     out[6] = -(
                         a00 * (a12 * a33 - a13 * a32) -
                         a10 * (a02 * a33 - a03 * a32) +
                         a30 * (a02 * a13 - a03 * a12)
                     )
                     out[7] =
-                        a00 * (a12 * a23 - a13 * a22) -
-                        a10 * (a02 * a23 - a03 * a22) +
-                        a20 * (a02 * a13 - a03 * a12)
+                        a00 * (a12 * a23 - a13 * a22) - a10 * (a02 * a23 - a03 * a22) + a20 * (a02 * a13 - a03 * a12)
                     out[8] =
-                        a10 * (a21 * a33 - a23 * a31) -
-                        a20 * (a11 * a33 - a13 * a31) +
-                        a30 * (a11 * a23 - a13 * a21)
+                        a10 * (a21 * a33 - a23 * a31) - a20 * (a11 * a33 - a13 * a31) + a30 * (a11 * a23 - a13 * a21)
                     out[9] = -(
                         a00 * (a21 * a33 - a23 * a31) -
                         a20 * (a01 * a33 - a03 * a31) +
                         a30 * (a01 * a23 - a03 * a21)
                     )
                     out[10] =
-                        a00 * (a11 * a33 - a13 * a31) -
-                        a10 * (a01 * a33 - a03 * a31) +
-                        a30 * (a01 * a13 - a03 * a11)
+                        a00 * (a11 * a33 - a13 * a31) - a10 * (a01 * a33 - a03 * a31) + a30 * (a01 * a13 - a03 * a11)
                     out[11] = -(
                         a00 * (a11 * a23 - a13 * a21) -
                         a10 * (a01 * a23 - a03 * a21) +
@@ -2876,18 +2653,14 @@ THE SOFTWARE. */
                         a30 * (a11 * a22 - a12 * a21)
                     )
                     out[13] =
-                        a00 * (a21 * a32 - a22 * a31) -
-                        a20 * (a01 * a32 - a02 * a31) +
-                        a30 * (a01 * a22 - a02 * a21)
+                        a00 * (a21 * a32 - a22 * a31) - a20 * (a01 * a32 - a02 * a31) + a30 * (a01 * a22 - a02 * a21)
                     out[14] = -(
                         a00 * (a11 * a32 - a12 * a31) -
                         a10 * (a01 * a32 - a02 * a31) +
                         a30 * (a01 * a12 - a02 * a11)
                     )
                     out[15] =
-                        a00 * (a11 * a22 - a12 * a21) -
-                        a10 * (a01 * a22 - a02 * a21) +
-                        a20 * (a01 * a12 - a02 * a11)
+                        a00 * (a11 * a22 - a12 * a21) - a10 * (a01 * a22 - a02 * a21) + a20 * (a01 * a12 - a02 * a11)
                     return out
                 }
 
@@ -2925,115 +2698,52 @@ THE SOFTWARE. */
                     minor0 = SIMD.Float32x4.mul(row1, tmp1)
                     minor1 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor0
-                    )
-                    minor1 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor1
-                    )
+                    minor0 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row1, tmp1), minor0)
+                    minor1 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor1)
                     minor1 = SIMD.Float32x4.swizzle(minor1, 2, 3, 0, 1)
 
                     tmp1 = SIMD.Float32x4.mul(row1, row2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor0 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor0
-                    )
+                    minor0 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor0)
                     minor3 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        minor0,
-                        SIMD.Float32x4.mul(row3, tmp1)
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor3
-                    )
+                    minor0 = SIMD.Float32x4.sub(minor0, SIMD.Float32x4.mul(row3, tmp1))
+                    minor3 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor3)
                     minor3 = SIMD.Float32x4.swizzle(minor3, 2, 3, 0, 1)
 
-                    tmp1 = SIMD.Float32x4.mul(
-                        SIMD.Float32x4.swizzle(row1, 2, 3, 0, 1),
-                        row3
-                    )
+                    tmp1 = SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(row1, 2, 3, 0, 1), row3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
                     row2 = SIMD.Float32x4.swizzle(row2, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor0
-                    )
+                    minor0 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row2, tmp1), minor0)
                     minor2 = SIMD.Float32x4.mul(row0, tmp1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor0 = SIMD.Float32x4.sub(
-                        minor0,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
-                    minor2 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row0, tmp1),
-                        minor2
-                    )
+                    minor0 = SIMD.Float32x4.sub(minor0, SIMD.Float32x4.mul(row2, tmp1))
+                    minor2 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row0, tmp1), minor2)
                     minor2 = SIMD.Float32x4.swizzle(minor2, 2, 3, 0, 1)
 
                     tmp1 = SIMD.Float32x4.mul(row0, row1)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor2 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor2
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor3
-                    )
+                    minor2 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor2)
+                    minor3 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row2, tmp1), minor3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor2 = SIMD.Float32x4.sub(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor2
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        minor3,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
+                    minor2 = SIMD.Float32x4.sub(SIMD.Float32x4.mul(row3, tmp1), minor2)
+                    minor3 = SIMD.Float32x4.sub(minor3, SIMD.Float32x4.mul(row2, tmp1))
 
                     tmp1 = SIMD.Float32x4.mul(row0, row3)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor1 = SIMD.Float32x4.sub(
-                        minor1,
-                        SIMD.Float32x4.mul(row2, tmp1)
-                    )
-                    minor2 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor2
-                    )
+                    minor1 = SIMD.Float32x4.sub(minor1, SIMD.Float32x4.mul(row2, tmp1))
+                    minor2 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row1, tmp1), minor2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor1 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row2, tmp1),
-                        minor1
-                    )
-                    minor2 = SIMD.Float32x4.sub(
-                        minor2,
-                        SIMD.Float32x4.mul(row1, tmp1)
-                    )
+                    minor1 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row2, tmp1), minor1)
+                    minor2 = SIMD.Float32x4.sub(minor2, SIMD.Float32x4.mul(row1, tmp1))
 
                     tmp1 = SIMD.Float32x4.mul(row0, row2)
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 1, 0, 3, 2)
-                    minor1 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row3, tmp1),
-                        minor1
-                    )
-                    minor3 = SIMD.Float32x4.sub(
-                        minor3,
-                        SIMD.Float32x4.mul(row1, tmp1)
-                    )
+                    minor1 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row3, tmp1), minor1)
+                    minor3 = SIMD.Float32x4.sub(minor3, SIMD.Float32x4.mul(row1, tmp1))
                     tmp1 = SIMD.Float32x4.swizzle(tmp1, 2, 3, 0, 1)
-                    minor1 = SIMD.Float32x4.sub(
-                        minor1,
-                        SIMD.Float32x4.mul(row3, tmp1)
-                    )
-                    minor3 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(row1, tmp1),
-                        minor3
-                    )
+                    minor1 = SIMD.Float32x4.sub(minor1, SIMD.Float32x4.mul(row3, tmp1))
+                    minor3 = SIMD.Float32x4.add(SIMD.Float32x4.mul(row1, tmp1), minor3)
 
                     SIMD.Float32x4.store(out, 0, minor0)
                     SIMD.Float32x4.store(out, 4, minor1)
@@ -3049,9 +2759,7 @@ THE SOFTWARE. */
                  * @param {mat4} a the source matrix
                  * @returns {mat4} out
                  */
-                mat4.adjoint = glMatrix.USE_SIMD
-                    ? mat4.SIMD.adjoint
-                    : mat4.scalar.adjoint
+                mat4.adjoint = glMatrix.USE_SIMD ? mat4.SIMD.adjoint : mat4.scalar.adjoint
 
                 /**
                  * Calculates the determinant of a mat4
@@ -3090,14 +2798,7 @@ THE SOFTWARE. */
                         b11 = a22 * a33 - a23 * a32
 
                     // Calculate the determinant
-                    return (
-                        b00 * b11 -
-                        b01 * b10 +
-                        b02 * b09 +
-                        b03 * b08 -
-                        b04 * b07 +
-                        b05 * b06
-                    )
+                    return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
                 }
 
                 /**
@@ -3116,101 +2817,53 @@ THE SOFTWARE. */
 
                     var b0 = SIMD.Float32x4.load(b, 0)
                     var out0 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(
-                            SIMD.Float32x4.swizzle(b0, 0, 0, 0, 0),
-                            a0
-                        ),
+                        SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b0, 0, 0, 0, 0), a0),
                         SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(
-                                SIMD.Float32x4.swizzle(b0, 1, 1, 1, 1),
-                                a1
-                            ),
+                            SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b0, 1, 1, 1, 1), a1),
                             SIMD.Float32x4.add(
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b0, 2, 2, 2, 2),
-                                    a2
-                                ),
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b0, 3, 3, 3, 3),
-                                    a3
-                                )
-                            )
-                        )
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b0, 2, 2, 2, 2), a2),
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b0, 3, 3, 3, 3), a3),
+                            ),
+                        ),
                     )
                     SIMD.Float32x4.store(out, 0, out0)
 
                     var b1 = SIMD.Float32x4.load(b, 4)
                     var out1 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(
-                            SIMD.Float32x4.swizzle(b1, 0, 0, 0, 0),
-                            a0
-                        ),
+                        SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b1, 0, 0, 0, 0), a0),
                         SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(
-                                SIMD.Float32x4.swizzle(b1, 1, 1, 1, 1),
-                                a1
-                            ),
+                            SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b1, 1, 1, 1, 1), a1),
                             SIMD.Float32x4.add(
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b1, 2, 2, 2, 2),
-                                    a2
-                                ),
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b1, 3, 3, 3, 3),
-                                    a3
-                                )
-                            )
-                        )
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b1, 2, 2, 2, 2), a2),
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b1, 3, 3, 3, 3), a3),
+                            ),
+                        ),
                     )
                     SIMD.Float32x4.store(out, 4, out1)
 
                     var b2 = SIMD.Float32x4.load(b, 8)
                     var out2 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(
-                            SIMD.Float32x4.swizzle(b2, 0, 0, 0, 0),
-                            a0
-                        ),
+                        SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b2, 0, 0, 0, 0), a0),
                         SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(
-                                SIMD.Float32x4.swizzle(b2, 1, 1, 1, 1),
-                                a1
-                            ),
+                            SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b2, 1, 1, 1, 1), a1),
                             SIMD.Float32x4.add(
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b2, 2, 2, 2, 2),
-                                    a2
-                                ),
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b2, 3, 3, 3, 3),
-                                    a3
-                                )
-                            )
-                        )
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b2, 2, 2, 2, 2), a2),
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b2, 3, 3, 3, 3), a3),
+                            ),
+                        ),
                     )
                     SIMD.Float32x4.store(out, 8, out2)
 
                     var b3 = SIMD.Float32x4.load(b, 12)
                     var out3 = SIMD.Float32x4.add(
-                        SIMD.Float32x4.mul(
-                            SIMD.Float32x4.swizzle(b3, 0, 0, 0, 0),
-                            a0
-                        ),
+                        SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b3, 0, 0, 0, 0), a0),
                         SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(
-                                SIMD.Float32x4.swizzle(b3, 1, 1, 1, 1),
-                                a1
-                            ),
+                            SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b3, 1, 1, 1, 1), a1),
                             SIMD.Float32x4.add(
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b3, 2, 2, 2, 2),
-                                    a2
-                                ),
-                                SIMD.Float32x4.mul(
-                                    SIMD.Float32x4.swizzle(b3, 3, 3, 3, 3),
-                                    a3
-                                )
-                            )
-                        )
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b3, 2, 2, 2, 2), a2),
+                                SIMD.Float32x4.mul(SIMD.Float32x4.swizzle(b3, 3, 3, 3, 3), a3),
+                            ),
+                        ),
                     )
                     SIMD.Float32x4.store(out, 12, out3)
 
@@ -3290,9 +2943,7 @@ THE SOFTWARE. */
                  * @param {mat4} b the second operand
                  * @returns {mat4} out
                  */
-                mat4.multiply = glMatrix.USE_SIMD
-                    ? mat4.SIMD.multiply
-                    : mat4.scalar.multiply
+                mat4.multiply = glMatrix.USE_SIMD ? mat4.SIMD.multiply : mat4.scalar.multiply
 
                 /**
                  * Alias for {@link mat4.multiply}
@@ -3396,23 +3047,11 @@ THE SOFTWARE. */
                         out[11] = a[11]
                     }
 
-                    a0 = SIMD.Float32x4.mul(
-                        a0,
-                        SIMD.Float32x4.swizzle(vec, 0, 0, 0, 0)
-                    )
-                    a1 = SIMD.Float32x4.mul(
-                        a1,
-                        SIMD.Float32x4.swizzle(vec, 1, 1, 1, 1)
-                    )
-                    a2 = SIMD.Float32x4.mul(
-                        a2,
-                        SIMD.Float32x4.swizzle(vec, 2, 2, 2, 2)
-                    )
+                    a0 = SIMD.Float32x4.mul(a0, SIMD.Float32x4.swizzle(vec, 0, 0, 0, 0))
+                    a1 = SIMD.Float32x4.mul(a1, SIMD.Float32x4.swizzle(vec, 1, 1, 1, 1))
+                    a2 = SIMD.Float32x4.mul(a2, SIMD.Float32x4.swizzle(vec, 2, 2, 2, 2))
 
-                    var t0 = SIMD.Float32x4.add(
-                        a0,
-                        SIMD.Float32x4.add(a1, SIMD.Float32x4.add(a2, a3))
-                    )
+                    var t0 = SIMD.Float32x4.add(a0, SIMD.Float32x4.add(a1, SIMD.Float32x4.add(a2, a3)))
                     SIMD.Float32x4.store(out, 12, t0)
 
                     return out
@@ -3426,9 +3065,7 @@ THE SOFTWARE. */
                  * @param {vec3} v vector to translate by
                  * @returns {mat4} out
                  */
-                mat4.translate = glMatrix.USE_SIMD
-                    ? mat4.SIMD.translate
-                    : mat4.scalar.translate
+                mat4.translate = glMatrix.USE_SIMD ? mat4.SIMD.translate : mat4.scalar.translate
 
                 /**
                  * Scales the mat4 by the dimensions in the given vec3 not using vectorization
@@ -3475,34 +3112,13 @@ THE SOFTWARE. */
                     var vec = SIMD.Float32x4(v[0], v[1], v[2], 0)
 
                     a0 = SIMD.Float32x4.load(a, 0)
-                    SIMD.Float32x4.store(
-                        out,
-                        0,
-                        SIMD.Float32x4.mul(
-                            a0,
-                            SIMD.Float32x4.swizzle(vec, 0, 0, 0, 0)
-                        )
-                    )
+                    SIMD.Float32x4.store(out, 0, SIMD.Float32x4.mul(a0, SIMD.Float32x4.swizzle(vec, 0, 0, 0, 0)))
 
                     a1 = SIMD.Float32x4.load(a, 4)
-                    SIMD.Float32x4.store(
-                        out,
-                        4,
-                        SIMD.Float32x4.mul(
-                            a1,
-                            SIMD.Float32x4.swizzle(vec, 1, 1, 1, 1)
-                        )
-                    )
+                    SIMD.Float32x4.store(out, 4, SIMD.Float32x4.mul(a1, SIMD.Float32x4.swizzle(vec, 1, 1, 1, 1)))
 
                     a2 = SIMD.Float32x4.load(a, 8)
-                    SIMD.Float32x4.store(
-                        out,
-                        8,
-                        SIMD.Float32x4.mul(
-                            a2,
-                            SIMD.Float32x4.swizzle(vec, 2, 2, 2, 2)
-                        )
-                    )
+                    SIMD.Float32x4.store(out, 8, SIMD.Float32x4.mul(a2, SIMD.Float32x4.swizzle(vec, 2, 2, 2, 2)))
 
                     out[12] = a[12]
                     out[13] = a[13]
@@ -3519,9 +3135,7 @@ THE SOFTWARE. */
                  * @param {vec3} v the vec3 to scale the matrix by
                  * @returns {mat4} out
                  */
-                mat4.scale = glMatrix.USE_SIMD
-                    ? mat4.SIMD.scale
-                    : mat4.scalar.scale
+                mat4.scale = glMatrix.USE_SIMD ? mat4.SIMD.scale : mat4.scalar.scale
 
                 /**
                  * Rotates a mat4 by the given angle around the given axis
@@ -3697,18 +3311,12 @@ THE SOFTWARE. */
                     SIMD.Float32x4.store(
                         out,
                         4,
-                        SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(a_1, c),
-                            SIMD.Float32x4.mul(a_2, s)
-                        )
+                        SIMD.Float32x4.add(SIMD.Float32x4.mul(a_1, c), SIMD.Float32x4.mul(a_2, s)),
                     )
                     SIMD.Float32x4.store(
                         out,
                         8,
-                        SIMD.Float32x4.sub(
-                            SIMD.Float32x4.mul(a_2, c),
-                            SIMD.Float32x4.mul(a_1, s)
-                        )
+                        SIMD.Float32x4.sub(SIMD.Float32x4.mul(a_2, c), SIMD.Float32x4.mul(a_1, s)),
                     )
                     return out
                 }
@@ -3721,9 +3329,7 @@ THE SOFTWARE. */
                  * @param {Number} rad the angle to rotate the matrix by
                  * @returns {mat4} out
                  */
-                mat4.rotateX = glMatrix.USE_SIMD
-                    ? mat4.SIMD.rotateX
-                    : mat4.scalar.rotateX
+                mat4.rotateX = glMatrix.USE_SIMD ? mat4.SIMD.rotateX : mat4.scalar.rotateX
 
                 /**
                  * Rotates a matrix by the given angle around the Y axis not using SIMD
@@ -3799,18 +3405,12 @@ THE SOFTWARE. */
                     SIMD.Float32x4.store(
                         out,
                         0,
-                        SIMD.Float32x4.sub(
-                            SIMD.Float32x4.mul(a_0, c),
-                            SIMD.Float32x4.mul(a_2, s)
-                        )
+                        SIMD.Float32x4.sub(SIMD.Float32x4.mul(a_0, c), SIMD.Float32x4.mul(a_2, s)),
                     )
                     SIMD.Float32x4.store(
                         out,
                         8,
-                        SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(a_0, s),
-                            SIMD.Float32x4.mul(a_2, c)
-                        )
+                        SIMD.Float32x4.add(SIMD.Float32x4.mul(a_0, s), SIMD.Float32x4.mul(a_2, c)),
                     )
                     return out
                 }
@@ -3823,9 +3423,7 @@ THE SOFTWARE. */
                  * @param {Number} rad the angle to rotate the matrix by
                  * @returns {mat4} out
                  */
-                mat4.rotateY = glMatrix.USE_SIMD
-                    ? mat4.SIMD.rotateY
-                    : mat4.scalar.rotateY
+                mat4.rotateY = glMatrix.USE_SIMD ? mat4.SIMD.rotateY : mat4.scalar.rotateY
 
                 /**
                  * Rotates a matrix by the given angle around the Z axis not using SIMD
@@ -3901,18 +3499,12 @@ THE SOFTWARE. */
                     SIMD.Float32x4.store(
                         out,
                         0,
-                        SIMD.Float32x4.add(
-                            SIMD.Float32x4.mul(a_0, c),
-                            SIMD.Float32x4.mul(a_1, s)
-                        )
+                        SIMD.Float32x4.add(SIMD.Float32x4.mul(a_0, c), SIMD.Float32x4.mul(a_1, s)),
                     )
                     SIMD.Float32x4.store(
                         out,
                         4,
-                        SIMD.Float32x4.sub(
-                            SIMD.Float32x4.mul(a_1, c),
-                            SIMD.Float32x4.mul(a_0, s)
-                        )
+                        SIMD.Float32x4.sub(SIMD.Float32x4.mul(a_1, c), SIMD.Float32x4.mul(a_0, s)),
                     )
                     return out
                 }
@@ -3925,9 +3517,7 @@ THE SOFTWARE. */
                  * @param {Number} rad the angle to rotate the matrix by
                  * @returns {mat4} out
                  */
-                mat4.rotateZ = glMatrix.USE_SIMD
-                    ? mat4.SIMD.rotateZ
-                    : mat4.scalar.rotateZ
+                mat4.rotateZ = glMatrix.USE_SIMD ? mat4.SIMD.rotateZ : mat4.scalar.rotateZ
 
                 /**
                  * Creates a matrix from a vector translation
@@ -4343,13 +3933,7 @@ THE SOFTWARE. */
                  * @param {vec3} o The origin vector around which to scale and rotate
                  * @returns {mat4} out
                  */
-                mat4.fromRotationTranslationScaleOrigin = function (
-                    out,
-                    q,
-                    v,
-                    s,
-                    o
-                ) {
+                mat4.fromRotationTranslationScaleOrigin = function (out, q, v, s, o) {
                     // Quaternion math
                     var x = q[0],
                         y = q[1],
@@ -4386,12 +3970,9 @@ THE SOFTWARE. */
                     out[9] = (yz - wx) * sz
                     out[10] = (1 - (xx + yy)) * sz
                     out[11] = 0
-                    out[12] =
-                        v[0] + ox - (out[0] * ox + out[4] * oy + out[8] * oz)
-                    out[13] =
-                        v[1] + oy - (out[1] * ox + out[5] * oy + out[9] * oz)
-                    out[14] =
-                        v[2] + oz - (out[2] * ox + out[6] * oy + out[10] * oz)
+                    out[12] = v[0] + ox - (out[0] * ox + out[4] * oy + out[8] * oz)
+                    out[13] = v[1] + oy - (out[1] * ox + out[5] * oy + out[9] * oz)
+                    out[14] = v[2] + oz - (out[2] * ox + out[6] * oy + out[10] * oz)
                     out[15] = 1
 
                     return out
@@ -4458,15 +4039,7 @@ THE SOFTWARE. */
                  * @param {Number} far Far bound of the frustum
                  * @returns {mat4} out
                  */
-                mat4.frustum = function (
-                    out,
-                    left,
-                    right,
-                    bottom,
-                    top,
-                    near,
-                    far
-                ) {
+                mat4.frustum = function (out, left, right, bottom, top, near, far) {
                     var rl = 1 / (right - left),
                         tb = 1 / (top - bottom),
                         nf = 1 / (near - far)
@@ -4532,18 +4105,11 @@ THE SOFTWARE. */
                  * @param {number} far Far bound of the frustum
                  * @returns {mat4} out
                  */
-                mat4.perspectiveFromFieldOfView = function (
-                    out,
-                    fov,
-                    near,
-                    far
-                ) {
+                mat4.perspectiveFromFieldOfView = function (out, fov, near, far) {
                     var upTan = Math.tan((fov.upDegrees * Math.PI) / 180.0),
                         downTan = Math.tan((fov.downDegrees * Math.PI) / 180.0),
                         leftTan = Math.tan((fov.leftDegrees * Math.PI) / 180.0),
-                        rightTan = Math.tan(
-                            (fov.rightDegrees * Math.PI) / 180.0
-                        ),
+                        rightTan = Math.tan((fov.rightDegrees * Math.PI) / 180.0),
                         xScale = 2.0 / (leftTan + rightTan),
                         yScale = 2.0 / (upTan + downTan)
 
@@ -4578,15 +4144,7 @@ THE SOFTWARE. */
                  * @param {number} far Far bound of the frustum
                  * @returns {mat4} out
                  */
-                mat4.ortho = function (
-                    out,
-                    left,
-                    right,
-                    bottom,
-                    top,
-                    near,
-                    far
-                ) {
+                mat4.ortho = function (out, left, right, bottom, top, near, far) {
                     var lr = 1 / (left - right),
                         bt = 1 / (bottom - top),
                         nf = 1 / (near - far)
@@ -4774,7 +4332,7 @@ THE SOFTWARE. */
                             Math.pow(a[12], 2) +
                             Math.pow(a[13], 2) +
                             Math.pow(a[14], 2) +
-                            Math.pow(a[15], 2)
+                            Math.pow(a[15], 2),
                     )
                 }
 
@@ -4968,54 +4526,22 @@ THE SOFTWARE. */
                         b15 = b[15]
 
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-                        Math.abs(a3 - b3) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
-                        Math.abs(a4 - b4) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
-                        Math.abs(a5 - b5) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
-                        Math.abs(a6 - b6) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
-                        Math.abs(a7 - b7) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a7), Math.abs(b7)) &&
-                        Math.abs(a8 - b8) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a8), Math.abs(b8)) &&
-                        Math.abs(a9 - b9) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a9), Math.abs(b9)) &&
-                        Math.abs(a10 - b10) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a10), Math.abs(b10)) &&
-                        Math.abs(a11 - b11) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a11), Math.abs(b11)) &&
-                        Math.abs(a12 - b12) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a12), Math.abs(b12)) &&
-                        Math.abs(a13 - b13) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a13), Math.abs(b13)) &&
-                        Math.abs(a14 - b14) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a14), Math.abs(b14)) &&
-                        Math.abs(a15 - b15) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a15), Math.abs(b15))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+                        Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
+                        Math.abs(a4 - b4) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
+                        Math.abs(a5 - b5) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
+                        Math.abs(a6 - b6) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
+                        Math.abs(a7 - b7) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7)) &&
+                        Math.abs(a8 - b8) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a8), Math.abs(b8)) &&
+                        Math.abs(a9 - b9) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a9), Math.abs(b9)) &&
+                        Math.abs(a10 - b10) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a10), Math.abs(b10)) &&
+                        Math.abs(a11 - b11) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a11), Math.abs(b11)) &&
+                        Math.abs(a12 - b12) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a12), Math.abs(b12)) &&
+                        Math.abs(a13 - b13) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a13), Math.abs(b13)) &&
+                        Math.abs(a14 - b14) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a14), Math.abs(b14)) &&
+                        Math.abs(a15 - b15) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a15), Math.abs(b15))
                     )
                 }
 
@@ -5090,8 +4616,7 @@ THE SOFTWARE. */
                         var dot = vec3.dot(a, b)
                         if (dot < -0.999999) {
                             vec3.cross(tmpvec3, xUnitVec3, a)
-                            if (vec3.length(tmpvec3) < 0.000001)
-                                vec3.cross(tmpvec3, yUnitVec3, a)
+                            if (vec3.length(tmpvec3) < 0.000001) vec3.cross(tmpvec3, yUnitVec3, a)
                             vec3.normalize(tmpvec3, tmpvec3)
                             quat.setAxisAngle(out, tmpvec3, Math.PI)
                             return out
@@ -5612,9 +5137,7 @@ THE SOFTWARE. */
                         var j = (i + 1) % 3
                         var k = (i + 2) % 3
 
-                        fRoot = Math.sqrt(
-                            m[i * 3 + i] - m[j * 3 + j] - m[k * 3 + k] + 1.0
-                        )
+                        fRoot = Math.sqrt(m[i * 3 + i] - m[j * 3 + j] - m[k * 3 + k] + 1.0)
                         out[i] = 0.5 * fRoot
                         fRoot = 0.5 / fRoot
                         out[3] = (m[j * 3 + k] - m[k * 3 + j]) * fRoot
@@ -5632,17 +5155,7 @@ THE SOFTWARE. */
                  * @returns {String} string representation of the vector
                  */
                 quat.str = function (a) {
-                    return (
-                        "quat(" +
-                        a[0] +
-                        ", " +
-                        a[1] +
-                        ", " +
-                        a[2] +
-                        ", " +
-                        a[3] +
-                        ")"
-                    )
+                    return "quat(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ")"
                 }
 
                 /**
@@ -6149,21 +5662,9 @@ THE SOFTWARE. */
                         factor3 = factorTimes2 * (t - 1),
                         factor4 = factorTimes2 * (3 - 2 * t)
 
-                    out[0] =
-                        a[0] * factor1 +
-                        b[0] * factor2 +
-                        c[0] * factor3 +
-                        d[0] * factor4
-                    out[1] =
-                        a[1] * factor1 +
-                        b[1] * factor2 +
-                        c[1] * factor3 +
-                        d[1] * factor4
-                    out[2] =
-                        a[2] * factor1 +
-                        b[2] * factor2 +
-                        c[2] * factor3 +
-                        d[2] * factor4
+                    out[0] = a[0] * factor1 + b[0] * factor2 + c[0] * factor3 + d[0] * factor4
+                    out[1] = a[1] * factor1 + b[1] * factor2 + c[1] * factor3 + d[1] * factor4
+                    out[2] = a[2] * factor1 + b[2] * factor2 + c[2] * factor3 + d[2] * factor4
 
                     return out
                 }
@@ -6188,21 +5689,9 @@ THE SOFTWARE. */
                         factor3 = 3 * factorTimes2 * inverseFactor,
                         factor4 = factorTimes2 * t
 
-                    out[0] =
-                        a[0] * factor1 +
-                        b[0] * factor2 +
-                        c[0] * factor3 +
-                        d[0] * factor4
-                    out[1] =
-                        a[1] * factor1 +
-                        b[1] * factor2 +
-                        c[1] * factor3 +
-                        d[1] * factor4
-                    out[2] =
-                        a[2] * factor1 +
-                        b[2] * factor2 +
-                        c[2] * factor3 +
-                        d[2] * factor4
+                    out[0] = a[0] * factor1 + b[0] * factor2 + c[0] * factor3 + d[0] * factor4
+                    out[1] = a[1] * factor1 + b[1] * factor2 + c[1] * factor3 + d[1] * factor4
+                    out[2] = a[2] * factor1 + b[2] * factor2 + c[2] * factor3 + d[2] * factor4
 
                     return out
                 }
@@ -6487,15 +5976,9 @@ THE SOFTWARE. */
                         b1 = b[1],
                         b2 = b[2]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2))
                     )
                 }
 
@@ -7096,17 +6579,7 @@ THE SOFTWARE. */
                  * @returns {String} string representation of the vector
                  */
                 vec4.str = function (a) {
-                    return (
-                        "vec4(" +
-                        a[0] +
-                        ", " +
-                        a[1] +
-                        ", " +
-                        a[2] +
-                        ", " +
-                        a[3] +
-                        ")"
-                    )
+                    return "vec4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ")"
                 }
 
                 /**
@@ -7117,12 +6590,7 @@ THE SOFTWARE. */
                  * @returns {Boolean} True if the vectors are equal, false otherwise.
                  */
                 vec4.exactEquals = function (a, b) {
-                    return (
-                        a[0] === b[0] &&
-                        a[1] === b[1] &&
-                        a[2] === b[2] &&
-                        a[3] === b[3]
-                    )
+                    return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3]
                 }
 
                 /**
@@ -7142,18 +6610,10 @@ THE SOFTWARE. */
                         b2 = b[2],
                         b3 = b[3]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-                        Math.abs(a2 - b2) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-                        Math.abs(a3 - b3) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a3), Math.abs(b3))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+                        Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+                        Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3))
                     )
                 }
 
@@ -7750,12 +7210,8 @@ THE SOFTWARE. */
                     var b0 = b[0],
                         b1 = b[1]
                     return (
-                        Math.abs(a0 - b0) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-                        Math.abs(a1 - b1) <=
-                            glMatrix.EPSILON *
-                                Math.max(1.0, Math.abs(a1), Math.abs(b1))
+                        Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+                        Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1))
                     )
                 }
 
@@ -7764,6 +7220,6 @@ THE SOFTWARE. */
                 /***/
             },
             /******/
-        ]
+        ],
     )
 })

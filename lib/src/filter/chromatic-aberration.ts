@@ -38,10 +38,7 @@ export class TgdFilterChromaticAberration extends TgdFilter {
             },
             setUniforms: ({ program }) => {
                 program.uniform1f("uniStrength", this.strength)
-                program.uniform1f(
-                    "uniInverseHeight",
-                    1 / program.gl.drawingBufferHeight
-                )
+                program.uniform1f("uniInverseHeight", 1 / program.gl.drawingBufferHeight)
             },
         })
         this.strength = strength

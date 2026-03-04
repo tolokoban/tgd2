@@ -9,10 +9,7 @@ function newLabel(name: string) {
     return `$_label_${name}_${ID++}`
 }
 
-export function wasm_call(
-    funcName: string,
-    ...args: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_call(funcName: string, ...args: TgdCodeBloc[]): TgdCodeBloc[] {
     if (args.length === 0) return [`(call $${funcName})`]
     return [`(call $${funcName}`, args, ")"]
 }
@@ -28,55 +25,35 @@ export function wasm_drop(): TgdCodeBloc[] {
 /**
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Control_flow/if...else)
  */
-export function wasm_if(
-    condition: TgdCodeBloc[],
-    thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_if(condition: TgdCodeBloc[], thenBloc: TgdCodeBloc[], elseBloc?: TgdCodeBloc[]): TgdCodeBloc[] {
     return wasm_if_typed(null, condition, thenBloc, elseBloc)
 }
 
 /**
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Control_flow/if...else)
  */
-export function wasm_if_i32(
-    condition: TgdCodeBloc[],
-    thenBloc: TgdCodeBloc[],
-    elseBloc: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_if_i32(condition: TgdCodeBloc[], thenBloc: TgdCodeBloc[], elseBloc: TgdCodeBloc[]): TgdCodeBloc[] {
     return wasm_if_typed("i32", condition, thenBloc, elseBloc)
 }
 
 /**
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Control_flow/if...else)
  */
-export function wasm_if_i64(
-    condition: TgdCodeBloc[],
-    thenBloc: TgdCodeBloc[],
-    elseBloc: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_if_i64(condition: TgdCodeBloc[], thenBloc: TgdCodeBloc[], elseBloc: TgdCodeBloc[]): TgdCodeBloc[] {
     return wasm_if_typed("i64", condition, thenBloc, elseBloc)
 }
 
 /**
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Control_flow/if...else)
  */
-export function wasm_if_f32(
-    condition: TgdCodeBloc[],
-    thenBloc: TgdCodeBloc[],
-    elseBloc: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_if_f32(condition: TgdCodeBloc[], thenBloc: TgdCodeBloc[], elseBloc: TgdCodeBloc[]): TgdCodeBloc[] {
     return wasm_if_typed("f32", condition, thenBloc, elseBloc)
 }
 
 /**
  * @see [MDN](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Control_flow/if...else)
  */
-export function wasm_if_f64(
-    condition: TgdCodeBloc[],
-    thenBloc: TgdCodeBloc[],
-    elseBloc: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_if_f64(condition: TgdCodeBloc[], thenBloc: TgdCodeBloc[], elseBloc: TgdCodeBloc[]): TgdCodeBloc[] {
     return wasm_if_typed("f64", condition, thenBloc, elseBloc)
 }
 
@@ -84,29 +61,16 @@ export function wasm_if_typed(
     type: WasmType | null,
     condition: TgdCodeBloc[],
     thenBloc: TgdCodeBloc[],
-    elseBloc?: TgdCodeBloc[]
+    elseBloc?: TgdCodeBloc[],
 ): TgdCodeBloc[] {
     return [
         `(if ${type ? `(result ${type})` : ""}`,
-        [
-            ...condition,
-            "(then",
-            ...thenBloc,
-            ")",
-            ...(elseBloc ? ["(else", elseBloc, ")"] : []),
-        ],
+        [...condition, "(then", ...thenBloc, ")", ...(elseBloc ? ["(else", elseBloc, ")"] : [])],
         ")",
     ]
 }
 
-export function wasm_while(
-    condition: TgdCodeBloc[],
-    body: TgdCodeBloc[]
-): TgdCodeBloc[] {
+export function wasm_while(condition: TgdCodeBloc[], body: TgdCodeBloc[]): TgdCodeBloc[] {
     const label = newLabel("loop")
-    return [
-        `(loop ${label}`,
-        wasm_if(condition, [...body, `(br ${label})`]),
-        ")",
-    ]
+    return [`(loop ${label}`, wasm_if(condition, [...body, `(br ${label})`]), ")"]
 }

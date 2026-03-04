@@ -12,9 +12,7 @@ if (!arg) {
     console.error("")
     console.error('It will search for any file ending with ".demo.tsx".')
     console.error("This file must default export a React component.")
-    console.error(
-        'Then the script will generate a file "index.tsx" with a component'
-    )
+    console.error('Then the script will generate a file "index.tsx" with a component')
     console.error("that will demonstate it, along with the highlighted code.")
     console.error("")
     process.exit(1)
@@ -40,10 +38,7 @@ async function processDemo(relPath: string) {
 
         console.log("[Demo]", file.substring(ROOT.length))
         const code = await loadText(file)
-        const [fullCode, focusedCode] = await parseCode(
-            code,
-            Path.dirname(file)
-        )
+        const [fullCode, focusedCode] = await parseCode(code, Path.dirname(file))
 
         await saveText(
             path,
@@ -54,10 +49,7 @@ async function processDemo(relPath: string) {
                 `import React from "react"`,
                 `import { ViewButton } from "@tolokoban/ui"`,
                 `import CodeViewer from "@/components/demo/CodeViewer"`,
-                `import Demo from "./${filename.substring(
-                    0,
-                    filename.length - ".tsx".length
-                )}"`,
+                `import Demo from "./${filename.substring(0, filename.length - ".tsx".length)}"`,
                 "",
                 `const FOCUS = ${JSON.stringify(focusedCode)}`,
                 `const FULL = ${JSON.stringify(fullCode)}`,
@@ -73,9 +65,7 @@ async function processDemo(relPath: string) {
                             "<div>",
                             [
                                 `<ViewButton variant="elevated" onClick={() => setFull(!full)}>`,
-                                [
-                                    `{full ? "Show code details" : "Show full code"}`,
-                                ],
+                                [`{full ? "Show code details" : "Show full code"}`],
                                 `</ViewButton>`,
                             ],
                             "</div>",
@@ -86,7 +76,7 @@ async function processDemo(relPath: string) {
                     "</>",
                 ],
                 "}",
-            ])
+            ]),
         )
     } catch (ex) {
         const msg = ex instanceof Error ? ex.message : JSON.stringify(ex)
@@ -114,14 +104,9 @@ class Matcher {
     }
 }
 
-const RX_IMPORT =
-    /^[ \t]*import[ \t]*[a-zA-Z0-9_]+[ \t]*from[ \t]*["'](\.[a-zA-Z0-9_\.\/\-\$\@]+\.(vert|frag))["']$/g
+const RX_IMPORT = /^[ \t]*import[ \t]*[a-zA-Z0-9_]+[ \t]*from[ \t]*["'](\.[a-zA-Z0-9_\.\/\-\$\@]+\.(vert|frag))["']$/g
 
-async function findShaderCodes(
-    code: string,
-    focused: Record<string, string>,
-    folder: string
-) {
+async function findShaderCodes(code: string, focused: Record<string, string>, folder: string) {
     const lines = code.split("\n")
     for (const line of lines) {
         RX_IMPORT.lastIndex = -1
@@ -130,18 +115,11 @@ async function findShaderCodes(
 
         const [, filename] = match
         const content = await loadText(Path.resolve(folder, filename))
-        focused[
-            `${
-                filename.endsWith(".vert") ? "Vertex" : "Fragment"
-            } shader "${filename}"`
-        ] = content
+        focused[`${filename.endsWith(".vert") ? "Vertex" : "Fragment"} shader "${filename}"`] = content
     }
 }
 
-async function parseCode(
-    code: string,
-    folder: string
-): Promise<[string, Record<string, string>]> {
+async function parseCode(code: string, folder: string): Promise<[string, Record<string, string>]> {
     const matcher = new Matcher()
     const lines = code.split("\n")
     const full: string[] = []
@@ -158,9 +136,7 @@ async function parseCode(
         }
         if (activeRegion && matcher.matchEnd(short)) {
             if (focused[activeRegion]) {
-                throw Error(
-                    `The code region "${activeRegion}" has been defined twice in the same demo file!`
-                )
+                throw Error(`The code region "${activeRegion}" has been defined twice in the same demo file!`)
             }
             focused[activeRegion] = currentRegion.join("\n")
             activeRegion = null
@@ -194,20 +170,19 @@ function codeToString(code: Code, indent = "") {
     if (typeof code === "string") return `${indent}${code}`
 
     const subIndent = `${indent}    `
-    return code.map(section => codeToString(section, subIndent)).join("\n")
+    return code.map((section) => codeToString(section, subIndent)).join("\n")
 }
 
 function codeLinesToString(lines: Code[]) {
     return lines
-        .filter(line => typeof line !== "boolean")
-        .map(line => codeToString(line))
+        .filter((line) => typeof line !== "boolean")
+        .map((line) => codeToString(line))
         .join("\n")
 }
 
 async function findFiles(path: string, acceptedExtensions: string[]) {
-    const jsFilter = info =>
-        !info.isDirectory() && matchAnyExtension(info.name, acceptedExtensions)
-    const dirFilter = info => !info.name.startsWith(".") && info.isDirectory()
+    const jsFilter = (info) => !info.isDirectory() && matchAnyExtension(info.name, acceptedExtensions)
+    const dirFilter = (info) => !info.name.startsWith(".") && info.isDirectory()
     const files = await readDir(path, jsFilter)
     const fringe = await readDir(path, dirFilter)
     while (fringe.length > 0) {
@@ -215,11 +190,11 @@ async function findFiles(path: string, acceptedExtensions: string[]) {
         if (!folder) continue
 
         const subFolders = await readDir(folder, dirFilter)
-        subFolders.forEach(dir => fringe.push(dir))
+        subFolders.forEach((dir) => fringe.push(dir))
         const subFiles = await readDir(folder, jsFilter)
-        subFiles.forEach(f => files.push(f))
+        subFiles.forEach((f) => files.push(f))
     }
-    return files.map(f => Path.relative(path, f))
+    return files.map((f) => Path.relative(path, f))
 }
 
 function matchAnyExtension(name, acceptedExtensions) {
@@ -234,10 +209,7 @@ function matchAnyExtension(name, acceptedExtensions) {
  * @param filters {Array<(info: Dirent) => boolean>}
  * @return {Promise<string[]>}
  */
-async function readDir(
-    root: string,
-    ...filters: Array<(info: Dirent) => boolean>
-) {
+async function readDir(root: string, ...filters: Array<(info: Dirent) => boolean>) {
     if (!existsSync(root)) throw Error(`[readDir] Path not found: "${root}"!`)
 
     const folders = []
@@ -259,7 +231,7 @@ async function readDir(
         if (pass) folders.push(name)
     }
     folders.sort()
-    return folders.map(name => Path.resolve(root, name))
+    return folders.map((name) => Path.resolve(root, name))
 }
 
 async function start() {

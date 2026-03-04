@@ -1,9 +1,5 @@
 import { WebglMagFilter, WebglMinFilter, WebglWrap } from "@tgd/types"
-import {
-    WebglTextureFormat,
-    WebglTextureInternalFormat,
-    WebglTextureType,
-} from "./types"
+import { WebglTextureFormat, WebglTextureInternalFormat, WebglTextureType } from "./types"
 
 export interface WebglTextureParameters {
     wrapS?: WebglWrap
@@ -13,8 +9,7 @@ export interface WebglTextureParameters {
     magFilter?: WebglMagFilter
 }
 
-export interface WebglTexture2DCreateFromArrayOptions
-    extends WebglTextureParameters {
+export interface WebglTexture2DCreateFromArrayOptions extends WebglTextureParameters {
     width: number
     height: number
     /** Mipmap level */
@@ -49,15 +44,13 @@ export function webglTextureCreate(gl: WebGL2RenderingContext): WebGLTexture {
  */
 export function webglTextureParametersSet(
     gl: WebGL2RenderingContext,
-    { wrapS, wrapT, wrapR, minFilter, magFilter }: WebglTextureParameters
+    { wrapS, wrapT, wrapR, minFilter, magFilter }: WebglTextureParameters,
 ) {
     if (wrapS) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl[wrapS])
     if (wrapT) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl[wrapT])
     if (wrapR) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl[wrapR])
-    if (minFilter)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[minFilter])
-    if (magFilter)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
+    if (minFilter) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl[minFilter])
+    if (magFilter) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl[magFilter])
 }
 
 export function webglTextureCreate2DFromArray(
@@ -71,7 +64,7 @@ export function webglTextureCreate2DFromArray(
         | Int32Array
         | Uint32Array
         | Float32Array,
-    options: WebglTexture2DCreateFromArrayOptions
+    options: WebglTexture2DCreateFromArrayOptions,
 ) {
     const texture = webglTextureCreate(gl)
     gl.activeTexture(gl.TEXTURE0 + (options.unit ?? 0))
@@ -87,18 +80,7 @@ export function webglTextureCreate2DFromArray(
         offset = 0,
     } = options
     if (options.flipY) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, options.flipY)
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        level,
-        gl[internalFormat],
-        width,
-        height,
-        0,
-        gl[format],
-        gl[type],
-        data,
-        offset
-    )
+    gl.texImage2D(gl.TEXTURE_2D, level, gl[internalFormat], width, height, 0, gl[format], gl[type], data, offset)
     return texture
 }
 

@@ -17,11 +17,7 @@ export class TgdTextureProcedural {
      */
     readonly attUV: string
 
-    constructor({
-        attPosition = "POSITION",
-        attNormal = "NORMAL",
-        attUV = "TEXCOORD_0",
-    }: TgdMaterialOptions) {
+    constructor({ attPosition = "POSITION", attNormal = "NORMAL", attUV = "TEXCOORD_0" }: TgdMaterialOptions) {
         this.attPosition = attPosition
         this.attNormal = attNormal
         this.attUV = attUV

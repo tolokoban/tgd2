@@ -19,7 +19,7 @@ async function processFile(path: string): Promise<void> {
  */
 const SHADER = ${JSON.stringify(content)}
 export default SHADER
-`
+`,
     )
 }
 

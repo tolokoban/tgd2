@@ -36,7 +36,7 @@ export class TgdBuffer {
 
     constructor(
         public readonly gl: WebGL2RenderingContext,
-        options: Partial<TgdBufferOptions> = {}
+        options: Partial<TgdBufferOptions> = {},
     ) {
         const buffer = gl.createBuffer()
         if (!buffer) throw new Error("Unable to create WebGLBuffer!")
@@ -60,9 +60,7 @@ export class TgdBuffer {
         gl.bindBuffer(gl[this._target], buffer)
     }
 
-    bufferData(
-        options: Partial<TgdBufferOptions> & { data: TgdTypeArrayOrBuffer }
-    ) {
+    bufferData(options: Partial<TgdBufferOptions> & { data: TgdTypeArrayOrBuffer }) {
         const { gl } = this
         this._usage = options.usage ?? this._usage
         this._target = options.target ?? this._target

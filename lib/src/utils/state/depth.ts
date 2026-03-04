@@ -12,13 +12,7 @@ export interface WebglDepthOptions {
 
 export const webglPresetDepth: Readonly<
     Record<
-        | "off"
-        | "always"
-        | "writeOnly"
-        | "less"
-        | "lessOrEqual"
-        | "lessReadOnly"
-        | "lessOrEqualReadOnly",
+        "off" | "always" | "writeOnly" | "less" | "lessOrEqual" | "lessReadOnly" | "lessOrEqualReadOnly",
         WebglDepthOptions
     >
 > = {
@@ -73,10 +67,7 @@ export const webglPresetDepth: Readonly<
     },
 }
 
-export function webglDepthSet(
-    context: { webglParams: WebglParams },
-    depth: WebglDepthOptions
-) {
+export function webglDepthSet(context: { webglParams: WebglParams }, depth: WebglDepthOptions) {
     const p = context.webglParams
     p.depthTest = depth.enabled
     p.depthFunc = depth.func
@@ -84,9 +75,7 @@ export function webglDepthSet(
     p.depthRange = [depth.rangeMin, depth.rangeMax]
 }
 
-export function webglDepthGet(context: {
-    webglParams: WebglParams
-}): WebglDepthOptions {
+export function webglDepthGet(context: { webglParams: WebglParams }): WebglDepthOptions {
     const p = context.webglParams
     const [rangeMin, rangeMax] = p.depthRange
     return {
@@ -98,11 +87,7 @@ export function webglDepthGet(context: {
     }
 }
 
-export function webglDepthExec(
-    context: { webglParams: WebglParams },
-    depth: WebglDepthOptions,
-    action: () => void
-) {
+export function webglDepthExec(context: { webglParams: WebglParams }, depth: WebglDepthOptions, action: () => void) {
     const currentState = webglDepthGet(context)
     webglDepthSet(context, depth)
     try {
@@ -112,23 +97,14 @@ export function webglDepthExec(
     }
 }
 
-export function webglDebugDepth(
-    context: { webglParams: WebglParams },
-    caption = "Depth enabled:"
-) {
+export function webglDebugDepth(context: { webglParams: WebglParams }, caption = "Depth enabled:") {
     console.log(caption)
     const depth = webglDepthGet(context)
     debug([
         [caption, depth.enabled, "\n"],
         [
             { cls: "code" },
-            [
-                "gl.",
-                depth.enabled ? "enable" : "disable",
-                "(",
-                highlightEnum("DEPTH_FUNC"),
-                ")\n",
-            ],
+            ["gl.", depth.enabled ? "enable" : "disable", "(", highlightEnum("DEPTH_FUNC"), ")\n"],
             [
                 "gl.depthFunc(",
                 highlightEnum(depth.func),

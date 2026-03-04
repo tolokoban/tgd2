@@ -69,11 +69,7 @@ export class TgdConsole {
 
     add(
         text = "\n",
-        {
-            color = "currentColor",
-            background = "transparent",
-            bold = false,
-        }: Partial<TgdConsoleStyle> = {}
+        { color = "currentColor", background = "transparent", bold = false }: Partial<TgdConsoleStyle> = {},
     ): this {
         this.items.push({
             text: `%c${text}`,
@@ -99,26 +95,15 @@ export class TgdConsole {
     }
 
     warn() {
-        console.warn(
-            ...this.args.map(
-                setDefaultStyle({ color: "#fff", background: "#990" })
-            )
-        )
+        console.warn(...this.args.map(setDefaultStyle({ color: "#fff", background: "#990" })))
     }
 
     error() {
-        console.error(
-            ...this.args.map(
-                setDefaultStyle({ color: "#fff", background: "#a00" })
-            )
-        )
+        console.error(...this.args.map(setDefaultStyle({ color: "#fff", background: "#a00" })))
     }
 
     private get args(): string[] {
-        return [
-            this.items.map(({ text }) => text).join(""),
-            ...this.items.map(({ style }) => style),
-        ]
+        return [this.items.map(({ text }) => text).join(""), ...this.items.map(({ style }) => style)]
     }
 }
 

@@ -70,30 +70,12 @@ async function test() {
                         wasm_i64_gt_s(wasm_local_get("a"), wasm_i64_const(1)),
                         [
                             wasm_while(
-                                wasm_i64_eq(
-                                    wasm_i64_const(0),
-                                    wasm_i64_and(
-                                        wasm_local_get("a"),
-                                        wasm_i64_const(1)
-                                    )
-                                ),
-                                wasm_local_set(
-                                    "a",
-                                    wasm_i64_shr_s(
-                                        wasm_local_get("a"),
-                                        wasm_i64_const(1)
-                                    )
-                                )
+                                wasm_i64_eq(wasm_i64_const(0), wasm_i64_and(wasm_local_get("a"), wasm_i64_const(1))),
+                                wasm_local_set("a", wasm_i64_shr_s(wasm_local_get("a"), wasm_i64_const(1))),
                             ),
-                            wasm_i64_add(
-                                wasm_i64_const(1),
-                                wasm_i64_mul(
-                                    wasm_local_get("a"),
-                                    wasm_i64_const(3)
-                                )
-                            ),
+                            wasm_i64_add(wasm_i64_const(1), wasm_i64_mul(wasm_local_get("a"), wasm_i64_const(3))),
                         ],
-                        wasm_i64_const(1)
+                        wasm_i64_const(1),
                     ),
                 ],
             },

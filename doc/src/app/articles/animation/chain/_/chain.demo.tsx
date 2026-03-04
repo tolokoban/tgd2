@@ -28,7 +28,7 @@ function init(ctx: TgdContext) {
                     transfo: { position: [0, 0, -0.1] },
                 }),
             ],
-        })
+        }),
     )
     const anim1: TgdAnimation = {
         duration: 1,
@@ -61,7 +61,7 @@ function init(ctx: TgdContext) {
     ctx.animSchedule(
         tgdAnimChain([anim1, anim2, anim3, anim4], {
             repeat: Infinity,
-        })
+        }),
     )
     ctx.animSchedule(
         tgdAnimChain(
@@ -79,8 +79,8 @@ function init(ctx: TgdContext) {
                     },
                 },
             ],
-            { repeat: Infinity }
-        )
+            { repeat: Infinity },
+        ),
     )
     ctx.paint()
     // #end

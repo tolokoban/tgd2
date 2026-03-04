@@ -1,12 +1,6 @@
 import * as React from "react"
 
-import {
-    Theme,
-    CommonProps,
-    styleCommon,
-    ViewButton,
-    ViewPanel,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, ViewButton, ViewPanel } from "@tolokoban/ui"
 import { TgdDataGlb } from "@tolokoban/tgd"
 
 import { Expander } from "./Expander"
@@ -33,12 +27,7 @@ export function ViewGltfTree(props: ViewGltfTreeProps) {
 
     return (
         <div className={$.join(props.className, Styles.gltfTree)} style={style}>
-            <ViewButton
-                variant="text"
-                color="secondary-5"
-                fullwidth
-                onClick={go({ type: "verbatim" })}
-            >
+            <ViewButton variant="text" color="secondary-5" fullwidth onClick={go({ type: "verbatim" })}>
                 Show verbatim content
             </ViewButton>
             <ViewScenes data={props.data} onAction={props.onAction} />
@@ -46,9 +35,7 @@ export function ViewGltfTree(props: ViewGltfTreeProps) {
             <ViewImages data={props.data} onAction={props.onAction} />
             <ViewLights data={props.data} onAction={props.onAction} />
             <hr />
-            <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html">
-                GLTF 2.0 Specification
-            </a>
+            <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html">GLTF 2.0 Specification</a>
         </div>
     )
 }

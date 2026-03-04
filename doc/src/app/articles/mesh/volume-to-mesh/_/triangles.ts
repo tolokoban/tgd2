@@ -21,12 +21,7 @@ export class PainterTriangles extends TgdPainter {
         this.dataset = this.createDataset()
         this.program = this.createProgram()
         const elements = new Uint8Array()
-        this.vao = new TgdVertexArray(
-            context.gl,
-            this.program,
-            [this.dataset],
-            elements
-        )
+        this.vao = new TgdVertexArray(context.gl, this.program, [this.dataset], elements)
     }
 
     set triangles(value: string) {
@@ -70,9 +65,7 @@ export class PainterTriangles extends TgdPainter {
             attributes: {
                 attPoint: "vec4",
             },
-            mainCode: [
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * attPoint;",
-            ],
+            mainCode: ["gl_Position = uniProjectionMatrix * uniModelViewMatrix * attPoint;"],
         }).code
         const frag = new TgdShaderFragment({
             uniforms: {

@@ -8,20 +8,10 @@ export interface InputFileProps {
     className?: string
     children: React.ReactNode
     accept: string
-    onLoad(file: {
-        name: string
-        size: number
-        type: string
-        data: ArrayBuffer | string
-    }): void
+    onLoad(file: { name: string; size: number; type: string; data: ArrayBuffer | string }): void
 }
 
-export default function InputFile({
-    className,
-    accept,
-    children,
-    onLoad,
-}: InputFileProps) {
+export default function InputFile({ className, accept, children, onLoad }: InputFileProps) {
     const ref = React.useRef<HTMLInputElement | null>(null)
     const handleClick = () => {
         const input = ref.current
@@ -37,7 +27,7 @@ export default function InputFile({
         if (!file) return
 
         const reader = new FileReader()
-        reader.onload = evt => {
+        reader.onload = (evt) => {
             onLoad({
                 name: file.name,
                 size: file.size,
@@ -49,12 +39,7 @@ export default function InputFile({
     }
     return (
         <div className={$.join(className, Style.InputFile)}>
-            <input
-                ref={ref}
-                type="file"
-                accept={accept}
-                onChange={handleChange}
-            />
+            <input ref={ref} type="file" accept={accept} onChange={handleChange} />
             <ViewButton icon={IconImport} onClick={handleClick}>
                 {children}
             </ViewButton>

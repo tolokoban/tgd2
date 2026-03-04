@@ -1,15 +1,6 @@
 import * as React from "react"
 
-import {
-    Theme,
-    CommonProps,
-    styleCommon,
-    Icon,
-    IconMinusO,
-    IconPlusO,
-    IconBook,
-    IconBullet,
-} from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, Icon, IconMinusO, IconPlusO, IconBook, IconBullet } from "@tolokoban/ui"
 
 import styles from "./Expander.module.css"
 
@@ -51,8 +42,7 @@ export function Expander(props: ViewExpanderProps) {
                           props.onClick?.()
                       }
             }
-            name={props.name}
-        >
+            name={props.name}>
             <summary>
                 <div className={styles.handle}>
                     {props.children ? (

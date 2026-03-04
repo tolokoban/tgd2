@@ -18,7 +18,7 @@ export class TgdVertexArray {
         public readonly gl: WebGL2RenderingContext,
         private readonly program?: TgdProgram,
         private readonly datasets?: Readonly<TgdDataset>[],
-        private elements?: TgdTypeArrayForElements
+        private elements?: TgdTypeArrayForElements,
     ) {
         const vao = gl.createVertexArray()
         if (!vao) throw new Error("Unable to create VertexArrayObject!")
@@ -56,9 +56,7 @@ export class TgdVertexArray {
     updateDataset(dataset: TgdDataset) {
         const { datasets } = this
         if (!datasets) {
-            console.error(
-                "You cannot update any dataset because no dataset has been attached to this VAO yet!"
-            )
+            console.error("You cannot update any dataset because no dataset has been attached to this VAO yet!")
             return false
         }
         const index = datasets.indexOf(dataset)
@@ -70,9 +68,7 @@ export class TgdVertexArray {
         }
         const buffer = this.getBuffer(index)
         if (!buffer) {
-            console.error(
-                `There is no buffer with index #${index} in this VAO!`
-            )
+            console.error(`There is no buffer with index #${index} in this VAO!`)
             this.debug()
             return false
         }
@@ -100,9 +96,7 @@ export class TgdVertexArray {
                 this.elements = new Uint32Array(elements)
                 break
             default:
-                throw new Error(
-                    `Don't know how to deal with ${this.elements.BYTES_PER_ELEMENT} bytes per element!`
-                )
+                throw new Error(`Don't know how to deal with ${this.elements.BYTES_PER_ELEMENT} bytes per element!`)
         }
         this.elemBuffer.bufferData({ data: this.elements })
     }
@@ -115,9 +109,7 @@ export class TgdVertexArray {
         const lines: string[] = [
             "function createVAO(",
             "  gl: WebGL2RenderingContext,",
-            `  prg: WebGLProgram${this.datasets
-                ?.map((_ds, index) => `, data${index}: ArrayBuffer`)
-                .join("")}`,
+            `  prg: WebGLProgram${this.datasets?.map((_ds, index) => `, data${index}: ArrayBuffer`).join("")}`,
             ") {",
             "  const vao = gl.createVertexArray()",
             "  gl.bindVertexArray(vao)",
@@ -128,7 +120,7 @@ export class TgdVertexArray {
                     `  const buff${index} = gl.createBuffer()`,
                     `  gl.bindBuffer(gl.${dataset.target}, buff${index})`,
                     `  gl.bufferData(gl.${dataset.target}, data${index}, gl.${dataset.usage})`,
-                    dataset.toCode({ indent: `${indent}  ` })
+                    dataset.toCode({ indent: `${indent}  ` }),
                 )
             }
         lines.push("  return vao", "}")
@@ -170,7 +162,7 @@ export class TgdVertexArray {
 function resolveBuffer(
     gl: WebGL2RenderingContext,
     dataset: Readonly<TgdDataset>,
-    buffersToDelete: Set<TgdBuffer>
+    buffersToDelete: Set<TgdBuffer>,
 ): TgdBuffer {
     const buffer =
         dataset.buffer ??

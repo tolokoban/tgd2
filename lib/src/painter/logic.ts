@@ -6,7 +6,7 @@ import { TgdPainter } from "./painter"
 export class TgdPainterLogic extends TgdPainter {
     constructor(
         private readonly logicFunction: (time: number, delay: number) => void,
-        options: Partial<{ name: string }> = {}
+        options: Partial<{ name: string }> = {},
     ) {
         super()
         this.name = options.name ?? `Logic/${this.name}`

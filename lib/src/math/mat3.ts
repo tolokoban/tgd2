@@ -40,11 +40,7 @@ import { mat3 } from "gl-matrix"
 export class TgdMat3 extends Float32Array {
     constructor()
     constructor(mat: TgdMat3)
-    constructor(
-        column1: TgdVec3 | TgdVec4,
-        column2: TgdVec3 | TgdVec4,
-        column3: TgdVec3 | TgdVec4
-    )
+    constructor(column1: TgdVec3 | TgdVec4, column2: TgdVec3 | TgdVec4, column3: TgdVec3 | TgdVec4)
     constructor(
         m00: number,
         m10: number,
@@ -54,7 +50,7 @@ export class TgdMat3 extends Float32Array {
         m21: number,
         m02: number,
         m12: number,
-        m22: number
+        m22: number,
     )
     constructor(
         m00: number | TgdVec3 | TgdVec4 | TgdMat3 | TgdMat4 = 1,
@@ -65,13 +61,9 @@ export class TgdMat3 extends Float32Array {
         m21: number = 0,
         m02: number = 0,
         m12: number = 0,
-        m22: number = 1
+        m22: number = 1,
     ) {
-        if (
-            typeof m00 === "number" &&
-            typeof m10 === "number" &&
-            typeof m20 === "number"
-        ) {
+        if (typeof m00 === "number" && typeof m10 === "number" && typeof m20 === "number") {
             super([m00, m10, m20, m01, m11, m21, m02, m12, m22])
         } else if (
             (m00 instanceof TgdVec3 || m00 instanceof TgdVec4) &&
@@ -89,30 +81,10 @@ export class TgdMat3 extends Float32Array {
             ])
         } else if (m00 instanceof TgdMat3) {
             const mat3 = m00
-            super([
-                mat3.m00,
-                mat3.m10,
-                mat3.m20,
-                mat3.m01,
-                mat3.m11,
-                mat3.m21,
-                mat3.m02,
-                mat3.m12,
-                mat3.m22,
-            ])
+            super([mat3.m00, mat3.m10, mat3.m20, mat3.m01, mat3.m11, mat3.m21, mat3.m02, mat3.m12, mat3.m22])
         } else if (m00 instanceof TgdMat4) {
             const mat4 = m00
-            super([
-                mat4.m00,
-                mat4.m10,
-                mat4.m20,
-                mat4.m01,
-                mat4.m11,
-                mat4.m21,
-                mat4.m02,
-                mat4.m12,
-                mat4.m22,
-            ])
+            super([mat4.m00, mat4.m10, mat4.m20, mat4.m01, mat4.m11, mat4.m21, mat4.m02, mat4.m12, mat4.m22])
         } else {
             // eslint-disable-next-line prefer-rest-params
             console.error("[TgdMat3]", arguments)

@@ -1,211 +1,184 @@
 import type { ArrayNumber2 } from "@tgd/types"
 
 export class WebglParams {
-	private _blend: boolean
-	private _blendEquationAlpha: number
-	private _blendEquationRGB: number
-	private _blendSrcRGB: number
-	private _blendDstRGB: number
-	private _blendSrcAlpha: number
-	private _blendDstAlpha: number
+    private _blend: boolean
+    private _blendEquationAlpha: number
+    private _blendEquationRGB: number
+    private _blendSrcRGB: number
+    private _blendDstRGB: number
+    private _blendSrcAlpha: number
+    private _blendDstAlpha: number
 
-	private _depthTest: boolean
-	private _depthFunc: number
-	private _depthWriteMask: boolean
-	private _depthRange: ArrayNumber2
+    private _depthTest: boolean
+    private _depthFunc: number
+    private _depthWriteMask: boolean
+    private _depthRange: ArrayNumber2
 
-	private _viewport: Int32Array
+    private _viewport: Int32Array
 
-	private _cullFace: boolean
-	private _cullFaceMode: number
+    private _cullFace: boolean
+    private _cullFaceMode: number
 
-	constructor(public readonly gl: WebGL2RenderingContext) {
-		this._viewport = gl.getParameter(gl.VIEWPORT)
+    constructor(public readonly gl: WebGL2RenderingContext) {
+        this._viewport = gl.getParameter(gl.VIEWPORT)
 
-		this._cullFace = Boolean(gl.getParameter(gl.CULL_FACE))
-		this._cullFaceMode = Number(gl.getParameter(gl.CULL_FACE_MODE))
+        this._cullFace = Boolean(gl.getParameter(gl.CULL_FACE))
+        this._cullFaceMode = Number(gl.getParameter(gl.CULL_FACE_MODE))
 
-		this._blend = Boolean(gl.getParameter(gl.BLEND))
-		this._blendEquationAlpha = Number(gl.getParameter(gl.BLEND_EQUATION_ALPHA))
-		this._blendEquationRGB = Number(gl.getParameter(gl.BLEND_EQUATION_RGB))
-		this._blendSrcRGB = Number(gl.getParameter(gl.BLEND_SRC_RGB))
-		this._blendDstRGB = Number(gl.getParameter(gl.BLEND_DST_RGB))
-		this._blendSrcAlpha = Number(gl.getParameter(gl.BLEND_SRC_ALPHA))
-		this._blendDstAlpha = Number(gl.getParameter(gl.BLEND_DST_ALPHA))
+        this._blend = Boolean(gl.getParameter(gl.BLEND))
+        this._blendEquationAlpha = Number(gl.getParameter(gl.BLEND_EQUATION_ALPHA))
+        this._blendEquationRGB = Number(gl.getParameter(gl.BLEND_EQUATION_RGB))
+        this._blendSrcRGB = Number(gl.getParameter(gl.BLEND_SRC_RGB))
+        this._blendDstRGB = Number(gl.getParameter(gl.BLEND_DST_RGB))
+        this._blendSrcAlpha = Number(gl.getParameter(gl.BLEND_SRC_ALPHA))
+        this._blendDstAlpha = Number(gl.getParameter(gl.BLEND_DST_ALPHA))
 
-		this._depthTest = Boolean(this.gl.getParameter(gl.DEPTH_TEST))
-		this._depthFunc = Number(this.gl.getParameter(gl.DEPTH_FUNC))
-		this._depthWriteMask = Boolean(this.gl.getParameter(gl.DEPTH_WRITEMASK))
-		const [depthRangeMin, depthRangeMax] = this.gl.getParameter(
-			gl.DEPTH_RANGE,
-		) as Float32Array
-		this._depthRange = [depthRangeMin, depthRangeMax]
-	}
+        this._depthTest = Boolean(this.gl.getParameter(gl.DEPTH_TEST))
+        this._depthFunc = Number(this.gl.getParameter(gl.DEPTH_FUNC))
+        this._depthWriteMask = Boolean(this.gl.getParameter(gl.DEPTH_WRITEMASK))
+        const [depthRangeMin, depthRangeMax] = this.gl.getParameter(gl.DEPTH_RANGE) as Float32Array
+        this._depthRange = [depthRangeMin, depthRangeMax]
+    }
 
-	get viewport() {
-		return this._viewport
-	}
-	set viewport(viewport: Int32Array) {
-		this._viewport = viewport
-		const [x, y, w, h] = viewport
-		this.gl.viewport(x, y, w, h)
-	}
+    get viewport() {
+        return this._viewport
+    }
+    set viewport(viewport: Int32Array) {
+        this._viewport = viewport
+        const [x, y, w, h] = viewport
+        this.gl.viewport(x, y, w, h)
+    }
 
-	get cullFace() {
-		return this._cullFace
-	}
-	set cullFace(enabled: boolean) {
-		this._cullFace = enabled
-		const { gl } = this
-		if (enabled) gl.enable(gl.CULL_FACE)
-		else gl.disable(gl.CULL_FACE)
-	}
+    get cullFace() {
+        return this._cullFace
+    }
+    set cullFace(enabled: boolean) {
+        this._cullFace = enabled
+        const { gl } = this
+        if (enabled) gl.enable(gl.CULL_FACE)
+        else gl.disable(gl.CULL_FACE)
+    }
 
-	get cullFaceMode() {
-		return this._cullFaceMode
-	}
-	set cullFaceMode(mode: number) {
-		this._cullFaceMode = mode
-		this.gl.cullFace(mode)
-	}
+    get cullFaceMode() {
+        return this._cullFaceMode
+    }
+    set cullFaceMode(mode: number) {
+        this._cullFaceMode = mode
+        this.gl.cullFace(mode)
+    }
 
-	setViewport(x: number, y: number, width: number, height: number) {
-		this.viewport[0] = x
-		this.viewport[1] = y
-		this.viewport[2] = width
-		this.viewport[3] = height
-		this.gl.viewport(x, y, width, height)
-	}
+    setViewport(x: number, y: number, width: number, height: number) {
+        this.viewport[0] = x
+        this.viewport[1] = y
+        this.viewport[2] = width
+        this.viewport[3] = height
+        this.gl.viewport(x, y, width, height)
+    }
 
-	get blend() {
-		return this._blend
-	}
-	set blend(value: boolean) {
-		this._blend = value
-		const { gl } = this
-		if (value) gl.enable(gl.BLEND)
-		else gl.disable(gl.BLEND)
-	}
+    get blend() {
+        return this._blend
+    }
+    set blend(value: boolean) {
+        this._blend = value
+        const { gl } = this
+        if (value) gl.enable(gl.BLEND)
+        else gl.disable(gl.BLEND)
+    }
 
-	get blendEquationAlpha() {
-		return this._blendEquationAlpha
-	}
-	set blendEquationAlpha(value: number) {
-		this._blendEquationAlpha = value
-		this.gl.blendEquationSeparate(this._blendEquationRGB, value)
-	}
+    get blendEquationAlpha() {
+        return this._blendEquationAlpha
+    }
+    set blendEquationAlpha(value: number) {
+        this._blendEquationAlpha = value
+        this.gl.blendEquationSeparate(this._blendEquationRGB, value)
+    }
 
-	get blendEquationRGB() {
-		return this._blendEquationRGB
-	}
-	set blendEquationRGB(value: number) {
-		this._blendEquationRGB = value
-		this.gl.blendEquationSeparate(value, this._blendEquationAlpha)
-	}
+    get blendEquationRGB() {
+        return this._blendEquationRGB
+    }
+    set blendEquationRGB(value: number) {
+        this._blendEquationRGB = value
+        this.gl.blendEquationSeparate(value, this._blendEquationAlpha)
+    }
 
-	setBlendEquationSeparate(rgb: number, alpha: number) {
-		this._blendEquationAlpha = rgb
-		this._blendEquationRGB = alpha
-		this.gl.blendEquationSeparate(rgb, alpha)
-	}
+    setBlendEquationSeparate(rgb: number, alpha: number) {
+        this._blendEquationAlpha = rgb
+        this._blendEquationRGB = alpha
+        this.gl.blendEquationSeparate(rgb, alpha)
+    }
 
-	get blendSrcRGB() {
-		return this._blendSrcRGB
-	}
-	set blendSrcRGB(value: number) {
-		this._blendSrcRGB = value
-		this.gl.blendFuncSeparate(
-			this._blendSrcRGB,
-			this._blendDstRGB,
-			this._blendSrcAlpha,
-			this._blendDstAlpha,
-		)
-	}
+    get blendSrcRGB() {
+        return this._blendSrcRGB
+    }
+    set blendSrcRGB(value: number) {
+        this._blendSrcRGB = value
+        this.gl.blendFuncSeparate(this._blendSrcRGB, this._blendDstRGB, this._blendSrcAlpha, this._blendDstAlpha)
+    }
 
-	get blendDstRGB() {
-		return this._blendDstRGB
-	}
-	set blendDstRGB(value: number) {
-		this._blendDstRGB = value
-		this.gl.blendFuncSeparate(
-			this._blendSrcRGB,
-			this._blendDstRGB,
-			this._blendSrcAlpha,
-			this._blendDstAlpha,
-		)
-	}
+    get blendDstRGB() {
+        return this._blendDstRGB
+    }
+    set blendDstRGB(value: number) {
+        this._blendDstRGB = value
+        this.gl.blendFuncSeparate(this._blendSrcRGB, this._blendDstRGB, this._blendSrcAlpha, this._blendDstAlpha)
+    }
 
-	get blendSrcAlpha() {
-		return this._blendSrcAlpha
-	}
-	set blendSrcAlpha(value: number) {
-		this._blendSrcAlpha = value
-		this.gl.blendFuncSeparate(
-			this._blendSrcRGB,
-			this._blendDstRGB,
-			this._blendSrcAlpha,
-			this._blendDstAlpha,
-		)
-	}
+    get blendSrcAlpha() {
+        return this._blendSrcAlpha
+    }
+    set blendSrcAlpha(value: number) {
+        this._blendSrcAlpha = value
+        this.gl.blendFuncSeparate(this._blendSrcRGB, this._blendDstRGB, this._blendSrcAlpha, this._blendDstAlpha)
+    }
 
-	get blendDstAlpha() {
-		return this._blendDstAlpha
-	}
-	set blendDstAlpha(value: number) {
-		this._blendDstAlpha = value
-		this.gl.blendFuncSeparate(
-			this._blendSrcRGB,
-			this._blendDstRGB,
-			this._blendSrcAlpha,
-			this._blendDstAlpha,
-		)
-	}
+    get blendDstAlpha() {
+        return this._blendDstAlpha
+    }
+    set blendDstAlpha(value: number) {
+        this._blendDstAlpha = value
+        this.gl.blendFuncSeparate(this._blendSrcRGB, this._blendDstRGB, this._blendSrcAlpha, this._blendDstAlpha)
+    }
 
-	setBlendFuncSeparate(
-		srcRGB: number,
-		dstRGB: number,
-		srcAlpha: number,
-		dstAlpha: number,
-	) {
-		this._blendSrcRGB = srcRGB
-		this._blendDstRGB = dstRGB
-		this._blendSrcAlpha = srcAlpha
-		this._blendDstAlpha = dstAlpha
-		this.gl.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha)
-	}
+    setBlendFuncSeparate(srcRGB: number, dstRGB: number, srcAlpha: number, dstAlpha: number) {
+        this._blendSrcRGB = srcRGB
+        this._blendDstRGB = dstRGB
+        this._blendSrcAlpha = srcAlpha
+        this._blendDstAlpha = dstAlpha
+        this.gl.blendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha)
+    }
 
-	get depthTest() {
-		return this._depthTest
-	}
-	set depthTest(value: boolean) {
-		this._depthTest = value
-		const { gl } = this
-		if (value) gl.enable(gl.DEPTH_TEST)
-		else gl.disable(gl.DEPTH_TEST)
-	}
+    get depthTest() {
+        return this._depthTest
+    }
+    set depthTest(value: boolean) {
+        this._depthTest = value
+        const { gl } = this
+        if (value) gl.enable(gl.DEPTH_TEST)
+        else gl.disable(gl.DEPTH_TEST)
+    }
 
-	get depthFunc() {
-		return this._depthFunc
-	}
-	set depthFunc(value: number) {
-		this._depthFunc = value
-		this.gl.depthFunc(value)
-	}
+    get depthFunc() {
+        return this._depthFunc
+    }
+    set depthFunc(value: number) {
+        this._depthFunc = value
+        this.gl.depthFunc(value)
+    }
 
-	get depthWriteMask() {
-		return this._depthWriteMask
-	}
-	set depthWriteMask(value: boolean) {
-		this._depthWriteMask = value
-		this.gl.depthMask(value)
-	}
+    get depthWriteMask() {
+        return this._depthWriteMask
+    }
+    set depthWriteMask(value: boolean) {
+        this._depthWriteMask = value
+        this.gl.depthMask(value)
+    }
 
-	get depthRange(): Readonly<ArrayNumber2> {
-		return this._depthRange
-	}
-	set depthRange([min, max]: Readonly<ArrayNumber2>) {
-		this._depthRange[0] = min
-		this._depthRange[1] = max
-		this.gl.depthRange(min, max)
-	}
+    get depthRange(): Readonly<ArrayNumber2> {
+        return this._depthRange
+    }
+    set depthRange([min, max]: Readonly<ArrayNumber2>) {
+        this._depthRange[0] = min
+        this._depthRange[1] = max
+        this.gl.depthRange(min, max)
+    }
 }

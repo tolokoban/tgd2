@@ -38,11 +38,11 @@ function init(context: TgdContext, assets: Assets): Controller {
             depth: webglPresetDepth.lessOrEqual,
             children: [mask, cube],
         }),
-        new TgdPainterLogic(time => {
+        new TgdPainterLogic((time) => {
             invisible.transfo.setEulerRotation(0, time * 10, 0)
             cube.transfo.setPosition(2 * Math.cos(time), 0, 0)
             cube.transfo.setEulerRotation(time * 17.945, 0, 0)
-        })
+        }),
     )
     context.play()
     // #end
@@ -77,8 +77,7 @@ export default function Demo() {
                 glb: {
                     suzanne: SuzanneURL,
                 },
-            }}
-        >
+            }}>
             <ViewPanel display="flex" gap="L" justifyContent="center">
                 <ViewSwitch value={R} onChange={setR}>
                     Red

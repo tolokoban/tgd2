@@ -61,7 +61,7 @@ function init(ctx: TgdContext, assets: Assets) {
                     asset: assets.glb.suzanne,
                 }),
             ],
-        })
+        }),
     )
     ctx.paint()
     // #end

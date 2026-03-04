@@ -12,7 +12,7 @@ export function tgdCalcMapRange(
     fromMax: number,
     toMin: number,
     toMax: number,
-    clamp = false
+    clamp = false,
 ): number {
     const v = clamp ? tgdCalcClamp(value, fromMin, fromMax) : value
     if (fromMin === fromMax) return v
@@ -21,11 +21,7 @@ export function tgdCalcMapRange(
     return toMin + alpha * (toMax - toMin)
 }
 
-export function tgdCalcMix(
-    valueAtT0: number,
-    valueAtT1: number,
-    t: number
-): number {
+export function tgdCalcMix(valueAtT0: number, valueAtT1: number, t: number): number {
     return (1 - t) * valueAtT0 + t * valueAtT1
 }
 
@@ -40,11 +36,7 @@ export function tgdCalcRadToDeg(rad: number) {
     return rad * DEG_PER_RAD
 }
 
-export function tgdCalcSmoothStep(
-    boundFor0: number,
-    boundFor1: number,
-    value: number
-): number {
+export function tgdCalcSmoothStep(boundFor0: number, boundFor1: number, value: number): number {
     const t = tgdCalcClamp((value - boundFor0) / (boundFor1 - boundFor0), 0, 1)
     return t * t * (3 - 2 * t)
 }
@@ -76,11 +68,7 @@ export function tgdCalcModulo(value: number, min: number, max: number) {
     return value
 }
 
-export function tgdCalcModuloDiscrete(
-    value: number,
-    size: number,
-    count: number
-) {
+export function tgdCalcModuloDiscrete(value: number, size: number, count: number) {
     if (size === 0) return 0
 
     const alpha = tgdCalcModulo(value, 0, size)

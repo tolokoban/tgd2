@@ -48,16 +48,10 @@ export function ViewNode(props: ViewNodeProps) {
             style={style}
             title={name}
             onClick={handleClick}
-            icon={icon}
-        >
+            icon={icon}>
             {Array.isArray(node.children) &&
-                node.children.map(nodeIndex => (
-                    <ViewNode
-                        key={`#${nodeIndex}`}
-                        data={props.data}
-                        index={nodeIndex}
-                        onAction={props.onAction}
-                    />
+                node.children.map((nodeIndex) => (
+                    <ViewNode key={`#${nodeIndex}`} data={props.data} index={nodeIndex} onAction={props.onAction} />
                 ))}
         </Expander>
     )

@@ -86,31 +86,13 @@ export class TgdPainterPointsCloud extends TgdPainter {
             shadowThickness: number
             shadowIntensity: number
             light: number
-        }> = {}
+        }> = {},
     ): TgdCodeBloc {
-        const {
-            specularExponent,
-            specularIntensity,
-            shadowThickness,
-            shadowIntensity,
-            light,
-        } = options
-        const SpE =
-            typeof specularExponent === "number"
-                ? specularExponent.toFixed(6)
-                : "uniSpecularExponent"
-        const SpI =
-            typeof specularIntensity === "number"
-                ? specularIntensity.toFixed(6)
-                : "uniSpecularIntensity"
-        const ShT =
-            typeof shadowThickness === "number"
-                ? shadowThickness.toFixed(6)
-                : "uniShadowThickness"
-        const ShI =
-            typeof shadowIntensity === "number"
-                ? shadowIntensity.toFixed(6)
-                : "uniShadowIntensity"
+        const { specularExponent, specularIntensity, shadowThickness, shadowIntensity, light } = options
+        const SpE = typeof specularExponent === "number" ? specularExponent.toFixed(6) : "uniSpecularExponent"
+        const SpI = typeof specularIntensity === "number" ? specularIntensity.toFixed(6) : "uniSpecularIntensity"
+        const ShT = typeof shadowThickness === "number" ? shadowThickness.toFixed(6) : "uniShadowThickness"
+        const ShI = typeof shadowIntensity === "number" ? shadowIntensity.toFixed(6) : "uniShadowIntensity"
         const L = typeof light === "number" ? light.toFixed(6) : "uniLight"
         return [
             "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
@@ -118,9 +100,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
             "if (len < 0.0) discard;",
             "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
             `float light = smoothstep(0.0, ${ShT}, len) * ${ShI} + (1.0 - ${ShI});`,
-            specularIntensity
-                ? `float spec = pow(len, ${SpE}) * ${SpI};`
-                : "// No specular.",
+            specularIntensity ? `float spec = pow(len, ${SpE}) * ${SpI};` : "// No specular.",
             `return color * vec4(vec3(light * ${L}), 1.0) + vec4(vec3(spec), 0.0);`,
         ]
     }
@@ -145,7 +125,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterPointsCloudOptions
+        options: TgdPainterPointsCloudOptions,
     ) {
         super()
         this.name = options.name ?? this.name
@@ -159,19 +139,15 @@ export class TgdPainterPointsCloud extends TgdPainter {
         this.dataPoint = options.dataPoint
         if ((this.dataPoint.length & 3) !== 0) {
             throw new Error(
-                `dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${this.dataPoint.length}`
+                `dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!\ndataPoint.length === ${this.dataPoint.length}`,
             )
         }
-        this.dataUV =
-            options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
+        this.dataUV = options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
         if (this.dataPoint.length !== this.dataUV.length * 2) {
             const message = `dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${this.dataPoint.length}, \ndataUV.length === ${this.dataUV.length}`
             console.error("[TgdPainterPointsCloud]", message)
             console.error("[TgdPainterPointsCloud] options =", options)
-            console.error(
-                "[TgdPainterPointsCloud] this.dataPoint =",
-                this.dataPoint
-            )
+            console.error("[TgdPainterPointsCloud] this.dataPoint =", this.dataPoint)
             console.error("[TgdPainterPointsCloud] this.dataUV =", this.dataUV)
             throw new Error(message)
         }
@@ -180,10 +156,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
             this.textureMustBeDeleted = false
         } else {
             this.texture = new TgdTexture2D(context).loadBitmap(
-                tgdCanvasCreateGradientHorizontal(
-                    128,
-                    tgdColorMakeHueWheel({ luminance: 0.2 })
-                )
+                tgdCanvasCreateGradientHorizontal(128, tgdColorMakeHueWheel({ luminance: 0.2 })),
             )
             this.textureMustBeDeleted = true
         }
@@ -200,15 +173,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
     }
 
     paint(): void {
-        const {
-            context,
-            program,
-            vao,
-            texture,
-            count,
-            radiusMultiplier,
-            minSizeInPixels,
-        } = this
+        const { context, program, vao, texture, count, radiusMultiplier, minSizeInPixels } = this
         const { gl, camera } = context
         program.use()
         texture.activate(0, program, "uniTexture")
@@ -294,10 +259,7 @@ export class TgdPainterPointsCloud extends TgdPainter {
                     "}",
                 ],
             },
-            mainCode: [
-                "vec4 color = texture(uniTexture, varUV);",
-                "FragColor = render(color);",
-            ],
+            mainCode: ["vec4 color = texture(uniTexture, varUV);", "FragColor = render(color);"],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
         return program

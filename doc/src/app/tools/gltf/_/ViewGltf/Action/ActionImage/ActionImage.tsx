@@ -30,12 +30,8 @@ export type ViewActionImageProps = {
 export function ViewActionImage({ data, index }: ViewActionImageProps) {
     const [mode, setMode] = React.useState<"light" | "dark">("light")
     const [image, setImage] = React.useState<HTMLImageElement | null>(null)
-    const [dimensions, setDimensions] = React.useState<
-        [width: number, height: number] | null
-    >(null)
-    const [imageDef, setImageDef] = React.useState<
-        TgdFormatGltfImage | undefined
-    >(undefined)
+    const [dimensions, setDimensions] = React.useState<[width: number, height: number] | null>(null)
+    const [imageDef, setImageDef] = React.useState<TgdFormatGltfImage | undefined>(undefined)
     const imageSize = useImageSize(data, imageDef)
     const [error, setError] = React.useState<string | null>(null)
     const onReady = React.useCallback(
@@ -58,7 +54,7 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
             context.add(background)
             context.paint()
         },
-        [data, index]
+        [data, index],
     )
 
     return (
@@ -66,8 +62,7 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
             className={$.join(Styles.actionImage)}
             style={{
                 backgroundImage: `url(${mode === "dark" ? DarkURL : LightURL})`,
-            }}
-        >
+            }}>
             {error ? (
                 <ViewError>{error}</ViewError>
             ) : (
@@ -77,17 +72,12 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
                     onReady={onReady}
                     noBorder
                     width="100%"
-                    height="100%"
-                ></Tgd>
+                    height="100%"></Tgd>
             )}
             <header>
-                <div className={Styles.dimensions}>
-                    {dimensions?.join(" × ")}
-                </div>
+                <div className={Styles.dimensions}>{dimensions?.join(" × ")}</div>
                 {imageSize > 0 && <ViewFileSize value={imageSize} />}
-                {imageDef && (
-                    <div className={Styles.mimeType}>{imageDef.mimeType}</div>
-                )}
+                {imageDef && <div className={Styles.mimeType}>{imageDef.mimeType}</div>}
                 <ViewOptions value={mode} onChange={setMode}>
                     <div key="light">Light</div>
                     <div key="dark">Dark</div>
@@ -123,10 +113,7 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
     )
 }
 
-function useImageSize(
-    data: TgdDataGlb,
-    imageDef: TgdFormatGltfImage | undefined
-) {
+function useImageSize(data: TgdDataGlb, imageDef: TgdFormatGltfImage | undefined) {
     return React.useMemo(() => {
         if (!imageDef) return 0
 

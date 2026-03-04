@@ -42,7 +42,7 @@ export class TgdPainterScissor extends TgdPainterGroup {
 
     constructor(
         private readonly context: { gl: WebGL2RenderingContext },
-        options: TgdPainterScissorOptions
+        options: TgdPainterScissorOptions,
     ) {
         super(options)
         this.x = options.x

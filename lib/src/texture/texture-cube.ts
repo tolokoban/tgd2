@@ -11,7 +11,7 @@ export class TgdTextureCube {
         public readonly context: {
             gl: WebGL2RenderingContext
         },
-        options: TgdTextureCubeOptions
+        options: TgdTextureCubeOptions,
     ) {
         const { gl } = context
         const texture = gl.createTexture()
@@ -27,11 +27,7 @@ export class TgdTextureCube {
         this.loadImage(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, options.imageNegZ)
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY)
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
-        gl.texParameteri(
-            gl.TEXTURE_CUBE_MAP,
-            gl.TEXTURE_MIN_FILTER,
-            gl.LINEAR_MIPMAP_LINEAR
-        )
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
     }
 
     delete() {
@@ -63,25 +59,20 @@ export class TgdTextureCube {
         program.uniform1i(uniformName, unit)
     }
 
-    private loadImage(
-        target: number | keyof typeof TARGETS,
-        image: WebglImage
-    ) {
+    private loadImage(target: number | keyof typeof TARGETS, image: WebglImage) {
         if (typeof target === "string") {
             target = TARGETS[target]
         }
         const { width, height } = image
         if (width !== height) {
-            throw new Error(
-                `Images in a CubeMap must be squares, but we got ${width}×${height}!`
-            )
+            throw new Error(`Images in a CubeMap must be squares, but we got ${width}×${height}!`)
         }
         if (this._width === 0) {
             this._width = width
             this._height = height
         } else if (this._width !== width || this._height !== height) {
             throw new Error(
-                `Images in a CubeMap must all have the same size, but we got ${this._width}×${this._height} and ${width}×${height}!`
+                `Images in a CubeMap must all have the same size, but we got ${this._width}×${this._height} and ${width}×${height}!`,
             )
         }
         const { context } = this

@@ -55,7 +55,7 @@ function init(context: TgdContext, assets: Assets) {
         new TgdPainterLogic((time, delay) => {
             mesh.transfo.orbitAroundX(delay * Math.sin(time))
             mesh.transfo.orbitAroundZ(delay * 1.341)
-        })
+        }),
     )
     // #end
     context.play()

@@ -37,8 +37,7 @@ function init(context: TgdContext, assets: Assets) {
         context,
         data: assets.glb.scene,
         node: "Building",
-        overrideMaterial: () => () =>
-            new TgdMaterialFlat({ color: [1, 0, 1, 1] }),
+        overrideMaterial: () => () => new TgdMaterialFlat({ color: [1, 0, 1, 1] }),
     })
     const mask = new TgdPainterState(context, {
         color: false,
@@ -52,7 +51,7 @@ function init(context: TgdContext, assets: Assets) {
             depth: webglPresetDepth.lessOrEqual,
             children: [mask, cube],
         }),
-        new TgdPainterLogic(time => {
+        new TgdPainterLogic((time) => {
             const mod = tgdCalcModulo(time * 0.1, 0, 2)
             let y = 0
             if (mod < 1) y = mod * 25
@@ -60,7 +59,7 @@ function init(context: TgdContext, assets: Assets) {
             const { x, z } = cube.transfo.position
             cube.transfo.setPosition(x, y, z)
             cube.transfo.setEulerRotation(time, time * 47, -time * 120)
-        })
+        }),
     )
     context.play()
     // #end
@@ -82,7 +81,6 @@ export default function Demo() {
                     suzanne: SuzanneURL,
                     scene: BackgroundGLB,
                 },
-            }}
-        ></View>
+            }}></View>
     )
 }

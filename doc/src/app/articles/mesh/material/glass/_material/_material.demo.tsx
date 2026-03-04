@@ -64,7 +64,7 @@ function init(context: TgdContext, assets: Assets) {
             clear.red = color.R
             clear.green = color.G
             clear.blue = color.B
-        })
+        }),
     )
     context.play()
     return {
@@ -90,14 +90,8 @@ function init(context: TgdContext, assets: Assets) {
 export default function Demo() {
     const ref = React.useRef<ReturnType<typeof init> | null>(null)
     const srv = ref.current
-    const [specularExponent, setSpecularExponent] = useFloat(
-        2.2,
-        srv?.specularExponent
-    )
-    const [specularIntensity, setSpecularIntensity] = useFloat(
-        2,
-        srv?.specularIntensity
-    )
+    const [specularExponent, setSpecularExponent] = useFloat(2.2, srv?.specularExponent)
+    const [specularIntensity, setSpecularIntensity] = useFloat(2, srv?.specularIntensity)
     const [opacityMin, setOpacityMin] = useFloat(0, srv?.opacityMin)
     const [opacityMax, setOpacityMax] = useFloat(0.05, srv?.opacityMax)
     return (
@@ -121,8 +115,7 @@ export default function Demo() {
                 }}
                 controller={{
                     inertiaOrbit: 1000,
-                }}
-            >
+                }}>
                 <ViewPanel
                     display="flex"
                     flex-wrap="wrap"
@@ -130,13 +123,8 @@ export default function Demo() {
                     alignItems="center"
                     gap="S"
                     width="600px"
-                    maxWidth="600px"
-                >
-                    <ViewInputNumber
-                        label="specularExponent"
-                        value={specularExponent}
-                        onChange={setSpecularExponent}
-                    />
+                    maxWidth="600px">
+                    <ViewInputNumber label="specularExponent" value={specularExponent} onChange={setSpecularExponent} />
                     <ViewInputNumber
                         label="specularIntensity"
                         value={specularIntensity}
@@ -150,18 +138,9 @@ export default function Demo() {
                     alignItems="center"
                     gap="S"
                     width="600px"
-                    maxWidth="600px"
-                >
-                    <ViewInputNumber
-                        label="opacityMin"
-                        value={opacityMin}
-                        onChange={setOpacityMin}
-                    />
-                    <ViewInputNumber
-                        label="opacityMax"
-                        value={opacityMax}
-                        onChange={setOpacityMax}
-                    />
+                    maxWidth="600px">
+                    <ViewInputNumber label="opacityMin" value={opacityMin} onChange={setOpacityMin} />
+                    <ViewInputNumber label="opacityMax" value={opacityMax} onChange={setOpacityMax} />
                 </ViewPanel>
             </View>
         </div>

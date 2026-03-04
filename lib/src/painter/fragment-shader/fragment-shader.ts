@@ -26,12 +26,7 @@ export interface TgdPainterFragmentShaderOptions {
      * If this function is defined, it will be called at each frame.
      * Most of the time, it is used tu update the uniforms.
      */
-    setUniforms?(options: {
-        context: TgdContext
-        program: TgdProgram
-        time: number
-        delay: number
-    }): void
+    setUniforms?(options: { context: TgdContext; program: TgdProgram; time: number; delay: number }): void
 }
 
 export class TgdPainterFragmentShader extends TgdPainter {
@@ -40,7 +35,7 @@ export class TgdPainterFragmentShader extends TgdPainter {
 
     constructor(
         private readonly context: TgdContext,
-        private readonly options: TgdPainterFragmentShaderOptions
+        private readonly options: TgdPainterFragmentShaderOptions,
     ) {
         super()
         this.name = options.name ?? `TgdPainterFragmentShader/${this.name}`
@@ -54,12 +49,7 @@ export class TgdPainterFragmentShader extends TgdPainter {
                 varPoint: "vec2",
                 varUV: "vec2",
             },
-            mainCode: [
-                "varUV = attUV;",
-                "gl_Position = vec4(",
-                ["attPoint,", "uniZ,", "1.0"],
-                ");",
-            ],
+            mainCode: ["varUV = attUV;", "gl_Position = vec4(", ["attPoint,", "uniZ,", "1.0"], ");"],
         }).code
         const { shader } = options
         shader.varying.varUV = "vec2"

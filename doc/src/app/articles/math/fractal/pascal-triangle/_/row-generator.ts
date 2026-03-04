@@ -11,9 +11,7 @@ export class RowGenerator {
             this.current = [1]
         } else {
             const newCurrent: number[] = range(this.current.length + 1).map(
-                index =>
-                    ((current[index - 1] ?? 0) + (current[index] ?? 0)) %
-                    this.modulo
+                (index) => ((current[index - 1] ?? 0) + (current[index] ?? 0)) % this.modulo,
             )
             this.current = newCurrent
         }

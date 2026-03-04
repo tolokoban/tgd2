@@ -73,9 +73,7 @@ export function tgdEasingFunctionOutExpo(x: number): number {
 export function tgdEasingFunctionInOutExpo(x: number): number {
     if (x <= 0) return 0
     if (x >= 1) return 1
-    return x < 0.5
-        ? Math.pow(2, 20 * x - 10) / 2
-        : (2 - Math.pow(2, -20 * x + 10)) / 2
+    return x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2
 }
 
 export function tgdEasingFunctionInCirc(x: number): number {
@@ -87,9 +85,7 @@ export function tgdEasingFunctionOutCirc(x: number): number {
 }
 
 export function tgdEasingFunctionInOutCirc(x: number): number {
-    return x < 0.5
-        ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
-        : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2
+    return x < 0.5 ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2 : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2
 }
 
 export function tgdEasingFunctionInBack(x: number): number {
@@ -161,7 +157,5 @@ export function tgdEasingFunctionOutBounce(x: number): number {
 }
 
 export function tgdEasingFunctionInOutBounce(x: number): number {
-    return x < 0.5
-        ? (1 - tgdEasingFunctionOutBounce(1 - 2 * x)) / 2
-        : (1 + tgdEasingFunctionOutBounce(2 * x - 1)) / 2
+    return x < 0.5 ? (1 - tgdEasingFunctionOutBounce(1 - 2 * x)) / 2 : (1 + tgdEasingFunctionOutBounce(2 * x - 1)) / 2
 }

@@ -79,12 +79,7 @@ export function MyComponentWithWebGL() {
 Now, let's paint a cube. For this, we will use [`TgdPainterMesh`](docs/classes/TgdPainterMesh.html).
 
 ```ts
-import {
-    TgdContext,
-    TgdPainterClear,
-    TgdPainterMesh,
-} from "@tolokoban/tgd"
-
+import { TgdContext, TgdPainterClear, TgdPainterMesh } from "@tolokoban/tgd"
 
 function init(context: TgdContext) {
     const clear = new TgdPainterClear(context, {
@@ -152,13 +147,7 @@ To paint for every frame, we need to do this instead: `context.play()`.
 Here is the full code:
 
 ```tsx
-import {
-    TgdContext,
-    TgdPainterClear,
-    TgdPainterMesh,
-    TgdPainterState,
-    webglPresetDepth,
-} from "@tolokoban/tgd"
+import { TgdContext, TgdPainterClear, TgdPainterMesh, TgdPainterState, webglPresetDepth } from "@tolokoban/tgd"
 
 function init(context: TgdContext) {
     const clear = new TgdPainterClear(context, {
@@ -212,14 +201,12 @@ And to load the asset asynchronously, TGD provides the function [`tgdLoadGlb`](d
 ```ts
 tgdLoadGlb(SuzanneURL).then((asset) => {
     if (!asset) return
-
 })
 ```
 
 If the GLB file is big and/or your network connection is poor, you will see en empty background
 for some time, then the mesh will appear and start rotating.
 To reduce the file size of your GLB files, try to use Draco compression.
-
 
 Here is the ful code of `init()`:
 

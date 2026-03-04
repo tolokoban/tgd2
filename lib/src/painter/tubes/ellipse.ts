@@ -38,18 +38,11 @@ export class Ellipse {
         nxt: SectionPoint | undefined,
         roundness: number,
         vertices: Vertices,
-        elements: number[]
+        elements: number[],
     ) {}
 
-    private computeAxis(
-        prv: SectionPoint | undefined,
-        cur: SectionPoint,
-        nxt: SectionPoint | undefined
-    ) {
-        if (!prv && !nxt)
-            throw new Error(
-                "Cannot compute axis without at least a previous or next point."
-            )
+    private computeAxis(prv: SectionPoint | undefined, cur: SectionPoint, nxt: SectionPoint | undefined) {
+        if (!prv && !nxt) throw new Error("Cannot compute axis without at least a previous or next point.")
 
         // const { vecZ, vecPrv, vecX, vecY } = this
         // vecZ.reset(...nxt.pos)

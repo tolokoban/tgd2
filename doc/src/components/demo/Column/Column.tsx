@@ -2,13 +2,7 @@ import React from "react"
 import Style from "./Column.module.css"
 
 export interface ColumnProps {
-    align:
-        | "marginLeft"
-        | "halfLeft"
-        | "center"
-        | "halfRight"
-        | "marginRight"
-        | "full"
+    align: "marginLeft" | "halfLeft" | "center" | "halfRight" | "marginRight" | "full"
     children: React.ReactNode
 }
 

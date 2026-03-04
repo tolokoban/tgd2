@@ -27,15 +27,9 @@ export class TgdGeometryGrid extends TgdGeometry {
         const vec = (x: number, y: number): ArrayNumber3 => {
             const sx = x * sizeX
             const sy = y * sizeY
-            return [
-                sx * vecX[0] + sy * vecY[0],
-                sx * vecX[1] + sy * vecY[1],
-                sx * vecX[2] + sy * vecY[2],
-            ]
+            return [sx * vecX[0] + sy * vecY[0], sx * vecX[1] + sy * vecY[1], sx * vecX[2] + sy * vecY[2]]
         }
-        const [nx, ny, nz] = new TgdVec3(vecX)
-            .normalize()
-            .cross(new TgdVec3(vecY).normalize())
+        const [nx, ny, nz] = new TgdVec3(vecX).normalize().cross(new TgdVec3(vecY).normalize())
         const dataset = new TgdDataset({
             POSITION: "vec3",
             NORMAL: "vec3",

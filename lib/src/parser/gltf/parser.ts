@@ -3,7 +3,7 @@ import { TgdFormatGltf, assertTgdFormatGltf } from "../../types/gltf"
 /**
  * @see https://www.khronos.org/files/gltf20-reference-guide.pdf
  */
- 
+
 export function parseGLB(data: ArrayBuffer): {
     gltf: TgdFormatGltf
     chunks: ArrayBuffer[]
@@ -16,9 +16,7 @@ export function parseGLB(data: ArrayBuffer): {
     }
     const version = view.getUint32(4, true)
     if (version !== 2) {
-        throw new Error(
-            `We support only version 2, but this file is in version ${version}!`
-        )
+        throw new Error(`We support only version 2, but this file is in version ${version}!`)
     }
     const length = view.getUint32(8, true)
     let gltf = {} as TgdFormatGltf
@@ -49,11 +47,7 @@ export function parseGLB(data: ArrayBuffer): {
             chunks.push(chunkData)
             chunkTypes.push({ type: "BIN", size: chunkData.byteLength })
         } else {
-            throw new Error(
-                `We got an invalid chunk type: 0x${chunkType
-                    .toString(16)
-                    .padStart(8, "0")}!`
-            )
+            throw new Error(`We got an invalid chunk type: 0x${chunkType.toString(16).padStart(8, "0")}!`)
         }
     }
     return { gltf, chunks, chunkTypes }

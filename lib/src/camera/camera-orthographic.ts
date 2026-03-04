@@ -24,10 +24,7 @@ export class TgdCameraOrthographic extends TgdCamera {
         return this
     }
 
-    castRay(
-        screenX: number,
-        screenY: number
-    ): Readonly<{ origin: TgdVec3; direction: TgdVec3 }> {
+    castRay(screenX: number, screenY: number): Readonly<{ origin: TgdVec3; direction: TgdVec3 }> {
         const { transfo } = this
         const { origin, direction } = this._ray
         direction.from(transfo.axisZ)
@@ -125,12 +122,8 @@ export class TgdCameraOrthographic extends TgdCamera {
         code.push(`  zoom: ${this.zoom},`)
         code.push(`  transfo: {`)
         code.push(`  distance: ${this.transfo.distance},`)
-        code.push(
-            `    position: ${JSON.stringify([...this.transfo.position])},`
-        )
-        code.push(
-            `    orientation: ${JSON.stringify([...this.transfo.orientation])},`
-        )
+        code.push(`    position: ${JSON.stringify([...this.transfo.position])},`)
+        code.push(`    orientation: ${JSON.stringify([...this.transfo.orientation])},`)
         code.push(`    scale: ${JSON.stringify([...this.transfo.scale])},`)
         code.push(`  }`)
         code.push("}")

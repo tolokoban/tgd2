@@ -90,7 +90,7 @@ function paintDisk(
     size: number,
     text: string,
     colorBack: string,
-    colorText = "#fff"
+    colorText = "#fff",
 ) {
     const x = (col + 0.5) * size
     const y = (row + 0.5) * size

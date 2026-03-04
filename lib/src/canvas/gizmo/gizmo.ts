@@ -69,8 +69,7 @@ export class TgdCanvasGizmo {
     private readonly handleInternalToExternal = (internalCamera: TgdCamera) => {
         const { contextExternal } = this
         if (contextExternal?.camera) {
-            contextExternal.camera.transfo.orientation =
-                internalCamera.transfo.orientation
+            contextExternal.camera.transfo.orientation = internalCamera.transfo.orientation
             contextExternal.paint()
         }
     }
@@ -89,9 +88,7 @@ export class TgdCanvasGizmo {
             const { orbiter } = this
             if (orbiter) {
                 orbiter.detach()
-                orbiter.eventChange.removeListener(
-                    this.handleInternalToExternal
-                )
+                orbiter.eventChange.removeListener(this.handleInternalToExternal)
             }
         }
         this.tipsPainter?.delete()
@@ -129,7 +126,7 @@ export class TgdCanvasGizmo {
                 depth: 1,
             }),
             new TgdPainterDepth(context, { enabled: true }),
-            painter
+            painter,
         )
         context.paint()
     }

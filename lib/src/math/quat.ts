@@ -29,11 +29,7 @@ export class TgdQuat extends TgdVec4 {
         return new TgdQuat().face(face)
     }
 
-    static fromSlerp(
-        valueAtT0: TgdQuat,
-        valueAtT1: TgdQuat,
-        t: number
-    ): TgdQuat {
+    static fromSlerp(valueAtT0: TgdQuat, valueAtT1: TgdQuat, t: number): TgdQuat {
         return new TgdQuat().fromSlerp(valueAtT0, valueAtT1, t)
     }
 
@@ -45,12 +41,7 @@ export class TgdQuat extends TgdVec4 {
     constructor(x: number, y: number)
     constructor(x: number, y: number, z: number)
     constructor(x: number, y: number, z: number, w: number)
-    constructor(
-        x: number | TgdVec4 | ArrayNumber4 = 0,
-        y: number = 0,
-        z: number = 0,
-        w: number = 1
-    ) {
+    constructor(x: number | TgdVec4 | ArrayNumber4 = 0, y: number = 0, z: number = 0, w: number = 1) {
         if (Array.isArray(x)) {
             const [xx, yy, zz, ww] = x
             super(xx, yy, zz, ww)
@@ -109,7 +100,7 @@ export class TgdQuat extends TgdVec4 {
     fromAxesTransposed(
         [m00, m01, m02]: Readonly<TgdVec3 | ArrayNumber3>,
         [m10, m11, m12]: Readonly<TgdVec3 | ArrayNumber3>,
-        [m20, m21, m22]: Readonly<TgdVec3 | ArrayNumber3>
+        [m20, m21, m22]: Readonly<TgdVec3 | ArrayNumber3>,
     ): this {
         return this.fromAxes([m00, m10, m20], [m01, m11, m21], [m02, m12, m22])
     }
@@ -117,7 +108,7 @@ export class TgdQuat extends TgdVec4 {
     fromAxes(
         X: Readonly<TgdVec3 | ArrayNumber3>,
         Y: Readonly<TgdVec3 | ArrayNumber3>,
-        Z: Readonly<TgdVec3 | ArrayNumber3>
+        Z: Readonly<TgdVec3 | ArrayNumber3>,
     ): this {
         const [x, y, z] = Z
         quat.setAxes(this, [-x, -y, -z], X, Y)
@@ -130,9 +121,7 @@ export class TgdQuat extends TgdVec4 {
     }
 
     rotateAround(axis: TgdVec3, angleInRadians: number): this {
-        temporaryMat3
-            .fromQuat(this)
-            .toAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
+        temporaryMat3.fromQuat(this).toAxes(temporaryAxisX, temporaryAxisY, temporaryAxisZ)
         temporaryAxisX.rotateAround(axis, angleInRadians)
         temporaryAxisY.rotateAround(axis, angleInRadians)
         temporaryAxisZ.rotateAround(axis, angleInRadians)

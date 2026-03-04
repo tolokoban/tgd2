@@ -36,24 +36,19 @@ export class TgdPainterLines extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterLinesOptions
+        options: TgdPainterLinesOptions,
     ) {
         super()
         this.dataPoint = options.dataPoint
         if ((this.dataPoint.length & 3) !== 0) {
-            throw new Error(
-                "dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!"
-            )
+            throw new Error("dataPoint must have a length that is an integral multiple of 4: [x, y, z, radius, ...]!")
         }
         if (options.texture) {
             this.texture = options.texture
             this.textureMustBeDeleted = false
         } else {
             this.texture = new TgdTexture2D(context).loadBitmap(
-                tgdCanvasCreateGradientHorizontal(
-                    128,
-                    tgdColorMakeHueWheel({ luminance: 90 })
-                )
+                tgdCanvasCreateGradientHorizontal(128, tgdColorMakeHueWheel({ luminance: 90 })),
             )
             this.textureMustBeDeleted = true
         }
@@ -117,10 +112,7 @@ export class TgdPainterLines extends TgdPainter {
                 varUV: "vec2",
             },
             outputs: { FragColor: "vec4" },
-            mainCode: [
-                "vec4 color = texture(uniTexture, varUV);",
-                "FragColor = color;",
-            ],
+            mainCode: ["vec4 color = texture(uniTexture, varUV);", "FragColor = color;"],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
         return program

@@ -5,31 +5,29 @@ import {
     TgdPainterFilter,
     TgdPainterLogic,
     TgdTexture2D,
-} from "@tolokoban/tgd";
-import View from "@/components/demo/Tgd";
+} from "@tolokoban/tgd"
+import View from "@/components/demo/Tgd"
 
-import BackgroundURL from "../../../marylin.webp";
+import BackgroundURL from "../../../marylin.webp"
 
 function init(context: TgdContext) {
     // #begin
-    const texture = new TgdTexture2D(context).loadBitmap(
-        tgdLoadImage(BackgroundURL),
-    );
-    const hueFilter = new TgdFilterHueRotation();
+    const texture = new TgdTexture2D(context).loadBitmap(tgdLoadImage(BackgroundURL))
+    const hueFilter = new TgdFilterHueRotation()
     const filter = new TgdPainterFilter(context, {
         texture,
         filters: [hueFilter],
-    });
+    })
     context.add(
         filter,
         new TgdPainterLogic((time) => {
-            hueFilter.hueShiftInDegrees = time * 90;
+            hueFilter.hueShiftInDegrees = time * 90
         }),
-    );
-    context.play();
+    )
+    context.play()
     // #end
 }
 
 export default function Demo() {
-    return <View onReady={init} width="512px" height="512px" />;
+    return <View onReady={init} width="512px" height="512px" />
 }

@@ -36,7 +36,7 @@ import styles from "./skybox.demo.module.css"
 
 function init(
     context: TgdContext,
-    assets: Assets
+    assets: Assets,
 ): {
     camera: TgdCamera
 } {
@@ -94,7 +94,7 @@ export default function Demo() {
                 {},
                 {
                     orientation,
-                }
+                },
             ),
             duration: 0.3,
             easingFunction: tgdEasingFunctionInOutCubic,
@@ -114,8 +114,7 @@ export default function Demo() {
                     imageNegY,
                     imageNegZ,
                 },
-            }}
-        >
+            }}>
             <footer className={styles.footer}>
                 <ViewButton onClick={() => face("+X+Y+Z")}>Reset</ViewButton>
                 <ViewButton onClick={() => face("-Z-Y-X")}>+X</ViewButton>

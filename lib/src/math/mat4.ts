@@ -60,7 +60,7 @@ export class TgdMat4 extends Float32Array {
         m03: number,
         m13: number,
         m23: number,
-        m33: number
+        m33: number,
     )
     constructor(
         m00: number | TgdMat4 = 1,
@@ -78,27 +78,10 @@ export class TgdMat4 extends Float32Array {
         m03: number = 0,
         m13: number = 0,
         m23: number = 0,
-        m33: number = 1
+        m33: number = 1,
     ) {
         if (typeof m00 === "number") {
-            super([
-                m00,
-                m10,
-                m20,
-                m30,
-                m01,
-                m11,
-                m21,
-                m31,
-                m02,
-                m12,
-                m22,
-                m32,
-                m03,
-                m13,
-                m23,
-                m33,
-            ])
+            super([m00, m10, m20, m30, m01, m11, m21, m31, m02, m12, m22, m32, m03, m13, m23, m33])
         } else {
             super(m00)
         }
@@ -108,7 +91,7 @@ export class TgdMat4 extends Float32Array {
         row0: ArrayNumber4 | TgdVec4 = TgdVec4.X,
         row1: ArrayNumber4 | TgdVec4 = TgdVec4.Y,
         row2: ArrayNumber4 | TgdVec4 = TgdVec4.Z,
-        row3: ArrayNumber4 | TgdVec4 = TgdVec4.W
+        row3: ArrayNumber4 | TgdVec4 = TgdVec4.W,
     ): this {
         const [m00, m01, m02, m03] = row0
         const [m10, m11, m12, m13] = row1

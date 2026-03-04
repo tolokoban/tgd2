@@ -2,11 +2,7 @@ import { tgdColorMakeHueWheel } from "@tgd/color"
 import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdProgram } from "@tgd/program"
-import {
-    type TgdCodeBloc,
-    TgdShaderFragment,
-    TgdShaderVertex,
-} from "@tgd/shader"
+import { type TgdCodeBloc, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdTexture2D } from "@tgd/texture"
 import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
@@ -27,10 +23,7 @@ interface TgdPainterPointsCloudMorphingData {
 
 export interface TgdPainterPointsCloudMorphingOptions {
     name?: string
-    data: [
-        TgdPainterPointsCloudMorphingData,
-        TgdPainterPointsCloudMorphingData,
-    ][]
+    data: [TgdPainterPointsCloudMorphingData, TgdPainterPointsCloudMorphingData][]
     /**
      * Mix between two point clouds.
      *
@@ -103,31 +96,13 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
             shadowThickness: number
             shadowIntensity: number
             light: number
-        }> = {}
+        }> = {},
     ): TgdCodeBloc {
-        const {
-            specularExponent,
-            specularIntensity,
-            shadowThickness,
-            shadowIntensity,
-            light,
-        } = options
-        const SpE =
-            typeof specularExponent === "number"
-                ? specularExponent.toFixed(6)
-                : "uniSpecularExponent"
-        const SpI =
-            typeof specularIntensity === "number"
-                ? specularIntensity.toFixed(6)
-                : "uniSpecularIntensity"
-        const ShT =
-            typeof shadowThickness === "number"
-                ? shadowThickness.toFixed(6)
-                : "uniShadowThickness"
-        const ShI =
-            typeof shadowIntensity === "number"
-                ? shadowIntensity.toFixed(6)
-                : "uniShadowIntensity"
+        const { specularExponent, specularIntensity, shadowThickness, shadowIntensity, light } = options
+        const SpE = typeof specularExponent === "number" ? specularExponent.toFixed(6) : "uniSpecularExponent"
+        const SpI = typeof specularIntensity === "number" ? specularIntensity.toFixed(6) : "uniSpecularIntensity"
+        const ShT = typeof shadowThickness === "number" ? shadowThickness.toFixed(6) : "uniShadowThickness"
+        const ShI = typeof shadowIntensity === "number" ? shadowIntensity.toFixed(6) : "uniShadowIntensity"
         const L = typeof light === "number" ? light.toFixed(6) : "uniLight"
         return [
             "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
@@ -135,9 +110,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
             "if (len < 0.0) discard;",
             "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
             `float light = smoothstep(0.0, ${ShT}, len) * ${ShI} + (1.0 - ${ShI});`,
-            specularIntensity
-                ? `float spec = pow(len, ${SpE}) * ${SpI};`
-                : "// No specular.",
+            specularIntensity ? `float spec = pow(len, ${SpE}) * ${SpI};` : "// No specular.",
             `return color * vec4(vec3(light * ${L}), 1.0) + vec4(vec3(spec), 0.0);`,
         ]
     }
@@ -164,7 +137,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterPointsCloudMorphingOptions
+        options: TgdPainterPointsCloudMorphingOptions,
     ) {
         super()
         this.name = options.name ?? this.name
@@ -181,17 +154,12 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
             this.textureMustBeDeleted = false
         } else {
             this.texture = new TgdTexture2D(context).loadBitmap(
-                tgdCanvasCreateGradientHorizontal(
-                    128,
-                    tgdColorMakeHueWheel({ luminance: 0.2 })
-                )
+                tgdCanvasCreateGradientHorizontal(128, tgdColorMakeHueWheel({ luminance: 0.2 })),
             )
             this.textureMustBeDeleted = true
         }
         if (options.data.length === 0) {
-            throw new Error(
-                "[TgdPainterPointsCloud] options.data must not be empty!"
-            )
+            throw new Error("[TgdPainterPointsCloud] options.data must not be empty!")
         }
         this.counts = options.data.map(([{ point }]) => point.length >> 2)
         this.program = this.createProgram(options.fragCode)
@@ -199,10 +167,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
             const datasetA = this.createDataset(dataA, "A")
             const datasetB = this.createDataset(dataB, "B")
             this.datasets.push(datasetA, datasetB)
-            return new TgdVertexArray(context.gl, this.program, [
-                datasetA,
-                datasetB,
-            ])
+            return new TgdVertexArray(context.gl, this.program, [datasetA, datasetB])
         })
     }
 
@@ -213,15 +178,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
     }
 
     paint(): void {
-        const {
-            context,
-            program,
-            vao,
-            texture,
-            count,
-            radiusMultiplier,
-            minSizeInPixels,
-        } = this
+        const { context, program, vao, texture, count, radiusMultiplier, minSizeInPixels } = this
         const { gl, camera } = context
         program.use()
         texture.activate(0, program, "uniTexture")
@@ -241,25 +198,20 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         vao.unbind()
     }
 
-    private createDataset(
-        data: TgdPainterPointsCloudMorphingData,
-        suffix: string
-    ) {
+    private createDataset(data: TgdPainterPointsCloudMorphingData, suffix: string) {
         const { point } = data
         if (point.length % 4 !== 0) {
             throw new Error(
-                `[TgdPainterPointsCloud] point.length must be a multiple of 4! Current value: ${point.length}`
+                `[TgdPainterPointsCloud] point.length must be a multiple of 4! Current value: ${point.length}`,
             )
         }
         const uv = data.uv ?? new Float32Array(point.length / 2)
         if (uv.length % 2 !== 0) {
-            throw new Error(
-                `[TgdPainterPointsCloud] uv.length must be a multiple of 2! Current value: ${uv.length}`
-            )
+            throw new Error(`[TgdPainterPointsCloud] uv.length must be a multiple of 2! Current value: ${uv.length}`)
         }
         if (point.length !== uv.length * 2) {
             throw new Error(
-                `[TgdPainterPointsCloud] point.length must be twice the size of uv.length! point.length === ${point.length}, uv.length === ${uv.length}`
+                `[TgdPainterPointsCloud] point.length must be twice the size of uv.length! point.length === ${point.length}, uv.length === ${uv.length}`,
             )
         }
         const attPoint = `attPoint_${suffix}`
@@ -345,10 +297,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
                     "}",
                 ],
             },
-            mainCode: [
-                "vec4 color = texture(uniTexture, varUV);",
-                "FragColor = render(color);",
-            ],
+            mainCode: ["vec4 color = texture(uniTexture, varUV);", "FragColor = render(color);"],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
         return program

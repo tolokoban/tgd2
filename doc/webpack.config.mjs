@@ -1,4 +1,4 @@
-import Package from "./package.json" with { "type": "json" }
+import Package from "./package.json" with { type: "json" }
 import Path from "path"
 import FS from "fs"
 import HtmlWebpackPlugin from "html-webpack-plugin"
@@ -17,14 +17,11 @@ import path from "path"
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-export default env => {
+export default (env) => {
     if (typeof Package.port !== "number") {
         // Define a random port number for dev server.
         Package.port = 1204 + Math.floor(Math.random() * (0xffff - 1024))
-        FS.writeFileSync(
-            Path.resolve(__dirname, "package.json"),
-            JSON.stringify(Package, null, "    ")
-        )
+        FS.writeFileSync(Path.resolve(__dirname, "package.json"), JSON.stringify(Package, null, "    "))
         console.log("A random port has been set for dev server:", Package.port)
     }
 
@@ -84,12 +81,12 @@ export default env => {
         plugins: [
             new Webpack.ProgressPlugin(),
             new WebpackShellPluginNext({
-                onBeforeCompile:{
-                  scripts: ['npm run generate'],
-                  blocking: true,
-                  parallel: false
+                onBeforeCompile: {
+                    scripts: ["npm run generate"],
+                    blocking: true,
+                    parallel: false,
                 },
-              }),
+            }),
             // // List of the needed files for later caching.
             // new WebpackManifestPlugin({
             //     filter: (file) => {
@@ -107,7 +104,7 @@ export default env => {
                 patterns: [
                     {
                         from: Path.resolve(__dirname, "public"),
-                        filter: async path => {
+                        filter: async (path) => {
                             // Allow non-root index.html to be copied verbatim.
                             return !path.endsWith("/public/index.html")
                         },
@@ -133,7 +130,7 @@ export default env => {
             hints: "warning",
             maxAssetSize: 300000,
             maxEntrypointSize: 200000,
-            assetFilter: filename => {
+            assetFilter: (filename) => {
                 // PNG are just fallbacks for WEBP images.
                 if (filename.endsWith(".png")) return false
                 if (filename.endsWith(".map")) return false
@@ -180,7 +177,7 @@ export default env => {
                 //       loader: "tsx", // Or 'ts' if you don't need tsx
                 //       target: "es2015",
                 //     },
-                // },          
+                // },
                 {
                     test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
                     // More information here https://webpack.js.org/guides/asset-modules/
@@ -248,12 +245,18 @@ export default env => {
                             loader: "@mdx-js/loader",
                             /** @type {import('@mdx-js/loader').Options} */
                             options: {
-                                rehypePlugins: [[rehypeHighlight, {
-                                    languages: {
-                                        ts: ()=>highlightJs.getLanguage("ts"),
-                                        glsl: ()=>highlightJs.getLanguage("glsl"),
-                                    }
-                                }], rehypeHighlightCodeLines],
+                                rehypePlugins: [
+                                    [
+                                        rehypeHighlight,
+                                        {
+                                            languages: {
+                                                ts: () => highlightJs.getLanguage("ts"),
+                                                glsl: () => highlightJs.getLanguage("glsl"),
+                                            },
+                                        },
+                                    ],
+                                    rehypeHighlightCodeLines,
+                                ],
                                 remarkPlugins: [remarkImages, remarkEmoji, remarkGfm],
                                 providerImportSource: "@mdx-js/react",
                             },

@@ -1,9 +1,4 @@
-import {
-    type ArrayNumber3,
-    TgdContext,
-    TgdPainterFragmentShader,
-    TgdShaderFragment,
-} from "@tolokoban/tgd"
+import { type ArrayNumber3, TgdContext, TgdPainterFragmentShader, TgdShaderFragment } from "@tolokoban/tgd"
 
 export class PalettePreviewHorizontalPainter {
     public a: ArrayNumber3 = [0.5, 0.5, 0.5]
@@ -38,10 +33,7 @@ export class PalettePreviewHorizontalPainter {
                         mainCode: [
                             "float t = varUV.x;",
                             "FragColor = vec4(",
-                            [
-                                `uniA + uniB*cos(${2 * Math.PI}*(uniC * t + uniD)),`,
-                                "1",
-                            ],
+                            [`uniA + uniB*cos(${2 * Math.PI}*(uniC * t + uniD)),`, "1"],
                             ");",
                         ],
                     }),
@@ -51,7 +43,7 @@ export class PalettePreviewHorizontalPainter {
                         program.uniform3f("uniC", ...this.c)
                         program.uniform3f("uniD", ...this.d)
                     },
-                })
+                }),
             )
             context.paint()
             this.context = context
