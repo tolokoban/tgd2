@@ -4,7 +4,7 @@
  */
 export async function tgdLoadVideo(url: string): Promise<HTMLVideoElement | null> {
     return new Promise((resolve) => {
-        const video = document.createElement("video")
+        const video = globalThis.document.createElement("video")
         video.addEventListener("canplay", () => resolve(video))
         video.addEventListener("error", () => {
             console.error("Unable to load video:", url)

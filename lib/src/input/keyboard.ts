@@ -8,16 +8,16 @@ export class TgdInputKeyboard {
     private attached = false
 
     constructor() {
-        document.addEventListener("keydown", this.handleKeyDown)
-        document.addEventListener("keyup", this.handleKeyUp)
+        globalThis.document.addEventListener("keydown", this.handleKeyDown)
+        globalThis.document.addEventListener("keyup", this.handleKeyUp)
         this.attached = true
     }
 
     detach() {
         if (!this.attached) return
 
-        document.removeEventListener("keydown", this.handleKeyDown)
-        document.removeEventListener("keyup", this.handleKeyUp)
+        globalThis.document.removeEventListener("keydown", this.handleKeyDown)
+        globalThis.document.removeEventListener("keyup", this.handleKeyUp)
         this.attached = false
     }
 

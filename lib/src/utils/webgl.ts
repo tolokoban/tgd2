@@ -65,5 +65,5 @@ export function webglLookup(type: number | keyof WebGL2RenderingContext): keyof 
     return `${type}` as keyof WebGL2RenderingContext
 }
 
-const canvas = document.createElement("canvas")
+const canvas = globalThis.document.createElement("canvas")
 const gl = canvas.getContext("webgl2")

@@ -1,3 +1,5 @@
+"use client"
+
 export * from "./bounding-box"
 export * from "./buffer"
 export * from "./camera"

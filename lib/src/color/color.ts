@@ -284,7 +284,7 @@ let globalContext: CanvasRenderingContext2D | null = null
 
 function getContext(): CanvasRenderingContext2D {
     if (!globalContext) {
-        const canvas: HTMLCanvasElement = document.createElement("canvas")
+        const canvas: HTMLCanvasElement = globalThis.document.createElement("canvas")
         canvas.width = 1
         canvas.height = 1
         const context = canvas.getContext("2d", {

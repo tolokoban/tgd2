@@ -3,17 +3,17 @@
  * @returns `true` if `elem` is displayed in fullscreen.
  */
 export function tgdFullscreenTest(element: Element | null): boolean {
-    const root = document.fullscreenElement
+    const root = globalThis.document.fullscreenElement
     if (!element || !root) return false
 
     let parent = element.parentElement
     while (parent) {
-        if (parent === document.fullscreenElement) {
+        if (parent === globalThis.document.fullscreenElement) {
             return root.clientWidth === element.clientWidth && root.clientHeight === element.clientHeight
         }
         parent = parent.parentElement
     }
-    return document.fullscreenElement === element
+    return globalThis.document.fullscreenElement === element
 }
 
 /**
@@ -40,10 +40,10 @@ export async function tgdFullscreenRequest(element: Element | null, options?: Fu
  * @returns `true` in case of success.
  */
 export async function tgdFullscreenExit(): Promise<boolean> {
-    if (!document.fullscreenElement) return false
+    if (!globalThis.document.fullscreenElement) return false
 
     try {
-        await document.exitFullscreen()
+        await globalThis.document.exitFullscreen()
         return true
     } catch {
         return false

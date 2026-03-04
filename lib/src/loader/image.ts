@@ -59,7 +59,7 @@ export function tgdLoadImageFromSvg(svg: string): Promise<HTMLImageElement> {
             canvas.style.background = "#888"
             canvas.style.position = "fixed"
             canvas.style.zIndex = "9999"
-            document.body.appendChild(canvas)
+            globalThis.document.body.appendChild(canvas)
             console.log("🚀 [image] canvas =", canvas) // @FIXME: Remove this line written on 2025-09-17 at 10:01
             resolve(img)
             // DOMURL.revokeObjectURL(url)
@@ -87,7 +87,7 @@ export async function tgdLoadCanvas(url: string): Promise<HTMLCanvasElement | nu
     const img = await tgdLoadImage(url)
     if (!img) return null
 
-    const canvas = document.createElement("canvas")
+    const canvas = globalThis.document.createElement("canvas")
     canvas.width = img.naturalWidth
     canvas.height = img.naturalHeight
     const context = canvas.getContext("2d")

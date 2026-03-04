@@ -6,7 +6,7 @@ import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
  * Helper to get a canvas with the given size.
  */
 export function tgdCanvasCreate(width: number, height: number): HTMLCanvasElement {
-    const canvas = document.createElement("canvas")
+    const canvas = globalThis.document.createElement("canvas")
     canvas.width = width
     canvas.height = height
     return canvas
@@ -21,7 +21,7 @@ export function tgdCanvasCreateWithContext2D(
     height: number,
     settings?: CanvasRenderingContext2DSettings,
 ): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
-    const canvas = document.createElement("canvas")
+    const canvas = globalThis.document.createElement("canvas")
     canvas.width = width
     canvas.height = height
     const context = canvas.getContext("2d", settings)
