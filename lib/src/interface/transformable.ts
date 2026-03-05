@@ -7,5 +7,5 @@ export interface TgdInterfaceTransformable {
 export interface TgdInterfaceTransformablePainter extends TgdInterfaceTransformable {
     name?: string
     delete?(): void
-    paint?(time: number, delay: number): void
+    paint?(time: number, delta: number): void
 }

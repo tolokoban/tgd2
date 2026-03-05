@@ -1,4 +1,4 @@
-import { tgdCanvasCreateFill, tgdCanvasFromImage } from "@tgd/utils"
+import { tgdCanvasCreate, tgdCanvasCreateFill, tgdCanvasFromImage } from "@tgd/utils"
 
 /**
  * Try to load an image and return `null` in case of failure.
@@ -40,45 +40,33 @@ export function tgdLoadImages(urls: string[]): Promise<Array<HTMLImageElement | 
 
 /**
  * The image will have the size specified in the SVG tag.
- * @param svg Content of a SVG image.
+ * @param svg XML content of a SVG image.
  */
-export function tgdLoadImageFromSvg(svg: string): Promise<HTMLImageElement> {
+export function tgdLoadCanvasFromSvg(svg: string): Promise<HTMLCanvasElement> {
     return new Promise((resolve) => {
         const img = new Image()
-        console.log("🚀 [image] svg =", svg) // @FIXME: Remove this line written on 2025-09-17 at 10:20
         const encoder = new TextEncoder()
         const bytes = encoder.encode(svg)
         const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("")
-        console.log("🚀 [image] binString =", binString) // @FIXME: Remove this line written on 2025-09-17 at 14:03
         const base64 = btoa(binString)
-        console.log("🚀 [image] base64 =", base64) // @FIXME: Remove this line written on 2025-09-17 at 10:20
         const url = `data:image/svg+xml;base64,${base64}`
-        console.log("🚀 [image] url =", url) // @FIXME: Remove this line written on 2025-09-17 at 10:16
-        img.addEventListener("load", function () {
-            const canvas = tgdCanvasFromImage(img)
-            canvas.style.background = "#888"
-            canvas.style.position = "fixed"
-            canvas.style.zIndex = "9999"
-            globalThis.document.body.appendChild(canvas)
-            console.log("🚀 [image] canvas =", canvas) // @FIXME: Remove this line written on 2025-09-17 at 10:01
-            resolve(img)
-            // DOMURL.revokeObjectURL(url)
+        img.addEventListener("load", () => {
+            resolve(tgdCanvasFromImage(img))
         })
         img.addEventListener("error", () => {
             console.error("Unable to load image from svg:", url)
             console.debug("SVG:", svg)
-            resolve(img)
+            resolve(tgdCanvasCreate(1, 1))
         })
         img.src = url
     })
 }
 
-export function tgdLoadImageFromElement(element: Element): Promise<HTMLImageElement> {
+export function tgdLoadCanvasFromElement(element: Element): Promise<HTMLCanvasElement> {
     const width = element.scrollWidth
     const height = element.scrollHeight
-    // const html = element.innerHTML
-    const html = "<h1>Hello world!</h1>"
-    return tgdLoadImageFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+    const html = element.innerHTML
+    return tgdLoadCanvasFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
     <foreignObject width="100%" height="100%">${html}</foreignObject>
 </svg>`)
 }

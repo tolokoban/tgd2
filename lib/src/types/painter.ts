@@ -1,1 +1,1 @@
-export type TgdPainterFunction = (time: number, delay: number) => void
+export type TgdPainterFunction = (time: number, delta: number) => void

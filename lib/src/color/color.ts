@@ -220,6 +220,20 @@ export class TgdColor {
         this.B = B + shift
         return this
     }
+
+    luminanceSet(lum: number): this {
+        this.rgb2hsl()
+        this.L = lum
+        this.hsl2rgb()
+        return this
+    }
+
+    luminanceMul(factor: number, max = Infinity): this {
+        this.rgb2hsl()
+        this.L = tgdCalcClamp(this.L * factor, 0, max)
+        this.hsl2rgb()
+        return this
+    }
 }
 
 const EPSILON = 1e-6

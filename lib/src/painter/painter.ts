@@ -19,7 +19,7 @@ export abstract class TgdPainter {
 
     abstract delete(): void
 
-    abstract paint(time: number, delay: number): void
+    abstract paint(time: number, delta: number): void
 
     get hierarchy(): TgdDebugPainterHierarchy {
         return {

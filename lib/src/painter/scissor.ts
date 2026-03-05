@@ -51,7 +51,7 @@ export class TgdPainterScissor extends TgdPainterGroup {
         this.height = options.height
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { gl } = this.context
         const enabled = gl.getParameter(gl.SCISSOR_TEST)
         const [curX, curY, curW, curH] = gl.getParameter(gl.SCISSOR_BOX)
@@ -61,7 +61,7 @@ export class TgdPainterScissor extends TgdPainterGroup {
         const h = Math.round(this.height * gl.drawingBufferHeight)
         gl.enable(gl.SCISSOR_TEST)
         gl.scissor(x, y, w, h)
-        super.paint(time, delay)
+        super.paint(time, delta)
         if (enabled) {
             gl.enable(gl.SCISSOR_TEST)
         } else {

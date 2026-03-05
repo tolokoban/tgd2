@@ -26,7 +26,7 @@ export interface TgdPainterFragmentShaderOptions {
      * If this function is defined, it will be called at each frame.
      * Most of the time, it is used tu update the uniforms.
      */
-    setUniforms?(options: { context: TgdContext; program: TgdProgram; time: number; delay: number }): void
+    setUniforms?(options: { context: TgdContext; program: TgdProgram; time: number; delta: number }): void
 }
 
 export class TgdPainterFragmentShader extends TgdPainter {
@@ -70,14 +70,14 @@ export class TgdPainterFragmentShader extends TgdPainter {
         program.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { vao, program, context, options } = this
         const { gl } = context
         program.use()
         program.uniform1f("uniTime", time)
         program.uniform1f("uniAspectRatio", context.aspectRatio)
         program.uniform1f("uniAspectRatioInverse", context.aspectRatioInverse)
-        options.setUniforms?.({ context, program, time, delay })
+        options.setUniforms?.({ context, program, time, delta })
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
         vao.unbind()

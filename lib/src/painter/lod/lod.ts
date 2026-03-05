@@ -69,8 +69,8 @@ export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformab
         this.group.delete()
     }
 
-    paint(time: number, delay: number): void {
-        this.group.paint(time, delay)
+    paint(time: number, delta: number): void {
+        this.group.paint(time, delta)
         this.computeOctree()
     }
 

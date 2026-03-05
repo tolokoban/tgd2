@@ -266,12 +266,12 @@ export class TgdPainterSegments extends TgdPainter {
         this.prg.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context, prg, vao, vertexCount, instanceCount, material } = this
         const { gl, camera } = context
         gl.disable(gl.DITHER)
         prg.use()
-        this.material.setUniforms?.({ program: prg, context, time, delay })
+        this.material.setUniforms?.({ program: prg, context, time, delta })
         prg.uniform1f("uniPixelPerScreenUnit", gl.drawingBufferHeight)
         prg.uniform1f("uniMinRadiusInPixel", this.minRadius)
         prg.uniform1f("uniRadiusMultiplier", this.radiusMultiplier)

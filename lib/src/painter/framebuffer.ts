@@ -182,7 +182,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = false
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context, options, size } = this
         const { gl } = context
         const { viewportMatchingScale = 1 } = options
@@ -194,7 +194,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         const viewport: Int32Array = gl.getParameter(gl.VIEWPORT)
         gl.viewport(0, 0, this.width, this.height)
         gl.drawBuffers(this.drawBuffers)
-        super.paint(time, delay)
+        super.paint(time, delta)
         gl.bindFramebuffer(gl.FRAMEBUFFER, currentFB)
         const [x, y, w, h] = viewport
         gl.viewport(x, y, w, h)

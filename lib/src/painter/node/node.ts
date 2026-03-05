@@ -13,7 +13,7 @@ export interface TgdPainterNodeOptions {
      * Default to `true`.
      */
     paintTheTargets?: boolean
-    logic(this: TgdPainterNode, time: number, delay: number): void
+    logic(this: TgdPainterNode, time: number, delta: number): void
 }
 
 export type TgdPainterNodeChild = TgdPainterNode | TgdInterfaceTransformablePainter
@@ -52,7 +52,7 @@ export type TgdPainterNodeChild = TgdPainterNode | TgdInterfaceTransformablePain
  */
 export class TgdPainterNode extends TgdPainter {
     public readonly transfo: TgdTransfo
-    public logic?: ((time: number, delay: number) => void) | undefined
+    public logic?: ((time: number, delta: number) => void) | undefined
 
     private readonly parentMatrix = new TgdMat4()
     /**
@@ -112,17 +112,17 @@ export class TgdPainterNode extends TgdPainter {
         return [...this.targets]
     }
 
-    paint(time: number, delay: number): void {
-        this.logic?.(time, delay)
+    paint(time: number, delta: number): void {
+        this.logic?.(time, delta)
         this.parentMatrix.reset()
         const fringe: TgdPainterNode[] = [this]
         while (fringe.length > 0) {
             const node = fringe.shift() as TgdPainterNode
             node.globalMatrix.from(node.parentMatrix).multiply(node.transfo.matrix)
-            node.logic?.(time, delay)
+            node.logic?.(time, delta)
             for (const target of node.targets) {
                 target.transfo.matrix.from(node.globalMatrix)
-                if (this.paintTheTargets) target.paint?.(time, delay)
+                if (this.paintTheTargets) target.paint?.(time, delta)
             }
             for (const child of node.nodes) {
                 child.parentMatrix.from(node.globalMatrix)

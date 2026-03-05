@@ -109,12 +109,12 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
         vao.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context, vao, program, textureDepth, textureColor, framebuffer } = this
         const { gl, width, height } = context
 
         if (width !== this.lastWidth || height !== this.lastHeight) {
-            framebuffer.paint(time, delay)
+            framebuffer.paint(time, delta)
             this.lastWidth = width
             this.lastHeight = height
         }

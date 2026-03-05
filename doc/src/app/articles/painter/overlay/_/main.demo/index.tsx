@@ -1,0 +1,25 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./main.demo"
+
+const FOCUS = {"Detail #1":"function init(context: TgdContext) {\n    const clear = new TgdPainterClear(context, { color: [0, 0.3, 0.5, 1], depth: 1 })\n    const overlay = new TgdPainterOverlay(context, {\n        margin: 16,\n        width: 160,\n        height: 120,\n        alignX: +1,\n        alignY: +1,\n        texture: new TgdTexture2D(context, {\n            load: tgdCanvasCreatePalette([\"#f44b\", \"#4f4b\", \"#44fb\", \"#0000\"], 2, 2),\n            params: {\n                minFilter: \"NEAREST\",\n                magFilter: \"NEAREST\",\n            },\n            storage: { flipY: false },\n        }),\n    })\n    const cube = new TgdPainterMesh(context)\n    cube.transfo.orbitAroundX(Math.random())\n    cube.transfo.orbitAroundY(Math.random())\n    cube.transfo.orbitAroundZ(Math.random())\n    context.add(\n        clear,\n        new TgdPainterState(context, {\n            depth: \"less\",\n            cull: \"back\",\n            children: [cube],\n        }),\n        new TgdPainterState(context, {\n            blend: \"alpha\",\n            children: [overlay],\n        }),\n    )\n    context.camera.fitSpaceAtTarget(1.2, 1.2)\n    context.paint()\n    overlay.eventPointerTap.addListener(({ x, y }) => {\n        console.log(\"Tap:\", x, y)\n    })\n    return ({ alignX, alignY, margin }: { alignX: number; alignY: number; margin: number }) => {\n        overlay.alignX = alignX\n        overlay.alignY = alignY\n        overlay.margin = margin\n        context.paint()\n    }\n}"}
+const FULL = "import {\n    tgdCanvasCreatePalette,\n    TgdContext,\n    TgdGeometryBox,\n    TgdPainterClear,\n    TgdPainterMesh,\n    TgdPainterOverlay,\n    TgdPainterState,\n    TgdTexture2D,\n} from \"@tolokoban/tgd\"\n\nimport View from \"@/components/demo/Tgd\"\n\nfunction init(context: TgdContext) {\n    const clear = new TgdPainterClear(context, { color: [0, 0.3, 0.5, 1], depth: 1 })\n    const overlay = new TgdPainterOverlay(context, {\n        margin: 16,\n        width: 160,\n        height: 120,\n        alignX: +1,\n        alignY: +1,\n        texture: new TgdTexture2D(context, {\n            load: tgdCanvasCreatePalette([\"#f44b\", \"#4f4b\", \"#44fb\", \"#0000\"], 2, 2),\n            params: {\n                minFilter: \"NEAREST\",\n                magFilter: \"NEAREST\",\n            },\n            storage: { flipY: false },\n        }),\n    })\n    const cube = new TgdPainterMesh(context)\n    cube.transfo.orbitAroundX(Math.random())\n    cube.transfo.orbitAroundY(Math.random())\n    cube.transfo.orbitAroundZ(Math.random())\n    context.add(\n        clear,\n        new TgdPainterState(context, {\n            depth: \"less\",\n            cull: \"back\",\n            children: [cube],\n        }),\n        new TgdPainterState(context, {\n            blend: \"alpha\",\n            children: [overlay],\n        }),\n    )\n    context.camera.fitSpaceAtTarget(1.2, 1.2)\n    context.paint()\n    overlay.eventPointerTap.addListener(({ x, y }) => {\n        console.log(\"Tap:\", x, y)\n    })\n    return ({ alignX, alignY, margin }: { alignX: number; alignY: number; margin: number }) => {\n        overlay.alignX = alignX\n        overlay.alignY = alignY\n        overlay.margin = margin\n        context.paint()\n    }\n}\n\nexport default function Demo() {\n    return (\n        <View\n            onReady={init}\n            controller={{\n                inertiaOrbit: 1000,\n            }}\n            options={{\n                preserveDrawingBuffer: true,\n            }}\n            settings={{\n                alignX: {\n                    label: \"alignX\",\n                    value: 1,\n                    min: -1,\n                    max: +1,\n                },\n                alignY: {\n                    label: \"alignX\",\n                    value: 1,\n                    min: -1,\n                    max: +1,\n                },\n                margin: {\n                    label: \"margin\",\n                    value: 16,\n                    min: 0,\n                    max: 32,\n                },\n            }}\n        />\n    )\n}\n"
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
+}

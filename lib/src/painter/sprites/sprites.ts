@@ -2,17 +2,15 @@
 import type { TgdContext } from "@tgd/context"
 import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdConsole } from "@tgd/debug"
-import type { TgdInterfaceTransformable } from "@tgd/interface"
-import { TgdTransfo, TgdVec2 } from "@tgd/math"
+import { TgdMat4, TgdTransfo, TgdVec2 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import { TgdCodeBloc, TgdCodeFunctions, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdCodeBloc, TgdCodeFunctions, TgdCodeVariables, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdPainter } from "../painter"
 import { AccessorProxy } from "./accessor"
 import type { Accessor, AtlasItem, TgdSprite } from "./types"
 import { isNumber } from "@tgd/types/guards"
-import { WebglAttributeType } from "@tgd/types"
+import { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdPainterSpritesAbstract } from "./sprites-abstract"
 
 export type { TgdSprite } from "./types"
@@ -34,6 +32,10 @@ export interface TgdPainterSpritesOptions {
      * Default: 1
      */
     initialCapacity?: number
+    /**
+     * If `true`, the sprites will always face the camera.
+     */
+    faceCamera?: boolean
     attributes?: TgdDatasetTypeRecord
     attributesSetter?(
         attributes: Record<keyof TgdDatasetTypeRecord, AccessorProxy>,
@@ -84,6 +86,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
     protected readonly attributes: Record<string, AccessorProxy> = {}
     protected readonly uniAtlasRatio = new TgdVec2(1, 1)
     protected dirty = true
+    private uniFaceCamera = new TgdMat4()
 
     private static id = 1
 
@@ -92,6 +95,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
         protected readonly options: TgdPainterSpritesOptions,
     ) {
         super()
+        this.name = `Sprites/${this.name}`
         for (const attribName of Object.keys(options.attributes ?? {})) {
             this.attributes[attribName] = new AccessorProxy(attribName)
         }
@@ -105,14 +109,18 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
             this.uniAtlasRatio.y = texture.height / texture.width
         }
         this.uniAtlasRatio.scale(options.atlasUnit ?? 1)
+        const uniforms: TgdCodeVariables<WebglUniformType> = {
+            uniTransfoMatrix: "mat4",
+            uniModelViewMatrix: "mat4",
+            uniProjectionMatrix: "mat4",
+            uniAtlasRatio: "vec2",
+        }
+        if (options.faceCamera) {
+            uniforms.uniFaceCamera = "mat4"
+        }
         const prg = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({
-                uniforms: {
-                    uniTransfoMatrix: "mat4",
-                    uniModelViewMatrix: "mat4",
-                    uniProjectionMatrix: "mat4",
-                    uniAtlasRatio: "vec2",
-                },
+                uniforms,
                 attributes: {
                     ...options.attributes,
                     attPosition: "vec3",
@@ -136,6 +144,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
                     ["attCos, attSin, 0, 0,", "-attSin, attCos, 0, 0,", "0, 0, 1, 0,", "0, 0, 0, 1"],
                     ");",
                     "position = rotation * position;",
+                    ...(options.faceCamera ? ["position = uniFaceCamera * position;"] : []),
                     "position += vec4(attPosition, 0.0);",
                     "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
                     extract(options.vert?.code) ?? "",
@@ -373,7 +382,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
     }
 
     paint(): void {
-        const { context, datasetInstances, vao, prg, transfo, texture, count } = this
+        const { context, datasetInstances, vao, prg, transfo, texture, count, uniFaceCamera, options } = this
         if (this.dirty) {
             this.dirty = false
             vao.updateDataset(datasetInstances)
@@ -385,6 +394,10 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
         prg.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         prg.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        if (options.faceCamera) {
+            camera.transfo.orientation.toMatrix(uniFaceCamera)
+            prg.uniformMatrix4fv("uniFaceCamera", uniFaceCamera)
+        }
         vao.bind()
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, count)
         vao.unbind()

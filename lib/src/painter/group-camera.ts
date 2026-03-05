@@ -4,6 +4,7 @@ import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "./painter"
 
 export interface TgdPainterGroupCameraOptions {
+    name?: string
     camera?: TgdCamera
     children?: TgdPainter[]
 }
@@ -19,14 +20,16 @@ export class TgdPainterGroupCamera extends TgdPainterGroup {
         options: TgdPainterGroupCameraOptions = {},
     ) {
         super(options.children)
+        if (options.name) this.name = options.name
+        else this.name = `GroupCamera/${this.name}`
         this.camera = options.camera ?? context.camera
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context } = this
         const savedCamera = context.camera
         context.camera = this.camera
-        super.paint(time, delay)
+        super.paint(time, delta)
         context.camera = savedCamera
     }
 }

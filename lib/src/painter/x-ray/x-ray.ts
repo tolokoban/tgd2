@@ -8,8 +8,7 @@ import { TgdPainterState } from "../state"
 import { TgdPainterClear } from "../clear"
 import { TgdPainterBackground } from "./background"
 import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
-import { TgdCamera } from "@tgd/camera"
-import { WebglParams } from "@tgd/context/webgl-params"
+import { TgdContext } from "@tgd/context/context"
 // import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
@@ -29,14 +28,7 @@ export class TgdPainterXRay extends TgdPainter {
     private readonly material: TgdMaterialGhost
 
     constructor(
-        private readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            width: Readonly<number>
-            height: Readonly<number>
-            camera: TgdCamera
-            paint?: () => void
-        },
+        private readonly context: TgdContext,
         options: TgdPainterXRayOptions,
     ) {
         super()
@@ -81,11 +73,11 @@ export class TgdPainterXRay extends TgdPainter {
         this.texture.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context, painterFB, painterBackground, material } = this
         material.exponent = this.exponent
         material.intensity = this.intensity
-        painterFB.paint(time, delay)
+        painterFB.paint(time, delta)
         TgdPainterState.do(context, {
             blend: webglPresetBlend.add,
             depth: webglPresetDepth.off,

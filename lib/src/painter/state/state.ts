@@ -94,13 +94,13 @@ export class TgdPainterState extends TgdPainterGroup {
     ) {
         super(options.children)
         const { onEnterActions, onExitActions } = prepareActions(this, context, options)
-        this.onEnter = (time, delay) => {
-            options.onEnter?.(time, delay)
+        this.onEnter = (time, delta) => {
+            options.onEnter?.(time, delta)
             for (const f of onEnterActions) f()
         }
-        this.onExit = (time, delay) => {
+        this.onExit = (time, delta) => {
             for (const f of onExitActions) f()
-            options.onExit?.(time, delay)
+            options.onExit?.(time, delta)
         }
         this.name = options.name ?? `State/${this.name}`
     }

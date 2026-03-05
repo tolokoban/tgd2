@@ -5,7 +5,7 @@ import { TgdPainter } from "./painter"
  */
 export class TgdPainterLogic extends TgdPainter {
     constructor(
-        private readonly logicFunction: (time: number, delay: number) => void,
+        private readonly logicFunction: (time: number, delta: number) => void,
         options: Partial<{ name: string }> = {},
     ) {
         super()
@@ -14,7 +14,7 @@ export class TgdPainterLogic extends TgdPainter {
 
     delete(): void {}
 
-    paint(time: number, delay: number): void {
-        this.logicFunction(time, delay)
+    paint(time: number, delta: number): void {
+        this.logicFunction(time, delta)
     }
 }

@@ -2,7 +2,7 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdGeometryBox,
-    tgdLoadImageFromElement,
+    tgdLoadCanvasFromElement,
     TgdMaterialDiffuse,
     TgdMaterialNormals,
     TgdPainterClear,
@@ -58,7 +58,7 @@ function init(context: TgdContext) {
             return
         }
         console.log(elem.innerHTML)
-        tgdLoadImageFromElement(elem).then((img) => {
+        tgdLoadCanvasFromElement(elem).then((img) => {
             document.body.appendChild(img)
             texture.loadBitmap(img)
         })

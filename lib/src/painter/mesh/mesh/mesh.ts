@@ -149,12 +149,12 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         return { min, max }
     }
 
-    public readonly paint = (time: number, delay: number) => {
+    public readonly paint = (time: number, delta: number) => {
         const { context, program, geometry, material, drawMode, count, transfo } = this
         const { gl, camera } = context
-        this.logic.exec(time, delay)
+        this.logic.exec(time, delta)
         program.use()
-        material.setUniforms?.({ context, program, time, delay })
+        material.setUniforms?.({ context, program, time, delta })
         program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)

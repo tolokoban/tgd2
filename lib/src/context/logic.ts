@@ -1,4 +1,4 @@
-export type TgdLogicFunction = (time: number, delay: number) => void
+export type TgdLogicFunction = (time: number, delta: number) => void
 
 /**
  * List of logic functions to be called (generaly) on every frame.
@@ -25,7 +25,7 @@ export class TgdLogic {
         return true
     }
 
-    exec(time: number, delay: number) {
-        for (const logic of this.logics) logic(time, delay)
+    exec(time: number, delta: number) {
+        for (const logic of this.logics) logic(time, delta)
     }
 }

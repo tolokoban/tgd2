@@ -4,8 +4,8 @@ import type { TgdPainterFunction } from "@tgd/types/painter"
 import { type TgdDebugPainterHierarchy, TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {
-    onEnter?(time: number, delay: number): void
-    onExit?(time: number, delay: number): void
+    onEnter?(time: number, delta: number): void
+    onExit?(time: number, delta: number): void
     name?: string
     children?: TgdPainter[]
 }
@@ -23,7 +23,7 @@ export class TgdPainterGroup extends TgdPainter {
     public onExit: TgdPainterFunction | undefined
     protected readonly painters: TgdPainter[]
 
-    private readonly logics: Array<(time: number, delay: number) => void> = []
+    private readonly logics: Array<(time: number, delta: number) => void> = []
 
     constructor()
     constructor(painters?: TgdPainter[], options?: TgdPainterGroupOptions)
@@ -116,20 +116,20 @@ export class TgdPainterGroup extends TgdPainter {
         this.logic.clear()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         if (!this.active) return
 
-        this.logic.exec(time, delay)
-        this.onEnter?.(time, delay)
+        this.logic.exec(time, delta)
+        this.onEnter?.(time, delta)
         for (const painter of this.painters) {
             if (painter.active) {
-                painter.paint(time, delay)
+                painter.paint(time, delta)
             }
         }
         for (const logic of this.logics) {
-            logic(time, delay)
+            logic(time, delta)
         }
-        this.onExit?.(time, delay)
+        this.onExit?.(time, delta)
     }
 
     get hierarchy(): TgdDebugPainterHierarchy {

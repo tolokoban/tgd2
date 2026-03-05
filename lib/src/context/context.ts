@@ -253,10 +253,7 @@ export class TgdContext extends TgdPainterGroup {
     set camera(camera: TgdCamera) {
         if (camera === this._camera) return
 
-        const { gl } = this
         this._camera = camera
-        camera.screenWidth = gl.drawingBufferWidth
-        camera.screenHeight = gl.drawingBufferHeight
         this.paint()
     }
 
@@ -317,6 +314,11 @@ export class TgdContext extends TgdPainterGroup {
 
     get aspectRatioInverse() {
         return this._aspectRatioInverse
+    }
+
+    set aspectRatio(aspectRatio: number) {
+        this._aspectRatio = aspectRatio
+        this._aspectRatioInverse = 1 / aspectRatio
     }
 
     /**
@@ -459,8 +461,7 @@ export class TgdContext extends TgdPainterGroup {
             this.lastTimeInSec = timeInSec
             this._camera.screenWidth = gl.drawingBufferWidth
             this._camera.screenHeight = gl.drawingBufferHeight
-            this._aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
-            this._aspectRatioInverse = 1 / this._aspectRatio
+            this.aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
 
             webglParams.setViewport(0, 0, gl.canvas.width, gl.canvas.height)
             super.paint(timeInSec, delayInSec)

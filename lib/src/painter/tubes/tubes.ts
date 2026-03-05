@@ -53,7 +53,7 @@ export class TgdPainterTubes extends TgdPainter {
         // this.prg.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         // const { context, prg, vao, vertexCount, material } = this
         // const { gl, camera } = context
         // gl.disable(gl.DITHER)

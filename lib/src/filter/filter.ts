@@ -55,5 +55,5 @@ export interface TgdFilterSerUniformsParameters {
     context: { gl: WebGL2RenderingContext }
     program: TgdProgram
     time: number
-    delay: number
+    delta: number
 }

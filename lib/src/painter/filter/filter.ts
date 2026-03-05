@@ -119,7 +119,7 @@ export class TgdPainterFilter extends TgdPainter {
         for (const prg of programs) prg.delete()
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         let inputTexture = this.texture
         if (!inputTexture) {
             console.warn("[TgdPainterFilter] Input texture is undefined!")
@@ -133,7 +133,7 @@ export class TgdPainterFilter extends TgdPainter {
                 this.filterIndex = index
                 this.inputTexture = inputTexture
                 curFB.size = inputTexture
-                curFB.paint(time, delay)
+                curFB.paint(time, delta)
                 inputTexture = curFB.textureColor0
                 const tmpFB = curFB
                 curFB = nxtFB
@@ -142,10 +142,10 @@ export class TgdPainterFilter extends TgdPainter {
         }
         this.filterIndex = filters.length - 1
         this.inputTexture = inputTexture
-        this.paintOneFilter(time, delay, (filters.length & 1) === (this.flipY ? 0 : 1) ? +1 : -1)
+        this.paintOneFilter(time, delta, (filters.length & 1) === (this.flipY ? 0 : 1) ? +1 : -1)
     }
 
-    private readonly paintOneFilter = (time: number, delay: number, flip = +1) => {
+    private readonly paintOneFilter = (time: number, delta: number, flip = +1) => {
         const index = this.filterIndex
         const inputTexture = this.inputTexture
         if (!inputTexture) return
@@ -161,7 +161,7 @@ export class TgdPainterFilter extends TgdPainter {
         program.uniform1f("uniFlipY", flip)
         program.uniform2f("uniSize", width, height)
         program.uniform2f("uniPixel", 1 / width, 1 / height)
-        filter.setUniforms({ context, program, time, delay })
+        filter.setUniforms({ context, program, time, delta })
         inputTexture.activate(0, program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)

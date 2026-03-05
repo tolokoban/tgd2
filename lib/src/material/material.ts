@@ -17,7 +17,7 @@ export interface TgdMaterialContext {
     }
     program: TgdProgram
     time: number
-    delay: number
+    delta: number
 }
 
 export interface TgdMaterialOptions {

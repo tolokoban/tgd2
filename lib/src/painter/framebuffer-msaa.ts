@@ -3,6 +3,7 @@ import type { TgdPainterFunction } from "@tgd/types/painter"
 import { webglCreateFramebuffer, webglLookup, webglRenderbufferStorageMultisample } from "@tgd/utils"
 import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdPainterFramebufferWithAntiAliasingOptions {
     name?: string
@@ -31,6 +32,11 @@ export interface TgdPainterFramebufferWithAntiAliasingOptions {
      * Default to `1`.
      */
     viewportMatchingScale?: number
+    /**
+     * If defined, this framebuffer won't adapt it's size to the size of the screen.
+     * Instead, it will start with this `width`/`height`.
+     */
+    fixedSize?: [width: number, height: number]
     textureColor0?: TgdTexture2D
     textureColor1?: TgdTexture2D
     textureColor2?: TgdTexture2D
@@ -69,19 +75,18 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
     private _depthBuffer: WebGLRenderbuffer | null = null
     private _stencilBuffer: WebGLRenderbuffer | null = null
     private readonly drawBuffers: number[]
+    private readonly isFixedSize: boolean
 
     constructor(
-        private readonly context: {
-            gl: WebGL2RenderingContext
-            width: Readonly<number>
-            height: Readonly<number>
-        },
+        private readonly context: TgdContext,
         private readonly options: Partial<TgdPainterFramebufferWithAntiAliasingOptions>,
     ) {
         super({
             name: options.name,
             children: options.children,
         })
+        if (options.name) this.name = options.name
+        else this.name = `FramebufferMSAA/${this.name}`
         const { textureColor0, textureColor1, textureColor2, textureColor3 } = options
         if (!(textureColor0 || textureColor1 || textureColor2 || textureColor3)) {
             console.error(
@@ -104,6 +109,12 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
             this.textureColor3 ? gl.COLOR_ATTACHMENT3 : gl.NONE,
         ]
         this.samples = Math.min(options.samples ?? 4, gl.getParameter(gl.MAX_SAMPLES))
+        this.isFixedSize = !!options.fixedSize
+        if (options.fixedSize) {
+            const [width, height] = options.fixedSize
+            this.width = width
+            this.height = height
+        }
     }
 
     get width(): number {
@@ -227,20 +238,33 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null)
     }
 
-    paint(time: number, delay: number): void {
+    paint(time: number, delta: number): void {
         const { context, options } = this
+        const { aspectRatio } = context
         const { gl } = context
-        const { viewportMatchingScale = 1 } = options
-        this.width = Math.round(context.width * viewportMatchingScale)
-        this.height = Math.round(context.height * viewportMatchingScale)
+        if (!this.isFixedSize) {
+            const { viewportMatchingScale = 1 } = options
+            this.width = Math.round(context.width * viewportMatchingScale)
+            this.height = Math.round(context.height * viewportMatchingScale)
+        }
+        context.aspectRatio = this.width / this.height
+        console.log(
+            "Camera aspect ratio:",
+            context.camera.screenAspectRatio,
+            context.camera.name,
+            context.camera.screenWidth,
+            context.camera.screenHeight,
+        )
         this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebufferMSAA)
+        const viewport = context.webglParams.viewport
         gl.viewport(0, 0, this.width, this.height)
         gl.drawBuffers(this.drawBuffers)
-        super.paint(time, delay)
+        super.paint(time, delta)
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         this.blitFramebuffers()
-        gl.viewport(0, 0, context.width, context.height)
+        context.webglParams.viewport = viewport
+        context.aspectRatio = aspectRatio
     }
 
     delete() {
