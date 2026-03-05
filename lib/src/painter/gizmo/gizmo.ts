@@ -22,6 +22,8 @@ export interface TgdPainterGizmoOptions {
 export class TgdPainterGizmo extends TgdPainter {
     public camera = new TgdCameraPerspective({
         name: "Gizmo/Camera",
+        near: 0.1,
+        far: 10,
     })
     public alignX
     public alignY
@@ -55,10 +57,11 @@ export class TgdPainterGizmo extends TgdPainter {
 
     private readonly init = ({ tips }: { tips: TgdPainterSprites }) => {
         const { context, group, size, alignX, alignY, camera } = this
+        console.log(camera.near, camera.far)
         this.textureTips = tips.texture
         group.removeAll()
         const clear = new TgdPainterClear(context, {
-            color: [0, 0, 0, 0],
+            color: [0.3, 0.2, 0.1, 0],
             depth: 1,
         })
         const state = new TgdPainterState(context, {

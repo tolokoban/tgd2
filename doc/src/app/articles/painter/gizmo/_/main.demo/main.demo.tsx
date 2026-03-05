@@ -25,7 +25,11 @@ function init(context: TgdContext) {
             cull: "back",
             children: [new TgdPainterMesh(context)],
         }),
-        new TgdPainterGizmo(context),
+        new TgdPainterState(context, {
+            depth: "off",
+            blend: "alpha",
+            children: [new TgdPainterGizmo(context, { size: 256 })],
+        }),
     )
     context.paint()
 }
@@ -40,6 +44,9 @@ export default function Demo() {
             }}
             options={{
                 preserveDrawingBuffer: true,
+                alpha: false,
+                antialias: true,
+                premultipliedAlpha: false,
             }}
         />
     )

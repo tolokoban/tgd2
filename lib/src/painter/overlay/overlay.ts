@@ -131,7 +131,6 @@ export class TgdPainterOverlay extends TgdPainter {
     private handleTap = (evtScreen: TgdInputPointerEventTap) => {
         const x = this.xScreenToLayout(evtScreen.x)
         const y = this.yScreenToLayout(evtScreen.y)
-        console.log("🐞 [overlay@121] x, y =", x, y) // @FIXME: Remove this line written on 2026-03-05 at 15:38
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
 
         const evtLayout = structuredClone(evtScreen)

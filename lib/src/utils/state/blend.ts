@@ -28,8 +28,8 @@ export const webglPresetBlend: Readonly<Record<"off" | "alpha" | "add" | "premul
         functionColorSrc: WebglEnumBlendFunction.SRC_ALPHA,
         functionColorDst: WebglEnumBlendFunction.ONE_MINUS_SRC_ALPHA,
         equationAlpha: WebglEnumBlendEquation.FUNC_ADD,
-        functionAlphaSrc: WebglEnumBlendFunction.ZERO,
-        functionAlphaDst: WebglEnumBlendFunction.ONE,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ZERO,
     },
     add: {
         enabled: true,

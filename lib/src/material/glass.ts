@@ -66,7 +66,7 @@ export class TgdMaterialGlass extends TgdMaterial {
 
         super({
             state: {
-                blend: webglPresetBlend.alpha,
+                blend: "alpha",
                 depth: webglPresetDepth.writeOnly,
             },
             delete: () => {
