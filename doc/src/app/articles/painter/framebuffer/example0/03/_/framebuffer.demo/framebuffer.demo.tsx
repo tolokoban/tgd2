@@ -1,17 +1,13 @@
 import {
-    TgdCameraPerspective,
     TgdContext,
     TgdFilterChromaticAberration,
-    TgdGeometryBox,
     TgdMaterialDiffuse,
-    TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterState,
     TgdTexture2D,
-    webglPresetDepth,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
@@ -30,22 +26,22 @@ function init(context: TgdContext, assets: Assets) {
         }),
     })
     const meshPainter = new TgdPainterState(context, {
-        depth: webglPresetDepth.less,
+        depth: "less",
         children: [clear, mesh],
     })
     // #begin
-    const hueRotation = new TgdFilterChromaticAberration({
+    const filter = new TgdFilterChromaticAberration({
         strength: 10,
     })
     const filters = new TgdPainterFilter(context, {
-        filters: [hueRotation],
+        filters: [filter],
         texture,
     })
     context.add(
         meshPainter,
         filters,
-        new TgdPainterLogic((time, delay) => {
-            hueRotation.strength = Math.sin(time) * 10
+        new TgdPainterLogic((time) => {
+            filter.strength = Math.sin(time) * 10
         }),
     )
     // #end

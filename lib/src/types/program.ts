@@ -1,11 +1,12 @@
+import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdCodeBloc } from "@tgd/shader/code"
 
 export interface TgdProgramOptions {
     name?: string
     /** Code of the vertex shader */
-    vert: TgdCodeBloc
+    vert: TgdCodeBloc | TgdShaderVertex
     /** Code of the fragment shader */
-    frag: TgdCodeBloc
+    frag: TgdCodeBloc | TgdShaderFragment
     /**
      * What attributes to record in a TransformFeedback operation.
      * Default to INTERLEAVED_ATTRIBS.

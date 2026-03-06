@@ -3,8 +3,9 @@ import { TgdFilter, TgdFilterSerUniformsParameters } from "./filter"
 export class TgdFilterHueRotation extends TgdFilter {
     private hueShift = 0
 
-    constructor({ hueShiftInDegrees = 0 }: Partial<{ hueShiftInDegrees: number }> = {}) {
+    constructor({ hueShiftInDegrees = 0, name }: Partial<{ hueShiftInDegrees: number; name: string }> = {}) {
         super({
+            name: name ?? "TgdFilterHueRotation",
             fragmentShaderCode: [
                 "vec4 color = texture(uniTexture, varUV);",
                 "vec3 rgb = color.rgb;",

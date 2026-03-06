@@ -9,6 +9,7 @@ import { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterFramebuffer } from "../framebuffer"
 import { TgdPainterLogic } from "../logic"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdPainterFilterOptions {
     filters: TgdFilter[]
@@ -26,16 +27,14 @@ export class TgdPainterFilter extends TgdPainter {
     private readonly programs: TgdProgram[]
     private readonly filters: TgdFilter[]
     private readonly vaos: TgdVertexArray[]
-    private readonly framebuffers: [TgdPainterFramebuffer, TgdPainterFramebuffer]
-    private readonly textures: [TgdTexture2D, TgdTexture2D]
-    private inputTexture: TgdTexture2D | undefined = undefined
+    private readonly framebuffer: TgdPainterFramebuffer
+    private textureInput: TgdTexture2D | undefined = undefined
+    private textureOutput: TgdTexture2D | undefined = undefined
+    private textureToDelete: TgdTexture2D | undefined = undefined
     private filterIndex = 0
 
     constructor(
-        private readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-        },
+        private readonly context: TgdContext,
         options: TgdPainterFilterOptions,
     ) {
         super()
@@ -86,83 +85,74 @@ export class TgdPainterFilter extends TgdPainter {
         this.programs = programs
         this.filters = filters
         this.vaos = vaos
-        const framebuffer = context.gl.createFramebuffer()
-        if (!framebuffer) throw new Error("Unable to create a WebGL Framebuffer!")
 
-        this.textures = [0, 1].map(
-            () =>
-                new TgdTexture2D(context, {
-                    params: {
-                        minFilter: "LINEAR",
-                        magFilter: "LINEAR",
-                    },
-                }),
-        ) as [TgdTexture2D, TgdTexture2D]
-        this.framebuffers = this.textures.map((textureColor0) => {
-            const fb = new TgdPainterFramebuffer(context, {
-                textureColor0,
-                viewportMatchingScale: 1,
-                children: [new TgdPainterLogic(this.paintOneFilter)],
-            })
-            return fb
-        }) as [TgdPainterFramebuffer, TgdPainterFramebuffer]
+        this.textureInput = options.texture
+        const textureOutput = new TgdTexture2D(context, {
+            params: {
+                minFilter: "LINEAR",
+                magFilter: "LINEAR",
+            },
+        })
+        this.textureToDelete = textureOutput
+        this.framebuffer = new TgdPainterFramebuffer(context, {
+            textureColor0: textureOutput,
+            viewportMatchingScale: 1,
+            children: [new TgdPainterLogic(this.paintOneFilter)],
+        })
         this.name = options.name ?? `Filter/${this.name}`
     }
 
     delete(): void {
-        const { textures, programs, vaos, framebuffers } = this
-        for (const vao of vaos) vao.delete()
-        for (const fb of framebuffers) fb.delete()
-        if (textures) {
-            for (const tex of textures) tex.delete()
-        }
+        const { programs, vaos, framebuffer, textureToDelete } = this
+        textureToDelete?.delete()
+        framebuffer.delete()
         for (const prg of programs) prg.delete()
+        for (const vao of vaos) vao.delete()
     }
 
     paint(time: number, delta: number): void {
-        let inputTexture = this.texture
-        if (!inputTexture) {
+        const { texture } = this
+        if (!texture) {
             console.warn("[TgdPainterFilter] Input texture is undefined!")
             return
         }
-
-        const { filters, framebuffers } = this
-        let [curFB, nxtFB] = framebuffers
-        if (filters.length > 0) {
-            for (let index = 0; index < filters.length - 1; index++) {
-                this.filterIndex = index
-                this.inputTexture = inputTexture
-                curFB.size = inputTexture
-                curFB.paint(time, delta)
-                inputTexture = curFB.textureColor0
-                const tmpFB = curFB
-                curFB = nxtFB
-                nxtFB = tmpFB
-            }
+        console.log("=".repeat(40))
+        const { filters, framebuffer } = this
+        this.textureInput = texture
+        this.textureOutput = this.textureToDelete
+        for (let index = 0; index < filters.length - 1; index++) {
+            this.filterIndex = index
+            framebuffer.textureColor0 = this.textureOutput
+            framebuffer.paint(time, delta)
+            // Swap textures.
+            const temp = this.textureInput
+            this.textureInput = this.textureOutput
+            this.textureOutput = temp
         }
         this.filterIndex = filters.length - 1
-        this.inputTexture = inputTexture
         this.paintOneFilter(time, delta, (filters.length & 1) === (this.flipY ? 0 : 1) ? +1 : -1)
+        console.log("-".repeat(40))
     }
 
     private readonly paintOneFilter = (time: number, delta: number, flip = +1) => {
         const index = this.filterIndex
-        const inputTexture = this.inputTexture
-        if (!inputTexture) return
+        const { textureInput } = this
+        if (!textureInput) return
 
         const filter = this.filters[index]
+        console.log("paintOnFilter:", filter.name, flip)
         const program = this.programs[index]
         const vao = this.vaos[index]
         const { context } = this
         const { gl } = context
-        const { width, height } = inputTexture
+        const { width, height } = textureInput
         program.use()
         program.uniform1f("uniZ", this.z)
         program.uniform1f("uniFlipY", flip)
         program.uniform2f("uniSize", width, height)
         program.uniform2f("uniPixel", 1 / width, 1 / height)
         filter.setUniforms({ context, program, time, delta })
-        inputTexture.activate(0, program, "uniTexture")
+        textureInput.activate(0, program, "uniTexture")
         vao.bind()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
         vao.unbind()

@@ -1,6 +1,7 @@
 import { TgdConsole, TgdConsoleItem } from "@tgd/debug"
 import { TgdMat2, TgdMat3, TgdMat4, TgdVec2, TgdVec3, TgdVec4 } from "@tgd/math"
-import { tgdCodeStringify } from "@tgd/shader/code"
+import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdCodeBloc, tgdCodeStringify } from "@tgd/shader/code"
 import { TgdProgramOptions } from "@tgd/types"
 
 /**
@@ -14,6 +15,8 @@ export class TgdProgram {
     /** Access to the real WebGLProgram object. */
     public readonly program: WebGLProgram
     public readonly name: string
+    public readonly vert: string
+    public readonly frag: string
 
     private readonly shaders: WebGLShader[]
     private readonly uniformsLocations: { [name: string]: WebGLUniformLocation }
@@ -26,10 +29,11 @@ export class TgdProgram {
         if (!prg) throw new Error("Unable to create WebGLProgram!")
 
         this.name = options.name ?? `TgdProgram#${TgdProgram.id++}`
-        const vert = tgdCodeStringify(options.vert)
+        const { vert, frag } = checkCompatibilityBetweenShaders(options)
+        this.vert = vert
+        this.frag = frag
         const vertShader = this.createShader("VERTEX_SHADER", vert)
         gl.attachShader(prg, vertShader)
-        const frag = tgdCodeStringify(options.frag)
         const fragShader = this.createShader("FRAGMENT_SHADER", frag)
         gl.attachShader(prg, fragShader)
         const { transformFeedback } = options
@@ -66,10 +70,10 @@ export class TgdProgram {
             `function createProgram(gl: WebGL2RenderingContext) {`,
             `  const prg = gl.createProgram()`,
             `  const vertexShader = gl.createShader(gl.VERTEX_SHADER)`,
-            `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(this.options.vert)}\`)`,
+            `  gl.shaderSource(vertexShader, \`${tgdCodeStringify(this.vert)}\`)`,
             `  gl.compileShader(vertexShader)`,
             `  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)`,
-            `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(this.options.frag)}\`)`,
+            `  gl.shaderSource(fragmentShader, \`${tgdCodeStringify(this.frag)}\`)`,
             `  gl.compileShader(fragmentShader)`,
             `  gl.attachShader(prg, vertexShader)`,
             `  gl.attachShader(prg, fragmentShader)`,
@@ -217,7 +221,6 @@ export class TgdProgram {
     debug(caption?: string) {
         const { gl, program } = this
         console.log(caption ?? this.name)
-        const { options: code } = this
         const contextLost = gl.isContextLost()
         const items: (string | TgdConsoleItem)[] = [
             { text: "Context lost: " },
@@ -244,8 +247,8 @@ export class TgdProgram {
             items.push("\n")
         }
         TgdConsole.debug(...items)
-        logCode("Vertex Shader", tgdCodeStringify(code.vert))
-        logCode("Fragment Shader", tgdCodeStringify(code.frag))
+        logCode("Vertex Shader", tgdCodeStringify(this.vert))
+        logCode("Fragment Shader", tgdCodeStringify(this.frag))
     }
 
     private createShader(type: ShaderType, code: string): WebGLShader {
@@ -343,4 +346,44 @@ function logCode(title: string, code: string, options?: { lines: number[]; messa
     }
     console.log(codeLines.join("\n"), ...styles)
     return hasError ? output.join("\n") : "No error."
+}
+
+function checkCompatibilityBetweenShaders({
+    vert,
+    frag,
+}: {
+    vert: TgdCodeBloc | TgdShaderVertex
+    frag: TgdCodeBloc | TgdShaderFragment
+}): { vert: string; frag: string } {
+    if (vert instanceof TgdShaderVertex && frag instanceof TgdShaderFragment) {
+        if (!frag.varying || Object.keys(frag.varying).length === 0) {
+            frag.varying = vert.varying
+        } else {
+            const vertVarying = Object.keys(vert.varying)
+                .sort()
+                .map((key) => `   ${key}:${vert.varying[key]} `)
+                .join("\n")
+            const fragVarying = Object.keys(frag.varying)
+                .sort()
+                .map((key) => `   ${key}:${frag.varying[key]} `)
+                .join("\n")
+            if (vertVarying !== fragVarying) {
+                throw new Error(`[TgdProgram] Different varying for vertex and fragments shaders!
+
+Vertex shader:
+${vertVarying}
+
+Fragment shader:
+${fragVarying}
+
+To avoid such mistake, just don't specify the varyings for the fragment shader,
+and we will use the same as the vertex shader.
+
+`)
+            }
+        }
+    }
+    const vertCode = vert instanceof TgdShaderVertex ? vert.code : tgdCodeStringify(vert)
+    const fragCode = frag instanceof TgdShaderFragment ? frag.code : tgdCodeStringify(frag)
+    return { vert: vertCode, frag: fragCode }
 }

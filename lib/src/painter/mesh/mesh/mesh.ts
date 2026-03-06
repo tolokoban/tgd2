@@ -1,5 +1,5 @@
 import type { TgdCamera } from "@tgd/camera"
-import { TgdLogic } from "@tgd/context"
+import { TgdContext, TgdLogic } from "@tgd/context"
 import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
 import { type TgdMaterial, TgdMaterialNormals } from "@tgd/material"
@@ -38,12 +38,7 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
     private bboxMax: TgdVec3 | null = null
 
     constructor(
-        protected readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            camera: TgdCamera
-            paint?: () => void
-        },
+        protected readonly context: TgdContext,
         options: TgdPainterMeshOptions = {},
     ) {
         super()

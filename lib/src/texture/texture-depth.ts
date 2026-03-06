@@ -1,5 +1,5 @@
-import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdTexture2D } from "./texture2d"
+import { TgdContext } from "@tgd/context"
 
 interface TgdTextureDepthStorage {
     width: number
@@ -9,11 +9,7 @@ interface TgdTextureDepthStorage {
 
 export class TgdTextureDepth extends TgdTexture2D {
     constructor(
-        public readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            paint?: () => void
-        },
+        public readonly context: TgdContext,
         { width = 1, height = 1, type = "DEPTH_COMPONENT24" }: Partial<TgdTextureDepthStorage> = {},
     ) {
         super(context, {

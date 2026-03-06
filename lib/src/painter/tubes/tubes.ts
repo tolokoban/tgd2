@@ -10,6 +10,7 @@ import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterTubesOptions } from "./types"
+import { TgdContext } from "@tgd/context"
 
 export class TgdPainterTubes extends TgdPainter {
     public readonly transfo = new TgdTransfo()
@@ -22,11 +23,7 @@ export class TgdPainterTubes extends TgdPainter {
     // private readonly vertexCount: number
 
     constructor(
-        protected readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            camera: TgdCamera
-        },
+        protected readonly context: TgdContext,
         options: TgdPainterTubesOptions,
     ) {
         super()

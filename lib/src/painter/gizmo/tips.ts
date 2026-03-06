@@ -1,9 +1,10 @@
 import { TgdTexture2D } from "@tgd/texture"
-import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
-import { TgdPainterSprites, TgdPainterSpritesAtlas } from "../sprites"
 import { TgdContext } from "@tgd/context"
 import { tgdLoadCanvasFromSvg } from "@tgd/loader"
 import { TgdColor } from "@tgd/color"
+import { TgdPainter } from "../painter"
+import { PainterTipsNormal } from "./painters/normal"
+import { PainterTipsMask } from "./painters/mask"
 
 const SIZE = 256
 const R = "#F63652FF"
@@ -24,12 +25,10 @@ interface SpritesOptions {
     blue: string
 }
 
-export async function createSprites(
+export async function createTipsPainter(
     context: TgdContext,
-    { size = 128, scale = 0.5, red = R, green = G, blue = B }: Partial<SpritesOptions> = {},
-): Promise<{ tips: TgdPainterSprites }> {
-    const width = 1 / 3
-    const height = 1 / 2
+    { size = 128, red = R, green = G, blue = B }: Partial<SpritesOptions> = {},
+): Promise<{ tipsNormal: TgdPainter; tipsMask: TgdPainter }> {
     const canvas = await tgdLoadCanvasFromSvg(makeTipsSVG(size, red, green, blue))
     const texture = new TgdTexture2D(context, {
         params: {
@@ -38,27 +37,9 @@ export async function createSprites(
         },
         load: canvas,
     })
-    const tips = new TgdPainterSprites(context, {
-        atlas: [
-            { x: 0, y: 0, width, height },
-            { x: width, y: 0, width, height },
-            { x: 2 * width, y: 0, width, height },
-            { x: 0, y: height, width, height },
-            { x: width, y: height, width, height },
-            { x: 2 * width, y: height, width, height },
-        ],
-        texture,
-        atlasUnit: scale,
-        faceCamera: true,
-    })
-    tips.add({ index: 0, x: +1, y: 0, z: 0 })
-    tips.add({ index: 1, x: 0, y: +1, z: 0 })
-    tips.add({ index: 2, x: 0, y: 0, z: +1 })
-    tips.add({ index: 3, x: -1, y: 0, z: 0 })
-    tips.add({ index: 4, x: 0, y: -1, z: 0 })
-    tips.add({ index: 5, x: 0, y: 0, z: -1 })
     return {
-        tips,
+        tipsNormal: new PainterTipsNormal(context, { texture }),
+        tipsMask: new PainterTipsMask(context),
     }
 }
 
@@ -81,7 +62,7 @@ ${[red, green, blue].map((color, index) => {
     const r1 = (55 * size) / 128
     const r2 = (50 * size) / 128
     const stroke = (8 * size) / 128
-    const back = TgdColor.fromString(color).luminanceMul(0.25).toString()
+    const back = TgdColor.fromString(color).alphaMul(0.25).toString()
     return `<circle fill="${color}" cx="${x}" cy="${y1}" r="${r1}" />
 <text fill="#000" x="${x}" y="${y1}">${"XYZ".charAt(index)}</text>
 <circle stroke="${color}" fill="${back}" stroke-width="${stroke}" cx="${x}" cy="${y2}" r="${r2}"/>`

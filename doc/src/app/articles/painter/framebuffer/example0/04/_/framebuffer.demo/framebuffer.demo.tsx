@@ -1,15 +1,11 @@
 import {
-    TgdCameraPerspective,
     TgdContext,
     TgdFilterChromaticAberration,
-    TgdFilterVerbatim,
-    TgdFilterZoom,
-    TgdGeometryBox,
     TgdMaterialDiffuse,
-    TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
+    TgdPainterFramebufferWithAntiAliasing,
     TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterState,
@@ -36,7 +32,7 @@ function init(context: TgdContext, assets: Assets) {
         children: [clear, mesh],
     })
     // #begin
-    const fb = new TgdPainterFramebuffer(context, {
+    const fb = new TgdPainterFramebufferWithAntiAliasing(context, {
         children: [meshPainter],
         depthBuffer: true,
         textureColor0: new TgdTexture2D(context),

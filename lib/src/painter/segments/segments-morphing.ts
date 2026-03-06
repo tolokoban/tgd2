@@ -1,5 +1,3 @@
-import type { TgdCamera } from "@tgd/camera"
-import type { WebglParams } from "@tgd/context/webgl-params"
 import type { TgdDataset } from "@tgd/dataset"
 import { type TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
 import { TgdTransfo } from "@tgd/math"
@@ -10,6 +8,7 @@ import { TgdTexture2D } from "@tgd/texture"
 import { tgdCanvasCreatePalette } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
 import { makeCapsule } from "./capsule"
+import { TgdContext } from "@tgd/context"
 
 type DatasetOption = TgdDataset | (() => TgdDataset)
 
@@ -84,11 +83,7 @@ export class TgdPainterSegmentsMorphing extends TgdPainter {
     // private readonly painter: TgdPainter
 
     constructor(
-        protected readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            camera: TgdCamera
-        },
+        protected readonly context: TgdContext,
         options: TgdPainterSegmentsMorphingOptions,
     ) {
         super()

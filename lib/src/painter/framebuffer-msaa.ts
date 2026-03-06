@@ -33,8 +33,8 @@ export interface TgdPainterFramebufferWithAntiAliasingOptions {
      */
     viewportMatchingScale?: number
     /**
-     * If defined, this framebuffer won't adapt it's size to the size of the screen.
-     * Instead, it will start with this `width`/`height`.
+     * If the size is defined, it takes precedence over `viewportMatchingScale`.
+     * In this case, the output textures will have this fixed size.
      */
     fixedSize?: [width: number, height: number]
     textureColor0?: TgdTexture2D
@@ -55,11 +55,12 @@ export interface TgdPainterFramebufferWithAntiAliasingOptions {
 
 export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
     public readonly samples: number
-    public readonly textureColor0: TgdTexture2D | undefined
-    public readonly textureColor1: TgdTexture2D | undefined
-    public readonly textureColor2: TgdTexture2D | undefined
-    public readonly textureColor3: TgdTexture2D | undefined
     public readonly textureDepth: TgdTexture2D | undefined
+
+    private _textureColor0: TgdTexture2D | undefined
+    private _textureColor1: TgdTexture2D | undefined
+    private _textureColor2: TgdTexture2D | undefined
+    private _textureColor3: TgdTexture2D | undefined
 
     private colorRenderbuffersMSAA: (WebGLRenderbuffer | undefined)[] = []
     private _depthBufferMSAA: WebGLRenderbuffer | null = null
@@ -82,7 +83,6 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         private readonly options: Partial<TgdPainterFramebufferWithAntiAliasingOptions>,
     ) {
         super({
-            name: options.name,
             children: options.children,
         })
         if (options.name) this.name = options.name
@@ -117,10 +117,50 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         }
     }
 
+    get textureColor0() {
+        return this._textureColor0
+    }
+    set textureColor0(textureColor0: TgdTexture2D | undefined) {
+        if (this._textureColor0 === textureColor0) return
+
+        this._textureColor0 = textureColor0
+        this.dirty = true
+    }
+
+    get textureColor1() {
+        return this._textureColor1
+    }
+    set textureColor1(textureColor1: TgdTexture2D | undefined) {
+        if (this._textureColor1 === textureColor1) return
+
+        this._textureColor1 = textureColor1
+        this.dirty = true
+    }
+
+    get textureColor2() {
+        return this._textureColor2
+    }
+    set textureColor2(textureColor2: TgdTexture2D | undefined) {
+        if (this._textureColor2 === textureColor2) return
+
+        this._textureColor2 = textureColor2
+        this.dirty = true
+    }
+
+    get textureColor3() {
+        return this._textureColor3
+    }
+    set textureColor3(textureColor3: TgdTexture2D | undefined) {
+        if (this._textureColor3 === textureColor3) return
+
+        this._textureColor3 = textureColor3
+        this.dirty = true
+    }
+
     get width(): number {
         return this._width
     }
-    private set width(v: number) {
+    set width(v: number) {
         if (this._width === v) return
 
         this._width = v
@@ -130,7 +170,7 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
     get height(): number {
         return this._height
     }
-    private set height(v: number) {
+    set height(v: number) {
         if (this._height === v) return
 
         this._height = v
@@ -168,7 +208,7 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
     }
 
     private createStencilBuffer(gl: WebGL2RenderingContext) {
-        if (this.options.stencilBuffer !== false) {
+        if (this.options.stencilBuffer) {
             const { width, height } = this
             const stencilBuffer = gl.createRenderbuffer()
             if (!stencilBuffer) throw new Error("Unable to create WebGLRenderBuffer for stencil!")
@@ -207,7 +247,6 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
         this.delete()
         const { gl } = context
         this.createFramebufferMSAA()
-
         this._framebuffer = webglCreateFramebuffer(gl)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         this.updateTextureForColor(this.textureColor0, 0)
@@ -248,13 +287,6 @@ export class TgdPainterFramebufferWithAntiAliasing extends TgdPainterGroup {
             this.height = Math.round(context.height * viewportMatchingScale)
         }
         context.aspectRatio = this.width / this.height
-        console.log(
-            "Camera aspect ratio:",
-            context.camera.screenAspectRatio,
-            context.camera.name,
-            context.camera.screenWidth,
-            context.camera.screenHeight,
-        )
         this.createFramebufferIfNeeded()
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebufferMSAA)
         const viewport = context.webglParams.viewport

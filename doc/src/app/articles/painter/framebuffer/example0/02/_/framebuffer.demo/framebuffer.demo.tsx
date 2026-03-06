@@ -1,9 +1,6 @@
 import {
-    TgdCameraPerspective,
     TgdContext,
-    TgdGeometryBox,
     TgdMaterialDiffuse,
-    TgdMaterialNormals,
     TgdPainterClear,
     TgdPainterLogic,
     TgdPainterMesh,
@@ -29,7 +26,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     // #end
     const meshPainter = new TgdPainterState(context, {
-        depth: webglPresetDepth.less,
+        depth: "less",
         children: [clear, mesh],
     })
     context.add(

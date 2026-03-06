@@ -16,6 +16,9 @@ import { WebglUniformType } from "@tgd/types"
  *  * `float uniHeight`: height of the texture in pixels.
  */
 export class TgdFilter {
+    private static id = 1
+
+    public name: string
     /**
      * If you need more uniforms, define them here.
      * And set the values in the `setUniforms()` method.
@@ -38,6 +41,7 @@ export class TgdFilter {
         if (fragmentShaderCode) this.fragmentShaderCode = fragmentShaderCode
         if (extraFunctions) this.extraFunctions = extraFunctions
         if (setUniforms) this.setUniforms = setUniforms
+        this.name = options.name ?? `TgdFilter#${TgdFilter.id++}`
     }
 
     /** Cleanup function. */
@@ -45,6 +49,7 @@ export class TgdFilter {
 }
 
 export interface TgdFilterOptions {
+    name: string
     uniforms: { [name: string]: WebglUniformType }
     fragmentShaderCode: TgdCodeBloc
     extraFunctions: TgdCodeFunctions | TgdCodeBloc

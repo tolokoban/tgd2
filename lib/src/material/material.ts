@@ -2,7 +2,7 @@ import type { WebglParams } from "@tgd/context/webgl-params"
 import type { TgdProgram } from "@tgd/program"
 import type { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
 import {
-    type TgdCamera,
+    TgdContext,
     TgdPainterState,
     type TgdPainterStateOptions,
     type WebglAttributeType,
@@ -10,11 +10,7 @@ import {
 } from ".."
 
 export interface TgdMaterialContext {
-    context: {
-        gl: WebGL2RenderingContext
-        webglParams: WebglParams
-        camera: TgdCamera
-    }
+    context: TgdContext
     program: TgdProgram
     time: number
     delta: number

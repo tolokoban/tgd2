@@ -3,6 +3,7 @@ import { TgdVec2 } from "../math"
 import { TgdFilter } from "./filter"
 
 export interface TgdFilterBlurOptions {
+    name: string
     size: number
     /**
      * Can be an angle expressed in degrees.
@@ -48,6 +49,7 @@ export class TgdFilterBlur extends TgdFilter {
         }
         total = total + total + size + 1
         super({
+            name: options.name ?? `TgdFilterBlur(${options.direction ?? 0} deg)`,
             fragmentShaderCode: [
                 "vec2 dir = uniStrength * uniPixel * vec2(",
                 [`${sx.toFixed(9)},`, `${sy.toFixed(9)}`],

@@ -1,4 +1,3 @@
-import type { TgdCamera } from "@tgd/camera"
 import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
@@ -10,6 +9,7 @@ import type { TgdDataGlb } from "@tgd/parser"
 import type { TgdTexture2D } from "@tgd/texture"
 import type { TgdFormatGltfMaterial } from "@tgd/types"
 import { TgdPainterMesh } from "../mesh"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdDataGlb
@@ -22,15 +22,7 @@ export interface TgdPainterMeshGltfOptions {
 /**
  */
 export class TgdPainterMeshGltf extends TgdPainterMesh {
-    constructor(
-        context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            camera: TgdCamera
-            paint?: () => void
-        },
-        options: TgdPainterMeshGltfOptions,
-    ) {
+    constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
         const { asset, meshIndexOrName = 0, primitiveIndex = 0, material: materialFactory = makeMaterial } = options
         const color = figureColor(asset, meshIndexOrName, primitiveIndex, context)
         const material = materialFactory instanceof TgdMaterial ? materialFactory : materialFactory({ color })
@@ -75,11 +67,7 @@ function figureColor(
     asset: TgdDataGlb,
     meshIndexOrName: number | string,
     primitiveIndex: number,
-    context: {
-        gl: WebGL2RenderingContext
-        webglParams: WebglParams
-        paint?: () => void
-    },
+    context: TgdContext,
 ): TgdVec4 | TgdTexture2D {
     const primitive = asset.getMeshPrimitive(meshIndexOrName, primitiveIndex)
     const materialIndex = primitive.material ?? -1
@@ -120,11 +108,7 @@ function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
 }
 
 function getTextureEmissive(
-    context: {
-        gl: WebGL2RenderingContext
-        webglParams: WebglParams
-        paint?: () => void
-    },
+    context: TgdContext,
     asset: TgdDataGlb,
     material: TgdFormatGltfMaterial,
 ): TgdTexture2D | null {

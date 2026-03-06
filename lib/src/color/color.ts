@@ -234,6 +234,16 @@ export class TgdColor {
         this.hsl2rgb()
         return this
     }
+
+    alphaSet(alpha: number): this {
+        this.A = alpha
+        return this
+    }
+
+    alphaMul(factor: number): this {
+        this.A *= factor
+        return this
+    }
 }
 
 const EPSILON = 1e-6

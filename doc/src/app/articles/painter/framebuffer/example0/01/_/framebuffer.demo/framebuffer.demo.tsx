@@ -1,17 +1,7 @@
-import {
-    TgdContext,
-    TgdPainterClear,
-    TgdPainterLogic,
-    TgdPainterMesh,
-    TgdPainterState,
-    webglPresetDepth,
-} from "@tolokoban/tgd"
-import View, { Assets } from "@/components/demo/Tgd"
+import { TgdContext, TgdPainterClear, TgdPainterLogic, TgdPainterMesh, TgdPainterState } from "@tolokoban/tgd"
+import View from "@/components/demo/Tgd"
 
-import SuzanneURL from "@/assets/mesh/logo.glb"
-import BackgroundURL from "@/assets/image/dino.webp"
-
-function init(context: TgdContext, assets: Assets) {
+function init(context: TgdContext) {
     // #begin
     context.camera.transfo.distance = 5
     const clear = new TgdPainterClear(context, {
@@ -19,14 +9,14 @@ function init(context: TgdContext, assets: Assets) {
     })
     const mesh = new TgdPainterMesh(context)
     const meshPainter = new TgdPainterState(context, {
-        depth: webglPresetDepth.less,
+        depth: "less",
         children: [clear, mesh],
     })
     context.add(
         meshPainter,
-        new TgdPainterLogic((time, delay) => {
-            mesh.transfo.orbitAroundX(delay * Math.sin(time))
-            mesh.transfo.orbitAroundZ(delay * 1.341)
+        new TgdPainterLogic((time, delta) => {
+            mesh.transfo.orbitAroundX(delta * Math.sin(time))
+            mesh.transfo.orbitAroundZ(delta * 1.341)
         }),
     )
     context.play()
@@ -34,17 +24,5 @@ function init(context: TgdContext, assets: Assets) {
 }
 
 export default function Demo() {
-    return (
-        <View
-            onReady={init}
-            assets={{
-                glb: {
-                    mesh: SuzanneURL,
-                },
-                image: {
-                    background: BackgroundURL,
-                },
-            }}
-        />
-    )
+    return <View onReady={init} />
 }

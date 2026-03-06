@@ -254,7 +254,8 @@ export class TgdContext extends TgdPainterGroup {
         if (camera === this._camera) return
 
         this._camera = camera
-        this.paint()
+        // camera.screenWidth = this.gl.drawingBufferWidth
+        // camera.screenHeight = this.gl.drawingBufferHeight
     }
 
     /**

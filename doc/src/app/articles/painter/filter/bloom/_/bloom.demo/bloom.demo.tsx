@@ -101,12 +101,18 @@ function init(context: TgdContext, assets: Assets) {
         filters: [
             new TgdFilterBlur({ direction: 0, size, strength }),
             new TgdFilterBlur({ direction: 90, size, strength }),
-            hue,
+            // hue,
         ],
         flipY: true,
     })
     const framebuffer3 = new TgdPainterFramebuffer(context, {
-        children: [filters],
+        children: [
+            new TgdPainterState(context, {
+                depth: "off",
+                blend: "off",
+                children: [filters],
+            }),
+        ],
         depthBuffer: false,
         textureColor0: new TgdTexture2D(context, {
             params: {
@@ -128,7 +134,8 @@ function init(context: TgdContext, assets: Assets) {
         framebuffer1,
         framebuffer2,
         framebuffer3,
-        mixer,
+        show(context, framebuffer3),
+        // mixer,
         new TgdPainterLogic((time) => {
             const t = tgdCalcModulo(time, 0, 2)
             const d = Math.abs(t - 1)
@@ -136,8 +143,18 @@ function init(context: TgdContext, assets: Assets) {
             hue.hueShiftInDegrees = time * 30
         }),
     )
-    context.play()
+    context.paint()
     // #end
+}
+
+function show(context: TgdContext, { textureColor0 }: { textureColor0: TgdTexture2D | undefined }) {
+    if (textureColor0) {
+        return new TgdPainterBackground(context, {
+            texture: textureColor0,
+            scaleY: -1,
+        })
+    }
+    return new TgdPainterClear(context, { color: [1, 0.1, 0.1, 1] })
 }
 
 export default function Demo() {

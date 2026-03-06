@@ -6,6 +6,7 @@ import { load } from "@loaders.gl/core"
 import { DracoLoader } from "@loaders.gl/draco"
 import { type GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
+import { TgdContext } from "@tgd/context"
 import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
@@ -360,10 +361,7 @@ export class TgdDataGlb {
         }
     }
 
-    createTexture2D(
-        context: { gl: WebGL2RenderingContext; webglParams: WebglParams },
-        textureIndex: number,
-    ): TgdTexture2D {
+    createTexture2D(context: TgdContext, textureIndex: number): TgdTexture2D {
         const gltfTex = this.json.textures?.[textureIndex]
         if (!gltfTex) {
             throw new Error(`Asset has no texture with index #${textureIndex}!`)

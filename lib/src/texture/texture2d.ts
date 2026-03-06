@@ -9,6 +9,7 @@ import { isString } from "@tgd/types/guards"
 import { webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
+import { TgdContext } from "@tgd/context"
 
 interface TgdTexture2DStorage {
     width: number
@@ -86,10 +87,7 @@ export class TgdTexture2D {
     private static counter = 0
 
     constructor(
-        public readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-        },
+        public readonly context: TgdContext,
         private readonly options: TgdTexture2DOptions = {},
     ) {
         const { storage, params, load } = options
@@ -295,7 +293,7 @@ gl.texStorage2D(
             textureColor0: output,
             depthBuffer: false,
             children: [painter],
-            size: this,
+            fixedSize: [this.width, this.height],
         })
         framebuffer.paint(0, 0)
         this.gl.deleteTexture(this._texture)

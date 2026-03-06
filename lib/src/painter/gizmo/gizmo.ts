@@ -1,9 +1,8 @@
 import { tgdCanvasCreate } from "@tgd/utils"
 import { TgdContext } from "@tgd/context"
 import { TgdPainterGroup } from "../group"
-import { createSprites } from "./tips"
+import { createTipsPainter } from "./tips"
 import { TgdTexture2D } from "@tgd/texture"
-import { TgdPainterSprites } from "../sprites"
 import { TgdDebugPainterHierarchy, TgdPainter } from "../painter"
 import { TgdCameraPerspective } from "@tgd/camera"
 import { TgdPainterState } from "../state"
@@ -31,7 +30,6 @@ export class TgdPainterGizmo extends TgdPainter {
     public margin
 
     private readonly group = new TgdPainterGroup({ name: "Gizmo/Group" })
-    private textureTips: TgdTexture2D | null = null
     private readonly textureFramebuffer: TgdTexture2D
     private overlay: TgdPainterOverlay | null = null
 
@@ -52,13 +50,12 @@ export class TgdPainterGizmo extends TgdPainter {
                 magFilter: "NEAREST",
             },
         })
-        createSprites(context).then(this.init)
+        createTipsPainter(context).then(this.init)
     }
 
-    private readonly init = ({ tips }: { tips: TgdPainterSprites }) => {
+    private readonly init = ({ tipsNormal, tipsMask }: { tipsNormal: TgdPainter; tipsMask: TgdPainter }) => {
         const { context, group, size, alignX, alignY, camera } = this
         console.log(camera.near, camera.far)
-        this.textureTips = tips.texture
         group.removeAll()
         const clear = new TgdPainterClear(context, {
             color: [0.3, 0.2, 0.1, 0],
@@ -66,13 +63,20 @@ export class TgdPainterGizmo extends TgdPainter {
         })
         const state = new TgdPainterState(context, {
             depth: "less",
-            children: [tips],
+            blend: "off",
+            cull: "off",
+            children: [
+                new TgdPainterGroupCamera(context, {
+                    camera,
+                    children: [clear, tipsMask],
+                }),
+            ],
         })
         const framebuffer = new TgdPainterFramebufferWithAntiAliasing(context, {
             name: "Framebuffer",
             depthBuffer: true,
             textureColor0: this.textureFramebuffer,
-            children: [clear, state],
+            children: [state],
             fixedSize: [size, size],
         })
         const overlay = new TgdPainterOverlay(context, {
@@ -85,18 +89,12 @@ export class TgdPainterGizmo extends TgdPainter {
             texture: framebuffer.textureColor0,
         })
         this.overlay = overlay
-        const groupCamera = new TgdPainterGroupCamera(context, {
-            camera,
-            children: [framebuffer],
-        })
-        group.add(groupCamera, overlay)
+        group.add(framebuffer, overlay)
         context.paint()
         context.debugHierarchy()
     }
 
     delete(): void {
-        this.textureTips?.delete()
-        this.textureTips = null
         this.group.delete()
     }
 

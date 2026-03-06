@@ -3,6 +3,7 @@ import type { TgdPainterFunction } from "@tgd/types/painter"
 import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
 import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
+import { TgdContext } from "@tgd/context"
 
 export interface TgdPainterFramebufferOptions {
     name?: string
@@ -31,7 +32,7 @@ export interface TgdPainterFramebufferOptions {
      * If the size is defined, it takes precedence over `viewportMatchingScale`.
      * In this case, the output textures will have this fixed size.
      */
-    size?: { width: number; height: number }
+    fixedSize?: [width: number, height: number]
     textureColor0?: TgdTexture2D
     textureColor1?: TgdTexture2D
     textureColor2?: TgdTexture2D
@@ -48,13 +49,12 @@ export interface TgdPainterFramebufferOptions {
 }
 
 export class TgdPainterFramebuffer extends TgdPainterGroup {
-    public readonly textureColor0: TgdTexture2D | undefined
-    public readonly textureColor1: TgdTexture2D | undefined
-    public readonly textureColor2: TgdTexture2D | undefined
-    public readonly textureColor3: TgdTexture2D | undefined
     public readonly textureDepth: TgdTextureDepth | undefined
-    public size?: { width: number; height: number } = undefined
 
+    private _textureColor0: TgdTexture2D | undefined
+    private _textureColor1: TgdTexture2D | undefined
+    private _textureColor2: TgdTexture2D | undefined
+    private _textureColor3: TgdTexture2D | undefined
     /**
      * The framebuffer becomes dirty as soon as the width or height changes.
      */
@@ -65,16 +65,17 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private _depthBuffer: WebGLRenderbuffer | null = null
     private _stencilBuffer: WebGLRenderbuffer | null = null
     private readonly drawBuffers: number[]
+    private readonly isFixedSize: boolean
 
     constructor(
-        private readonly context: { gl: WebGL2RenderingContext },
+        private readonly context: TgdContext,
         private readonly options: Partial<TgdPainterFramebufferOptions>,
     ) {
         super({
-            name: options.name,
             children: options.children,
         })
-        this.size = options.size
+        if (options.name) this.name = options.name
+        else this.name = `FramebufferMSAA/${this.name}`
         const { textureColor0, textureColor1, textureColor2, textureColor3 } = options
         if (!(textureColor0 || textureColor1 || textureColor2 || textureColor3)) {
             console.warn(
@@ -96,12 +97,58 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             this.textureColor2 ? gl.COLOR_ATTACHMENT2 : gl.NONE,
             this.textureColor3 ? gl.COLOR_ATTACHMENT3 : gl.NONE,
         ]
+        this.isFixedSize = !!options.fixedSize
+        if (options.fixedSize) {
+            const [width, height] = options.fixedSize
+            this.width = width
+            this.height = height
+        }
+    }
+
+    get textureColor0() {
+        return this._textureColor0
+    }
+    set textureColor0(textureColor0: TgdTexture2D | undefined) {
+        if (this._textureColor0 === textureColor0) return
+
+        this._textureColor0 = textureColor0
+        this.dirty = true
+    }
+
+    get textureColor1() {
+        return this._textureColor1
+    }
+    set textureColor1(textureColor1: TgdTexture2D | undefined) {
+        if (this._textureColor1 === textureColor1) return
+
+        this._textureColor1 = textureColor1
+        this.dirty = true
+    }
+
+    get textureColor2() {
+        return this._textureColor2
+    }
+    set textureColor2(textureColor2: TgdTexture2D | undefined) {
+        if (this._textureColor2 === textureColor2) return
+
+        this._textureColor2 = textureColor2
+        this.dirty = true
+    }
+
+    get textureColor3() {
+        return this._textureColor3
+    }
+    set textureColor3(textureColor3: TgdTexture2D | undefined) {
+        if (this._textureColor3 === textureColor3) return
+
+        this._textureColor3 = textureColor3
+        this.dirty = true
     }
 
     get width(): number {
         return this._width
     }
-    private set width(v: number) {
+    set width(v: number) {
         if (this._width === v) return
 
         this._width = v
@@ -111,7 +158,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     get height(): number {
         return this._height
     }
-    private set height(v: number) {
+    set height(v: number) {
         if (this._height === v) return
 
         this._height = v
@@ -149,7 +196,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     }
 
     private createStencilBuffer(gl: WebGL2RenderingContext) {
-        if (this.options.stencilBuffer !== false) {
+        if (this.options.stencilBuffer) {
             const { width, height } = this
             const stencilBuffer = gl.createRenderbuffer()
             if (!stencilBuffer) throw new Error("Unable to create WebGLRenderBuffer for stencil!")
@@ -164,9 +211,11 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private createFramebufferIfNeeded() {
         if (!this.dirty) return
 
-        const { context } = this
-        const { gl } = context
+        const { context, width, height } = this
+        if (width < 1 || height < 1) return
+
         this.delete()
+        const { gl } = context
         this._framebuffer = webglCreateFramebuffer(gl)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         this.updateTextureForColor(this.textureColor0, 0)
@@ -183,21 +232,34 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     }
 
     paint(time: number, delta: number): void {
-        const { context, options, size } = this
+        const { context, options } = this
+        const { aspectRatio } = context
         const { gl } = context
-        const { viewportMatchingScale = 1 } = options
-        this.width = size?.width ?? Math.round(gl.drawingBufferWidth * viewportMatchingScale)
-        this.height = size?.height ?? Math.round(gl.drawingBufferHeight * viewportMatchingScale)
+        if (!this.isFixedSize) {
+            const { viewportMatchingScale = 1 } = options
+            this.width = Math.round(context.width * viewportMatchingScale)
+            this.height = Math.round(context.height * viewportMatchingScale)
+        }
+        context.aspectRatio = this.width / this.height
         this.createFramebufferIfNeeded()
-        const currentFB = gl.getParameter(gl.FRAMEBUFFER_BINDING)
+        // const currentFB = gl.getParameter(gl.FRAMEBUFFER_BINDING)
+        // gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+        // const viewport: Int32Array = gl.getParameter(gl.VIEWPORT)
+        // gl.viewport(0, 0, this.width, this.height)
+        // gl.drawBuffers(this.drawBuffers)
+        // super.paint(time, delta)
+        // gl.bindFramebuffer(gl.FRAMEBUFFER, currentFB)
+        // const [x, y, w, h] = viewport
+        // gl.viewport(x, y, w, h)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        const viewport: Int32Array = gl.getParameter(gl.VIEWPORT)
+        const viewport = context.webglParams.viewport
         gl.viewport(0, 0, this.width, this.height)
         gl.drawBuffers(this.drawBuffers)
         super.paint(time, delta)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, currentFB)
-        const [x, y, w, h] = viewport
-        gl.viewport(x, y, w, h)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+        // this.blitFramebuffers()
+        context.webglParams.viewport = viewport
+        context.aspectRatio = aspectRatio
     }
 
     delete() {

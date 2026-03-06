@@ -10,6 +10,7 @@ import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { makeCapsule } from "./capsule"
+import { TgdContext } from "@tgd/context"
 
 type DatasetOption = TgdPainterSegments | InstanceDataset | (() => InstanceDataset)
 
@@ -117,11 +118,7 @@ export class TgdPainterSegments extends TgdPainter {
     private readonly material: TgdMaterial
 
     constructor(
-        protected readonly context: {
-            gl: WebGL2RenderingContext
-            webglParams: WebglParams
-            camera: TgdCamera
-        },
+        protected readonly context: TgdContext,
         options: TgdPainterSegmentsOptions,
     ) {
         super()
