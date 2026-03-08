@@ -28,7 +28,7 @@ interface SpritesOptions {
 export async function createTipsPainter(
     context: TgdContext,
     { size = 128, red = R, green = G, blue = B }: Partial<SpritesOptions> = {},
-): Promise<{ tipsNormal: TgdPainter; tipsMask: TgdPainter }> {
+): Promise<{ tipsNormal: PainterTipsNormal; tipsMask: TgdPainter }> {
     const canvas = await tgdLoadCanvasFromSvg(makeTipsSVG(size, red, green, blue))
     const texture = new TgdTexture2D(context, {
         params: {

@@ -12,6 +12,8 @@ interface PainterTipsNormalOptions {
 }
 
 export class PainterTipsNormal extends TgdPainter {
+    public index = -1
+
     private readonly texture: TgdTexture2D
     private readonly prg: TgdProgram
     private readonly vao: TgdVertexArray
@@ -107,9 +109,10 @@ export class PainterTipsNormal extends TgdPainter {
     }
 
     paint(time: number, delta: number): void {
-        const { context, prg, vao, texture } = this
+        const { context, prg, vao, texture, index } = this
         const { gl, camera } = context
         prg.use()
+        prg.uniform1f("uniIndex", index)
         prg.uniform1f("uniRadius", 0.17)
         prg.uniform1f("uniScreenHeightInPixels", context.height)
         prg.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)

@@ -10,6 +10,8 @@ import { TgdPainterClear } from "../clear"
 import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
 import { TgdPainterOverlay } from "../overlay"
 import { TgdPainterGroupCamera } from "../group-camera"
+import { TgdInputPointerEventMove } from "@tgd/types"
+import { PainterTipsNormal } from "./painters/normal"
 
 export interface TgdPainterGizmoOptions {
     alignX: number
@@ -32,6 +34,7 @@ export class TgdPainterGizmo extends TgdPainter {
     private readonly group = new TgdPainterGroup({ name: "Gizmo/Group" })
     private readonly textureFramebuffer: TgdTexture2D
     private overlay: TgdPainterOverlay | null = null
+    private contextOffscreen: TgdContext | null = null
 
     constructor(
         private readonly context: TgdContext,
@@ -53,7 +56,7 @@ export class TgdPainterGizmo extends TgdPainter {
         createTipsPainter(context).then(this.init)
     }
 
-    private readonly init = ({ tipsNormal, tipsMask }: { tipsNormal: TgdPainter; tipsMask: TgdPainter }) => {
+    private readonly init = ({ tipsNormal, tipsMask }: { tipsNormal: PainterTipsNormal; tipsMask: TgdPainter }) => {
         const { context, group, size, alignX, alignY, camera } = this
         console.log(camera.near, camera.far)
         group.removeAll()
@@ -68,7 +71,7 @@ export class TgdPainterGizmo extends TgdPainter {
             children: [
                 new TgdPainterGroupCamera(context, {
                     camera,
-                    children: [clear, tipsMask],
+                    children: [clear, tipsNormal],
                 }),
             ],
         })
@@ -91,7 +94,36 @@ export class TgdPainterGizmo extends TgdPainter {
         this.overlay = overlay
         group.add(framebuffer, overlay)
         context.paint()
-        context.debugHierarchy()
+        // Offscreen
+        const contextOffscreen = new TgdContext(new OffscreenCanvas(size, size), {
+            preserveDrawingBuffer: true,
+            antialias: false,
+            alpha: false,
+        })
+        contextOffscreen.add(
+            new TgdPainterState(contextOffscreen, {
+                depth: "less",
+                blend: "off",
+                cull: "off",
+                children: [
+                    new TgdPainterGroupCamera(context, {
+                        camera,
+                        children: [new TgdPainterClear(contextOffscreen, { color: [0, 0, 0, 1], depth: 1 }), tipsMask],
+                    }),
+                ],
+            }),
+        )
+        contextOffscreen.camera = camera
+        this.contextOffscreen = contextOffscreen
+        overlay.eventPointerHover.addListener((evt: TgdInputPointerEventMove) => {
+            const [red] = contextOffscreen.readPixel(evt.current.x, evt.current.y)
+            const index = Math.floor((red * 8) / 0xff) - 1
+            console.log("🐞 [gizmo@120] index =", index) // @FIXME: Remove this line written on 2026-03-08 at 18:56
+            if (tipsNormal.index !== index) {
+                tipsNormal.index = index
+                context.paint()
+            }
+        })
     }
 
     delete(): void {
@@ -99,12 +131,14 @@ export class TgdPainterGizmo extends TgdPainter {
     }
 
     paint(time: number, delta: number): void {
-        const { context, camera, group, size } = this
+        const { context, contextOffscreen, camera, group, size } = this
         camera.screenWidth = size
         camera.screenHeight = size
         camera.fitSpaceAtTarget(3, 3)
         camera.transfo.orientation = context.camera.transfo.orientation
         group.paint(time, delta)
+        // Offscreen
+        contextOffscreen?.paint()
     }
 
     get hierarchy(): TgdDebugPainterHierarchy {

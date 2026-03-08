@@ -6,7 +6,7 @@ import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdEvent } from "@tgd/event"
-import { TgdInputPointerEventTap } from "@tgd/index"
+import { TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/index"
 
 export interface TgdPainterOverlayOptions {
     /**
@@ -47,6 +47,7 @@ export interface TgdPainterOverlayOptions {
 
 export class TgdPainterOverlay extends TgdPainter {
     public readonly eventPointerTap = new TgdEvent<TgdInputPointerEventTap>()
+    public readonly eventPointerHover = new TgdEvent<TgdInputPointerEventMove>()
     public alignX: number
     public alignY: number
     public scaleX: number
@@ -126,6 +127,7 @@ export class TgdPainterOverlay extends TgdPainter {
         this.vao = vao
         const { pointer } = context.inputs
         pointer.eventTap.addListener(this.handleTap)
+        pointer.eventHover.addListener(this.handleHover)
     }
 
     private handleTap = (evtScreen: TgdInputPointerEventTap) => {
@@ -133,10 +135,21 @@ export class TgdPainterOverlay extends TgdPainter {
         const y = this.yScreenToLayout(evtScreen.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
 
-        const evtLayout = structuredClone(evtScreen)
-        evtLayout.x = x
-        evtLayout.y = y
-        this.eventPointerTap.dispatch(evtLayout)
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.x = x
+        evtOverlay.y = y
+        this.eventPointerTap.dispatch(evtOverlay)
+    }
+
+    private handleHover = (evtScreen: TgdInputPointerEventMove) => {
+        const x = this.xScreenToLayout(evtScreen.current.x)
+        const y = this.yScreenToLayout(evtScreen.current.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.current.x = x
+        evtOverlay.current.y = y
+        this.eventPointerHover.dispatch(evtOverlay)
     }
 
     delete(): void {
