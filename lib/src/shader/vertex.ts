@@ -1,11 +1,16 @@
-import { TgdConsole, WebglAttributeType, WebglUniformType } from ".."
 import {
-    TgdCodeBloc,
-    TgdCodeFunctions,
-    TgdCodeVariables,
-    expandFunctions,
-    tgdCodeStringify as tgdCodeToString,
-    expandVariables,
+	ensureArray,
+	TgdConsole,
+	WebglAttributeType,
+	WebglUniformType,
+} from ".."
+import {
+	expandFunctions,
+	expandVariables,
+	TgdCodeBloc,
+	TgdCodeFunctions,
+	TgdCodeVariables,
+	tgdCodeStringify as tgdCodeToString,
 } from "./code"
 
 /**
@@ -18,62 +23,67 @@ import {
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderVertex {
-    public precision: "lowp" | "mediump" | "highp"
-    public uniforms: TgdCodeVariables<WebglUniformType>
-    public attributes: TgdCodeVariables<WebglAttributeType>
-    public varying: TgdCodeVariables<WebglAttributeType>
-    public functions: TgdCodeFunctions
-    public mainCode: TgdCodeBloc
+	public precision: "lowp" | "mediump" | "highp"
+	public uniforms: TgdCodeVariables<WebglUniformType>
+	public attributes: TgdCodeVariables<WebglAttributeType>
+	public varying: TgdCodeVariables<WebglAttributeType>
+	public functions: TgdCodeFunctions
+	public mainCode: TgdCodeBloc
+	private readonly header: TgdCodeBloc
 
-    constructor({
-        precision = "highp",
-        uniforms = {},
-        attributes = {},
-        varying = {},
-        functions = {},
-        mainCode = [],
-    }: Partial<{
-        precision: "lowp" | "mediump" | "highp"
-        uniforms: TgdCodeVariables<WebglUniformType>
-        attributes: TgdCodeVariables<WebglAttributeType>
-        varying: TgdCodeVariables<WebglAttributeType>
-        functions: TgdCodeFunctions
-        mainCode: TgdCodeBloc
-    }> = {}) {
-        this.precision = precision
-        this.uniforms = uniforms
-        this.attributes = attributes
-        this.varying = varying
-        this.functions = functions
-        this.mainCode = mainCode
-    }
+	constructor({
+		precision = "highp",
+		uniforms = {},
+		attributes = {},
+		varying = {},
+		functions = {},
+		mainCode = [],
+		header = [],
+	}: Partial<{
+		precision: "lowp" | "mediump" | "highp"
+		uniforms: TgdCodeVariables<WebglUniformType>
+		attributes: TgdCodeVariables<WebglAttributeType>
+		varying: TgdCodeVariables<WebglAttributeType>
+		functions: TgdCodeFunctions
+		mainCode: TgdCodeBloc
+		header: TgdCodeBloc
+	}> = {}) {
+		this.precision = precision
+		this.uniforms = uniforms
+		this.attributes = attributes
+		this.varying = varying
+		this.functions = functions
+		this.mainCode = mainCode
+		this.header = header
+	}
 
-    get code() {
-        return tgdCodeToString([
-            `#version 300 es`,
-            `precision ${this.precision} float;`,
-            ...expandVariables(this.uniforms, "uniform"),
-            ...expandVariables(this.attributes, "in"),
-            ...expandVariables(this.varying, "out"),
-            ...expandFunctions(this.functions),
-            "",
-            `void main() {`,
-            this.mainCode,
-            "}",
-        ])
-    }
+	get code() {
+		return tgdCodeToString([
+			"#version 300 es",
+			`precision ${this.precision} float;`,
+			...ensureArray(this.header),
+			...expandVariables(this.uniforms, "uniform"),
+			...expandVariables(this.attributes, "in"),
+			...expandVariables(this.varying, "out"),
+			...expandFunctions(this.functions),
+			"",
+			"void main() {",
+			this.mainCode,
+			"}",
+		])
+	}
 
-    debug(caption = "Vertex shader") {
-        console.log(caption)
-        const { code } = this
-        const out = new TgdConsole(
-            {
-                text: caption,
-                bold: true,
-                color: "#6bf",
-            },
-            code,
-        )
-        out.debug()
-    }
+	debug(caption = "Vertex shader") {
+		console.log(caption)
+		const { code } = this
+		const out = new TgdConsole(
+			{
+				text: caption,
+				bold: true,
+				color: "#6bf",
+			},
+			code,
+		)
+		out.debug()
+	}
 }

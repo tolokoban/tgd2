@@ -1,10 +1,10 @@
 import {
-    TgdContext,
+    TgdCameraPerspective,
+    type TgdContext,
     TgdPainterClear,
-    TgdPainterState,
     TgdPainterGizmo,
     TgdPainterMesh,
-    TgdCameraPerspective,
+    TgdPainterState,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -39,6 +39,7 @@ export default function Demo() {
     return (
         <View
             onReady={init}
+            disableDefaultDoubleTap
             controller={{
                 inertiaOrbit: 1000,
             }}

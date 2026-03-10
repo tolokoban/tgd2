@@ -1,5 +1,6 @@
 export * from "./action"
 export * from "./animation"
+export * from "./array"
 export * from "./assert"
 export * from "./bbox"
 export * from "./canvas"
