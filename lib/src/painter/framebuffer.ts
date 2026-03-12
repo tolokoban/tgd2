@@ -68,7 +68,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private readonly isFixedSize: boolean
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         private readonly options: Partial<TgdPainterFramebufferOptions>,
     ) {
         super({

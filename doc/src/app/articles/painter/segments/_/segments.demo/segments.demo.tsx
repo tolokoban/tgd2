@@ -6,10 +6,8 @@ import {
     TgdControllerCameraOrbit,
     TgdMaterialDiffuse,
     TgdPainterClear,
-    TgdPainterLogic,
     TgdPainterSegments,
     TgdPainterSegmentsData,
-    TgdPainterSegmentsMorphing,
     TgdPainterState,
     TgdTexture2D,
     webglPresetDepth,
@@ -50,7 +48,7 @@ function init(context: TgdContext) {
     const palette = new TgdTexture2D(context).loadBitmap(
         tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
     )
-    const segments1 = new TgdPainterSegments(context, {
+    const segments = new TgdPainterSegments(context, {
         dataset: data1.makeDataset,
         roundness: 16,
         minRadius: 2,
@@ -59,12 +57,12 @@ function init(context: TgdContext) {
             lockLightsToCamera: true,
         }),
     })
-    segments1.debug()
-    segments1.transfo.orbitAroundX(Math.random() * 360)
-    segments1.transfo.orbitAroundZ(Math.random() * 360)
+    segments.debug()
+    segments.transfo.orbitAroundX(Math.random() * 360)
+    segments.transfo.orbitAroundZ(Math.random() * 360)
     const state = new TgdPainterState(context, {
-        depth: webglPresetDepth.less,
-        children: [segments1],
+        depth: "less",
+        children: [segments],
     })
     context.add(clear, state)
     context.paint()
@@ -74,6 +72,10 @@ function init(context: TgdContext) {
         const [R, G, B] = context.readPixel(x, y)
         console.log(`%c(${R}, ${G}, ${B})]`, `color:#777;background:rgb(${R},${G},${B})`)
     })
+    return ({ minRadius }: { minRadius: number }) => {
+        segments.minRadius = minRadius
+        context.paint()
+    }
 }
 
 export default function Demo() {
@@ -83,6 +85,15 @@ export default function Demo() {
             gizmo
             options={{
                 preserveDrawingBuffer: true,
+            }}
+            settings={{
+                minRadius: {
+                    label: "minRadius",
+                    value: 2,
+                    min: 0,
+                    max: 16,
+                    step: 1,
+                },
             }}
         />
     )

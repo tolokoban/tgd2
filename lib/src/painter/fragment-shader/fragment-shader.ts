@@ -34,7 +34,7 @@ export class TgdPainterFragmentShader extends TgdPainter {
     private readonly vao: TgdVertexArray
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         private readonly options: TgdPainterFragmentShaderOptions,
     ) {
         super()

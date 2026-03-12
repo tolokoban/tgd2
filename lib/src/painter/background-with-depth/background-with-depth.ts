@@ -53,7 +53,7 @@ export class TgdPainterBackgroundWithDepth extends TgdPainter {
     private lastHeight = -1
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         { background, children }: TgdPainterBackgroundWithDepthOptions,
     ) {
         super()

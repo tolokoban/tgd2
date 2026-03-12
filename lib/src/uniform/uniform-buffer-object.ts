@@ -53,7 +53,7 @@ export class TgdUniformBufferObject<
     private dirty = true
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         { uniforms, values }: TgdUniformBufferObjectOptions<T>,
     ) {
         this.bindingPoint = context.uniformBufferObjects.add(this)

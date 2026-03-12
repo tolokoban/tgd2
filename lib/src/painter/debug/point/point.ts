@@ -14,7 +14,7 @@ export class TgdPainterDebugPoint extends TgdPainter {
 
     private readonly prg: TgdProgram
 
-    constructor(private readonly context: TgdContext) {
+    constructor(public readonly context: TgdContext) {
         super()
         this.prg = new TgdProgram(context.gl, {
             vert: new TgdShaderVertex({

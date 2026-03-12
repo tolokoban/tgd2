@@ -29,7 +29,7 @@ export class TgdPainterSkybox extends TgdPainter {
     private readonly tmpMat = new TgdMat4()
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         options: TgdPainterSkyboxOptions,
     ) {
         super()

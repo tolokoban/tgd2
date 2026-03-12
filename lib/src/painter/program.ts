@@ -96,7 +96,7 @@ export class TgdPainterProgram extends TgdPainter {
     private readonly onDelete?: () => void
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         {
             onEnter,
             onDelete,

@@ -43,7 +43,7 @@ export class TgdPainterGizmo extends TgdPainter {
     private readonly uniformCamera: TgdUniformBufferObject
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         { alignX = +1, alignY = +1, size = 128, margin = 0 }: Partial<TgdPainterGizmoOptions> = {},
     ) {
         super()

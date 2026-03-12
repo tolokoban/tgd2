@@ -14,7 +14,7 @@ export class TipsPainter extends TgdPainter {
     private readonly prg: TgdProgram
     private readonly vao: TgdVertexArray
 
-    constructor(private readonly context: TgdContext) {
+    constructor(public readonly context: TgdContext) {
         super()
         this.texture = new TgdTexture2D(context)
             .loadBitmap(createTipsCanvas())

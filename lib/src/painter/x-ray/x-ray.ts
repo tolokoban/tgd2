@@ -28,7 +28,7 @@ export class TgdPainterXRay extends TgdPainter {
     private readonly material: TgdMaterialGhost
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         options: TgdPainterXRayOptions,
     ) {
         super()

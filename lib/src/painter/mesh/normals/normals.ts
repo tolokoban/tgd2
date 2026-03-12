@@ -19,7 +19,7 @@ export class TgdPainterMeshNormals extends TgdPainter {
     private readonly elementsCount: number
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         geometry: TgdGeometry,
     ) {
         super()

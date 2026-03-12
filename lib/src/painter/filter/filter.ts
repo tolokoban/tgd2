@@ -34,7 +34,7 @@ export class TgdPainterFilter extends TgdPainter {
     private filterIndex = 0
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         options: TgdPainterFilterOptions,
     ) {
         super()

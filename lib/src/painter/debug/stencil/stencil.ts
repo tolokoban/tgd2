@@ -11,7 +11,7 @@ export class TgdPainterDebugStencil extends TgdPainter {
     private readonly program: TgdProgram
     private readonly vao: TgdVertexArray
 
-    constructor(private readonly context: TgdContext) {
+    constructor(public readonly context: TgdContext) {
         super()
 
         this.program = new TgdProgram(context.gl, {

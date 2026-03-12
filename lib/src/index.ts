@@ -1,5 +1,7 @@
 "use client"
 
+export { version } from "./version"
+
 export * from "./bounding-box"
 export * from "./buffer"
 export * from "./camera"

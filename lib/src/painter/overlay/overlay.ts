@@ -68,7 +68,7 @@ export class TgdPainterOverlay extends TgdPainter {
     private vao: TgdVertexArray
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         {
             alignX = +1,
             alignY = +1,

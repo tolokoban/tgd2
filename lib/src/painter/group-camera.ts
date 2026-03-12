@@ -17,7 +17,7 @@ export class TgdPainterGroupCamera extends TgdPainterGroup {
     public camera: TgdCamera
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         options: TgdPainterGroupCameraOptions = {},
     ) {
         super(options.children)

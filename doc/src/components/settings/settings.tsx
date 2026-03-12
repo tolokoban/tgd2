@@ -12,6 +12,7 @@ export type SettingsDefinitions = Record<
         label: string
         min?: number
         max?: number
+        step?: number
     }
 >
 
@@ -61,6 +62,7 @@ export function Settings<T extends SettingsDefinitions>({ className, values, onC
                             label={item.label}
                             min={min}
                             max={max}
+                            step={item.step ?? (max - min) / 100}
                             value={item.value}
                             onChange={(value) => update(key, value)}
                         />

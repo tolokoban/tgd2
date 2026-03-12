@@ -13,7 +13,7 @@ export class PainterTipsMask extends TgdPainter {
     private readonly vao: TgdVertexArray
 
     constructor(
-        private readonly context: TgdContext,
+        public readonly context: TgdContext,
         options: { size: number },
     ) {
         super()
