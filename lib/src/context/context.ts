@@ -1,3 +1,4 @@
+import { TgdPainterFunction } from "@tgd/types/painter"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdConsole } from "@tgd/debug"
 import { TgdInputs } from "@tgd/input"
@@ -144,6 +145,7 @@ export class TgdContext extends TgdPainterGroup {
     private readonly readPixelColor = new Uint8Array(4)
     // Function to call after WebGL context restore.
     private readonly initialize?: (context: TgdContext) => void
+    private readonly oneTimePainters = new Set<{ paint: TgdPainterFunction }>()
 
     /**
      * @param canvas The canvas to which attach a WebGL2 context.
@@ -424,6 +426,20 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     /**
+     * When you need a painter to be painted only one time.
+     *
+     * These painters will be painted before all the recurrent ones during next repaint.
+     * The main purpose of this function is to use it with framebuffers that will
+     * update textures that could be used in normal paintings.
+     */
+    readonly paintOneTime = (...painters: Array<{ paint: TgdPainterFunction }>) => {
+        for (const painter of painters) {
+            this.oneTimePainters.add(painter)
+        }
+        this.paint()
+    }
+
+    /**
      * Trigger the painters to render the scene.
      */
     readonly paint = () => {
@@ -467,6 +483,10 @@ export class TgdContext extends TgdPainterGroup {
             this.aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
 
             webglParams.setViewport(0, 0, gl.canvas.width, gl.canvas.height)
+            for (const oneTimePainter of this.oneTimePainters) {
+                oneTimePainter.paint(timeInSec, delayInSec)
+            }
+            this.oneTimePainters.clear()
             super.paint(timeInSec, delayInSec)
             if (this.animationManager.paint(timeInSec) || this.paintingIsQueued || this.isPlaying) {
                 this.paintingIsOngoing = false
