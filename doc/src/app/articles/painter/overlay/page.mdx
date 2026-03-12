@@ -1,5 +1,19 @@
-import Demo from "./_/main.demo"
+import DemoMain from "./_/main.demo"
+import DemoMargin from "./_/margin.demo"
 
 # [TgdPainterOverlay](docs/classes/TgdPainterOverlay.html)
 
-<Demo />
+## Alignement
+
+Use `alignX` and `alignY` to move the overlay around.
+
+<DemoMain />
+
+## Margins and fullsize
+
+If you don't define the __width__, the overlay will take the maximum width, respecting the margins.
+This is the same behaviour with the __height__.
+
+Check `eventResize` for overlay size changes.
+
+<DemoMargin />

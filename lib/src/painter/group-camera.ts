@@ -2,11 +2,12 @@ import { TgdCamera } from "@tgd/camera"
 import { TgdPainterGroup } from "./group"
 import { TgdContext } from "@tgd/context"
 import { TgdPainter } from "./painter"
+import { TgdPainterFunction } from "@tgd/types/painter"
 
 export interface TgdPainterGroupCameraOptions {
     name?: string
     camera?: TgdCamera
-    children?: TgdPainter[]
+    children?: (TgdPainter | TgdPainterFunction)[]
 }
 
 /**

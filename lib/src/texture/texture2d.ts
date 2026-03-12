@@ -3,13 +3,14 @@ import { TgdEvent } from "@tgd/event"
 import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
-import type { TgdProgram } from "@tgd/program"
+import { TgdProgram } from "@tgd/program"
 import { isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
 import { webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 import { TgdContext } from "@tgd/context"
+import { TgdUniformBufferObject } from "@tgd/uniform"
 
 interface TgdTexture2DStorage {
     width: number
@@ -347,7 +348,7 @@ gl.texStorage2D(
     /**
      *
      * @param unit Unit to link the texture to
-     * @param program The program that owns the uniform to update
+     * @param program The program or uniform block object that owns the uniform to update
      * @param uniformName The uniform that holds the texture
      */
     activate(unit: number, program?: TgdProgram, uniformName?: string) {

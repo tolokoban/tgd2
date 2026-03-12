@@ -1,4 +1,3 @@
-import type { TgdCamera } from "@tgd/camera"
 import { TgdContext, TgdLogic } from "@tgd/context"
 import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
@@ -8,10 +7,13 @@ import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
 import { TgdVertexArray } from "@tgd/vao"
-import type { WebglParams } from "./../../../context/webgl-params"
 import { TgdPainter } from "../../painter"
+import { TgdUniformBufferObjectCamera } from "@tgd/uniform"
+import { WebglUniformType } from "@tgd/types"
+import { TgdCodeVariables } from "@tgd/shader"
 
 export interface TgdPainterMeshOptions {
+    uniformCamera?: TgdUniformBufferObjectCamera
     transfo?: Partial<TgdTransfoOptions> | TgdTransfo
     geometry?: TgdGeometry
     material?: TgdMaterial
@@ -36,13 +38,15 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
     private readonly drawMode: number = 0
     private bboxMin: TgdVec3 | null = null
     private bboxMax: TgdVec3 | null = null
+    private readonly uniformCamera?: TgdUniformBufferObjectCamera
 
     constructor(
         protected readonly context: TgdContext,
         options: TgdPainterMeshOptions = {},
     ) {
         super()
-        const { transfo, material = new TgdMaterialNormals(), geometry = new TgdGeometryBox() } = options
+        const { uniformCamera, transfo, material = new TgdMaterialNormals(), geometry = new TgdGeometryBox() } = options
+        this.uniformCamera = uniformCamera
         this.transfo = new TgdTransfo(transfo)
         this.material = material
         this.geometry = geometry
@@ -50,13 +54,17 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         material.attPosition = geometry.attPosition
         material.attNormal = geometry.attNormal
         material.attUV = geometry.attUV
+        const uniforms: TgdCodeVariables<WebglUniformType> = {
+            uniTransfoMatrix: "mat4",
+            ...material.uniforms,
+        }
+        if (!uniformCamera) {
+            uniforms.uniModelViewMatrix = "mat4"
+            uniforms.uniProjectionMatrix = "mat4"
+        }
         const vert = new TgdShaderVertex({
-            uniforms: {
-                uniTransfoMatrix: "mat4",
-                uniModelViewMatrix: "mat4",
-                uniProjectionMatrix: "mat4",
-                ...material.uniforms,
-            },
+            uniforms,
+            header: uniformCamera?.toShaderCode("uniformCamera"),
             attributes: {
                 [geometry.attPosition]: "vec4",
                 [geometry.attNormal]: "vec3",
@@ -102,6 +110,9 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
             frag: frag.code,
         })
         this.program = prg
+        if (uniformCamera) {
+            uniformCamera.bindToProgram(prg, "uniformCamera")
+        }
         this.vao = new TgdVertexArray(context.gl, prg, [geometry.dataset], geometry.elements)
         this.elementsType = geometry.elementsType
         this.count = geometry.count
@@ -145,14 +156,16 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
     }
 
     public readonly paint = (time: number, delta: number) => {
-        const { context, program, geometry, material, drawMode, count, transfo } = this
+        const { context, program, geometry, material, drawMode, count, transfo, uniformCamera } = this
         const { gl, camera } = context
         this.logic.exec(time, delta)
         program.use()
         material.setUniforms?.({ context, program, time, delta })
         program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
-        program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
-        program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        if (!uniformCamera) {
+            program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
+            program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        }
         material.applyState(this.context, () => {
             this.vao.bind()
             if (geometry.elements) {

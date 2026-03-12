@@ -27,7 +27,16 @@ if (typeof Package.port !== "number") {
  * @returns {Rspack.Configuration}
  */
 export default function (env, argv) {
-    const isProdMode = process.env.NODE_ENV === "production"
+    const isProdMode = argv.mode === "production"
+    if (isProdMode) {
+        console.log("+------------+")
+        console.log("| PRODUCTION |")
+        console.log("+------------+")
+    } else {
+        console.log("+-------------+")
+        console.log("| DEVELOPMENT |")
+        console.log("+-------------+")
+    }
 
     return {
         cache: false,
@@ -104,7 +113,7 @@ export default function (env, argv) {
                     version: Package.version,
                     title: "Tolokoban",
                 },
-                minify: isProdMode,
+                minify: false, // isProdMode,
             }),
             new Rspack.CssExtractRspackPlugin(),
         ],

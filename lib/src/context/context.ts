@@ -7,6 +7,7 @@ import type { TgdAnimation } from "../types/animation"
 import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { WebglParams } from "./webgl-params"
+import { UniformBufferObjectsManager } from "./ubo-manager"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -106,6 +107,7 @@ export class TgdContext extends TgdPainterGroup {
      */
     public readonly eventWebGLContextRestored = new TgdEvent<TgdContext>()
     public resolution = 1
+    public readonly uniformBufferObjects = new UniformBufferObjectsManager()
 
     private _gl: WebGL2RenderingContext | null = null
     /**

@@ -2,12 +2,13 @@ import { TgdLogic } from "@tgd/context"
 import { TgdConsole } from "@tgd/debug"
 import type { TgdPainterFunction } from "@tgd/types/painter"
 import { type TgdDebugPainterHierarchy, TgdPainter } from "./painter"
+import { TgdPainterLogic } from "./logic"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delta: number): void
     onExit?(time: number, delta: number): void
     name?: string
-    children?: TgdPainter[]
+    children?: (TgdPainter | TgdPainterFunction)[]
 }
 
 /**
@@ -26,19 +27,19 @@ export class TgdPainterGroup extends TgdPainter {
     private readonly logics: Array<(time: number, delta: number) => void> = []
 
     constructor()
-    constructor(painters?: TgdPainter[], options?: TgdPainterGroupOptions)
+    constructor(painters?: (TgdPainter | TgdPainterFunction)[], options?: TgdPainterGroupOptions)
     constructor(options?: TgdPainterGroupOptions)
-    constructor(arg1?: TgdPainter[] | TgdPainterGroupOptions, arg2?: TgdPainterGroupOptions) {
+    constructor(arg1?: (TgdPainter | TgdPainterFunction)[] | TgdPainterGroupOptions, arg2?: TgdPainterGroupOptions) {
         super()
         this.painters = []
         if (Array.isArray(arg1)) {
-            for (const painter of arg1) this.painters.push(painter)
+            for (const painter of arg1) this.add(painter)
         } else if (arg1) {
             this.onEnter = arg1.onEnter
             this.onExit = arg1.onExit
             this.name = arg1.name ?? `Group/${this.name}`
             if (arg1.children) {
-                for (const painter of arg1.children) this.painters.push(painter)
+                for (const painter of arg1.children) this.add(painter)
             }
         }
         if (arg2) {
@@ -47,9 +48,9 @@ export class TgdPainterGroup extends TgdPainter {
             this.name = arg2.name ?? `Group/${this.name}`
             if (arg2.children) {
                 for (const painter of arg2.children) {
-                    if (!this.painters.includes(painter)) {
-                        this.painters.push(painter)
-                    }
+                    if (painter instanceof TgdPainter && this.painters.includes(painter)) continue
+
+                    this.add(painter)
                 }
             }
         }
@@ -63,9 +64,13 @@ export class TgdPainterGroup extends TgdPainter {
         return this.painters.includes(painter)
     }
 
-    add(...painters: TgdPainter[]) {
+    add(...painters: (TgdPainter | TgdPainterFunction)[]) {
         for (const painter of painters) {
-            this.painters.push(painter)
+            if (painter instanceof TgdPainter) {
+                this.painters.push(painter)
+            } else {
+                this.painters.push(new TgdPainterLogic(painter))
+            }
         }
     }
 

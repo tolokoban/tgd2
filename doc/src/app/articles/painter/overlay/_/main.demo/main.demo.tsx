@@ -1,7 +1,6 @@
 import {
     tgdCanvasCreatePalette,
     TgdContext,
-    TgdGeometryBox,
     TgdPainterClear,
     TgdPainterMesh,
     TgdPainterOverlay,
@@ -14,6 +13,7 @@ import View from "@/components/demo/Tgd"
 // #begin
 function init(context: TgdContext) {
     const clear = new TgdPainterClear(context, { color: [0, 0.3, 0.5, 1], depth: 1 })
+    const canvas = tgdCanvasCreatePalette(["#f44b", "#4f4b", "#44fb", "#0000"], 2, 2)
     const overlay = new TgdPainterOverlay(context, {
         margin: 16,
         width: 160,
@@ -21,7 +21,7 @@ function init(context: TgdContext) {
         alignX: +1,
         alignY: +1,
         texture: new TgdTexture2D(context, {
-            load: tgdCanvasCreatePalette(["#f44b", "#4f4b", "#44fb", "#0000"], 2, 2),
+            load: canvas,
             params: {
                 minFilter: "NEAREST",
                 magFilter: "NEAREST",
@@ -47,13 +47,20 @@ function init(context: TgdContext) {
     )
     context.camera.fitSpaceAtTarget(1.2, 1.2)
     context.paint()
-    overlay.eventPointerTap.addListener(({ x, y }) => {
-        console.log("Tap:", x, y)
+    overlay.eventPointerTap.addListener((evt) => {
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return
+
+        const x = ((1 + evt.x) * ctx.canvas.width) / 2
+        const y = ((1 + evt.y) * ctx.canvas.height) / 2
+        ctx.fillStyle = "#ff0"
+        ctx.beginPath()
+        ctx.ellipse(x, y, 8, 8, 0, 0, Math.PI * 2)
+        ctx.fill()
     })
-    return ({ alignX, alignY, margin }: { alignX: number; alignY: number; margin: number }) => {
+    return ({ alignX, alignY }: { alignX: number; alignY: number }) => {
         overlay.alignX = alignX
         overlay.alignY = alignY
-        overlay.margin = margin
         context.paint()
     }
 }
@@ -77,16 +84,10 @@ export default function Demo() {
                     max: +1,
                 },
                 alignY: {
-                    label: "alignX",
+                    label: "alignY",
                     value: 1,
                     min: -1,
                     max: +1,
-                },
-                margin: {
-                    label: "margin",
-                    value: 16,
-                    min: 0,
-                    max: 32,
                 },
             }}
         />

@@ -32,7 +32,7 @@ export interface TgdPainterOverlayOptions {
     /**
      * Margin in pixels.
      */
-    margin: number
+    margin: number | [vertical: number, horizontal: number] | [top: number, right: number, bottom: number, left: number]
     /**
      * Texture to display in the overlay
      */
@@ -46,18 +46,24 @@ export interface TgdPainterOverlayOptions {
 }
 
 export class TgdPainterOverlay extends TgdPainter {
+    public readonly eventResize = new TgdEvent<{ width: number; height: number }>()
     public readonly eventPointerTap = new TgdEvent<TgdInputPointerEventTap>()
     public readonly eventPointerHover = new TgdEvent<TgdInputPointerEventMove>()
     public alignX: number
     public alignY: number
     public scaleX: number
     public scaleY: number
-    public width: number
-    public height: number
-    public margin: number
-    public texture: TgdTexture2D | undefined
+    public width?: number
+    public height?: number
+    public marginTop: number
+    public marginRight: number
+    public marginBottom: number
+    public marginLeft: number
     public z: number
+    public texture: TgdTexture2D | undefined
 
+    private lastWidth = 0
+    private lastHeight = 0
     private prg: TgdProgram
     private vao: TgdVertexArray
 
@@ -68,8 +74,8 @@ export class TgdPainterOverlay extends TgdPainter {
             alignY = +1,
             scaleX = 1,
             scaleY = 1,
-            width = 160,
-            height = 120,
+            width,
+            height,
             margin = 0,
             z = 0,
             texture,
@@ -83,7 +89,24 @@ export class TgdPainterOverlay extends TgdPainter {
         this.scaleY = scaleY
         this.width = width
         this.height = height
-        this.margin = margin
+        if (typeof margin === "number") {
+            this.marginTop = margin
+            this.marginRight = margin
+            this.marginBottom = margin
+            this.marginLeft = margin
+        } else if (margin.length === 2) {
+            const [vertical, horizontal] = margin
+            this.marginTop = vertical
+            this.marginRight = horizontal
+            this.marginBottom = vertical
+            this.marginLeft = horizontal
+        } else {
+            const [top, right, bottom, left] = margin
+            this.marginTop = top
+            this.marginRight = right
+            this.marginBottom = bottom
+            this.marginLeft = left
+        }
         this.z = z
         this.texture = texture
         const dataset = new TgdDataset({
@@ -162,6 +185,7 @@ export class TgdPainterOverlay extends TgdPainter {
     }
 
     paint(time: number, delta: number): void {
+        this.checkForResizeEvent()
         const { context, prg, vao, z, scaleX, scaleY, xLayoutToScreen, yLayoutToScreen, texture } = this
         const { gl } = context
         prg.use()
@@ -185,28 +209,55 @@ export class TgdPainterOverlay extends TgdPainter {
         vao.unbind()
     }
 
-    private xScreenToLayout = (xScreen: number) => {
-        const { context, width, alignX, margin } = this
-        const screenPerPixel = 2 / context.width
-        const center = alignX * (1 - screenPerPixel * (margin + width / 2))
-        return (2 * (xScreen - center)) / (width * screenPerPixel)
+    private checkForResizeEvent() {
+        const { context, lastWidth, lastHeight, marginLeft, marginRight, marginTop, marginBottom } = this
+        const width = Math.max(0, this.width ?? context.width - marginLeft - marginRight)
+        const height = Math.max(0, this.height ?? context.height - marginTop - marginBottom)
+        if (width !== lastWidth || height !== lastHeight) {
+            this.lastWidth = width
+            this.lastHeight = height
+            this.eventResize.dispatch({ width, height })
+        }
     }
-    private yScreenToLayout = (yScreen: number) => {
-        const { context, height, alignY, margin } = this
-        const screenPerPixel = 2 / context.height
-        const center = alignY * (1 - screenPerPixel * (margin + height / 2))
-        return (2 * (yScreen - center)) / (height * screenPerPixel)
+
+    private xScreenToLayout = (xScreen: number) => {
+        const { context, alignX, marginLeft, marginRight } = this
+        const marginPx = marginLeft + marginRight
+        const widthPx = this.width ?? context.width - marginPx
+        const frameWidthPx = context.width - widthPx - marginPx
+        const screenPerPixel = 2 / context.width
+        const center = marginLeft + (widthPx + (1 + alignX) * frameWidthPx - context.width) / 2
+        const factor = context.width / widthPx
+        return (xScreen - center * screenPerPixel) * factor
     }
     private readonly xLayoutToScreen = (xLayout: number) => {
-        const { context, width, alignX, margin } = this
+        const { context, alignX, marginLeft, marginRight } = this
+        const marginPx = marginLeft + marginRight
+        const widthPx = this.width ?? context.width - marginPx
+        const frameWidthPx = context.width - widthPx - marginPx
         const screenPerPixel = 2 / context.width
-        const center = alignX * (1 - screenPerPixel * (margin + width / 2))
-        return center + (xLayout * (width * screenPerPixel)) / 2
+        const center = marginLeft + (widthPx + (1 + alignX) * frameWidthPx - context.width) / 2
+        const factor = widthPx / context.width
+        return xLayout * factor + center * screenPerPixel
+    }
+    private yScreenToLayout = (yScreen: number) => {
+        const { context, alignY, marginTop, marginBottom } = this
+        const marginPx = marginTop + marginBottom
+        const heightPx = this.height ?? context.height - marginPx
+        const frameHeightPx = context.height - heightPx - marginPx
+        const screenPerPixel = 2 / context.height
+        const center = marginBottom + (heightPx + (1 + alignY) * frameHeightPx - context.height) / 2
+        const factor = context.height / heightPx
+        return (yScreen - center * screenPerPixel) * factor
     }
     private readonly yLayoutToScreen = (yLayout: number) => {
-        const { context, height, alignY, margin } = this
+        const { context, alignY, marginTop, marginBottom } = this
+        const marginPx = marginTop + marginBottom
+        const heightPx = this.height ?? context.height - marginPx
+        const frameHeightPx = context.height - heightPx - marginPx
         const screenPerPixel = 2 / context.height
-        const center = alignY * (1 - screenPerPixel * (margin + height / 2))
-        return center + (yLayout * (height * screenPerPixel)) / 2
+        const center = marginBottom + (heightPx + (1 + alignY) * frameHeightPx - context.height) / 2
+        const factor = heightPx / context.height
+        return yLayout * factor + center * screenPerPixel
     }
 }

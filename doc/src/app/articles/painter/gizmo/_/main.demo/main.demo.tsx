@@ -5,6 +5,7 @@ import {
     TgdPainterGizmo,
     TgdPainterMesh,
     TgdPainterState,
+    TgdUniformBufferObjectCamera,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -17,13 +18,19 @@ function init(context: TgdContext) {
         camera.far = 10
     }
     camera.fitSpaceAtTarget(2.2, 2.2)
+    const uniformCamera = new TgdUniformBufferObjectCamera(context)
     const clear = new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 })
+    const mesh = new TgdPainterMesh(context, { uniformCamera })
+    mesh.debug()
     context.add(
         clear,
+        () => {
+            uniformCamera.updateData()
+        },
         new TgdPainterState(context, {
             depth: "less",
             cull: "back",
-            children: [new TgdPainterMesh(context)],
+            children: [mesh],
         }),
         new TgdPainterState(context, {
             depth: "off",
