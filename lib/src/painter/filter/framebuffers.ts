@@ -19,6 +19,16 @@ export class Framebuffers {
         return this.textures[0]
     }
 
+    clear() {
+        const { gl } = this.context
+        const fb = this.framebuffers[1]
+        const currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+        gl.clearColor(0, 0, 0, 0)
+        gl.clear(gl.COLOR_BUFFER_BIT)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
+    }
+
     paint(action: () => void): TgdTexture2D {
         const { context, textureInput, textureToDelete } = this
         const { width, height } = textureInput

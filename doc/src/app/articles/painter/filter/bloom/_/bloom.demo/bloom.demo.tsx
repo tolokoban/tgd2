@@ -1,10 +1,7 @@
 import {
     type ArrayNumber4,
-    tgdCalcMapRange,
-    tgdCalcModulo,
     type TgdContext,
     TgdFilterBlur,
-    TgdFilterHueRotation,
     TgdFilterMultiply,
     TgdLight,
     TgdMaterialDiffuse,
@@ -13,13 +10,9 @@ import {
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
-    TgdPainterLogic,
     TgdPainterMeshGltf,
-    TgdPainterMix,
     TgdPainterState,
     TgdTexture2D,
-    webglPresetBlend,
-    webglPresetDepth,
 } from "@tolokoban/tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
 import View, { type Assets } from "@/components/demo/Tgd"
@@ -58,32 +51,29 @@ function init(context: TgdContext, assets: Assets) {
                 new TgdPainterFilter(context, {
                     texture: framebuffer.textureColor0,
                     flipY: true,
-                    filters: [
-                        ...TgdFilterBlur.createPair({ size: blurSize }),
-                        // filterMultiply
-                    ],
+                    filters: [...TgdFilterBlur.createPair({ size: blurSize }), filterMultiply],
                 }),
             ],
         }),
+        (time) => {
+            const s = Math.pow(Math.abs(Math.sin(time)), 13) * 2
+            filterMultiply.color.x = s
+            filterMultiply.color.y = s
+            filterMultiply.color.z = s
+        },
     )
-    context.paint()
+    context.play()
     // #end
-}
-
-function show(context: TgdContext, { textureColor0 }: { textureColor0: TgdTexture2D | undefined }) {
-    if (textureColor0) {
-        return new TgdPainterBackground(context, {
-            texture: textureColor0,
-            scaleY: -1,
-        })
-    }
-    return new TgdPainterClear(context, { color: [1, 0.1, 0.1, 1] })
 }
 
 export default function Demo() {
     return (
         <View
             onReady={init}
+            options={{
+                alpha: false,
+                preserveDrawingBuffer: false,
+            }}
             assets={{
                 glb: {
                     suzane: SuzaneURL,
@@ -101,16 +91,13 @@ function createMesh(context: TgdContext, assets: Assets, flat: boolean) {
         color: [0, 0, 0, 1],
         depth: 1,
     })
-    const color: ArrayNumber4 = [0.9, 0.3, 0.7, 1]
+    const color: ArrayNumber4 = [0.9, 0.6, 0.1, 1]
     const mesh = new TgdPainterMeshGltf(context, {
         asset: assets.glb.suzane,
         material: flat
-            ? new TgdMaterialFlat({ color })
+            ? new TgdMaterialFlat({ color: [0.3, 0.6, 0.9, 1] })
             : new TgdMaterialDiffuse({
                   color,
-                  ambient: new TgdLight({
-                      color: [0.8, 0.8, 0.8, 0],
-                  }),
                   lockLightsToCamera: true,
               }),
     })
@@ -118,6 +105,12 @@ function createMesh(context: TgdContext, assets: Assets, flat: boolean) {
         depth: "less",
         blend: "off",
         cull: "back",
-        children: [clear, mesh],
+        children: [
+            clear,
+            mesh,
+            (time) => {
+                mesh.transfo.setEulerRotation(time * 5, time * 7.124, time * -3.085)
+            },
+        ],
     })
 }

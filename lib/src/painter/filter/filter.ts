@@ -9,6 +9,7 @@ import { TgdVertexArray } from "@tgd/vao"
 import { TgdContext } from "@tgd/context"
 import { Framebuffers } from "./framebuffers"
 import { TgdConsole } from "@tgd/debug"
+import { TgdPainterState } from "../state"
 export interface TgdPainterFilterOptions {
     filters?: TgdFilter[]
     texture?: TgdTexture2D
@@ -98,10 +99,17 @@ export class TgdPainterFilter extends TgdPainter {
     paint(time: number, delta: number): void {
         const out = new TgdConsole()
         const { framebuffers, filters } = this
-        for (let index = 0; index < filters.length - 1; index++) {
-            out.add(framebuffers.texture.name).add(" -> ").add(filters[index].name).nl()
-            framebuffers.paint(() => this.paintOneFilter(index, time, delta))
-        }
+        TgdPainterState.do(this.context, {
+            depth: "off",
+            blend: "off",
+            cull: "off",
+            action: () => {
+                for (let index = 0; index < filters.length - 1; index++) {
+                    out.add(framebuffers.texture.name).add(" -> ").add(filters[index].name).nl()
+                    framebuffers.paint(() => this.paintOneFilter(index, time, delta))
+                }
+            },
+        })
         out.add(framebuffers.texture.name)
             .add(" -> ")
             .add(filters[filters.length - 1].name)
