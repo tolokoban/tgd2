@@ -1,12 +1,13 @@
 import {
-    type ArrayNumber4,
-    tgdCalcMapRange,
-    tgdCalcModulo,
+    ArrayNumber4,
     type TgdContext,
     TgdFilterBlur,
-    TgdFilterHueRotation,
+    TgdFilterChromaticAberration,
     TgdFilterMultiply,
+    TgdFilterVerbatim,
+    TgdFilterZoom,
     TgdLight,
+    tgdLoadImage,
     TgdMaterialDiffuse,
     TgdMaterialFlat,
     TgdPainterBackground,
@@ -15,24 +16,22 @@ import {
     TgdPainterFramebuffer,
     TgdPainterLogic,
     TgdPainterMeshGltf,
-    TgdPainterMix,
     TgdPainterState,
     TgdTexture2D,
-    webglPresetBlend,
-    webglPresetDepth,
 } from "@tolokoban/tgd"
-import SuzaneURL from "@/assets/mesh/suzanne.glb"
+import React from "react"
 import View, { type Assets } from "@/components/demo/Tgd"
+
+import SuzaneURL from "@/assets/mesh/suzanne.glb"
+import ImageURL from "@/assets/image/uv-grid.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
     const { camera } = context
     camera.fitSpaceAtTarget(3, 3)
     const mesh = createMesh(context, assets, false)
-    const meshFlat = createMesh(context, assets, true)
     const framebuffer = new TgdPainterFramebuffer(context, {
-        viewportMatchingScale: 0.25,
-        children: [meshFlat],
+        children: [mesh],
         textureColor0: new TgdTexture2D(context, {
             params: {
                 minFilter: "LINEAR",
@@ -44,40 +43,35 @@ function init(context: TgdContext, assets: Assets) {
         }),
     })
     const filterMultiply = new TgdFilterMultiply({
-        color: [0.5, 0.5, 0.5, 1],
+        color: [1, 1, 1, 1],
     })
-    const blurSize = 16
+    const filterZoom = new TgdFilterZoom()
+    const filterAberration = new TgdFilterChromaticAberration({
+        strength: 10,
+    })
+    const [hBlur, vBlur] = TgdFilterBlur.createPair({ size: 8 })
     context.add(
-        mesh,
         framebuffer,
-        new TgdPainterState(context, {
-            depth: "off",
-            cull: "off",
-            blend: "add",
-            children: [
-                new TgdPainterFilter(context, {
-                    texture: framebuffer.textureColor0,
-                    flipY: true,
-                    filters: [
-                        ...TgdFilterBlur.createPair({ size: blurSize }),
-                        // filterMultiply
-                    ],
-                }),
-            ],
+        new TgdPainterFilter(context, {
+            texture: framebuffer.textureColor0,
+            filters: [filterMultiply, filterZoom, hBlur, vBlur, filterAberration],
+            flipY: true,
         }),
+        (time) => {
+            filterMultiply.color.reset(
+                0.5 + Math.abs(Math.cos(time * 0.458)),
+                0.5 + Math.abs(Math.cos(time * 0.725)),
+                0.5 + Math.abs(Math.cos(time * 0.881)),
+                1,
+            )
+            filterZoom.zoom = 1 + Math.sin(time * 1.6) * 0.1
+            const blur = Math.max(0, Math.sin(time * 0.755))
+            hBlur.strength = blur
+            vBlur.strength = blur
+        },
     )
-    context.paint()
+    context.play()
     // #end
-}
-
-function show(context: TgdContext, { textureColor0 }: { textureColor0: TgdTexture2D | undefined }) {
-    if (textureColor0) {
-        return new TgdPainterBackground(context, {
-            texture: textureColor0,
-            scaleY: -1,
-        })
-    }
-    return new TgdPainterClear(context, { color: [1, 0.1, 0.1, 1] })
 }
 
 export default function Demo() {
@@ -88,9 +82,9 @@ export default function Demo() {
                 glb: {
                     suzane: SuzaneURL,
                 },
-            }}
-            controller={{
-                inertiaOrbit: 1000,
+                image: {
+                    image: ImageURL,
+                },
             }}
         />
     )
@@ -114,10 +108,20 @@ function createMesh(context: TgdContext, assets: Assets, flat: boolean) {
                   lockLightsToCamera: true,
               }),
     })
+    const background = new TgdPainterBackground(context, {
+        texture: new TgdTexture2D(context).loadBitmap(assets.image.image),
+    })
     return new TgdPainterState(context, {
         depth: "less",
         blend: "off",
         cull: "back",
-        children: [clear, mesh],
+        children: [
+            clear,
+            background,
+            mesh,
+            (time) => {
+                mesh.transfo.setEulerRotation(time * 50, time * 71.24, time * -34.85)
+            },
+        ],
     })
 }

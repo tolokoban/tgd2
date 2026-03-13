@@ -126,7 +126,14 @@ function coords(
 }
 
 // prettier-ignore
-const FACE_UV = [0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0]
+const FACE_UV = [
+    1, 1, 
+    1, 0, 
+    0, 1, 
+    0, 0, 
+    0, 1,
+    1, 0, 
+]
 
 const W3x2 = 1 / 3
 const H3x2 = 1 / 2

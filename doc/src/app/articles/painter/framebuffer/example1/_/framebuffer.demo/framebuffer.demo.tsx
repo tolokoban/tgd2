@@ -84,17 +84,6 @@ function init(context: TgdContext, assets: Assets) {
         filters: [new TgdFilterZoom()],
         flipY: true,
     })
-    /**
-     * This is important because the texture of a framebuffer is recreated
-     * any time the screen size changes.
-     */
-    framebuffer1.onExit = () => {
-        filters.texture = framebuffer1.textureColor0 ?? defaultTexture
-    }
-    framebuffer2.onExit = () => {
-        background.texture = framebuffer2.textureColor0 ?? defaultTexture
-        screen.texture = framebuffer2.textureColor0 ?? defaultTexture
-    }
     context.add(
         framebuffer1,
         framebuffer2,

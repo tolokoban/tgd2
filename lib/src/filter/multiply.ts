@@ -10,6 +10,7 @@ export class TgdFilterMultiply extends TgdFilter {
 
     constructor({ color }: { color?: TgdVec4 | ArrayNumber4 }) {
         super({
+            name: `TgdFilterMultiply/${TgdFilter.id++}`,
             fragmentShaderCode: [
                 "vec2 uv = varUV;",
                 "vec4 color = texture(uniTexture, uv);",

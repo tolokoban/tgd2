@@ -32,7 +32,7 @@ export interface TgdPainterFramebufferOptions {
      * If the size is defined, it takes precedence over `viewportMatchingScale`.
      * In this case, the output textures will have this fixed size.
      */
-    fixedSize?: [width: number, height: number]
+    fixedSize?: boolean
     textureColor0?: TgdTexture2D
     textureColor1?: TgdTexture2D
     textureColor2?: TgdTexture2D
@@ -59,8 +59,8 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
      * The framebuffer becomes dirty as soon as the width or height changes.
      */
     private dirty = true
-    private _width = 0
-    private _height = 0
+    private _lastWidth = 0
+    private _lastHeight = 0
     private _framebuffer: WebGLFramebuffer | null = null
     private _depthBuffer: WebGLRenderbuffer | null = null
     private _stencilBuffer: WebGLRenderbuffer | null = null
@@ -75,7 +75,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             children: options.children,
         })
         if (options.name) this.name = options.name
-        else this.name = `FramebufferMSAA/${this.name}`
+        else this.name = `Framebuffer/${this.name}`
         const { textureColor0, textureColor1, textureColor2, textureColor3 } = options
         if (!(textureColor0 || textureColor1 || textureColor2 || textureColor3)) {
             console.warn(
@@ -99,9 +99,15 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         ]
         this.isFixedSize = !!options.fixedSize
         if (options.fixedSize) {
-            const [width, height] = options.fixedSize
-            this.width = width
-            this.height = height
+            const texture = this.textureColor0 ?? this.textureColor1 ?? this.textureColor2 ?? this.textureColor3
+            if (!texture) throw new Error("[TgdPainterFramebuffer] Impossible error! Should be caugth before.")
+
+            const { width, height } = texture
+            if (width < 1 || height < 1) {
+                throw new Error(
+                    '[TgdPainterFramebuffer] If you chose "fixedSize", you must provide at least one texture with a size!',
+                )
+            }
         }
     }
 
@@ -145,30 +151,56 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = true
     }
 
-    get width(): number {
-        return this._width
-    }
-    set width(v: number) {
-        if (this._width === v) return
+    get textureWidth(): number {
+        const texture = this.textureColor0 ?? this.textureColor1 ?? this.textureColor2 ?? this.textureColor3
+        if (!texture)
+            throw new Error(
+                "[TgdPainterFramebuffer] You must provide at least one texture: textureColor0, textureColor1, textureColor2 or textureColor3!",
+            )
 
-        this._width = v
-        this.dirty = true
+        return texture.width
+    }
+
+    get textureHeight(): number {
+        const texture = this.textureColor0 ?? this.textureColor1 ?? this.textureColor2 ?? this.textureColor3
+        if (!texture)
+            throw new Error(
+                "[TgdPainterFramebuffer] You must provide at least one texture: textureColor0, textureColor1, textureColor2 or textureColor3!",
+            )
+
+        return texture.height
+    }
+
+    get width(): number {
+        if (this.isFixedSize) return this.textureWidth
+
+        const { context } = this
+        const { viewportMatchingScale = 1 } = this.options
+        return Math.round(context.width * viewportMatchingScale)
     }
 
     get height(): number {
-        return this._height
-    }
-    set height(v: number) {
-        if (this._height === v) return
+        if (this.isFixedSize) return this.textureHeight
 
-        this._height = v
-        this.dirty = true
+        const { context } = this
+        const { viewportMatchingScale = 1 } = this.options
+        return Math.round(context.height * viewportMatchingScale)
     }
 
-    private updateTextureForColor(tgdTexture: TgdTexture2D | undefined, attachment: number) {
+    private updateTextureForColor(
+        tgdTexture: TgdTexture2D | undefined,
+        attachment: number,
+        width: number,
+        height: number,
+    ) {
         if (!tgdTexture) return
 
-        const { context, width, height } = this
+        if (tgdTexture.internalFormat !== "RGBA8") {
+            throw new Error(
+                `[TgdPainterFramebuffer] texctureColor${attachment} must has an internal format of "RGBA8", but we got "${tgdTexture.internalFormat}"!`,
+            )
+        }
+        const { context } = this
         const { gl } = context
         tgdTexture.resize(width, height)
         gl.framebufferTexture2D(
@@ -180,10 +212,9 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         )
     }
 
-    private updateTextureForDepth(gl: WebGL2RenderingContext) {
+    private updateTextureForDepth(gl: WebGL2RenderingContext, width: number, height: number) {
         if (this.options.depthBuffer === false) return
 
-        const { width, height } = this
         // Create a Depth Buffer, because the default
         // framebuffer has none.
         const depthBuffer = gl.createRenderbuffer()
@@ -192,38 +223,43 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this._depthBuffer = depthBuffer
         gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height)
+        this.context.checkError("updateTextureForDepth")
         gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
     }
 
-    private createStencilBuffer(gl: WebGL2RenderingContext) {
-        if (this.options.stencilBuffer) {
-            const { width, height } = this
-            const stencilBuffer = gl.createRenderbuffer()
-            if (!stencilBuffer) throw new Error("Unable to create WebGLRenderBuffer for stencil!")
+    private createStencilBuffer(gl: WebGL2RenderingContext, width: number, height: number) {
+        if (!this.options.stencilBuffer) return
 
-            this._stencilBuffer = stencilBuffer
-            gl.bindRenderbuffer(gl.RENDERBUFFER, stencilBuffer)
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, width, height)
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilBuffer)
-        }
+        const stencilBuffer = gl.createRenderbuffer()
+        if (!stencilBuffer) throw new Error("Unable to create WebGLRenderBuffer for stencil!")
+
+        this._stencilBuffer = stencilBuffer
+        gl.bindRenderbuffer(gl.RENDERBUFFER, stencilBuffer)
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, width, height)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilBuffer)
     }
 
-    private createFramebufferIfNeeded() {
-        if (!this.dirty) return
-
-        const { context, width, height } = this
+    private createFramebufferIfNeeded(width: number, height: number) {
         if (width < 1 || height < 1) return
 
+        if (!this.dirty || (width === this._lastWidth && height === this._lastHeight)) return
+
+        const { context } = this
+        this._lastWidth = width
+        this._lastHeight = height
+        console.log("🐞 [framebuffer@244] width, height =", width, height) // @FIXME: Remove this line written on 2026-03-12 at 22:43
         this.delete()
         const { gl } = context
         this._framebuffer = webglCreateFramebuffer(gl)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        this.updateTextureForColor(this.textureColor0, 0)
-        this.updateTextureForColor(this.textureColor1, 1)
-        this.updateTextureForColor(this.textureColor2, 2)
-        this.updateTextureForColor(this.textureColor3, 3)
-        this.updateTextureForDepth(gl)
-        this.createStencilBuffer(gl)
+        this.updateTextureForColor(this.textureColor0, 0, width, height)
+        this.updateTextureForColor(this.textureColor1, 1, width, height)
+        this.updateTextureForColor(this.textureColor2, 2, width, height)
+        this.updateTextureForColor(this.textureColor3, 3, width, height)
+        this.updateTextureForDepth(gl, width, height)
+        this.createStencilBuffer(gl, width, height)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
             console.error(`Your Framebuffer is incomplete: ${webglLookup(status)}!`)
@@ -232,34 +268,17 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     }
 
     paint(time: number, delta: number): void {
-        const { context, options } = this
-        const { aspectRatio } = context
+        const { context, width, height } = this
         const { gl } = context
-        if (!this.isFixedSize) {
-            const { viewportMatchingScale = 1 } = options
-            this.width = Math.round(context.width * viewportMatchingScale)
-            this.height = Math.round(context.height * viewportMatchingScale)
+        const paint = () => {
+            const currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING)
+            this.createFramebufferIfNeeded(width, height)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+            gl.drawBuffers(this.drawBuffers)
+            super.paint(time, delta)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         }
-        context.aspectRatio = this.width / this.height
-        this.createFramebufferIfNeeded()
-        // const currentFB = gl.getParameter(gl.FRAMEBUFFER_BINDING)
-        // gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        // const viewport: Int32Array = gl.getParameter(gl.VIEWPORT)
-        // gl.viewport(0, 0, this.width, this.height)
-        // gl.drawBuffers(this.drawBuffers)
-        // super.paint(time, delta)
-        // gl.bindFramebuffer(gl.FRAMEBUFFER, currentFB)
-        // const [x, y, w, h] = viewport
-        // gl.viewport(x, y, w, h)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
-        const viewport = context.webglParams.viewport
-        gl.viewport(0, 0, this.width, this.height)
-        gl.drawBuffers(this.drawBuffers)
-        super.paint(time, delta)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-        // this.blitFramebuffers()
-        context.webglParams.viewport = viewport
-        context.aspectRatio = aspectRatio
+        context.paintInCustomSize(width, height, paint)
     }
 
     delete() {

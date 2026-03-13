@@ -123,6 +123,8 @@ export class TgdContext extends TgdPainterGroup {
         fovy: Math.PI / 8,
         zoom: 1,
     })
+    private _width = 0
+    private _height = 0
     private _fps = 0
     private _aspectRatio = 1
     private _aspectRatioInverse = 1
@@ -306,11 +308,17 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     get width() {
-        return this.gl.drawingBufferWidth
+        return this._width
+    }
+    private set width(width: number) {
+        this._width = width
     }
 
     get height() {
-        return this.gl.drawingBufferHeight
+        return this._height
+    }
+    private set height(height: number) {
+        this._height = height
     }
 
     get aspectRatio() {
@@ -426,6 +434,27 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     /**
+     * Most of the painters rely on the current viewport which is based on the canvas size.
+     * But if you want to paint in a framebuffer, you may want to use the texture widt/height
+     * instead.
+     */
+    paintInCustomSize(width: number, height: number, paint: () => void) {
+        const { width: savedWidth, height: savedHeight } = this
+        this.setCurrentSize(width, height)
+        paint()
+        this.setCurrentSize(savedWidth, savedHeight)
+    }
+
+    private setCurrentSize(width: number, height: number) {
+        this.width = width
+        this.height = height
+        this.camera.screenWidth = this.width
+        this.camera.screenHeight = this.height
+        this.aspectRatio = this.width / this.height
+        this.webglParams.setViewport(0, 0, this.width, this.height)
+    }
+
+    /**
      * When you need a painter to be painted only one time.
      *
      * These painters will be painted before all the recurrent ones during next repaint.
@@ -468,21 +497,17 @@ export class TgdContext extends TgdPainterGroup {
             return
         }
         try {
+            const { gl } = this
+            this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
             this.timeShift = timeInSec - this.now()
             if (this.playing) {
                 // the pause is like a frozen time.
                 timeInSec -= this.pauseAccumulation
             }
             this.eventPaintEnter.dispatch(this)
-            const { gl, webglParams } = this
             const delayInSec = timeInSec - this.lastTimeInSec
             this._fps = Math.round(1 / delayInSec)
             this.lastTimeInSec = timeInSec
-            this._camera.screenWidth = gl.drawingBufferWidth
-            this._camera.screenHeight = gl.drawingBufferHeight
-            this.aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight
-
-            webglParams.setViewport(0, 0, gl.canvas.width, gl.canvas.height)
             for (const oneTimePainter of this.oneTimePainters) {
                 oneTimePainter.paint(timeInSec, delayInSec)
             }

@@ -1,4 +1,3 @@
-import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdEvent } from "@tgd/event"
 import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
@@ -6,11 +5,10 @@ import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 import { TgdProgram } from "@tgd/program"
 import { isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
-import { webglLookup } from "@tgd/utils"
+import { tgdCanvasCreate, webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 import { TgdContext } from "@tgd/context"
-import { TgdUniformBufferObject } from "@tgd/uniform"
 
 interface TgdTexture2DStorage {
     width: number
@@ -62,6 +60,7 @@ interface TgdTexture2DStorage {
 }
 
 export interface TgdTexture2DOptions {
+    name?: string
     storage?: Partial<TgdTexture2DStorage>
     params?: WebglTextureParameters
     load?: WebglImage | string | LoadBmpOptions
@@ -94,7 +93,7 @@ export class TgdTexture2D {
         const { storage, params, load } = options
         const { gl } = context
         this.gl = gl
-        this.name = `Texture2D/${TgdTexture2D.counter++}`
+        this.name = options.name ?? `Texture2D/${TgdTexture2D.counter++}`
         this.storage = {
             width: 0,
             height: 0,
@@ -117,6 +116,16 @@ export class TgdTexture2D {
         } else if (isLoadBmpOptions(load)) {
             this.loadBitmap(load.bmp, load)
         }
+    }
+
+    clone(name?: string): TgdTexture2D {
+        return new TgdTexture2D(
+            this.context,
+            structuredClone({
+                ...this.options,
+                name: name ?? this.options.name,
+            }),
+        ).loadBitmap(tgdCanvasCreate(this.width, this.height))
     }
 
     get internalFormat() {
@@ -155,34 +164,35 @@ export class TgdTexture2D {
         const height = Math.ceil(h)
         if (width === this.width && height === this.height) return
 
-        const { gl, storage } = this
-        this.createTexture()
-        this._width = width
-        this._height = height
-        storage.width = width
-        storage.height = height
-        const { internalFormat, levels } = this.storage
-        if (internalFormat.startsWith("COMPRESSED_")) {
-            // We need to load an extension for that.
-            const extension = gl.getExtension("WEBGL_compressed_texture_etc")
-            if (!extension)
-                throw new Error(
-                    'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!',
-                )
-        }
-        this.bind()
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
-        gl.texStorage2D(gl.TEXTURE_2D, levels, (gl as unknown as Record<string, GLenum>)[internalFormat], width, height)
-        this.checkError(`resize(${width}, ${height})
-gl.texStorage2D(
-    gl.TEXTURE_2D,
-    ${levels},
-    gl.${internalFormat},
-    ${width},
-    ${height}
-)`)
-        this.unbind()
+        this.loadBitmap(tgdCanvasCreate(width, height))
+        //         const { gl, storage } = this
+        //         this.createTexture()
+        //         this._width = width
+        //         this._height = height
+        //         storage.width = width
+        //         storage.height = height
+        //         const { internalFormat, levels } = this.storage
+        //         if (internalFormat.startsWith("COMPRESSED_")) {
+        //             // We need to load an extension for that.
+        //             const extension = gl.getExtension("WEBGL_compressed_texture_etc")
+        //             if (!extension)
+        //                 throw new Error(
+        //                     'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!',
+        //                 )
+        //         }
+        //         this.bind()
+        //         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+        //         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
+        //         gl.texStorage2D(gl.TEXTURE_2D, levels, (gl as unknown as Record<string, GLenum>)[internalFormat], width, height)
+        //         this.checkError(`resize(${width}, ${height})
+        // gl.texStorage2D(
+        //     gl.TEXTURE_2D,
+        //     ${levels},
+        //     gl.${internalFormat},
+        //     ${width},
+        //     ${height}
+        // )`)
+        //         this.unbind()
     }
 
     private checkError(caption: string) {
@@ -294,7 +304,7 @@ gl.texStorage2D(
             textureColor0: output,
             depthBuffer: false,
             children: [painter],
-            fixedSize: [this.width, this.height],
+            fixedSize: true,
         })
         framebuffer.paint(0, 0)
         this.gl.deleteTexture(this._texture)

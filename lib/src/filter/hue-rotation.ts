@@ -5,7 +5,7 @@ export class TgdFilterHueRotation extends TgdFilter {
 
     constructor({ hueShiftInDegrees = 0, name }: Partial<{ hueShiftInDegrees: number; name: string }> = {}) {
         super({
-            name: name ?? "TgdFilterHueRotation",
+            name: name ?? `TgdFilterHueRotation/${TgdFilter.id++}`,
             fragmentShaderCode: [
                 "vec4 color = texture(uniTexture, varUV);",
                 "vec3 rgb = color.rgb;",

@@ -17,6 +17,22 @@ export interface TgdFilterBlurOptions {
 const DEFAULT_DIRECTION: Readonly<TgdVec2> = new TgdVec2(1, 0)
 
 export class TgdFilterBlur extends TgdFilter {
+    public static createPair(options: Partial<Omit<TgdFilterBlurOptions, "direction"> & { direction?: number }> = {}) {
+        const direction = options.direction ?? 0
+        const name = options.name ?? "TgdFilterBlur/Pair/"
+        return [
+            new TgdFilterBlur({
+                ...options,
+                direction,
+                name: `${name}/${direction}°`,
+            }),
+            new TgdFilterBlur({
+                ...options,
+                direction: direction + 90,
+                name: `${name}/${direction}°`,
+            }),
+        ]
+    }
     public strength: number
 
     constructor(options: Partial<TgdFilterBlurOptions> = {}) {
@@ -51,7 +67,7 @@ export class TgdFilterBlur extends TgdFilter {
         super({
             name: options.name ?? `TgdFilterBlur(${options.direction ?? 0} deg)`,
             fragmentShaderCode: [
-                "vec2 dir = uniStrength * uniPixel * vec2(",
+                "vec2 dir = uniStrength * varPixel * vec2(",
                 [`${sx.toFixed(9)},`, `${sy.toFixed(9)}`],
                 ");",
                 `vec4 color = ${(size + 1).toFixed(1)} * texture(uniTexture, varUV);`,

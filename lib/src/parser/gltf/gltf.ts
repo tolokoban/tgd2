@@ -7,7 +7,6 @@ import { DracoLoader } from "@loaders.gl/draco"
 import { type GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
-import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
 import { tgdLoadImage, tgdLoadImageFromArrayBuffer } from "@tgd/loader"
@@ -71,7 +70,6 @@ export class TgdDataGlb {
             const bufferView = gltf.bufferViews?.[image.bufferView]
             if (!bufferView) throw new Error(`No bufferView with index #${image.bufferView}!`)
 
-            console.log("Image", imageIndex, bufferView)
             images.push(
                 (await tgdLoadImageFromArrayBuffer(
                     chunks[bufferView.buffer].slice(
@@ -120,7 +118,6 @@ export class TgdDataGlb {
     createTransfoFromNode(node: TgdFormatGltfNode): TgdTransfo {
         const transfo: Partial<TgdTransfoOptions> = {}
         if (node.rotation) {
-            console.log("🚀 [gltf] node.rotation =", node.rotation) // @FIXME: Remove this line written on 2025-04-17 at 21:07
             transfo.orientation = new TgdQuat(node.rotation)
         }
         if (node.translation) transfo.position = new TgdVec3(node.translation)
@@ -397,7 +394,6 @@ export class TgdDataGlb {
         const buffer = this.chunks[bufferView.buffer]
         const byteOffset = bufferView.byteOffset ?? 0
         const data = buffer.slice(byteOffset, byteOffset + bufferView.byteLength)
-        console.log("🐞 [gltf@499] data =", data) // @FIXME: Remove this line written on 2025-12-02 at 10:47
         const view = figureOutView(
             data,
             convertTypeToNumber(type ?? this.findAccessorForBufferView(bufferViewIndex)?.componentType ?? "Float32"),
@@ -433,12 +429,6 @@ export class TgdDataGlb {
 
         const accessor = gltf.accessors?.[attribute]
         if (!accessor) {
-            console.log("🚀 [gltf] attribute =", attribute) // @FIXME: Remove this line written on 2025-09-17 at 17:47
-            console.log("🚀 [gltf] gltf =", gltf) // @FIXME: Remove this line written on 2025-09-17 at 17:46
-            console.log(
-                "🚀 [gltf] this.getMesh(meshIndexOrName).primitives[primitiveIndex].attributes =",
-                this.getMeshOrThrow(meshIndexOrName).primitives[primitiveIndex].attributes,
-            ) // @FIXME: Remove this line written on 2025-09-17 at 17:51
             throw new Error(
                 `No attribute "${
                     primitiveAttribName ?? attribName

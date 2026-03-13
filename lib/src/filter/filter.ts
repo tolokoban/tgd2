@@ -16,7 +16,7 @@ import { WebglUniformType } from "@tgd/types"
  *  * `float uniHeight`: height of the texture in pixels.
  */
 export class TgdFilter {
-    private static id = 1
+    protected static id = 1
 
     public name: string
     /**

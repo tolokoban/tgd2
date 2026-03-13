@@ -7,8 +7,9 @@ export class TgdFilterZoom extends TgdFilter {
 
     constructor({ zoom = 1 }: Partial<{ zoom: number }> = {}) {
         super({
+            name: `TgdFilterZoom/${TgdFilter.id++}`,
             fragmentShaderCode: [
-                "vec2 uv = (varUV - vec2(0.5) - uniTranslation) * uniZoom + vec2(0.5);",
+                "vec2 uv = (varUV - vec2(0.5)) * uniZoom + uniTranslation + vec2(0.5);",
                 "vec4 color = texture(uniTexture, uv);",
                 "FragColor = color;",
             ],
@@ -23,6 +24,6 @@ export class TgdFilterZoom extends TgdFilter {
 
     public readonly setUniforms = ({ program }: TgdFilterSetUniformsParameters): void => {
         program.uniform1f("uniZoom", 1 / this.zoom)
-        program.uniform2f("uniTranslation", this.translation.x, this.translation.y)
+        program.uniform2fv("uniTranslation", this.translation)
     }
 }

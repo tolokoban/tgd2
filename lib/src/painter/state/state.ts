@@ -30,7 +30,7 @@ type Keys<T2, T1> =
     | T2
 
 export interface TgdPainterStateOptions {
-    children: TgdPainter[]
+    children: (TgdPainter | TgdPainterFunction)[]
     color: boolean | [boolean, boolean, boolean, boolean]
     blend: Keys<WebglBlendOptions, typeof webglPresetBlend>
     depth: Keys<WebglDepthOptions, typeof webglPresetDepth>

@@ -70,20 +70,13 @@ function init(context: TgdContext, assets: Assets) {
         filters: [new TgdFilterZoom({ zoom: 1.1 })],
         flipY: true,
     })
-    framebufferRender.onExit = () => {
-        copy.texture = framebufferRender.textureColor0
-    }
-    framebufferCopy.onExit = () => {
-        material.texture = framebufferCopy.textureColor0
-        screen.texture = framebufferCopy.textureColor0
-    }
     context.add(
         framebufferRender,
         framebufferCopy,
         screen,
-        new TgdPainterLogic((time, delay) => {
+        new TgdPainterLogic((_, delta) => {
             const { camera } = context
-            camera.transfo.orbitAroundY(delay)
+            camera.transfo.orbitAroundY(delta)
         }),
     )
     context.play()
