@@ -16,6 +16,7 @@ import { PainterTipsNormal } from "./painters/normal"
 import { TgdUniformBufferObject } from "@tgd/uniform"
 import { PainterAxes } from "./painters/axes"
 import { TgdEvent } from "@tgd/event"
+import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterGizmoOptions {
     alignX: number
@@ -94,12 +95,13 @@ export class TgdPainterGizmo extends TgdPainter {
                 }),
             ],
         })
-        const framebuffer = new TgdPainterFramebufferWithAntiAliasing(context, {
+        const framebuffer = new TgdPainterFramebuffer(context, {
             name: "Framebuffer",
+            antiAliasing: true,
             depthBuffer: true,
             textureColor0: this.textureFramebuffer,
             children: [state],
-            fixedSize: [size, size],
+            fixedSize: true,
         })
         const overlay = new TgdPainterOverlay(context, {
             alignX,

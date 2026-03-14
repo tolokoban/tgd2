@@ -38,6 +38,7 @@ function init(context: TgdContext, assets: Assets) {
         children: [clear, mesh],
     })
     const framebuffer = new TgdPainterFramebuffer(context, {
+        antiAliasing: true,
         viewportMatchingScale: 1 / 8,
         textureColor0: new TgdTexture2D(context, {
             params: {
@@ -60,7 +61,7 @@ function init(context: TgdContext, assets: Assets) {
         width: 32,
         height: 32,
         margin: 8,
-        texture: red,
+        texture: green,
     })
     context.add(framebuffer, filters, overlay)
     context.paint()
