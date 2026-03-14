@@ -105,10 +105,9 @@ export class TgdTexture2D {
         }
         const width = storage?.width
         const height = storage?.height
+        this.createTexture()
         if (typeof width === "number" && typeof height === "number") {
             this.resize(width, height)
-        } else {
-            this.createTexture()
         }
         if (params) this.setParams(params)
         if (isWebglImage(load) || isString(load)) {
@@ -206,7 +205,9 @@ export class TgdTexture2D {
     get glTexture(): WebGLTexture {
         if (this._texture) return this._texture
 
-        throw new Error(`Texture "${this.name}" has been deleted!`)
+        const error = `[TgdTexture2D] Texture "${this.name}" has been deleted!`
+        console.error(error)
+        throw new Error(error)
     }
 
     bind() {

@@ -1,3 +1,4 @@
+export * from "./anti-aliasing"
 export * from "./blur"
 export * from "./chromatic-aberration"
 export * from "./filter"

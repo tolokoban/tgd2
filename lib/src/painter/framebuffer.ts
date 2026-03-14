@@ -195,11 +195,6 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     ) {
         if (!tgdTexture) return
 
-        if (tgdTexture.internalFormat !== "RGBA8") {
-            throw new Error(
-                `[TgdPainterFramebuffer] texctureColor${attachment} must has an internal format of "RGBA8", but we got "${tgdTexture.internalFormat}"!`,
-            )
-        }
         const { context } = this
         const { gl } = context
         tgdTexture.resize(width, height)
@@ -249,7 +244,6 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         const { context } = this
         this._lastWidth = width
         this._lastHeight = height
-        console.log("🐞 [framebuffer@244] width, height =", width, height) // @FIXME: Remove this line written on 2026-03-12 at 22:43
         this.delete()
         const { gl } = context
         this._framebuffer = webglCreateFramebuffer(gl)
@@ -262,7 +256,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.createStencilBuffer(gl, width, height)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
-            console.error(`Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+            console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
         }
         this.dirty = false
     }

@@ -15,7 +15,7 @@ function init(ctx: TgdContext, assets: Assets) {
     const texture = new TgdTexture2D(ctx)
     texture.loadBitmap(assets.image.background)
     const filter = new TgdFilterHueRotation({ hueShiftInDegrees: 180 })
-    texture.applyFilter(filter)
+    // texture.applyFilter(filter)
     const background = new TgdPainterBackground(ctx, { texture })
     const logic = new TgdPainterLogic((time, delta) => {
         background.x = Math.cos(time * 0.251)
@@ -23,7 +23,7 @@ function init(ctx: TgdContext, assets: Assets) {
         background.zoom = Math.sin(time * 0.1) * 3
     })
     ctx.add(background, logic)
-    ctx.paint()
+    ctx.play()
     // #end
 }
 

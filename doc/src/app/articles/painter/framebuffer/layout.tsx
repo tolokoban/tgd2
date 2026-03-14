@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {!isRouteEqualTo("/articles/painter/framebuffer") && (
                 <>
                     <hr />
-                    <a href="#/articles/painters/framebuffer">Back to TgdPainterFrambuffer</a>
+                    <a href="#/articles/painter/framebuffer">Back to TgdPainterFrambuffer</a>
                 </>
             )}
         </>

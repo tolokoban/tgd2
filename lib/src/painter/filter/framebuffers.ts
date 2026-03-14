@@ -9,6 +9,9 @@ export class Framebuffers {
         public readonly context: TgdContext,
         private readonly textureInput: TgdTexture2D,
     ) {
+        if (textureInput.width < 1 || textureInput.height < 1) {
+            textureInput.resize(1, 1)
+        }
         const textureOutput = textureInput.clone("Back Texture")
         this.textureToDelete = textureOutput
         this.textures = [textureInput, textureOutput]
@@ -67,7 +70,7 @@ function createFB({ gl }: TgdContext, texture: TgdTexture2D): WebGLFramebuffer {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.glTexture, 0)
     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
     if (status !== gl.FRAMEBUFFER_COMPLETE) {
-        console.error(`Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+        console.error(`[TgdPainterFilter] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
     return fb

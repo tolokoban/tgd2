@@ -520,6 +520,7 @@ export class TgdContext extends TgdPainterGroup {
             this.eventPaint.dispatch(this)
         } catch (error) {
             console.error(error)
+            this.pause()
         } finally {
             this.paintingIsOngoing = false
             this.doSnapshot?.()
