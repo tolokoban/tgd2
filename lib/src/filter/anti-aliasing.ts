@@ -24,12 +24,12 @@ export class TgdFilterAntiAliasing extends TgdFilter {
         super({
             name: `TgdFilterAntiAliasing/${TgdFilter.id++}`,
             fragmentShaderCode: [
-                `float a = varPixel.x * ${A} * uniStrength;`,
-                `float b = varPixel.y * ${B} * uniStrength;`,
-                "vec4 col1 = texture(uniTexture, varUV + vec2(a, b));",
-                "vec4 col2 = texture(uniTexture, varUV + vec2(-b, a));",
-                "vec4 col3 = texture(uniTexture, varUV + vec2(-a, -b));",
-                "vec4 col4 = texture(uniTexture, varUV + vec2(b, -a));",
+                `float a = ${A.toFixed(9)} * uniStrength;`,
+                `float b = ${B.toFixed(9)} * uniStrength;`,
+                "vec4 col1 = texture(uniTexture, varUV + vec2(a, b) * varPixel);",
+                "vec4 col2 = texture(uniTexture, varUV + vec2(-b, a) * varPixel);",
+                "vec4 col3 = texture(uniTexture, varUV + vec2(-a, -b) * varPixel);",
+                "vec4 col4 = texture(uniTexture, varUV + vec2(b, -a) * varPixel);",
                 `FragColor = 0.25 * (col1 + col2 + col3 + col4);`,
             ],
             uniforms: {

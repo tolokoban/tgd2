@@ -1,17 +1,17 @@
 import {
     TgdContext,
-    TgdPainterBackground,
     TgdFilterAntiAliasing,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
-    TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterState,
     TgdTexture2D,
     TgdGeometryBox,
     TgdMaterialDiffuse,
-    tgdCalcModuloDiscrete,
+    tgdCanvasCreateFill,
+    TgdPainterOverlay,
+    TgdPainterFramebufferWithAntiAliasing,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
@@ -47,18 +47,33 @@ function init(context: TgdContext, assets: Assets) {
         }),
         children: [clear, meshPainter],
     })
-    const filterAA = new TgdFilterAntiAliasing()
     const filters = new TgdPainterFilter(context, {
         texture: framebuffer.textureColor0,
-        filters: [filterAA],
+        filters: [],
         flipY: true,
     })
-    globalThis.setInterval(() => {
-        filterAA.strength = 1 - filterAA.strength
-        context.paint()
-    }, 2000)
-    context.add(framebuffer, filters)
+    const red = new TgdTexture2D(context).loadBitmap(tgdCanvasCreateFill(1, 1, "#f00"))
+    const green = new TgdTexture2D(context).loadBitmap(tgdCanvasCreateFill(1, 1, "#0f0"))
+    const overlay = new TgdPainterOverlay(context, {
+        alignX: +1,
+        alignY: +1,
+        width: 32,
+        height: 32,
+        margin: 8,
+        texture: red,
+    })
+    context.add(framebuffer, filters, overlay)
     context.paint()
+    overlay.eventPointerTap.addListener(() => {
+        if (framebuffer.antiAliasing) {
+            framebuffer.antiAliasing = false
+            overlay.texture = red
+        } else {
+            framebuffer.antiAliasing = true
+            overlay.texture = green
+        }
+        context.paint()
+    })
     // #end
 }
 

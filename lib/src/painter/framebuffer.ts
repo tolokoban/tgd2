@@ -1,9 +1,11 @@
+import { Framebuffers } from "./filter/framebuffers"
 import type { TgdTexture2D, TgdTextureDepth } from "@tgd/texture"
 import type { TgdPainterFunction } from "@tgd/types/painter"
-import { webglCreateFramebuffer, webglLookup } from "@tgd/utils"
+import { webglCreateFramebuffer, webglLookup, webglRenderbufferStorageMultisample } from "@tgd/utils"
 import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
 import { TgdContext } from "@tgd/context"
+import { TgdConsole } from "@tgd/debug"
 
 export interface TgdPainterFramebufferOptions {
     name?: string
@@ -17,6 +19,13 @@ export interface TgdPainterFramebufferOptions {
      * Default to `true`.
      */
     stencilBuffer: boolean
+    /**
+     * Use Multi Sampled Anti Aliasing.
+     * This gets better visual results, but at a time penalty.
+     *
+     * Default to `false`.
+     */
+    antiAliasing: boolean
     /**
      * If defined, the framebuffer will automatically match the
      * current viewport size multiplied by `viewportMatchingScale`.
@@ -50,11 +59,16 @@ export interface TgdPainterFramebufferOptions {
 
 export class TgdPainterFramebuffer extends TgdPainterGroup {
     public readonly textureDepth: TgdTextureDepth | undefined
+    public readonly samples: number
 
     private _textureColor0: TgdTexture2D | undefined
     private _textureColor1: TgdTexture2D | undefined
     private _textureColor2: TgdTexture2D | undefined
     private _textureColor3: TgdTexture2D | undefined
+
+    private colorRenderbuffersMSAA: (WebGLRenderbuffer | undefined)[] = []
+    private _depthBufferMSAA: WebGLRenderbuffer | null = null
+    private _framebufferMSAA: WebGLFramebuffer | null = null
     /**
      * The framebuffer becomes dirty as soon as the width or height changes.
      */
@@ -66,6 +80,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
     private _stencilBuffer: WebGLRenderbuffer | null = null
     private readonly drawBuffers: number[]
     private readonly isFixedSize: boolean
+    private _antiAliasing: boolean
 
     constructor(
         public readonly context: TgdContext,
@@ -74,6 +89,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         super({
             children: options.children,
         })
+        this._antiAliasing = options.antiAliasing ?? false
         if (options.name) this.name = options.name
         else this.name = `Framebuffer/${this.name}`
         const { textureColor0, textureColor1, textureColor2, textureColor3 } = options
@@ -91,6 +107,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.onEnter = options.onEnter
         this.onExit = options.onExit
         const { gl } = this.context
+        this.samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES))
         this.drawBuffers = [
             this.textureColor0 ? gl.COLOR_ATTACHMENT0 : gl.NONE,
             this.textureColor1 ? gl.COLOR_ATTACHMENT1 : gl.NONE,
@@ -109,6 +126,16 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
                 )
             }
         }
+    }
+
+    get antiAliasing(): boolean {
+        return this._antiAliasing
+    }
+    set antiAliasing(antiAliasing: boolean) {
+        if (this._antiAliasing === antiAliasing) return
+
+        this._antiAliasing = antiAliasing
+        this.dirty = true
     }
 
     get textureColor0() {
@@ -223,6 +250,20 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
     }
 
+    private createDepthBufferMSAA(gl: WebGL2RenderingContext, width: number, height: number) {
+        if (this.options.depthBuffer === false) return
+
+        // Create a Depth Buffer, because the default
+        // framebuffer has none.
+        const depthBuffer = gl.createRenderbuffer()
+        if (!depthBuffer) throw new Error("Unable to create WebGLRenderBuffer for depth!")
+
+        this._depthBufferMSAA = depthBuffer
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+        webglRenderbufferStorageMultisample(gl, this.samples, gl.DEPTH_COMPONENT24, width, height)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+    }
+
     private createStencilBuffer(gl: WebGL2RenderingContext, width: number, height: number) {
         if (!this.options.stencilBuffer) return
 
@@ -236,23 +277,46 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilBuffer)
     }
 
+    private createFramebufferMSAA(width: number, height: number) {
+        const { context } = this
+        const { gl } = context
+        this.createRenderbuffersMSAA(width, height)
+        this.createDepthBufferMSAA(gl, width, height)
+        this._framebufferMSAA = webglCreateFramebuffer(gl)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebufferMSAA)
+        this.colorRenderbuffersMSAA.map((renderbuffer, index) => {
+            if (renderbuffer) {
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + index, gl.RENDERBUFFER, renderbuffer)
+            }
+        })
+        if (this._depthBufferMSAA) {
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this._depthBufferMSAA)
+        }
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    }
+
     private createFramebufferIfNeeded(width: number, height: number) {
         if (width < 1 || height < 1) return
 
-        if (!this.dirty || (width === this._lastWidth && height === this._lastHeight)) return
+        if (!this.dirty && width === this._lastWidth && height === this._lastHeight) return
 
-        const { context } = this
+        const { context, antiAliasing } = this
         this._lastWidth = width
         this._lastHeight = height
         this.delete()
         const { gl } = context
+        if (antiAliasing) this.createFramebufferMSAA(width, height)
         this._framebuffer = webglCreateFramebuffer(gl)
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
         this.updateTextureForColor(this.textureColor0, 0, width, height)
         this.updateTextureForColor(this.textureColor1, 1, width, height)
         this.updateTextureForColor(this.textureColor2, 2, width, height)
         this.updateTextureForColor(this.textureColor3, 3, width, height)
-        this.updateTextureForDepth(gl, width, height)
+        if (!antiAliasing) this.updateTextureForDepth(gl, width, height)
         this.createStencilBuffer(gl, width, height)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
@@ -261,15 +325,37 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.dirty = false
     }
 
+    private blitFramebuffers(width: number, height: number) {
+        const { context } = this
+        const { gl } = context
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this._framebufferMSAA)
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this._framebuffer)
+        this.colorRenderbuffersMSAA.map((rd, index) => {
+            if (!rd) return
+
+            gl.readBuffer(gl.COLOR_ATTACHMENT0 + index)
+            const buffers: GLenum[] = [gl.NONE, gl.NONE, gl.NONE, gl.NONE]
+            buffers[index] = gl.COLOR_ATTACHMENT0 + index
+            gl.drawBuffers(buffers)
+            gl.blitFramebuffer(0, 0, width, height, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST)
+        })
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null)
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null)
+    }
+
     paint(time: number, delta: number): void {
-        const { context, width, height } = this
+        const { context, width, height, antiAliasing } = this
         const { gl } = context
         const paint = () => {
             const currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING)
             this.createFramebufferIfNeeded(width, height)
-            gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, antiAliasing ? this._framebufferMSAA : this._framebuffer)
             gl.drawBuffers(this.drawBuffers)
             super.paint(time, delta)
+            if (this.antiAliasing) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                this.blitFramebuffers(width, height)
+            }
             gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)
         }
         context.paintInCustomSize(width, height, paint)
@@ -290,6 +376,44 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             gl.deleteRenderbuffer(_stencilBuffer)
             this._stencilBuffer = null
         }
+        if (this._depthBufferMSAA) {
+            gl.deleteRenderbuffer(this._depthBufferMSAA)
+            this._depthBufferMSAA = null
+        }
+        if (this._framebufferMSAA) {
+            gl.deleteFramebuffer(this._framebufferMSAA)
+            this._framebufferMSAA = null
+        }
+        this.deleteRenderbuffersMSAA()
+    }
+
+    private deleteRenderbuffersMSAA() {
+        const { gl } = this.context
+        for (let i = 0; i < this.colorRenderbuffersMSAA.length; i++) {
+            const colorRenderbuffer = this.colorRenderbuffersMSAA[i]
+            if (colorRenderbuffer) {
+                gl.deleteRenderbuffer(colorRenderbuffer)
+            }
+        }
+        this.colorRenderbuffersMSAA.splice(0)
+    }
+
+    private createRenderbuffersMSAA(width: number, height: number) {
+        const { context, textureColor0, textureColor1, textureColor2, textureColor3 } = this
+        const { gl } = context
+        this.deleteRenderbuffersMSAA()
+        this.colorRenderbuffersMSAA = [textureColor0, textureColor1, textureColor2, textureColor3].map((texture) => {
+            if (!texture) return
+
+            const colorRenderBuffer = gl.createRenderbuffer()
+            if (!colorRenderBuffer) throw new Error("Unable to create RenderBuffer!")
+
+            gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderBuffer)
+            const internalFormat = gl[texture.internalFormat as keyof WebGL2RenderingContext] as number
+            webglRenderbufferStorageMultisample(gl, this.samples, internalFormat, width, height)
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+            return colorRenderBuffer
+        })
     }
 }
 

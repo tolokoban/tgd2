@@ -68,6 +68,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/fragment-shader/tunnel": ["/articles/painter/fragment-shader/tunnel"],
     "/articles/painter/framebuffer": ["/articles/painter/framebuffer"],
     "/articles/painter/framebuffer/anti-alising": ["/articles/painter/framebuffer/anti-alising"],
+    "/articles/painter/framebuffer/anti-alising/msaa": ["/articles/painter/framebuffer/anti-alising/msaa"],
     "/articles/painter/framebuffer/example0": ["/articles/painter/framebuffer/example0"],
     "/articles/painter/framebuffer/example0/01": ["/articles/painter/framebuffer/example0/01"],
     "/articles/painter/framebuffer/example0/02": ["/articles/painter/framebuffer/example0/02"],
