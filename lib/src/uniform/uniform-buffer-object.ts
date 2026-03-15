@@ -30,7 +30,8 @@ type UniformBufferObjectType =
     | "mat4"
 
 export interface TgdUniformBufferObjectOptions<
-    T extends Record<string, UniformBufferObjectType> = Record<string, UniformBufferObjectType>,
+    S extends string = string,
+    T extends Record<S, UniformBufferObjectType> = Record<S, UniformBufferObjectType>,
 > {
     uniforms: T
     values?: Partial<{
@@ -39,11 +40,12 @@ export interface TgdUniformBufferObjectOptions<
 }
 
 export class TgdUniformBufferObject<
-    T extends Record<string, UniformBufferObjectType> = Record<string, UniformBufferObjectType>,
+    S extends string = string,
+    T extends Record<S, UniformBufferObjectType> = Record<S, UniformBufferObjectType>,
 > {
     public readonly bindingPoint: number
     public readonly values = {} as {
-        [key in keyof T]: Values[T[key]]
+        [key in S]: Values[T[key]]
     }
 
     private readonly data: ArrayBuffer
@@ -54,13 +56,13 @@ export class TgdUniformBufferObject<
 
     constructor(
         public readonly context: TgdContext,
-        { uniforms, values }: TgdUniformBufferObjectOptions<T>,
+        { uniforms, values }: TgdUniformBufferObjectOptions<S, T>,
     ) {
         this.bindingPoint = context.uniformBufferObjects.add(this)
         this.uniforms = uniforms
         // Offset in floats (not bytes).
         let offsetInFloats = 0
-        for (const name of Object.keys(uniforms)) {
+        for (const name of Object.keys(uniforms) as S[]) {
             const type = uniforms[name]
             const { modulo, length } = LAYOUTS[type]
             // Word alignment.
@@ -72,7 +74,7 @@ export class TgdUniformBufferObject<
         this.data = new ArrayBuffer(bytesLength)
         this.view = new DataView(this.data)
         if (values) {
-            const keys: Array<keyof T> = Object.keys(values)
+            const keys = Object.keys(values) as S[]
             for (const key of keys) {
                 const val = values[key]
                 if (val === undefined) continue
@@ -119,7 +121,7 @@ export class TgdUniformBufferObject<
         return [
             `/* Binding point: ${this.bindingPoint} */`,
             `layout(std140) uniform ${blockName} {`,
-            Object.keys(uniforms).map((key) => `${uniforms[key]} ${key};`),
+            (Object.keys(uniforms) as S[]).map((key) => `${uniforms[key]} ${key};`),
             instanceName ? `} ${instanceName};` : "};",
         ]
     }

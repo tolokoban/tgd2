@@ -151,6 +151,13 @@ export class TgdPainterProgram extends TgdPainter {
             frag: fragmentShader,
         })
         this.prg = program
+        program.use()
+        const samplerNames = Object.keys(textures)
+        for (let unit = 0; unit < samplerNames.length; unit++) {
+            const uniformName = samplerNames[unit]
+            const texture = textures[uniformName]
+            texture.activate(unit, program, uniformName)
+        }
         const vao = new TgdVertexArray(context.gl, program, datasets, elements)
         this.vao = vao
         this.painterState = new TgdPainterState(context, {

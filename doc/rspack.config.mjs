@@ -160,7 +160,7 @@ export default function (env, argv) {
                     exclude: /node_modules/,
                 },
                 {
-                    test: /\.(png|jpe?g|gif|webp|avif|svg)$/i,
+                    test: /\.(png|jpe?g|gif|webp|avif|svg|mp4|webm)$/i,
                     type: "asset",
                     generator: {
                         filename: "img/[name].[hash][ext][query]",

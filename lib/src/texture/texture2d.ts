@@ -218,6 +218,36 @@ export class TgdTexture2D {
         this.gl.bindTexture(this.gl.TEXTURE_2D, null)
     }
 
+    loadVideo(
+        url: string,
+        options: {
+            onLoad?: () => void
+        } = {},
+    ): this {
+        let playing = false
+        let timeupdate = false
+        const video = document.createElement("video")
+        const checkReady = () => {
+            if (!playing || !timeupdate) return
+
+            this.loadBitmap(video, options)
+        }
+        video.playsInline = true
+        video.muted = true
+        video.loop = true
+        video.addEventListener("playing", () => {
+            playing = true
+            checkReady()
+        })
+        video.addEventListener("timeupdate", () => {
+            timeupdate = true
+            checkReady()
+        })
+        video.src = url
+        video.play()
+        return this
+    }
+
     loadBitmap(
         bmp: string | WebglImage | null | Promise<WebglImage | null> | undefined,
         options: {
@@ -229,7 +259,8 @@ export class TgdTexture2D {
         if (!bmp) return this
 
         if (typeof bmp === "string") {
-            return this.loadBitmap(tgdLoadImage(bmp), options)
+            if (isImageURL(bmp)) return this.loadBitmap(tgdLoadImage(bmp), options)
+            return this.loadVideo(bmp, options)
         }
 
         if (!isWebglImage(bmp)) {
@@ -508,4 +539,13 @@ function printArray(data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayB
         return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
     }
     return JSON.stringify(data)
+}
+
+function isImageURL(url: string) {
+    const extensions = [".webp", ".jpg", ".jpeg", ".png", ".avif", ".gif"]
+    const urlLowercase = url.toLowerCase().trim()
+    for (const ext of extensions) {
+        if (urlLowercase.endsWith(ext)) return true
+    }
+    return false
 }

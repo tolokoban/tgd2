@@ -36,6 +36,11 @@ declare module "*.avif" {
     export = value
 }
 
+declare module "*.mp4" {
+    const value: any
+    export = value
+}
+
 declare module "*.obj" {
     const value: string
     export = value

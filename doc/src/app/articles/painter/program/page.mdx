@@ -1,5 +1,21 @@
 import Demo from "./_/main.demo"
+import DemoMatrix from "./_/matrix.demo"
 
 # [TgdPainterProgram](docs/classes/TgdPainterProgram.html)
 
+To write a painter, you often need datasets ([TgdDataset](/docs/classes/TgdDataset.html)),
+uniforms ([TgdUniformBufferObject](/docs/classes/TgdUniformBufferObject.html)),
+two shaders ([TgdShaderVertex](/docs/classes/TgdShaderVertex.html) and [TgdShaderFragment](/docs/classes/TgdShaderFragment.html)),
+a program ([TgdProgram](/docs/classes/TgdProgram.html)) and a vertex array object ([TgdVertexArray](/docs/classes/TgdVertexArray.html)).
+You will also need to select the drawing mode (`gl.TRIANGLES`, `gl.POINTS`, ...), choose to use elements and/or instance, ...
+
+This can be a lot of boilerplate.
+
+This class will help you do all this without the need to instanciate yourself all the needed objects.
+You will avoid a lot of common error by using this class.
+
 <Demo />
+
+Blablabla
+
+<DemoMatrix />
