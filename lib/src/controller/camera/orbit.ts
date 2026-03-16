@@ -531,7 +531,7 @@ export class TgdControllerCameraOrbit {
     private readonly handleDebug = (event: { key: string }) => {
         if (event.key === "?") {
             this.context.camera.debug(this.name)
-            console.log(this.context.camera.toCode())
+            console.debug(this.context.camera.toCode())
         }
     }
 }

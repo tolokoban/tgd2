@@ -128,14 +128,14 @@ export class TgdVertexArray {
     }
 
     debug(caption = "TgdVertexArray") {
-        console.log(caption)
+        console.debug(caption)
         if (this.program) this.program.debug()
         if (this.datasets) {
             for (const [index, dataset] of this.datasets.entries()) {
                 dataset.debug(`   Dataset #${index}`)
             }
         }
-        if (this.elements) console.log("Elements:", this.elements)
+        if (this.elements) console.debug("Elements:", this.elements)
     }
 
     bind() {

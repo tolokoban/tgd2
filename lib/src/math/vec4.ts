@@ -234,6 +234,6 @@ export class TgdVec4 extends Float32Array {
     debug(caption = "vec4") {
         const { x, y, z, w } = this
         const out: string[] = [x, y, z, w].map((n) => n.toFixed(6))
-        console.log(`${caption}:   `, out.join(" | "), `  (length = ${this.size})`)
+        console.debug(`${caption}:   `, out.join(" | "), `  (length = ${this.size})`)
     }
 }

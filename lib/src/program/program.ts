@@ -220,7 +220,7 @@ export class TgdProgram {
 
     debug(caption?: string) {
         const { gl, program } = this
-        console.log(caption ?? this.name)
+        console.debug(caption ?? this.name)
         const contextLost = gl.isContextLost()
         const items: (string | TgdConsoleItem)[] = [
             { text: "Context lost: " },
@@ -344,7 +344,7 @@ function logCode(title: string, code: string, options?: { lines: number[]; messa
             console.error()
         }
     }
-    console.log(codeLines.join("\n"), ...styles)
+    console.debug(codeLines.join("\n"), ...styles)
     return hasError ? output.join("\n") : "No error."
 }
 

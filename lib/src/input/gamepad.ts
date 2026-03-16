@@ -3,11 +3,9 @@ export class TgdInputGamepad {
 
     constructor() {
         globalThis.addEventListener("gamepadconnected", (evt) => {
-            console.log("🐞 [gamepad@6] evt =", evt) // @FIXME: Remove this line written on 2026-01-29 at 16:48
             this.gamepad = evt.gamepad
         })
         globalThis.addEventListener("gamepaddisconnected", (evt) => {
-            console.log("Gamepad disconnected:", evt.gamepad.id)
             this.gamepad = null
         })
     }

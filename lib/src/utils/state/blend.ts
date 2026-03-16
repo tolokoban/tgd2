@@ -87,7 +87,7 @@ export function webglBlendExec(context: { webglParams: WebglParams }, blend: Web
 }
 
 export function webglDebugBlend(context: { webglParams: WebglParams }, caption = "Blend enabled:") {
-    console.log(caption)
+    console.debug(caption)
     const blend = webglBlendGet(context)
     debug([
         [caption, blend.enabled, "\n"],

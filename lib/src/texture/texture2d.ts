@@ -461,7 +461,7 @@ export class TgdTexture2D {
     }
 
     debug(title?: string) {
-        console.log(title ?? this.name ?? "TgdTexture2D", "  ", this.width, "×", this.height)
+        console.debug(title ?? this.name ?? "TgdTexture2D", "  ", this.width, "×", this.height)
         const parameters: WebglTexParameter[] = [
             "TEXTURE_MAG_FILTER",
             "TEXTURE_MIN_FILTER",
@@ -479,7 +479,7 @@ export class TgdTexture2D {
         ]
         for (const name of parameters) {
             const value = this.getParameter(name)
-            console.log(">", name, "=", value, typeof value === "number" ? `(${webglLookup(value)})` : " ")
+            console.debug(">", name, "=", value, typeof value === "number" ? `(${webglLookup(value)})` : " ")
         }
     }
 }

@@ -98,7 +98,7 @@ export function webglDepthExec(context: { webglParams: WebglParams }, depth: Web
 }
 
 export function webglDebugDepth(context: { webglParams: WebglParams }, caption = "Depth enabled:") {
-    console.log(caption)
+    console.debug(caption)
     const depth = webglDepthGet(context)
     debug([
         [caption, depth.enabled, "\n"],

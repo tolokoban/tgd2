@@ -47,7 +47,7 @@ export function webglCullExec(context: { webglParams: WebglParams }, cull: Webgl
 }
 
 export function webglDebugCull(context: { webglParams: WebglParams }, caption = "Cull test:") {
-    console.log(caption)
+    console.debug(caption)
     const cull = webglCullGet(context)
     debug([
         [caption, cull.enabled, "\n"],

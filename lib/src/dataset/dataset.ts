@@ -477,7 +477,7 @@ export class TgdDataset {
 	}
 
 	debug(caption = "Dataset") {
-		console.log(
+		console.debug(
 			caption,
 			"   count:",
 			this.count,
@@ -504,7 +504,7 @@ export class TgdDataset {
 			),
 		)
 		for (const [name, type, offset] of rows)
-			console.log(
+			console.debug(
 				`%c${name.padEnd(sizes[0] + 2)}${type.padStart(sizes[1] + 2)}${offset.padStart(sizes[2] + 2)}`,
 				"font-family:monospace",
 			)
@@ -522,7 +522,7 @@ export class TgdDataset {
 				}
 				data.push(items)
 			}
-			console.log(`Attribute "${attName}":`, data)
+			console.debug(`Attribute "${attName}":`, data)
 		}
 	}
 }

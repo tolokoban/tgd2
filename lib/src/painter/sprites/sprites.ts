@@ -446,7 +446,7 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
             }
         }
         out.debug()
-        console.log("Sprites list:", this.sprites)
+        console.debug("Sprites list:", this.sprites)
     }
 
     protected updateAccessors() {

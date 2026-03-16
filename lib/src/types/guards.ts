@@ -214,7 +214,6 @@ export function assertType$<T>(data: unknown, type: TypeDef, prefix = "data"): a
 
     if (type === "null") {
         if (data !== null) {
-            console.log("🚀 [index] data =", data, typeof data) // @FIXME: Remove this line written on 2024-10-18 at 13:22
             throw new TypeError(`Expected ${prefix} to be a null and not a ${prettyTypeof(data)}!`)
         }
         return

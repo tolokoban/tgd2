@@ -72,7 +72,6 @@ export class TgdPainterGizmo extends TgdPainter {
 
     private readonly init = (tipsNormal: PainterTipsNormal) => {
         const { context, size, alignX, alignY, camera, uniformCamera } = this
-        console.log(camera.near, camera.far)
         const group = new TgdPainterState(context, {
             depth: "off",
             blend: "alpha",

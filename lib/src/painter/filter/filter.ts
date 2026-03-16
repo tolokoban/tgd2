@@ -1,15 +1,14 @@
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset/dataset"
 import { type TgdFilter, TgdFilterVerbatim } from "@tgd/filter"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
-import { TgdTexture2D } from "@tgd/texture"
+import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdContext } from "@tgd/context"
-import { Framebuffers } from "./framebuffers"
-import { TgdConsole } from "@tgd/debug"
 import { TgdPainterState } from "../state"
+import { Framebuffers } from "./framebuffers"
 export interface TgdPainterFilterOptions {
     filters?: TgdFilter[]
     texture?: TgdTexture2D
@@ -97,7 +96,6 @@ export class TgdPainterFilter extends TgdPainter {
     }
 
     paint(time: number, delta: number): void {
-        const out = new TgdConsole()
         const { framebuffers, filters } = this
         TgdPainterState.do(this.context, {
             depth: "off",
@@ -105,17 +103,11 @@ export class TgdPainterFilter extends TgdPainter {
             cull: "off",
             action: () => {
                 for (let index = 0; index < filters.length - 1; index++) {
-                    out.add(framebuffers.texture.name).add(" -> ").add(filters[index].name).nl()
                     framebuffers.paint(() => this.paintOneFilter(index, time, delta))
                 }
             },
         })
-        out.add(framebuffers.texture.name)
-            .add(" -> ")
-            .add(filters[filters.length - 1].name)
-            .nl()
         this.paintOneFilter(filters.length - 1, time, delta, (filters.length & 1) === (this.flipY ? 0 : 1) ? +1 : -1)
-        out.debug()
         if (filters.length % 2 === 0) framebuffers.swap()
     }
 

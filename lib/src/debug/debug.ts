@@ -5,7 +5,7 @@ type HighlightedCode = string | boolean | HighlightedCode[] | { cls: string; txt
 export function debug(code: HighlightedCode, classNames: Record<string, string> = {}) {
     const css: string[] = []
     const txt = stringify(code, classNames, css)
-    console.log(txt, ...css)
+    console.debug(txt, ...css)
 }
 
 export function highlightEnum(value: keyof WebGL2RenderingContext | number): HighlightedCode {

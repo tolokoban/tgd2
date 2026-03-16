@@ -99,9 +99,9 @@ export class TgdMat2 extends Float32Array {
         const row0 = padColOfNumbers([this.m00, this.m01])
         const row1 = padColOfNumbers([this.m10, this.m11])
 
-        console.log(caption, this.slice())
-        console.log("   ", row0.join(" | "))
-        console.log("   ", row1.join(" | "))
+        console.debug(caption, this.slice())
+        console.debug("   ", row0.join(" | "))
+        console.debug("   ", row1.join(" | "))
     }
 }
 

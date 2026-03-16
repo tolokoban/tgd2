@@ -135,7 +135,7 @@ export function webglStencilExec(gl: WebGL2RenderingContext, stencil: WebglStenc
 export function webglDebugStencil(gl: WebGL2RenderingContext, caption = "Stencil test:") {
     const stencil = webglStencilGet(gl)
     debug([`Stencil ${caption}: `, stencil.enabled])
-    console.log(stencil)
+    console.debug(stencil)
     if (stencil.enabled) {
         debug([
             { cls: "code" },

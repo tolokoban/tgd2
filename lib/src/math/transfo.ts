@@ -253,8 +253,8 @@ export class TgdTransfo {
     }
 
     debug(caption = "Transfo") {
-        console.log(caption)
-        console.log("Distance:", this.distance)
+        console.debug(caption)
+        console.debug("Distance:", this.distance)
         this.orientation.debug("Orientation")
         this.scale.debug("Scale")
         this.position.debug("Position")

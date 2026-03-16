@@ -71,7 +71,7 @@ export class TgdPainterState extends TgdPainterGroup {
 
     public static debug(context: { webglParams: WebglParams }) {
         const depth = webglDepthGet(context)
-        console.log("Depth:", {
+        console.debug("Depth:", {
             enabled: depth.enabled,
             func: webglLookup(depth.func),
             mask: depth.mask,

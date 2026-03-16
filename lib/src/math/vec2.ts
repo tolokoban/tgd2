@@ -147,6 +147,6 @@ export class TgdVec2 extends Float32Array {
     debug(caption = "vec2") {
         const { x, y } = this
         const out: string[] = [x, y].map((n) => n.toFixed(6))
-        console.log(`${caption}:   `, out.join(" | "), "   length:", Math.sqrt(x * x + y * y))
+        console.debug(`${caption}:   `, out.join(" | "), "   length:", Math.sqrt(x * x + y * y))
     }
 }

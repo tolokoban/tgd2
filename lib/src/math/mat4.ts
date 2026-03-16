@@ -338,11 +338,11 @@ export class TgdMat4 extends Float32Array {
         const row2 = padColOfNumbers([this.m20, this.m21, this.m22, this.m23])
         const row3 = padColOfNumbers([this.m30, this.m31, this.m32, this.m33])
 
-        console.log(caption)
-        console.log("   ", row0.join(" | "))
-        console.log("   ", row1.join(" | "))
-        console.log("   ", row2.join(" | "))
-        console.log("   ", row3.join(" | "))
+        console.debug(caption)
+        console.debug("   ", row0.join(" | "))
+        console.debug("   ", row1.join(" | "))
+        console.debug("   ", row2.join(" | "))
+        console.debug("   ", row3.join(" | "))
     }
 }
 

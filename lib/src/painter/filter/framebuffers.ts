@@ -42,7 +42,6 @@ export class Framebuffers {
         gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
         const viewport = context.webglParams.viewport
         gl.viewport(0, 0, width, height)
-        console.log("🐞 [framebuffers@35] width, height =", width, height) // @FIXME: Remove this line written on 2026-03-13 at 16:14
         action()
         context.webglParams.viewport = viewport
         gl.bindFramebuffer(gl.FRAMEBUFFER, currentFramebuffer)

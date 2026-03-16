@@ -40,19 +40,6 @@ function recursiveListBBoxes(
 ) {
     const visibility = camera.computeBoundingBoxVisibleSurface(bbox)
     if (visibility < 1e-12) {
-        // const text = JSON.stringify(bbox)
-        // if (lastText !== text) {
-        //     lastText = text
-        //     console.log("🐞 [octree@47] bbox =", bbox) // @FIXME: Remove this line written on 2026-01-20 at 13:55
-        //     console.log(
-        //         "🐞 [octree@51] x, y, z, level, levels =",
-        //         x,
-        //         y,
-        //         z,
-        //         level,
-        //         levels
-        //     ) // @FIXME: Remove this line written on 2026-01-20 at 13:57
-        // }
         return
     }
 

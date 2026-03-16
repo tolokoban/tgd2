@@ -199,8 +199,8 @@ export class TgdPainterProgram extends TgdPainter {
     }
 
     debug(caption?: string) {
-        console.log(caption ?? this.name)
-        console.log({
+        console.debug(caption ?? this.name)
+        console.debug({
             drawMode: webglLookup(this.drawMode),
             elementsCount: this.elementsCount,
             elementsOffset: this.elementsOffset,

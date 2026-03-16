@@ -1,11 +1,9 @@
-import { Framebuffers } from "./filter/framebuffers"
 import type { TgdTexture2D, TgdTextureDepth } from "@tgd/texture"
 import type { TgdPainterFunction } from "@tgd/types/painter"
 import { webglCreateFramebuffer, webglLookup, webglRenderbufferStorageMultisample } from "@tgd/utils"
 import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
 import { TgdContext } from "@tgd/context"
-import { TgdConsole } from "@tgd/debug"
 
 export interface TgdPainterFramebufferOptions {
     name?: string

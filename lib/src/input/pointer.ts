@@ -212,7 +212,6 @@ export class TgdInputPointer {
 
         if (tap.fingersCount !== lastTap.fingersCount) return false
 
-        console.log("isMultipleTap === true")
         return true
     }
 

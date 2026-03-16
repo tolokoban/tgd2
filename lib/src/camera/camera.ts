@@ -234,13 +234,6 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         }
         const N = points.length
         if (left === N || right === N || top === N || bottom === N || near === N || far === N) {
-            // const text = JSON.stringify(bbox)
-            // if (text !== lastText) {
-            //     lastText = text
-            //     console.log(text)
-            //     console.log("🐞 [camera@257] bbox =", bbox) // @FIXME: Remove this line written on 2026-01-20 at 13:41
-            //     console.log("🐞 [camera@258] debug =", debug) // @FIXME: Remove this line written on 2026-01-20 at 13:41
-            // }
             return 0
         }
         return (maxX - minX) * (maxY - minY)
@@ -295,9 +288,9 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
 
     debug(caption?: string) {
         const name = `${this.name}: ${caption ?? ""}`
-        console.log("TgdCamera", name)
-        console.log("    Distance:", this.transfo.distance)
-        console.log("    Zoom:", this.zoom)
+        console.debug("TgdCamera", name)
+        console.debug("    Distance:", this.transfo.distance)
+        console.debug("    Zoom:", this.zoom)
         this.transfo.orientation.debug("   Orientation")
         this.transfo.position.debug("    Target")
         this.transfo.actualPosition.debug("    Actual position")

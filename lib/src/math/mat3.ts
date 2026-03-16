@@ -223,10 +223,10 @@ export class TgdMat3 extends Float32Array {
         const row1 = padColOfNumbers([this.m10, this.m11, this.m12])
         const row2 = padColOfNumbers([this.m20, this.m21, this.m22])
 
-        console.log(caption, this.slice())
-        console.log("   ", row0.join(" | "))
-        console.log("   ", row1.join(" | "))
-        console.log("   ", row2.join(" | "))
+        console.debug(caption, this.slice())
+        console.debug("   ", row0.join(" | "))
+        console.debug("   ", row1.join(" | "))
+        console.debug("   ", row2.join(" | "))
     }
 }
 

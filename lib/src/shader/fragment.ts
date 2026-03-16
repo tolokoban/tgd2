@@ -81,7 +81,7 @@ export class TgdShaderFragment {
     }
 
     debug(caption = "Vertex shader") {
-        console.log(caption)
+        console.debug(caption)
         const { code } = this
         const out = new TgdConsole(
             {
