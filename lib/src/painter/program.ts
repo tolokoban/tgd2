@@ -185,6 +185,48 @@ export class TgdPainterProgram extends TgdPainter {
         })
     }
 
+    setElements(elements: number[]) {
+        this.vao.updateElements(elements)
+        this.elementsCount = elements.length
+    }
+
+    /**
+     * Update the values of an attribute of a dataset and resolve the counts.
+     */
+    setAttributeValues(dataset: TgdDataset, attribName: string, values: Float32Array) {
+        try {
+            dataset.set(attribName, values)
+            this.vao.updateDataset(dataset)
+            if (dataset.divisor > 0) {
+                this.instancesCount = values.length
+            } else {
+                const { gl } = this.context
+                switch (this.drawMode) {
+                    case gl.POINTS:
+                        return values.length
+                    case gl.LINES:
+                        return Math.floor(values.length / 2)
+                    case gl.LINE_LOOP:
+                        return values.length
+                    case gl.LINE_STRIP:
+                        return values.length - 1
+                    case gl.TRIANGLES:
+                        return Math.floor(values.length / 3)
+                    case gl.TRIANGLE_FAN:
+                    case gl.TRIANGLE_STRIP:
+                        return values.length - 2
+                    default:
+                        throw new Error(`Unknown drawMode: ${webglLookup(this.drawMode)}!`)
+                }
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : JSON.stringify(error)
+            throw new Error(
+                `[TgdPainterProgram] Unable to set attribute values of dataset "${dataset.name}" for "${this.name}"!\n${message}`,
+            )
+        }
+    }
+
     delete(): void {
         this.onDelete?.()
         for (const block of this.uniformBlocksToDelete) {
