@@ -94,6 +94,10 @@ export class TgdContext extends TgdPainterGroup {
      */
     public readonly eventPaintEnter = new TgdEvent<TgdContext>()
     /**
+     * Dispathed everytime we play or pause the main animation loop (`TgdContext.play()`, `TgdContext.pause()`).
+     */
+    public readonly eventPaintingChange = new TgdEvent<boolean>()
+    /**
      * When the browser decides to destroy the context.
      * @see https://wikis.khronos.org/webgl/HandlingContextLost
      */
@@ -349,6 +353,7 @@ export class TgdContext extends TgdPainterGroup {
             this.requestAnimationFrame = -1
         }
         this.isPlaying = value
+        this.eventPaintingChange.dispatch(value)
         /**
          * Even when pausing, we want to paint a last time.
          * This will be helpful for TgdTime, for instance.

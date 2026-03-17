@@ -42,7 +42,6 @@ export class TgdTime {
     set seconds(seconds: number) {
         const delta = this.seconds - seconds
         this.timeStart += delta
-        this.timeStop += delta
     }
 
     get milliseconds() {
