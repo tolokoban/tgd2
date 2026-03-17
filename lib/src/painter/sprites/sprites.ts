@@ -1,17 +1,23 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 import type { TgdContext } from "@tgd/context"
-import { TgdDataset, TgdDatasetTypeRecord } from "@tgd/dataset"
+import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdConsole } from "@tgd/debug"
 import { TgdMat4, TgdTransfo, TgdVec2 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import { TgdCodeBloc, TgdCodeFunctions, TgdCodeVariables, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import {
+    type TgdCodeBloc,
+    type TgdCodeFunctions,
+    type TgdCodeVariables,
+    TgdShaderFragment,
+    TgdShaderVertex,
+} from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
+import type { WebglAttributeType, WebglUniformType } from "@tgd/types"
+import { isNumber } from "@tgd/types/guards"
 import { TgdVertexArray } from "@tgd/vao"
 import { AccessorProxy } from "./accessor"
-import type { Accessor, AtlasItem, TgdSprite } from "./types"
-import { isNumber } from "@tgd/types/guards"
-import { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdPainterSpritesAbstract } from "./sprites-abstract"
+import type { Accessor, AtlasItem, TgdSprite } from "./types"
 
 export type { TgdSprite } from "./types"
 export type TgdPainterSpritesAtlas = AtlasItem[]

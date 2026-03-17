@@ -1,14 +1,14 @@
-import { TgdPainterFunction } from "@tgd/types/painter"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdConsole } from "@tgd/debug"
 import { TgdInputs } from "@tgd/input"
+import type { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdEvent } from "../event"
 import { TgdPainterGroup } from "../painter/group"
 import type { TgdAnimation } from "../types/animation"
 import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
-import { WebglParams } from "./webgl-params"
 import { UniformBufferObjectsManager } from "./ubo-manager"
+import { WebglParams } from "./webgl-params"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -136,12 +136,6 @@ export class TgdContext extends TgdPainterGroup {
     private requestAnimationFrame = -1
     // Last time the context has been painted.
     private lastTimeInSec = -1
-    // Difference between `Data.now()` and the time in `requestAnimationFrame()`.
-    private timeShift = 0
-    // Last time `pause()` was called.
-    private pauseTime = 0
-    // Number of seconds while we have been in pause.
-    private pauseAccumulation = 0
     private readonly animationManager = new TgdManagerAnimation()
     // Used to store result of gl.readPixels() for one pixel.
     private readonly readPixelColor = new Uint8Array(4)
@@ -348,14 +342,18 @@ export class TgdContext extends TgdPainterGroup {
     set playing(value: boolean) {
         if (value === this.isPlaying) return
 
-        if (value) this.paint()
-        else {
+        if (!value) {
             this.paintingIsOngoing = false
             this.paintingIsQueued = false
             globalThis.cancelAnimationFrame(this.requestAnimationFrame)
             this.requestAnimationFrame = -1
         }
         this.isPlaying = value
+        /**
+         * Even when pausing, we want to paint a last time.
+         * This will be helpful for TgdTime, for instance.
+         */
+        this.paint()
     }
 
     /**
@@ -366,9 +364,6 @@ export class TgdContext extends TgdPainterGroup {
      */
     play() {
         this.playing = true
-        if (this.pauseTime > 0) {
-            this.pauseAccumulation += this.time - this.pauseTime
-        }
     }
 
     /**
@@ -379,9 +374,6 @@ export class TgdContext extends TgdPainterGroup {
      */
     pause() {
         this.playing = false
-        this.pauseTime = this.time
-        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-        this.requestAnimationFrame = -1
     }
 
     takeSnapshot(): Promise<HTMLImageElement> {
@@ -487,7 +479,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     private readonly actualPaint = (time: number) => {
-        let timeInSec = time * 1e-3
+        const timeInSec = time * 1e-3
         if (this.lastTimeInSec < 0) {
             this.lastTimeInSec = timeInSec
             this.paintingIsOngoing = false
@@ -499,11 +491,6 @@ export class TgdContext extends TgdPainterGroup {
         try {
             const { gl } = this
             this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
-            this.timeShift = timeInSec - this.now()
-            if (this.playing) {
-                // the pause is like a frozen time.
-                timeInSec -= this.pauseAccumulation
-            }
             this.eventPaintEnter.dispatch(this)
             const delayInSec = timeInSec - this.lastTimeInSec
             this._fps = Math.round(1 / delayInSec)

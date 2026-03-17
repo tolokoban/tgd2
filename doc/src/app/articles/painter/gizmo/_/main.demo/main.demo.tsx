@@ -1,6 +1,7 @@
 import {
     TgdCameraPerspective,
     type TgdContext,
+    TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterGizmo,
     TgdPainterMesh,
@@ -20,8 +21,22 @@ function init(context: TgdContext) {
     camera.fitSpaceAtTarget(2.2, 2.2)
     const uniformCamera = new TgdUniformBufferObjectCamera(context)
     const clear = new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 })
-    const mesh = new TgdPainterMesh(context, { uniformCamera })
-    mesh.debug()
+    const material = new TgdMaterialDiffuse({ lockLightsToCamera: true })
+    const meshes: TgdPainterMesh[] = []
+    const S = 0.6
+    for (const x of [-S, +S]) {
+        for (const y of [-S, +S]) {
+            meshes.push(
+                new TgdPainterMesh(context, {
+                    uniformCamera,
+                    material,
+                    transfo: {
+                        position: [x, y, 0],
+                    },
+                }),
+            )
+        }
+    }
     context.add(
         clear,
         () => {
@@ -30,7 +45,7 @@ function init(context: TgdContext) {
         new TgdPainterState(context, {
             depth: "less",
             cull: "back",
-            children: [mesh],
+            children: meshes,
         }),
         new TgdPainterState(context, {
             depth: "off",

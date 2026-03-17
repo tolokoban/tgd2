@@ -1,0 +1,20 @@
+import Demo from "./_/main.demo"
+
+# TgdTime
+
+The time `TgdContext` gives you in the painters is the real machine time, expressed in seconds.
+Even if you are not playing the animation, the time goes on.
+It is the number of seconds elapsed since the creation of the `TgdContext`.
+
+[`TgdTime`](docs/classes/TgdTime.html) class allows you to use a virtual time instead, that can be speed up/slow down and paused.
+Even reversed.
+
+* The **red** cube uses the context time.
+* The **green** cude uses a virtual time with speed **1**.
+* The **blue** cude uses a negative speed: **-1**.
+* The **yellow** cude uses a triple speed: **3**.
+
+Tap the screen to switch between **play**/**pause**, and see how it is dealt by `TgdTime`.
+Pay attention at the red cube and how it "jumps" when you start again a paused animation.
+
+<Demo />

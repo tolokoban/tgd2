@@ -1,5 +1,5 @@
-import { TgdCamera } from "@tgd/camera"
-import { TgdContext } from "@tgd/context"
+import type { TgdCamera } from "@tgd/camera"
+import type { TgdContext } from "@tgd/context"
 import { TgdUniformBufferObject } from "@tgd/uniform"
 
 export class TgdUniformBufferObjectCamera extends TgdUniformBufferObject {
@@ -20,6 +20,5 @@ export class TgdUniformBufferObjectCamera extends TgdUniformBufferObject {
         values.uniModelViewMatrix = camera.matrixModelView
         values.uniProjectionMatrix = camera.matrixProjection
         super.updateData()
-        this.debug()
     }
 }

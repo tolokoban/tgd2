@@ -107,6 +107,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/texture/2d/data": ["/articles/texture/2d/data"],
     "/articles/texture/2d/video": ["/articles/texture/2d/video"],
     "/articles/texture/cube": ["/articles/texture/cube"],
+    "/articles/time": ["/articles/time"],
     "/articles/utils": ["/articles/utils"],
     "/articles/utils/loaders": ["/articles/utils/loaders"],
     "/articles/utils/loaders/tgdLoadImageFromElement": ["/articles/utils/loaders/tgdLoadImageFromElement"],

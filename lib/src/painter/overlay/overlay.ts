@@ -1,12 +1,12 @@
-import { TgdContext } from "@tgd/context"
-import { TgdPainter } from "../painter"
-import { TgdTexture2D } from "@tgd/texture"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
+import { TgdEvent } from "@tgd/event"
+import type { TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/index"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import type { TgdTexture2D } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdEvent } from "@tgd/event"
-import { TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/index"
+import { TgdPainter } from "../painter"
 
 export interface TgdPainterOverlayOptions {
     /**

@@ -1,16 +1,17 @@
-import { TgdContext, TgdLogic } from "@tgd/context"
+import { type TgdContext, TgdLogic } from "@tgd/context"
 import { type TgdGeometry, TgdGeometryBox } from "@tgd/geometry"
 import type { TgdInterfaceTransformable } from "@tgd/interface"
 import { type TgdMaterial, TgdMaterialNormals } from "@tgd/material"
 import { TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
+import type { TgdCodeVariables } from "@tgd/shader"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
+import type { WebglUniformType } from "@tgd/types"
+import type { TgdUniformBufferObjectCamera } from "@tgd/uniform"
+import { ensureArray } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../../painter"
-import { TgdUniformBufferObjectCamera } from "@tgd/uniform"
-import { WebglUniformType } from "@tgd/types"
-import { TgdCodeVariables } from "@tgd/shader"
 
 export interface TgdPainterMeshOptions {
     uniformCamera?: TgdUniformBufferObjectCamera
@@ -56,7 +57,7 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         material.attUV = geometry.attUV
         const uniforms: TgdCodeVariables<WebglUniformType> = {
             uniTransfoMatrix: "mat4",
-            ...material.uniforms,
+            ...removeDuplicatedUniforms(material.uniforms, uniformCamera),
         }
         if (!uniformCamera) {
             uniforms.uniModelViewMatrix = "mat4"
@@ -91,8 +92,11 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
             ],
         })
         const frag = new TgdShaderFragment({
-            header: material.fragmentShaderHeader,
-            uniforms: material.uniforms,
+            header: [
+                ...ensureArray(material.fragmentShaderHeader),
+                ...ensureArray(uniformCamera?.toShaderCode("uniformCamera")),
+            ],
+            uniforms: removeDuplicatedUniforms(material.uniforms, uniformCamera),
             outputs: { FragColor: "vec4" },
             varying: material.varyings,
             functions: {
@@ -181,4 +185,15 @@ export class TgdPainterMesh extends TgdPainter implements TgdInterfaceTransforma
         this.vao.delete()
         this.program.delete()
     }
+}
+
+function removeDuplicatedUniforms(
+    uniforms: { [name: string]: WebglUniformType },
+    uniformCamera: TgdUniformBufferObjectCamera | undefined,
+): TgdCodeVariables<WebglUniformType> | undefined {
+    const copy = structuredClone(uniforms)
+    for (const name of uniformCamera?.names ?? []) {
+        delete copy[name]
+    }
+    return copy
 }

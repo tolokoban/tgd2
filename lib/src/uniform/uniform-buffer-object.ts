@@ -1,8 +1,8 @@
+import { TgdConsole } from "@tgd/debug"
 import { type TgdMat2, type TgdMat3, type TgdMat4, TgdVec2, TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import { tgdCodeStringify, type TgdCodeBloc } from "@tgd/shader"
+import { type TgdCodeBloc, tgdCodeStringify } from "@tgd/shader"
 import type { TgdContext } from "./../context/context"
-import { TgdConsole } from "@tgd/debug"
 
 type UniformBufferObjectType =
     | "bool"
