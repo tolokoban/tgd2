@@ -8,6 +8,7 @@ import {
     TgdPainterState,
     TgdTime,
     TgdUniformBufferObjectCamera,
+    tgdCalcModulo,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
@@ -53,9 +54,15 @@ function init(context: TgdContext) {
                 meshes[index],
                 times[index],
             ])
+            const virtualTime = times[1]
+            if (virtualTime.seconds > 3) {
+                virtualTime.seconds -= 3
+                console.log("JUMP!")
+            }
+            console.log(virtualTime.seconds)
             for (const [mesh, virtualTime] of cases) {
                 const t = virtualTime.speed !== 0 ? virtualTime.seconds : time
-                const angY = t * 37.756
+                const angY = t * 30
                 mesh.transfo.setEulerRotation(0, angY, 0)
             }
         },
