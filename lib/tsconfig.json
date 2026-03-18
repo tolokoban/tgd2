@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "allowJs": true,
+        "incremental": true,
+        "tsBuildInfoFile": ".tsbuildinfo",
 
         /* Visit https://aka.ms/tsconfig to read more about this file */
         "target": "ES6" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,

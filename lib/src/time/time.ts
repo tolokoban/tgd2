@@ -41,7 +41,7 @@ export class TgdTime {
     }
     set seconds(seconds: number) {
         const delta = this.seconds - seconds
-        this.timeStart += delta
+        this.timeStart += delta / this.speed
     }
 
     get milliseconds() {

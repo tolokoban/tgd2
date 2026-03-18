@@ -1,5 +1,6 @@
 import {
     ArrayNumber4,
+    tgdCalcMapRange,
     TgdCameraPerspective,
     type TgdContext,
     TgdMaterialDiffuse,
@@ -8,12 +9,11 @@ import {
     TgdPainterState,
     TgdTime,
     TgdUniformBufferObjectCamera,
-    tgdCalcModulo,
 } from "@tolokoban/tgd"
 
 import View from "@/components/demo/Tgd"
+import { PainterPlayPause } from "@/painter/play-pause"
 
-// #begin
 function init(context: TgdContext) {
     const { camera } = context
     if (camera instanceof TgdCameraPerspective) {
@@ -21,6 +21,7 @@ function init(context: TgdContext) {
         camera.far = 10
     }
     camera.fitSpaceAtTarget(3, 3)
+    // #begin
     const uniformCamera = new TgdUniformBufferObjectCamera(context)
     const clear = new TgdPainterClear(context, { color: [0.2, 0.1, 0, 1], depth: 1 })
     const colors: ArrayNumber4[] = [
@@ -47,6 +48,7 @@ function init(context: TgdContext) {
         }
     }
     const times: TgdTime[] = [0, 1, -1, 3].map((speed) => new TgdTime({ speed, context }))
+    const virtualTime = times[1]
     context.add(
         (time) => {
             uniformCamera.updateData()
@@ -54,12 +56,9 @@ function init(context: TgdContext) {
                 meshes[index],
                 times[index],
             ])
-            const virtualTime = times[1]
             if (virtualTime.seconds > 3) {
                 virtualTime.seconds -= 3
-                console.log("JUMP!")
             }
-            console.log(virtualTime.seconds)
             for (const [mesh, virtualTime] of cases) {
                 const t = virtualTime.speed !== 0 ? virtualTime.seconds : time
                 const angY = t * 30
@@ -72,14 +71,17 @@ function init(context: TgdContext) {
             cull: "back",
             children: meshes,
         }),
+        new PainterPlayPause(context, { size: 128 }),
     )
     context.play()
-    context.inputs.pointer.eventTap.addListener(() => {
-        if (context.playing) context.pause()
-        else context.play()
+    // #end
+    context.inputs.pointer.eventMove.addListener((evt) => {
+        if (!evt.shiftKey) return
+
+        virtualTime.seconds = tgdCalcMapRange(evt.current.x, -1, +1, 0, 3)
+        context.paint()
     })
 }
-// #end
 
 export default function Demo() {
     return (

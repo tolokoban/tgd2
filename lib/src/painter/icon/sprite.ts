@@ -115,6 +115,7 @@ export class PainterSprite extends TgdPainter {
         this.uniUV.y = y
         this.uniUV.z = width
         this.uniUV.w = height
+        this.uniUV.debug()
         this.uniformBlock.values.uniUV = this.uniUV
     }
 

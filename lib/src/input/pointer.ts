@@ -1,4 +1,4 @@
-import { TgdEvent } from "@tgd/event"
+import { TgdEventPriority } from "@tgd/event"
 import {
     TgdInputPointerEventMove,
     TgdInputPointerEventFinger,
@@ -11,13 +11,13 @@ import { TgdUtilCyclicBuffer } from "@tgd/utils"
 const MOUSE_BUTTON_RIGHT = 2
 
 export class TgdInputPointer {
-    readonly eventTap = new TgdEvent<Readonly<TgdInputPointerEventTap>>()
-    readonly eventTapMultiple = new TgdEvent<Readonly<TgdInputPointerEventTapMultiple>>()
-    readonly eventMoveStart = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
-    readonly eventMove = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
-    readonly eventHover = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
-    readonly eventMoveEnd = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
-    readonly eventZoom = new TgdEvent<Readonly<TgdInputPointerEventZoom>>()
+    readonly eventTap = new TgdEventPriority<Readonly<TgdInputPointerEventTap>>()
+    readonly eventTapMultiple = new TgdEventPriority<Readonly<TgdInputPointerEventTapMultiple>>()
+    readonly eventMoveStart = new TgdEventPriority<Readonly<TgdInputPointerEventMove>>()
+    readonly eventMove = new TgdEventPriority<Readonly<TgdInputPointerEventMove>>()
+    readonly eventHover = new TgdEventPriority<Readonly<TgdInputPointerEventMove>>()
+    readonly eventMoveEnd = new TgdEventPriority<Readonly<TgdInputPointerEventMove>>()
+    readonly eventZoom = new TgdEventPriority<Readonly<TgdInputPointerEventZoom>>()
     /**
      * This is a tap only of the pointer touched for less that
      * `tapDelay` milliseconds.
@@ -160,7 +160,9 @@ export class TgdInputPointer {
             ...this.controlKeys,
         }
         this.eventHover.dispatch(output)
-        if (this.pointerEvent) this.eventMove.dispatch(output)
+        if (this.pointerEvent) {
+            this.eventMove.dispatch(output)
+        }
     }
 
     private readonly handlePointerUp = (event: PointerEvent) => {

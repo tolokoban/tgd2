@@ -220,7 +220,7 @@ export class TgdUniformBufferObject<
                         this.view.setFloat32(byteOffset, x, true)
                         this.view.setFloat32(byteOffset + 4, y, true)
                         this.view.setFloat32(byteOffset + 8, z, true)
-                        this.view.setFloat32(byteOffset + 12, z, true)
+                        this.view.setFloat32(byteOffset + 12, w, true)
                         this.dirty = true
                     },
                     get: () =>

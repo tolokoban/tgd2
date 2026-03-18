@@ -111,7 +111,6 @@ export class TgdPainterGizmo extends TgdPainter {
             margin: 0,
             texture: framebuffer.textureColor0,
         })
-        this.overlay = overlay
         group.add(framebuffer, overlay)
         context.paint()
         // Offscreen
@@ -144,6 +143,10 @@ export class TgdPainterGizmo extends TgdPainter {
                 tipsNormal.index = index
                 context.paint()
             }
+        })
+        overlay.eventPointerMove.addListener(() => {
+            console.log("Gizmo")
+            return true
         })
         let animations: TgdAnimation[] = []
         overlay.eventPointerTap.addListener((evt: TgdInputPointerEventTap) => {

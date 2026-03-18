@@ -49,6 +49,7 @@ export class TgdPainterOverlay extends TgdPainter {
     public readonly eventResize = new TgdEvent<{ width: number; height: number }>()
     public readonly eventPointerTap = new TgdEvent<TgdInputPointerEventTap>()
     public readonly eventPointerHover = new TgdEvent<TgdInputPointerEventMove>()
+    public readonly eventPointerMove = new TgdEvent<TgdInputPointerEventMove>()
     public alignX: number
     public alignY: number
     public scaleX: number
@@ -151,6 +152,7 @@ export class TgdPainterOverlay extends TgdPainter {
         const { pointer } = context.inputs
         pointer.eventTap.addListener(this.handleTap)
         pointer.eventHover.addListener(this.handleHover)
+        pointer.eventMove.addListener(this.handleMove)
     }
 
     private handleTap = (evtScreen: TgdInputPointerEventTap) => {
@@ -172,7 +174,18 @@ export class TgdPainterOverlay extends TgdPainter {
         const evtOverlay = structuredClone(evtScreen)
         evtOverlay.current.x = x
         evtOverlay.current.y = y
-        this.eventPointerHover.dispatch(evtOverlay)
+        return this.eventPointerHover.dispatch(evtOverlay)
+    }
+
+    private handleMove = (evtScreen: TgdInputPointerEventMove) => {
+        const x = this.xScreenToLayout(evtScreen.current.x)
+        const y = this.yScreenToLayout(evtScreen.current.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.current.x = x
+        evtOverlay.current.y = y
+        return this.eventPointerMove.dispatch(evtOverlay)
     }
 
     delete(): void {

@@ -103,10 +103,10 @@ enum GestureEnum {
 }
 
 export class TgdControllerCameraOrbit {
-    private static counter = 0
+    private static ID = 1
 
     public readonly name: string
-    public readonly id = `TgdControllerCameraOrbit#${TgdControllerCameraOrbit.counter++}`
+    public readonly id = `TgdControllerCameraOrbit#${TgdControllerCameraOrbit.ID++}`
     public readonly eventChange = new TgdEvent<TgdCamera>()
     public readonly debug: boolean
     public minZoom = 1e-3
@@ -211,10 +211,10 @@ export class TgdControllerCameraOrbit {
             ...cameraInitialState,
         }
         const { inputs } = context
-        inputs.pointer.eventMoveStart.addListener(this.handleMoveStart)
-        inputs.pointer.eventMoveEnd.addListener(this.handleMoveEnd)
-        inputs.pointer.eventMove.addListener(this.handleMove)
-        inputs.pointer.eventZoom.addListener(this.handleZoom)
+        inputs.pointer.eventMoveStart.addListener(this.handleMoveStart, -1)
+        inputs.pointer.eventMoveEnd.addListener(this.handleMoveEnd, -1)
+        inputs.pointer.eventMove.addListener(this.handleMove, -1)
+        inputs.pointer.eventZoom.addListener(this.handleZoom, -1)
         this.speedOrbit = speedOrbit
         this.speedZoom = speedZoom
         this.speedPanning = speedPanning
