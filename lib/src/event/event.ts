@@ -49,4 +49,4 @@ export class TgdEventPriority<T = void> {
     }
 }
 
-type Listener<T> = (value: T) => void | true
+type Listener<T> = (value: T) => void | boolean
