@@ -59,18 +59,14 @@ export class PainterPlayPause extends TgdPainterIcon {
     private readonly handleTap = () => {
         const { context } = this
         if (context.playing) {
-            console.log("PAUSE")
             context.pause()
         } else {
-            console.log("PLAY")
             context.play()
         }
-        console.log("Playing >>", context.playing)
     }
 
     private readonly handlePlayingChange = () => {
         this.index = this.context.playing ? 1 : 0
-        console.log("🐞 [play-pause@57] this.index =", this.index) // @FIXME: Remove this line written on 2026-03-18 at 10:55
     }
 }
 

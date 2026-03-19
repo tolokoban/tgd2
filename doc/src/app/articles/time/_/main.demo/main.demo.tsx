@@ -48,7 +48,8 @@ function init(context: TgdContext) {
         }
     }
     const times: TgdTime[] = [0, 1, -1, 3].map((speed) => new TgdTime({ speed, context }))
-    const virtualTime = times[1]
+    const virtualTimeGreen = times[1]
+    const virtualTimeYellow = times[3]
     context.add(
         (time) => {
             uniformCamera.updateData()
@@ -56,11 +57,12 @@ function init(context: TgdContext) {
                 meshes[index],
                 times[index],
             ])
-            if (virtualTime.seconds > 3) {
-                virtualTime.seconds -= 3
+            if (virtualTimeGreen.seconds > 3) {
+                virtualTimeGreen.seconds -= 3
             }
-            for (const [mesh, virtualTime] of cases) {
-                const t = virtualTime.speed !== 0 ? virtualTime.seconds : time
+            for (const index of [0, 1, 2, 3]) {
+                const [mesh, virtualTime] = cases[index]
+                const t = index > 0 ? virtualTime.seconds : time
                 const angY = t * 30
                 mesh.transfo.setEulerRotation(0, angY, 0)
             }
@@ -78,9 +80,12 @@ function init(context: TgdContext) {
     context.inputs.pointer.eventMove.addListener((evt) => {
         if (!evt.shiftKey) return
 
-        virtualTime.seconds = tgdCalcMapRange(evt.current.x, -1, +1, 0, 3)
+        virtualTimeGreen.seconds = tgdCalcMapRange(evt.current.x, -1, +1, 0, 3)
         context.paint()
     })
+    return ({ speed }: { speed: number }) => {
+        virtualTimeYellow.speed = speed
+    }
 }
 
 export default function Demo() {
@@ -93,6 +98,15 @@ export default function Demo() {
                 alpha: false,
                 antialias: true,
                 premultipliedAlpha: false,
+            }}
+            settings={{
+                speed: {
+                    label: "speed",
+                    value: 3,
+                    min: 0,
+                    max: 5,
+                    step: 0.5,
+                },
             }}
         />
     )

@@ -14,11 +14,12 @@ export class TgdTime {
     /**
      * Multiply the real time by this factor.
      */
-    public speed = 1
-
+    private _speed = 1
     private playing = false
     private timeStart = 0
     private timeStop = 0
+    private secondsAtSpeedZero = 0
+    private speedAtPause = 0
     private firstUpdate = true
     private context:
         | {
@@ -27,19 +28,43 @@ export class TgdTime {
         | undefined = undefined
 
     constructor({ speed = 1, context }: Partial<TgdTimeOptions> = {}) {
-        this.speed = speed
+        this._speed = speed
+        this.speedAtPause = speed
         this.context = context
         this.bind(context)
     }
 
+    get speed(): number {
+        return this._speed
+    }
+    set speed(speed: number) {
+        if (this._speed === speed) return
+
+        if (this.playing) {
+            // Changing speed during playing should not make the time jump.
+            // These calculations make sure of that.
+            const { seconds } = this
+            if (speed === 0) this.secondsAtSpeedZero = seconds
+            else if (this._speed === 0) {
+                this.timeStart = this.time - this.secondsAtSpeedZero / speed
+            } else {
+                this.timeStart = this.time - seconds / speed
+            }
+        }
+        this._speed = speed
+    }
+
     get seconds(): number {
-        const { speed, timeStart } = this
+        const { speed, timeStart, timeStop } = this
+        if (speed === 0) return this.secondsAtSpeedZero
         if (this.playing) {
             return (this.time - timeStart) * speed
         }
-        return (this.timeStop - timeStart) * speed
+        return (timeStop - timeStart) * speed
     }
     set seconds(seconds: number) {
+        if (this.speed === 0) return
+
         const delta = this.seconds - seconds
         this.timeStart += delta / this.speed
     }
@@ -81,7 +106,8 @@ export class TgdTime {
         this.firstUpdate = true
     }
 
-    update(context: { time: number; playing: boolean }) {
+    update(context: { playing: boolean }) {
+        // Manual updates are ignored when already bound to a context.
         if (this.context) return
 
         this.actualUpdate(context)
@@ -104,13 +130,22 @@ export class TgdTime {
         if (playing !== this.playing) {
             if (playing) {
                 // Play
-                this.timeStart = time + this.timeStart - this.timeStop
+                const { speed, speedAtPause, timeStart, timeStop } = this
+                if (speedAtPause === 0) {
+                    if (speed !== 0) {
+                        this.timeStart = time - this.secondsAtSpeedZero / speed
+                    }
+                } else if (speed === 0) {
+                    this.secondsAtSpeedZero = (timeStop - timeStart) * speedAtPause
+                } else {
+                    this.timeStart = time + ((timeStart - timeStop) * speedAtPause) / speed
+                }
             } else {
                 // Pause
+                this.speedAtPause = this.speed
                 this.timeStop = time
             }
             this.playing = playing
-            // console.log(playing ? "Play:" : "Pause:", this.seconds)
         }
     }
 }
