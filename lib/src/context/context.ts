@@ -238,7 +238,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
-        const { webglParams } = this
+        const { webglParams, camera } = this
         const savedWidth = this.width
         const savedHeight = this.height
         const savedViewport = webglParams.viewport
@@ -254,7 +254,15 @@ export class TgdContext extends TgdPainterGroup {
         webglParams.setViewport(x, y, width, height)
         webglParams.scissorTest = true
         webglParams.scissor = [x, y, width, height]
+        if (camera) {
+            camera.screenWidth = width
+            camera.screenHeight = height
+        }
         action()
+        if (camera) {
+            camera.screenWidth = savedWidth
+            camera.screenHeight = savedHeight
+        }
         webglParams.scissorTest = savedScissorTest
         webglParams.scissor = savedScissor
         webglParams.viewport = savedViewport
@@ -287,8 +295,8 @@ export class TgdContext extends TgdPainterGroup {
         if (camera === this._camera) return
 
         this._camera = camera
-        // camera.screenWidth = this.gl.drawingBufferWidth
-        // camera.screenHeight = this.gl.drawingBufferHeight
+        camera.screenWidth = this.width
+        camera.screenHeight = this.height
     }
 
     /**

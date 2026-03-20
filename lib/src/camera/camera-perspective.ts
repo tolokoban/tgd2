@@ -26,6 +26,18 @@ export class TgdCameraPerspective extends TgdCamera {
         this._fovy = options.fovy ?? Math.PI / 4
     }
 
+    clone(): TgdCameraPerspective {
+        const camera = new TgdCameraPerspective({
+            transfo: this.transfo.clone(),
+        })
+        camera.screenWidth = this.screenWidth
+        camera.screenHeight = this.screenHeight
+        camera.near = this.near
+        camera.far = this.far
+        camera.fovy = this.fovy
+        return camera
+    }
+
     copyProjectionFrom(camera: TgdCameraPerspective): this {
         this.fovy = camera.fovy
         this.near = camera.near

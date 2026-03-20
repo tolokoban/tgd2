@@ -54,6 +54,8 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.zoom = options.zoom ?? 1
     }
 
+    abstract clone(): TgdCamera
+
     getCurrentState(): Readonly<TgdCameraState> {
         return {
             distance: this.transfo.distance,

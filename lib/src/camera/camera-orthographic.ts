@@ -19,6 +19,18 @@ export class TgdCameraOrthographic extends TgdCamera {
         this.spaceHeight = options.spaceHeight ?? 10
     }
 
+    clone(): TgdCameraOrthographic {
+        const camera = new TgdCameraOrthographic({
+            transfo: this.transfo.clone(),
+        })
+        camera.screenWidth = this.screenWidth
+        camera.screenHeight = this.screenHeight
+        camera.near = this.near
+        camera.far = this.far
+        camera.spaceHeight = this.spaceHeight
+        return camera
+    }
+
     copyProjectionFrom(camera: TgdCameraOrthographic): this {
         this.spaceHeight = camera.spaceHeight
         return this
