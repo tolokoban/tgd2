@@ -5,7 +5,6 @@ import { TgdTexture2D } from "@tgd/texture"
 import { TgdAnimation, TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/types"
 import { tgdActionCreateCameraInterpolation, tgdCanvasCreate } from "@tgd/utils"
 import { TgdPainterClear } from "../clear"
-import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
 import { TgdPainterGroup } from "../group"
 import { TgdPainterGroupCamera } from "../group-camera"
 import { TgdPainterOverlay } from "../overlay"
@@ -136,7 +135,7 @@ export class TgdPainterGizmo extends TgdPainter {
         )
         contextOffscreen.camera = camera
         this.contextOffscreen = contextOffscreen
-        overlay.eventPointerHover.addListener((evt: TgdInputPointerEventMove) => {
+        overlay.eventHover.addListener((evt: TgdInputPointerEventMove) => {
             const [red] = contextOffscreen.readPixel(evt.current.x, evt.current.y)
             const index = Math.floor((4 + red * 8) / 0xff) - 1
             if (tipsNormal.index !== index) {
@@ -144,12 +143,11 @@ export class TgdPainterGizmo extends TgdPainter {
                 context.paint()
             }
         })
-        overlay.eventPointerMove.addListener(() => {
-            console.log("Gizmo")
-            return true
-        })
+        overlay.eventMoveStart.addListener(() => true)
+        overlay.eventMove.addListener(() => true)
+        overlay.eventMoveEnd.addListener(() => true)
         let animations: TgdAnimation[] = []
-        overlay.eventPointerTap.addListener((evt: TgdInputPointerEventTap) => {
+        overlay.eventTap.addListener((evt: TgdInputPointerEventTap) => {
             const [red] = contextOffscreen.readPixel(evt.x, evt.y)
             const index = Math.floor((4 + red * 8) / 0xff) - 1
             if (index < 0 || index > 5) return

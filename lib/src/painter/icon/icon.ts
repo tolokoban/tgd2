@@ -78,7 +78,7 @@ export class TgdPainterIcon extends TgdPainter {
             ...options,
             texture: framebuffer.textureColor0,
         }))
-        overlay.eventPointerTap.addListener((evt) => this.eventPointerTap.dispatch(evt))
+        overlay.eventTap.addListener((evt) => this.eventPointerTap.dispatch(evt))
         overlay.eventResize.addListener(this.handleOverlayResize)
         this.state = new TgdPainterState(context, {
             cull: "off",

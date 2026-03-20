@@ -24,7 +24,6 @@
         "doc": "typedoc",
         "build": "build-typescript-library --allow-circular .",
         "dev": "build-typescript-library --allow-circular .",
-        "postbuild": "npm run doc",
         "lint": "eslint -c eslint.config.mjs './src/**/*.ts'",
         "lint:fix": "eslint -c eslint.config.mjs --fix './src/**/*.ts'",
         "start": "build-typescript-library --allow-circular --watch .",

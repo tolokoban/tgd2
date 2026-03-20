@@ -1,10 +1,13 @@
 import {
     type ArrayNumber2,
     type ArrayNumber4,
+    tgdCalcDegToRad,
+    tgdCalcRadToDeg,
     tgdCanvasCreatePalette,
     type TgdContext,
     TgdControllerCameraOrbit,
     TgdMaterialDiffuse,
+    TgdMaterialFlatTexture,
     TgdPainterClear,
     TgdPainterSegments,
     TgdPainterSegmentsData,
@@ -24,13 +27,13 @@ function init(context: TgdContext) {
         speedZoom: 1,
     })
     const clear = new TgdPainterClear(context, {
-        color: [0.3, 0.3, 0.3, 1],
+        color: [0.1, 0.1, 0.1, 1],
         depth: 1,
     })
     const radius = 10
     const width = 50
     const data1 = new TgdPainterSegmentsData()
-    const nodes1: ArrayNumber4[] = []
+    const nodes1: ArrayNumber4[] = [[0, -1000, 0, 0]]
     for (let step = -width; step < width; step++) {
         const ang = step * 0.5
         const r = radius * Math.cos((step * Math.PI * 0.5) / width)
@@ -40,6 +43,7 @@ function init(context: TgdContext) {
         const thickness = Math.max(0, 1.0 - Math.abs(step) / width)
         nodes1.push([x, y, z, thickness])
     }
+    nodes1.push([0, 1000, 0, 0])
     for (let i = 1; i < nodes1.length; i++) {
         const uv0: ArrayNumber2 = [(i - 0.5) / (nodes1.length + 1), 0]
         const uv1: ArrayNumber2 = [(i + 0.5) / (nodes1.length + 1), 0]
@@ -52,14 +56,12 @@ function init(context: TgdContext) {
         dataset: data1.makeDataset,
         roundness: 16,
         minRadius: 2,
-        material: new TgdMaterialDiffuse({
-            color: palette,
-            lockLightsToCamera: true,
+        material: new TgdMaterialFlatTexture({
+            texture: palette,
         }),
     })
     segments.debug()
-    segments.transfo.orbitAroundX(Math.random() * 360)
-    segments.transfo.orbitAroundZ(Math.random() * 360)
+    segments.transfo.orbitAroundZ(tgdCalcDegToRad(90))
     const state = new TgdPainterState(context, {
         depth: "less",
         children: [segments],

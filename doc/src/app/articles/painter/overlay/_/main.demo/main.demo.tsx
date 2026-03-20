@@ -47,7 +47,7 @@ function init(context: TgdContext) {
     )
     context.camera.fitSpaceAtTarget(1.2, 1.2)
     context.paint()
-    overlay.eventPointerTap.addListener((evt) => {
+    overlay.eventTap.addListener((evt) => {
         const ctx = canvas.getContext("2d")
         if (!ctx) return
 

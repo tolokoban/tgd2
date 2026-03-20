@@ -65,7 +65,7 @@ function init(context: TgdContext, assets: Assets) {
     })
     context.add(framebuffer, filters, overlay)
     context.paint()
-    overlay.eventPointerTap.addListener(() => {
+    overlay.eventTap.addListener(() => {
         if (framebuffer.antiAliasing) {
             framebuffer.antiAliasing = false
             overlay.texture = red

@@ -7,7 +7,6 @@ import {
     TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterLogic,
-    TgdPainterSegments,
     TgdPainterSegmentsData,
     TgdPainterSegmentsMorphing,
     TgdPainterState,
@@ -32,7 +31,7 @@ function init(context: TgdContext) {
     const radius = 10
     const width = 50
     const data1 = new TgdPainterSegmentsData()
-    const nodes1: ArrayNumber4[] = []
+    const nodes1: ArrayNumber4[] = [[0, -1000, 0, 0]]
     for (let step = -width; step < width; step++) {
         const ang = step * 0.5
         const r = radius * Math.cos((step * Math.PI * 0.5) / width)
@@ -42,13 +41,14 @@ function init(context: TgdContext) {
         const thickness = Math.max(0, 1.0 - Math.abs(step) / width)
         nodes1.push([x, y, z, thickness])
     }
+    nodes1.push([0, 1000, 0, 0])
     for (let i = 1; i < nodes1.length; i++) {
         const uv0: ArrayNumber2 = [(i - 0.5) / (nodes1.length + 1), 0]
         const uv1: ArrayNumber2 = [(i + 0.5) / (nodes1.length + 1), 0]
         data1.add(nodes1[i - 1], nodes1[i], uv0, uv1)
     }
     const data2 = new TgdPainterSegmentsData()
-    const nodes2: ArrayNumber4[] = []
+    const nodes2: ArrayNumber4[] = [[0, -1000, 0, 0]]
     for (let step = -width; step < width; step++) {
         const ang = step * 0.25
         const r = radius * Math.cos((step * Math.PI * 0.5) / width) * 0.5
@@ -58,6 +58,7 @@ function init(context: TgdContext) {
         const thickness = Math.max(0, 1.0 - Math.abs(step) / (width - 1))
         nodes2.push([x, y, z, thickness])
     }
+    nodes2.push([0, 1000, 0, 0])
     for (let i = 1; i < nodes2.length; i++) {
         const uv0: ArrayNumber2 = [(i - 0.5) / (nodes2.length + 1), 0]
         const uv1: ArrayNumber2 = [(i + 0.5) / (nodes2.length + 1), 0]
@@ -66,11 +67,11 @@ function init(context: TgdContext) {
     const palette = new TgdTexture2D(context).loadBitmap(
         tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
     )
-    const segments2 = new TgdPainterSegmentsMorphing(context, {
+    const segments = new TgdPainterSegmentsMorphing(context, {
         datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
-        roundness: 32,
-        minRadius: 1,
-        radiusMultiplier: 1.2,
+        roundness: 64,
+        minRadius: 2,
+        radiusMultiplier: 1,
         material: new TgdMaterialDiffuse({
             color: palette,
             lockLightsToCamera: true,
@@ -78,24 +79,23 @@ function init(context: TgdContext) {
     })
     const state = new TgdPainterState(context, {
         depth: webglPresetDepth.less,
-        children: [segments2],
+        children: [segments],
     })
     context.add(
         clear,
         state,
         new TgdPainterLogic((time, delta) => {
-            segments2.mix = Math.abs(Math.sin(time))
-            segments2.transfo.orbitAroundX(delta * 0.315481)
-            segments2.transfo.orbitAroundZ(delta * 0.2)
+            segments.mix = Math.abs(Math.sin(time))
+            segments.transfo.orbitAroundX(delta * 0.315481)
+            segments.transfo.orbitAroundZ(delta * 0.2)
         }),
     )
     context.play()
+    return ({ radiusMultiplier }: { radiusMultiplier: number }) => {
+        segments.radiusMultiplier = radiusMultiplier
+        context.paint()
+    }
     // #end
-    context.inputs.pointer.eventHover.addListener((event) => {
-        const { x, y } = event.current
-        const [R, G, B] = context.readPixel(x, y)
-        console.log(`%c(${R}, ${G}, ${B})]`, `color:#777;background:rgb(${R},${G},${B})`)
-    })
 }
 
 export default function Demo() {
@@ -105,6 +105,15 @@ export default function Demo() {
             gizmo
             options={{
                 preserveDrawingBuffer: true,
+            }}
+            settings={{
+                radiusMultiplier: {
+                    label: "radiusMultiplier",
+                    value: 1,
+                    min: 0.1,
+                    max: 3,
+                    step: 0.1,
+                },
             }}
         />
     )

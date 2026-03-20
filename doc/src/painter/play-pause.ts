@@ -46,13 +46,13 @@ export class PainterPlayPause extends TgdPainterIcon {
         this.textureIcons = texture
         this.handlePlayingChange()
         this.eventPointerTap.addListener(this.handleTap)
-        context.eventPaintingChange.addListener(this.handlePlayingChange)
+        context.eventPlayingChange.addListener(this.handlePlayingChange)
     }
 
     delete() {
         this.textureIcons.delete()
         this.eventPointerTap.removeListener(this.handleTap)
-        this.context.eventPaintingChange.removeListener(this.handlePlayingChange)
+        this.context.eventPlayingChange.removeListener(this.handlePlayingChange)
         super.delete()
     }
 

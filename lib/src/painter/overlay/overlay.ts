@@ -1,7 +1,12 @@
 import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdEvent } from "@tgd/event"
-import type { TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/index"
+import type {
+    TgdInputPointerEventMove,
+    TgdInputPointerEventTap,
+    TgdInputPointerEventTapMultiple,
+    TgdInputPointerEventZoom,
+} from "@tgd/index"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { TgdTexture2D } from "@tgd/texture"
@@ -47,9 +52,14 @@ export interface TgdPainterOverlayOptions {
 
 export class TgdPainterOverlay extends TgdPainter {
     public readonly eventResize = new TgdEvent<{ width: number; height: number }>()
-    public readonly eventPointerTap = new TgdEvent<TgdInputPointerEventTap>()
-    public readonly eventPointerHover = new TgdEvent<TgdInputPointerEventMove>()
-    public readonly eventPointerMove = new TgdEvent<TgdInputPointerEventMove>()
+    public readonly eventTap = new TgdEvent<Readonly<TgdInputPointerEventTap>>()
+    public readonly eventTapMultiple = new TgdEvent<Readonly<TgdInputPointerEventTapMultiple>>()
+    public readonly eventMoveStart = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
+    public readonly eventMove = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
+    public readonly eventHover = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
+    public readonly eventMoveEnd = new TgdEvent<Readonly<TgdInputPointerEventMove>>()
+    public readonly eventZoom = new TgdEvent<Readonly<TgdInputPointerEventZoom>>()
+
     public alignX: number
     public alignY: number
     public scaleX: number
@@ -151,11 +161,26 @@ export class TgdPainterOverlay extends TgdPainter {
         this.vao = vao
         const { pointer } = context.inputs
         pointer.eventTap.addListener(this.handleTap)
-        pointer.eventHover.addListener(this.handleHover)
+        pointer.eventTapMultiple.addListener(this.handleTapMultiple)
+        pointer.eventMoveStart.addListener(this.handleMoveStart)
         pointer.eventMove.addListener(this.handleMove)
+        pointer.eventHover.addListener(this.handleHover)
+        pointer.eventMoveEnd.addListener(this.handleMoveEnd)
+        pointer.eventZoom.addListener(this.handleZoom)
     }
 
-    private handleTap = (evtScreen: TgdInputPointerEventTap) => {
+    private readonly handleZoom = (evtScreen: TgdInputPointerEventZoom) => {
+        const x = this.xScreenToLayout(evtScreen.current.x)
+        const y = this.yScreenToLayout(evtScreen.current.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.current.x = x
+        evtOverlay.current.y = y
+        this.eventZoom.dispatch(evtOverlay)
+    }
+
+    private readonly handleTap = (evtScreen: TgdInputPointerEventTap) => {
         const x = this.xScreenToLayout(evtScreen.x)
         const y = this.yScreenToLayout(evtScreen.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
@@ -163,10 +188,21 @@ export class TgdPainterOverlay extends TgdPainter {
         const evtOverlay = structuredClone(evtScreen)
         evtOverlay.x = x
         evtOverlay.y = y
-        this.eventPointerTap.dispatch(evtOverlay)
+        this.eventTap.dispatch(evtOverlay)
     }
 
-    private handleHover = (evtScreen: TgdInputPointerEventMove) => {
+    private readonly handleTapMultiple = (evtScreen: TgdInputPointerEventTapMultiple) => {
+        const x = this.xScreenToLayout(evtScreen.x)
+        const y = this.yScreenToLayout(evtScreen.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.x = x
+        evtOverlay.y = y
+        this.eventTapMultiple.dispatch(evtOverlay)
+    }
+
+    private readonly handleHover = (evtScreen: TgdInputPointerEventMove) => {
         const x = this.xScreenToLayout(evtScreen.current.x)
         const y = this.yScreenToLayout(evtScreen.current.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
@@ -174,10 +210,10 @@ export class TgdPainterOverlay extends TgdPainter {
         const evtOverlay = structuredClone(evtScreen)
         evtOverlay.current.x = x
         evtOverlay.current.y = y
-        return this.eventPointerHover.dispatch(evtOverlay)
+        return this.eventHover.dispatch(evtOverlay)
     }
 
-    private handleMove = (evtScreen: TgdInputPointerEventMove) => {
+    private readonly handleMove = (evtScreen: TgdInputPointerEventMove) => {
         const x = this.xScreenToLayout(evtScreen.current.x)
         const y = this.yScreenToLayout(evtScreen.current.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
@@ -185,13 +221,42 @@ export class TgdPainterOverlay extends TgdPainter {
         const evtOverlay = structuredClone(evtScreen)
         evtOverlay.current.x = x
         evtOverlay.current.y = y
-        return this.eventPointerMove.dispatch(evtOverlay)
+        return this.eventMove.dispatch(evtOverlay)
+    }
+
+    private readonly handleMoveStart = (evtScreen: TgdInputPointerEventMove) => {
+        const x = this.xScreenToLayout(evtScreen.current.x)
+        const y = this.yScreenToLayout(evtScreen.current.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.current.x = x
+        evtOverlay.current.y = y
+        return this.eventMoveStart.dispatch(evtOverlay)
+    }
+
+    private readonly handleMoveEnd = (evtScreen: TgdInputPointerEventMove) => {
+        const x = this.xScreenToLayout(evtScreen.current.x)
+        const y = this.yScreenToLayout(evtScreen.current.y)
+        if (Math.abs(x) > 1 || Math.abs(y) > 1) return
+
+        const evtOverlay = structuredClone(evtScreen)
+        evtOverlay.current.x = x
+        evtOverlay.current.y = y
+        return this.eventMoveEnd.dispatch(evtOverlay)
     }
 
     delete(): void {
         const { context } = this
         if (context) {
-            this.eventPointerTap.removeListener(this.handleTap)
+            const { pointer } = context.inputs
+            pointer.eventTap.removeListener(this.handleTap)
+            pointer.eventTapMultiple.removeListener(this.handleTapMultiple)
+            pointer.eventMoveStart.removeListener(this.handleMoveStart)
+            pointer.eventMove.removeListener(this.handleMove)
+            pointer.eventHover.removeListener(this.handleHover)
+            pointer.eventMoveEnd.removeListener(this.handleMoveEnd)
+            pointer.eventZoom.removeListener(this.handleZoom)
         }
         this.prg.delete()
         this.vao.delete()

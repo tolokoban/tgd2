@@ -85,6 +85,7 @@ export class TgdContext extends TgdPainterGroup {
     public readonly webglParams: WebglParams
     public readonly implementationColorReadFormat: number
     public readonly implementationColorReadType: number
+    public readonly eventResize = new TgdEvent<{ width: number; height: number }>()
     /**
      * Dispatched when everything has been painted.
      */
@@ -96,7 +97,7 @@ export class TgdContext extends TgdPainterGroup {
     /**
      * Dispathed everytime we play or pause the main animation loop (`TgdContext.play()`, `TgdContext.pause()`).
      */
-    public readonly eventPaintingChange = new TgdEvent<boolean>()
+    public readonly eventPlayingChange = new TgdEvent<boolean>()
     /**
      * When the browser decides to destroy the context.
      * @see https://wikis.khronos.org/webgl/HandlingContextLost
@@ -219,6 +220,7 @@ export class TgdContext extends TgdPainterGroup {
                 canvas.width = width
                 canvas.height = height
             }
+            this.eventResize.dispatch({ width, height })
             this.paint()
         })
         if (isOffscreen(canvas)) {
@@ -353,7 +355,7 @@ export class TgdContext extends TgdPainterGroup {
             this.requestAnimationFrame = -1
         }
         this.isPlaying = value
-        this.eventPaintingChange.dispatch(value)
+        this.eventPlayingChange.dispatch(value)
         /**
          * Even when pausing, we want to paint a last time.
          * This will be helpful for TgdTime, for instance.
