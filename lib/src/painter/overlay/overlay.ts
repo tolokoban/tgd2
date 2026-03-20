@@ -160,13 +160,13 @@ export class TgdPainterOverlay extends TgdPainter {
         this.prg = prg
         this.vao = vao
         const { pointer } = context.inputs
-        pointer.eventTap.addListener(this.handleTap)
-        pointer.eventTapMultiple.addListener(this.handleTapMultiple)
-        pointer.eventMoveStart.addListener(this.handleMoveStart)
-        pointer.eventMove.addListener(this.handleMove)
-        pointer.eventHover.addListener(this.handleHover)
-        pointer.eventMoveEnd.addListener(this.handleMoveEnd)
-        pointer.eventZoom.addListener(this.handleZoom)
+        pointer.eventTap.addListener(this.handleTap, 1)
+        pointer.eventTapMultiple.addListener(this.handleTapMultiple, 1)
+        pointer.eventMoveStart.addListener(this.handleMoveStart, 1)
+        pointer.eventMove.addListener(this.handleMove, 1)
+        pointer.eventHover.addListener(this.handleHover, 1)
+        pointer.eventMoveEnd.addListener(this.handleMoveEnd, 1)
+        pointer.eventZoom.addListener(this.handleZoom, 1)
     }
 
     private readonly handleZoom = (evtScreen: TgdInputPointerEventZoom) => {

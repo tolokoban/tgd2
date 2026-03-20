@@ -36,7 +36,7 @@ export interface TgdPainterStateOptions {
     depth: Keys<WebglDepthOptions, typeof webglPresetDepth>
     cull: Keys<WebglCullOptions, typeof webglPresetCull>
     stencil: Keys<WebglStencilOptions, typeof webglPresetStencil>
-    viewport: ArrayNumber4 | Int32Array
+    viewport: ArrayNumber4
     name: string
     /**
      * Function to execute before painting.
@@ -147,7 +147,7 @@ function prepareActions(
         })
     }
     if (viewport) {
-        let savedViewport: Int32Array
+        let savedViewport: Readonly<ArrayNumber4>
         onEnterActions.push(() => {
             savedViewport = p.viewport
             const [x, y, w, h] = viewport

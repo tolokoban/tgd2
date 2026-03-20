@@ -123,6 +123,7 @@ const Page106 = React.lazy(() => import("./tricks/page.mdx"))
 const Page107 = React.lazy(() => import("./tricks/color-mask/page.mdx"))
 const Page108 = React.lazy(() => import("./tricks/color-mask/2/page.mdx"))
 const Page109 = React.lazy(() => import("./tricks/color-mask/3/page.mdx"))
+const Page110 = React.lazy(() => import("./tricks/stereo-vision/page.mdx"))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function App({ lang }: { lang?: string }) {
@@ -233,6 +234,7 @@ export default function App({ lang }: { lang?: string }) {
     const pg107 = Page107
     const pg108 = Page108
     const pg109 = Page109
+    const pg110 = Page110
     return (
         <Route path="/" Page={pg0} Layout={ly0} fallback={fb0} context={context}>
             <Route path="/api" Page={pg1} fallback={fb0} context={context}/>
@@ -372,6 +374,7 @@ export default function App({ lang }: { lang?: string }) {
                     <Route path="/tricks/color-mask/2" Page={pg108} fallback={fb0} context={context}/>
                     <Route path="/tricks/color-mask/3" Page={pg109} fallback={fb0} context={context}/>
                 </Route>
+                <Route path="/tricks/stereo-vision" Page={pg110} fallback={fb0} context={context}/>
             </Route>
         </Route>
     )

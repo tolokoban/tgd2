@@ -1,4 +1,4 @@
-import type { ArrayNumber2 } from "@tgd/types"
+import type { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 
 export class WebglParams {
     private _blend: boolean
@@ -14,13 +14,16 @@ export class WebglParams {
     private _depthWriteMask: boolean
     private _depthRange: ArrayNumber2
 
-    private _viewport: Int32Array
+    private _viewport: Readonly<ArrayNumber4>
 
     private _cullFace: boolean
     private _cullFaceMode: number
 
+    private _scissorTest: boolean
+    private _scissor: Readonly<ArrayNumber4>
+
     constructor(public readonly gl: WebGL2RenderingContext) {
-        this._viewport = gl.getParameter(gl.VIEWPORT)
+        this._viewport = toArrayNumber4(gl.getParameter(gl.VIEWPORT))
 
         this._cullFace = Boolean(gl.getParameter(gl.CULL_FACE))
         this._cullFaceMode = Number(gl.getParameter(gl.CULL_FACE_MODE))
@@ -33,19 +36,22 @@ export class WebglParams {
         this._blendSrcAlpha = Number(gl.getParameter(gl.BLEND_SRC_ALPHA))
         this._blendDstAlpha = Number(gl.getParameter(gl.BLEND_DST_ALPHA))
 
-        this._depthTest = Boolean(this.gl.getParameter(gl.DEPTH_TEST))
-        this._depthFunc = Number(this.gl.getParameter(gl.DEPTH_FUNC))
-        this._depthWriteMask = Boolean(this.gl.getParameter(gl.DEPTH_WRITEMASK))
-        const [depthRangeMin, depthRangeMax] = this.gl.getParameter(gl.DEPTH_RANGE) as Float32Array
+        this._depthTest = Boolean(gl.getParameter(gl.DEPTH_TEST))
+        this._depthFunc = Number(gl.getParameter(gl.DEPTH_FUNC))
+        this._depthWriteMask = Boolean(gl.getParameter(gl.DEPTH_WRITEMASK))
+        const [depthRangeMin, depthRangeMax] = gl.getParameter(gl.DEPTH_RANGE) as Float32Array
         this._depthRange = [depthRangeMin, depthRangeMax]
+
+        this._scissorTest = Boolean(gl.getParameter(gl.SCISSOR_TEST))
+        this._scissor = gl.getParameter(gl.SCISSOR_BOX) as ArrayNumber4
     }
 
-    get viewport() {
+    get viewport(): Readonly<ArrayNumber4> {
         return this._viewport
     }
-    set viewport(viewport: Int32Array) {
-        this._viewport = viewport
+    set viewport(viewport: Readonly<ArrayNumber4>) {
         const [x, y, w, h] = viewport
+        this._viewport = [x, y, w, h]
         this.gl.viewport(x, y, w, h)
     }
 
@@ -68,11 +74,7 @@ export class WebglParams {
     }
 
     setViewport(x: number, y: number, width: number, height: number) {
-        this.viewport[0] = x
-        this.viewport[1] = y
-        this.viewport[2] = width
-        this.viewport[3] = height
-        this.gl.viewport(x, y, width, height)
+        this.viewport = [x, y, width, height]
     }
 
     get blend() {
@@ -181,4 +183,35 @@ export class WebglParams {
         this._depthRange[1] = max
         this.gl.depthRange(min, max)
     }
+
+    get scissorTest(): boolean {
+        return this._scissorTest
+    }
+    set scissorTest(scissorTest: boolean) {
+        if (this._scissorTest === scissorTest) return
+
+        this._scissorTest = scissorTest
+        const { gl } = this
+        if (scissorTest) {
+            gl.enable(gl.SCISSOR_TEST)
+        } else {
+            gl.disable(gl.SCISSOR_TEST)
+        }
+    }
+
+    get scissor(): Readonly<ArrayNumber4> {
+        return this._scissor
+    }
+    set scissor(scissor: Readonly<ArrayNumber4>) {
+        const [x, y, width, height] = scissor
+        if (this._scissor === scissor) return
+
+        this._scissor = scissor
+        this.gl.scissor(x, y, width, height)
+    }
+}
+
+function toArrayNumber4(arr: number[] | Int32Array | Float32Array): Readonly<ArrayNumber4> {
+    const [x, y, w, h] = arr
+    return [x, y, w, h]
 }

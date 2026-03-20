@@ -237,6 +237,33 @@ export class TgdContext extends TgdPainterGroup {
         this.webglParams = new WebglParams(gl)
     }
 
+    viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
+        const { webglParams } = this
+        const savedWidth = this.width
+        const savedHeight = this.height
+        const savedViewport = webglParams.viewport
+        const savedScissor = webglParams.scissor
+        const savedScissorTest = webglParams.scissorTest
+        const savedAspectRatio = this.width / this.height
+        const savedAspectRatioInverse = 1 / savedAspectRatio
+        const { x = 0, y = 0, width = savedWidth, height = savedHeight } = viewport
+        this.width = width
+        this.height = height
+        this._aspectRatio = width / height
+        this._aspectRatioInverse = 1 / this._aspectRatio
+        webglParams.setViewport(x, y, width, height)
+        webglParams.scissorTest = true
+        webglParams.scissor = [x, y, width, height]
+        action()
+        webglParams.scissorTest = savedScissorTest
+        webglParams.scissor = savedScissor
+        webglParams.viewport = savedViewport
+        this._aspectRatio = savedAspectRatio
+        this._aspectRatioInverse = savedAspectRatioInverse
+        this.width = savedWidth
+        this.height = savedHeight
+    }
+
     get gl(): WebGL2RenderingContext {
         if (!this._gl) {
             throw new Error(`[TgdContext] This context has been deleted: ${this.name}!`)

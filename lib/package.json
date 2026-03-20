@@ -21,11 +21,14 @@
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
     "scripts": {
+        "clean": "rm -rf dist/ .tsbuildinfo",
         "doc": "typedoc",
+        "prebuild": "npm run clean",
         "build": "build-typescript-library --allow-circular .",
         "dev": "build-typescript-library --allow-circular .",
         "lint": "eslint -c eslint.config.mjs './src/**/*.ts'",
         "lint:fix": "eslint -c eslint.config.mjs --fix './src/**/*.ts'",
+        "prestart": "npm run clean",
         "start": "build-typescript-library --allow-circular --watch .",
         "test": "jest",
         "test:watch": "jest --watch"
