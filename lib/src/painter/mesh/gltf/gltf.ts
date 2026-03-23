@@ -1,22 +1,45 @@
-import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdLight } from "@tgd/light"
 import { TgdMaterial } from "@tgd/material"
-import { TgdMaterialCameraLight } from "@tgd/material/camera-light"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import type { TgdDataGlb } from "@tgd/parser"
-import type { TgdTexture2D } from "@tgd/texture"
-import type { TgdFormatGltfMaterial } from "@tgd/types"
+import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 import { TgdPainterMesh } from "../mesh"
 import { TgdContext } from "@tgd/context"
+import { TgdMaterialGltf } from "@tgd/material/gltf"
+import { TgdTexture2D } from "@tgd/texture"
+import { ensureArrayNumber4, tgdCanvasCreateFill } from "@tgd/utils"
+
+export interface TgdPainterMeshGltfMaterialDescription {
+    name: string
+    asset: TgdDataGlb
+    context: TgdContext
+    color?: ArrayNumber4
+    abedo?: {
+        imageIndex: number
+    }
+    metallicRoughness?: {
+        imageIndex: number
+    }
+    normal?: {
+        imageIndex: number
+    }
+    occlusion?: {
+        imageIndex: number
+    }
+    emission?: {
+        imageIndex: number
+        strength: ArrayNumber3
+    }
+}
 
 export interface TgdPainterMeshGltfOptions {
     asset: TgdDataGlb
     meshIndexOrName?: number | string
     primitiveIndex?: number
     name?: string
-    material?: TgdMaterial | ((this: void, options: { color?: TgdVec4 | TgdTexture2D }) => TgdMaterial)
+    material?: TgdMaterial | ((this: void, options: TgdPainterMeshGltfMaterialDescription) => TgdMaterial)
 }
 
 /**
@@ -24,8 +47,8 @@ export interface TgdPainterMeshGltfOptions {
 export class TgdPainterMeshGltf extends TgdPainterMesh {
     constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
         const { asset, meshIndexOrName = 0, primitiveIndex = 0, material: materialFactory = makeMaterial } = options
-        const color = figureColor(asset, meshIndexOrName, primitiveIndex, context)
-        const material = materialFactory instanceof TgdMaterial ? materialFactory : materialFactory({ color })
+        const materialDescription = figureMaterialDescription(asset, meshIndexOrName, primitiveIndex, context)
+        const material = materialFactory instanceof TgdMaterial ? materialFactory : materialFactory(materialDescription)
         let computeNormals = false
         const attributes: TgdDatasetTypeRecord = {
             POSITION: "vec3",
@@ -63,37 +86,83 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
 
 const DEFAULT_COLOR = new TgdVec4(0.9, 0.5, 0.1, 1)
 
-function figureColor(
+function figureMaterialDescription(
     asset: TgdDataGlb,
     meshIndexOrName: number | string,
     primitiveIndex: number,
     context: TgdContext,
-): TgdVec4 | TgdTexture2D {
+): TgdPainterMeshGltfMaterialDescription {
+    const description: TgdPainterMeshGltfMaterialDescription = {
+        asset,
+        context,
+        name: "Material",
+    }
     const primitive = asset.getMeshPrimitive(meshIndexOrName, primitiveIndex)
     const materialIndex = primitive.material ?? -1
-    if (materialIndex === -1) return DEFAULT_COLOR
+    if (materialIndex === -1) {
+        return {
+            ...description,
+            color: DEFAULT_COLOR.toArrayNumber4(),
+        }
+    }
 
     const material = asset.getMaterial(materialIndex)
-    const textureEmissive = getTextureEmissive(context, asset, material)
-    const pbr = material.pbrMetallicRoughness
-    if (!pbr) return textureEmissive ?? DEFAULT_COLOR
-    if (textureEmissive) return textureEmissive
-
-    if (pbr.baseColorTexture) {
-        const textureIndex = pbr.baseColorTexture?.index
-        const color = asset.createTexture2D(context, textureIndex ?? 0)
-        if (context.paint) color.eventChange.addListener(context.paint)
-        return color
+    description.name = material.name ?? description.name
+    description.color = material.pbrMetallicRoughness?.baseColorFactor
+    const abedoIndex = material.pbrMetallicRoughness?.baseColorTexture?.index
+    if (typeof abedoIndex === "number") {
+        description.abedo = {
+            imageIndex: abedoIndex,
+        }
     }
-    if (pbr.baseColorFactor) {
-        return new TgdVec4(...pbr.baseColorFactor)
+    const roughnessIndex = material.pbrMetallicRoughness?.metalicRoughnessTexture?.index
+    if (typeof roughnessIndex === "number") {
+        description.metallicRoughness = {
+            imageIndex: roughnessIndex,
+        }
     }
-    return DEFAULT_COLOR
+    const normalIndex = material.normalTexture?.index
+    if (typeof normalIndex === "number") {
+        description.normal = {
+            imageIndex: normalIndex,
+        }
+    }
+    const occlusionIndex = material.occlusionTexture?.index
+    if (typeof occlusionIndex === "number") {
+        description.occlusion = {
+            imageIndex: occlusionIndex,
+        }
+    }
+    const emissionIndex = material.emissiveTexture?.index
+    if (typeof emissionIndex === "number") {
+        description.emission = {
+            imageIndex: emissionIndex,
+            strength: material.emissiveFactor ?? [1, 1, 1],
+        }
+    }
+    return description
 }
 
-function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
-    const material = new TgdMaterialCameraLight({
-        color,
+function makeMaterial({ asset, context, abedo, emission, occlusion, color }: TgdPainterMeshGltfMaterialDescription) {
+    const makeTexture = (index: number | undefined, name: string, color: ArrayNumber4) => {
+        if (typeof index === "number") {
+            const texture = asset.createTexture2D(context, index, color)
+            texture.name = name
+            return texture
+        }
+
+        return undefined
+    }
+    return new TgdMaterialGltf({
+        textures: {
+            abedo:
+                makeTexture(abedo?.imageIndex, "Abedo", ensureArrayNumber4(DEFAULT_COLOR)) ??
+                new TgdTexture2D(context, {
+                    color: color ?? DEFAULT_COLOR,
+                }),
+            emission: makeTexture(emission?.imageIndex, "Emission", [0, 0, 0, 1]),
+            occlusion: makeTexture(occlusion?.imageIndex, "Occlusion", [1, 1, 1, 1]),
+        },
         specularIntensity: 0.3,
         specularExponent: 80,
         light: new TgdLight({
@@ -104,18 +173,4 @@ function makeMaterial({ color }: { color?: TgdVec4 | TgdTexture2D }) {
             color: new TgdVec4(0.2, 0.1, 0, 1),
         }),
     })
-    return material
-}
-
-function getTextureEmissive(
-    context: TgdContext,
-    asset: TgdDataGlb,
-    material: TgdFormatGltfMaterial,
-): TgdTexture2D | null {
-    const emissive = material.emissiveTexture
-    if (!emissive) return null
-
-    const color = asset.createTexture2D(context, emissive.index ?? 0)
-    if (context.paint) color.eventChange.addListener(context.paint)
-    return color
 }

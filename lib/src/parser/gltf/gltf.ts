@@ -6,13 +6,19 @@ import { load } from "@loaders.gl/core"
 import { DracoLoader } from "@loaders.gl/draco"
 import { type GLTF, GLTFLoader, type GLTFWithBuffers } from "@loaders.gl/gltf"
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
+import { TgdColor } from "@tgd/color"
 import { TgdContext } from "@tgd/context"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
 import { tgdLoadImage, tgdLoadImageFromArrayBuffer } from "@tgd/loader"
-import { TgdQuat, TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
+import { TgdQuat, TgdTransfo, type TgdTransfoOptions, TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdTexture2D } from "@tgd/texture"
-import { assertTgdFormatGltf, assertTgdTypeArrayForElements, type TgdTypeArrayForElements } from "@tgd/types"
+import {
+    ArrayNumber4,
+    assertTgdFormatGltf,
+    assertTgdTypeArrayForElements,
+    type TgdTypeArrayForElements,
+} from "@tgd/types"
 // import { parseGLB } from "./parser"
 import type {
     TgdFormatGltf,
@@ -358,14 +364,18 @@ export class TgdDataGlb {
         }
     }
 
-    createTexture2D(context: TgdContext, textureIndex: number): TgdTexture2D {
+    createTexture2D(
+        context: TgdContext,
+        textureIndex: number,
+        color: ArrayNumber4 | TgdVec4 | TgdColor = [0, 0, 0, 1],
+    ): TgdTexture2D {
         const gltfTex = this.json.textures?.[textureIndex]
         if (!gltfTex) {
             throw new Error(`Asset has no texture with index #${textureIndex}!`)
         }
 
         const source = gltfTex.source ?? gltfTex.extensions?.EXT_texture_webp?.source ?? 0
-        const texture = new TgdTexture2D(context).loadBitmap(this.images[source])
+        const texture = new TgdTexture2D(context, { color }).loadBitmap(this.images[source])
         return texture
     }
 

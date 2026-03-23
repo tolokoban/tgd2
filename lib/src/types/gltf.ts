@@ -129,6 +129,7 @@ export interface TgdFormatGltfMaterial {
         stength?: number
     }
     emissiveTexture?: TextureInfo
+    emissiveFactor?: ArrayNumber3
     alphaMode?: "OPAQUE" | "MASK" | "BLEND" | string
     /** Default to 0.5 */
     alphaCutoff?: number

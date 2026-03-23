@@ -77,8 +77,6 @@ export class TgdPainterState extends TgdPainterGroup {
             mask: depth.mask,
             range: [depth.rangeMin, depth.rangeMax],
         })
-        // console.log("Cull:", webglCullGet(context))
-        // console.log("Blend:", webglBlendGet(context))
     }
 
     readonly color = {

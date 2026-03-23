@@ -97,6 +97,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/sprites": ["/articles/painter/sprites"],
     "/articles/painter/x-ray": ["/articles/painter/x-ray"],
     "/articles/state": ["/articles/state"],
+    "/articles/state/blend": ["/articles/state/blend"],
     "/articles/state/cull": ["/articles/state/cull"],
     "/articles/state/stencil": ["/articles/state/stencil"],
     "/articles/suzanne": ["/articles/suzanne"],

@@ -3,12 +3,14 @@ import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 import { TgdProgram } from "@tgd/program"
-import { isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
+import { ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
-import { tgdCanvasCreate, webglLookup } from "@tgd/utils"
+import { ensureArray, ensureArrayNumber4, tgdCanvasCreate, webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 import { TgdContext } from "@tgd/context"
+import { TgdVec4 } from "@tgd/math"
+import { TgdColor } from "@tgd/color"
 
 interface TgdTexture2DStorage {
     width: number
@@ -65,6 +67,11 @@ export interface TgdTexture2DOptions {
     params?: WebglTextureParameters
     load?: WebglImage | string | LoadBmpOptions
     filter?: TgdFilter
+    /**
+     * The texture starts as a 1x1 black transparent pixel.
+     * You can specify another color with this.
+     */
+    color?: ArrayNumber4 | TgdVec4 | TgdColor
 }
 
 export class TgdTexture2D {
@@ -105,7 +112,7 @@ export class TgdTexture2D {
         }
         const width = storage?.width
         const height = storage?.height
-        this.createTexture()
+        this.createTexture(options.color)
         if (typeof width === "number" && typeof height === "number") {
             this.resize(width, height)
         }
@@ -147,7 +154,7 @@ export class TgdTexture2D {
         return this._height
     }
 
-    private createTexture() {
+    private createTexture(color?: ArrayNumber4 | TgdVec4 | TgdColor) {
         this.delete()
         const { gl } = this
         const texture = gl.createTexture()
@@ -156,6 +163,17 @@ export class TgdTexture2D {
         this._texture = texture
         this.bind()
         this.setParams(this.params)
+        gl.texImage2D(
+            gl.TEXTURE_2D, // target
+            0, // level of detail
+            gl.RGBA, // internal format
+            1, // width
+            1, // height
+            0, // border
+            gl.RGBA, // source format
+            gl.UNSIGNED_BYTE, // source type
+            new Uint8Array(ensureArrayNumber4()), // data
+        )
     }
 
     resize(w: number, h: number) {
@@ -164,34 +182,6 @@ export class TgdTexture2D {
         if (width === this.width && height === this.height) return
 
         this.loadBitmap(tgdCanvasCreate(width, height))
-        //         const { gl, storage } = this
-        //         this.createTexture()
-        //         this._width = width
-        //         this._height = height
-        //         storage.width = width
-        //         storage.height = height
-        //         const { internalFormat, levels } = this.storage
-        //         if (internalFormat.startsWith("COMPRESSED_")) {
-        //             // We need to load an extension for that.
-        //             const extension = gl.getExtension("WEBGL_compressed_texture_etc")
-        //             if (!extension)
-        //                 throw new Error(
-        //                     'Your browser does not support extension "WEBGL_compressed_texture_etc" on this device!',
-        //                 )
-        //         }
-        //         this.bind()
-        //         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        //         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
-        //         gl.texStorage2D(gl.TEXTURE_2D, levels, (gl as unknown as Record<string, GLenum>)[internalFormat], width, height)
-        //         this.checkError(`resize(${width}, ${height})
-        // gl.texStorage2D(
-        //     gl.TEXTURE_2D,
-        //     ${levels},
-        //     gl.${internalFormat},
-        //     ${width},
-        //     ${height}
-        // )`)
-        //         this.unbind()
     }
 
     private checkError(caption: string) {

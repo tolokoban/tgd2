@@ -1,13 +1,18 @@
-import { ArrayNumber4, WebglAttributeType, WebglUniformType } from "@tgd/types"
+import { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdMaterial } from "./material"
 import { TgdLight } from "@tgd/light"
-import { TgdTexture2D } from "@tgd/texture"
+import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 import { TgdCodeBloc } from "@tgd/shader"
 
-export type TgdMaterialCameraLightOptions = {
-    color: TgdVec4 | ArrayNumber4 | TgdTexture2D
+export type TgdMaterialGltfOptions = {
+    textures: {
+        abedo: TgdTexture2D
+        emission?: TgdTexture2D
+        occlusion?: TgdTexture2D
+        skybox?: TgdTextureCube
+    }
     cleanupTexturesOnDelete?: boolean
     light: TgdLight
     ambient: TgdLight
@@ -17,18 +22,20 @@ export type TgdMaterialCameraLightOptions = {
 
 const DEFAULT_COLOR = new TgdVec4(0.8, 0.6, 0.1, 1)
 
-export class TgdMaterialCameraLight extends TgdMaterial {
+export class TgdMaterialGltf extends TgdMaterial {
     public light = new TgdLight()
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 32
     public specularIntensity = 0.8
 
-    private readonly texture: TgdTexture2D | null
+    private readonly textureAbedo: TgdTexture2D | undefined
+    private readonly textureEmission: TgdTexture2D | undefined
+    private readonly textureOcclusion: TgdTexture2D | undefined
     private readonly lightColor = new TgdVec3()
     private readonly ambientColor = new TgdVec3()
 
-    constructor(options: Partial<TgdMaterialCameraLightOptions> = {}) {
-        const vertexShaderCode: TgdCodeBloc = ["varNormal = mat3(uniTransfoMatrix) * NORMAL;"]
+    constructor(options: Partial<TgdMaterialGltfOptions> = {}) {
+        const vertexShaderCode: TgdCodeBloc = ["varNormal = mat3(uniTransfoMatrix) * NORMAL;", "varUV = TEXCOORD_0;"]
         const uniforms: { [name: string]: WebglUniformType } = {
             uniLight: "vec3",
             uniLightDir: "vec3",
@@ -36,17 +43,14 @@ export class TgdMaterialCameraLight extends TgdMaterial {
             uniSpecularExponent: "float",
             uniSpecularIntensity: "float",
             uniModelViewMatrix: "mat4",
+            texAbedo: "sampler2D",
+            texEmission: "sampler2D",
+            texOcclusion: "sampler2D",
+            texSkybox: "samplerCube",
         }
         const varyings: { [name: string]: WebglAttributeType } = {
             varNormal: "vec3",
-        }
-        const color =
-            options.color instanceof TgdTexture2D ? options.color : new TgdVec4(options.color ?? DEFAULT_COLOR)
-        const hasTexture = !(color instanceof TgdVec4)
-        if (hasTexture) {
-            vertexShaderCode.push("varUV = TEXCOORD_0;")
-            varyings.varUV = "vec2"
-            uniforms.texDiffuse = "sampler2D"
+            varUV: "vec2",
         }
 
         super({
@@ -54,18 +58,25 @@ export class TgdMaterialCameraLight extends TgdMaterial {
             varyings,
             vertexShaderCode,
             fragmentShaderCode: [
-                "vec3 normal = mat3(uniModelViewMatrix) * varNormal;",
+                "vec3 N = normalize(varNormal);",
+                "vec3 normal = mat3(uniModelViewMatrix) * N;",
+                "vec3 L = normalize(varPosition.xyz - uniCameraPosition);",
+                "vec3 R = reflect(L, N);",
+                "vec3 skybox = texture(texSkybox, R).rgb;",
                 "float light = 1.0 - dot(normal, uniLightDir);",
-                hasTexture ? "vec4 color = texture(texDiffuse, varUV);" : `vec4 color = vec4(${color.join(", ")});`,
+                "vec4 abedo = texture(texAbedo, varUV);",
                 "float spec = max(0.0, reflect(uniLightDir, normal).z);",
                 "spec = pow(spec, uniSpecularExponent) * uniSpecularIntensity;",
-                "color = vec4(",
-                "  color.rgb * (",
+                "abedo = vec4(",
+                "  abedo.rgb * (",
                 "    uniAmbient + uniLight * light",
                 "  ) + vec3(spec),",
                 "  1.0",
                 ");",
-                "return color;",
+                "vec4 occlusion = texture(texOcclusion, varUV);",
+                "vec4 emission = texture(texEmission, varUV);",
+                "vec4 frag = abedo + emission;",
+                "return vec4(frag.rgb * occlusion.r, frag.a);",
             ],
             setUniforms: ({ program }: { program: TgdProgram }) => {
                 program.uniform3fv("uniLightDir", this.light.direction)
@@ -76,13 +87,15 @@ export class TgdMaterialCameraLight extends TgdMaterial {
                 program.uniform1f("uniSpecularExponent", this.specularExponent)
                 program.uniform1f("uniSpecularIntensity", this.specularIntensity)
 
-                const { texture } = this
-                if (texture) texture.activate(0, program, "texDiffuse")
+                const { textureAbedo, textureEmission, textureOcclusion } = this
+                if (textureAbedo) textureAbedo.activate(0, program, "texAbedo")
+                if (textureEmission) textureEmission.activate(1, program, "texEmission")
+                if (textureOcclusion) textureOcclusion.activate(2, program, "texOcclusion")
             },
             delete: () => {
-                if (options.cleanupTexturesOnDelete) {
-                    this.texture?.delete()
-                }
+                this.textureAbedo?.delete()
+                this.textureEmission?.delete()
+                this.textureOcclusion?.delete()
             },
         })
 
@@ -98,6 +111,8 @@ export class TgdMaterialCameraLight extends TgdMaterial {
         if (typeof options.specularIntensity === "number") {
             this.specularIntensity = options.specularIntensity
         }
-        this.texture = hasTexture ? color : null
+        this.textureAbedo = options.textures?.abedo
+        this.textureEmission = options.textures?.emission
+        this.textureOcclusion = options.textures?.occlusion
     }
 }

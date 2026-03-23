@@ -231,6 +231,11 @@ export class TgdVec4 extends Float32Array {
         return this.scale(1 / Math.sqrt(squareLength))
     }
 
+    toArrayNumber4(): ArrayNumber4 {
+        const [x, y, z, w] = this
+        return [x, y, z, w]
+    }
+
     debug(caption = "vec4") {
         const { x, y, z, w } = this
         const out: string[] = [x, y, z, w].map((n) => n.toFixed(6))

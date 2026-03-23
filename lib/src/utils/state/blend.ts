@@ -12,7 +12,9 @@ export interface WebglBlendOptions {
     functionAlphaDst: WebglEnumBlendFunction
 }
 
-export const webglPresetBlend: Readonly<Record<"off" | "alpha" | "add" | "premultipliedAlpha", WebglBlendOptions>> = {
+export const webglPresetBlend: Readonly<
+    Record<"off" | "alpha" | "add" | "max" | "min" | "multiply" | "premultipliedAlpha", WebglBlendOptions>
+> = {
     off: {
         enabled: false,
         equationColor: WebglEnumBlendEquation.FUNC_ADD,
@@ -39,6 +41,33 @@ export const webglPresetBlend: Readonly<Record<"off" | "alpha" | "add" | "premul
         equationAlpha: WebglEnumBlendEquation.FUNC_ADD,
         functionAlphaSrc: WebglEnumBlendFunction.ONE,
         functionAlphaDst: WebglEnumBlendFunction.ZERO,
+    },
+    multiply: {
+        enabled: true,
+        equationColor: WebglEnumBlendEquation.FUNC_ADD,
+        functionColorSrc: WebglEnumBlendFunction.DST_COLOR,
+        functionColorDst: WebglEnumBlendFunction.ZERO,
+        equationAlpha: WebglEnumBlendEquation.FUNC_ADD,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ZERO,
+    },
+    max: {
+        enabled: true,
+        equationColor: WebglEnumBlendEquation.MAX,
+        functionColorSrc: WebglEnumBlendFunction.ONE,
+        functionColorDst: WebglEnumBlendFunction.ONE,
+        equationAlpha: WebglEnumBlendEquation.MAX,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ONE,
+    },
+    min: {
+        enabled: true,
+        equationColor: WebglEnumBlendEquation.MIN,
+        functionColorSrc: WebglEnumBlendFunction.ONE,
+        functionColorDst: WebglEnumBlendFunction.ONE,
+        equationAlpha: WebglEnumBlendEquation.MIN,
+        functionAlphaSrc: WebglEnumBlendFunction.ONE,
+        functionAlphaDst: WebglEnumBlendFunction.ONE,
     },
     premultipliedAlpha: {
         enabled: true,

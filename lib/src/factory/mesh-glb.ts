@@ -1,9 +1,13 @@
 import { TgdContext } from "@tgd/context"
 import { TgdMaterial } from "@tgd/material"
-import { TgdTransfoOptions, TgdVec4 } from "@tgd/math"
-import { TgdPainterMeshGltf, TgdPainterNode, TgdPainterNodeChild } from "@tgd/painter"
+import { TgdTransfoOptions } from "@tgd/math"
+import {
+    TgdPainterMeshGltf,
+    TgdPainterMeshGltfMaterialDescription,
+    TgdPainterNode,
+    TgdPainterNodeChild,
+} from "@tgd/painter"
 import { TgdDataGlb } from "@tgd/parser"
-import { TgdTexture2D } from "@tgd/texture"
 import { TgdFormatGltfMesh, TgdFormatGltfMeshPrimitive, TgdFormatGltfNode, TgdInterfaceTransformable } from "@tgd/types"
 import { isNumber, isString } from "@tgd/types/guards"
 
@@ -15,7 +19,7 @@ interface OverrideMaterialOptions {
 
 type MaterialOverrider = (
     options: OverrideMaterialOptions,
-) => (this: void, options: { color?: TgdVec4 | TgdTexture2D }) => TgdMaterial
+) => (this: void, options: TgdPainterMeshGltfMaterialDescription) => TgdMaterial
 
 interface MakeMeshGlbPainterOptions {
     data: TgdDataGlb

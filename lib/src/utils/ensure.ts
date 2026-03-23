@@ -1,5 +1,6 @@
 import { TgdColor } from "@tgd/color"
 import { TgdVec2, TgdVec3, TgdVec4 } from "@tgd/math"
+import { ArrayNumber4 } from "@tgd/types"
 
 export function ensureArray<T>(items: T | T[] | undefined): T[] {
     if (items === undefined) return []
@@ -32,4 +33,18 @@ export function ensureTgdVec4(
     if (vec instanceof TgdVec4) return vec
     const [x, y, z, w] = vec
     return new TgdVec4(x ?? 0, y ?? 0, z ?? 0, w ?? 1)
+}
+
+export function ensureArrayNumber4(
+    vec?: TgdColor | TgdVec2 | TgdVec3 | TgdVec4 | number[] | number | null,
+    defaultValue?: ArrayNumber4,
+): ArrayNumber4 {
+    if (typeof vec === "number") return [vec, vec, vec, vec]
+    if (!vec) return defaultValue ?? [0, 0, 0, 1]
+    if (vec instanceof TgdColor) return [vec.R, vec.G, vec.B, vec.A]
+    if (vec instanceof TgdVec2) return [vec.x, vec.y, 0, 1]
+    if (vec instanceof TgdVec3) return [vec.x, vec.y, vec.z, 1]
+    if (vec instanceof TgdVec4) return [vec.x, vec.y, vec.z, vec.w]
+    const [x, y, z, w] = vec
+    return [x, y, z, w]
 }
