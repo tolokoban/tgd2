@@ -8,6 +8,7 @@ import { useData } from "./hooks"
 import type { Action } from "./types"
 
 import Styles from "./ViewGltf.module.css"
+import Spinner from "@/components/Spinner"
 
 const $ = Theme.classNames
 
@@ -49,7 +50,7 @@ export function ViewGLTF(props: ViewViewGltfProps) {
                     </ViewInputFile>
                 </ViewPanel>
                 <ViewPanel overflow="auto" minHeight="auto" color="neutral-5" padding="S">
-                    {!data && <div>Loading...</div>}
+                    {!data && <Spinner />}
                     {data && <ViewGltfTree data={data} onAction={setAction} />}
                 </ViewPanel>
             </ViewStrip>

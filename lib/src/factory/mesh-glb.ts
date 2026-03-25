@@ -8,6 +8,7 @@ import {
     TgdPainterNodeChild,
 } from "@tgd/painter"
 import { TgdDataGlb } from "@tgd/parser"
+import { TgdTextureCube } from "@tgd/texture"
 import { TgdFormatGltfMesh, TgdFormatGltfMeshPrimitive, TgdFormatGltfNode, TgdInterfaceTransformable } from "@tgd/types"
 import { isNumber, isString } from "@tgd/types/guards"
 
@@ -34,6 +35,7 @@ interface MakeMeshGlbPainterOptions {
      * If defined, we skip all primitives with a material's name NOT in the list.
      */
     includeOnlyMaterialNames?: string[]
+    skybox?: TgdTextureCube
 }
 
 /**
@@ -122,6 +124,7 @@ function makeMeshPainters(
             meshIndexOrName: meshIndexOrName,
             primitiveIndex,
             material: materialFactory,
+            skybox: options.skybox,
         })
         targets.push(target)
     }

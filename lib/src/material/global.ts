@@ -83,7 +83,7 @@ export class TgdMaterialGlobal extends TgdMaterial {
                     // Lazy creation of a texture from an unique color.
                     const color = this.options.ambientColor ?? DEFAULT_AMBIENT
                     const canvas = tgdCanvasCreateFill(1, 1, color instanceof TgdTextureCube ? DEFAULT_AMBIENT : color)
-                    this.textureAmbient = new TgdTextureCube(program, {
+                    this.textureAmbient = new TgdTextureCube(context, {
                         imagePosX: canvas,
                         imagePosY: canvas,
                         imagePosZ: canvas,

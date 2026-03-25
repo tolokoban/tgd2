@@ -1,9 +1,8 @@
 import * as React from "react"
 
-import { Theme, CommonProps, styleCommon, ViewButton, ViewPanel } from "@tolokoban/ui"
+import { Theme, CommonProps, styleCommon, ViewButton } from "@tolokoban/ui"
 import { TgdDataGlb } from "@tolokoban/tgd"
 
-import { Expander } from "./Expander"
 import { Action } from "../types"
 
 import Styles from "./GltfTree.module.css"
@@ -38,9 +37,4 @@ export function ViewGltfTree(props: ViewGltfTreeProps) {
             <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html">GLTF 2.0 Specification</a>
         </div>
     )
-}
-
-function formatNumber(value: number) {
-    const fmt = new Intl.NumberFormat()
-    return fmt.format(value)
 }

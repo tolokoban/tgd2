@@ -284,9 +284,12 @@ export class TgdDataGlb {
                 : (this.json.meshes ?? []).find((item) => item.name === meshIndexOrName)
         if (!mesh) {
             throw new Error(
-                `Asset has no mesh with index/name ${JSON.stringify(
-                    meshIndexOrName,
-                )}!\nAvailable names are: ${(this.json.meshes ?? []).map((mesh) => mesh.name).join(", ")}.`,
+                `Asset has no mesh with index/name ${JSON.stringify(meshIndexOrName)}!\nAvailable names are: ${(
+                    this.json.meshes ?? []
+                )
+                    .sort()
+                    .map((mesh) => mesh.name)
+                    .join(", ")}.`,
             )
         }
 
@@ -459,56 +462,27 @@ export class TgdDataGlb {
         })
     }
 
-    makeGeometry({
-        computeNormals,
-        meshIndex = 0,
-        primitiveIndex = 0,
-        attPositionName = "POSITION",
-        attNormalName = "NORMAL",
-        attTextureCoordsName = "TEXCOORD_0",
-    }: {
-        computeNormals?: boolean
-        meshIndex?: number
-        primitiveIndex?: number
-        attPositionName?: string
-        attNormalName?: string
-        attTextureCoordsName?: string
-    } = {}): TgdGeometry {
-        const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
+    makeGeometry(
+        options: {
+            computeNormals?: boolean
+            meshIndex?: number | string
+            primitiveIndex?: number
+            attPositionName?: string
+            attNormalName?: string
+            attTextureCoordsName?: string
+        } = {},
+    ): TgdGeometry {
+        const {
+            computeNormals,
+            meshIndex = 0,
+            primitiveIndex = 0,
+            attPositionName = "POSITION",
+            attNormalName = "NORMAL",
+            attTextureCoordsName = "TEXCOORD_0",
+        } = options
         try {
-            const { attributes } = primitive
-            if (!attributes) throw new Error("No attributes found!")
+            const dataset = this.makeDataset(options)
             const elements = this.getMeshPrimitiveIndices(meshIndex, primitiveIndex)
-            const definition: TgdDatasetTypeRecord = {
-                [attPositionName]: "vec3",
-            }
-            if (typeof attributes[attNormalName] === "string") {
-                definition[attNormalName] = "vec3"
-            }
-            if (typeof attributes[attTextureCoordsName] === "string") {
-                definition[attTextureCoordsName] = "vec2"
-            }
-            const dataset = new TgdDataset(definition)
-            dataset.set(
-                attPositionName,
-                returnFloat32Array(this.getBufferViewData(this.getAccessorByAttributeName(primitive, attPositionName))),
-            )
-            if (typeof attributes[attNormalName] === "string") {
-                dataset.set(
-                    attNormalName,
-                    returnFloat32Array(
-                        this.getBufferViewData(this.getAccessorByAttributeName(primitive, attNormalName)),
-                    ),
-                )
-            }
-            if (typeof attributes[attTextureCoordsName] === "string") {
-                dataset.set(
-                    attTextureCoordsName,
-                    returnFloat32Array(
-                        this.getBufferViewData(this.getAccessorByAttributeName(primitive, attTextureCoordsName)),
-                    ),
-                )
-            }
             return new TgdGeometry({
                 computeNormalsIfMissing: computeNormals,
                 dataset,
@@ -520,6 +494,72 @@ export class TgdDataGlb {
         } catch (error) {
             const message = error instanceof Error ? error.message : JSON.stringify(error)
             throw new Error(`Error in primitive #${primitiveIndex} of mesh #${meshIndex}:\n${message}`)
+        }
+    }
+
+    makeDataset({
+        meshIndex = 0,
+        primitiveIndex = 0,
+        attPositionName = "POSITION",
+        attNormalName = "NORMAL",
+        attTextureCoordsName = "TEXCOORD_0",
+    }: {
+        meshIndex?: number | string
+        primitiveIndex?: number
+        attPositionName?: string
+        attNormalName?: string
+        attTextureCoordsName?: string
+    } = {}): TgdDataset {
+        const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
+        try {
+            const { attributes } = primitive
+            if (!attributes) throw new Error("No attributes found!")
+            const definition: TgdDatasetTypeRecord = {
+                [attPositionName]: "vec3",
+            }
+            if (attributes[attNormalName] !== undefined) {
+                definition[attNormalName] = "vec3"
+            }
+            if (attributes[attTextureCoordsName] !== undefined) {
+                definition[attTextureCoordsName] = "vec2"
+            }
+            const dataset = new TgdDataset(definition)
+            if (isNumber(attributes[attPositionName])) {
+                dataset.set(
+                    attPositionName,
+                    returnFloat32Array(
+                        this.getBufferViewData(this.getAccessorByAttributeName(primitive, attPositionName)),
+                    ),
+                )
+            } else {
+                dataset.set(attPositionName, attributes[attPositionName].value)
+            }
+            if (typeof definition[attNormalName] === "string") {
+                dataset.set(
+                    attNormalName,
+                    isNumber(attributes[attNormalName])
+                        ? returnFloat32Array(
+                              this.getBufferViewData(this.getAccessorByAttributeName(primitive, attNormalName)),
+                          )
+                        : attributes[attNormalName].value,
+                )
+            }
+            if (typeof definition[attTextureCoordsName] === "string") {
+                dataset.set(
+                    attTextureCoordsName,
+                    isNumber(attributes[attTextureCoordsName])
+                        ? returnFloat32Array(
+                              this.getBufferViewData(this.getAccessorByAttributeName(primitive, attTextureCoordsName)),
+                          )
+                        : attributes[attTextureCoordsName].value,
+                )
+            }
+            return dataset
+        } catch (error) {
+            const message = error instanceof Error ? error.message : JSON.stringify(error)
+            throw new Error(
+                `Error in primitive #${primitiveIndex} of mesh ${typeof meshIndex === "number" ? `#${meshIndex}` : JSON.stringify(meshIndex)}:\n${message}`,
+            )
         }
     }
 }

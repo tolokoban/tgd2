@@ -8,6 +8,7 @@ import DefaultURL from "@/assets/mesh/helmet.glb"
 export function useData(): [TgdDataGlb | null, (urlOrFile: string | File) => void] {
     const [data, setData] = React.useState<TgdDataGlb | null>(null)
     const load = React.useCallback((urlOrFile: string | File) => {
+        setData(null)
         tgdLoadArrayBuffer(urlOrFile)
             .then((content) => {
                 if (!content) return

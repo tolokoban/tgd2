@@ -36,6 +36,11 @@ declare module "*.avif" {
     export = value
 }
 
+declare module "*.woff2" {
+    const value: any
+    export = value
+}
+
 declare module "*.mp4" {
     const value: any
     export = value
@@ -47,6 +52,11 @@ declare module "*.obj" {
 }
 
 declare module "*.bin" {
+    const value: any
+    export = value
+}
+
+declare module "*.zip" {
     const value: any
     export = value
 }

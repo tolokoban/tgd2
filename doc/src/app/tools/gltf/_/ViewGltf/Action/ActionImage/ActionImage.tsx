@@ -19,6 +19,7 @@ import DarkURL from "./checkboard-dark.jpg"
 
 import Styles from "./ActionImage.module.css"
 import CodeEditorView from "@/components/code-editor"
+import { PainterImage } from "./painter-image"
 
 const $ = Theme.classNames
 
@@ -28,6 +29,11 @@ export type ViewActionImageProps = {
 }
 
 export function ViewActionImage({ data, index }: ViewActionImageProps) {
+    const refUpdateRGBA = React.useRef<(rgba: string) => void>(() => {})
+    const [rgba, setRgba] = React.useState("RGBA")
+    React.useEffect(() => {
+        refUpdateRGBA.current(rgba)
+    }, [rgba])
     const [mode, setMode] = React.useState<"light" | "dark">("light")
     const [image, setImage] = React.useState<HTMLImageElement | null>(null)
     const [dimensions, setDimensions] = React.useState<[width: number, height: number] | null>(null)
@@ -47,12 +53,16 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
             setImage(img)
             setDimensions([img.width, img.height])
             const texture = new TgdTexture2D(context).loadBitmap(img)
-            const background = new TgdPainterBackground(context, {
-                mode: "contain",
+            const background = new PainterImage(context, {
                 texture,
             })
             context.add(background)
+            background.mode = rgba
             context.paint()
+            refUpdateRGBA.current = (value: string) => {
+                background.mode = value
+                context.paint()
+            }
         },
         [data, index],
     )
@@ -76,12 +86,17 @@ export function ViewActionImage({ data, index }: ViewActionImageProps) {
             )}
             <header>
                 <div className={Styles.dimensions}>{dimensions?.join(" × ")}</div>
-                {imageSize > 0 && <ViewFileSize value={imageSize} />}
-                {imageDef && <div className={Styles.mimeType}>{imageDef.mimeType}</div>}
+                <ViewOptions value={rgba} onChange={setRgba}>
+                    {["RGBA", "R", "G", "B", "A"].map((key) => (
+                        <div key={key}>{key}</div>
+                    ))}
+                </ViewOptions>
                 <ViewOptions value={mode} onChange={setMode}>
                     <div key="light">Light</div>
                     <div key="dark">Dark</div>
                 </ViewOptions>
+                {imageSize > 0 && <ViewFileSize value={imageSize} />}
+                {imageDef && <div className={Styles.mimeType}>{imageDef.mimeType}</div>}
                 <div className={Styles.link}>
                     {image && (
                         <a href={image.src} target="_blank">

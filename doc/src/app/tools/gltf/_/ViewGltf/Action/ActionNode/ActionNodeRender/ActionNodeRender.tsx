@@ -1,6 +1,5 @@
 import * as React from "react"
 
-import { Theme } from "@tolokoban/ui"
 import {
     ArrayNumber3,
     TgdContext,
@@ -15,13 +14,26 @@ import {
     TgdVec4,
     webglPresetDepth,
     tgdMakeMeshGlbPainter,
+    TgdTextureCube,
+    tgdLoadImage,
+    tgdCanvasCreateFill,
+    TgdPainterSkybox,
+    tgdCalcRadToDeg,
+    tgdCalcDegToRad,
+    TgdQuat,
 } from "@tolokoban/tgd"
-
-import Styles from "./ActionNodeRender.module.css"
 import Tgd from "@/components/demo/Tgd"
 import { isNumber, isType } from "@tolokoban/type-guards"
 
-const $ = Theme.classNames
+import PosX from "@/assets/cubemap/sky/contrast/posX.webp"
+import PosY from "@/assets/cubemap/sky/contrast/posY.webp"
+import PosZ from "@/assets/cubemap/sky/contrast/posZ.webp"
+import NegX from "@/assets/cubemap/sky/contrast/negX.webp"
+import NegY from "@/assets/cubemap/sky/contrast/negY.webp"
+import NegZ from "@/assets/cubemap/sky/contrast/negZ.webp"
+
+import Styles from "./ActionNodeRender.module.css"
+import { PainterPlayPause } from "@/painter/play-pause"
 
 export type ViewActionNodeRenderProps = {
     data: TgdDataGlb
@@ -32,7 +44,15 @@ export function ViewActionNodeRender({ data, node }: ViewActionNodeRenderProps) 
     const handleReady = useReadyHandler(data, node)
     return (
         <div className={Styles.actionNodeRender}>
-            <Tgd key={JSON.stringify(node)} onReady={handleReady} width="100%" height="100%" gizmo noBorder />
+            <Tgd
+                key={JSON.stringify(node)}
+                onReady={handleReady}
+                options={{ alpha: false }}
+                width="100%"
+                height="100%"
+                gizmo
+                noBorder
+            />
         </div>
     )
 }
@@ -40,31 +60,79 @@ export function ViewActionNodeRender({ data, node }: ViewActionNodeRenderProps) 
 function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
     return React.useCallback(
         (context: TgdContext) => {
-            const bbox = computeBBox(data, node)
-            context.camera.transfo.position = bbox.center
-            context.camera.transfo.distance = bbox.radius * 2
-            context.camera.far = bbox.radius * 4
-            context.camera.near = context.camera.far * 1e-4
-            new TgdControllerCameraOrbit(context, {
-                inertiaOrbit: 1000,
-                speedZoom: bbox.radius * 0.25,
-            })
-            const clear = new TgdPainterClear(context, {
-                color: [0.2, 0.2, 0.2, 1],
-                depth: 1,
-            })
-            const { painter: nodePainter } = tgdMakeMeshGlbPainter({
-                data,
-                node,
-                context,
-            })
-            nodePainter.debug("nodePainter")
-            const state = new TgdPainterState(context, {
-                depth: webglPresetDepth.lessOrEqual,
-                children: [nodePainter],
-            })
-            context.add(clear, state)
-            context.paint()
+            const action = async () => {
+                const bbox = computeBBox(data, node)
+                const { camera } = context
+                camera.transfo.position = bbox.center
+                camera.far = bbox.radius * 4
+                camera.near = context.camera.far * 1e-4
+                camera.fitSpaceAtTarget(bbox.radius, bbox.radius)
+                new TgdControllerCameraOrbit(context, {
+                    inertiaOrbit: 1000,
+                    speedZoom: bbox.radius * 0.25,
+                })
+                const clear = new TgdPainterClear(context, {
+                    // color: [0.2, 0.2, 0.2, 1],
+                    depth: 1,
+                })
+                const defaultCanvas = tgdCanvasCreateFill(1, 1, [0.3, 0.6, 0.9, 1])
+                const imagePosX = (await tgdLoadImage(PosX)) ?? defaultCanvas
+                const imagePosY = (await tgdLoadImage(PosY)) ?? defaultCanvas
+                const imagePosZ = (await tgdLoadImage(PosZ)) ?? defaultCanvas
+                const imageNegX = (await tgdLoadImage(NegX)) ?? defaultCanvas
+                const imageNegY = (await tgdLoadImage(NegY)) ?? defaultCanvas
+                const imageNegZ = (await tgdLoadImage(NegZ)) ?? defaultCanvas
+                const skybox = new TgdTextureCube(context, {
+                    imagePosX,
+                    imagePosY,
+                    imagePosZ,
+                    imageNegX,
+                    imageNegY,
+                    imageNegZ,
+                })
+
+                const { painter: nodePainter } = tgdMakeMeshGlbPainter({
+                    data,
+                    node,
+                    context,
+                    skybox,
+                })
+                nodePainter.debug("nodePainter")
+                const state = new TgdPainterState(context, {
+                    depth: webglPresetDepth.lessOrEqual,
+                    children: [nodePainter],
+                })
+                const button = new PainterPlayPause(context, {
+                    alignX: +1,
+                    alignY: -1,
+                    margin: 8,
+                    size: 64,
+                })
+                const initialOrientation = new TgdQuat(nodePainter.transfo.orientation)
+                context.add(
+                    new TgdPainterSkybox(context, {
+                        camera: context.camera,
+                        imagePosX,
+                        imagePosY,
+                        imagePosZ,
+                        imageNegX,
+                        imageNegY,
+                        imageNegZ,
+                    }),
+                    clear,
+                    state,
+                    button,
+                    () => {
+                        const orientation = new TgdQuat(initialOrientation)
+                        const rotation = new TgdQuat()
+                        rotation.rotateAroundY(tgdCalcDegToRad(context.virtualTime.seconds * 15))
+                        rotation.multiply(orientation)
+                        nodePainter.transfo.orientation = rotation
+                    },
+                )
+                context.paint()
+            }
+            action()
         },
         [data, node],
     )

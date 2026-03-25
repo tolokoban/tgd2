@@ -10,11 +10,10 @@ import {
     tgdLoadText,
 } from "@tolokoban/tgd"
 import { IconFullscreen, IconOrientation, IconPin, IconSnapshot, Theme } from "@tolokoban/ui"
-import React from "react"
+import React, { CSSProperties } from "react"
 import { Settings, type SettingsDefinitions } from "@/components/settings"
 import Spinner from "../../Spinner"
 import styles from "./tgd.module.css"
-
 export interface Assets {
     image: Record<string, HTMLImageElement>
     glb: Record<string, TgdDataGlb>
@@ -39,6 +38,7 @@ interface TgdProps<T extends SettingsDefinitions> {
     children?: React.ReactNode
     disableDefaultDoubleTap?: boolean
     settings?: T
+    fullscreen?: boolean
 }
 export default function Tgd<T extends SettingsDefinitions>({
     className,
@@ -53,6 +53,7 @@ export default function Tgd<T extends SettingsDefinitions>({
     settings,
     children,
     disableDefaultDoubleTap = false,
+    fullscreen = false,
 }: TgdProps<T>) {
     const refUpdateSettings = React.useRef<void | null | ((settings: Record<keyof T, number>) => void)>(null)
     const [settingValues, setSettingValues] = React.useState(settings)
@@ -175,15 +176,18 @@ export default function Tgd<T extends SettingsDefinitions>({
         return () => observer.unobserve(canvas)
     }, [refContext.current, refCanvas.current])
 
-    if (noBorder) {
+    if (noBorder || fullscreen) {
+        const style: CSSProperties = fullscreen
+            ? {}
+            : {
+                  width: landscape ? width : height,
+                  height: landscape ? height : width,
+              }
         return (
             <div
                 ref={refScreen}
-                className={styles.screen}
-                style={{
-                    width: landscape ? width : height,
-                    height: landscape ? height : width,
-                }}>
+                className={Theme.classNames.join(styles.screen, fullscreen && styles.fullscreen)}
+                style={style}>
                 <canvas className={styles.canvas} ref={mountCanvas} />
                 {settingValues && <Settings<T> values={settingValues} onChange={setSettingValues} />}
                 {error && <div className={styles.error}>{error}</div>}

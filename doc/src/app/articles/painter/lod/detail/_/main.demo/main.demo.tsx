@@ -12,19 +12,18 @@ import {
     TgdPainterMeshGltf,
     TgdPainterState,
     TgdTextureCube,
-    tgdCalcMix,
     tgdColorMakeHueWheel,
     tgdLoadGlb,
     webglPresetCull,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
-import NegX from "@/assets/cubemap/sky/negX.webp"
-import NegY from "@/assets/cubemap/sky/negY.webp"
-import NegZ from "@/assets/cubemap/sky/negZ.webp"
-import PosX from "@/assets/cubemap/sky/posX.webp"
-import PosY from "@/assets/cubemap/sky/posY.webp"
-import PosZ from "@/assets/cubemap/sky/posZ.webp"
+import NegX from "@/assets/cubemap/sky/contrast/negX.webp"
+import NegY from "@/assets/cubemap/sky/contrast/negY.webp"
+import NegZ from "@/assets/cubemap/sky/contrast/negZ.webp"
+import PosX from "@/assets/cubemap/sky/contrast/posX.webp"
+import PosY from "@/assets/cubemap/sky/contrast/posY.webp"
+import PosZ from "@/assets/cubemap/sky/contrast/posZ.webp"
 import View, { type Assets } from "@/components/demo/Tgd"
 import { WireCube } from "./wire-cube"
 

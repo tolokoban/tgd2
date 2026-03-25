@@ -8,10 +8,8 @@ import {
     TgdDataGlb,
     TgdFormatGltfNode,
     TgdFormatGltfScene,
-    TgdGeometryBox,
     tgdMakeMeshGlbPainter,
     TgdPainterClear,
-    TgdPainterMesh,
     TgdPainterNode,
     TgdPainterState,
     TgdTransfo,
@@ -36,7 +34,16 @@ export function ViewActionScene({ data, index }: ViewActionSceneProps) {
     if (!scene) return <p>No scene...</p>
     return (
         <div className={$.join(Styles.actionScene)}>
-            <Tgd key={JSON.stringify(scene)} onReady={handleReady} width="100%" height="100%" gizmo noBorder></Tgd>
+            <Tgd
+                key={JSON.stringify(scene)}
+                options={{
+                    alpha: false,
+                }}
+                onReady={handleReady}
+                width="100%"
+                height="100%"
+                gizmo
+                noBorder></Tgd>
         </div>
     )
 }

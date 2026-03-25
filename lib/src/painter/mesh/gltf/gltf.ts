@@ -1,15 +1,15 @@
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
-import { TgdLight } from "@tgd/light"
 import { TgdMaterial } from "@tgd/material"
-import { TgdVec3, TgdVec4 } from "@tgd/math"
+import { tgdCalcRandom } from "@tgd/math"
 import type { TgdDataGlb } from "@tgd/parser"
 import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 import { TgdPainterMesh } from "../mesh"
 import { TgdContext } from "@tgd/context"
 import { TgdMaterialGltf } from "@tgd/material/gltf"
-import { TgdTexture2D } from "@tgd/texture"
-import { ensureArrayNumber4, tgdCanvasCreateFill } from "@tgd/utils"
+import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
+import { tgdCanvasCreateFill } from "@tgd/utils"
+import { TgdColor } from "@tgd/color"
 
 export interface TgdPainterMeshGltfMaterialDescription {
     name: string
@@ -32,6 +32,7 @@ export interface TgdPainterMeshGltfMaterialDescription {
         imageIndex: number
         strength: ArrayNumber3
     }
+    skybox?: TgdTextureCube
 }
 
 export interface TgdPainterMeshGltfOptions {
@@ -40,14 +41,27 @@ export interface TgdPainterMeshGltfOptions {
     primitiveIndex?: number
     name?: string
     material?: TgdMaterial | ((this: void, options: TgdPainterMeshGltfMaterialDescription) => TgdMaterial)
+    skybox?: TgdTextureCube
 }
 
 /**
  */
 export class TgdPainterMeshGltf extends TgdPainterMesh {
     constructor(context: TgdContext, options: TgdPainterMeshGltfOptions) {
-        const { asset, meshIndexOrName = 0, primitiveIndex = 0, material: materialFactory = makeMaterial } = options
-        const materialDescription = figureMaterialDescription(asset, meshIndexOrName, primitiveIndex, context)
+        const {
+            asset,
+            meshIndexOrName = 0,
+            primitiveIndex = 0,
+            skybox,
+            material: materialFactory = makeMaterial,
+        } = options
+        const materialDescription = figureMaterialDescription({
+            asset,
+            meshIndexOrName,
+            primitiveIndex,
+            context,
+            skybox,
+        })
         const material = materialFactory instanceof TgdMaterial ? materialFactory : materialFactory(materialDescription)
         let computeNormals = false
         const attributes: TgdDatasetTypeRecord = {
@@ -84,25 +98,33 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
     }
 }
 
-const DEFAULT_COLOR = new TgdVec4(0.9, 0.5, 0.1, 1)
+const DEFAULT_COLOR: ArrayNumber4 = [0.9, 0.5, 0.1, 1]
 
-function figureMaterialDescription(
-    asset: TgdDataGlb,
-    meshIndexOrName: number | string,
-    primitiveIndex: number,
-    context: TgdContext,
-): TgdPainterMeshGltfMaterialDescription {
+function figureMaterialDescription({
+    asset,
+    meshIndexOrName,
+    primitiveIndex,
+    context,
+    skybox,
+}: {
+    asset: TgdDataGlb
+    meshIndexOrName: number | string
+    primitiveIndex: number
+    context: TgdContext
+    skybox?: TgdTextureCube
+}): TgdPainterMeshGltfMaterialDescription {
     const description: TgdPainterMeshGltfMaterialDescription = {
         asset,
         context,
         name: "Material",
+        skybox,
     }
     const primitive = asset.getMeshPrimitive(meshIndexOrName, primitiveIndex)
     const materialIndex = primitive.material ?? -1
     if (materialIndex === -1) {
         return {
             ...description,
-            color: DEFAULT_COLOR.toArrayNumber4(),
+            color: DEFAULT_COLOR,
         }
     }
 
@@ -115,7 +137,7 @@ function figureMaterialDescription(
             imageIndex: abedoIndex,
         }
     }
-    const roughnessIndex = material.pbrMetallicRoughness?.metalicRoughnessTexture?.index
+    const roughnessIndex = material.pbrMetallicRoughness?.metallicRoughnessTexture?.index
     if (typeof roughnessIndex === "number") {
         description.metallicRoughness = {
             imageIndex: roughnessIndex,
@@ -140,37 +162,62 @@ function figureMaterialDescription(
             strength: material.emissiveFactor ?? [1, 1, 1],
         }
     }
+    console.log("🐞 [gltf@166] material =", material) // @FIXME: Remove this line written on 2026-03-24 at 09:34
+    console.log("🐞 [gltf@167] description =", description) // @FIXME: Remove this line written on 2026-03-24 at 09:34
     return description
 }
 
-function makeMaterial({ asset, context, abedo, emission, occlusion, color }: TgdPainterMeshGltfMaterialDescription) {
-    const makeTexture = (index: number | undefined, name: string, color: ArrayNumber4) => {
+function makeMaterial({
+    asset,
+    context,
+    normal,
+    abedo,
+    emission,
+    occlusion,
+    metallicRoughness,
+    color,
+    skybox,
+}: TgdPainterMeshGltfMaterialDescription) {
+    const makeTexture = (index: number | undefined, name: string): TgdTexture2D | undefined => {
         if (typeof index === "number") {
-            const texture = asset.createTexture2D(context, index, color)
+            const texture = asset.createTexture2D(context, index)
             texture.name = name
             return texture
         }
-
-        return undefined
+    }
+    const fill = ([R, G, B, A]: ArrayNumber4) => {
+        const texture = new TgdTexture2D(context)
+        texture.loadBitmap(tgdCanvasCreateFill(1, 1, new TgdColor(R, G, B, A).toString()))
+        return texture
     }
     return new TgdMaterialGltf({
         textures: {
-            abedo:
-                makeTexture(abedo?.imageIndex, "Abedo", ensureArrayNumber4(DEFAULT_COLOR)) ??
-                new TgdTexture2D(context, {
-                    color: color ?? DEFAULT_COLOR,
-                }),
-            emission: makeTexture(emission?.imageIndex, "Emission", [0, 0, 0, 1]),
-            occlusion: makeTexture(occlusion?.imageIndex, "Occlusion", [1, 1, 1, 1]),
+            normal: makeTexture(normal?.imageIndex, "Normal") ?? fill([0.5, 0.5, 1, 1]),
+            albedo: makeTexture(abedo?.imageIndex, "Abedo") ?? fill(color ?? DEFAULT_COLOR),
+            emission: makeTexture(emission?.imageIndex, "Emission") ?? fill([0, 0, 0, 1]),
+            occlusion: makeTexture(occlusion?.imageIndex, "Occlusion"),
+            metallicRoughness: makeTexture(metallicRoughness?.imageIndex, "Roughness") ?? fill([0, 0.5, 0.5, 1]),
+            skybox: skybox ?? makeDefaultSkybox(context),
         },
-        specularIntensity: 0.3,
-        specularExponent: 80,
-        light: new TgdLight({
-            color: new TgdVec4(1, 1, 1, 1),
-            direction: new TgdVec3(1, 0.2, 0),
-        }),
-        ambient: new TgdLight({
-            color: new TgdVec4(0.2, 0.1, 0, 1),
-        }),
     })
+}
+
+function makeDefaultSkybox(context: TgdContext): TgdTextureCube {
+    const skybox = new TgdTextureCube(context, {
+        imageNegX: randomCanvas(),
+        imageNegY: randomCanvas(),
+        imageNegZ: randomCanvas(),
+        imagePosX: randomCanvas(),
+        imagePosY: randomCanvas(),
+        imagePosZ: randomCanvas(),
+    })
+    return skybox
+}
+
+function randomCanvas() {
+    return tgdCanvasCreateFill(
+        1,
+        1,
+        new TgdColor(tgdCalcRandom(0, 0.2), tgdCalcRandom(0.5, 0.7), tgdCalcRandom(0.7, 1), 1),
+    )
 }

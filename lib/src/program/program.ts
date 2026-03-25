@@ -108,7 +108,9 @@ export class TgdProgram {
         }
         const location = uniformsLocations[name]
         if (!location) {
-            console.warn(`No active uniform found with name "${name}"!\nAvailable names are: ${names.join(", ")}.`)
+            console.warn(
+                `No active uniform found with name "${name}"!\nAvailable names are: ${names.sort().join(", ")}.`,
+            )
         }
         return location
     }

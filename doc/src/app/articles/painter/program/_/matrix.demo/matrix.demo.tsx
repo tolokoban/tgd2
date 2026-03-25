@@ -1,9 +1,17 @@
 import {
+    tgdCanvasCreateWithContext2D,
     type TgdContext,
+    TgdDataGlb,
+    tgdLoadFont,
+    TgdMaterialGlobal,
     TgdPainter,
     TgdPainterClear,
+    TgdPainterMesh,
     TgdPainterProgram,
+    TgdPainterSkybox,
+    TgdPainterState,
     TgdTexture2D,
+    TgdTextureCube,
     TgdUniformBufferObject,
     TgdUniformBufferObjectCamera,
     WebglImage,
@@ -11,22 +19,76 @@ import {
 
 import View, { Assets } from "@/components/demo/Tgd"
 
-import LettersURL from "./letters.webp"
+import ScreenURL from "./screen.glb"
 import DustURL from "./dust.webp"
+import FuzarFontURL from "./Fuzar_GX.woff2"
+import imagePosX from "@/assets/cubemap/1024/electric-board/posX.webp" // +X
+import imagePosY from "@/assets/cubemap/1024/electric-board/posY.webp" // +Y
+import imagePosZ from "@/assets/cubemap/1024/electric-board/posZ.webp" // +Z
+import imageNegX from "@/assets/cubemap/1024/electric-board/negX.webp" // -X
+import imageNegY from "@/assets/cubemap/1024/electric-board/negY.webp" // -Y
+import imageNegZ from "@/assets/cubemap/1024/electric-board/negZ.webp" // -Z
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
-    context.camera.transfo.setPosition(0, 0.5, 0)
-    context.camera.fitSpaceAtTarget(2, 3)
+    context.camera.transfo.setPosition(0, 2, 0)
+    context.camera.fitSpaceAtTarget(9, 7)
     const clear = new TgdPainterClear(context, {
-        color: [0.2, 0.1, 0, 1],
         depth: 1,
     })
     const uniformCamera = new TgdUniformBufferObjectCamera(context)
     const imageLetters = assets.image.letters
     const imageDust = assets.image.dust
-    const painterScreen = new PainterScreen(context, { uniformCamera, imageLetters, imageDust })
-    context.add(clear, painterScreen)
+    const cameraSkybox = context.camera.clone()
+    const painterSkybox = new TgdPainterSkybox(context, {
+        tint: [0.4, 0.4, 0.4, 1],
+        camera: cameraSkybox,
+        imagePosX: assets.image.imagePosX,
+        imagePosY: assets.image.imagePosY,
+        imagePosZ: assets.image.imagePosZ,
+        imageNegX: assets.image.imageNegX,
+        imageNegY: assets.image.imageNegY,
+        imageNegZ: assets.image.imageNegZ,
+    })
+    const skybox = new TgdTextureCube(context, {
+        imagePosX: assets.image.imagePosX,
+        imagePosY: assets.image.imagePosY,
+        imagePosZ: assets.image.imagePosZ,
+        imageNegX: assets.image.imageNegX,
+        imageNegY: assets.image.imageNegY,
+        imageNegZ: assets.image.imageNegZ,
+    })
+    const painterScreen = new PainterScreen(context, {
+        uniformCamera,
+        imageLetters,
+        imageDust,
+        assetScreen: assets.glb.screen,
+        skybox,
+    })
+    const geometry = assets.glb.screen.makeGeometry({
+        meshIndex: "Mesh",
+    })
+    const material = new TgdMaterialGlobal({
+        ambientColor: skybox,
+    })
+    const foot = new TgdPainterMesh(context, {
+        geometry,
+        material,
+    })
+    context.add(
+        painterSkybox,
+        new TgdPainterState(context, {
+            depth: "less",
+            children: [clear, foot, painterScreen],
+        }),
+        (time) => {
+            const angX = Math.abs(10 * Math.sin(time * 0.341))
+            const angY = 30 * Math.sin(time * 0.5)
+            context.camera.transfo.setEulerRotation(angX, angY, 0)
+            cameraSkybox.zoom = 0.3
+            cameraSkybox.transfo.setEulerRotation(angX, angY + 160, 0)
+        },
+    )
     context.play()
     // #end
 }
@@ -35,16 +97,16 @@ export default function Demo() {
     return (
         <View
             onReady={init}
-            gizmo
-            width="512px"
-            height="512px"
             controller={{
                 inertiaOrbit: 1000,
             }}
             options={{
                 preserveDrawingBuffer: true,
             }}
-            assets={{ image: { letters: LettersURL, dust: DustURL } }}
+            assets={{
+                glb: { screen: ScreenURL },
+                image: { dust: DustURL, imagePosX, imagePosY, imagePosZ, imageNegX, imageNegY, imageNegZ },
+            }}
         />
     )
 }
@@ -53,6 +115,8 @@ interface PainterScreenOptions {
     imageLetters: WebglImage
     imageDust: WebglImage
     uniformCamera: TgdUniformBufferObjectCamera
+    assetScreen: TgdDataGlb
+    skybox: TgdTextureCube
 }
 
 class PainterScreen extends TgdPainter {
@@ -63,12 +127,16 @@ class PainterScreen extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        { uniformCamera, imageLetters, imageDust }: PainterScreenOptions,
+        { uniformCamera, imageDust, assetScreen, skybox }: PainterScreenOptions,
     ) {
         super()
-        const W = 1
-        const H = 1.6
-        const D = 0.1
+        const W = 3
+        const H = 2
+        const elements = assetScreen.getMeshPrimitiveIndices("Screen")
+        const dataset = assetScreen.makeDataset({
+            meshIndex: "Screen",
+        })
+        dataset.debug()
         const uniformBlock = new TgdUniformBufferObject(context, {
             uniforms: {
                 uniTime: "float",
@@ -83,67 +151,55 @@ class PainterScreen extends TgdPainter {
                 wrapS: "REPEAT",
                 wrapT: "REPEAT",
             },
-        }).loadBitmap(imageLetters)
+        })
+        const scale = 512
+        const { ctx, canvas } = tgdCanvasCreateWithContext2D(W * scale, H * scale * 2)
+        this.initCanvas(canvas, ctx)
+        this.loadFont(canvas, ctx)
         this.textureDust = new TgdTexture2D(context).loadBitmap(imageDust)
-        // prettier-ignore
-        const attPos = [
-            -W, 0, +D,
-            +W, 0, +D,
-            +W, H, +D,
-            -W, H, +D,
-            -W, 0, -D,
-            +W, 0, -D,
-            +W, H, -D,
-            -W, H, -D,
-        ]
-        // prettier-ignore
-        const attUV = [
-            0, 1,
-            1, 1,
-            1, 0,
-            0, 0,
-            0, 1,
-            1, 1,
-            1, 0,
-            0, 0,
-        ]
         this.program = new TgdPainterProgram(context, {
             drawMode: "TRIANGLES",
             state: {
-                depth: "off",
                 blend: "add",
                 cull: "off",
             },
             uniforms: { uniformCamera, uniformBlock },
-            dataset: {
-                attribs: {
-                    attPos: { type: "vec3", data: new Float32Array(attPos) },
-                    attUV: { type: "vec2", data: new Float32Array(attUV) },
-                },
-            },
-            elements: new Uint8Array([0, 1, 2, 0, 2, 3, 4, 0, 3, 4, 3, 7, 1, 5, 6, 1, 6, 2, 5, 4, 7, 5, 7, 6]),
+            dataset,
+            elements,
             textures: {
                 uniTextureLetters: this.textureLetters,
                 uniTextureDust: this.textureDust,
+                uniTextureSkybox: skybox,
             },
             varying: {
                 varUV: "vec2",
+                varNormal: "vec3",
+                varPosition: "vec4",
             },
             vert: {
                 mainCode: [
-                    "varUV = attUV;",
-                    "gl_Position = uniProjectionMatrix * uniModelViewMatrix * vec4(attPos, 1.0);",
+                    "varNormal = NORMAL;",
+                    "varUV = TEXCOORD_0;",
+                    "varPosition = vec4(POSITION, 1.0);",
+                    "gl_Position = uniProjectionMatrix * uniModelViewMatrix * varPosition;",
                 ],
             },
             frag: {
                 mainCode: [
-                    "vec4 color = texture(uniTextureLetters, vec2(1.0, .5) * varUV + vec2(0, 0.1 * uniTime));",
+                    "vec4 color = texture(uniTextureLetters, vec2(1.0, .5) * varUV + vec2(0, 0.05 * uniTime));",
                     "float dist = fract(uniTime) - fract(varUV.y);",
                     "if (dist < 0.0) dist += 1.0;",
-                    "dist = 1.0 / (8.0 * dist);",
-                    "color.rgb *= dist * (gl_FrontFacing ? 1.0 : 0.2);",
+                    "dist = 1.0 / (6.0 * dist);",
+                    "color.rgb *= dist * (gl_FrontFacing ? 1.0 : 0.15);",
                     "color.rgb *= texture(uniTextureDust, varUV).r;",
                     "FragColor = color;",
+                    "if (!gl_FrontFacing) return;",
+                    "vec3 N = normalize(varNormal);",
+                    "vec3 V = normalize(uniCameraPosition - varPosition.xyz);",
+                    "vec3 R = reflect(-V, N);",
+                    "vec3 specular = textureLod(uniTextureSkybox, R, 0.0).rgb;",
+                    "specular = pow(specular, vec3(5.0));",
+                    "FragColor.rgb += specular * .5;",
                 ],
             },
         })
@@ -158,4 +214,65 @@ class PainterScreen extends TgdPainter {
         this.uniformBlock.values.uniTime = time
         this.program.paint(time, delta)
     }
+
+    private initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+        const { width, height } = canvas
+        const text = "Loading..."
+        ctx.font = `bold ${width / 7}px monospace`
+        const measure = ctx.measureText(text)
+        ctx.fillStyle = "#3e3"
+        const h = height / 5
+        const x = (width - measure.width) / 2
+        for (let y = h; y < height; y += h) {
+            ctx.fillText(text, x, y)
+        }
+        this.textureLetters.loadBitmap(canvas)
+    }
+
+    private loadFont(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+        tgdLoadFont("Fuzar", FuzarFontURL).then(() => {
+            const { width, height } = canvas
+            ctx.clearRect(0, 0, width, height)
+            const fontSize = width / 8
+            const margin = fontSize / 3
+            ctx.font = `italic ${fontSize}px Fuzar`
+            ctx.fillStyle = "#3e3"
+            let x = margin
+            let y = fontSize * 3
+            let bold = false
+            let italic = false
+            const text = `*Fuzar is the best font ever made in this world of madness. It was engineered by an unknown _genius hidden in a swiss city called Geneva. "0123456789"`
+            for (const word of text.split(" ")) {
+                italic = false
+                bold = false
+                if (word.startsWith("_")) italic = true
+                if (word.startsWith("*")) italic = false
+                const cleanWord = removeStyle(word)
+                ctx.font = `${bold ? "bold " : ""}${italic ? "italic " : ""} ${fontSize}px Fuzar`
+                const measure = ctx.measureText(`${cleanWord} `)
+                if (x > width - measure.width - 2 * margin) {
+                    x = margin
+                    y += fontSize
+                }
+                ctx.fillText(cleanWord, x, y)
+                x += measure.width
+            }
+            ctx.lineWidth = 0.5
+            ctx.strokeStyle = "#5f57"
+            for (let h = 0; h < height; h += fontSize / 8) {
+                const y = Math.floor(h) + 0.5
+                ctx.beginPath()
+                ctx.moveTo(0, y)
+                ctx.lineTo(width, y)
+                ctx.stroke()
+            }
+            this.textureLetters.loadBitmap(canvas)
+            this.context.paint()
+        })
+    }
+}
+
+function removeStyle(word: string) {
+    while ("*_".includes(word.charAt(0))) word = word.slice(1)
+    return word
 }

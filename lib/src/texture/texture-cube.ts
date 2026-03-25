@@ -1,22 +1,27 @@
+import { tgdCanvasCreateFill } from "@tgd/utils"
+import { TgdContext } from "@tgd/context"
+import { tgdLoadImage } from "@tgd/loader"
 import { TgdProgram } from "@tgd/program"
 import { TgdTextureCubeOptions, WebglImage } from "@tgd/types"
 
 export class TgdTextureCube {
+    private static ID = 1
+
+    public name: string
     public readonly texture: WebGLTexture
 
     private _width = 0
     private _height = 0
 
     constructor(
-        public readonly context: {
-            gl: WebGL2RenderingContext
-        },
+        public readonly context: TgdContext,
         options: TgdTextureCubeOptions,
     ) {
         const { gl } = context
         const texture = gl.createTexture()
         if (!texture) throw new Error("Unable to create a WebGLTexture!")
 
+        this.name = options.name ?? `TgdTextureCube/${TgdTextureCube.ID++}`
         this.texture = texture
         const flipY = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL)
         this.loadImage(gl.TEXTURE_CUBE_MAP_POSITIVE_X, options.imagePosX)
@@ -79,7 +84,17 @@ export class TgdTextureCube {
         const { gl } = context
         this.bind()
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, image instanceof Image)
-        gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+        try {
+            gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+            context.checkError(`[TgdTextureCube.loadImage] ${this.name}`, () => {
+                console.log("image =", image)
+            })
+            context.paint()
+        } catch (error) {
+            console.error(error)
+            console.log("image =", image)
+            console.log("target =", context.lookupWebglConstant(target))
+        }
     }
 }
 

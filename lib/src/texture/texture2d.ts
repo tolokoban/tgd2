@@ -5,7 +5,7 @@ import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 import { TgdProgram } from "@tgd/program"
 import { ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
-import { ensureArray, ensureArrayNumber4, tgdCanvasCreate, webglLookup } from "@tgd/utils"
+import { ensureArrayNumber4, tgdCanvasCreate, webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 import { TgdContext } from "@tgd/context"
@@ -39,6 +39,7 @@ interface TgdTexture2DStorage {
         | "RGB16F"
         | "RGB32F"
         | "RGB8UI"
+        | "RGBA"
         | "RGBA8"
         | "SRGB8_ALPHA8"
         | "RGB5_A1"
@@ -172,8 +173,10 @@ export class TgdTexture2D {
             0, // border
             gl.RGBA, // source format
             gl.UNSIGNED_BYTE, // source type
-            new Uint8Array(ensureArrayNumber4()), // data
+            new Uint8Array(ensureArrayNumber4(color, [1, 0, 0.667, 1])), // data
         )
+        this._width = 1
+        this._height = 1
     }
 
     resize(w: number, h: number) {
@@ -184,11 +187,12 @@ export class TgdTexture2D {
         this.loadBitmap(tgdCanvasCreate(width, height))
     }
 
-    private checkError(caption: string) {
+    private checkError(caption: string, action?: () => void) {
         const { gl } = this
         const error = gl.getError()
         if (error !== gl.NO_ERROR) {
             console.error(`[TgdTexture2D::${this.name}] Error in ${caption}:`, webglLookup(error), this)
+            action?.()
         }
     }
 
@@ -271,8 +275,8 @@ export class TgdTexture2D {
         gl.texImage2D(
             gl.TEXTURE_2D,
             level,
-            (gl as unknown as Record<string, GLenum>)[storage.internalFormat],
-            gl[figureOutCompatibleFormat(storage.internalFormat)] as number,
+            gl.RGBA, // (gl as unknown as Record<string, GLenum>)[storage.internalFormat],
+            gl.RGBA, // gl[figureOutCompatibleFormat(storage.internalFormat)] as number,
             gl.UNSIGNED_BYTE,
             bmp,
         )
@@ -281,8 +285,14 @@ export class TgdTexture2D {
                 width: bmp.width,
                 height: bmp.height,
             })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-                storage.internalFormat
-            }, gl.${figureOutCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)`,
+                "RGBA" // storage.internalFormat
+            }, gl.${
+                "RGBA" // resolveCompatibleFormat(storage.internalFormat)
+            }, gl.UNSIGNED_BYTE, bmp)`,
+            () => {
+                console.log("storage =", this.storage)
+                console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
+            },
         )
         if (options.generateMipmap) {
             this.generateMipmap()
@@ -292,7 +302,7 @@ export class TgdTexture2D {
                     height: bmp.height,
                 })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
                     storage.internalFormat
-                }, gl.${figureOutCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
+                }, gl.${resolveCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
             )
         }
         const { filter } = this.options
@@ -517,7 +527,7 @@ const COMPATIBLE_FORMATS: Array<[keyof WebGL2RenderingContext, Set<string>]> = [
     ["RED", new Set(["R8"])],
 ]
 
-function figureOutCompatibleFormat(internalFormat: string): keyof WebGL2RenderingContext {
+function resolveCompatibleFormat(internalFormat: string): keyof WebGL2RenderingContext {
     for (const [format, internalFormats] of COMPATIBLE_FORMATS) {
         if (internalFormats.has(internalFormat)) return format
     }

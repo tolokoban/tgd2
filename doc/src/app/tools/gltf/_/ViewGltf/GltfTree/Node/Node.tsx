@@ -35,7 +35,6 @@ export function ViewNode(props: ViewNodeProps) {
     const name = node.name ?? `#${props.index}`
     const icon = figureIcon(node)
     const handleClick = () => {
-        ;() => console.log(name, node)
         props.onAction?.({
             type: "node",
             index: props.index,

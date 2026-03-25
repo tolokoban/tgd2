@@ -167,7 +167,7 @@ export default function (env, argv) {
                     },
                 },
                 {
-                    test: /\.(bin|glb|dat|swc)$/i,
+                    test: /\.(bin|glb|dat|swc|zip)$/i,
                     type: "asset",
                     generator: {
                         filename: "bin/[name].[hash][ext][query]",

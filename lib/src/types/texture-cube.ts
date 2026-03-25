@@ -1,6 +1,7 @@
 import type { WebglImage } from "./webgl"
 
 export interface TgdTextureCubeOptions {
+    name?: string
     /**
      * When you look at this image the
      *

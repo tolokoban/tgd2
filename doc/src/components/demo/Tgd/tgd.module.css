@@ -3,6 +3,23 @@
     margin: 1em;
 }
 
+.screen.fullscreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+
+    > canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
 .Tgd canvas {
     border: 1px solid #fff;
     max-width: 100vw;

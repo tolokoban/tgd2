@@ -60,6 +60,7 @@ export class TgdPainterGizmo extends TgdPainter {
         this.margin = margin
         this.name = "Gizmo"
         this.textureFramebuffer = new TgdTexture2D(context, {
+            name: `Gizmo FB (${size}×${size})`,
             load: tgdCanvasCreate(size, size),
             params: {
                 minFilter: "NEAREST",

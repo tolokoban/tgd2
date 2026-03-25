@@ -75,7 +75,7 @@ export interface TgdFormatGltfMaterialPbrMetallicRoughness {
     /**
      * The metallic-roughness texture.
      */
-    metalicRoughnessTexture?: TextureInfo
+    metallicRoughnessTexture?: TextureInfo
 }
 
 interface TextureInfo {
@@ -283,7 +283,7 @@ export function assertTgdFormatGltf(data: unknown): asserts data is TgdFormatGlt
             meshes: [
                 "array",
                 {
-                    name: "string",
+                    name: ["?", "string"],
                     primitives: [
                         "array",
                         {

@@ -112,6 +112,8 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/utils": ["/articles/utils"],
     "/articles/utils/loaders": ["/articles/utils/loaders"],
     "/articles/utils/loaders/tgdLoadImageFromElement": ["/articles/utils/loaders/tgdLoadImageFromElement"],
+    "/example": ["/example"],
+    "/example/retro-futuristic-screen": ["/example/retro-futuristic-screen"],
     "/quick-start": ["/quick-start"],
     "/tools": ["/tools"],
     "/tools/filter": ["/tools/filter"],

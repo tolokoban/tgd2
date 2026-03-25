@@ -36,6 +36,7 @@ export function parseGLB(data: ArrayBuffer): {
             try {
                 const object: unknown = JSON.parse(json)
                 assertTgdFormatGltf(object)
+                addMissingMeshNames(object)
                 gltf = object
                 chunkTypes.push({ type: "JSON", size: chunkData.byteLength })
             } catch (error) {
@@ -51,4 +52,14 @@ export function parseGLB(data: ArrayBuffer): {
         }
     }
     return { gltf, chunks, chunkTypes }
+}
+
+function addMissingMeshNames(object: TgdFormatGltf) {
+    const { meshes } = object
+    if (!meshes) return
+
+    for (let index = 0; index < meshes.length; index++) {
+        const mesh = meshes[index]
+        if (!mesh.name) mesh.name = `mesh_${index}`
+    }
 }

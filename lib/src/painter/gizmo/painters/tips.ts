@@ -26,6 +26,7 @@ export async function createTipsTexture(
 ): Promise<TgdTexture2D> {
     const canvas = await tgdLoadCanvasFromSvg(makeTipsSVG(size, red, green, blue))
     const texture = new TgdTexture2D(context, {
+        name: `Gizmo tip (${size})`,
         params: {
             magFilter: "LINEAR",
             minFilter: "LINEAR",

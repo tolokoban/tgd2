@@ -1,4 +1,4 @@
-import { tgdCanvasCreate, tgdCanvasCreateFill, tgdCanvasFromImage } from "@tgd/utils"
+import { tgdCanvasCreate, tgdCanvasFromImage } from "@tgd/utils"
 
 /**
  * Try to load an image and return `null` in case of failure.

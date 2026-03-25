@@ -9,6 +9,7 @@ import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { UniformBufferObjectsManager } from "./ubo-manager"
 import { WebglParams } from "./webgl-params"
+import { TgdTime } from "@tgd/time"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -71,7 +72,6 @@ export type TgdContextOptions = WebGLContextAttributes & {
  */
 export class TgdContext extends TgdPainterGroup {
     private static incrementalId = 1
-
     /**
      * Ratio of the resolution in physical pixels to the resolution in CSS pixels
      * for the current display device.
@@ -80,7 +80,9 @@ export class TgdContext extends TgdPainterGroup {
     public static get devicePixelRatio() {
         return globalThis.devicePixelRatio ?? 1
     }
+
     public readonly name: string
+    public readonly virtualTime: TgdTime
     public readonly inputs: TgdInputs
     public readonly webglParams: WebglParams
     public readonly implementationColorReadFormat: number
@@ -235,6 +237,7 @@ export class TgdContext extends TgdPainterGroup {
         this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
         this.stateReset()
         this.webglParams = new WebglParams(gl)
+        this.virtualTime = new TgdTime()
     }
 
     viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
@@ -532,6 +535,7 @@ export class TgdContext extends TgdPainterGroup {
         }
         try {
             const { gl } = this
+            this.virtualTime.update(this)
             this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
             this.eventPaintEnter.dispatch(this)
             const delayInSec = timeInSec - this.lastTimeInSec
