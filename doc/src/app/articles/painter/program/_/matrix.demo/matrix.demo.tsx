@@ -40,16 +40,6 @@ function init(context: TgdContext, assets: Assets) {
     const imageLetters = assets.image.letters
     const imageDust = assets.image.dust
     const cameraSkybox = context.camera.clone()
-    const painterSkybox = new TgdPainterSkybox(context, {
-        tint: [0.4, 0.4, 0.4, 1],
-        camera: cameraSkybox,
-        imagePosX: assets.image.imagePosX,
-        imagePosY: assets.image.imagePosY,
-        imagePosZ: assets.image.imagePosZ,
-        imageNegX: assets.image.imageNegX,
-        imageNegY: assets.image.imageNegY,
-        imageNegZ: assets.image.imageNegZ,
-    })
     const skybox = new TgdTextureCube(context, {
         imagePosX: assets.image.imagePosX,
         imagePosY: assets.image.imagePosY,
@@ -57,6 +47,11 @@ function init(context: TgdContext, assets: Assets) {
         imageNegX: assets.image.imageNegX,
         imageNegY: assets.image.imageNegY,
         imageNegZ: assets.image.imageNegZ,
+    })
+    const painterSkybox = new TgdPainterSkybox(context, {
+        tint: [0.4, 0.4, 0.4, 1],
+        camera: cameraSkybox,
+        texture: skybox,
     })
     const painterScreen = new PainterScreen(context, {
         uniformCamera,

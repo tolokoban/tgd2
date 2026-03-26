@@ -79,12 +79,24 @@ export class TgdColor {
     private _L = 1
 
     constructor()
-    constructor(cssColor: string)
+    constructor(color: string | ArrayNumber4 | TgdVec4 | TgdColor)
     constructor(r: number, g: number, b: number)
     constructor(r: number, g: number, b: number, a: number)
-    constructor(r: number | string = 0, g = 0, b = 0, a = 1) {
+    constructor(r: number | string | ArrayNumber4 | TgdVec4 | TgdColor = 0, g = 0, b = 0, a = 1) {
         if (typeof r === "string") {
             this.parse(r)
+        } else if (r instanceof TgdColor) {
+            const { R, G, B, A } = r
+            this.R = R
+            this.G = G
+            this.B = B
+            this.A = A
+        } else if (r instanceof TgdVec4 || Array.isArray(r)) {
+            const [R, G, B, A] = r
+            this.R = R
+            this.G = G
+            this.B = B
+            this.A = A
         } else {
             this.R = r
             this.G = g

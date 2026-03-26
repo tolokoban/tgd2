@@ -74,12 +74,14 @@ function init(context: TgdContext) {
     })
     const skybox = new TgdPainterSkybox(context, {
         camera: context.camera,
-        imagePosX: PosX,
-        imagePosY: PosY,
-        imagePosZ: PosZ,
-        imageNegX: NegX,
-        imageNegY: NegY,
-        imageNegZ: NegZ,
+        texture: {
+            imagePosX: PosX,
+            imagePosY: PosY,
+            imagePosZ: PosZ,
+            imageNegX: NegX,
+            imageNegY: NegY,
+            imageNegZ: NegZ,
+        },
     })
     context.add(skybox)
     const texture = new TgdTexture2D(context).loadBitmap(FaceWEBP).setParams({

@@ -1,11 +1,17 @@
 import {
     tgdCanvasCreateWithContext2D,
+    tgdCodeFunction_fbm,
+    tgdCodeFunction_perlinNoise,
     type TgdContext,
     TgdDataGlb,
     tgdLoadFont,
+    TgdMaterialFlat,
     TgdMaterialGlobal,
     TgdPainter,
     TgdPainterClear,
+    TgdPainterFilter,
+    TgdPainterFramebuffer,
+    TgdPainterFramebufferWithAntiAliasing,
     TgdPainterMesh,
     TgdPainterProgram,
     TgdPainterSkybox,
@@ -29,29 +35,19 @@ import imageNegX from "@/assets/cubemap/1024/electric-board/negX.webp" // -X
 import imageNegY from "@/assets/cubemap/1024/electric-board/negY.webp" // -Y
 import imageNegZ from "@/assets/cubemap/1024/electric-board/negZ.webp" // -Z
 
-const COLOR = "#5e9"
+const COLOR = "#2e6"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
     context.camera.transfo.setPosition(0, 2, 0)
     context.camera.fitSpaceAtTarget(9, 7)
-    const clear = new TgdPainterClear(context, {
+    const clearDepth = new TgdPainterClear(context, {
         depth: 1,
     })
     const uniformCamera = new TgdUniformBufferObjectCamera(context)
     const imageLetters = assets.image.letters
     const imageDust = assets.image.dust
     const cameraSkybox = context.camera.clone()
-    const painterSkybox = new TgdPainterSkybox(context, {
-        tint: [0.4, 0.4, 0.4, 1],
-        camera: cameraSkybox,
-        imagePosX: assets.image.imagePosX,
-        imagePosY: assets.image.imagePosY,
-        imagePosZ: assets.image.imagePosZ,
-        imageNegX: assets.image.imageNegX,
-        imageNegY: assets.image.imageNegY,
-        imageNegZ: assets.image.imageNegZ,
-    })
     const skybox = new TgdTextureCube(context, {
         imagePosX: assets.image.imagePosX,
         imagePosY: assets.image.imagePosY,
@@ -60,12 +56,11 @@ function init(context: TgdContext, assets: Assets) {
         imageNegY: assets.image.imageNegY,
         imageNegZ: assets.image.imageNegZ,
     })
-    const painterScreen = new PainterScreen(context, {
-        uniformCamera,
-        imageLetters,
-        imageDust,
-        assetScreen: assets.glb.screen,
-        skybox,
+    const painterSkybox = new TgdPainterSkybox(context, {
+        zoom: 0.5,
+        tint: [0.6, 0.6, 0.6, 1],
+        camera: cameraSkybox,
+        texture: skybox,
     })
     const geometry = assets.glb.screen.makeGeometry({
         meshIndex: "Mesh",
@@ -73,15 +68,44 @@ function init(context: TgdContext, assets: Assets) {
     const material = new TgdMaterialGlobal({
         ambientColor: skybox,
     })
-    const foot = new TgdPainterMesh(context, {
-        geometry,
-        material,
+    const foot = new TgdPainterState(context, {
+        depth: "less",
+        children: [
+            new TgdPainterMesh(context, {
+                geometry,
+                material,
+            }),
+        ],
+    })
+    const background = new TgdTexture2D(context)
+    const framebuffer = new TgdPainterFramebuffer(context, {
+        antiAliasing: true,
+        textureColor0: background,
+        children: [painterSkybox, clearDepth, foot],
+    })
+    const footHoldout = new TgdPainterState(context, {
+        color: false,
+        children: [
+            new TgdPainterMesh(context, {
+                geometry,
+                material: new TgdMaterialFlat(),
+            }),
+        ],
+    })
+    const painterScreen = new PainterScreen(context, {
+        uniformCamera,
+        imageLetters,
+        imageDust,
+        assetScreen: assets.glb.screen,
+        skybox,
+        background,
     })
     context.add(
-        painterSkybox,
+        framebuffer,
+        new TgdPainterFilter(context, { flipY: true, filters: [], texture: background }),
         new TgdPainterState(context, {
             depth: "less",
-            children: [clear, foot, painterScreen],
+            children: [clearDepth, footHoldout, painterScreen],
         }),
         (time) => {
             const angX = Math.abs(10 * Math.sin(time * 0.341))
@@ -89,6 +113,7 @@ function init(context: TgdContext, assets: Assets) {
             context.camera.transfo.setEulerRotation(angX, angY, 0)
             cameraSkybox.zoom = 0.3
             cameraSkybox.transfo.setEulerRotation(angX, angY + 160, 0)
+            // painterSkybox.transfo.setScale(Math.cos(time))
         },
     )
     context.play()
@@ -119,6 +144,7 @@ interface PainterScreenOptions {
     uniformCamera: TgdUniformBufferObjectCamera
     assetScreen: TgdDataGlb
     skybox: TgdTextureCube
+    background: TgdTexture2D
 }
 
 class PainterScreen extends TgdPainter {
@@ -129,7 +155,7 @@ class PainterScreen extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        { uniformCamera, imageDust, assetScreen, skybox }: PainterScreenOptions,
+        { uniformCamera, imageDust, assetScreen, skybox, background }: PainterScreenOptions,
     ) {
         super()
         const W = 3
@@ -162,16 +188,17 @@ class PainterScreen extends TgdPainter {
         this.program = new TgdPainterProgram(context, {
             drawMode: "TRIANGLES",
             state: {
-                blend: "add",
+                blend: "off",
                 cull: "off",
             },
             uniforms: { uniformCamera, uniformBlock },
             dataset,
             elements,
             textures: {
-                uniTextureLetters: this.textureLetters,
                 uniTextureDust: this.textureDust,
                 uniTextureSkybox: skybox,
+                uniTextureLetters: this.textureLetters,
+                uniTextureBackground: background,
             },
             varying: {
                 varUV: "vec2",
@@ -187,6 +214,9 @@ class PainterScreen extends TgdPainter {
                 ],
             },
             frag: {
+                functions: {
+                    ...tgdCodeFunction_perlinNoise(),
+                },
                 mainCode: [
                     "vec4 color = texture(uniTextureLetters, vec2(1.0, .5) * varUV + vec2(0, 0.05 * uniTime));",
                     "float dist = fract(uniTime) - fract(varUV.y);",
@@ -199,13 +229,20 @@ class PainterScreen extends TgdPainter {
                     "vec3 N = normalize(varNormal);",
                     "vec3 V = normalize(uniCameraPosition - varPosition.xyz);",
                     "vec3 R = reflect(-V, N);",
-                    "vec3 specular = textureLod(uniTextureSkybox, -R, 0.0).rgb;",
-                    "specular = pow(specular, vec3(5.0));",
+                    "vec3 specular = textureLod(uniTextureSkybox, -R, 2.0).rgb;",
+                    "specular = pow(specular, vec3(3.0));",
                     "FragColor.rgb += specular * .5;",
                     "FragColor.rgb += vec3(-.1, .05, -.1);",
+                    // Background
+                    "vec2 uv = gl_FragCoord.xy * uniPixel;",
+                    "vec2 xy = varUV * 5.0;",
+                    "vec2 shift = vec2(perlinNoise(vec3(xy, 1.0)), perlinNoise(vec3(xy, 2.0)));",
+                    "uv += shift * .02;",
+                    "FragColor.rgb += texture(uniTextureBackground, uv).rgb;",
                 ],
             },
         })
+        this.program.debug()
     }
 
     delete() {

@@ -112,12 +112,14 @@ function useReadyHandler(data: TgdDataGlb, node: TgdFormatGltfNode) {
                 context.add(
                     new TgdPainterSkybox(context, {
                         camera: context.camera,
-                        imagePosX,
-                        imagePosY,
-                        imagePosZ,
-                        imageNegX,
-                        imageNegY,
-                        imageNegZ,
+                        texture: {
+                            imagePosX,
+                            imagePosY,
+                            imagePosZ,
+                            imageNegX,
+                            imageNegY,
+                            imageNegZ,
+                        },
                     }),
                     clear,
                     state,

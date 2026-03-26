@@ -1,10 +1,75 @@
 import { tgdCanvasCreateFill } from "@tgd/utils"
 import { TgdContext } from "@tgd/context"
-import { tgdLoadImage } from "@tgd/loader"
 import { TgdProgram } from "@tgd/program"
-import { TgdTextureCubeOptions, WebglImage } from "@tgd/types"
+import { ArrayNumber4, TgdTextureCubeOptions, WebglImage } from "@tgd/types"
+import { TgdVec4 } from "@tgd/math"
+import { TgdColor } from "@tgd/color"
+import { tgdLoadImage } from "@tgd/loader"
 
 export class TgdTextureCube {
+    public static lazyLoad(
+        context: TgdContext,
+        {
+            size,
+            initialColor,
+            name,
+            posX,
+            posY,
+            posZ,
+            negX,
+            negY,
+            negZ,
+        }: {
+            size: number
+            initialColor?: ArrayNumber4 | TgdVec4 | TgdColor | string
+            name?: string
+            posX: string
+            posY: string
+            posZ: string
+            negX: string
+            negY: string
+            negZ: string
+        },
+    ): TgdTextureCube {
+        const color = new TgdColor(initialColor ?? "#888").toString()
+        const canvas = tgdCanvasCreateFill(size, size, color)
+        const texture = new TgdTextureCube(context, {
+            name,
+            imagePosX: canvas,
+            imagePosY: canvas,
+            imagePosZ: canvas,
+            imageNegX: canvas,
+            imageNegY: canvas,
+            imageNegZ: canvas,
+        })
+        for (const [target, url] of [
+            ["posX", posX],
+            ["posY", posY],
+            ["posZ", posZ],
+            ["negX", negX],
+            ["negY", negY],
+            ["negZ", negZ],
+        ]) {
+            tgdLoadImage(url).then((image) => {
+                if (!image) {
+                    console.error(
+                        `Unable to lazy load image for target "${target}" in texture "${texture.name}": ${url}`,
+                    )
+                    return
+                }
+                if (image.width !== image.height || image.width !== size) {
+                    console.error(
+                        `Unable to lazy load image for target "${target}" in texture "${texture.name}": we were expecting a size of ${size}×${size}, but we got ${image.width}×${image.height}!`,
+                    )
+                    return
+                }
+                texture.loadImage(TARGETS[target], image)
+                context.paint()
+            })
+        }
+        return texture
+    }
+
     private static ID = 1
 
     public name: string
@@ -89,6 +154,7 @@ export class TgdTextureCube {
             context.checkError(`[TgdTextureCube.loadImage] ${this.name}`, () => {
                 console.log("image =", image)
             })
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
             context.paint()
         } catch (error) {
             console.error(error)
@@ -98,7 +164,7 @@ export class TgdTextureCube {
     }
 }
 
-const TARGETS = {
+const TARGETS: Record<string, number> = {
     posX: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_X,
     posY: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Y,
     posZ: WebGL2RenderingContext.TEXTURE_CUBE_MAP_POSITIVE_Z,

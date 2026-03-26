@@ -194,7 +194,10 @@ export default function (env, argv) {
                     use: [
                         {
                             loader: Rspack.CssExtractRspackPlugin.loader,
-                            options: {},
+                            options: {
+                                filename: "css/[name].css",
+                                enforceRelative: true
+                            },
                         },
                         {
                             loader: "css-loader",

@@ -27,7 +27,7 @@ export class TgdUniformBufferObjectCamera extends TgdUniformBufferObject<
         values.uniModelViewMatrix = camera.matrixModelView
         values.uniProjectionMatrix = camera.matrixProjection
         values.uniCameraPosition = camera.transfo.actualPosition
-        uniPixel.reset(camera.screenWidth, camera.screenHeight)
+        uniPixel.reset(1 / camera.screenWidth, 1 / camera.screenHeight)
         values.uniPixel = uniPixel
         super.updateData()
     }

@@ -5,20 +5,14 @@ import {
     TgdCameraPerspective,
     TgdContext,
     TgdControllerCameraOrbit,
-    tgdEasingFunctionInOutBounce,
     tgdEasingFunctionInOutCubic,
-    TgdGeometryBox,
-    TgdMat3,
     TgdPainterAxes,
     TgdPainterClear,
-    TgdPainterLogic,
     TgdPainterMesh,
     TgdPainterSkybox,
     TgdPainterState,
     TgdQuat,
     TgdQuatFace,
-    TgdTransfo,
-    TgdVec3,
     webglPresetDepth,
 } from "@tolokoban/tgd"
 
@@ -53,12 +47,14 @@ function init(
     context.camera.debug()
     const skybox = new TgdPainterSkybox(context, {
         camera: context.camera,
-        imagePosX: assets.image.imagePosX,
-        imagePosY: assets.image.imagePosY,
-        imagePosZ: assets.image.imagePosZ,
-        imageNegX: assets.image.imageNegX,
-        imageNegY: assets.image.imageNegY,
-        imageNegZ: assets.image.imageNegZ,
+        texture: {
+            imagePosX: assets.image.imagePosX,
+            imagePosY: assets.image.imagePosY,
+            imagePosZ: assets.image.imagePosZ,
+            imageNegX: assets.image.imageNegX,
+            imageNegY: assets.image.imageNegY,
+            imageNegZ: assets.image.imageNegZ,
+        },
     })
     const clear = new TgdPainterClear(context, {
         depth: 1,

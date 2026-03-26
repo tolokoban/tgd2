@@ -51,12 +51,14 @@ function init(context: TgdContext, assets: Assets) {
         }),
         new TgdPainterSkybox(context, {
             camera: context.camera,
-            imagePosX: assets.image.posX,
-            imagePosY: assets.image.posY,
-            imagePosZ: assets.image.posZ,
-            imageNegX: assets.image.negX,
-            imageNegY: assets.image.negY,
-            imageNegZ: assets.image.negZ,
+            texture: {
+                imagePosX: assets.image.posX,
+                imagePosY: assets.image.posY,
+                imagePosZ: assets.image.posZ,
+                imageNegX: assets.image.negX,
+                imageNegY: assets.image.negY,
+                imageNegZ: assets.image.negZ,
+            },
         }),
         new TgdPainterState(context, {
             depth: webglPresetDepth.less,
