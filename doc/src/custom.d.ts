@@ -97,6 +97,13 @@ declare module "*.md" {
     export default value
 }
 
+declare module "*.mdx" {
+    const value: React.ComponentType
+    export default value
+}
+
+declare module "*.css" {}
+
 declare module "*.vert" {
     const value: string
     export default value

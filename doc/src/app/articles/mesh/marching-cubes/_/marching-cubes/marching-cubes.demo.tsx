@@ -2,17 +2,16 @@ import {
     type ArrayNumber3,
     type ArrayNumber4,
     type MakeGeometryFromVolumeOptions,
-    tgdCalcDegToRad,
-    tgdCalcRandom,
     type TgdContext,
     TgdControllerCameraOrbit,
-    tgdMakeGeometryFromVolume,
-    tgdMakePointsCloudFromVolume,
     TgdMaterialFaceOrientation,
     TgdPainterAxes,
     TgdPainterClear,
     TgdPainterMesh,
     TgdPainterState,
+    tgdCalcDegToRad,
+    tgdCalcRandom,
+    tgdMakeGeometryFromVolume,
     tgdSdfCapsule,
     tgdSdfSphere,
     webglPresetDepth,
@@ -37,18 +36,6 @@ function init(ctx: TgdContext) {
             dendrite(1, 0.5, -60, 0),
             dendrite(1, 0.5, -60, 120),
             dendrite(1, 0.5, -60, 240),
-            // { point: [0, -1, -0.4, 0.2] },
-            // { point: [1.2, -1.6, 1.6, 0.3] },
-            // { point: [-1.5, -1, -1.2, 0.1] },
-            // {
-            //     point: [-1.2, -1.5, 1.2, 0.2],
-            //     children: [
-            //         { point: [-1.2, -1.75, 1.2, 0.2] },
-            //         { point: [2, -2.3, 1, 0.2] },
-            //         { point: [-0.7, -2.1, -1.2, 0.2] },
-            //     ],
-            // },
-            // { point: [-0.2, 1.5, 0.2, 0.4] },
         ],
     }
     const bbox = computeBBox(tree)
@@ -61,7 +48,7 @@ function init(ctx: TgdContext) {
     const options: MakeGeometryFromVolumeOptions = {
         bboxCorner,
         bboxSize,
-        voxelSize: 1 / 8,
+        voxelSize: 1 / 16,
         sdfPoint(x, y, z) {
             const p: ArrayNumber3 = [x, y, z]
             const o: ArrayNumber3 = [0, 0.5, 0]
@@ -89,7 +76,7 @@ function init(ctx: TgdContext) {
 }
 
 export default function Demo() {
-    return <View onReady={init} />
+    return <View onReady={init} gizmo />
 }
 
 function makeListOfSDF(tree: Tree): ((p: ArrayNumber3) => number)[] {

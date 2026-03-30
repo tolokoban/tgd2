@@ -1,10 +1,8 @@
-import * as React from "react"
-
-import { Theme, useLocalStorageState, ViewOptions, ViewPanel, ViewSlider, ViewStrip } from "@tolokoban/ui"
 import { TgdDataGlb, webglLookup } from "@tolokoban/tgd"
-
-import Styles from "./ActionBufferView.module.css"
 import { isNumber } from "@tolokoban/type-guards"
+import { Theme, useLocalStorageState, ViewOptions, ViewPanel, ViewSlider, ViewStrip } from "@tolokoban/ui"
+import * as React from "react"
+import Styles from "./ActionBufferView.module.css"
 import { ViewHeader } from "./Header"
 
 const $ = Theme.classNames
@@ -23,7 +21,7 @@ export function ViewActionBufferView({ className, data, index }: ViewActionBuffe
     const [format, setFormat] = React.useState<"Int8" | "Uint8" | "Int16" | "Uint16" | "Uint32" | "Float32">(
         bufferView?.target === WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER ? "Uint16" : "Float32",
     )
-    const [columns, setColumns] = useLocalStorageState(4, `ViewActionBufferView/columns`, ensureColumns)
+    const [columns, setColumns] = useLocalStorageState(4, "ViewActionBufferView/columns", ensureColumns)
     const [start, setStart] = React.useState(0)
     const view = React.useMemo(() => {
         try {

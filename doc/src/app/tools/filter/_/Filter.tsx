@@ -1,7 +1,5 @@
-import * as React from "react"
-
-import { Theme, useLocalStorageState, ViewPanel, ViewStrip, ViewTab, ViewTabs } from "@tolokoban/ui"
 import {
+    type TgdCodeFunctions,
     tgdCodeConstants,
     tgdCodeFunction_luminance,
     tgdCodeFunction_polar2uv,
@@ -12,16 +10,16 @@ import {
     tgdCodeFunction_uv2xy,
     tgdCodeFunction_xy2polar,
     tgdCodeFunction_xy2uv,
-    TgdCodeFunctions,
     tgdCodeStringify,
 } from "@tolokoban/tgd"
 
-import { ViewVertexShaderCodeEditor } from "./VertexShaderCodeEditor"
-import { ViewFilterResult } from "./FilterResult"
+import { Theme, useLocalStorageState, ViewPanel, ViewStrip, ViewTab, ViewTabs } from "@tolokoban/ui"
+import * as React from "react"
 import Doc from "./doc.mdx"
-
 import Styles from "./Filter.module.css"
+import { ViewFilterResult } from "./FilterResult"
 import { useGlslFunctions } from "./functions"
+import { ViewVertexShaderCodeEditor } from "./VertexShaderCodeEditor"
 
 const $ = Theme.classNames
 
