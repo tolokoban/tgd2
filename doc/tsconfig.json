@@ -21,6 +21,7 @@
 		},
 		"preserveWatchOutput": false,
 		"removeComments": true,
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,

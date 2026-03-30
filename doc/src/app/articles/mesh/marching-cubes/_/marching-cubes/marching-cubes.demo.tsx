@@ -76,7 +76,7 @@ function init(ctx: TgdContext) {
 }
 
 export default function Demo() {
-    return <View onReady={init} gizmo />
+    return <View onReady={init} gizmo options={{ alpha: false }} />
 }
 
 function makeListOfSDF(tree: Tree): ((p: ArrayNumber3) => number)[] {
