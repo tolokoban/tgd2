@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.118",
+    "version": "2.0.120",
     "description": "ToloGameDev library for WebGL2",
     "keywords": [
         "WebGL2",
@@ -21,11 +21,14 @@
     "main": "./dist/index.js",
     "typings": "./dist/index.d.ts",
     "scripts": {
+        "clean": "rm -rf dist/ .tsbuildinfo",
         "doc": "typedoc",
+        "prebuild": "npm run clean",
         "build": "build-typescript-library --allow-circular .",
         "dev": "build-typescript-library --allow-circular .",
         "lint": "eslint -c eslint.config.mjs './src/**/*.ts'",
         "lint:fix": "eslint -c eslint.config.mjs --fix './src/**/*.ts'",
+        "prestart": "npm run clean",
         "start": "build-typescript-library --allow-circular --watch .",
         "test": "jest",
         "test:watch": "jest --watch"
@@ -34,25 +37,19 @@
         "@loaders.gl/core": "^4.3.4",
         "@loaders.gl/draco": "^4.3.4",
         "@loaders.gl/gltf": "^4.3.4",
-        "gl-matrix": "^3.4.3",
+        "gl-matrix": "^3.4.4",
         "tslib": "^2.8.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.39.1",
         "@jest/globals": "^30.2.0",
         "@types/jest": "^30.0.0",
-        "@types/node": "^24.10.1",
+        "@types/node": "^25.5.0",
         "build-typescript-library": "^0.10.0",
-        "eslint": "^9.39.1",
-        "eslint-plugin-unicorn": "^62.0.0",
         "jest-canvas-mock": "^2.5.2",
-        "jest-environment-jsdom": "^30.0.0",
-        "lefthook": "^2.0.4",
-        "prettier": "^3.6.2",
-        "ts-jest": "^29.4.5",
-        "typedoc": "^0.28.5",
-        "typescript": "^5.9.3",
-        "typescript-eslint": "^8.47.0"
+        "jest-environment-jsdom": "^30.3.0",
+        "lefthook": "^2.1.4",
+        "typedoc": "^0.28.18",
+        "typescript": "^6.0.2"
     },
     "browserslist": {
         "production": [

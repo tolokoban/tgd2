@@ -39,6 +39,11 @@ export interface TgdInputPointerEventTap extends TgdInputPointerModifierKeys {
     x: number
     y: number
     t: number
+    start: {
+        x: number
+        y: number
+        t: number
+    }
     fingersCount: number
 }
 

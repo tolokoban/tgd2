@@ -186,7 +186,8 @@ export class TgdInputPointer {
                 this.eventTapMultiple.dispatch({
                     ...resolvePointerButtons(event),
                     tapsCount: this.tapsCount,
-                    ...this.start,
+                    ...this.current,
+                    start: this.start,
                     ...this.controlKeys,
                     preventTap: () => {
                         tapEventEnabled = false
@@ -198,7 +199,8 @@ export class TgdInputPointer {
             if (tapEventEnabled) {
                 this.eventTap.dispatch({
                     ...resolvePointerButtons(event),
-                    ...this.start,
+                    ...this.current,
+                    start: this.start,
                     ...this.controlKeys,
                 })
             }
@@ -227,11 +229,11 @@ export class TgdInputPointer {
         const { left, top, width, height } = this.canvas
             ? this.canvas.getBoundingClientRect()
             : {
-                  left: 0,
-                  top: 0,
-                  width: 1,
-                  height: 1,
-              }
+                left: 0,
+                top: 0,
+                width: 1,
+                height: 1,
+            }
         const x = 2 * ((event.clientX - left) / width - 0.5)
         const y = -2 * ((event.clientY - top) / height - 0.5)
         return { x, y, t: event.timeStamp, fingersCount: 1 }
