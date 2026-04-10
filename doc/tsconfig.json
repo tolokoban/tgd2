@@ -42,8 +42,7 @@
 		"./src/**/*.jpg",
 		"./src/**/*.jpeg",
 		"./src/**/*.gif",
-		"./src/**/*.webp",
-		"src/app/articles/mesh/material/glass/page.mdx2"
+		"./src/**/*.webp"
 	],
 	"exclude": [
 		"_backup_/",
