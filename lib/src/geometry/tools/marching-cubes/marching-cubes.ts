@@ -1,8 +1,8 @@
 /* eslint-disable unicorn/prevent-abbreviations */
 import { TgdDataset } from "@tgd/dataset"
+import { TgdVec3 } from "@tgd/math"
 import { ArrayNumber3, TgdTypeArrayForElements } from "@tgd/types"
 import { TgdGeometry } from "../../geometry"
-import { TgdVec3 } from "@tgd/math"
 import {
     tgdDataMarchingCubesConfigurations,
     tgdDataMarchingCubesVoxelCorners,
@@ -128,7 +128,6 @@ class VolumeHelper {
         if (voxelSize <= 0) {
             throw new Error(`We cannot do marching cube with voxels so small: ${voxelSize}`)
         }
-        const time0 = Date.now()
         this.configurations = tgdDataMarchingCubesConfigurations()
         this.corners = tgdDataMarchingCubesVoxelCorners()
         this.midPoints = tgdDataMarchingCubesVoxelMidPoints()
@@ -143,17 +142,14 @@ class VolumeHelper {
             voxelSize *= 2
         }
         this.volume = this.computeVolume()
-        console.log("Volume: ", Date.now() - time0, "ms")
     }
 
     getMesh() {
-        const time0 = Date.now()
         this.elementsCount = 0
         this._cache.clear()
         this._points.splice(0)
         this._elements.splice(0)
         this.addTriangles()
-        console.log("Triangles: ", Date.now() - time0, "ms")
         return {
             points: new Float32Array(this._points),
             elements: new Uint32Array(this._elements),
@@ -161,7 +157,6 @@ class VolumeHelper {
     }
 
     getPointsCloud(radiusMultiplier: number): Float32Array {
-        const time0 = Date.now()
         const { voxelSize } = this.options
         const points: number[] = []
         this.march((xi: number, yi: number, zi: number, x: number, y: number, z: number) => {
@@ -169,7 +164,6 @@ class VolumeHelper {
                 points.push(x, y, z, voxelSize * radiusMultiplier)
             }
         })
-        console.log("PontsCould: ", Date.now() - time0, "ms")
         return new Float32Array(points)
     }
 
@@ -251,7 +245,6 @@ class VolumeHelper {
     }
 
     private march(func: (xi: number, yi: number, zi: number, x: number, y: number, z: number) => void) {
-        console.log("------------------------------------------------------")
         const { dimX, dimY, dimZ, options } = this
         const { voxelSize, bboxCorner } = options
         const [cornerX, cornerY, cornerZ] = bboxCorner

@@ -186,13 +186,13 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
         // prettier-ignore
         datasetFrame.set(
             "attCorners",
-			new Float32Array([
-                -1, -1, 0, 1, 
-                +1, -1, 1, 1, 
-                -1, +1, 0, 0, 
+            new Float32Array([
+                -1, -1, 0, 1,
+                +1, -1, 1, 1,
+                -1, +1, 0, 0,
                 +1, +1, 1, 0,
-			]),
-		)
+            ]),
+        )
         const datasetInstances = new TgdDataset(
             {
                 ...options.attributes,
@@ -452,7 +452,6 @@ export class TgdPainterSprites<T extends TgdSprite = TgdSprite> extends TgdPaint
             }
         }
         out.debug()
-        console.debug("Sprites list:", this.sprites)
     }
 
     protected updateAccessors() {

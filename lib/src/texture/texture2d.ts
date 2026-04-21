@@ -1,6 +1,9 @@
+import { TgdColor } from "@tgd/color"
+import { TgdContext } from "@tgd/context"
 import { TgdEvent } from "@tgd/event"
 import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
+import { TgdVec4 } from "@tgd/math"
 import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
 import { TgdProgram } from "@tgd/program"
 import { ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
@@ -8,9 +11,6 @@ import { isString } from "@tgd/types/guards"
 import { ensureArrayNumber4, tgdCanvasCreate, webglLookup } from "@tgd/utils"
 import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
-import { TgdContext } from "@tgd/context"
-import { TgdVec4 } from "@tgd/math"
-import { TgdColor } from "@tgd/color"
 
 interface TgdTexture2DStorage {
     width: number
@@ -23,43 +23,43 @@ interface TgdTexture2DStorage {
      */
     premultipliedAlpha: boolean
     internalFormat:
-        | "R8"
-        | "R16F"
-        | "R32F"
-        | "R8UI"
-        | "RG8"
-        | "RG16F"
-        | "RG32F"
-        | "RG8UI"
-        | "RGB8"
-        | "SRGB8"
-        | "RGB565"
-        | "R11F_G11F_B10F"
-        | "RGB9_E5"
-        | "RGB16F"
-        | "RGB32F"
-        | "RGB8UI"
-        | "RGBA"
-        | "RGBA8"
-        | "SRGB8_ALPHA8"
-        | "RGB5_A1"
-        | "RGBA4"
-        | "RGBA16F"
-        | "RGBA32F"
-        | "RGBA8UI"
-        | "COMPRESSED_R11_EAC"
-        | "COMPRESSED_SIGNED_R11_EAC"
-        | "COMPRESSED_RG11_EAC"
-        | "COMPRESSED_SIGNED_RG11_EAC"
-        | "COMPRESSED_RGB8_ETC2"
-        | "COMPRESSED_RGBA8_ETC2_EAC"
-        | "COMPRESSED_SRGB8_ETC2"
-        | "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
-        | "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-        | "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-        | "DEPTH_COMPONENT24"
-        | "DEPTH_COMPONENT16"
-        | "DEPTH_COMPONENT32F"
+    | "R8"
+    | "R16F"
+    | "R32F"
+    | "R8UI"
+    | "RG8"
+    | "RG16F"
+    | "RG32F"
+    | "RG8UI"
+    | "RGB8"
+    | "SRGB8"
+    | "RGB565"
+    | "R11F_G11F_B10F"
+    | "RGB9_E5"
+    | "RGB16F"
+    | "RGB32F"
+    | "RGB8UI"
+    | "RGBA"
+    | "RGBA8"
+    | "SRGB8_ALPHA8"
+    | "RGB5_A1"
+    | "RGBA4"
+    | "RGBA16F"
+    | "RGBA32F"
+    | "RGBA8UI"
+    | "COMPRESSED_R11_EAC"
+    | "COMPRESSED_SIGNED_R11_EAC"
+    | "COMPRESSED_RG11_EAC"
+    | "COMPRESSED_SIGNED_RG11_EAC"
+    | "COMPRESSED_RGB8_ETC2"
+    | "COMPRESSED_RGBA8_ETC2_EAC"
+    | "COMPRESSED_SRGB8_ETC2"
+    | "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
+    | "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
+    | "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
+    | "DEPTH_COMPONENT24"
+    | "DEPTH_COMPONENT16"
+    | "DEPTH_COMPONENT32F"
 }
 
 export interface TgdTexture2DOptions {
@@ -191,7 +191,7 @@ export class TgdTexture2D {
         const { gl } = this
         const error = gl.getError()
         if (error !== gl.NO_ERROR) {
-            console.error(`[TgdTexture2D::${this.name}] Error in ${caption}:`, webglLookup(error), this)
+            this.context.console.error(`[TgdTexture2D::${this.name}] Error in ${caption}:`, webglLookup(error), this)
             action?.()
         }
     }
@@ -200,7 +200,7 @@ export class TgdTexture2D {
         if (this._texture) return this._texture
 
         const error = `[TgdTexture2D] Texture "${this.name}" has been deleted!`
-        console.error(error)
+        this.context.console.error(error)
         throw new Error(error)
     }
 
@@ -261,7 +261,7 @@ export class TgdTexture2D {
             // This is a Promise
             bmp.then((data) => {
                 this.loadBitmap(data)
-            }).catch((error) => console.error("Unable to load texture BMP:", error))
+            }).catch((error) => this.context.console.error("Unable to load texture BMP:", error))
             return this
         }
 
@@ -284,14 +284,12 @@ export class TgdTexture2D {
             `loadBitmap(${JSON.stringify({
                 width: bmp.width,
                 height: bmp.height,
-            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-                "RGBA" // storage.internalFormat
-            }, gl.${
-                "RGBA" // resolveCompatibleFormat(storage.internalFormat)
+            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
+            }, gl.${"RGBA" // resolveCompatibleFormat(storage.internalFormat)
             }, gl.UNSIGNED_BYTE, bmp)`,
             () => {
-                console.log("storage =", this.storage)
-                console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
+                this.context.console.log("storage =", this.storage)
+                this.context.console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
             },
         )
         if (options.generateMipmap) {
@@ -300,8 +298,7 @@ export class TgdTexture2D {
                 `loadBitmap(${JSON.stringify({
                     width: bmp.width,
                     height: bmp.height,
-                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-                    storage.internalFormat
+                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${storage.internalFormat
                 }, gl.${resolveCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
             )
         }

@@ -1,10 +1,10 @@
-import { tgdCanvasCreateFill } from "@tgd/utils"
-import { TgdContext } from "@tgd/context"
-import { TgdProgram } from "@tgd/program"
-import { ArrayNumber4, TgdTextureCubeOptions, WebglImage } from "@tgd/types"
-import { TgdVec4 } from "@tgd/math"
 import { TgdColor } from "@tgd/color"
+import type { TgdContext } from "@tgd/context"
 import { tgdLoadImage } from "@tgd/loader"
+import type { TgdVec4 } from "@tgd/math"
+import type { TgdProgram } from "@tgd/program"
+import type { ArrayNumber4, TgdTextureCubeOptions, WebglImage } from "@tgd/types"
+import { tgdCanvasCreateFill } from "@tgd/utils"
 
 export class TgdTextureCube {
     public static lazyLoad(
@@ -52,13 +52,13 @@ export class TgdTextureCube {
         ]) {
             tgdLoadImage(url).then((image) => {
                 if (!image) {
-                    console.error(
+                    context.console.error(
                         `Unable to lazy load image for target "${target}" in texture "${texture.name}": ${url}`,
                     )
                     return
                 }
                 if (image.width !== image.height || image.width !== size) {
-                    console.error(
+                    context.console.error(
                         `Unable to lazy load image for target "${target}" in texture "${texture.name}": we were expecting a size of ${size}×${size}, but we got ${image.width}×${image.height}!`,
                     )
                     return
@@ -152,14 +152,14 @@ export class TgdTextureCube {
         try {
             gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
             context.checkError(`[TgdTextureCube.loadImage] ${this.name}`, () => {
-                console.log("image =", image)
+                context.console.log("image =", image)
             })
             gl.generateMipmap(gl.TEXTURE_CUBE_MAP)
             context.paint()
         } catch (error) {
-            console.error(error)
-            console.log("image =", image)
-            console.log("target =", context.lookupWebglConstant(target))
+            context.console.error(error)
+            context.console.log("image =", image)
+            context.console.log("target =", context.lookupWebglConstant(target))
         }
     }
 }

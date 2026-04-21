@@ -1,15 +1,16 @@
 import { type TgdCamera, TgdCameraPerspective } from "@tgd/camera"
 import { TgdConsole } from "@tgd/debug"
 import { TgdInputs } from "@tgd/input"
+import { TgdTime } from "@tgd/time"
 import type { TgdPainterFunction } from "@tgd/types/painter"
 import { TgdEvent } from "../event"
 import { TgdPainterGroup } from "../painter/group"
 import type { TgdAnimation } from "../types/animation"
 import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
+import { Console } from "./console"
 import { UniformBufferObjectsManager } from "./ubo-manager"
 import { WebglParams } from "./webgl-params"
-import { TgdTime } from "@tgd/time"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -50,6 +51,13 @@ export type TgdContextOptions = WebGLContextAttributes & {
      * will be used.
      */
     resolution?: number
+    /**
+     * TGD will write error and warning messages to the console
+     * in case of problems and if `verbose` is set to `true`.
+     * 
+     * Defaults to `true`.
+     */
+    verbose?: boolean
 }
 
 /**
@@ -82,6 +90,12 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     public readonly name: string
+    /**
+     * TGD will write error and warning messages to the console
+     * in case of problems and if `verbose` is set to `true`.
+     */
+    public verbose = true
+    public readonly console = new Console(this)
     public readonly virtualTime: TgdTime
     public readonly inputs: TgdInputs
     public readonly webglParams: WebglParams
@@ -143,7 +157,7 @@ export class TgdContext extends TgdPainterGroup {
     private requestAnimationFrame = -1
     // Last time the context has been painted.
     private lastTimeInSec = -1
-    private readonly animationManager = new TgdManagerAnimation()
+    private readonly animationManager = new TgdManagerAnimation(this)
     // Used to store result of gl.readPixels() for one pixel.
     private readonly readPixelColor = new Uint8Array(4)
     // Function to call after WebGL context restore.
@@ -159,6 +173,7 @@ export class TgdContext extends TgdPainterGroup {
         public readonly options: Readonly<TgdContextOptions> = {},
     ) {
         super()
+        this.verbose = options.verbose ?? true
         const gl = this.createWebGLContext()
         this.initialize = options.initialize
         canvas.addEventListener(
@@ -304,7 +319,7 @@ export class TgdContext extends TgdPainterGroup {
 
     /**
      * Check if the last WebGL command has returned an error.
-     * If an error has been found, output `caption` to the console
+     * If an error has been found, output `caption` to the console (if verbose is true)
      * and execute `action()`.
      * Do not use this function in a loop because it is slow.
      * @returns `true` is an error has been detected.
@@ -313,7 +328,7 @@ export class TgdContext extends TgdPainterGroup {
         const { gl } = this
         const error = gl.getError()
         if (error !== gl.NO_ERROR && error !== gl.CONTEXT_LOST_WEBGL) {
-            console.error(`WebGL Error in ${caption}:`, webglLookup(error))
+            this.console.error(`WebGL Error in ${caption}:`, webglLookup(error))
             action?.()
             return true
         }
@@ -552,7 +567,7 @@ export class TgdContext extends TgdPainterGroup {
             }
             this.eventPaint.dispatch(this)
         } catch (error) {
-            console.error(error)
+            this.console.error(error)
             this.pause()
         } finally {
             this.paintingIsOngoing = false
@@ -617,7 +632,7 @@ export class TgdContext extends TgdPainterGroup {
             (evt) => {
                 // @see https://wikis.khronos.org/webgl/HandlingContextLost
                 evt.preventDefault()
-                console.error(
+                this.console.error(
                     "[TgdContext] WebGL context has been lost!",
                     evt instanceof WebGLContextEvent ? evt.statusMessage : evt,
                 )
@@ -630,7 +645,7 @@ export class TgdContext extends TgdPainterGroup {
         gl.canvas.addEventListener(
             "webglcontextrestored",
             () => {
-                console.info("[TgdContext] WebGL context has been restored.")
+                this.console.info("[TgdContext] WebGL context has been restored.")
                 this.initialize?.(this)
                 this.eventWebGLContextRestored.dispatch(this)
             },

@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.0.120",
+    "version": "2.0.121",
     "private": true,
     "description": "ToloGameDev library for WebGL2",
     "homepage": "https://tolokoban.github.io/tgd2",
@@ -18,20 +18,20 @@
         "lint": "oxlint src/"
     },
     "dependencies": {
-        "@tolokoban/react-state": "^0.7.2",
+        "@tolokoban/react-state": "^0.7.3",
         "@tolokoban/tgd": "file:..",
         "@tolokoban/type-guards": "^0.9.0",
         "@tolokoban/ui": "^0.25.3",
         "colord": "^2.9.3",
         "highlight.js": "^11.11.1",
         "prismjs": "^1.30.0",
-        "react": "19.2.4",
-        "react-dom": "19.2.4",
+        "react": "19.2.5",
+        "react-dom": "19.2.5",
         "react-simple-code-editor": "^0.14.1"
     },
     "devDependencies": {
-        "@mdx-js/react": "^3.1.1",
         "@mdx-js/loader": "^3.1.1",
+        "@mdx-js/react": "^3.1.1",
         "@rspack/cli": "^1.7.10",
         "@rspack/core": "^1.7.10",
         "@types/mdx": "^2.0.13",
@@ -58,8 +58,7 @@
         "style-loader": "^3.3.4",
         "ts-loader": "^9.5.4",
         "tsx": "^4.21.0",
-        "typescript": "6.0.2",
-        "typescript-eslint": "^8.57.2",
+        "typescript": "6.0.3",
         "webpack-shell-plugin-next": "^2.3.3",
         "workbox-webpack-plugin": "^7.4.0"
     },

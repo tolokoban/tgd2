@@ -1,13 +1,13 @@
 import type { TgdCamera } from "@tgd/camera"
+import { TgdColor } from "@tgd/color"
 import type { TgdContext } from "@tgd/context"
-import { TgdMat4, TgdTransfo, TgdVec4, type TgdTransfoOptions } from "@tgd/math"
+import { TgdMat4, TgdTransfo, type TgdTransfoOptions, TgdVec4 } from "@tgd/math"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdTextureCube } from "@tgd/texture"
 import type { ArrayNumber4, TgdTextureCubeOptions } from "@tgd/types"
-import { ensureArrayNumber4 } from "@tgd/utils"
-import { TgdColor } from "@tgd/color"
-import { TgdPainterProgram } from "../program"
 import { TgdUniformBufferObject } from "@tgd/uniform"
+import { ensureArrayNumber4 } from "@tgd/utils"
+import { TgdPainterProgram } from "../program"
 
 export type TgdPainterSkyboxOptions = {
     texture: TgdTextureCubeOptions | TgdTextureCube
@@ -126,7 +126,6 @@ export class TgdPainterSkybox extends TgdPainter {
         uniforms.uniTint = uniTint
         uniforms.uniMatrix = matrix
         uniforms.uniTransfo = this.transfo.matrix
-        console.log("🐞 [skybox@134] zoom =", zoom) // @FIXME: Remove this line written on 2026-03-25 at 15:37
         painter.paint(time, delta)
     }
 }

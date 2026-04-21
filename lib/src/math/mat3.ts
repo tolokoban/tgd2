@@ -1,9 +1,9 @@
 import { padColOfNumbers } from "@tgd/debug"
+import { mat3 } from "gl-matrix"
+import { TgdMat4 } from "./mat4"
 import { TgdQuat } from "./quat"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
-import { TgdMat4 } from "./mat4"
-import { mat3 } from "gl-matrix"
 
 /**
  * Column-first 3x3 matrix.
@@ -56,12 +56,12 @@ export class TgdMat3 extends Float32Array {
         m00: number | TgdVec3 | TgdVec4 | TgdMat3 | TgdMat4 = 1,
         m10: number | TgdVec3 | TgdVec4 = 0,
         m20: number | TgdVec3 | TgdVec4 = 0,
-        m01: number = 0,
-        m11: number = 1,
-        m21: number = 0,
-        m02: number = 0,
-        m12: number = 0,
-        m22: number = 1,
+        m01 = 0,
+        m11 = 1,
+        m21 = 0,
+        m02 = 0,
+        m12 = 0,
+        m22 = 1,
     ) {
         if (typeof m00 === "number" && typeof m10 === "number" && typeof m20 === "number") {
             super([m00, m10, m20, m01, m11, m21, m02, m12, m22])
@@ -88,7 +88,7 @@ export class TgdMat3 extends Float32Array {
         } else {
             // eslint-disable-next-line prefer-rest-params
             console.error("[TgdMat3]", arguments)
-            throw new Error(`Invalid TgdMat3 initialization!`)
+            throw new Error("Invalid TgdMat3 initialization!")
         }
     }
 

@@ -1,9 +1,9 @@
+import { TgdContext } from "@tgd/context"
 import type { TgdTexture2D, TgdTextureDepth } from "@tgd/texture"
 import type { TgdPainterFunction } from "@tgd/types/painter"
 import { webglCreateFramebuffer, webglLookup, webglRenderbufferStorageMultisample } from "@tgd/utils"
 import { TgdPainterGroup } from "./group"
 import type { TgdPainter } from "./painter"
-import { TgdContext } from "@tgd/context"
 
 export interface TgdPainterFramebufferOptions {
     name?: string
@@ -92,7 +92,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         else this.name = `Framebuffer/${this.name}`
         const { textureColor0, textureColor1, textureColor2, textureColor3 } = options
         if (!(textureColor0 || textureColor1 || textureColor2 || textureColor3)) {
-            console.warn(
+            this.context.console.warn(
                 "[TgdPainterFramebuffer] You gave no color texture in the constructor: nothing will be rendered!",
                 options,
             )
@@ -292,7 +292,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         }
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
-            console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+            this.context.console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
         }
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
@@ -318,7 +318,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.createStencilBuffer(gl, width, height)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
-            console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+            this.context.console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
         }
         this.dirty = false
     }

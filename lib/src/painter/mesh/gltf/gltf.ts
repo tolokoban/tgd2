@@ -1,15 +1,15 @@
+import { TgdColor } from "@tgd/color"
+import { TgdContext } from "@tgd/context"
 import { TgdDataset, type TgdDatasetTypeRecord } from "@tgd/dataset"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdMaterial } from "@tgd/material"
+import { TgdMaterialGltf } from "@tgd/material/gltf"
 import { tgdCalcRandom } from "@tgd/math"
 import type { TgdDataGlb } from "@tgd/parser"
-import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
-import { TgdPainterMesh } from "../mesh"
-import { TgdContext } from "@tgd/context"
-import { TgdMaterialGltf } from "@tgd/material/gltf"
 import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
+import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 import { tgdCanvasCreateFill } from "@tgd/utils"
-import { TgdColor } from "@tgd/color"
+import { TgdPainterMesh } from "../mesh"
 
 export interface TgdPainterMeshGltfMaterialDescription {
     name: string
@@ -79,7 +79,7 @@ export class TgdPainterMeshGltf extends TgdPainterMesh {
         } else {
             // It seems to be impossible to retrieve normals.
             // We will compute them with a smooth shading.
-            console.warn("No normals found! We will apply smooth shading.")
+            context.console.warn("No normals found! We will apply smooth shading.")
             computeNormals = true
         }
         if (primitive.attributes.TEXCOORD_0) {
@@ -162,8 +162,6 @@ function figureMaterialDescription({
             strength: material.emissiveFactor ?? [1, 1, 1],
         }
     }
-    console.log("🐞 [gltf@166] material =", material) // @FIXME: Remove this line written on 2026-03-24 at 09:34
-    console.log("🐞 [gltf@167] description =", description) // @FIXME: Remove this line written on 2026-03-24 at 09:34
     return description
 }
 

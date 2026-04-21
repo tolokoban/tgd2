@@ -1,5 +1,6 @@
 import type { TgdBuffer, TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
 import type { TgdCamera } from "@tgd/camera"
+import { TgdContext } from "@tgd/context"
 import type { WebglParams } from "@tgd/context/webgl-params"
 import { TgdDataset } from "@tgd/dataset"
 import { type TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
@@ -10,7 +11,6 @@ import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import type { ArrayNumber2, ArrayNumber4 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
 import { makeCapsule } from "./capsule"
-import { TgdContext } from "@tgd/context"
 
 type DatasetOption = TgdPainterSegments | InstanceDataset | (() => InstanceDataset)
 
@@ -244,7 +244,7 @@ export class TgdPainterSegments extends TgdPainter {
             this.vao = new TgdVertexArray(context.gl, prg, [geometry.dataset, instance], geometry.elements)
             this.instanceCount = instance.count
         } else {
-            console.error("[TgdPainterSegments] options =", options) // @FIXME: Remove this line written on 2026-02-04 at 19:53
+            context.console.error("[TgdPainterSegments] options =", options)
             throw new Error("option `dataset` of TgdPainterSegments is undefined!")
         }
         this.vertexCount = geometry.elements?.length ?? 0

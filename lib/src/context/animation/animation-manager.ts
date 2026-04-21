@@ -1,5 +1,6 @@
 import { TgdConsole } from "@tgd/debug"
 import { TgdAnimation } from "@tgd/types/animation"
+import { TgdContext } from "../context"
 
 interface Animation {
     name: string
@@ -20,6 +21,8 @@ export class TgdManagerAnimation {
     private time = 0
 
     private readonly animations = new Map<TgdAnimation, Animation>()
+
+    constructor(private readonly context: TgdContext) { }
 
     schedule(animation: TgdAnimation): TgdAnimation {
         if (!animation.name) animation.name = `TgdAnimation#${TgdManagerAnimation.counter++}`
@@ -60,8 +63,8 @@ export class TgdManagerAnimation {
             let loops = 0
             while (time > anim.start + anim.duration) {
                 if (loops++ > 10) {
-                    console.log("Too many loops for", anim)
-                    console.log(
+                    this.context.console.log("Too many loops for", anim)
+                    this.context.console.log(
                         "🚀 [animation-manager] time, anim.start + anim.duration =",
                         time,
                         anim.start + anim.duration,
@@ -71,8 +74,8 @@ export class TgdManagerAnimation {
                 try {
                     anim.onEnd?.()
                 } catch (error) {
-                    console.error("Animation.onEnd() failed for", anim)
-                    console.error(error)
+                    this.context.console.error("Animation.onEnd() failed for", anim)
+                    this.context.console.error(error)
                 }
                 anim.loop++
                 if (anim.loop > anim.repeat) break

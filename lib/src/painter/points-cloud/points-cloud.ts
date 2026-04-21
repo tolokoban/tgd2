@@ -1,12 +1,12 @@
-import { TgdTexture2D } from "@tgd/texture"
-import { TgdPainter } from "../painter"
+import { tgdColorMakeHueWheel } from "@tgd/color"
+import { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdProgram } from "@tgd/program"
-import { TgdVertexArray } from "@tgd/vao"
-import { TgdContext } from "@tgd/context"
-import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
-import { tgdColorMakeHueWheel } from "@tgd/color"
 import { TgdCodeBloc, TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdTexture2D } from "@tgd/texture"
+import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdPainter } from "../painter"
 
 export interface TgdPainterPointsCloudOptions {
     name?: string
@@ -145,10 +145,10 @@ export class TgdPainterPointsCloud extends TgdPainter {
         this.dataUV = options.dataUV ?? new Float32Array(this.dataPoint.length >> 1)
         if (this.dataPoint.length !== this.dataUV.length * 2) {
             const message = `dataUV must be half of the size of dataPoint: [u, v, ...]!\ndataPoint.length === ${this.dataPoint.length}, \ndataUV.length === ${this.dataUV.length}`
-            console.error("[TgdPainterPointsCloud]", message)
-            console.error("[TgdPainterPointsCloud] options =", options)
-            console.error("[TgdPainterPointsCloud] this.dataPoint =", this.dataPoint)
-            console.error("[TgdPainterPointsCloud] this.dataUV =", this.dataUV)
+            context.console.error("[TgdPainterPointsCloud]", message)
+            context.console.error("[TgdPainterPointsCloud] options =", options)
+            context.console.error("[TgdPainterPointsCloud] this.dataPoint =", this.dataPoint)
+            context.console.error("[TgdPainterPointsCloud] this.dataUV =", this.dataUV)
             throw new Error(message)
         }
         if (options.texture) {
