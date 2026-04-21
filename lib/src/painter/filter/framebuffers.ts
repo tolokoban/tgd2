@@ -1,4 +1,4 @@
-import { TgdContext, TgdTexture2D, webglCreateFramebuffer, webglLookup } from "@tolokoban/tgd"
+import { type TgdContext, type TgdTexture2D, webglCreateFramebuffer, webglLookup } from "@tolokoban/tgd"
 
 export class Framebuffers {
     private readonly textures: [TgdTexture2D, TgdTexture2D]
@@ -62,7 +62,7 @@ export class Framebuffers {
     }
 }
 
-function createFB({ gl }: TgdContext, texture: TgdTexture2D): WebGLFramebuffer {
+function createFB({ gl, console }: TgdContext, texture: TgdTexture2D): WebGLFramebuffer {
     const currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING)
     const fb = webglCreateFramebuffer(gl)
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
