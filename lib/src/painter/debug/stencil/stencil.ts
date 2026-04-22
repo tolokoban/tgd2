@@ -4,8 +4,8 @@ import { TgdProgram } from "@tgd/program"
 import { webglStencilGet, webglStencilSet } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../../painter"
-import FRAG from "./stencil.frag"
-import VERT from "./stencil.vert"
+import { FRAG } from "./stencil.frag"
+import { VERT } from "./stencil.vert"
 
 export class TgdPainterDebugStencil extends TgdPainter {
     private readonly program: TgdProgram
@@ -56,5 +56,5 @@ export class TgdPainterDebugStencil extends TgdPainter {
         webglStencilSet(gl, state)
     }
 
-    delete(): void {}
+    delete(): void { }
 }

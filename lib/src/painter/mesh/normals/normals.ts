@@ -1,12 +1,11 @@
-import { TgdContext } from "@tgd/context"
+import type { TgdContext } from "@tgd/context"
+import type { TgdGeometry } from "@tgd/geometry"
 import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram } from "@tgd/program"
-import { TgdVertexArray } from "@tgd/vao"
-
-import FRAG from "./shader.frag"
-import VERT from "./shader.vert"
 import { webglElementTypeFromTypedArray } from "@tgd/utils"
-import { TgdGeometry } from "@tgd/geometry"
+import { TgdVertexArray } from "@tgd/vao"
+import { FRAG } from "./shader.frag"
+import { VERT } from "./shader.vert"
 
 /**
  * Render a totaly opaque black and white mesh

@@ -1,13 +1,12 @@
-import { TgdContext } from "@tgd/context"
-import { TgdProgram } from "@tgd/program"
-import { TgdPainter } from "@tgd/painter/painter"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
+import { type TgdVec3, TgdVec4 } from "@tgd/math"
+import { TgdPainter } from "@tgd/painter/painter"
+import { TgdProgram } from "@tgd/program"
+import type { ArrayNumber3 } from "@tgd/types"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdVec3, TgdVec4 } from "@tgd/math"
-
-import VERT from "./axes.vert"
-import FRAG from "./axes.frag"
-import { ArrayNumber3 } from "@tgd/types"
+import { FRAG } from "./axes.frag"
+import { VERT } from "./axes.vert"
 
 export type TgdPainterAxesOptions = {
     x: number

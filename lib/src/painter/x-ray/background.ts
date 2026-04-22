@@ -1,12 +1,10 @@
-import { TgdPainter } from "../painter"
 import { TgdDataset } from "@tgd/dataset/dataset"
-import { TgdVertexArray } from "@tgd/vao"
-
-import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
-
-import VERT from "./background.vert"
-import FRAG from "./background.frag"
+import type { TgdTexture2D } from "@tgd/texture"
+import { TgdVertexArray } from "@tgd/vao"
+import { TgdPainter } from "../painter"
+import { FRAG } from "./background.frag"
+import { VERT } from "./background.vert"
 
 export interface TgdPainterBackgroundOptions {
     texture: TgdTexture2D

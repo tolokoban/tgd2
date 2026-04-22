@@ -1,18 +1,16 @@
-import { TgdPainter } from "../painter"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset/dataset"
-import { TgdVertexArray } from "@tgd/vao"
+import { TgdProgram } from "@tgd/program"
 
 import { TgdTexture2D } from "@tgd/texture"
-import { TgdProgram } from "@tgd/program"
 import { webglPresetBlend, webglPresetCull, webglPresetDepth } from "@tgd/utils"
-import { TgdContext } from "@tgd/context"
-
-import { TgdPainterState } from "../state"
-import { TgdPainterFramebuffer } from "../framebuffer"
-
-import VERT from "./background.vert"
-import FRAG from "./background.frag"
+import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterClear } from "../clear"
+import { TgdPainterFramebuffer } from "../framebuffer"
+import { TgdPainter } from "../painter"
+import { TgdPainterState } from "../state"
+import { FRAG } from "./background.frag"
+import { VERT } from "./background.vert"
 
 export interface TgdPainterBackgroundWithDepthOptions {
     background: TgdTexture2D

@@ -1,13 +1,13 @@
-import { TgdContext } from "@tgd/context"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdPainter } from "@tgd/painter/painter"
+import { TgdProgram } from "@tgd/program"
+import { TgdTexture2D } from "@tgd/texture"
 import { tgdCanvasCreateWithContext2D } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
-import { TgdTexture2D } from "@tgd/texture"
-import { TgdProgram } from "@tgd/program"
 
-import FRAG from "./shader.frag"
-import VERT from "./shader.vert"
+import { FRAG } from "./shader.frag"
+import { VERT } from "./shader.vert"
 
 export class TipsPainter extends TgdPainter {
     private readonly texture: TgdTexture2D
@@ -29,23 +29,23 @@ export class TipsPainter extends TgdPainter {
         })
         // prettier-ignore
         data.set("attPos", new Float32Array([
-             1,  0,  0,
-             0,  1,  0,
-             0,  0,  1,
-            -1,  0,  0,
-             0, -1,  0,
-             0,  0, -1,
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1,
+            -1, 0, 0,
+            0, -1, 0,
+            0, 0, -1,
         ]))
         const X = 1 / 3
         const Y = 1 / 2
         // prettier-ignore
         data.set("attUV", new Float32Array([
-              0, 0,
-              X, 0,
-            2*X, 0,
-              0, Y,
-              X, Y,
-            2*X, Y,
+            0, 0,
+            X, 0,
+            2 * X, 0,
+            0, Y,
+            X, Y,
+            2 * X, Y,
         ]))
         const prg = new TgdProgram(context.gl, { vert: VERT, frag: FRAG })
         const vao = new TgdVertexArray(context.gl, prg, [data])

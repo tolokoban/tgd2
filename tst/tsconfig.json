@@ -1,35 +1,21 @@
 {
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "baseUrl": "./src/",
-        "declaration": true,
-        "declarationMap": true,
-        "esModuleInterop": true,
-        "lib": ["dom", "dom.iterable", "ES2020"],
+        "target": "esnext",
         "module": "esnext",
-        "moduleResolution": "node",
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "outDir": "./dist/",
-        "paths": {
-            "@/*": ["*"]
-        },
-        "removeComments": true,
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "sourceMap": true,
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
         "strict": true,
-        "strictNullChecks": true,
-        "target": "ES2020"
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "outDir": "./dist/front",
+        "rootDir": "./src/front",
+        "lib": ["dom", "dom.iterable", "ES2024"],
+        "paths": {
+            "@/*": ["./src/front/*"]
+        }
     },
-    "include": [
-        "./src/**/*.ts",
-        "./src/**/*.tsx"
-    ],
-    "exclude": [
-        "node_modules/",
-        "build/",
-        "dist/"
-    ]
+    "include": ["./src/front/**/*.ts", "./src/front/**/*.tsx"],
+    "exclude": ["node_modules"]
 }

@@ -1,14 +1,14 @@
-import { TgdGeometry } from "@tgd/geometry"
+import type { TgdContext } from "@tgd/context/context"
+import type { TgdGeometry } from "@tgd/geometry"
+import { TgdMaterialGhost, type TgdMaterialGhostOptions } from "@tgd/material"
 import { TgdTexture2D } from "@tgd/texture"
 import { webglPresetBlend, webglPresetCull, webglPresetDepth } from "@tgd/utils"
-import { TgdMaterialGhost, TgdMaterialGhostOptions } from "@tgd/material"
+import { TgdPainterClear } from "../clear"
+import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
 import { TgdPainterMesh } from "../mesh"
 import { TgdPainter } from "../painter"
 import { TgdPainterState } from "../state"
-import { TgdPainterClear } from "../clear"
 import { TgdPainterBackground } from "./background"
-import { TgdPainterFramebufferWithAntiAliasing } from "../framebuffer-msaa"
-import { TgdContext } from "@tgd/context/context"
 // import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
@@ -16,8 +16,8 @@ export interface TgdPainterXRayOptions extends TgdMaterialGhostOptions {
 }
 
 export class TgdPainterXRay extends TgdPainter {
-    public exponent: number = 2
-    public intensity: number = 1
+    public exponent = 2
+    public intensity = 1
 
     private readonly texture: TgdTexture2D
     private readonly painterMesh: TgdPainter
