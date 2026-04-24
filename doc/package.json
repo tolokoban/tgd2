@@ -8,6 +8,7 @@
     "scripts": {
         "prebuild": "cd ../lib && npm run build && npm run doc",
         "build": "rspack --mode=development",
+        "build:doc": "rspack --mode=development",
         "dev": "NODE_ENV=dev rspack --mode=development",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d ./build",

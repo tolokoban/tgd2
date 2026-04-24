@@ -98,10 +98,10 @@ export default function (env, argv) {
             new Rspack.CopyRspackPlugin({
                 patterns: [
                     {
-                        from: "public/*",
+                        from: "./*",
                         context: Path.resolve(__dirname, "public"),
                         globOptions: {
-                            ignore: ["index.html"],
+                            ignore: ["**/index.html"],
                         },
                     },
                 ],
@@ -151,9 +151,19 @@ export default function (env, argv) {
                     test: /\.tsx?$/,
                     use: [
                         {
-                            loader: "ts-loader",
+                            loader: "builtin:swc-loader",
                             options: {
-                                transpileOnly: false,
+                                jsc: {
+                                    parser: {
+                                        syntax: "typescript",
+                                        tsx: true,
+                                    },
+                                    transform: {
+                                        react: {
+                                            runtime: "automatic",
+                                        },
+                                    },
+                                },
                             },
                         },
                     ],

@@ -1,11 +1,11 @@
 import { TgdCamera, TgdCameraState } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
 import { TgdEvent } from "@tgd/event"
-import { resolvePointerButtons } from "@tgd/input/pointer"
+import { resolvePointerButtons } from "@tgd/input"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
-import { tgdCalcClamp } from "@tgd/math/math"
+import { tgdCalcClamp } from "@tgd/math"
 import { TgdInputPointerEventMove, TgdInputPointerEventZoom, TgdInputPointerModifierKeys } from "@tgd/types"
-import { TgdAnimation } from "@tgd/types/animation"
+import { TgdAnimation } from "@tgd/types"
 import { tgdActionCreateCameraInterpolation, tgdEasingFunctionOutQuad } from "@tgd/utils"
 
 export interface TgdControllerCameraOrbitZoomRequest extends TgdInputPointerModifierKeys {
@@ -152,7 +152,6 @@ export class TgdControllerCameraOrbit {
      * @see resetZoom()
      */
     private spaceHeightAtTargetForZoom1 = 1
-    private _zoom = 1
     /**
      * It can be usefull to disable to orbit controller for some time
      * because an animation is going on on the camera, for instance.
@@ -227,8 +226,7 @@ export class TgdControllerCameraOrbit {
         this.onZoomRequest = onZoomRequest
         if (this.geo) this.orbitGeo(this.geo.lat, this.geo.lng)
         globalThis.setTimeout(() => context.paint())
-        this._zoom = zoom
-        context.camera.zoom = zoom
+        this.zoom = zoom
     }
 
     get context() {
@@ -239,23 +237,19 @@ export class TgdControllerCameraOrbit {
             this._context.inputs.keyboard.eventKeyPress.removeListener(this.handleDebug)
         }
         this._context = context
-        this._zoom = context.camera.zoom
         if (this.debug) {
             context.inputs.keyboard.eventKeyPress.addListener(this.handleDebug)
         }
     }
 
     get zoom() {
-        return this._zoom
+        return this.context.camera.zoom
     }
     set zoom(value: number) {
         const newZoom = tgdCalcClamp(value, this.minZoom, this.maxZoom)
-        if (newZoom === this._zoom) return
+        if (newZoom === this.context.camera.zoom) return
 
-        this._zoom = newZoom
         this.context.camera.zoom = newZoom
-        // this.context.camera.spaceHeightAtTarget =
-        //     this.spaceHeightAtTargetForZoom1 / newZoom
     }
 
     get enabled() {
