@@ -47,6 +47,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 				: new TgdVec4(options.color ?? DEFAULT_COLOR)
 		const hasTexture = colorOrTexture instanceof TgdTexture2D
 		const uniforms: { [name: string]: WebglUniformType } = {
+			uniAlphaCut: "float",
 			uniLight: "vec3",
 			uniLightDir: "vec3",
 			uniAmbient: "vec3",
