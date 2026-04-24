@@ -1,3 +1,4 @@
+import { TgdMat4, TgdVec4 } from "."
 import type { ArrayNumber3 } from "./types"
 
 export class TgdBoundingBox {
@@ -32,6 +33,56 @@ export class TgdBoundingBox {
         const { xMin, yMin, zMin } = this
         const { xMax, yMax, zMax } = this
         return [xMax - xMin, yMax - yMin, zMax - zMin]
+    }
+
+    copyFrom(bbox: {min: ArrayNumber3, max: ArrayNumber3}): this {
+        const [x0, y0, z0] = bbox.min
+        const [x1, y1, z1] = bbox.max
+        this.xMin = x0
+        this.yMin = y0
+        this.zMin = z0
+        this.xMax = x1
+        this.yMax = y1
+        this.zMax = z1
+        return this
+    }
+
+    clone(transfoMatrix?: TgdMat4): TgdBoundingBox {
+        if (!transfoMatrix) {
+            return new TgdBoundingBox(this.min, this.max)
+        }
+
+        const [x0, y0, z0] = this.min
+        const [x1, y1, z1] = this.max
+        const points: TgdVec4[] = [
+            new TgdVec4(x0, y0, z0, 1),
+            new TgdVec4(x0, y0, z1, 1),
+            new TgdVec4(x0, y1, z0, 1),
+            new TgdVec4(x0, y1, z1, 1),
+            new TgdVec4(x1, y0, z0, 1),
+            new TgdVec4(x1, y0, z1, 1),
+            new TgdVec4(x1, y1, z0, 1),
+            new TgdVec4(x1, y1, z1, 1),
+        ].map((vec) => vec.applyMatrix(transfoMatrix))
+        const transformedBBox = new TgdBoundingBox()
+        for (const [x, y, z] of points) {
+            transformedBBox.addPoint(x, y, z)
+        }
+        return transformedBBox
+    }
+
+    addBBox(bbox: { min: ArrayNumber3; max: ArrayNumber3 }): this {
+        const [x0, y0, z0] = bbox.min
+        const [x1, y1, z1] = bbox.max
+        this.addPoint(x0, y0, z0)
+        this.addPoint(x0, y0, z1)
+        this.addPoint(x0, y1, z0)
+        this.addPoint(x0, y1, z1)
+        this.addPoint(x1, y0, z0)
+        this.addPoint(x1, y0, z1)
+        this.addPoint(x1, y1, z0)
+        this.addPoint(x1, y1, z1)
+        return this
     }
 
     addPoint(x: number, y: number, z: number): this {
