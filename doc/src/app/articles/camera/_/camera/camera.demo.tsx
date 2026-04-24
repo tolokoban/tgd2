@@ -19,7 +19,7 @@ import View, { Assets } from "@/components/demo/Tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
 import React from "react"
 import { useFloat } from "@/utils/hooks/float"
-import { ViewPanel, ViewSlider } from "@tolokoban/ui"
+import { ViewButton, ViewInputNumber, ViewPanel, ViewSlider } from "@tolokoban/ui"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
@@ -94,6 +94,10 @@ function init(context: TgdContext, assets: Assets) {
             scissor2.width = 1 - a
             context.paint()
         },
+        zoom(value: number) {
+            context.camera.zoom = value
+            context.paint()
+        },
     }
 }
 
@@ -101,6 +105,11 @@ export default function Demo() {
     const ref = React.useRef<ReturnType<typeof init> | null>(null)
     const srv = ref.current
     const [split, setSplit] = useFloat(0.5, srv?.split)
+    const [zoom, setZoom] = React.useState(1)
+    const handleApplyZoom = () => {
+        if (srv) srv.zoom(zoom)
+    }
+
     return (
         <div>
             <View
@@ -115,12 +124,16 @@ export default function Demo() {
                 gizmo
                 controller={{
                     inertiaOrbit: 1000,
-                    inertiaPanning: 1000
+                    inertiaPanning: 1000,
                 }}>
                 <ViewSlider value={split} onChange={setSplit} min={0} max={1} step={1e-2} />
                 <ViewPanel fullwidth display="flex" justifyContent="space-between" alignItems="center">
                     <div>Orthographic</div>
                     <div>Perspective</div>
+                </ViewPanel>
+                <ViewPanel display="flex" alignItems="center" gap="M">
+                    <ViewInputNumber value={zoom} onChange={setZoom} />
+                    <ViewButton onClick={handleApplyZoom}>Apply zoom</ViewButton>
                 </ViewPanel>
             </View>
         </div>
