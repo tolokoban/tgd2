@@ -14,4 +14,5 @@ void main() {
     if (FragColor.w < 1.0) {
         discard;
     }
-}`
+}
+`
