@@ -1,5 +1,5 @@
-import { TgdVec3 } from "@tolokoban/tgd"
-import { TgdMat4, TgdVec3, TgdVec4 } from "."
+import type { TgdMat4, TgdVec3 } from "."
+import { TgdVec4 } from "."
 import type { ArrayNumber3, ArrayNumber4 } from "./types"
 
 export class TgdBoundingBox {
