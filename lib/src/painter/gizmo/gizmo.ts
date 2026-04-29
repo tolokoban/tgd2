@@ -31,11 +31,11 @@ export class TgdPainterGizmo extends TgdPainter {
         near: 0.1,
         far: 10,
     })
-    public alignX
-    public alignY
-    public size
-    public margin
 
+    private _alignX: number
+    private _alignY: number
+    private _size: number
+    private _margin: number
     private group: TgdPainterGroup | null = null
     private readonly textureFramebuffer: TgdTexture2D
     private overlay: TgdPainterOverlay | null = null
@@ -54,10 +54,10 @@ export class TgdPainterGizmo extends TgdPainter {
             },
         })
         this.uniformCamera = uniformCamera
-        this.alignX = alignX
-        this.alignY = alignY
-        this.size = size
-        this.margin = margin
+        this._alignX = alignX
+        this._alignY = alignY
+        this._size = size
+        this._margin = margin
         this.name = "Gizmo"
         this.textureFramebuffer = new TgdTexture2D(context, {
             name: `Gizmo FB (${size}×${size})`,
@@ -68,6 +68,58 @@ export class TgdPainterGizmo extends TgdPainter {
             },
         })
         PainterTipsNormal.create(context, { size, uniformCamera }).then(this.init)
+    }
+
+    get alignX(): number {
+        return this._alignX
+    }
+    set alignX(alignX: number) {
+        if (this._alignX === alignX) return
+
+        this._alignX = alignX
+        const { overlay } = this
+        if (overlay) overlay.alignX = alignX
+    }
+
+    get alignY(): number {
+        return this._alignY
+    }
+    set alignY(alignY: number) {
+        if (this._alignY === alignY) return
+
+        this._alignY = alignY
+        const { overlay } = this
+        if (overlay) overlay.alignY = alignY
+    }
+
+    get size(): number {
+        return this._size
+    }
+    set size(size: number) {
+        if (this._size === size) return
+
+        this._size = size
+        const { overlay } = this
+        if (overlay) {
+            overlay.width = size
+            overlay.height = size
+        }
+    }
+
+    get margin(): number {
+        return this._margin
+    }
+    set margin(margin: number) {
+        if (this._margin === margin) return
+
+        this._margin = margin
+        const { overlay } = this
+        if (overlay) {
+            overlay.marginBottom = margin
+            overlay.marginTop = margin
+            overlay.marginLeft = margin
+            overlay.marginRight = margin
+        }
     }
 
     private readonly init = (tipsNormal: PainterTipsNormal) => {
@@ -111,6 +163,7 @@ export class TgdPainterGizmo extends TgdPainter {
             margin: 0,
             texture: framebuffer.textureColor0,
         })
+        this.overlay = overlay
         group.add(framebuffer, overlay)
         context.paint()
         // Offscreen
