@@ -39,8 +39,9 @@ export class TgdPainterGizmo extends TgdPainter {
     private group: TgdPainterGroup | null = null
     private readonly textureFramebuffer: TgdTexture2D
     private overlay: TgdPainterOverlay | null = null
-    private contextOffscreen: TgdContext | null = null
     private readonly uniformCamera: TgdUniformBufferObject
+    private contextOffscreen: TgdContext | null = null
+    private tipsNormal: PainterTipsNormal | null = null
 
     constructor(
         public readonly context: TgdContext,
@@ -104,6 +105,9 @@ export class TgdPainterGizmo extends TgdPainter {
             overlay.width = size
             overlay.height = size
         }
+        this.textureFramebuffer.resize(size, size)
+        if (this.tipsNormal) this.tipsNormal.size = size
+        this.context?.paint()
     }
 
     get margin(): number {
@@ -124,6 +128,7 @@ export class TgdPainterGizmo extends TgdPainter {
 
     private readonly init = (tipsNormal: PainterTipsNormal) => {
         const { context, size, alignX, alignY, camera, uniformCamera } = this
+        this.tipsNormal = tipsNormal
         const group = new TgdPainterState(context, {
             depth: "off",
             blend: "alpha",
@@ -167,7 +172,8 @@ export class TgdPainterGizmo extends TgdPainter {
         group.add(framebuffer, overlay)
         context.paint()
         // Offscreen
-        const contextOffscreen = new TgdContext(new OffscreenCanvas(size, size), {
+        const offscreenCanvas = new OffscreenCanvas(size, size)
+        const contextOffscreen = new TgdContext(offscreenCanvas, {
             preserveDrawingBuffer: true,
             antialias: false,
             alpha: false,

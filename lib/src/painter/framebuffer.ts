@@ -292,7 +292,9 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         }
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
-            this.context.console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+            this.context.console.error(
+                `[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`,
+            )
         }
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     }
@@ -318,7 +320,9 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         this.createStencilBuffer(gl, width, height)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
-            this.context.console.error(`[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`)
+            this.context.console.error(
+                `[TgdPainterFramebuffer] Your Framebuffer is incomplete: ${webglLookup(status)}!`,
+            )
         }
         this.dirty = false
     }

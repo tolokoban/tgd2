@@ -37,6 +37,8 @@ function init(context: TgdContext) {
             )
         }
     }
+    const gizmo = new TgdPainterGizmo(context, { size: 128 })
+    gizmo.eventTap.addListener((evt) => console.log("🐞 [main.demo@41] evt =", evt))
     context.add(
         clear,
         () => {
@@ -50,10 +52,14 @@ function init(context: TgdContext) {
         new TgdPainterState(context, {
             depth: "off",
             blend: "alpha",
-            children: [new TgdPainterGizmo(context, { size: 256 })],
+            children: [gizmo],
         }),
     )
     context.paint()
+    return ({ size }: { size: number }) => {
+        gizmo.size = size
+        context.paint()
+    }
 }
 // #end
 
@@ -70,6 +76,14 @@ export default function Demo() {
                 alpha: false,
                 antialias: true,
                 premultipliedAlpha: false,
+            }}
+            settings={{
+                size: {
+                    label: "size",
+                    value: 128,
+                    min: 64,
+                    max: 512,
+                },
             }}
         />
     )
