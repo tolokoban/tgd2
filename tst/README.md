@@ -3,8 +3,6 @@
 This is an electron application that generates images with @tolokoban/tgd library,
 and compare them with references to see if there is a regression.
 
-We use "rspack" as bundler.
-
 The main directories are:
 
 - `references`: Contain images in WEBP format at 50% of quality. Each image as the same name of the folder in `src/front/cases` that was used to generate it.
@@ -61,14 +59,19 @@ This starts the rspack dev server, watches the back-end TypeScript, and launches
 **Option B — Manual terminals:**
 
 1. Build and watch the Electron main process:
+
    ```bash
    npm run dev:back
    ```
+
 2. Start the rspack dev server for the renderer:
+
    ```bash
    npm run dev:front
    ```
+
 3. Once the dev server is ready (port 9321), launch Electron:
+
    ```bash
    npm run start
    ```

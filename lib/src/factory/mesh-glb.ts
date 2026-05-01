@@ -1,12 +1,8 @@
 import { TgdContext } from "@tgd/context"
 import { TgdMaterial } from "@tgd/material"
 import { TgdTransfoOptions } from "@tgd/math"
-import {
-    TgdPainterMeshGltf,
-    TgdPainterMeshGltfMaterialDescription,
-    TgdPainterNode,
-    TgdPainterNodeChild,
-} from "@tgd/painter"
+import { TgdPainterMeshGltf, TgdPainterMeshGltfMaterialDescription, TgdPainterNode } from "@tgd/painter"
+import { TgdPainter } from "@tgd/painter/painter"
 import { TgdDataGlb } from "@tgd/parser"
 import { TgdTextureCube } from "@tgd/texture"
 import { TgdFormatGltfMesh, TgdFormatGltfMeshPrimitive, TgdFormatGltfNode, TgdInterfaceTransformable } from "@tgd/types"
@@ -76,7 +72,7 @@ function makeNodePainter(node: TgdFormatGltfNode, options: MakeMeshGlbPainterOpt
         transfo.scale = node.scale
     }
     const { data } = options
-    const children: TgdPainterNodeChild[] = makeMeshPainters(node.mesh, options)
+    const children: TgdPainter[] = makeMeshPainters(node.mesh, options)
     if (node.children) {
         for (const nodeIndex of node.children) {
             children.push(makeNodePainter(data.getNode(nodeIndex), options))
@@ -93,7 +89,7 @@ function makeNodePainter(node: TgdFormatGltfNode, options: MakeMeshGlbPainterOpt
 function makeMeshPainters(
     meshIndexOrName: number | string | undefined,
     options: MakeMeshGlbPainterOptions,
-): TgdInterfaceTransformable[] {
+): TgdPainter[] {
     if (!isNumber(meshIndexOrName)) return []
 
     const { data, context, overrideMaterial, excludeByMaterialName, includeOnlyMaterialNames } = options

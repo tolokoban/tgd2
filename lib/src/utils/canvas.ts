@@ -36,6 +36,19 @@ export function tgdCanvasFromImage(img: HTMLImageElement): HTMLCanvasElement {
     return canvas
 }
 
+export async function tgdCanvasToArrayBuffer(
+    canvas: HTMLCanvasElement,
+    type: "image/png" | "image/jpeg" | "image/webp" = "image/png",
+    quality = 1,
+): Promise<ArrayBuffer> {
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality))
+    if (!blob) {
+        throw new Error(`[tgdCanvasToArrayBuffer] Failed to get canvas blob for "${type}" with quality ${quality}!`)
+    }
+
+    return await blob.arrayBuffer()
+}
+
 /**
  * A palette is an image with a different (or not) color for each pixel.
  * It can be used in a texture with NEAREST filter, for instance.

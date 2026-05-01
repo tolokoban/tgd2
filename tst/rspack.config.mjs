@@ -1,5 +1,6 @@
 import Path from "node:path"
 import * as Rspack from "@rspack/core"
+import { execSync } from "node:child_process"
 
 const __dirname = Path.dirname(new URL(import.meta.url).pathname)
 
@@ -31,12 +32,44 @@ export default function (_env, argv) {
                     exclude: /node_modules/,
                 },
                 {
+                    test: /\.(png|jpe?g|gif|webp|avif|svg|mp4|webm)$/i,
+                    type: "asset",
+                    generator: {
+                        filename: "img/[name].[hash][ext][query]",
+                    },
+                },
+                {
                     test: /\.css$/,
-                    use: [Rspack.CssExtractRspackPlugin.loader, "css-loader"],
+                    use: [
+                        {
+                            loader: Rspack.CssExtractRspackPlugin.loader,
+                            options: {
+                                filename: "css/[name].css",
+                                enforceRelative: true,
+                            },
+                        },
+                        {
+                            loader: "css-loader",
+                            options: {
+                                modules: {
+                                    auto: true,
+                                    namedExport: false,
+                                    localIdentName: "[path][name]_[local]_[hash:base64:6]",
+                                },
+                            },
+                        },
+                    ],
                 },
             ],
         },
         plugins: [
+            {
+                apply(compiler) {
+                    compiler.hooks.beforeCompile.tap("BuildRoutes", () => {
+                        execSync("npm run usecases && npm run routes", { stdio: "inherit" })
+                    })
+                },
+            },
             new Rspack.HtmlRspackPlugin({
                 template: "public/index.html",
             }),

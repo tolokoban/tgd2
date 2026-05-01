@@ -17,3 +17,17 @@ to launch a browser with the documentation:
 ```bash
 npm start
 ```
+
+## Release notes
+
+### v2.0.131
+
+- **TgdPainterNode refactored**: `TgdPainterNode` now extends `TgdPainterGroup` instead of `TgdPainter`, enabling richer group-based behavior.
+  - `add()` now accepts `TgdPainter`, `TgdPainterFunction`, or `TgdInterfaceTransformable` (previously limited to `TgdPainterNodeChild`).
+  - `logic` is now a collection (add/exec pattern) instead of a single optional callback, allowing multiple logic functions per node.
+  - Removed the `TgdPainterNodeChild` type alias in favor of standard `TgdPainter` types.
+  - Added runtime validation with `isTgdInterfaceTransformablePainter` type guard and descriptive error messages on invalid children.
+- **New type guard**: Added `isTgdInterfaceTransformablePainter()` in `interface/transformable.ts` for runtime checking of transformable painters.
+- **New utility**: Added `tgdCanvasToArrayBuffer()` in `utils/canvas.ts` to convert a canvas to an `ArrayBuffer` (supports PNG, JPEG, WebP).
+- **TgdContext debug logging**: Constructor and `delete()` now emit debug messages via `this.console.debug` for easier tracing.
+- **GLB mesh factory cleanup**: `factory/mesh-glb.ts` now uses `TgdPainter` directly instead of `TgdPainterNodeChild` / `TgdInterfaceTransformable` for children and mesh painter types.

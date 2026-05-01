@@ -1,0 +1,49 @@
+.preview {
+    padding: 1em;
+
+    div.result {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        gap: 1em;
+        margin-bottom: 2em;
+
+        h3 {
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            gap: 1em;
+        }
+
+        canvas,
+        img {
+            box-shadow: 0 .25em .5em #000;
+        }
+
+        .NEW,
+        .SAME,
+        .DIFF {
+            border-radius: 99vmax;
+            padding: .125em .5em;
+            font-weight: bold;
+            color: #000;
+            font-size: 80%;
+        }
+
+        span.NEW {
+            background-color: #09f;
+        }
+
+        span.SAME {
+            background-color: #0f9;
+        }
+
+        span.DIFF {
+            background-color: #f90;
+        }
+    }
+}

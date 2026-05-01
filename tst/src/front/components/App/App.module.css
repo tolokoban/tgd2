@@ -1,0 +1,16 @@
+.App {
+    padding: 1em;
+    font-family: sans-serif;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 2em;
+
+    canvas {
+        border: 1px solid #000;
+        box-shadow: 0 .25em .5em #0007;
+        margin: 1em 0;
+    }
+}

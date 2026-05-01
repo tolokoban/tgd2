@@ -1,13 +1,19 @@
 import { TgdConsole } from "@tgd/debug"
 import { TgdMat4, type TgdQuat, type TgdVec3 } from "@tgd/math"
-import type { TgdInterfaceTransformablePainter } from "../../interface"
+import {
+    isTgdInterfaceTransformablePainter,
+    TgdInterfaceTransformable,
+    type TgdInterfaceTransformablePainter,
+} from "../../interface"
 import { TgdTransfo, type TgdTransfoOptions } from "../../math/transfo"
 import { type TgdDebugPainterHierarchy, TgdPainter } from "../painter"
+import { TgdPainterGroup } from "../group"
+import { TgdPainterFunction } from "@tgd/types/painter"
 
 export interface TgdPainterNodeOptions {
     name?: string
     transfo: TgdTransfo | Partial<TgdTransfoOptions>
-    children: TgdPainterNodeChild[]
+    children: (TgdPainter | TgdPainterFunction)[]
     /**
      * Do we call the `paint()` method of the targets?
      * Default to `true`.
@@ -15,8 +21,6 @@ export interface TgdPainterNodeOptions {
     paintTheTargets?: boolean
     logic(this: TgdPainterNode, time: number, delta: number): void
 }
-
-export type TgdPainterNodeChild = TgdPainterNode | TgdInterfaceTransformablePainter
 
 /**
  * A Node can hold others Nodes or any object providing the
@@ -50,9 +54,8 @@ export type TgdPainterNodeChild = TgdPainterNode | TgdInterfaceTransformablePain
  * body.add( leftArm, rightArm )
  * ```
  */
-export class TgdPainterNode extends TgdPainter {
+export class TgdPainterNode extends TgdPainterGroup {
     public readonly transfo: TgdTransfo
-    public logic?: ((time: number, delta: number) => void) | undefined
 
     private readonly parentMatrix = new TgdMat4()
     /**
@@ -69,7 +72,7 @@ export class TgdPainterNode extends TgdPainter {
         this.paintTheTargets = paintTheTargets
         for (const child of children) this.add(child)
         this.transfo = new TgdTransfo(transfo)
-        this.logic = logic?.bind(this)
+        if (logic) this.logic.add(logic?.bind(this))
         this.name = name
     }
 
@@ -80,24 +83,34 @@ export class TgdPainterNode extends TgdPainter {
         for (const target of this.targets) target.delete?.()
     }
 
-    add(...children: TgdPainterNodeChild[]): this {
-        for (const child of children) {
-            if (child instanceof TgdPainterNode) {
-                this.nodes.push(child)
+    add(...painters: (TgdPainter | TgdPainterFunction | TgdInterfaceTransformable)[]): this {
+        for (const painter of painters) {
+            if (painter instanceof TgdPainterNode) {
+                this.nodes.push(painter)
+            } else if (isTgdInterfaceTransformablePainter(painter)) {
+                this.targets.push(painter)
+            } else if (typeof painter === "function") {
+                this.logic.add(painter)
             } else {
-                this.targets.push(child)
+                console.error(
+                    `[${this.name}] Only nodes, transformable painters or logic functions can be added to a node!`,
+                )
+                console.error(`[${this.name}] You tried to add this:`, painter)
+                throw new Error(
+                    `[${this.name}] Only nodes, transformable painters or logic functions can be added to a node!`,
+                )
             }
         }
         return this
     }
 
-    remove(...children: TgdPainterNodeChild[]): this {
-        for (const child of children) {
-            if (child instanceof TgdPainterNode) {
-                const nodePosition = this.nodes.indexOf(child)
+    remove(...painters: TgdPainter[]): this {
+        for (const painter of painters) {
+            if (painter instanceof TgdPainterNode) {
+                const nodePosition = this.nodes.indexOf(painter)
                 if (nodePosition !== -1) this.nodes.splice(nodePosition, 1)
-            } else {
-                const index = this.targets.indexOf(child)
+            } else if (isTgdInterfaceTransformablePainter(painter)) {
+                const index = this.targets.indexOf(painter)
                 if (index !== -1) this.targets.splice(index, 1)
             }
         }
@@ -113,13 +126,13 @@ export class TgdPainterNode extends TgdPainter {
     }
 
     paint(time: number, delta: number): void {
-        this.logic?.(time, delta)
+        this.logic.exec(time, delta)
         this.parentMatrix.reset()
         const fringe: TgdPainterNode[] = [this]
         while (fringe.length > 0) {
             const node = fringe.shift() as TgdPainterNode
             node.globalMatrix.from(node.parentMatrix).multiply(node.transfo.matrix)
-            node.logic?.(time, delta)
+            node.logic.exec(time, delta)
             for (const target of node.targets) {
                 target.transfo.matrix.from(node.globalMatrix)
                 if (this.paintTheTargets) target.paint?.(time, delta)

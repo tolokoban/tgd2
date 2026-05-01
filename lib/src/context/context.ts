@@ -54,7 +54,7 @@ export type TgdContextOptions = WebGLContextAttributes & {
     /**
      * TGD will write error and warning messages to the console
      * in case of problems and if `verbose` is set to `true`.
-     * 
+     *
      * Defaults to `true`.
      */
     verbose?: boolean
@@ -253,6 +253,7 @@ export class TgdContext extends TgdPainterGroup {
         this.stateReset()
         this.webglParams = new WebglParams(gl)
         this.virtualTime = new TgdTime()
+        this.console.debug(`[TgdContext/${this.name}] New:`, options)
     }
 
     viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
@@ -619,6 +620,7 @@ export class TgdContext extends TgdPainterGroup {
         }
         super.delete()
         this._gl = null
+        this.console.debug(`[TgdContext/${this.name}] Delete`)
     }
 
     private readonly createWebGLContext = () => {
