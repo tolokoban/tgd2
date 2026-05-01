@@ -30,4 +30,4 @@ npm start
 - **New type guard**: Added `isTgdInterfaceTransformablePainter()` in `interface/transformable.ts` for runtime checking of transformable painters.
 - **New utility**: Added `tgdCanvasToArrayBuffer()` in `utils/canvas.ts` to convert a canvas to an `ArrayBuffer` (supports PNG, JPEG, WebP).
 - **TgdContext debug logging**: Constructor and `delete()` now emit debug messages via `this.console.debug` for easier tracing.
-- **GLB mesh factory cleanup**: `factory/mesh-glb.ts` now uses `TgdPainter` directly instead of `TgdPainterNodeChild` / `TgdInterfaceTransformable` for children and mesh painter types.
+- **GLB mesh factory cleanup**: `factory/mesh-glb.ts` now uses `TgdPainter` directly instead of `TgdPainterNodeChild` / `TgdInterfaceTransformable` for children and mesh painter types

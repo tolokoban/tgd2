@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+        "tgd2-release-notes": {
+            "command": "npx",
+            "args": ["tsx", "mcp/release-notes/src/index.ts"],
+            "cwd": "${workspaceFolder}"
+        }
+    }
+}
