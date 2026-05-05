@@ -20,6 +20,12 @@ npm start
 
 ## Release notes
 
+### v2.0.132
+
+- **New camera property**: Added `spacePerPixel` getter on `TgdCamera` — returns the size in space units of a single screen pixel at the target (useful for scalebars).
+- **TgdTexture2D improvements**: Removed unnecessary `unbind()` calls after parameter/mipmap operations; added safety checks for incomplete `HTMLImageElement` and zero-size `HTMLCanvasElement`.
+- **tgdCanvasCreate Safari fix**: Forces backing store allocation via `getContext("2d")` to prevent `INVALID_OPERATION` errors with textures on Safari.
+
 ### v2.0.131
 
 - **TgdPainterNode refactored**: `TgdPainterNode` now extends `TgdPainterGroup` instead of `TgdPainter`, enabling richer group-based behavior.
@@ -27,7 +33,8 @@ npm start
   - `logic` is now a collection (add/exec pattern) instead of a single optional callback, allowing multiple logic functions per node.
   - Removed the `TgdPainterNodeChild` type alias in favor of standard `TgdPainter` types.
   - Added runtime validation with `isTgdInterfaceTransformablePainter` type guard and descriptive error messages on invalid children.
+- **TgdPainterGizmo resizable**: `alignX`, `alignY`, `size`, and `margin` are now reactive setters; changing them after construction updates the gizmo immediately.
 - **New type guard**: Added `isTgdInterfaceTransformablePainter()` in `interface/transformable.ts` for runtime checking of transformable painters.
 - **New utility**: Added `tgdCanvasToArrayBuffer()` in `utils/canvas.ts` to convert a canvas to an `ArrayBuffer` (supports PNG, JPEG, WebP).
 - **TgdContext debug logging**: Constructor and `delete()` now emit debug messages via `this.console.debug` for easier tracing.
-- **GLB mesh factory cleanup**: `factory/mesh-glb.ts` now uses `TgdPainter` directly instead of `TgdPainterNodeChild` / `TgdInterfaceTransformable` for children and mesh painter types
+- **GLB mesh factory cleanup**: `factory/mesh-glb.ts` now uses `TgdPainter` directly instead of `TgdPainterNodeChild` / `TgdInterfaceTransformable` for children and mesh painter types.
