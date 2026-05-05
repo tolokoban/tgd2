@@ -89,7 +89,9 @@ export default function Tgd<T extends SettingsDefinitions>({
 
         refCanvas.current = canvas
         if (gizmo && options) options.alpha = false
-        const context = new TgdContext(canvas, options)
+        const context = new TgdContext(canvas, {
+            alpha:false, ...options
+        })
         const depthBits = context.gl.getParameter(context.gl.DEPTH_BITS)
         console.log("Depth buffer bits:", depthBits)
         refContext.current = context

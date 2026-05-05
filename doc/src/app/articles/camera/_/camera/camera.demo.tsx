@@ -5,11 +5,13 @@ import {
     TgdCameraOrthographic,
     TgdCameraPerspective,
     TgdContext,
+    TgdGeometrySphereIco,
     TgdLight,
     TgdMaterialDiffuse,
     TgdPainterClear,
     TgdPainterGroupCamera,
     TgdPainterLogic,
+    TgdPainterMesh,
     TgdPainterMeshGltf,
     TgdPainterScissor,
     TgdPainterState,
@@ -73,7 +75,6 @@ function init(context: TgdContext, assets: Assets) {
             camOrtho.fitSpaceAtTarget(2, 2)
             camOrtho.fromTransfo(camera.transfo)
             camOrtho.zoom = camera.zoom
-            console.log("🐞 [camera.demo@80] camera.zoom =", camera.zoom) // @FIXME: Remove this line written on 2026-02-12 at 14:29
         }),
         new TgdPainterClear(context, {
             color: [0.3, 0.3, 0.3, 1],
@@ -84,6 +85,15 @@ function init(context: TgdContext, assets: Assets) {
             children: [scissor1, scissor2],
         }),
     )
+    context.inputs.pointer.eventTap.addListener((evt) => {
+        if (evt.x < 0) {
+            console.log("Orthographic:", camOrtho.spacePerPixel * camOrtho.screenHeight)
+            console.log("> Height:", camOrtho.screenHeight)
+        } else {
+            console.log("Perspective:", camPersp.spacePerPixel * camPersp.screenHeight)
+            console.log("> Height:", camPersp.screenHeight)
+        }
+    })
     context.paint()
     return {
         split(value: number) {

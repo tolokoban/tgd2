@@ -99,7 +99,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
      * Useful for scalebars (mostly in Orthographic mode).
      */
     get spacePerPixel() {
-        return this.spaceHeightAtTarget / this.screenHeight
+        return 2 * this.spaceHeightAtTarget / (this.screenHeight * this.zoom)
     }
 
     get screenAspectRatio() {

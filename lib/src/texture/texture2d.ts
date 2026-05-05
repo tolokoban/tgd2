@@ -265,6 +265,16 @@ export class TgdTexture2D {
             return this
         }
 
+        if (bmp instanceof HTMLImageElement) {
+            if (!bmp.complete) {
+                bmp.addEventListener("load", () => this.loadBitmap(bmp, options))
+                return this
+            }
+        } else if (bmp instanceof HTMLCanvasElement) {
+            if (bmp.width <= 0 || bmp.height <= 0) {
+                return this
+            }
+        }
         const { storage, gl } = this
         const { level = 0 } = options
         this._width = bmp.width
@@ -285,11 +295,12 @@ export class TgdTexture2D {
                 width: bmp.width,
                 height: bmp.height,
             })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
-            }, gl.${"RGBA" // resolveCompatibleFormat(storage.internalFormat)
+            }, gl.${"RGBA"
             }, gl.UNSIGNED_BYTE, bmp)`,
             () => {
-                this.context.console.log("storage =", this.storage)
                 this.context.console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
+                this.context.console.log("storage.flipY =", this.storage.flipY)
+                this.context.console.log("storage.premultipliedAlpha =", this.storage.premultipliedAlpha)
             },
         )
         if (options.generateMipmap) {
@@ -404,7 +415,6 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         gl.generateMipmap(gl.TEXTURE_2D)
-        this.unbind()
         return this
     }
 
@@ -415,7 +425,6 @@ export class TgdTexture2D {
             ...this.params,
             ...parameters,
         }
-        this.unbind()
         return this
     }
 
@@ -423,14 +432,12 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, value)
-        this.unbind()
     }
 
     get textureBaseLevel(): number {
         const { gl } = this
         this.bind()
         const value = gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL) as number
-        this.unbind()
         return value
     }
 
@@ -438,14 +445,12 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, value)
-        this.unbind()
     }
 
     get textureMaxLevel(): number {
         const { gl } = this
         this.bind()
         const value = gl.getTexParameter(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL) as number
-        this.unbind()
         return value
     }
 
@@ -453,7 +458,6 @@ export class TgdTexture2D {
         const { gl } = this
         this.bind()
         const value = gl.getTexParameter(gl.TEXTURE_2D, gl[parameter]) as number | boolean | null
-        this.unbind()
         return value
     }
 

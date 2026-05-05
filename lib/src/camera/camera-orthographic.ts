@@ -85,11 +85,11 @@ export class TgdCameraOrthographic extends TgdCamera {
     }
 
     protected getSpaceHeightAtTarget() {
-        return this.spaceHeight / this.zoom
+        return this.spaceHeight
     }
 
     protected setSpaceHeightAtTarget(v: number) {
-        this.spaceHeight = v * this.zoom
+        this.spaceHeight = v
     }
 
     private updateProjectionIfNeeded(): void {

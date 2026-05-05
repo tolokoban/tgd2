@@ -9,6 +9,9 @@ export function tgdCanvasCreate(width: number, height: number): HTMLCanvasElemen
     const canvas = globalThis.document.createElement("canvas")
     canvas.width = width
     canvas.height = height
+    // Force backing store allocation
+    // Needed for Safari to prevent INVALID_OPERATION errors with textures.
+    canvas.getContext("2d")
     return canvas
 }
 
