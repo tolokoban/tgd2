@@ -94,6 +94,14 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         this.dirtyProjection = true
     }
 
+    /**
+     * Size in space of a screen pixel at target.
+     * Useful for scalebars (mostly in Orthographic mode).
+     */
+    get spacePerPixel() {
+        return this.spaceHeightAtTarget / this.screenHeight
+    }
+
     get screenAspectRatio() {
         return this._screenAspectRatio
     }

@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/prefer-single-call */
 import { TgdMat4, TgdVec3 } from "@tgd/math"
-import { TgdCamera, TgdCameraOptions } from "./camera"
+import { TgdCamera, type TgdCameraOptions } from "./camera"
 
 export interface TgdCameraOrthographicOptions extends TgdCameraOptions {
     spaceHeight?: number
@@ -85,11 +85,11 @@ export class TgdCameraOrthographic extends TgdCamera {
     }
 
     protected getSpaceHeightAtTarget() {
-        return this.spaceHeight
+        return this.spaceHeight / this.zoom
     }
 
     protected setSpaceHeightAtTarget(v: number) {
-        this.spaceHeight = v
+        this.spaceHeight = v * this.zoom
     }
 
     private updateProjectionIfNeeded(): void {
