@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
-import { execSync } from "child_process"
-import { readFileSync } from "fs"
-import { resolve } from "path"
+import { execSync } from "node:child_process"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 
 const PROJECT_ROOT = resolve(import.meta.dirname, "..", "..", "..")
 
@@ -17,6 +17,13 @@ function git(cmd: string): string {
     } catch {
         return ""
     }
+}
+
+function getCommitOfPreviousVersion(version: string) {
+    const commit = git(
+        `git rev-parse $(git log -S "v${version}" --reverse --format=%H -- "${PROJECT_ROOT}/README.md" | head -1)^`,
+    ).trim()
+    return git(`git log --format=%H --diff-filter=M -1 ${commit} -- "${PROJECT_ROOT}/README.md"`).trim()
 }
 
 function getLastTag(): string {
@@ -51,9 +58,11 @@ const server = new McpServer({
     version: "1.0.0",
 })
 
-server.tool(
+server.registerTool(
     "generate_release_notes",
-    "Gather git history and project context to draft a release note entry for the tgd2 project",
+    {
+        description: "Gather git history and project context to draft a release note entry for the tgd2 project",
+    },
     async () => {
         const versions = VERSION_FILES.map(readVersion)
         const allMatch = versions.every((v) => v.version === versions[0].version)
