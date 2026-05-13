@@ -41,6 +41,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/mesh/material/diffuse": ["/articles/mesh/material/diffuse"],
     "/articles/mesh/material/face-orientation": ["/articles/mesh/material/face-orientation"],
     "/articles/mesh/material/flat": ["/articles/mesh/material/flat"],
+    "/articles/mesh/material/flat-texture": ["/articles/mesh/material/flat-texture"],
     "/articles/mesh/material/ghost": ["/articles/mesh/material/ghost"],
     "/articles/mesh/material/glass": ["/articles/mesh/material/glass"],
     "/articles/mesh/material/global": ["/articles/mesh/material/global"],

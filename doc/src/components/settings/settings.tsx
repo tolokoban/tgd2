@@ -1,7 +1,8 @@
 import React from "react"
-import { IconGear, Theme } from "@tolokoban/ui"
+import { Theme } from "@tolokoban/ui"
 
 import Slider from "./slider"
+import { Option } from "./Option"
 
 import styles from "./settings.module.css"
 
@@ -12,7 +13,7 @@ export type SettingsDefinitions = Record<
         label: string
         min?: number
         max?: number
-        step?: number
+        step?: number | string[]
     }
 >
 
@@ -53,6 +54,18 @@ export function Settings<T extends SettingsDefinitions>({ className, values, onC
                 {Object.keys(values).map((key) => {
                     const item = values[key]
                     if (!item) return null
+
+                    if (Array.isArray(item.step)) {
+                        return (
+                            <Option
+                                key={key}
+                                label={item.label}
+                                step={item.step}
+                                value={item.value}
+                                onChange={(value) => update(key, value)}
+                            />
+                        )
+                    }
 
                     const min = item.min ?? 0
                     const max = item.max ?? 1

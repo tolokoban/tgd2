@@ -1,6 +1,6 @@
 import { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdMaterial } from "./material"
-import { TgdCodeBloc } from "@tgd/shader/code"
+import { TgdCodeBloc } from "@tgd/shader"
 import { TgdTexture2D } from "@tgd/texture"
 import { TgdProgram } from "@tgd/program"
 
@@ -9,7 +9,7 @@ export type TgdMaterialFlatTextureOptions = {
 }
 
 export class TgdMaterialFlatTexture extends TgdMaterial {
-    public readonly texture: TgdTexture2D | null
+    private _texture: TgdTexture2D | null = null
 
     constructor(options: TgdMaterialFlatTextureOptions) {
         const uniforms: { [name: string]: WebglUniformType } = {
@@ -30,9 +30,19 @@ export class TgdMaterialFlatTexture extends TgdMaterial {
             vertexShaderCode,
             fragmentShaderCode,
             setUniforms: ({ program }: { program: TgdProgram }): void => {
-                options.texture.activate(0, program, "uniTexture")
+                this._texture?.activate(0, program, "uniTexture")
             },
         })
-        this.texture = options.texture
+        this._texture = options.texture
+    }
+
+    get texture() {
+        return this._texture
+    }
+
+    set texture(texture: TgdTexture2D | null) {
+        if (this._texture === texture) return
+
+        this._texture = texture
     }
 }
