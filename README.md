@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.133
+
+- **TgdMaterialFlatTexture mutable texture**: `texture` is now a read/write property (getter + setter) instead of a `readonly` field, allowing dynamic texture swapping at runtime.
+
 ### v2.0.132
 
 - **New camera property**: Added `spacePerPixel` getter on `TgdCamera` — returns the size in space units of a single screen pixel at the target (useful for scalebars).

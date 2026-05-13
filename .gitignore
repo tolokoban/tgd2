@@ -11,3 +11,4 @@ test_coverage/
 .DS_Store
 **/.tsbuildinfo
 **/*.tsbuildinfo
+.release-notes/

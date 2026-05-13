@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/mcp-release-notes",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "type": "module",
     "scripts": {
@@ -11,7 +11,7 @@
         "@modelcontextprotocol/sdk": "^1.29.0"
     },
     "devDependencies": {
-        "tsx": "^4.19.4",
+        "tsx": "^4.21.0",
         "typescript": "^5.9.3"
     }
 }
