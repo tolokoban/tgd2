@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.134
+
+- **TgdMaterialGlass configurable opacity**: Added `opacityMin` and `opacityMax` options to `TgdMaterialGlassOptions`, allowing control over glass transparency range from the constructor (defaults: `0.1` / `0.2`).
+
 ### v2.0.133
 
 - **TgdMaterialFlatTexture mutable texture**: `texture` is now a read/write property (getter + setter) instead of a `readonly` field, allowing dynamic texture swapping at runtime.

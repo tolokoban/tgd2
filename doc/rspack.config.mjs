@@ -8,7 +8,7 @@ import rehypeHighlightCodeLines from "rehype-highlight-code-lines"
 import remarkEmoji from "remark-emoji"
 import remarkGfm from "remark-gfm"
 import remarkImages from "remark-images"
-import WebpackShellPluginNext from "webpack-shell-plugin-next"
+import { execSync } from "node:child_process"
 import Package from "./package.json" with { type: "json" }
 
 const __dirname = Path.dirname(new URL(import.meta.url).pathname)
@@ -85,11 +85,17 @@ export default function (env, argv) {
         },
         plugins: [
             new Rspack.ProgressPlugin(),
-            new WebpackShellPluginNext({
-                onBeforeCompile: {
-                    scripts: ["npm run generate"],
-                    blocking: true,
-                    parallel: false,
+            /** @type {Rspack.RspackPluginInstance} */
+            ({
+                apply(compiler) {
+                    compiler.hooks.beforeCompile.tapAsync(
+                        "GeneratePlugin",
+                        /** @param {unknown} _params @param {() => void} done */
+                        (_params, done) => {
+                            execSync("npm run generate", { stdio: "inherit" })
+                            done()
+                        },
+                    )
                 },
             }),
             new CleanWebpackPlugin({
@@ -206,7 +212,7 @@ export default function (env, argv) {
                             loader: Rspack.CssExtractRspackPlugin.loader,
                             options: {
                                 filename: "css/[name].css",
-                                enforceRelative: true
+                                enforceRelative: true,
                             },
                         },
                         {
