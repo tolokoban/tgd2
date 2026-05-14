@@ -13,6 +13,8 @@ export type TgdMaterialGlassOptions = Partial<{
     ambientIntensity: number
     specularExponent: number
     specularIntensity: number
+    opacityMin: number
+    opacityMax: number
     normalMap: TgdTexture2D
 }>
 
@@ -22,8 +24,8 @@ const DEFAULT_AMBIENT = new TgdVec3(0.8, 0.8, 0.8)
 export class TgdMaterialGlass extends TgdMaterial {
     public specularExponent = 2.2
     public specularIntensity = 2
-    public opacityMin = 0
-    public opacityMax = 0.05
+    public opacityMin = 0.1
+    public opacityMax = 0.2
 
     private textureColor: TgdTexture2D | null = null
     private mustDeleteTextureColor = false
@@ -123,5 +125,7 @@ export class TgdMaterialGlass extends TgdMaterial {
         if (options.ambientColor instanceof TgdTextureCube) {
             this.textureAmbient = options.ambientColor
         }
+        this.opacityMin = options.opacityMin ?? 0.1
+        this.opacityMax = options.opacityMax ?? 0.2
     }
 }

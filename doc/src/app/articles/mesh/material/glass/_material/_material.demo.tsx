@@ -15,7 +15,7 @@ import {
 import View, { Assets } from "@/components/demo/Tgd"
 import React from "react"
 import { useFloat } from "@/utils/hooks/float"
-import { ViewButton, ViewInputNumber, ViewPanel } from "@tolokoban/ui"
+import { ViewInputNumber, ViewPanel } from "@tolokoban/ui"
 
 import SpecimenURL from "@/assets/mesh/specimen.glb"
 import PosX from "@/assets/cubemap/sky/contrast/posX.webp"
@@ -26,7 +26,7 @@ import NegY from "@/assets/cubemap/sky/contrast/negY.webp"
 import NegZ from "@/assets/cubemap/sky/contrast/negZ.webp"
 
 function init(context: TgdContext, assets: Assets) {
-    context.camera.fitSpaceAtTarget(14, 1.1)
+    context.camera.fitSpaceAtTarget(13, 1.1)
     // #begin Initializing WebGL
     const color: ArrayNumber4 = [1, 1, 1, 1]
     const skybox = new TgdTextureCube(context, {
@@ -58,9 +58,7 @@ function init(context: TgdContext, assets: Assets) {
         }),
         new TgdPainterLogic((time) => {
             mesh.transfo.setEulerRotation(0, Math.sin(time) * 20, 0)
-            const color = new TgdColor(0.1, 0.2, 0.3, 1)
-            color.rgb2hsl().H = time * 0.1
-            color.hsl2rgb()
+            const color = TgdColor.fromHSL(time * 0.1, 0.7, 0.1)
             clear.red = color.R
             clear.green = color.G
             clear.blue = color.B
@@ -92,8 +90,8 @@ export default function Demo() {
     const srv = ref.current
     const [specularExponent, setSpecularExponent] = useFloat(2.2, srv?.specularExponent)
     const [specularIntensity, setSpecularIntensity] = useFloat(2, srv?.specularIntensity)
-    const [opacityMin, setOpacityMin] = useFloat(0, srv?.opacityMin)
-    const [opacityMax, setOpacityMax] = useFloat(0.05, srv?.opacityMax)
+    const [opacityMin, setOpacityMin] = useFloat(0.1, srv?.opacityMin)
+    const [opacityMax, setOpacityMax] = useFloat(0.3, srv?.opacityMax)
     return (
         <div>
             <View

@@ -10,6 +10,7 @@ import {
     TgdPainterLogic,
     TgdPainterSkybox,
     TgdMaterialGlobal,
+    TgdColor,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 import React from "react"
@@ -26,7 +27,7 @@ import NegZ from "@/assets/cubemap/sky/contrast/negZ.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
-    const color: ArrayNumber4 = [...tgdCalcRandom3(), 1]
+    const color: ArrayNumber4 = TgdColor.fromHSL(Math.random(), 1, 0.8).toArayNumber4()
     const skybox = new TgdTextureCube(context, {
         imagePosX: assets.image.posX,
         imagePosY: assets.image.posY,

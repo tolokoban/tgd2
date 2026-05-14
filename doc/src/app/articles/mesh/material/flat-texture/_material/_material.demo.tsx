@@ -12,8 +12,8 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 import SuzaneURL from "@/assets/mesh/suzanne.glb"
-import Image1URL from "@/assets/image/uv-grid.webp"
-import Image2URL from "@/assets/image/whale-1024.webp"
+import Image1URL from "@/assets/image/suzanne-baked.webp"
+import Image2URL from "@/assets/image/uv-grid.webp"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin Initializing WebGL
@@ -65,7 +65,7 @@ export default function Demo() {
                 texture: {
                     label: "texture",
                     value: 0,
-                    step: ["UV Grid", "Whale"],
+                    step: ["Baked", "UV Grid"],
                 },
             }}
             gizmo

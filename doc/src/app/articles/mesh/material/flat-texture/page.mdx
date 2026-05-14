@@ -4,6 +4,17 @@ import Demo from "./_material"
 
 <Demo />
 
+This material just applies a texture verbatim, without any kind of shading.
+The lighting and shadows you see are baked into the texture in Blender.
+
+This material is the best choice for static environment objects.
+
+1. Create a `monkey.low` and a `monkey.high`. The last one is a copy of the first one, but with all the details we want.
+2. Ensure your are in **Cycles**.
+3. Select `monkey.high`, then shift-select `monkey.low`.
+4. In the material of `monkey.low` select the texture we want to bake into.
+5. Click on **Bake**.
+
 ---
 
 [Back](#/articles/mesh/material)
