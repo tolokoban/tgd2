@@ -20,6 +20,13 @@ npm start
 
 ## Release notes
 
+### v2.0.135
+
+- **New TgdPainterParticles**: Fully implemented GPU particle system using Transform Feedback with ping-pong buffers, configurable draw mode (`POINTS`, `LINES`, `TRIANGLES`), custom uniforms callback, and automatic attribute-to-varying mapping via `prefixAttribute`/`prefixVarying` options.
+- **TgdShaderVertex improvements**: Added `name`, `clone()`, `createShader()` methods, and `mainCodeHeaders` for injecting code before the main body.
+- **TgdShaderFragment improvements**: Added `name` and `clone()` methods.
+- **TgdDataset.getTypeRecord()**: New method returning the full attribute type record.
+
 ### v2.0.134
 
 - **TgdMaterialGlass configurable opacity**: Added `opacityMin` and `opacityMax` options to `TgdMaterialGlassOptions`, allowing control over glass transparency range from the constructor (defaults: `0.1` / `0.2`).
