@@ -5,7 +5,7 @@ export type TgdDebugPainterHierarchy = Record<string, TgdDebugPainterHierarchy[]
 export abstract class TgdPainter {
     static readonly log = new TgdLogger()
 
-    private static counter = 0
+    protected static counter = 0
 
     public readonly id = TgdPainter.counter++
 
