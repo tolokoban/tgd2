@@ -13,6 +13,9 @@ import {
  * @see https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf
  */
 export class TgdShaderFragment {
+    protected static counter = 0
+
+    public readonly name: string
     public precision: "lowp" | "mediump" | "highp" = "mediump"
     public uniforms: TgdCodeVariables<WebglUniformType>
     public varying: TgdCodeVariables<WebglAttributeType>
@@ -35,6 +38,7 @@ export class TgdShaderFragment {
 
     constructor(
         options: Partial<{
+            name: string
             precision: "lowp" | "mediump" | "highp"
             uniforms: TgdCodeVariables<WebglUniformType>
             outputs: TgdCodeVariables<WebglAttributeType>
@@ -45,6 +49,7 @@ export class TgdShaderFragment {
         }> = {},
     ) {
         const {
+            name,
             precision = "highp",
             uniforms = {},
             outputs = {
@@ -55,6 +60,7 @@ export class TgdShaderFragment {
             mainCode = ["FragColor = vec4(1, 0.667, 0, 1);"],
             header = [],
         } = options
+        this.name = name ?? `TgdShaderFragment#${TgdShaderFragment.counter++}`
         this.precision = precision
         this.uniforms = uniforms
         this.outputs = outputs
@@ -62,6 +68,19 @@ export class TgdShaderFragment {
         this.functions = functions
         this.mainCode = mainCode
         this.header = header
+    }
+
+    clone(): TgdShaderFragment {
+        return new TgdShaderFragment({
+            name: `${this.name}/copy`,
+            precision: this.precision,
+            uniforms: { ...this.uniforms },
+            outputs: { ...this.outputs },
+            varying: { ...this.varying },
+            functions: structuredClone(this.functions),
+            mainCode: structuredClone(this.mainCode),
+            header: structuredClone(this.header),
+        })
     }
 
     get code() {

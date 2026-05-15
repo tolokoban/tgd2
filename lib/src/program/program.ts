@@ -1,7 +1,7 @@
 import { TgdConsole, TgdConsoleItem } from "@tgd/debug"
 import { TgdMat2, TgdMat3, TgdMat4, TgdVec2, TgdVec3, TgdVec4 } from "@tgd/math"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
-import { TgdCodeBloc, tgdCodeStringify } from "@tgd/shader/code"
+import { TgdCodeBloc, tgdCodeStringify } from "@tgd/shader"
 import { TgdProgramOptions } from "@tgd/types"
 
 /**

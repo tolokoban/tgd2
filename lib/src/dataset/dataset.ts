@@ -59,6 +59,14 @@ export class TgdDataset {
         return type
     }
 
+    getTypeRecord(): TgdDatasetTypeRecord {
+        const types: TgdDatasetTypeRecord = {}
+        for (const attribName of this.attributesNames) {
+            types[attribName] = this.getType(attribName)
+        }
+        return types
+    }
+
     private initialize(attributesDefinition: TgdDatasetTypeRecord, options: Partial<TgdDatasetOptions> = {}) {
         for (const name of Object.keys(attributesDefinition)) {
             const definition = attributesDefinition[name]
