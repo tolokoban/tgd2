@@ -12,7 +12,7 @@ import {
 } from "@tgd/shader"
 import type { TgdTypeArrayForElements, WebglAttributeType, WebglUniformType } from "@tgd/types"
 import type { TgdPainterFunction } from "@tgd/types/painter"
-import { ensureArray, webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
+import { ensureArray, tgdTextureRecordToUniforms, webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
 import { TgdPainterLogic, TgdTexture2D, TgdTextureCube, TgdVertexArray } from "@tolokoban/tgd"
 import { TgdUniformBufferObject, type TgdUniformBufferObjectOptions } from "./../uniform/uniform-buffer-object"
 import { TgdPainter } from "./painter"
@@ -132,7 +132,7 @@ export class TgdPainterProgram extends TgdPainter {
         })
         this.drawMode = typeof drawMode === "number" ? drawMode : context.gl[drawMode]
         const uniformsHeader = ensureArray(this.uniformsToCode(uniforms))
-        const uniformsForTextures = texturesToUniforms(textures)
+        const uniformsForTextures = tgdTextureRecordToUniforms(textures)
         const vertexShader = new TgdShaderVertex({
             ...vert,
             uniforms: uniformsForTextures,
@@ -417,21 +417,4 @@ function resolveInstancesCount(datasets: TgdDataset[]): number {
             .filter((ds) => ds.divisor > 0)
             .map((ds) => `  ${ds.name}: count == ${ds.count} / ${ds.divisor} == ${ds.count / ds.divisor}`)}`,
     )
-}
-
-function texturesToUniforms(textures: Record<string, TgdTexture2D | TgdTextureCube>) {
-    const uniforms: Record<string, WebglUniformType> = {}
-    for (const name of Object.keys(textures)) {
-        uniforms[name] = resolveTextureType(textures[name])
-    }
-    return uniforms
-}
-
-function resolveTextureType(texture: TgdTexture2D | TgdTextureCube) {
-    if (texture instanceof TgdTexture2D) return "sampler2D"
-
-    if (texture instanceof TgdTextureCube) return "samplerCube"
-
-    console.error("[resolveTextureType] Don't know the type of this texture:", texture)
-    throw new Error("[resolveTextureType] Don't know the type of this texture!")
 }

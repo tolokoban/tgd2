@@ -79,14 +79,14 @@ export class TgdInputPointer {
 
     get speedX() {
         const x1 = this.moves.newest?.x ?? 0
-        const t1 = Date.now()
+        const t1 = Date.now() * 1e-3
         const x0 = this.moves.oldest?.x ?? 0
         const t0 = this.moves.oldest?.t ?? 0
         return t0 < t1 ? (1e3 * (x1 - x0)) / (t1 - t0) : 0
     }
     get speedY() {
         const y1 = this.moves.newest?.y ?? 0
-        const t1 = Date.now()
+        const t1 = Date.now() * 1e-3
         const y0 = this.moves.oldest?.y ?? 0
         const t0 = this.moves.oldest?.t ?? 0
         return t0 < t1 ? (1e3 * (y1 - y0)) / (t1 - t0) : 0
@@ -179,7 +179,8 @@ export class TgdInputPointer {
         })
         this.pointerEvent = null
         // Tap event.
-        if (event.timeStamp - this.start.t < this.tapDelay) {
+        const seconds = event.timeStamp * 1e-3
+        if (seconds - this.start.t < this.tapDelay) {
             let tapEventEnabled = true
             if (this.isMultiTap(this.start)) {
                 this.tapsCount++
@@ -229,14 +230,14 @@ export class TgdInputPointer {
         const { left, top, width, height } = this.canvas
             ? this.canvas.getBoundingClientRect()
             : {
-                left: 0,
-                top: 0,
-                width: 1,
-                height: 1,
-            }
+                  left: 0,
+                  top: 0,
+                  width: 1,
+                  height: 1,
+              }
         const x = 2 * ((event.clientX - left) / width - 0.5)
         const y = -2 * ((event.clientY - top) / height - 0.5)
-        return { x, y, t: event.timeStamp, fingersCount: 1 }
+        return { x, y, t: event.timeStamp * 1e-3, fingersCount: 1 }
     }
 }
 

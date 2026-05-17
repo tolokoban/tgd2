@@ -78,14 +78,7 @@ function init(context: TgdContext) {
 // #end
 
 export default function Demo() {
-    return (
-        <View
-            onReady={init}
-            controller={{
-                inertiaOrbit: 1000,
-            }}
-        />
-    )
+    return <View onReady={init} />
 }
 
 function makeDataset(count: number): TgdDataset {

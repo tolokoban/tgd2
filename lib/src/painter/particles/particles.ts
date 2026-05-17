@@ -3,9 +3,10 @@ import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdPainter } from "../painter"
 import { TgdContext } from "@tgd/context"
 import { TgdBuffer } from "@tgd/buffer"
-import { resolveErrorMessage } from "@tgd/utils"
+import { resolveErrorMessage, tgdTextureRecordToUniforms } from "@tgd/utils"
 import { TgdProgram } from "@tgd/program"
 import { TgdVertexArray } from "@tgd/vao"
+import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
 
 export interface TgdPainterParticlesUniformsContext {
     time: number
@@ -21,6 +22,7 @@ export interface TgdPainterParticlesOptions {
         vert: TgdShaderVertex
         frag: TgdShaderFragment
     }
+    textures?: Record<string, TgdTexture2D | TgdTextureCube>
     setUniforms?(options: TgdPainterParticlesUniformsContext): void
     prefixAttribute?: string
     prefixVarying?: string
@@ -35,6 +37,7 @@ export class TgdPainterParticles extends TgdPainter {
 
     public setUniforms?: (options: TgdPainterParticlesUniformsContext) => void
 
+    private readonly textures: Record<string, TgdTexture2D | TgdTextureCube>
     private readonly vaos: [TgdVertexArray, TgdVertexArray]
     private readonly buffers: [TgdBuffer, TgdBuffer]
     private readonly prg: TgdProgram
@@ -47,6 +50,7 @@ export class TgdPainterParticles extends TgdPainter {
             dataset,
             shader,
             drawMode,
+            textures = {},
             setUniforms,
             prefixAttribute = "att",
             prefixVarying = "var",
@@ -54,6 +58,7 @@ export class TgdPainterParticles extends TgdPainter {
     ) {
         super()
         this.name = name ?? `TgdPainterParticles#${TgdPainterParticles.counter++}`
+        this.textures = textures
         this.setUniforms = setUniforms
         this.drawMode = drawMode
         try {
@@ -61,6 +66,15 @@ export class TgdPainterParticles extends TgdPainter {
             const varyings: string[] = []
             const vert = shader.vert.clone()
             const frag = shader.frag.clone()
+            const uniformsForTextures = tgdTextureRecordToUniforms(textures)
+            vert.uniforms = {
+                ...vert.uniforms,
+                ...uniformsForTextures,
+            }
+            frag.uniforms = {
+                ...frag.uniforms,
+                ...uniformsForTextures,
+            }
             for (const attName of Object.keys(vert.attributes)) {
                 if (!attName.startsWith(prefixAttribute)) {
                     throw new Error(
@@ -72,10 +86,10 @@ If you don't want any prefix, just set "prefixAttribute" to "".`,
 
                 const varName = `${prefixVarying}${attName.slice(prefixAttribute.length)}`
                 vert.varying[varName] = vert.attributes[attName]
-                frag.varying[varName] = vert.varying[varName]
                 vert.mainCodeHeaders.push(`${varName} = ${attName};`)
                 varyings.push(varName)
             }
+            frag.varying = structuredClone(vert.varying)
             dataset.usage = "DYNAMIC_READ"
             this.count = dataset.count
             const prg = new TgdProgram(gl, {
@@ -87,7 +101,13 @@ If you don't want any prefix, just set "prefixAttribute" to "".`,
                 },
             })
             this.prg = prg
-            prg.debug()
+            prg.use()
+            const samplerNames = Object.keys(textures)
+            for (let unit = 0; unit < samplerNames.length; unit++) {
+                const uniformName = samplerNames[unit]
+                const texture = textures[uniformName]
+                texture.activate(unit, prg, uniformName)
+            }
             const vaoIn = new TgdVertexArray(gl, prg, [dataset])
             const bufferIn = vaoIn.getBuffer(0)
             if (!bufferIn) throw new Error("Unable to get buffer!")
@@ -109,11 +129,16 @@ If you don't want any prefix, just set "prefixAttribute" to "".`,
     }
 
     paint(time: number, delta: number): void {
-        const { context, drawMode, prg, vaos, buffers, count, pingPong, setUniforms } = this
+        const { context, textures, drawMode, prg, vaos, buffers, count, pingPong, setUniforms } = this
         const { gl } = context
         const src = pingPong
         const dst = 1 - pingPong
         prg.use()
+        let unit = 0
+        for (const name of Object.keys(textures)) {
+            const texture = textures[name]
+            texture.activate(unit++, prg, name)
+        }
         if (setUniforms) {
             setUniforms({ time, delta, prg })
         }

@@ -1,7 +1,24 @@
-import DemoMain from "./_/main.demo"
+import DemoMain from "./example1/_/main.demo"
 
 # [TgdPainterParticles](docs/classes/TgdPainterParticles.html)
 
-Move your mouse around to interact with the 250'000 particules.
+We use **transform feedback** in a simpe but efficient way.
+This painter only needs:
 
-<DemoMain />
+1. a dataset,
+2. a vertex shader,
+3. a fragment shader,
+4. a draw mode (POINTS, LINES or TRIANGLES).
+
+Once the painter is created, you cannot change the dataset. So the number of particles cannot be changed.
+
+For each attribute, a corresponding varying will be created (unless you have already specified it in the shaders).
+The simplest way to do this is to add `att` as a prefix for the attributes.
+Then the corresponding varyings will have the prefix `var`.
+It's how your vertex shader can change the value of the attributes of a particle.
+If you do nothing, the varying will be set with the same value of the attribute.
+
+## Examples
+
+- [Push the balls with your mouse](#/articles/painter/particles/example1)
+- [Smoke following the cursor](#/articles/painter/particles/example2)
