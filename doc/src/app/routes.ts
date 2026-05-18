@@ -22,6 +22,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/animation/chain": ["/articles/animation/chain"],
     "/articles/animation/transfo": ["/articles/animation/transfo"],
     "/articles/camera": ["/articles/camera"],
+    "/articles/camera/screen-coords": ["/articles/camera/screen-coords"],
     "/articles/context": ["/articles/context"],
     "/articles/context/painters": ["/articles/context/painters"],
     "/articles/context/play-pause": ["/articles/context/play-pause"],
@@ -94,6 +95,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/particles": ["/articles/painter/particles"],
     "/articles/painter/particles/example1": ["/articles/painter/particles/example1"],
     "/articles/painter/particles/example2": ["/articles/painter/particles/example2"],
+    "/articles/painter/particles/example3": ["/articles/painter/particles/example3"],
     "/articles/painter/points-cloud": ["/articles/painter/points-cloud"],
     "/articles/painter/program": ["/articles/painter/program"],
     "/articles/painter/segments": ["/articles/painter/segments"],
@@ -191,7 +193,7 @@ export function matchRoute(path: string, parts: string[] | undefined): RouteMatc
             const [head, tail] = decapitate(current)
             params[name] = head
             current = tail
-        } else if (current.startsWith(part)) {
+        } else if (isPrefixedBy(current,part)) {
             current = current.substring(part.length + 1)
         } else {
             return null
@@ -204,6 +206,17 @@ export function matchRoute(path: string, parts: string[] | undefined): RouteMatc
         distance: current.length,
     }
     return match
+}
+
+function isPrefixedBy(current: string, part: string): boolean {
+    if (part === "/" && current.startsWith("/")) return true
+
+    const items = current.split("/")
+    for (let i = 1; i < items.length + 1; i++) {
+        const prefix = items.slice(0, i).join("/")
+        if (prefix === part) return true
+    }
+    return false
 }
 
 function decapitate(text: string): [string, string] {

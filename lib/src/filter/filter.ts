@@ -1,5 +1,6 @@
 import { TgdProgram } from "@tgd/program"
 import { TgdCodeBloc, TgdCodeFunctions } from "@tgd/shader/code"
+import { TgdTextureCube, TgdTexture2D } from "@tgd/texture"
 import { WebglUniformType } from "@tgd/types"
 
 /**
@@ -11,7 +12,7 @@ import { WebglUniformType } from "@tgd/types"
  *  * `vec2 varUV`
  *
  * Always available uniforms:
- *  * `sampler2D texSource`: input texture.
+ *  * `sampler2D uniTexture`: input texture.
  *  * `float uniWidth`: width of the texture in pixels.
  *  * `float uniHeight`: height of the texture in pixels.
  */
@@ -23,21 +24,21 @@ export class TgdFilter {
      * If you need more uniforms, define them here.
      * And set the values in the `setUniforms()` method.
      */
-    public readonly uniforms: { [name: string]: WebglUniformType } = {}
-
+    public readonly uniforms: Record<string, WebglUniformType> = {}
+    public readonly textures: Record<string, TgdTexture2D | TgdTextureCube> = {}
     /**
      * The code of a `vec4 applyColor()` function.
      * Must return a `vec4` color.
      */
-    public readonly fragmentShaderCode: TgdCodeBloc = ["vec4 color = texture(uniTexture, varUV);", "return color;"]
-
+    public readonly fragmentShaderCode: TgdCodeBloc = ["vec4 color = texture(uniTexture, varUV);", "FragColor = color;"]
     public readonly extraFunctions: TgdCodeFunctions | TgdCodeBloc = {}
-
     public readonly setUniforms = (_parameters: TgdFilterSerUniformsParameters): void => {}
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
-        const { uniforms, fragmentShaderCode, extraFunctions, setUniforms } = options
+        const { uniforms, textures, fragmentShaderCode, extraFunctions, setUniforms } = options
+
         if (uniforms) this.uniforms = uniforms
+        if (textures) this.textures = textures
         if (fragmentShaderCode) this.fragmentShaderCode = fragmentShaderCode
         if (extraFunctions) this.extraFunctions = extraFunctions
         if (setUniforms) this.setUniforms = setUniforms
@@ -51,6 +52,7 @@ export class TgdFilter {
 export interface TgdFilterOptions {
     name: string
     uniforms: { [name: string]: WebglUniformType }
+    textures?: Record<string, TgdTexture2D | TgdTextureCube>
     fragmentShaderCode: TgdCodeBloc
     extraFunctions: TgdCodeFunctions | TgdCodeBloc
     setUniforms(parameters: TgdFilterSerUniformsParameters): void

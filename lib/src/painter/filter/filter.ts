@@ -5,10 +5,13 @@ import { TgdPainter } from "@tgd/painter/painter"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment } from "@tgd/shader/fragment"
 import { TgdShaderVertex } from "@tgd/shader/vertex"
-import type { TgdTexture2D } from "@tgd/texture"
+import type { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterState } from "../state"
 import { Framebuffers } from "./framebuffers"
+import { tgdTextureRecordToUniforms } from "@tgd/utils"
+import { WebglUniformType } from "@tgd/types"
+import { log } from "node:console"
 export interface TgdPainterFilterOptions {
     filters?: TgdFilter[]
     texture?: TgdTexture2D
@@ -25,6 +28,7 @@ export class TgdPainterFilter extends TgdPainter {
     private readonly filters: TgdFilter[]
     private readonly vaos: TgdVertexArray[]
     private readonly framebuffers: Framebuffers
+    private readonly texturesArray: Record<string, TgdTexture2D | TgdTextureCube>[] = []
 
     constructor(
         public readonly context: TgdContext,
@@ -67,8 +71,13 @@ export class TgdPainterFilter extends TgdPainter {
                     ");",
                 ],
             }).code
+            const { textures } = filter
+            this.texturesArray.push(textures)
+            const uniformsForTextures = tgdTextureRecordToUniforms(textures)
+            console.log("🐞 [filter@77] filter =", filter) // @FIXME: Remove this line written on 2026-05-18 at 20:37
             const frag = new TgdShaderFragment({
                 uniforms: {
+                    ...uniformsForTextures,
                     uniTexture: "sampler2D",
                     ...filter.uniforms,
                 },
@@ -76,10 +85,21 @@ export class TgdPainterFilter extends TgdPainter {
                     varUV: "vec2",
                     varPixel: "vec2",
                 },
-                mainCode: filter.fragmentShaderCode,
+                mainCode: filter.fragmentShaderCode ?? [
+                    "vec4 color = texture(uniTexture, varUV);",
+                    "FragColor = color;",
+                ],
                 functions: filter.extraFunctions,
             }).code
-            return new TgdProgram(context.gl, { vert, frag })
+            const prg = new TgdProgram(context.gl, { vert, frag })
+            prg.use()
+            const samplerNames = Object.keys(textures)
+            for (let unit = 1; unit <= samplerNames.length; unit++) {
+                const uniformName = samplerNames[unit - 1]
+                const texture = textures[uniformName]
+                texture.activate(unit, prg, uniformName)
+            }
+            return prg
         })
         const vaos = programs.map((program) => createVAO(context, program))
         this.programs = programs
@@ -123,6 +143,14 @@ export class TgdPainterFilter extends TgdPainter {
         program.use()
         program.uniform1f("uniZ", this.z)
         program.uniform1f("uniFlipY", flip)
+        const textures = this.texturesArray[filterIndex]
+        if (textures) {
+            let unit = 1
+            for (const uniformName of Object.keys(textures)) {
+                const texture = textures[uniformName]
+                texture.activate(unit++, program, uniformName)
+            }
+        }
         filter.setUniforms({ context, program, time, delta })
         textureInput.activate(0, program, "uniTexture")
         vao.bind()

@@ -1,9 +1,13 @@
 import {
     tgdCalcRandom,
+    tgdCanvasCreatePalette,
     tgdCodeFunction_perlinNoise,
     TgdContext,
     TgdDataset,
+    TgdFilter,
     TgdPainterClear,
+    TgdPainterFilter,
+    TgdPainterFramebuffer,
     TgdPainterParticles,
     TgdPainterState,
     TgdShaderFragment,
@@ -14,23 +18,23 @@ import {
 
 import View, { Assets } from "@/components/demo/Tgd"
 
-import BubbleURL from "./soap-bubble.webp"
-
 const COUNT = 50000
 const DURATION = 5
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
-    console.log("🐞 [main.demo@22] assets =", assets) // @FIXME: Remove this line written on 2026-05-17 at 21:42
+    const extensions = ["EXT_color_buffer_float", "EXT_float_blend"]
+    for (const name of extensions) {
+        const ext = context.gl.getExtension(name)
+        if (!ext) throw new Error(`Extension ${name} not supported`)
+    }
+
     const clear = new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 })
     const dataset: TgdDataset = makeDataset(COUNT, DURATION)
     const virtualTime = new TgdTime({ context, speed: 0 })
     const particles = new TgdPainterParticles(context, {
         dataset,
         drawMode: "POINTS",
-        textures: {
-            uniTexture: new TgdTexture2D(context).loadBitmap(assets.image.bubble),
-        },
         shader: {
             vert: new TgdShaderVertex({
                 functions: {
@@ -68,14 +72,20 @@ function init(context: TgdContext, assets: Assets) {
             }),
             frag: new TgdShaderFragment({
                 mainCode: [
-                    "vec4 color = texture(uniTexture, gl_PointCoord);",
-                    "color.a *= varAlpha;",
-                    "FragColor = color;",
+                    "vec2 p = 2.0 * (gl_PointCoord.xy - vec2(.5));",
+                    "float dist = dot(p, p);",
+                    "float value = 1e-1;",
+                    "value *= 1.0 - dist;",
+                    "value *= varAlpha;",
+                    "FragColor = vec4(value, 0.0, 0.0, 1.0);",
                 ],
             }),
         },
         setUniforms: ({ _time, delta, prg }) => {
-            virtualTime.speed = 1
+            if (virtualTime.speed === 0) {
+                virtualTime.reset()
+                virtualTime.speed = 1
+            }
             prg.uniform1f("uniSize", Math.min(context.width, context.height) / 5)
             prg.uniform1f("uniDelta", delta)
             prg.uniform1f("uniTime", virtualTime.seconds)
@@ -83,28 +93,53 @@ function init(context: TgdContext, assets: Assets) {
             prg.uniform2f("uniSpeed", context.inputs.pointer.speedX, context.inputs.pointer.speedY)
         },
     })
-    context.add(
-        clear,
-        new TgdPainterState(context, {
-            blend: "alpha",
-            children: [particles],
-        }),
-    )
+    const textureFB = new TgdTexture2D(context, {
+        params: {
+            minFilter: "NEAREST",
+            magFilter: "NEAREST",
+        },
+        storage: {
+            format: "R32F / RED / FLOAT",
+        },
+    })
+    const framebuffer = new TgdPainterFramebuffer(context, {
+        antiAliasing: false,
+        textureColor0: textureFB,
+        children: [
+            new TgdPainterState(context, {
+                blend: "add",
+                children: [clear, particles],
+            }),
+        ],
+    })
+    const palette = new TgdTexture2D(context, {
+        params: {
+            minFilter: "LINEAR",
+            magFilter: "LINEAR",
+        },
+    }).loadBitmap(tgdCanvasCreatePalette(["#000", "#f00", "#f92", "#ee3", "#ff4", "#fff"]))
+    const filters = new TgdPainterFilter(context, {
+        flipY: true,
+        texture: framebuffer.textureColor0,
+        filters: [
+            new TgdFilter({
+                textures: {
+                    texPalette: palette,
+                },
+                fragmentShaderCode: [
+                    "float u = texture(uniTexture, varUV).r;",
+                    "FragColor = texture(texPalette, vec2(u, .5));",
+                ],
+            }),
+        ],
+    })
+    context.add(clear, framebuffer, filters)
     context.play()
 }
 // #end
 
 export default function Demo() {
-    return (
-        <View
-            onReady={init}
-            assets={{
-                image: {
-                    bubble: BubbleURL,
-                },
-            }}
-        />
-    )
+    return <View onReady={init} />
 }
 
 function makeDataset(count: number, duration: number): TgdDataset {
@@ -120,9 +155,9 @@ function makeDataset(count: number, duration: number): TgdDataset {
     const attRandom: number[] = []
     const rnd = (min = 0, max = 1) => tgdCalcRandom(min, max)
     for (let i = 0; i < count; i++) {
-        attPosition.push(rnd(-1, +1), rnd(-1, +1))
+        attPosition.push(rnd(-0.1, +0.1), rnd(-0.1, +0.1))
         attSpeed.push(rnd(-0.1, +0.1), rnd(-0.1, +0.1))
-        attBirth.push((i / count) * duration)
+        attBirth.push((-i / count) * duration)
         attRandom.push(rnd(), rnd())
     }
     dataset.set("attPosition", new Float32Array(attPosition))

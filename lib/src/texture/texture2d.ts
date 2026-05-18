@@ -4,12 +4,12 @@ import { TgdEvent } from "@tgd/event"
 import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
 import { TgdVec4 } from "@tgd/math"
-import { TgdPainterFilter, TgdPainterFramebuffer } from "@tgd/painter"
+import { TgdPainterFilter, TgdPainterFramebuffer, TgdPainterLogic } from "@tgd/painter"
 import { TgdProgram } from "@tgd/program"
 import { ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
-import { ensureArrayNumber4, tgdCanvasCreate, webglLookup } from "@tgd/utils"
-import { type WebglTextureInternalFormat, type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
+import { ensureArrayNumber4, resolveErrorMessage, tgdCanvasCreate, webglLookup } from "@tgd/utils"
+import { type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 
 interface TgdTexture2DStorage {
@@ -22,44 +22,73 @@ interface TgdTexture2DStorage {
      * Default to `false`.
      */
     premultipliedAlpha: boolean
-    internalFormat:
-    | "R8"
-    | "R16F"
-    | "R32F"
-    | "R8UI"
-    | "RG8"
-    | "RG16F"
-    | "RG32F"
-    | "RG8UI"
-    | "RGB8"
-    | "SRGB8"
-    | "RGB565"
-    | "R11F_G11F_B10F"
-    | "RGB9_E5"
-    | "RGB16F"
-    | "RGB32F"
-    | "RGB8UI"
-    | "RGBA"
-    | "RGBA8"
-    | "SRGB8_ALPHA8"
-    | "RGB5_A1"
-    | "RGBA4"
-    | "RGBA16F"
-    | "RGBA32F"
-    | "RGBA8UI"
-    | "COMPRESSED_R11_EAC"
-    | "COMPRESSED_SIGNED_R11_EAC"
-    | "COMPRESSED_RG11_EAC"
-    | "COMPRESSED_SIGNED_RG11_EAC"
-    | "COMPRESSED_RGB8_ETC2"
-    | "COMPRESSED_RGBA8_ETC2_EAC"
-    | "COMPRESSED_SRGB8_ETC2"
-    | "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC"
-    | "COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-    | "COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2"
-    | "DEPTH_COMPONENT24"
-    | "DEPTH_COMPONENT16"
-    | "DEPTH_COMPONENT32F"
+    format:
+        | "R8 / RED / UNSIGNED_BYTE"
+        | "R8_SNORM / RED / BYTE"
+        | "R16F / RED / HALF_FLOAT"
+        | "R16F / RED / FLOAT"
+        | "R32F / RED / FLOAT"
+        | "R8UI / RED_INTEGER / UNSIGNED_BYTE"
+        | "R8I / RED_INTEGER / BYTE"
+        | "R16UI / RED_INTEGER / UNSIGNED_SHORT"
+        | "R16I / RED_INTEGER / SHORT"
+        | "R32UI / RED_INTEGER / UNSIGNED_INT"
+        | "R32I / RED_INTEGER / INT"
+        | "RG8 / RG / UNSIGNED_BYTE"
+        | "RG8_SNORM / RG / BYTE"
+        | "RG16F / RG / HALF_FLOAT"
+        | "RG16F / RG / FLOAT"
+        | "RG32F / RG / FLOAT"
+        | "RG8UI / RG_INTEGER / UNSIGNED_BYTE"
+        | "RG8I / RG_INTEGER / BYTE"
+        | "RG16UI / RG_INTEGER / UNSIGNED_SHORT"
+        | "RG16I / RG_INTEGER / SHORT"
+        | "RG32UI / RG_INTEGER / UNSIGNED_INT"
+        | "RG32I / RG_INTEGER / INT"
+        | "RGB8 / RGB / UNSIGNED_BYTE"
+        | "SRGB8 / RGB / UNSIGNED_BYTE"
+        | "RGB565 / RGB / UNSIGNED_BYTE"
+        | "RGB565 / RGB / UNSIGNED_SHORT_5_6_5"
+        | "RGB8_SNORM / RGB / BYTE"
+        | "R11F_G11F_B10F / RGB / UNSIGNED_INT_10F_11F_11F_REV"
+        | "R11F_G11F_B10F / RGB / HALF_FLOAT"
+        | "R11F_G11F_B10F / RGB / FLOAT"
+        | "RGB9_E5 / RGB / UNSIGNED_INT_5_9_9_9_REV"
+        | "RGB9_E5 / RGB / HALF_FLOAT"
+        | "RGB9_E5 / RGB / FLOAT"
+        | "RGB16F / RGB / HALF_FLOAT"
+        | "RGB16F / RGB / FLOAT"
+        | "RGB32F / RGB / FLOAT"
+        | "RGB8UI / RGB_INTEGER / UNSIGNED_BYTE"
+        | "RGB8I / RGB_INTEGER / BYTE"
+        | "RGB16UI / RGB_INTEGER / UNSIGNED_SHORT"
+        | "RGB16I / RGB_INTEGER / SHORT"
+        | "RGB32UI / RGB_INTEGER / UNSIGNED_INT"
+        | "RGB32I / RGB_INTEGER / INT"
+        | "RGBA8 / RGBA / UNSIGNED_BYTE"
+        | "SRGB8_ALPHA8 / RGBA / UNSIGNED_BYTE"
+        | "RGBA8_SNORM / RGBA / BYTE"
+        | "RGB5_A1 / RGBA / UNSIGNED_BYTE"
+        | "RGB5_A1 / RGBA / UNSIGNED_SHORT_5_5_5_1"
+        | "RGB5_A1 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
+        | "RGBA4 / RGBA / UNSIGNED_BYTE"
+        | "RGBA4 / RGBA / UNSIGNED_SHORT_4_4_4_4"
+        | "RGB10_A2 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
+        | "RGBA16F / RGBA / HALF_FLOAT"
+        | "RGBA16F / RGBA / FLOAT"
+        | "RGBA32F / RGBA / FLOAT"
+        | "RGBA8UI / RGBA_INTEGER / UNSIGNED_BYTE"
+        | "RGBA8I / RGBA_INTEGER / BYTE"
+        | "RGBA16UI / RGBA_INTEGER / UNSIGNED_SHORT"
+        | "RGBA16I / RGBA_INTEGER / SHORT"
+        | "RGBA32UI / RGBA_INTEGER / UNSIGNED_INT"
+        | "RGBA32I / RGBA_INTEGER / INT"
+        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_SHORT"
+        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_INT"
+        | "DEPTH_COMPONENT24 / DEPTH_COMPONENT / UNSIGNED_INT"
+        | "DEPTH_COMPONENT32F / DEPTH_COMPONENT / FLOAT"
+        | "DEPTH24_STENCIL8 / DEPTH_STENCIL / UNSIGNED_INT_24_8"
+        | "DEPTH32F_STENCIL8 / DEPTH_STENCIL / FLOAT_32_UNSIGNED_INT_24_8_REV"
 }
 
 export interface TgdTexture2DOptions {
@@ -91,7 +120,7 @@ export class TgdTexture2D {
         wrapT: "REPEAT",
         wrapR: "REPEAT",
     }
-
+    private videoUpdater: TgdPainterLogic | null = null
     private static counter = 0
 
     constructor(
@@ -105,7 +134,7 @@ export class TgdTexture2D {
         this.storage = {
             width: 0,
             height: 0,
-            internalFormat: storage?.internalFormat ?? "RGBA8",
+            format: storage?.format ?? "RGBA8 / RGBA / UNSIGNED_BYTE",
             levels: 1,
             flipY: false,
             premultipliedAlpha: false,
@@ -135,14 +164,31 @@ export class TgdTexture2D {
         ).loadBitmap(tgdCanvasCreate(this.width, this.height))
     }
 
-    get internalFormat() {
-        return this.storage.internalFormat
+    get format() {
+        return this.storage.format
     }
-    private set internalFormat(internalFormat: TgdTexture2DStorage["internalFormat"]) {
-        this.storage.internalFormat = internalFormat
+    private set format(format: TgdTexture2DStorage["format"]) {
+        this.storage.format = format
+    }
+
+    get internalFormat(): number {
+        const [internalFormat] = this.splitFormat(this.context.gl)
+        return internalFormat
+    }
+
+    get sourceFormat(): number {
+        const [, sourceFormat] = this.splitFormat(this.context.gl)
+        return sourceFormat
+    }
+
+    get sourceType(): number {
+        const [, , sourceType] = this.splitFormat(this.context.gl)
+        return sourceType
     }
 
     delete() {
+        const { videoUpdater } = this
+        if (videoUpdater) this.context.remove(videoUpdater)
         if (this._texture) this.gl.deleteTexture(this._texture)
         this._texture = null
     }
@@ -164,19 +210,32 @@ export class TgdTexture2D {
         this._texture = texture
         this.bind()
         this.setParams(this.params)
+        const color4 = ensureArrayNumber4(color, [1, 0, 0.667, 1])
+        const [internalFormat, sourceFormat, sourceType] = this.splitFormat(gl)
         gl.texImage2D(
             gl.TEXTURE_2D, // target
             0, // level of detail
-            gl.RGBA, // internal format
+            internalFormat, // internal format
             1, // width
             1, // height
             0, // border
-            gl.RGBA, // source format
-            gl.UNSIGNED_BYTE, // source type
-            new Uint8Array(ensureArrayNumber4(color, [1, 0, 0.667, 1])), // data
+            sourceFormat, // source format
+            sourceType, // source type
+            sourceType === gl.FLOAT ? new Float32Array(color4) : new Uint8Array(color4),
         )
         this._width = 1
         this._height = 1
+    }
+
+    private splitFormat(
+        gl: WebGL2RenderingContext,
+    ): [internalFormat: number, sourceFormat: number, sourceType: number] {
+        const [internalFormat, sourceFormat, sourceType] = this.storage.format.split(" / ") as [
+            keyof WebGL2RenderingContext,
+            keyof WebGL2RenderingContext,
+            keyof WebGL2RenderingContext,
+        ]
+        return [gl[internalFormat] as number, gl[sourceFormat] as number, gl[sourceType] as number]
     }
 
     resize(w: number, h: number) {
@@ -221,10 +280,20 @@ export class TgdTexture2D {
         let playing = false
         let timeupdate = false
         const video = document.createElement("video")
+        let initialized = false
         const checkReady = () => {
-            if (!playing || !timeupdate) return
+            if (!playing || !timeupdate || initialized) return
 
+            initialized = true
             this.loadBitmap(video, options)
+            const videoUpdater = new TgdPainterLogic(() => {
+                if (!video.paused && !video.ended) {
+                    this.loadBitmap(video)
+                }
+            })
+            if (this.videoUpdater) this.context.remove(this.videoUpdater)
+            this.context.add(videoUpdater)
+            this.videoUpdater = videoUpdater
         }
         video.playsInline = true
         video.muted = true
@@ -238,7 +307,10 @@ export class TgdTexture2D {
             checkReady()
         })
         video.src = url
-        video.play()
+        video.play().catch(() => {
+            // We want to prevent this error:
+            // The fetching process for the media resource was aborted by the user agent at the user's request.
+        })
         return this
     }
 
@@ -282,21 +354,15 @@ export class TgdTexture2D {
         this.bind()
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            level,
-            gl.RGBA, // (gl as unknown as Record<string, GLenum>)[storage.internalFormat],
-            gl.RGBA, // gl[figureOutCompatibleFormat(storage.internalFormat)] as number,
-            gl.UNSIGNED_BYTE,
-            bmp,
-        )
+        const [internalFormat, sourceFormat, sourceType] = this.splitFormat(gl)
+        gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, sourceFormat, sourceType, bmp)
         this.checkError(
             `loadBitmap(${JSON.stringify({
                 width: bmp.width,
                 height: bmp.height,
-            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
-            }, gl.${"RGBA"
-            }, gl.UNSIGNED_BYTE, bmp)`,
+            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
+                "RGBA" // storage.internalFormat
+            }, gl.${"RGBA"}, gl.UNSIGNED_BYTE, bmp)`,
             () => {
                 this.context.console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
                 this.context.console.log("storage.flipY =", this.storage.flipY)
@@ -305,12 +371,16 @@ export class TgdTexture2D {
         )
         if (options.generateMipmap) {
             this.generateMipmap()
+            const { context } = this
             this.checkError(
                 `loadBitmap(${JSON.stringify({
                     width: bmp.width,
                     height: bmp.height,
-                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${storage.internalFormat
-                }, gl.${resolveCompatibleFormat(storage.internalFormat)}, gl.UNSIGNED_BYTE, bmp)\ngenerateMipmap()`,
+                })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${context.lookupWebglConstant(
+                    internalFormat,
+                )}, gl.${context.lookupWebglConstant(sourceFormat)}, gl.${context.lookupWebglConstant(
+                    sourceType,
+                )}, bmp)\ngenerateMipmap()`,
             )
         }
         const { filter } = this.options
@@ -330,7 +400,7 @@ export class TgdTexture2D {
         const output = new TgdTexture2D(this.context, {
             params: { ...this.params },
             storage: {
-                internalFormat: "RGBA8",
+                ...this.storage,
                 width: this.width,
                 height: this.height,
             },
@@ -355,44 +425,60 @@ export class TgdTexture2D {
     }
 
     loadData(
-        data: Uint8Array | Uint8ClampedArray,
+        data: Uint8Array | Uint8ClampedArray | Float32Array,
         options: {
             width: number
             height: number
-            internalFormat: WebglTextureInternalFormat
-            format: "RED" | "RG" | "RGB" | "RGBA" | "RED_INTEGER" | "RG_INTEGER" | "RGB_INTEGER" | "RGBA_INTEGER"
             level?: number
             offset?: number
+            format?: TgdTexture2DStorage["format"]
         },
     ) {
-        const {
-            level = 0,
-            width,
-            height,
-            internalFormat = "RGB",
-            format = "RGB",
-            // offset = 0,
-        } = options
-        const { gl } = this
-        this.bind()
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            level,
-            gl[internalFormat],
-            width,
-            height,
-            0,
-            gl[format],
-            gl.UNSIGNED_BYTE,
-            data,
-            // offset
-        )
-        this.checkError(`loadData(${printArray(data)}, ${JSON.stringify(options)})`)
-        this.unbind()
-        this.eventChange.dispatch(this)
-        return this
+        try {
+            const {
+                level = 0,
+                width,
+                height,
+                format,
+                // offset = 0,
+            } = options
+            const { gl, context } = this
+            if (format) {
+                this.format = format
+            }
+            checkIfDataHasMinimalRequestedSize(data, this.format, width, height)
+            this._width = width
+            this._height = height
+            this.bind()
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
+            const [internalFormat, sourceFormat, sourceType] = this.splitFormat(gl)
+            if (sourceType === gl.FLOAT && !(data instanceof Float32Array)) {
+                throw new Error(`You must pass a Float32Array with this format: ${this.format}!`)
+            }
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                level,
+                internalFormat,
+                width,
+                height,
+                0,
+                sourceFormat,
+                sourceType,
+                data,
+                // offset
+            )
+            this.checkError(`loadData(${printArray(data)}, ${JSON.stringify(options)})
+internalFormat: ${context.lookupWebglConstant(internalFormat)}
+sourceFormat: ${context.lookupWebglConstant(sourceFormat)}
+sourceType: ${context.lookupWebglConstant(sourceType)}
+`)
+            this.unbind()
+            this.eventChange.dispatch(this)
+            return this
+        } catch (error) {
+            throw new Error(`[${this.name}::loadData()] ${resolveErrorMessage(error)}`)
+        }
     }
 
     /**
@@ -485,57 +571,7 @@ export class TgdTexture2D {
     }
 }
 
-const COMPATIBLE_FORMATS: Array<[keyof WebGL2RenderingContext, Set<string>]> = [
-    [
-        "RGB",
-        new Set([
-            "RGB",
-            "RGB8",
-            "RGB565",
-            "SRGB8",
-            "RGB8_SNORM",
-            "RGB565",
-            "R11F_G11F_B10F",
-            "RGB9_E5",
-            "RGB16F",
-            "R11F_G11F_B10F",
-            "RGB9_E5",
-            "RGB32F",
-            "RGB16F",
-            "R11F_G11F_B10F",
-            "RGB9_E5",
-        ]),
-    ],
-    [
-        "RGBA",
-        new Set([
-            "RGBA",
-            "RGBA8",
-            "RGB5_A1",
-            "RGBA4",
-            "SRGB8_ALPHA8",
-            "RGBA8_SNORM",
-            "RGBA4",
-            "RGB5_A1",
-            "RGB10_A2",
-            "RGB5_A1",
-            "RGBA16F",
-            "RGBA32F",
-            "RGBA16F",
-        ]),
-    ],
-    ["RG", new Set(["RG8"])],
-    ["RED", new Set(["R8"])],
-]
-
-function resolveCompatibleFormat(internalFormat: string): keyof WebGL2RenderingContext {
-    for (const [format, internalFormats] of COMPATIBLE_FORMATS) {
-        if (internalFormats.has(internalFormat)) return format
-    }
-    throw new Error(`There is no compatible format for internalFormat "${internalFormat}" and type "UNSIGNED_BYTE"!`)
-}
-
-function printArray(data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike>) {
+function printArray(data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike> | Float32Array) {
     if (data.length > 10) {
         return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
     }
@@ -549,4 +585,68 @@ function isImageURL(url: string) {
         if (urlLowercase.endsWith(ext)) return true
     }
     return false
+}
+
+function computeDataSizePerRow(format: TgdTexture2DStorage["format"], width: number): number {
+    const [, sourceFormat, sourceType] = format.split(" / ")
+    const componentCount: Record<string, number> = {
+        RED: 1,
+        RED_INTEGER: 1,
+        RG: 2,
+        RG_INTEGER: 2,
+        RGB: 3,
+        RGB_INTEGER: 3,
+        RGBA: 4,
+        RGBA_INTEGER: 4,
+        DEPTH_COMPONENT: 1,
+        DEPTH_STENCIL: 1,
+    }
+    const typeBytes: Record<string, number> = {
+        UNSIGNED_BYTE: 1,
+        BYTE: 1,
+        UNSIGNED_SHORT: 2,
+        SHORT: 2,
+        HALF_FLOAT: 2,
+        UNSIGNED_INT: 4,
+        INT: 4,
+        FLOAT: 4,
+        UNSIGNED_SHORT_5_6_5: 2,
+        UNSIGNED_SHORT_5_5_5_1: 2,
+        UNSIGNED_SHORT_4_4_4_4: 2,
+        UNSIGNED_INT_2_10_10_10_REV: 4,
+        UNSIGNED_INT_10F_11F_11F_REV: 4,
+        UNSIGNED_INT_5_9_9_9_REV: 4,
+        UNSIGNED_INT_24_8: 4,
+        FLOAT_32_UNSIGNED_INT_24_8_REV: 8,
+    }
+    const packed =
+        typeBytes[sourceType] !== undefined &&
+        sourceType !== "UNSIGNED_BYTE" &&
+        sourceType !== "BYTE" &&
+        sourceType !== "UNSIGNED_SHORT" &&
+        sourceType !== "SHORT" &&
+        sourceType !== "UNSIGNED_INT" &&
+        sourceType !== "INT" &&
+        sourceType !== "HALF_FLOAT" &&
+        sourceType !== "FLOAT"
+    const bytesPerPixel = packed
+        ? typeBytes[sourceType]
+        : (componentCount[sourceFormat] ?? 4) * (typeBytes[sourceType] ?? 1)
+    const rowBytes = width * bytesPerPixel
+    return Math.ceil(rowBytes / 4) * 4
+}
+
+function checkIfDataHasMinimalRequestedSize(
+    data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayBufferLike> | Float32Array<ArrayBufferLike>,
+    format: TgdTexture2DStorage["format"],
+    width: number,
+    height: number,
+) {
+    const expectedSizePerRow = computeDataSizePerRow(format, width)
+    const expectedSize = expectedSizePerRow * height
+    if (data.byteLength < expectedSize) {
+        throw new Error(`For a texture of ${width}×${height} with format "${format}", you need a storage of ${expectedSizePerRow}×${height} = ${expectedSize}.
+But your data has only ${data.byteLength} bytes.
+Did you specify the right format?`)
+    }
 }

@@ -8,7 +8,7 @@ import {
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
-import VideoURL from "@/assets/movie/video.mp4"
+import VideoURL from "@/assets/movie/hologram.mp4"
 
 function init(context: TgdContext, assets: Assets) {
     // #begin
@@ -29,7 +29,7 @@ function init(context: TgdContext, assets: Assets) {
         children: [clear, mesh],
     })
     context.add(meshPainter, (time) => {
-        mesh.transfo.setEulerRotation(time * 47.4885, time * 60.1403, 0)
+        mesh.transfo.setEulerRotation(time * 4.4885, time * 6.1403, 0)
     })
     context.play()
     // #end

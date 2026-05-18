@@ -174,9 +174,7 @@ export class TgdPainterOverlay extends TgdPainter {
         const y = this.yScreenToLayout(evtScreen.current.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
 
-        const evtOverlay = structuredClone(evtScreen)
-        evtOverlay.current.x = x
-        evtOverlay.current.y = y
+        const evtOverlay = { ...evtScreen, x, y }
         this.eventZoom.dispatch(evtOverlay)
     }
 
@@ -185,9 +183,7 @@ export class TgdPainterOverlay extends TgdPainter {
         const y = this.yScreenToLayout(evtScreen.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
 
-        const evtOverlay = structuredClone(evtScreen)
-        evtOverlay.x = x
-        evtOverlay.y = y
+        const evtOverlay = { ...evtScreen, x, y }
         this.eventTap.dispatch(evtOverlay)
     }
 
@@ -196,9 +192,11 @@ export class TgdPainterOverlay extends TgdPainter {
         const y = this.yScreenToLayout(evtScreen.y)
         if (Math.abs(x) > 1 || Math.abs(y) > 1) return
 
-        const evtOverlay = structuredClone(evtScreen)
-        evtOverlay.x = x
-        evtOverlay.y = y
+        const evtOverlay = {
+            ...evtScreen,
+            x,
+            y,
+        }
         this.eventTapMultiple.dispatch(evtOverlay)
     }
 

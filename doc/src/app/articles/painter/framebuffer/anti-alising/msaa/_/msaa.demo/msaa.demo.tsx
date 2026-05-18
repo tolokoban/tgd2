@@ -1,6 +1,5 @@
 import {
     TgdContext,
-    TgdFilterAntiAliasing,
     TgdPainterClear,
     TgdPainterFilter,
     TgdPainterFramebuffer,
@@ -9,9 +8,6 @@ import {
     TgdTexture2D,
     TgdGeometryBox,
     TgdMaterialDiffuse,
-    tgdCanvasCreateFill,
-    TgdPainterOverlay,
-    TgdPainterFramebufferWithAntiAliasing,
 } from "@tolokoban/tgd"
 import View, { Assets } from "@/components/demo/Tgd"
 
@@ -53,28 +49,12 @@ function init(context: TgdContext, assets: Assets) {
         filters: [],
         flipY: true,
     })
-    const red = new TgdTexture2D(context).loadBitmap(tgdCanvasCreateFill(1, 1, "#f00"))
-    const green = new TgdTexture2D(context).loadBitmap(tgdCanvasCreateFill(1, 1, "#0f0"))
-    const overlay = new TgdPainterOverlay(context, {
-        alignX: +1,
-        alignY: +1,
-        width: 32,
-        height: 32,
-        margin: 8,
-        texture: green,
-    })
-    context.add(framebuffer, filters, overlay)
+    context.add(framebuffer, filters)
     context.paint()
-    overlay.eventTap.addListener(() => {
-        if (framebuffer.antiAliasing) {
-            framebuffer.antiAliasing = false
-            overlay.texture = red
-        } else {
-            framebuffer.antiAliasing = true
-            overlay.texture = green
-        }
+    return ({ antiAliasing }: { antiAliasing: number }) => {
+        framebuffer.antiAliasing = antiAliasing === 1
         context.paint()
-    })
+    }
     // #end
 }
 
@@ -85,6 +65,13 @@ export default function Demo() {
             controller={{ inertiaOrbit: 1000 }}
             assets={{
                 image: { grid: GridURL },
+            }}
+            settings={{
+                antiAliasing: {
+                    label: "antiAliasing",
+                    value: 0,
+                    step: ["false", "true"],
+                },
             }}
         />
     )

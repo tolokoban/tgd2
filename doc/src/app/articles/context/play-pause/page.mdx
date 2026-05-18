@@ -14,6 +14,11 @@ Tap the screen in the demo below to start/stop the animation.
 
 <Demo />
 
+Beware that `TgdContext.pause()` just pause the render loop, but it does not freeze the time.
+That's why when you hit **play** again, the cube reappears where it should be if you didn't hit **pause**.
+
+If you need to _freeze_ the time, then you should consider the class [`TgdTime`](#/articles/time).
+
 ---
 
 [Back](#/articles/context)

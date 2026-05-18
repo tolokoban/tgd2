@@ -9,7 +9,7 @@ import {
     tgdLoadImage,
     tgdLoadText,
 } from "@tolokoban/tgd"
-import { IconFullscreen, IconOrientation, IconPin, IconSnapshot, Theme } from "@tolokoban/ui"
+import { IconCenter, IconFullscreen, IconOrientation, IconPin, IconSnapshot, Theme } from "@tolokoban/ui"
 import React, { CSSProperties } from "react"
 import { Settings, type SettingsDefinitions } from "@/components/settings"
 import Spinner from "../../Spinner"
@@ -36,7 +36,6 @@ interface TgdProps<T extends SettingsDefinitions> {
     assets?: Partial<AssetsToLoad>
     controller?: Partial<TgdControllerCameraOrbitOptions>
     children?: React.ReactNode
-    disableDefaultDoubleTap?: boolean
     settings?: T
     fullscreen?: boolean
 }
@@ -52,7 +51,6 @@ export default function Tgd<T extends SettingsDefinitions>({
     controller,
     settings,
     children,
-    disableDefaultDoubleTap = false,
     fullscreen = false,
 }: TgdProps<T>) {
     const refUpdateSettings = React.useRef<void | null | ((settings: Record<keyof T, number>) => void)>(null)
@@ -90,7 +88,8 @@ export default function Tgd<T extends SettingsDefinitions>({
         refCanvas.current = canvas
         if (gizmo && options) options.alpha = false
         const context = new TgdContext(canvas, {
-            alpha:false, ...options
+            alpha: false,
+            ...options,
         })
         const depthBits = context.gl.getParameter(context.gl.DEPTH_BITS)
         console.log("Depth buffer bits:", depthBits)
@@ -108,13 +107,6 @@ export default function Tgd<T extends SettingsDefinitions>({
                             ...controller,
                         })
                         refOrbiter.current = orbiter
-                        context.inputs.pointer.eventTapMultiple.addListener((evt) => {
-                            console.log("🚀 [tgd] evt.tapsCount =", evt.tapsCount) // @FIXME: Remove this line written on 2025-11-10 at 13:36
-                            evt.preventTap()
-                            if (evt.tapsCount === 2 && !disableDefaultDoubleTap) {
-                                orbiter.reset((controller.inertiaOrbit ?? 500) * 1e-3)
-                            }
-                        })
                     }
                     refUpdateSettings.current = onReady(context, loadedAssets)
                     refUpdateSettings.current?.(reduceSettings())
@@ -162,6 +154,12 @@ export default function Tgd<T extends SettingsDefinitions>({
         orbiter.cameraInitialState = context.camera.getCurrentState()
         orbiter.zoom = 1
     }
+    const handleResetCamera = () => {
+        const orbiter = refOrbiter.current
+        if (!orbiter || !controller) return
+
+        orbiter.reset((controller.inertiaOrbit ?? 500) * 1e-3)
+    }
     React.useEffect(() => {
         const canvas = refCanvas.current
         const scene = refContext.current
@@ -200,21 +198,26 @@ export default function Tgd<T extends SettingsDefinitions>({
     return (
         <div className={Theme.classNames.join(className, styles.Tgd)}>
             <div className={Theme.classNames.join(styles.actions, !loading && styles.enabled)}>
-                <div>
+                <div title="Switch landscape / portrait">
                     <IconOrientation onClick={() => setLandscape(!landscape)} />
                 </div>
-                <div>
+                <div title="Take a snapshot of the scene">
                     <IconSnapshot onClick={handleScreenshot} />
                 </div>
                 {fullscreenAvailable && (
-                    <div>
+                    <div title="Go fullscreen">
                         <IconFullscreen onClick={handleFullscreen} />
                     </div>
                 )}
                 {controller && (
-                    <div>
-                        <IconPin onClick={handleSetCameraRestPosition} />
-                    </div>
+                    <>
+                        <div title="Save current camera position">
+                            <IconPin onClick={handleSetCameraRestPosition} />
+                        </div>
+                        <div title="Restore camera to previously saved position">
+                            <IconCenter onClick={handleResetCamera} />
+                        </div>
+                    </>
                 )}
             </div>
             <div className={styles.relative}>

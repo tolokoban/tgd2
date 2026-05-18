@@ -20,8 +20,7 @@ function init(ctx: TgdContext) {
         .loadData(data, {
             width: 5,
             height: 5,
-            internalFormat: "RGB8",
-            format: "RGB",
+            format: "RGB8 / RGB / UNSIGNED_BYTE",
         })
     const background = new Painter(ctx, texture)
     ctx.add(background)

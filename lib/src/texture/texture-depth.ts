@@ -4,16 +4,26 @@ import { TgdContext } from "@tgd/context"
 interface TgdTextureDepthStorage {
     width: number
     height: number
-    type: "DEPTH_COMPONENT24" | "DEPTH_COMPONENT16" | "DEPTH_COMPONENT32F"
+    format:
+        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_SHORT"
+        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_INT"
+        | "DEPTH_COMPONENT24 / DEPTH_COMPONENT / UNSIGNED_INT"
+        | "DEPTH_COMPONENT32F / DEPTH_COMPONENT / FLOAT"
+        | "DEPTH24_STENCIL8 / DEPTH_STENCIL / UNSIGNED_INT_24_8"
+        | "DEPTH32F_STENCIL8 / DEPTH_STENCIL / FLOAT_32_UNSIGNED_INT_24_8_REV"
 }
 
 export class TgdTextureDepth extends TgdTexture2D {
     constructor(
         public readonly context: TgdContext,
-        { width = 1, height = 1, type = "DEPTH_COMPONENT24" }: Partial<TgdTextureDepthStorage> = {},
+        {
+            width = 1,
+            height = 1,
+            format = "DEPTH_COMPONENT24 / DEPTH_COMPONENT / UNSIGNED_INT",
+        }: Partial<TgdTextureDepthStorage> = {},
     ) {
         super(context, {
-            storage: { width, height, internalFormat: type },
+            storage: { width, height, format },
         })
         this.setParams({
             magFilter: "NEAREST",
@@ -21,16 +31,12 @@ export class TgdTextureDepth extends TgdTexture2D {
             wrapS: "CLAMP_TO_EDGE",
             wrapT: "CLAMP_TO_EDGE",
         })
-        switch (type) {
-            case "DEPTH_COMPONENT16":
-                this.resize = this.resize16
-                break
-            case "DEPTH_COMPONENT24":
-                this.resize = this.resize24
-                break
-            default:
-                this.resize = this.resize32F
-                break
+        if (format.startsWith("DEPTH_COMPONENT16")) {
+            this.resize = this.resize16
+        } else if (format.startsWith("DEPTH_COMPONENT24")) {
+            this.resize = this.resize24
+        } else {
+            this.resize = this.resize32F
         }
     }
 

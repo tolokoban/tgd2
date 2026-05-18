@@ -390,7 +390,7 @@ export class TgdControllerCameraOrbit {
         const { context, inertiaOrbit, inertiaPanning, currentGesture } = this
         if (this.animGestureInertia) context.animCancel(this.animGestureInertia)
         if (currentGesture === GestureEnum.Orbit && inertiaOrbit > 0) {
-            const inverseDeltaTime = 1 / (event.current.t - event.previous.t)
+            const inverseDeltaTime = 1e-3 / (event.current.t - event.previous.t)
             const speedX = inverseDeltaTime * (event.current.x - event.previous.x)
             const speedY = inverseDeltaTime * (event.current.y - event.previous.y)
             const currentEvent = structuredClone(event)
@@ -417,7 +417,7 @@ export class TgdControllerCameraOrbit {
             context.animSchedule(this.animGestureInertia)
         }
         if (currentGesture === GestureEnum.Pan && inertiaPanning > 0) {
-            const inverseDeltaTime = 1 / (event.current.t - event.previous.t)
+            const inverseDeltaTime = 1e-3 / (event.current.t - event.previous.t)
             const speedX = inverseDeltaTime * (event.current.x - event.previous.x)
             const speedY = inverseDeltaTime * (event.current.y - event.previous.y)
             const currentEvent = structuredClone(event)

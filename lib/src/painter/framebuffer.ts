@@ -411,8 +411,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
             if (!colorRenderBuffer) throw new Error("Unable to create RenderBuffer!")
 
             gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderBuffer)
-            const internalFormat = gl[texture.internalFormat as keyof WebGL2RenderingContext] as number
-            webglRenderbufferStorageMultisample(gl, this.samples, internalFormat, width, height)
+            webglRenderbufferStorageMultisample(gl, this.samples, texture.internalFormat, width, height)
             gl.bindRenderbuffer(gl.RENDERBUFFER, null)
             return colorRenderBuffer
         })
