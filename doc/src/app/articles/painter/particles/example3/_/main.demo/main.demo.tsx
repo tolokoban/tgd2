@@ -18,8 +18,8 @@ import {
 
 import View, { Assets } from "@/components/demo/Tgd"
 
-const COUNT = 50000
-const DURATION = 5
+const COUNT = 200000
+const DURATION = 3
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
@@ -55,7 +55,7 @@ function init(context: TgdContext, assets: Assets) {
                     `float life = clamp((uniTime - attBirth) * ${(1 / DURATION).toFixed(6)}, 0.0, 1.0);`,
                     "varAlpha = 1.0 - life;",
                     "gl_Position = vec4(attPosition, 0, 1);",
-                    "gl_PointSize = uniSize * (0.1 + .9 * life * life);",
+                    "gl_PointSize = uniSize * (0.2 + .8 * life * life);",
                     "varPosition -= attSpeed * uniDelta * varAlpha;",
                     "if (life >= 1.0) {",
                     [
@@ -74,7 +74,8 @@ function init(context: TgdContext, assets: Assets) {
                 mainCode: [
                     "vec2 p = 2.0 * (gl_PointCoord.xy - vec2(.5));",
                     "float dist = dot(p, p);",
-                    "float value = 1e-1;",
+                    "if (dist >= 1.0) discard;",
+                    "float value = 1e-3;",
                     "value *= 1.0 - dist;",
                     "value *= varAlpha;",
                     "FragColor = vec4(value, 0.0, 0.0, 1.0);",
@@ -97,6 +98,9 @@ function init(context: TgdContext, assets: Assets) {
         params: {
             minFilter: "NEAREST",
             magFilter: "NEAREST",
+            wrapR: "CLAMP_TO_EDGE",
+            wrapS: "CLAMP_TO_EDGE",
+            wrapT: "CLAMP_TO_EDGE",
         },
         storage: {
             format: "R32F / RED / FLOAT",
@@ -139,7 +143,7 @@ function init(context: TgdContext, assets: Assets) {
 // #end
 
 export default function Demo() {
-    return <View onReady={init} />
+    return <View onReady={init} options={{ alpha: false }} />
 }
 
 function makeDataset(count: number, duration: number): TgdDataset {
