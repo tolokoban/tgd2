@@ -20,6 +20,15 @@ npm start
 
 ## Release notes
 
+### v2.0.136
+
+- **New TgdGeometry.join()**: Static method and standalone `tgdGeometryJoin()` function to merge multiple geometries into a single one, combining positions, normals, UVs, and elements with proper index offsetting.
+- **TgdGeometry.fitElementsInTypeArray()**: New static helper that picks the smallest typed array (`Uint8Array`, `Uint16Array`, or `Uint32Array`) for a given elements array based on the maximum index value.
+- **New isTgdTypeArrayForElements type guard**: Runtime check for valid element typed arrays (`Uint8Array | Uint16Array | Uint32Array`).
+- **TgdDataset.get()**: New method to extract all values of a given attribute into a plain `number[]` array.
+- **TgdTexture2D**: Better texture format. Only the compatible triplet of internal format, format and type are available.
+- **TgdContext.extensions**: Access to all the WebGL2 extensions that are available on this hardware.
+
 ### v2.0.135
 
 - **New TgdPainterParticles**: Fully implemented GPU particle system using Transform Feedback with ping-pong buffers, configurable draw mode (`POINTS`, `LINES`, `TRIANGLES`), custom uniforms callback, and automatic attribute-to-varying mapping via `prefixAttribute`/`prefixVarying` options.
