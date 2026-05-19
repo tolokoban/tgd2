@@ -276,6 +276,11 @@ export class TgdDataset {
         return Object.keys(this.attributesDefinition)
     }
 
+    hasAttribute(attribName: string): boolean {
+        const def = this.attributesDefinition[attribName]
+        return !!def
+    }
+
     getAttribAccessor(attribName: string): {
         get: (index: number, dimension?: number) => number
         set: (value: number, index: number, dimension?: number) => void
@@ -293,6 +298,18 @@ export class TgdDataset {
                 definition.setter(view, byteOffset, value)
             },
         }
+    }
+
+    get(attribName: string, target?: number[]): number[] {
+        const values: number[] = target ?? []
+        const { dimension } = this.getDef(attribName)
+        const { get } = this.getAttribAccessor(attribName)
+        for (let idx = 0; idx < this.count; idx++) {
+            for (let dim = 0; dim < dimension; dim++) {
+                values.push(get(idx, dim))
+            }
+        }
+        return values
     }
 
     /**

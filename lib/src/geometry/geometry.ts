@@ -1,8 +1,8 @@
 import { TgdDataset, TgdDatasetType, TgdDatasetTypeRecord } from "@tgd/dataset"
-import { TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
+import { isTgdTypeArrayForElements, TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
 import { TgdVec3 } from "@tgd/math"
 import { webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
-import { TgdBoundingBox } from ".."
+import { TgdBoundingBox, tgdGeometryJoin } from ".."
 
 interface TgdGeometryOptionsCommon {
     name?: string
@@ -81,6 +81,19 @@ export class TgdGeometry {
             elements,
             computeNormalsIfMissing,
         })
+    }
+
+    public static fitElementsInTypeArray(elements: TgdTypeArrayForElements | number[]): TgdTypeArrayForElements {
+        if (isTgdTypeArrayForElements(elements)) return elements
+
+        const max = elements.reduce((prv, cur) => Math.max(prv, cur), 0)
+        if (max <= 0xff) return new Uint8Array(elements)
+        if (max <= 0xffff) return new Uint16Array(elements)
+        return new Uint32Array(elements)
+    }
+
+    public static join(geometries: TgdGeometry[]): TgdGeometry {
+        return tgdGeometryJoin(geometries)
     }
 
     constructor(options: TgdGeometryOptions1) {
