@@ -1,4 +1,5 @@
 import {
+    tgdCalcClamp,
     tgdCalcRandom,
     tgdCanvasCreatePalette,
     tgdCodeFunction_perlinNoise,
@@ -18,8 +19,7 @@ import {
 
 import View, { Assets } from "@/components/demo/Tgd"
 
-const COUNT = 200000
-const DURATION = 3
+const DURATION = 1
 
 // #begin
 function init(context: TgdContext, assets: Assets) {
@@ -30,7 +30,9 @@ function init(context: TgdContext, assets: Assets) {
     }
 
     const clear = new TgdPainterClear(context, { color: [0, 0, 0, 1], depth: 1 })
-    const dataset: TgdDataset = makeDataset(COUNT, DURATION)
+    // const is32bits = context.extensions.EXT_color_buffer_float
+    const is32bits = false
+    const dataset: TgdDataset = makeDataset(is32bits ? 50000 : 80000, DURATION)
     const virtualTime = new TgdTime({ context, speed: 0 })
     const particles = new TgdPainterParticles(context, {
         dataset,
@@ -39,6 +41,16 @@ function init(context: TgdContext, assets: Assets) {
             vert: new TgdShaderVertex({
                 functions: {
                     ...tgdCodeFunction_perlinNoise(),
+                    computeSize: [
+                        "float computeSize(float x) {",
+                        [
+                            "// 1 - 4*((x-1)^2-0.5)^2",
+                            "float t = x - 1.0;",
+                            "float a = t * t - 0.5;",
+                            "return 1.0 - 4.0 * a * a;",
+                        ],
+                        "}",
+                    ],
                 },
                 uniforms: {
                     uniTime: "float",
@@ -47,21 +59,19 @@ function init(context: TgdContext, assets: Assets) {
                     uniSpeed: "vec2",
                     uniSize: "float",
                 },
-                varying: {
-                    varAlpha: "float",
-                },
                 attributes: dataset.getTypeRecord(),
+                varying: { varAlpha: "float" },
                 mainCode: [
                     `float life = clamp((uniTime - attBirth) * ${(1 / DURATION).toFixed(6)}, 0.0, 1.0);`,
                     "varAlpha = 1.0 - life;",
                     "gl_Position = vec4(attPosition, 0, 1);",
-                    "gl_PointSize = uniSize * (0.2 + .8 * life * life);",
-                    "varPosition -= attSpeed * uniDelta * varAlpha;",
+                    "gl_PointSize = uniSize * (0.2 + .8 * computeSize(life));",
+                    "varPosition -= attSpeed * uniDelta * 2.0 * (.75 + life);",
                     "if (life >= 1.0) {",
                     [
                         `varBirth = uniTime + attRandom.x * ${DURATION.toFixed(3)};`,
                         "varPosition = uniCenter;",
-                        "varSpeed = normalize(uniSpeed) * 1e-1;",
+                        "varSpeed = uniSpeed * 1e2;",
                         "vec2 shift = 0.3 * vec2(",
                         ["perlinNoise(vec3(attRandom.xy, uniTime)),", "perlinNoise(vec3(attRandom.yx, uniTime))"],
                         ");",
@@ -75,9 +85,13 @@ function init(context: TgdContext, assets: Assets) {
                     "vec2 p = 2.0 * (gl_PointCoord.xy - vec2(.5));",
                     "float dist = dot(p, p);",
                     "if (dist >= 1.0) discard;",
-                    "float value = 1e-3;",
+                    `float value = (1.0 / ${is32bits ? "20.0" : "8.0"}) / 255.0;`,
                     "value *= 1.0 - dist;",
                     "value *= varAlpha;",
+                    // "float y = 0.5 * (1.0 + varPosition.y);",
+                    // "float h = 0.1;",
+                    // "y = h + (1.0 - h) * y;",
+                    // "value *= 1.0 - y;",
                     "FragColor = vec4(value, 0.0, 0.0, 1.0);",
                 ],
             }),
@@ -87,23 +101,36 @@ function init(context: TgdContext, assets: Assets) {
                 virtualTime.reset()
                 virtualTime.speed = 1
             }
-            prg.uniform1f("uniSize", Math.min(context.width, context.height) / 5)
+            prg.uniform1f("uniSize", Math.min(context.width, context.height) / 4)
             prg.uniform1f("uniDelta", delta)
             prg.uniform1f("uniTime", virtualTime.seconds)
-            prg.uniform2f("uniCenter", context.inputs.pointer.x, context.inputs.pointer.y)
-            prg.uniform2f("uniSpeed", context.inputs.pointer.speedX, context.inputs.pointer.speedY)
+            let { speedX, speedY } = context.inputs.pointer
+            const factor = -1e5
+            speedX *= factor
+            speedY = factor * Math.abs(speedY)
+            const thresholdY = 0.1
+            const thresholdX = thresholdY / 32
+            speedX = -tgdCalcClamp(speedX, -thresholdX, +thresholdX)
+            speedY = tgdCalcClamp(speedY, 0, +thresholdY) + 0.01
+            prg.uniform2f("uniSpeed", -speedX, -speedY)
+            if (speedX === 0 && speedY === 0) {
+                prg.uniform2f("uniCenter", 9, 9)
+            } else {
+                let x = context.inputs.pointer.x
+                if (x < 0) x = -x * x
+                else x *= x
+                x *= 0.125
+                prg.uniform2f("uniCenter", x, -1.1)
+            }
         },
     })
     const textureFB = new TgdTexture2D(context, {
         params: {
             minFilter: "NEAREST",
             magFilter: "NEAREST",
-            wrapR: "CLAMP_TO_EDGE",
-            wrapS: "CLAMP_TO_EDGE",
-            wrapT: "CLAMP_TO_EDGE",
         },
         storage: {
-            format: "R32F / RED / FLOAT",
+            format: is32bits ? "R32F / RED / FLOAT" : "R16F / RED / FLOAT",
         },
     })
     const framebuffer = new TgdPainterFramebuffer(context, {
@@ -120,6 +147,9 @@ function init(context: TgdContext, assets: Assets) {
         params: {
             minFilter: "LINEAR",
             magFilter: "LINEAR",
+            wrapR: "CLAMP_TO_EDGE",
+            wrapS: "CLAMP_TO_EDGE",
+            wrapT: "CLAMP_TO_EDGE",
         },
     }).loadBitmap(tgdCanvasCreatePalette(["#000", "#f00", "#f92", "#ee3", "#ff4", "#fff"]))
     const filters = new TgdPainterFilter(context, {
@@ -131,8 +161,10 @@ function init(context: TgdContext, assets: Assets) {
                     texPalette: palette,
                 },
                 fragmentShaderCode: [
-                    "float u = texture(uniTexture, varUV).r;",
-                    "FragColor = texture(texPalette, vec2(u, .5));",
+                    "float u = clamp(texture(uniTexture, varUV).r, 0.0, 1.0);",
+                    // "float u2 = u * u;",
+                    // "u = mix(u, u2, varUV.y * 1.0);",
+                    "FragColor = texture(texPalette, vec2(u, u));",
                 ],
             }),
         ],
@@ -159,7 +191,7 @@ function makeDataset(count: number, duration: number): TgdDataset {
     const attRandom: number[] = []
     const rnd = (min = 0, max = 1) => tgdCalcRandom(min, max)
     for (let i = 0; i < count; i++) {
-        attPosition.push(rnd(-0.1, +0.1), rnd(-0.1, +0.1))
+        attPosition.push(9, 9)
         attSpeed.push(rnd(-0.1, +0.1), rnd(-0.1, +0.1))
         attBirth.push((-i / count) * duration)
         attRandom.push(rnd(), rnd())

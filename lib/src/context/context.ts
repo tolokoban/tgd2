@@ -11,6 +11,7 @@ import { TgdManagerAnimation } from "./animation/animation-manager"
 import { Console } from "./console"
 import { UniformBufferObjectsManager } from "./ubo-manager"
 import { WebglParams } from "./webgl-params"
+import { TgdExtensions } from "./extensions"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -32,7 +33,6 @@ export type TgdContextOptions = WebGLContextAttributes & {
     onResize?(this: void, context: TgdContext, width: number, height: number): void
     name?: string
     camera?: TgdCamera
-    enableTextureFloatStorage?: boolean
     /**
      * Function to initialize the context.
      *
@@ -90,6 +90,7 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     public readonly name: string
+    public readonly extensions: TgdExtensions
     /**
      * TGD will write error and warning messages to the console
      * in case of problems and if `verbose` is set to `true`.
@@ -175,6 +176,7 @@ export class TgdContext extends TgdPainterGroup {
         super()
         this.verbose = options.verbose ?? true
         const gl = this.createWebGLContext()
+        this.extensions = new TgdExtensions(gl)
         this.initialize = options.initialize
         canvas.addEventListener(
             "webglcontextlost",
@@ -218,9 +220,6 @@ export class TgdContext extends TgdPainterGroup {
         this.resolution = options.resolution ?? 1
         if (this.resolution <= 0) {
             this.resolution = TgdContext.devicePixelRatio ?? 1
-        }
-        if (options.enableTextureFloatStorage) {
-            gl.getExtension("EXT_color_buffer_float")
         }
         this.implementationColorReadFormat = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT) as number
         this.implementationColorReadType = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE) as number
@@ -477,7 +476,7 @@ export class TgdContext extends TgdPainterGroup {
      * @param restorationDelayInMilliseconds Time, in milliseconds, before the context is restored.
      */
     loseContext(restorationDelayInMilliseconds = 1000) {
-        const ext = this.gl.getExtension("WEBGL_lose_context")
+        const ext = this.extensions.WEBGL_lose_context
         if (ext) {
             ext.loseContext()
             globalThis.setTimeout(() => {
@@ -657,9 +656,6 @@ export class TgdContext extends TgdPainterGroup {
         this.resolution = options.resolution ?? 1
         if (this.resolution <= 0) {
             this.resolution = TgdContext.devicePixelRatio ?? 1
-        }
-        if (options.enableTextureFloatStorage) {
-            gl.getExtension("EXT_color_buffer_float")
         }
         this.stateReset()
         return gl
