@@ -1,8 +1,0 @@
-export * from "@/painter/background"
-export * from "../../src/painter/clear"
-export * from "../../src/painter/group"
-export * from "./isometric"
-export * from "../../src/painter/logic"
-export * from "../../src/painter/painter"
-export * from "./primitive"
-// export * from "./sprites"
