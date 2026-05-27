@@ -274,7 +274,7 @@ export class TgdContext extends TgdPainterGroup {
 	}
 
 	get isDeleted() {
-		return !!this._gl
+		return !this._gl
 	}
 
 	viewportExec(

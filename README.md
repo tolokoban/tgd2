@@ -20,7 +20,7 @@ npm start
 
 ## Release notes
 
-### v2.0.138
+### v2.0.139
 
 - Fix a bug in TgdContext related to `isDeleted`.
 
