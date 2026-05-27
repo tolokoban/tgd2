@@ -1,21 +1,30 @@
 import { TgdLogger } from "@tgd/log"
+import { nextId } from "@tgd/utils/id"
 
 export type TgdDebugPainterHierarchy = Record<string, TgdDebugPainterHierarchy[] | null>
 
 export abstract class TgdPainter {
     static readonly log = new TgdLogger()
 
-    protected static counter = 0
-
-    public readonly id = TgdPainter.counter++
+    public readonly id = nextId()
 
     /**
      * This attribute has no other purpose than debugging.
      * Its value is not used by Tgd.
      */
-    public name = `Painter/${this.id}`
+    public name = `${this.id} Painter`
 
     public active = true
+
+    constructor(name?: string) {
+        if (name) this.name = `${this.id} ${name}`
+    }
+
+    get nameUniq() {
+        const { name, id } = this
+        if (name.startsWith(id)) return name
+        return `${id} ${name}`
+    }
 
     abstract delete(): void
 

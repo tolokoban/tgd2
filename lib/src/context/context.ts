@@ -3,15 +3,16 @@ import { TgdConsole } from "@tgd/debug"
 import { TgdInputs } from "@tgd/input"
 import { TgdTime } from "@tgd/time"
 import type { TgdPainterFunction } from "@tgd/types/painter"
+import { nextId } from "@tgd/utils/id"
 import { TgdEvent } from "../event"
 import { TgdPainterGroup } from "../painter/group"
 import type { TgdAnimation } from "../types/animation"
 import { webglLookup } from "../utils"
 import { TgdManagerAnimation } from "./animation/animation-manager"
 import { Console } from "./console"
+import { TgdExtensions } from "./extensions"
 import { UniformBufferObjectsManager } from "./ubo-manager"
 import { WebglParams } from "./webgl-params"
-import { TgdExtensions } from "./extensions"
 
 /**
  * You can pass all the attributes of the [WebGL2ContextAttributes](https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext)
@@ -19,45 +20,50 @@ import { TgdExtensions } from "./extensions"
  * @see {@link TgdContext}
  */
 export type TgdContextOptions = WebGLContextAttributes & {
-    /**
-     * You can override the behaviour for when a resize event occurs,
-     * by providing a callback `onResize(...)`.
-     *
-     * By default, this is what will happen:
-     * ```
-     * gl.canvas.width = width
-     * gl.canvas.height = height
-     * gl.viewport(0, 0, width, height)
-     * ```
-     */
-    onResize?(this: void, context: TgdContext, width: number, height: number): void
-    name?: string
-    camera?: TgdCamera
-    /**
-     * Function to initialize the context.
-     *
-     * If defined, it will be automatically called at the end of the construction process
-     * and after a WebGL context restore.
-     */
-    initialize?: (context: TgdContext) => void
-    /**
-     * Size of a pixel.
-     *  - Use values over 1.0 for retina screens.
-     *  - Under 1, you will start to have pixelated render.
-     *
-     * Defaut to 1.
-     *
-     * If you give a null or negative value, `globalThis.devicePixelRatio`
-     * will be used.
-     */
-    resolution?: number
-    /**
-     * TGD will write error and warning messages to the console
-     * in case of problems and if `verbose` is set to `true`.
-     *
-     * Defaults to `true`.
-     */
-    verbose?: boolean
+	/**
+	 * You can override the behaviour for when a resize event occurs,
+	 * by providing a callback `onResize(...)`.
+	 *
+	 * By default, this is what will happen:
+	 * ```
+	 * gl.canvas.width = width
+	 * gl.canvas.height = height
+	 * gl.viewport(0, 0, width, height)
+	 * ```
+	 */
+	onResize?(
+		this: void,
+		context: TgdContext,
+		width: number,
+		height: number,
+	): void
+	name?: string
+	camera?: TgdCamera
+	/**
+	 * Function to initialize the context.
+	 *
+	 * If defined, it will be automatically called at the end of the construction process
+	 * and after a WebGL context restore.
+	 */
+	initialize?: (context: TgdContext) => void
+	/**
+	 * Size of a pixel.
+	 *  - Use values over 1.0 for retina screens.
+	 *  - Under 1, you will start to have pixelated render.
+	 *
+	 * Defaut to 1.
+	 *
+	 * If you give a null or negative value, `globalThis.devicePixelRatio`
+	 * will be used.
+	 */
+	resolution?: number
+	/**
+	 * TGD will write error and warning messages to the console
+	 * in case of problems and if `verbose` is set to `true`.
+	 *
+	 * Defaults to `true`.
+	 */
+	verbose?: boolean
 }
 
 /**
@@ -79,655 +85,685 @@ export type TgdContextOptions = WebGLContextAttributes & {
  * ```
  */
 export class TgdContext extends TgdPainterGroup {
-    private static incrementalId = 1
-    /**
-     * Ratio of the resolution in physical pixels to the resolution in CSS pixels
-     * for the current display device.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
-     */
-    public static get devicePixelRatio() {
-        return globalThis.devicePixelRatio ?? 1
-    }
+	private static incrementalId = 1
+	/**
+	 * Ratio of the resolution in physical pixels to the resolution in CSS pixels
+	 * for the current display device.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
+	 */
+	public static get devicePixelRatio() {
+		return globalThis.devicePixelRatio ?? 1
+	}
 
-    public readonly name: string
-    public readonly extensions: TgdExtensions
-    /**
-     * TGD will write error and warning messages to the console
-     * in case of problems and if `verbose` is set to `true`.
-     */
-    public verbose = true
-    public readonly console = new Console(this)
-    public readonly virtualTime: TgdTime
-    public readonly inputs: TgdInputs
-    public readonly webglParams: WebglParams
-    public readonly implementationColorReadFormat: number
-    public readonly implementationColorReadType: number
-    public readonly eventResize = new TgdEvent<{ width: number; height: number }>()
-    /**
-     * Dispatched when everything has been painted.
-     */
-    public readonly eventPaint = new TgdEvent<TgdContext>()
-    /**
-     * Dispatched before anything is painted.
-     */
-    public readonly eventPaintEnter = new TgdEvent<TgdContext>()
-    /**
-     * Dispathed everytime we play or pause the main animation loop (`TgdContext.play()`, `TgdContext.pause()`).
-     */
-    public readonly eventPlayingChange = new TgdEvent<boolean>()
-    /**
-     * When the browser decides to destroy the context.
-     * @see https://wikis.khronos.org/webgl/HandlingContextLost
-     */
-    public readonly eventWebGLContextLost = new TgdEvent<TgdContext>()
-    /**
-     * At the point that setupWebGLStateAndResources is called the browser
-     * has reset all state to the default WebGL state and all previously
-     * allocated resources are invalid. So, you need to re-create textures,
-     * buffers, framebuffers, renderbuffers, shaders, programs,
-     * and setup your state (clearColor, blendFunc, depthFunc, etc...)
-     * @see https://wikis.khronos.org/webgl/HandlingContextLost
-     */
-    public readonly eventWebGLContextRestored = new TgdEvent<TgdContext>()
-    public resolution = 1
-    public readonly uniformBufferObjects = new UniformBufferObjectsManager()
+	public readonly name: string
+	public readonly extensions: TgdExtensions
+	/**
+	 * TGD will write error and warning messages to the console
+	 * in case of problems and if `verbose` is set to `true`.
+	 */
+	public verbose = true
+	public readonly console = new Console(this)
+	public readonly virtualTime: TgdTime
+	public readonly inputs: TgdInputs
+	public readonly webglParams: WebglParams
+	public readonly implementationColorReadFormat: number
+	public readonly implementationColorReadType: number
+	public readonly eventResize = new TgdEvent<{
+		width: number
+		height: number
+	}>()
+	/**
+	 * Dispatched when everything has been painted.
+	 */
+	public readonly eventPaint = new TgdEvent<TgdContext>()
+	/**
+	 * Dispatched before anything is painted.
+	 */
+	public readonly eventPaintEnter = new TgdEvent<TgdContext>()
+	/**
+	 * Dispathed everytime we play or pause the main animation loop (`TgdContext.play()`, `TgdContext.pause()`).
+	 */
+	public readonly eventPlayingChange = new TgdEvent<boolean>()
+	/**
+	 * When the browser decides to destroy the context.
+	 * @see https://wikis.khronos.org/webgl/HandlingContextLost
+	 */
+	public readonly eventWebGLContextLost = new TgdEvent<TgdContext>()
+	/**
+	 * At the point that setupWebGLStateAndResources is called the browser
+	 * has reset all state to the default WebGL state and all previously
+	 * allocated resources are invalid. So, you need to re-create textures,
+	 * buffers, framebuffers, renderbuffers, shaders, programs,
+	 * and setup your state (clearColor, blendFunc, depthFunc, etc...)
+	 * @see https://wikis.khronos.org/webgl/HandlingContextLost
+	 */
+	public readonly eventWebGLContextRestored = new TgdEvent<TgdContext>()
+	public resolution = 1
+	public readonly uniformBufferObjects = new UniformBufferObjectsManager()
 
-    private _gl: WebGL2RenderingContext | null = null
-    /**
-     * If this function is set, it will be called once at the end of the next repaint.
-     * This is useful for snapshots.
-     */
-    private doSnapshot: null | (() => void) = null
-    private _camera: TgdCamera = new TgdCameraPerspective({
-        transfo: { distance: 10 },
-        far: 100,
-        near: 0.1,
-        fovy: Math.PI / 8,
-        zoom: 1,
-    })
-    private _width = 0
-    private _height = 0
-    private _fps = 0
-    private _aspectRatio = 1
-    private _aspectRatioInverse = 1
-    private readonly observer: ResizeObserver
-    private paintingIsOngoing = false
-    // We need to start another paiting after the current one is finished
-    private paintingIsQueued = false
-    private isPlaying = false
-    private requestAnimationFrame = -1
-    // Last time the context has been painted.
-    private lastTimeInSec = -1
-    private readonly animationManager = new TgdManagerAnimation(this)
-    // Used to store result of gl.readPixels() for one pixel.
-    private readonly readPixelColor = new Uint8Array(4)
-    // Function to call after WebGL context restore.
-    private readonly initialize?: (context: TgdContext) => void
-    private readonly oneTimePainters = new Set<{ paint: TgdPainterFunction }>()
-    /** When the context has been deleted, this is `true` and you can read it with `context.isDeleted`. */
+	private _gl: WebGL2RenderingContext | null = null
+	/**
+	 * If this function is set, it will be called once at the end of the next repaint.
+	 * This is useful for snapshots.
+	 */
+	private doSnapshot: null | (() => void) = null
+	private _camera: TgdCamera = new TgdCameraPerspective({
+		transfo: { distance: 10 },
+		far: 100,
+		near: 0.1,
+		fovy: Math.PI / 8,
+		zoom: 1,
+	})
+	private _width = 0
+	private _height = 0
+	private _fps = 0
+	private _aspectRatio = 1
+	private _aspectRatioInverse = 1
+	private readonly observer: ResizeObserver
+	private paintingIsOngoing = false
+	// We need to start another paiting after the current one is finished
+	private paintingIsQueued = false
+	private isPlaying = false
+	private requestAnimationFrame = -1
+	// Last time the context has been painted.
+	private lastTimeInSec = -1
+	private readonly animationManager = new TgdManagerAnimation(this)
+	// Used to store result of gl.readPixels() for one pixel.
+	private readonly readPixelColor = new Uint8Array(4)
+	// Function to call after WebGL context restore.
+	private readonly initialize?: (context: TgdContext) => void
+	private readonly oneTimePainters = new Set<{ paint: TgdPainterFunction }>()
+	/** When the context has been deleted, this is `true` and you can read it with `context.isDeleted`. */
 
-    /**
-     * @param canvas The canvas to which attach a WebGL2 context.
-     * @see {@link TgdContextOptions}
-     */
-    constructor(
-        public readonly canvas: HTMLCanvasElement | OffscreenCanvas,
-        public readonly options: Readonly<TgdContextOptions> = {},
-    ) {
-        super()
-        this.verbose = options.verbose ?? true
-        const gl = this.createWebGLContext()
-        this.extensions = new TgdExtensions(gl)
-        this.initialize = options.initialize
-        canvas.addEventListener(
-            "webglcontextlost",
-            (evt) => {
-                TgdConsole.debug(
-                    {
-                        text: "[TgdContext]",
-                        color: "#fffe",
-                        background: "#a00",
-                    },
-                    ` WebGL context has been lost! ${evt instanceof WebGLContextEvent ? evt.statusMessage : evt}`,
-                )
-                // @see https://wikis.khronos.org/webgl/HandlingContextLost
-                evt.preventDefault()
-                this.delete({ preserveContextLostEvents: true })
-                this.eventWebGLContextLost.dispatch(this)
-            },
-            false,
-        )
-        canvas.addEventListener(
-            "webglcontextrestored",
-            () => {
-                TgdConsole.debug(
-                    {
-                        text: "[TgdContext]",
-                        color: "#000e",
-                        background: "#0f0",
-                    },
-                    " WebGL context has been restored",
-                )
-                const { initialize } = this
-                if (initialize) {
-                    this.createWebGLContext()
-                    initialize(this)
-                }
-                this.eventWebGLContextRestored.dispatch(this)
-            },
-            false,
-        )
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
-        this.resolution = options.resolution ?? 1
-        if (this.resolution <= 0) {
-            this.resolution = TgdContext.devicePixelRatio ?? 1
-        }
-        this.implementationColorReadFormat = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT) as number
-        this.implementationColorReadType = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE) as number
-        this._gl = gl
-        this.observer = new ResizeObserver(() => {
-            const width = isOffscreen(canvas) ? canvas.width : canvas.clientWidth * this.resolution
-            const height = isOffscreen(canvas) ? canvas.width : canvas.clientHeight * this.resolution
-            const { onResize } = options
-            if (onResize) {
-                if (!isOffscreen(canvas)) {
-                    onResize(this, canvas.clientWidth, canvas.clientHeight)
-                }
-            } else {
-                canvas.width = width
-                canvas.height = height
-            }
-            this.eventResize.dispatch({ width, height })
-            this.paint()
-        })
-        if (isOffscreen(canvas)) {
-            this.inputs = new TgdInputs()
-        } else {
-            this.observer.observe(canvas)
-            this.inputs = new TgdInputs(canvas)
-            // Prevent system gestures.
-            canvas.style.touchAction = "none"
-        }
-        if (options.camera) this._camera = options.camera
-        this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
-        this.stateReset()
-        this.webglParams = new WebglParams(gl)
-        this.virtualTime = new TgdTime()
-        this.console.debug(`[TgdContext/${this.name}] New:`, options)
-    }
+	/**
+	 * @param canvas The canvas to which attach a WebGL2 context.
+	 * @see {@link TgdContextOptions}
+	 */
+	constructor(
+		public readonly canvas: HTMLCanvasElement | OffscreenCanvas,
+		public readonly options: Readonly<TgdContextOptions> = {},
+	) {
+		super({ name: options.name })
+		this.verbose = options.verbose ?? false
+		const gl = this.createWebGLContext()
+		this.extensions = new TgdExtensions(gl)
+		this.initialize = options.initialize
+		canvas.addEventListener(
+			"webglcontextlost",
+			(evt) => {
+				TgdConsole.debug(
+					{
+						text: "[TgdContext]",
+						color: "#fffe",
+						background: "#a00",
+					},
+					` WebGL context has been lost! ${evt instanceof WebGLContextEvent ? evt.statusMessage : evt}`,
+				)
+				// @see https://wikis.khronos.org/webgl/HandlingContextLost
+				evt.preventDefault()
+				this.delete({ preserveContextLostEvents: true })
+				this.eventWebGLContextLost.dispatch(this)
+			},
+			false,
+		)
+		canvas.addEventListener(
+			"webglcontextrestored",
+			() => {
+				TgdConsole.debug(
+					{
+						text: "[TgdContext]",
+						color: "#000e",
+						background: "#0f0",
+					},
+					" WebGL context has been restored",
+				)
+				const { initialize } = this
+				if (initialize) {
+					this.createWebGLContext()
+					initialize(this)
+				}
+				this.eventWebGLContextRestored.dispatch(this)
+			},
+			false,
+		)
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+		this.resolution = options.resolution ?? 1
+		if (this.resolution <= 0) {
+			this.resolution = TgdContext.devicePixelRatio ?? 1
+		}
+		this.implementationColorReadFormat = gl.getParameter(
+			gl.IMPLEMENTATION_COLOR_READ_FORMAT,
+		) as number
+		this.implementationColorReadType = gl.getParameter(
+			gl.IMPLEMENTATION_COLOR_READ_TYPE,
+		) as number
+		this._gl = gl
+		this.observer = new ResizeObserver(() => {
+			const width = isOffscreen(canvas)
+				? canvas.width
+				: canvas.clientWidth * this.resolution
+			const height = isOffscreen(canvas)
+				? canvas.width
+				: canvas.clientHeight * this.resolution
+			const { onResize } = options
+			if (onResize) {
+				if (!isOffscreen(canvas)) {
+					onResize(this, canvas.clientWidth, canvas.clientHeight)
+				}
+			} else {
+				canvas.width = width
+				canvas.height = height
+			}
+			this.eventResize.dispatch({ width, height })
+			this.paint()
+		})
+		if (isOffscreen(canvas)) {
+			this.inputs = new TgdInputs()
+		} else {
+			this.observer.observe(canvas)
+			this.inputs = new TgdInputs(canvas)
+			// Prevent system gestures.
+			canvas.style.touchAction = "none"
+		}
+		if (options.camera) this._camera = options.camera
+		this.name = options.name ?? `Context#${TgdContext.incrementalId++}`
+		this.stateReset()
+		this.webglParams = new WebglParams(gl)
+		this.virtualTime = new TgdTime()
+		this.console.debug(`[TgdContext/${this.name}] New:`, options)
+	}
 
-    get isDeleted() { return !!this._gl }
+	get isDeleted() {
+		return !!this._gl
+	}
 
-    viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
-        const { webglParams, camera } = this
-        const savedWidth = this.width
-        const savedHeight = this.height
-        const savedViewport = webglParams.viewport
-        const savedScissor = webglParams.scissor
-        const savedScissorTest = webglParams.scissorTest
-        const savedAspectRatio = this.width / this.height
-        const savedAspectRatioInverse = 1 / savedAspectRatio
-        const { x = 0, y = 0, width = savedWidth, height = savedHeight } = viewport
-        this.width = width
-        this.height = height
-        this._aspectRatio = width / height
-        this._aspectRatioInverse = 1 / this._aspectRatio
-        webglParams.setViewport(x, y, width, height)
-        webglParams.scissorTest = true
-        webglParams.scissor = [x, y, width, height]
-        if (camera) {
-            camera.screenWidth = width
-            camera.screenHeight = height
-        }
-        action()
-        if (camera) {
-            camera.screenWidth = savedWidth
-            camera.screenHeight = savedHeight
-        }
-        webglParams.scissorTest = savedScissorTest
-        webglParams.scissor = savedScissor
-        webglParams.viewport = savedViewport
-        this._aspectRatio = savedAspectRatio
-        this._aspectRatioInverse = savedAspectRatioInverse
-        this.width = savedWidth
-        this.height = savedHeight
-    }
+	viewportExec(
+		action: () => void,
+		viewport: Partial<{ x: number; y: number; width: number; height: number }>,
+	) {
+		const { webglParams, camera } = this
+		const savedWidth = this.width
+		const savedHeight = this.height
+		const savedViewport = webglParams.viewport
+		const savedScissor = webglParams.scissor
+		const savedScissorTest = webglParams.scissorTest
+		const savedAspectRatio = this.width / this.height
+		const savedAspectRatioInverse = 1 / savedAspectRatio
+		const { x = 0, y = 0, width = savedWidth, height = savedHeight } = viewport
+		this.width = width
+		this.height = height
+		this._aspectRatio = width / height
+		this._aspectRatioInverse = 1 / this._aspectRatio
+		webglParams.setViewport(x, y, width, height)
+		webglParams.scissorTest = true
+		webglParams.scissor = [x, y, width, height]
+		if (camera) {
+			camera.screenWidth = width
+			camera.screenHeight = height
+		}
+		action()
+		if (camera) {
+			camera.screenWidth = savedWidth
+			camera.screenHeight = savedHeight
+		}
+		webglParams.scissorTest = savedScissorTest
+		webglParams.scissor = savedScissor
+		webglParams.viewport = savedViewport
+		this._aspectRatio = savedAspectRatio
+		this._aspectRatioInverse = savedAspectRatioInverse
+		this.width = savedWidth
+		this.height = savedHeight
+	}
 
-    get gl(): WebGL2RenderingContext {
-        if (!this._gl) {
-            throw new Error(`[TgdContext] This context has been deleted: ${this.name}!`)
-        }
-        return this._gl
-    }
+	get gl(): WebGL2RenderingContext {
+		if (!this._gl) {
+			throw new Error(
+				`[TgdContext] This context has been deleted: ${this.name}!`,
+			)
+		}
+		return this._gl
+	}
 
-    get fps() {
-        return this._fps
-    }
+	get fps() {
+		return this._fps
+	}
 
-    get time() {
-        return this.lastTimeInSec
-    }
+	get time() {
+		return this.lastTimeInSec
+	}
 
-    get camera() {
-        return this._camera
-    }
+	get camera() {
+		return this._camera
+	}
 
-    set camera(camera: TgdCamera) {
-        if (camera === this._camera) return
+	set camera(camera: TgdCamera) {
+		if (camera === this._camera) return
 
-        this._camera = camera
-        camera.screenWidth = this.width
-        camera.screenHeight = this.height
-    }
+		this._camera = camera
+		camera.screenWidth = this.width
+		camera.screenHeight = this.height
+	}
 
-    /**
-     * Check if the last WebGL command has returned an error.
-     * If an error has been found, output `caption` to the console (if verbose is true)
-     * and execute `action()`.
-     * Do not use this function in a loop because it is slow.
-     * @returns `true` is an error has been detected.
-     */
-    checkError(caption: string, action?: () => void) {
-        const { gl } = this
-        const error = gl.getError()
-        if (error !== gl.NO_ERROR && error !== gl.CONTEXT_LOST_WEBGL) {
-            this.console.error(`WebGL Error in ${caption}:`, webglLookup(error))
-            action?.()
-            return true
-        }
-        return false
-    }
+	/**
+	 * Check if the last WebGL command has returned an error.
+	 * If an error has been found, output `caption` to the console (if verbose is true)
+	 * and execute `action()`.
+	 * Do not use this function in a loop because it is slow.
+	 * @returns `true` is an error has been detected.
+	 */
+	checkError(caption: string, action?: () => void) {
+		const { gl } = this
+		const error = gl.getError()
+		if (error !== gl.NO_ERROR && error !== gl.CONTEXT_LOST_WEBGL) {
+			this.console.error(`WebGL Error in ${caption}:`, webglLookup(error))
+			action?.()
+			return true
+		}
+		return false
+	}
 
-    animSchedule(...animations: TgdAnimation[]): TgdAnimation[] {
-        const result: TgdAnimation[] = []
-        let delay = 0
-        for (const animation of animations) {
-            const duration = animation.duration + (animation.delay ?? 0)
-            animation.delay = delay + (animation.delay ?? 0)
-            delay += duration
-            result.push(this.animationManager.schedule(animation))
-        }
-        this.paint()
-        return result
-    }
+	animSchedule(...animations: TgdAnimation[]): TgdAnimation[] {
+		const result: TgdAnimation[] = []
+		let delay = 0
+		for (const animation of animations) {
+			const duration = animation.duration + (animation.delay ?? 0)
+			animation.delay = delay + (animation.delay ?? 0)
+			delay += duration
+			result.push(this.animationManager.schedule(animation))
+		}
+		this.paint()
+		return result
+	}
 
-    animCancel(animation: TgdAnimation) {
-        this.animationManager.cancel(animation)
-    }
+	animCancel(animation: TgdAnimation) {
+		this.animationManager.cancel(animation)
+	}
 
-    animCancelArray(animations: TgdAnimation[]) {
-        for (const animation of animations) this.animationManager.cancel(animation)
-    }
+	animCancelArray(animations: TgdAnimation[]) {
+		for (const animation of animations) this.animationManager.cancel(animation)
+	}
 
-    animDebug(caption?: string) {
-        this.animationManager.debug(caption)
-    }
+	animDebug(caption?: string) {
+		this.animationManager.debug(caption)
+	}
 
-    get width() {
-        return this._width
-    }
-    private set width(width: number) {
-        this._width = width
-    }
+	get width() {
+		return this._width
+	}
+	private set width(width: number) {
+		this._width = width
+	}
 
-    get height() {
-        return this._height
-    }
-    private set height(height: number) {
-        this._height = height
-    }
+	get height() {
+		return this._height
+	}
+	private set height(height: number) {
+		this._height = height
+	}
 
-    get aspectRatio() {
-        return this._aspectRatio
-    }
+	get aspectRatio() {
+		return this._aspectRatio
+	}
 
-    get aspectRatioInverse() {
-        return this._aspectRatioInverse
-    }
+	get aspectRatioInverse() {
+		return this._aspectRatioInverse
+	}
 
-    set aspectRatio(aspectRatio: number) {
-        this._aspectRatio = aspectRatio
-        this._aspectRatioInverse = 1 / aspectRatio
-    }
+	set aspectRatio(aspectRatio: number) {
+		this._aspectRatio = aspectRatio
+		this._aspectRatioInverse = 1 / aspectRatio
+	}
 
-    /**
-     * Is the animation playing?
-     */
-    get playing() {
-        return this.isPlaying
-    }
-    /**
-     * If `playing` is true, the method `paint()` will be called
-     * for every animation frame.
-     * @see paint()
-     */
-    set playing(value: boolean) {
-        if (value === this.isPlaying) return
+	/**
+	 * Is the animation playing?
+	 */
+	get playing() {
+		return this.isPlaying
+	}
+	/**
+	 * If `playing` is true, the method `paint()` will be called
+	 * for every animation frame.
+	 * @see paint()
+	 */
+	set playing(value: boolean) {
+		if (value === this.isPlaying) return
 
-        if (!value) {
-            this.paintingIsOngoing = false
-            this.paintingIsQueued = false
-            globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-            this.requestAnimationFrame = -1
-        }
-        this.isPlaying = value
-        this.eventPlayingChange.dispatch(value)
-        /**
-         * Even when pausing, we want to paint a last time.
-         * This will be helpful for TgdTime, for instance.
-         */
-        this.paint()
-    }
+		if (!value) {
+			this.paintingIsOngoing = false
+			this.paintingIsQueued = false
+			globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+			this.requestAnimationFrame = -1
+		}
+		this.isPlaying = value
+		this.eventPlayingChange.dispatch(value)
+		/**
+		 * Even when pausing, we want to paint a last time.
+		 * This will be helpful for TgdTime, for instance.
+		 */
+		this.paint()
+	}
 
-    /**
-     * Start the animation.
-     * You can achieve the same result with `context.playing = true`.
-     *
-     * @see playing
-     */
-    play() {
-        this.playing = true
-    }
+	/**
+	 * Start the animation.
+	 * You can achieve the same result with `context.playing = true`.
+	 *
+	 * @see playing
+	 */
+	play() {
+		this.playing = true
+	}
 
-    /**
-     * Pause the animation.
-     * You can achieve the same result with `context.playing = false`.
-     *
-     * @see playing
-     */
-    pause() {
-        this.playing = false
-    }
+	/**
+	 * Pause the animation.
+	 * You can achieve the same result with `context.playing = false`.
+	 *
+	 * @see playing
+	 */
+	pause() {
+		this.playing = false
+	}
 
-    takeSnapshot(): Promise<HTMLImageElement> {
-        const { canvas } = this
-        const img = new Image()
-        return new Promise((resolve) => {
-            const blobToImage = (blob: Blob | null) => {
-                if (!blob) {
-                    resolve(img)
-                    return
-                }
-                const url = URL.createObjectURL(blob)
-                img.src = url
-                // eslint-disable-next-line unicorn/prefer-add-event-listener
-                img.onload = () => resolve(img)
-            }
-            this.doSnapshot = () => {
-                if (isOffscreen(canvas)) {
-                    canvas
-                        .convertToBlob()
-                        .then(blobToImage)
-                        .catch(() => resolve(img))
-                } else {
-                    canvas.toBlob(blobToImage)
-                }
-            }
-        })
-    }
+	takeSnapshot(): Promise<HTMLImageElement> {
+		const { canvas } = this
+		const img = new Image()
+		return new Promise((resolve) => {
+			const blobToImage = (blob: Blob | null) => {
+				if (!blob) {
+					resolve(img)
+					return
+				}
+				const url = URL.createObjectURL(blob)
+				img.src = url
+				// eslint-disable-next-line unicorn/prefer-add-event-listener
+				img.onload = () => resolve(img)
+			}
+			this.doSnapshot = () => {
+				if (isOffscreen(canvas)) {
+					canvas
+						.convertToBlob()
+						.then(blobToImage)
+						.catch(() => resolve(img))
+				} else {
+					canvas.toBlob(blobToImage)
+				}
+			}
+		})
+	}
 
-    lookupWebglConstant(value: number): string {
-        const { gl } = this
-        for (const key in gl) {
-            if (gl[key as keyof WebGL2RenderingContext] === value) return key
-        }
-        return `Unknown gl[${value}]`
-    }
+	lookupWebglConstant(value: number): string {
+		const { gl } = this
+		for (const key in gl) {
+			if (gl[key as keyof WebGL2RenderingContext] === value) return key
+		}
+		return `Unknown gl[${value}]`
+	}
 
-    /**
-     * Helper to test a context lost situation.
-     * @param restorationDelayInMilliseconds Time, in milliseconds, before the context is restored.
-     */
-    loseContext(restorationDelayInMilliseconds = 1000) {
-        const ext = this.extensions.WEBGL_lose_context
-        if (ext) {
-            ext.loseContext()
-            globalThis.setTimeout(() => {
-                ext.restoreContext()
-            }, restorationDelayInMilliseconds)
-        }
-    }
+	/**
+	 * Helper to test a context lost situation.
+	 * @param restorationDelayInMilliseconds Time, in milliseconds, before the context is restored.
+	 */
+	loseContext(restorationDelayInMilliseconds = 1000) {
+		const ext = this.extensions.WEBGL_lose_context
+		if (ext) {
+			ext.loseContext()
+			globalThis.setTimeout(() => {
+				ext.restoreContext()
+			}, restorationDelayInMilliseconds)
+		}
+	}
 
-    /**
-     * Most of the painters rely on the current viewport which is based on the canvas size.
-     * But if you want to paint in a framebuffer, you may want to use the texture widt/height
-     * instead.
-     */
-    paintInCustomSize(width: number, height: number, paint: () => void) {
-        const { width: savedWidth, height: savedHeight } = this
-        this.setCurrentSize(width, height)
-        paint()
-        this.setCurrentSize(savedWidth, savedHeight)
-    }
+	/**
+	 * Most of the painters rely on the current viewport which is based on the canvas size.
+	 * But if you want to paint in a framebuffer, you may want to use the texture widt/height
+	 * instead.
+	 */
+	paintInCustomSize(width: number, height: number, paint: () => void) {
+		const { width: savedWidth, height: savedHeight } = this
+		this.setCurrentSize(width, height)
+		paint()
+		this.setCurrentSize(savedWidth, savedHeight)
+	}
 
-    private setCurrentSize(width: number, height: number) {
-        this.width = width
-        this.height = height
-        this.camera.screenWidth = this.width
-        this.camera.screenHeight = this.height
-        this.aspectRatio = this.width / this.height
-        this.webglParams.setViewport(0, 0, this.width, this.height)
-    }
+	private setCurrentSize(width: number, height: number) {
+		this.width = width
+		this.height = height
+		this.camera.screenWidth = this.width
+		this.camera.screenHeight = this.height
+		this.aspectRatio = this.width / this.height
+		this.webglParams.setViewport(0, 0, this.width, this.height)
+	}
 
-    /**
-     * When you need a painter to be painted only one time.
-     *
-     * These painters will be painted before all the recurrent ones during next repaint.
-     * The main purpose of this function is to use it with framebuffers that will
-     * update textures that could be used in normal paintings.
-     */
-    readonly paintOneTime = (...painters: Array<{ paint: TgdPainterFunction }>) => {
-        for (const painter of painters) {
-            this.oneTimePainters.add(painter)
-        }
-        this.paint()
-    }
+	/**
+	 * When you need a painter to be painted only one time.
+	 *
+	 * These painters will be painted before all the recurrent ones during next repaint.
+	 * The main purpose of this function is to use it with framebuffers that will
+	 * update textures that could be used in normal paintings.
+	 */
+	readonly paintOneTime = (
+		...painters: Array<{ paint: TgdPainterFunction }>
+	) => {
+		for (const painter of painters) {
+			this.oneTimePainters.add(painter)
+		}
+		this.paint()
+	}
 
-    /**
-     * Trigger the painters to render the scene.
-     */
-    readonly paint = () => {
-        if (this.paintingIsOngoing) {
-            this.paintingIsQueued = true
-        } else {
-            this.paintingIsQueued = false
-            this.paintingIsOngoing = true
-            globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-            this.requestAnimationFrame = globalThis.requestAnimationFrame(this.actualPaint)
-        }
-    }
+	/**
+	 * Trigger the painters to render the scene.
+	 */
+	readonly paint = () => {
+		if (this.paintingIsOngoing) {
+			this.paintingIsQueued = true
+		} else {
+			this.paintingIsQueued = false
+			this.paintingIsOngoing = true
+			globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+			this.requestAnimationFrame = globalThis.requestAnimationFrame(
+				this.actualPaint,
+			)
+		}
+	}
 
-    private now() {
-        return Date.now() * 1e-3
-    }
+	private now() {
+		return Date.now() * 1e-3
+	}
 
-    private readonly actualPaint = (time: number) => {
-        if (this.isDeleted) return
+	private readonly actualPaint = (time: number) => {
+		if (this.isDeleted) return
 
-        const timeInSec = time * 1e-3
-        if (this.lastTimeInSec < 0) {
-            this.lastTimeInSec = timeInSec
-            this.paintingIsOngoing = false
-            this.paintingIsQueued = false
-            // First frame, let's skip it to get better timing.
-            this.paint()
-            return
-        }
-        try {
-            const { gl } = this
-            this.virtualTime.update(this)
-            this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
-            this.eventPaintEnter.dispatch(this)
-            const delayInSec = timeInSec - this.lastTimeInSec
-            this._fps = Math.round(1 / delayInSec)
-            this.lastTimeInSec = timeInSec
-            for (const oneTimePainter of this.oneTimePainters) {
-                oneTimePainter.paint(timeInSec, delayInSec)
-            }
-            this.oneTimePainters.clear()
-            super.paint(timeInSec, delayInSec)
-            if (this.animationManager.paint(timeInSec) || this.paintingIsQueued || this.isPlaying) {
-                this.paintingIsOngoing = false
-                this.paint()
-            }
-            this.eventPaint.dispatch(this)
-        } catch (error) {
-            this.console.error(error)
-            this.pause()
-        } finally {
-            this.paintingIsOngoing = false
-            this.doSnapshot?.()
-        }
-    }
+		const timeInSec = time * 1e-3
+		if (this.lastTimeInSec < 0) {
+			this.lastTimeInSec = timeInSec
+			this.paintingIsOngoing = false
+			this.paintingIsQueued = false
+			// First frame, let's skip it to get better timing.
+			this.paint()
+			return
+		}
+		try {
+			const { gl } = this
+			this.virtualTime.update(this)
+			this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
+			this.eventPaintEnter.dispatch(this)
+			const delayInSec = timeInSec - this.lastTimeInSec
+			this._fps = Math.round(1 / delayInSec)
+			this.lastTimeInSec = timeInSec
+			for (const oneTimePainter of this.oneTimePainters) {
+				oneTimePainter.paint(timeInSec, delayInSec)
+			}
+			this.oneTimePainters.clear()
+			super.paint(timeInSec, delayInSec)
+			if (
+				this.animationManager.paint(timeInSec) ||
+				this.paintingIsQueued ||
+				this.isPlaying
+			) {
+				this.paintingIsOngoing = false
+				this.paint()
+			}
+			this.eventPaint.dispatch(this)
+		} catch (error) {
+			this.console.error(error)
+			this.pause()
+		} finally {
+			this.paintingIsOngoing = false
+			this.doSnapshot?.()
+		}
+	}
 
-    /**
-     * Read the color of a pixel as a Uint8Array of size 4.
-     *
-     * Don't forget to use `preserveDrawingBuffer: true` in the creation options
-     * of the WebGL context.
-     *
-     * @param xScreen From -1 (left) to +1 (right)
-     * @param yScreen From -1 (bottom) to +1 (top)
-     * @returns The color of a pixel
-     */
-    readPixel(xScreen: number, yScreen: number): Readonly<Uint8Array> {
-        const { gl } = this
-        const pixelX = Math.round(0.5 * (xScreen + 1) * gl.drawingBufferWidth)
-        const pixelY = Math.round(0.5 * (yScreen + 1) * gl.drawingBufferHeight)
-        gl.readPixels(
-            pixelX,
-            pixelY,
-            1, // width
-            1, // height
-            gl.RGBA, // format
-            gl.UNSIGNED_BYTE, // type
-            this.readPixelColor,
-        )
-        return this.readPixelColor
-    }
+	/**
+	 * Read the color of a pixel as a Uint8Array of size 4.
+	 *
+	 * Don't forget to use `preserveDrawingBuffer: true` in the creation options
+	 * of the WebGL context.
+	 *
+	 * @param xScreen From -1 (left) to +1 (right)
+	 * @param yScreen From -1 (bottom) to +1 (top)
+	 * @returns The color of a pixel
+	 */
+	readPixel(xScreen: number, yScreen: number): Readonly<Uint8Array> {
+		const { gl } = this
+		const pixelX = Math.round(0.5 * (xScreen + 1) * gl.drawingBufferWidth)
+		const pixelY = Math.round(0.5 * (yScreen + 1) * gl.drawingBufferHeight)
+		gl.readPixels(
+			pixelX,
+			pixelY,
+			1, // width
+			1, // height
+			gl.RGBA, // format
+			gl.UNSIGNED_BYTE, // type
+			this.readPixelColor,
+		)
+		return this.readPixelColor
+	}
 
-    delete({
-        preserveContextLostEvents = false,
-    }: {
-        preserveContextLostEvents?: boolean
-    } = {}) {
-        this.eventPaint.removeAllListeners()
-        if (!preserveContextLostEvents) {
-            this.eventWebGLContextLost.removeAllListeners()
-            this.eventWebGLContextRestored.removeAllListeners()
-        }
-        this.inputs.keyboard.detach()
-        this.inputs.pointer.detach()
-        this.pause()
-        if (!isOffscreen(this.canvas)) {
-            this.observer.unobserve(this.canvas)
-        }
-        super.delete()
-        this._gl = null
-        this.console.debug(`[TgdContext/${this.name}] Delete`)
-        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
-    }
+	delete({
+		preserveContextLostEvents = false,
+	}: {
+		preserveContextLostEvents?: boolean
+	} = {}) {
+		this.eventPaint.removeAllListeners()
+		if (!preserveContextLostEvents) {
+			this.eventWebGLContextLost.removeAllListeners()
+			this.eventWebGLContextRestored.removeAllListeners()
+		}
+		this.inputs.keyboard.detach()
+		this.inputs.pointer.detach()
+		this.pause()
+		if (!isOffscreen(this.canvas)) {
+			this.observer.unobserve(this.canvas)
+		}
+		super.delete()
+		this._gl = null
+		this.console.debug(`[TgdContext/${this.name}] Delete`)
+		globalThis.cancelAnimationFrame(this.requestAnimationFrame)
+	}
 
-    private readonly createWebGLContext = () => {
-        const { canvas, options } = this
-        const gl = canvas.getContext("webgl2", options)
-        if (!gl) throw new Error("Unable to create a WebGL2 context!")
+	private readonly createWebGLContext = () => {
+		const { canvas, options } = this
+		const gl = canvas.getContext("webgl2", options)
+		if (!gl) throw new Error("Unable to create a WebGL2 context!")
 
-        this._gl = gl
-        gl.canvas.addEventListener(
-            "webglcontextlost",
-            (evt) => {
-                // @see https://wikis.khronos.org/webgl/HandlingContextLost
-                evt.preventDefault()
-                this.console.error(
-                    "[TgdContext] WebGL context has been lost!",
-                    evt instanceof WebGLContextEvent ? evt.statusMessage : evt,
-                )
-                this.pause()
-                super.delete()
-                this.eventWebGLContextLost.dispatch(this)
-            },
-            false,
-        )
-        gl.canvas.addEventListener(
-            "webglcontextrestored",
-            () => {
-                this.console.info("[TgdContext] WebGL context has been restored.")
-                this.initialize?.(this)
-                this.eventWebGLContextRestored.dispatch(this)
-            },
-            false,
-        )
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
-        this.resolution = options.resolution ?? 1
-        if (this.resolution <= 0) {
-            this.resolution = TgdContext.devicePixelRatio ?? 1
-        }
-        this.stateReset()
-        return gl
-    }
+		this._gl = gl
+		gl.canvas.addEventListener(
+			"webglcontextlost",
+			(evt) => {
+				// @see https://wikis.khronos.org/webgl/HandlingContextLost
+				evt.preventDefault()
+				this.console.error(
+					"[TgdContext] WebGL context has been lost!",
+					evt instanceof WebGLContextEvent ? evt.statusMessage : evt,
+				)
+				this.pause()
+				super.delete()
+				this.eventWebGLContextLost.dispatch(this)
+			},
+			false,
+		)
+		gl.canvas.addEventListener(
+			"webglcontextrestored",
+			() => {
+				this.console.info("[TgdContext] WebGL context has been restored.")
+				this.initialize?.(this)
+				this.eventWebGLContextRestored.dispatch(this)
+			},
+			false,
+		)
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+		this.resolution = options.resolution ?? 1
+		if (this.resolution <= 0) {
+			this.resolution = TgdContext.devicePixelRatio ?? 1
+		}
+		this.stateReset()
+		return gl
+	}
 
-    private stateReset() {
-        const { gl } = this
-        const numberAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) as number
-        const temporary = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, temporary)
-        for (let ii = 0; ii < numberAttribs; ++ii) {
-            gl.disableVertexAttribArray(ii)
-            gl.vertexAttribPointer(ii, 4, gl.FLOAT, false, 0, 0)
-            gl.vertexAttrib1f(ii, 0)
-        }
-        gl.deleteBuffer(temporary)
+	private stateReset() {
+		const { gl } = this
+		const numberAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) as number
+		const temporary = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, temporary)
+		for (let ii = 0; ii < numberAttribs; ++ii) {
+			gl.disableVertexAttribArray(ii)
+			gl.vertexAttribPointer(ii, 4, gl.FLOAT, false, 0, 0)
+			gl.vertexAttrib1f(ii, 0)
+		}
+		gl.deleteBuffer(temporary)
 
-        const numberTextureUnits: number = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) as number
-        for (let ii = 0; ii < numberTextureUnits; ++ii) {
-            gl.activeTexture(gl.TEXTURE0 + ii)
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
-            gl.bindTexture(gl.TEXTURE_2D, null)
-        }
+		const numberTextureUnits: number = gl.getParameter(
+			gl.MAX_TEXTURE_IMAGE_UNITS,
+		) as number
+		for (let ii = 0; ii < numberTextureUnits; ++ii) {
+			gl.activeTexture(gl.TEXTURE0 + ii)
+			gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
+			gl.bindTexture(gl.TEXTURE_2D, null)
+		}
 
-        gl.activeTexture(gl.TEXTURE0)
-        gl.useProgram(null)
-        gl.bindBuffer(gl.ARRAY_BUFFER, null)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
-        gl.disable(gl.BLEND)
-        gl.disable(gl.CULL_FACE)
-        gl.disable(gl.DEPTH_TEST)
-        gl.disable(gl.DITHER)
-        gl.disable(gl.SCISSOR_TEST)
-        gl.blendColor(0, 0, 0, 0)
-        gl.blendEquation(gl.FUNC_ADD)
-        gl.blendFunc(gl.ONE, gl.ZERO)
-        gl.clearColor(0, 0, 0, 0)
-        gl.clearDepth(1)
-        gl.clearStencil(-1)
-        gl.colorMask(true, true, true, true)
-        gl.cullFace(gl.BACK)
-        gl.depthFunc(gl.LESS)
-        gl.depthMask(true)
-        gl.depthRange(0, 1)
-        gl.frontFace(gl.CCW)
-        gl.hint(gl.GENERATE_MIPMAP_HINT, gl.DONT_CARE)
-        gl.lineWidth(1)
-        gl.pixelStorei(gl.PACK_ALIGNMENT, 4)
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4)
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
-        gl.polygonOffset(0, 0)
-        gl.sampleCoverage(1, false)
-        gl.scissor(0, 0, gl.canvas.width, gl.canvas.height)
-        gl.stencilFunc(gl.ALWAYS, 0, 0xffffffff)
-        gl.stencilMask(0xffffffff)
-        gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
+		gl.activeTexture(gl.TEXTURE0)
+		gl.useProgram(null)
+		gl.bindBuffer(gl.ARRAY_BUFFER, null)
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+		gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+		gl.disable(gl.BLEND)
+		gl.disable(gl.CULL_FACE)
+		gl.disable(gl.DEPTH_TEST)
+		gl.disable(gl.DITHER)
+		gl.disable(gl.SCISSOR_TEST)
+		gl.blendColor(0, 0, 0, 0)
+		gl.blendEquation(gl.FUNC_ADD)
+		gl.blendFunc(gl.ONE, gl.ZERO)
+		gl.clearColor(0, 0, 0, 0)
+		gl.clearDepth(1)
+		gl.clearStencil(-1)
+		gl.colorMask(true, true, true, true)
+		gl.cullFace(gl.BACK)
+		gl.depthFunc(gl.LESS)
+		gl.depthMask(true)
+		gl.depthRange(0, 1)
+		gl.frontFace(gl.CCW)
+		gl.hint(gl.GENERATE_MIPMAP_HINT, gl.DONT_CARE)
+		gl.lineWidth(1)
+		gl.pixelStorei(gl.PACK_ALIGNMENT, 4)
+		gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4)
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+		gl.polygonOffset(0, 0)
+		gl.sampleCoverage(1, false)
+		gl.scissor(0, 0, gl.canvas.width, gl.canvas.height)
+		gl.stencilFunc(gl.ALWAYS, 0, 0xffffffff)
+		gl.stencilMask(0xffffffff)
+		gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 
-        return gl
-    }
+		return gl
+	}
 }
 
-function isOffscreen(canvas: HTMLCanvasElement | OffscreenCanvas): canvas is OffscreenCanvas {
-    return canvas instanceof OffscreenCanvas
+function isOffscreen(
+	canvas: HTMLCanvasElement | OffscreenCanvas,
+): canvas is OffscreenCanvas {
+	return canvas instanceof OffscreenCanvas
 }

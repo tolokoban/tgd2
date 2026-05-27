@@ -1,8 +1,8 @@
 import { TgdLogic } from "@tgd/context"
 import { TgdConsole } from "@tgd/debug"
 import type { TgdPainterFunction } from "@tgd/types/painter"
-import { type TgdDebugPainterHierarchy, TgdPainter } from "./painter"
 import { TgdPainterLogic } from "./logic"
+import { type TgdDebugPainterHierarchy, TgdPainter } from "./painter"
 
 export type TgdPainterGroupOptions = {
     onEnter?(time: number, delta: number): void
@@ -30,7 +30,7 @@ export class TgdPainterGroup extends TgdPainter {
     constructor(painters?: (TgdPainter | TgdPainterFunction)[], options?: TgdPainterGroupOptions)
     constructor(options?: TgdPainterGroupOptions)
     constructor(arg1?: (TgdPainter | TgdPainterFunction)[] | TgdPainterGroupOptions, arg2?: TgdPainterGroupOptions) {
-        super()
+        super(extractName(arg1, arg2))
         this.painters = []
         if (Array.isArray(arg1)) {
             for (const painter of arg1) this.add(painter)
@@ -145,7 +145,7 @@ export class TgdPainterGroup extends TgdPainter {
 
     debugHierarchy(caption?: string) {
         const cons = new TgdConsole({
-            text: caption ?? this.name,
+            text: caption ?? this.nameUniq,
             bold: true,
         }).add()
         this.recursiveDebug(cons, this.hierarchy)
@@ -162,3 +162,10 @@ export class TgdPainterGroup extends TgdPainter {
         }
     }
 }
+
+function extractName(arg1: (TgdPainter | TgdPainterFunction)[] | TgdPainterGroupOptions | undefined, arg2: TgdPainterGroupOptions | undefined): string | undefined {
+    if (!Array.isArray(arg1)) return arg1?.name
+    if (!Array.isArray(arg2)) return arg2?.name
+    return undefined
+}
+

@@ -1,8 +1,8 @@
-import { WebglAttributeType, WebglUniformType } from "@tgd/types"
+import type { TgdProgram } from "@tgd/program"
+import type { TgdCodeBloc } from "@tgd/shader"
+import type { TgdTexture2D } from "@tgd/texture"
+import type { WebglAttributeType, WebglUniformType } from "@tgd/types"
 import { TgdMaterial } from "./material"
-import { TgdCodeBloc } from "@tgd/shader"
-import { TgdTexture2D } from "@tgd/texture"
-import { TgdProgram } from "@tgd/program"
 
 export type TgdMaterialFlatTextureOptions = {
     texture: TgdTexture2D
