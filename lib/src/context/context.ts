@@ -164,6 +164,7 @@ export class TgdContext extends TgdPainterGroup {
     // Function to call after WebGL context restore.
     private readonly initialize?: (context: TgdContext) => void
     private readonly oneTimePainters = new Set<{ paint: TgdPainterFunction }>()
+    /** When the context has been deleted, this is `true` and you can read it with `context.isDeleted`. */
 
     /**
      * @param canvas The canvas to which attach a WebGL2 context.
@@ -254,6 +255,8 @@ export class TgdContext extends TgdPainterGroup {
         this.virtualTime = new TgdTime()
         this.console.debug(`[TgdContext/${this.name}] New:`, options)
     }
+
+    get isDeleted() { return !!this._gl }
 
     viewportExec(action: () => void, viewport: Partial<{ x: number; y: number; width: number; height: number }>) {
         const { webglParams, camera } = this
@@ -539,6 +542,8 @@ export class TgdContext extends TgdPainterGroup {
     }
 
     private readonly actualPaint = (time: number) => {
+        if (this.isDeleted) return
+
         const timeInSec = time * 1e-3
         if (this.lastTimeInSec < 0) {
             this.lastTimeInSec = timeInSec
@@ -620,6 +625,7 @@ export class TgdContext extends TgdPainterGroup {
         super.delete()
         this._gl = null
         this.console.debug(`[TgdContext/${this.name}] Delete`)
+        globalThis.cancelAnimationFrame(this.requestAnimationFrame)
     }
 
     private readonly createWebGLContext = () => {
