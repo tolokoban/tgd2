@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.138
+
+- Fix a bug in TgdContext related to `isDeleted`.
+
 ### v2.0.137
 
 - **TgdContext verbose defaults to `false`**: The `verbose` option now defaults to `false` instead of `true`, reducing console noise in production.

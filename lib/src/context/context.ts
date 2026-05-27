@@ -570,8 +570,6 @@ export class TgdContext extends TgdPainterGroup {
 	}
 
 	private readonly actualPaint = (time: number) => {
-		if (this.isDeleted) return
-
 		const timeInSec = time * 1e-3
 		if (this.lastTimeInSec < 0) {
 			this.lastTimeInSec = timeInSec
