@@ -20,6 +20,11 @@ npm start
 
 ## Release notes
 
+### v2.0.140
+
+- **TgdPainterGizmo error handling**: The async initialization now catches errors via `context.console.error` and guards against painting on a deleted context.
+- **Console methods as arrow functions**: `Console` class methods (`log`, `info`, `debug`, `error`, `warn`) are now arrow function properties, ensuring correct `this` binding when passed as callbacks (e.g. `.catch(context.console.error)`).
+
 ### v2.0.139
 
 - Fix a bug in TgdContext related to `isDeleted`.

@@ -12,3 +12,4 @@ test_coverage/
 **/.tsbuildinfo
 **/*.tsbuildinfo
 .release-notes/
+.release-notes
