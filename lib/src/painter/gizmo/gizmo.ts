@@ -1,272 +1,287 @@
 import { TgdCameraPerspective } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
+import { TgdEvent } from "@tgd/event"
 import { TgdMat3, TgdQuat, TgdVec3 } from "@tgd/math"
 import { TgdTexture2D } from "@tgd/texture"
-import { TgdAnimation, TgdInputPointerEventMove, TgdInputPointerEventTap } from "@tgd/types"
+import type {
+	TgdAnimation,
+	TgdInputPointerEventMove,
+	TgdInputPointerEventTap,
+} from "@tgd/types"
+import { TgdUniformBufferObject } from "@tgd/uniform"
 import { tgdActionCreateCameraInterpolation, tgdCanvasCreate } from "@tgd/utils"
 import { TgdPainterClear } from "../clear"
-import { TgdPainterGroup } from "../group"
+import { TgdPainterFramebuffer } from "../framebuffer"
+import type { TgdPainterGroup } from "../group"
 import { TgdPainterGroupCamera } from "../group-camera"
 import { TgdPainterOverlay } from "../overlay"
-import { TgdDebugPainterHierarchy, TgdPainter } from "../painter"
+import { type TgdDebugPainterHierarchy, TgdPainter } from "../painter"
 import { TgdPainterState } from "../state"
+import { PainterAxes } from "./painters/axes"
 import { PainterTipsMask } from "./painters/mask"
 import { PainterTipsNormal } from "./painters/normal"
-import { TgdUniformBufferObject } from "@tgd/uniform"
-import { PainterAxes } from "./painters/axes"
-import { TgdEvent } from "@tgd/event"
-import { TgdPainterFramebuffer } from "../framebuffer"
 
 export interface TgdPainterGizmoOptions {
-    alignX: number
-    alignY: number
-    size: number
-    margin: number
+	alignX: number
+	alignY: number
+	size: number
+	margin: number
 }
 
 export class TgdPainterGizmo extends TgdPainter {
-    public readonly eventTap = new TgdEvent<Readonly<TgdVec3>>()
-    public camera = new TgdCameraPerspective({
-        name: "Gizmo/Camera",
-        near: 0.1,
-        far: 10,
-    })
+	public readonly eventTap = new TgdEvent<Readonly<TgdVec3>>()
+	public camera = new TgdCameraPerspective({
+		name: "Gizmo/Camera",
+		near: 0.1,
+		far: 10,
+	})
 
-    private _alignX: number
-    private _alignY: number
-    private _size: number
-    private _margin: number
-    private group: TgdPainterGroup | null = null
-    private readonly textureFramebuffer: TgdTexture2D
-    private overlay: TgdPainterOverlay | null = null
-    private readonly uniformCamera: TgdUniformBufferObject
-    private contextOffscreen: TgdContext | null = null
-    private tipsNormal: PainterTipsNormal | null = null
+	private _alignX: number
+	private _alignY: number
+	private _size: number
+	private _margin: number
+	private group: TgdPainterGroup | null = null
+	private readonly textureFramebuffer: TgdTexture2D
+	private overlay: TgdPainterOverlay | null = null
+	private readonly uniformCamera: TgdUniformBufferObject
+	private contextOffscreen: TgdContext | null = null
+	private tipsNormal: PainterTipsNormal | null = null
 
-    constructor(
-        public readonly context: TgdContext,
-        { alignX = +1, alignY = +1, size = 128, margin = 0 }: Partial<TgdPainterGizmoOptions> = {},
-    ) {
-        super()
-        const uniformCamera = new TgdUniformBufferObject(context, {
-            uniforms: {
-                uniModelViewMatrix: "mat4",
-                uniProjectionMatrix: "mat4",
-            },
-        })
-        this.uniformCamera = uniformCamera
-        this._alignX = alignX
-        this._alignY = alignY
-        this._size = size
-        this._margin = margin
-        this.name = "Gizmo"
-        this.textureFramebuffer = new TgdTexture2D(context, {
-            name: `Gizmo FB (${size}×${size})`,
-            load: tgdCanvasCreate(size, size),
-            params: {
-                minFilter: "NEAREST",
-                magFilter: "NEAREST",
-            },
-        })
-        PainterTipsNormal.create(context, { size, uniformCamera }).then(this.init)
-    }
+	constructor(
+		public readonly context: TgdContext,
+		{
+			alignX = +1,
+			alignY = +1,
+			size = 128,
+			margin = 0,
+		}: Partial<TgdPainterGizmoOptions> = {},
+	) {
+		super()
+		const uniformCamera = new TgdUniformBufferObject(context, {
+			uniforms: {
+				uniModelViewMatrix: "mat4",
+				uniProjectionMatrix: "mat4",
+			},
+		})
+		this.uniformCamera = uniformCamera
+		this._alignX = alignX
+		this._alignY = alignY
+		this._size = size
+		this._margin = margin
+		this.name = "Gizmo"
+		this.textureFramebuffer = new TgdTexture2D(context, {
+			name: `Gizmo FB (${size}×${size})`,
+			load: tgdCanvasCreate(size, size),
+			params: {
+				minFilter: "NEAREST",
+				magFilter: "NEAREST",
+			},
+		})
+		PainterTipsNormal.create(context, { size, uniformCamera })
+			.then(this.init)
+			.catch(context.console.error)
+	}
 
-    get alignX(): number {
-        return this._alignX
-    }
-    set alignX(alignX: number) {
-        if (this._alignX === alignX) return
+	get alignX(): number {
+		return this._alignX
+	}
+	set alignX(alignX: number) {
+		if (this._alignX === alignX) return
 
-        this._alignX = alignX
-        const { overlay } = this
-        if (overlay) overlay.alignX = alignX
-    }
+		this._alignX = alignX
+		const { overlay } = this
+		if (overlay) overlay.alignX = alignX
+	}
 
-    get alignY(): number {
-        return this._alignY
-    }
-    set alignY(alignY: number) {
-        if (this._alignY === alignY) return
+	get alignY(): number {
+		return this._alignY
+	}
+	set alignY(alignY: number) {
+		if (this._alignY === alignY) return
 
-        this._alignY = alignY
-        const { overlay } = this
-        if (overlay) overlay.alignY = alignY
-    }
+		this._alignY = alignY
+		const { overlay } = this
+		if (overlay) overlay.alignY = alignY
+	}
 
-    get size(): number {
-        return this._size
-    }
-    set size(size: number) {
-        if (this._size === size) return
+	get size(): number {
+		return this._size
+	}
+	set size(size: number) {
+		if (this._size === size) return
 
-        this._size = size
-        const { overlay } = this
-        if (overlay) {
-            overlay.width = size
-            overlay.height = size
-        }
-        this.textureFramebuffer.resize(size, size)
-        if (this.tipsNormal) this.tipsNormal.size = size
-        this.context?.paint()
-    }
+		this._size = size
+		const { overlay } = this
+		if (overlay) {
+			overlay.width = size
+			overlay.height = size
+		}
+		this.textureFramebuffer.resize(size, size)
+		if (this.tipsNormal) this.tipsNormal.size = size
+		this.context?.paint()
+	}
 
-    get margin(): number {
-        return this._margin
-    }
-    set margin(margin: number) {
-        if (this._margin === margin) return
+	get margin(): number {
+		return this._margin
+	}
+	set margin(margin: number) {
+		if (this._margin === margin) return
 
-        this._margin = margin
-        const { overlay } = this
-        if (overlay) {
-            overlay.marginBottom = margin
-            overlay.marginTop = margin
-            overlay.marginLeft = margin
-            overlay.marginRight = margin
-        }
-    }
+		this._margin = margin
+		const { overlay } = this
+		if (overlay) {
+			overlay.marginBottom = margin
+			overlay.marginTop = margin
+			overlay.marginLeft = margin
+			overlay.marginRight = margin
+		}
+	}
 
-    private readonly init = (tipsNormal: PainterTipsNormal) => {
-        const { context, size, alignX, alignY, camera, uniformCamera } = this
-        this.tipsNormal = tipsNormal
-        const group = new TgdPainterState(context, {
-            depth: "off",
-            blend: "alpha",
-        })
-        this.group = group
-        group.removeAll()
-        const clear = new TgdPainterClear(context, {
-            color: [0, 0, 0, 0],
-            depth: 1,
-        })
-        const axes = new PainterAxes(context, { uniformCamera, size })
-        const state = new TgdPainterState(context, {
-            depth: "less",
-            blend: "off",
-            cull: "off",
-            children: [
-                new TgdPainterGroupCamera(context, {
-                    camera,
-                    children: [clear, axes, tipsNormal],
-                }),
-            ],
-        })
-        const framebuffer = new TgdPainterFramebuffer(context, {
-            name: "Framebuffer",
-            antiAliasing: true,
-            depthBuffer: true,
-            textureColor0: this.textureFramebuffer,
-            children: [state],
-            fixedSize: true,
-        })
-        const overlay = new TgdPainterOverlay(context, {
-            alignX,
-            alignY,
-            scaleY: -1,
-            width: size,
-            height: size,
-            margin: 0,
-            texture: framebuffer.textureColor0,
-        })
-        this.overlay = overlay
-        group.add(framebuffer, overlay)
-        context.paint()
-        // Offscreen
-        const offscreenCanvas = new OffscreenCanvas(size, size)
-        const contextOffscreen = new TgdContext(offscreenCanvas, {
-            preserveDrawingBuffer: true,
-            antialias: false,
-            alpha: false,
-            camera,
-        })
-        contextOffscreen.add(
-            new TgdPainterState(contextOffscreen, {
-                depth: "less",
-                blend: "off",
-                cull: "off",
-                children: [
-                    new TgdPainterClear(contextOffscreen, {
-                        color: [0, 0, 0, 1],
-                        depth: 1,
-                    }),
-                    new PainterTipsMask(contextOffscreen, { size }),
-                ],
-            }),
-        )
-        contextOffscreen.camera = camera
-        this.contextOffscreen = contextOffscreen
-        overlay.eventHover.addListener((evt: TgdInputPointerEventMove) => {
-            const [red] = contextOffscreen.readPixel(evt.current.x, evt.current.y)
-            const index = Math.floor((4 + red * 8) / 0xff) - 1
-            if (tipsNormal.index !== index) {
-                tipsNormal.index = index
-                context.paint()
-            }
-        })
-        overlay.eventMoveStart.addListener(() => true)
-        overlay.eventMove.addListener(() => true)
-        overlay.eventMoveEnd.addListener(() => true)
-        let animations: TgdAnimation[] = []
-        overlay.eventTap.addListener((evt: TgdInputPointerEventTap) => {
-            const [red] = contextOffscreen.readPixel(evt.x, evt.y)
-            const index = Math.floor((4 + red * 8) / 0xff) - 1
-            if (index < 0 || index > 5) return
+	private readonly init = (tipsNormal: PainterTipsNormal) => {
+		const { context, size, alignX, alignY, camera, uniformCamera } = this
+		if (context.isDeleted) return
 
-            const { matrix } = context.camera.transfo
-            const facing = new TgdVec3(matrix.m02, matrix.m12, matrix.m22)
-            const axisZ = AXES[index]
-            this.eventTap.dispatch(axisZ)
-            if (axisZ.isClose(facing)) {
-                // Clicking the facing vector is like cliking the opposite vector.
-                axisZ.scale(-1)
-            }
-            if (Math.abs(axisZ.y) > 0.999) axisZ.scale(-1)
-            const axisY = Math.abs(axisZ.y) > 0.999 ? new TgdVec3(0, 0, 1) : new TgdVec3(0, 1, 0)
-            const axisX = TgdVec3.newFrom(axisY).cross(axisZ)
-            const orientation = TgdQuat.fromMatrix(new TgdMat3(axisX, axisY, axisZ))
-            context.animCancelArray(animations)
-            animations = context.animSchedule({
-                duration: 0.2,
-                action: tgdActionCreateCameraInterpolation(context.camera, {
-                    orientation,
-                }),
-            })
-        })
-    }
+		this.tipsNormal = tipsNormal
+		const group = new TgdPainterState(context, {
+			depth: "off",
+			blend: "alpha",
+		})
+		this.group = group
+		group.removeAll()
+		const clear = new TgdPainterClear(context, {
+			color: [0, 0, 0, 0],
+			depth: 1,
+		})
+		const axes = new PainterAxes(context, { uniformCamera, size })
+		const state = new TgdPainterState(context, {
+			depth: "less",
+			blend: "off",
+			cull: "off",
+			children: [
+				new TgdPainterGroupCamera(context, {
+					camera,
+					children: [clear, axes, tipsNormal],
+				}),
+			],
+		})
+		const framebuffer = new TgdPainterFramebuffer(context, {
+			name: "Framebuffer",
+			antiAliasing: true,
+			depthBuffer: true,
+			textureColor0: this.textureFramebuffer,
+			children: [state],
+			fixedSize: true,
+		})
+		const overlay = new TgdPainterOverlay(context, {
+			alignX,
+			alignY,
+			scaleY: -1,
+			width: size,
+			height: size,
+			margin: 0,
+			texture: framebuffer.textureColor0,
+		})
+		this.overlay = overlay
+		group.add(framebuffer, overlay)
+		context.paint()
+		// Offscreen
+		const offscreenCanvas = new OffscreenCanvas(size, size)
+		const contextOffscreen = new TgdContext(offscreenCanvas, {
+			preserveDrawingBuffer: true,
+			antialias: false,
+			alpha: false,
+			camera,
+		})
+		contextOffscreen.add(
+			new TgdPainterState(contextOffscreen, {
+				depth: "less",
+				blend: "off",
+				cull: "off",
+				children: [
+					new TgdPainterClear(contextOffscreen, {
+						color: [0, 0, 0, 1],
+						depth: 1,
+					}),
+					new PainterTipsMask(contextOffscreen, { size }),
+				],
+			}),
+		)
+		contextOffscreen.camera = camera
+		this.contextOffscreen = contextOffscreen
+		overlay.eventHover.addListener((evt: TgdInputPointerEventMove) => {
+			const [red] = contextOffscreen.readPixel(evt.current.x, evt.current.y)
+			const index = Math.floor((4 + red * 8) / 0xff) - 1
+			if (tipsNormal.index !== index) {
+				tipsNormal.index = index
+				context.paint()
+			}
+		})
+		overlay.eventMoveStart.addListener(() => true)
+		overlay.eventMove.addListener(() => true)
+		overlay.eventMoveEnd.addListener(() => true)
+		let animations: TgdAnimation[] = []
+		overlay.eventTap.addListener((evt: TgdInputPointerEventTap) => {
+			const [red] = contextOffscreen.readPixel(evt.x, evt.y)
+			const index = Math.floor((4 + red * 8) / 0xff) - 1
+			if (index < 0 || index > 5) return
 
-    delete(): void {
-        this.group?.delete()
-        this.uniformCamera.delete()
-    }
+			const { matrix } = context.camera.transfo
+			const facing = new TgdVec3(matrix.m02, matrix.m12, matrix.m22)
+			const axisZ = AXES[index]
+			this.eventTap.dispatch(axisZ)
+			if (axisZ.isClose(facing)) {
+				// Clicking the facing vector is like cliking the opposite vector.
+				axisZ.scale(-1)
+			}
+			if (Math.abs(axisZ.y) > 0.999) axisZ.scale(-1)
+			const axisY =
+				Math.abs(axisZ.y) > 0.999 ? new TgdVec3(0, 0, 1) : new TgdVec3(0, 1, 0)
+			const axisX = TgdVec3.newFrom(axisY).cross(axisZ)
+			const orientation = TgdQuat.fromMatrix(new TgdMat3(axisX, axisY, axisZ))
+			context.animCancelArray(animations)
+			animations = context.animSchedule({
+				duration: 0.2,
+				action: tgdActionCreateCameraInterpolation(context.camera, {
+					orientation,
+				}),
+			})
+		})
+	}
 
-    paint(time: number, delta: number): void {
-        const { context, contextOffscreen, camera, group, size, uniformCamera } = this
-        camera.screenWidth = size
-        camera.screenHeight = size
-        camera.fitSpaceAtTarget(3, 3)
-        camera.transfo.orientation = context.camera.transfo.orientation
-        uniformCamera.values.uniModelViewMatrix = camera.matrixModelView
-        uniformCamera.values.uniProjectionMatrix = camera.matrixProjection
-        group?.paint(time, delta)
-        // Offscreen
-        contextOffscreen?.paint()
-    }
+	delete(): void {
+		this.group?.delete()
+		this.uniformCamera.delete()
+	}
 
-    get hierarchy(): TgdDebugPainterHierarchy {
-        const { group } = this
-        if (!group) return {}
+	paint(time: number, delta: number): void {
+		const { context, contextOffscreen, camera, group, size, uniformCamera } =
+			this
+		camera.screenWidth = size
+		camera.screenHeight = size
+		camera.fitSpaceAtTarget(3, 3)
+		camera.transfo.orientation = context.camera.transfo.orientation
+		uniformCamera.values.uniModelViewMatrix = camera.matrixModelView
+		uniformCamera.values.uniProjectionMatrix = camera.matrixProjection
+		group?.paint(time, delta)
+		// Offscreen
+		contextOffscreen?.paint()
+	}
 
-        return {
-            [this.name]: [group.hierarchy],
-        }
-    }
+	get hierarchy(): TgdDebugPainterHierarchy {
+		const { group } = this
+		if (!group) return {}
+
+		return {
+			[this.name]: [group.hierarchy],
+		}
+	}
 }
 
 const AXES = [
-    new TgdVec3(+1, 0, 0),
-    new TgdVec3(0, +1, 0),
-    new TgdVec3(0, 0, +1),
-    new TgdVec3(-1, 0, 0),
-    new TgdVec3(0, -1, 0),
-    new TgdVec3(0, 0, -1),
+	new TgdVec3(+1, 0, 0),
+	new TgdVec3(0, +1, 0),
+	new TgdVec3(0, 0, +1),
+	new TgdVec3(-1, 0, 0),
+	new TgdVec3(0, -1, 0),
+	new TgdVec3(0, 0, -1),
 ]

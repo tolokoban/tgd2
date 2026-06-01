@@ -1,33 +1,33 @@
 export class Console {
-    constructor(private readonly context: { verbose: boolean }) { }
+	constructor(private readonly context: { verbose: boolean }) {}
 
-    log(...args: unknown[]) {
-        if (!this.context.verbose) return
+	readonly log = (...args: unknown[]) => {
+		if (!this.context.verbose) return
 
-        console.log(...args)
-    }
+		console.log(...args)
+	}
 
-    info(...args: unknown[]) {
-        if (!this.context.verbose) return
+	readonly info = (...args: unknown[]) => {
+		if (!this.context.verbose) return
 
-        console.info(...args)
-    }
+		console.info(...args)
+	}
 
-    debug(...args: unknown[]) {
-        if (!this.context.verbose) return
+	readonly debug = (...args: unknown[]) => {
+		if (!this.context.verbose) return
 
-        console.debug(...args)
-    }
+		console.debug(...args)
+	}
 
-    error(...args: unknown[]) {
-        if (!this.context.verbose) return
+	readonly error = (...args: unknown[]) => {
+		if (!this.context.verbose) return
 
-        console.error(...args)
-    }
+		console.error(...args)
+	}
 
-    warn(...args: unknown[]) {
-        if (!this.context.verbose) return
+	readonly warn = (...args: unknown[]) => {
+		if (!this.context.verbose) return
 
-        console.warn(...args)
-    }
+		console.warn(...args)
+	}
 }
