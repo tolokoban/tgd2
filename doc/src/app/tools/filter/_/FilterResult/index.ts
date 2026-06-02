@@ -1,1 +1,1 @@
-export * from "./FilterResult"
+export * from "./FilterResult";

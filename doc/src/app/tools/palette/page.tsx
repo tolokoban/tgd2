@@ -1,5 +1,5 @@
-import { ViewPalette } from "./_Palette"
+import { ViewPalette } from "./_Palette";
 
 export default function PageViewGLTF() {
-    return <ViewPalette />
+	return <ViewPalette />;
 }

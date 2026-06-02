@@ -101,6 +101,11 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/particles/example3": ["/articles/painter/particles/example3"],
     "/articles/painter/particles/example4": ["/articles/painter/particles/example4"],
     "/articles/painter/points-cloud": ["/articles/painter/points-cloud"],
+    "/articles/painter/points-cloud/variant": ["/articles/painter/points-cloud/variant"],
+    "/articles/painter/points-cloud/variant/default": ["/articles/painter/points-cloud/variant/default"],
+    "/articles/painter/points-cloud/variant/material-flat": ["/articles/painter/points-cloud/variant/material-flat"],
+    "/articles/painter/points-cloud/variant/material-sphere": ["/articles/painter/points-cloud/variant/material-sphere"],
+    "/articles/painter/points-cloud/variant/morphing": ["/articles/painter/points-cloud/variant/morphing"],
     "/articles/painter/program": ["/articles/painter/program"],
     "/articles/painter/segments": ["/articles/painter/segments"],
     "/articles/painter/segments/02": ["/articles/painter/segments/02"],
@@ -197,7 +202,7 @@ export function matchRoute(path: string, parts: string[] | undefined): RouteMatc
             const [head, tail] = decapitate(current)
             params[name] = head
             current = tail
-        } else if (current.startsWith(part)) {
+        } else if (isPrefixedBy(current,part)) {
             current = current.substring(part.length + 1)
         } else {
             return null
@@ -210,6 +215,17 @@ export function matchRoute(path: string, parts: string[] | undefined): RouteMatc
         distance: current.length,
     }
     return match
+}
+
+function isPrefixedBy(current: string, part: string): boolean {
+    if (part === "/" && current.startsWith("/")) return true
+
+    const items = current.split("/")
+    for (let i = 1; i < items.length + 1; i++) {
+        const prefix = items.slice(0, i).join("/")
+        if (prefix === part) return true
+    }
+    return false
 }
 
 function decapitate(text: string): [string, string] {

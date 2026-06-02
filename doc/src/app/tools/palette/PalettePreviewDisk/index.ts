@@ -1,1 +1,1 @@
-export * from "./PalettePreviewDisk"
+export * from "./PalettePreviewDisk";

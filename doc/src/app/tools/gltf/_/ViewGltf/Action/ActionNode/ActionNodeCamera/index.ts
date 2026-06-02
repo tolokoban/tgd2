@@ -1,1 +1,1 @@
-export * from "./ActionNodeCamera"
+export * from "./ActionNodeCamera";

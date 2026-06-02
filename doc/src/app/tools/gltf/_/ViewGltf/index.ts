@@ -1,1 +1,1 @@
-export * from "./ViewGltf"
+export * from "./ViewGltf";

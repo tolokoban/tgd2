@@ -1,1 +1,1 @@
-export * from "./VertexShaderCodeEditor"
+export * from "./VertexShaderCodeEditor";

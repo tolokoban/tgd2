@@ -3,7 +3,6 @@ import { TgdConsole } from "@tgd/debug"
 import { TgdInputs } from "@tgd/input"
 import { TgdTime } from "@tgd/time"
 import type { TgdPainterFunction } from "@tgd/types/painter"
-import { nextId } from "@tgd/utils/id"
 import { TgdEvent } from "../event"
 import { TgdPainterGroup } from "../painter/group"
 import type { TgdAnimation } from "../types/animation"
@@ -140,6 +139,14 @@ export class TgdContext extends TgdPainterGroup {
 	public readonly eventWebGLContextRestored = new TgdEvent<TgdContext>()
 	public resolution = 1
 	public readonly uniformBufferObjects = new UniformBufferObjectsManager()
+	/**
+	 * Minimal value for `gl_PointSize`.
+	 */
+	public readonly pointSizeMin: number
+	/**
+	 * Maximal value for `gl_PointSize`.
+	 */
+	public readonly pointSizeMax: number
 
 	private _gl: WebGL2RenderingContext | null = null
 	/**
@@ -173,7 +180,8 @@ export class TgdContext extends TgdPainterGroup {
 	// Function to call after WebGL context restore.
 	private readonly initialize?: (context: TgdContext) => void
 	private readonly oneTimePainters = new Set<{ paint: TgdPainterFunction }>()
-	/** When the context has been deleted, this is `true` and you can read it with `context.isDeleted`. */
+	private actionsBeforeNextPaint: TgdPainterFunction[] = []
+	private actionsAfterNextPaint: TgdPainterFunction[] = []
 
 	/**
 	 * @param canvas The canvas to which attach a WebGL2 context.
@@ -186,6 +194,11 @@ export class TgdContext extends TgdPainterGroup {
 		super({ name: options.name })
 		this.verbose = options.verbose ?? false
 		const gl = this.createWebGLContext()
+		const pointSize = gl.getParameter(
+			gl.ALIASED_POINT_SIZE_RANGE,
+		) as Float32Array
+		this.pointSizeMin = pointSize[0]
+		this.pointSizeMax = pointSize[1]
 		this.extensions = new TgdExtensions(gl)
 		this.initialize = options.initialize
 		canvas.addEventListener(
@@ -275,6 +288,14 @@ export class TgdContext extends TgdPainterGroup {
 
 	get isDeleted() {
 		return !this._gl
+	}
+
+	execBeforeNextPaint(...actions: TgdPainterFunction[]) {
+		this.actionsBeforeNextPaint.push(...actions)
+	}
+
+	execAfterNextPaint(...actions: TgdPainterFunction[]) {
+		this.actionsAfterNextPaint.push(...actions)
 	}
 
 	viewportExec(
@@ -565,10 +586,6 @@ export class TgdContext extends TgdPainterGroup {
 		}
 	}
 
-	private now() {
-		return Date.now() * 1e-3
-	}
-
 	private readonly actualPaint = (time: number) => {
 		const timeInSec = time * 1e-3
 		if (this.lastTimeInSec < 0) {
@@ -583,10 +600,17 @@ export class TgdContext extends TgdPainterGroup {
 			const { gl } = this
 			this.virtualTime.update(this)
 			this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
-			this.eventPaintEnter.dispatch(this)
 			const delayInSec = timeInSec - this.lastTimeInSec
 			this._fps = Math.round(1 / delayInSec)
 			this.lastTimeInSec = timeInSec
+			const { actionsBeforeNextPaint } = this
+			if (actionsBeforeNextPaint.length > 0) {
+				for (const action of actionsBeforeNextPaint) {
+					action(timeInSec, delayInSec)
+				}
+				actionsBeforeNextPaint.splice(0)
+			}
+			this.eventPaintEnter.dispatch(this)
 			for (const oneTimePainter of this.oneTimePainters) {
 				oneTimePainter.paint(timeInSec, delayInSec)
 			}
@@ -600,6 +624,14 @@ export class TgdContext extends TgdPainterGroup {
 				this.paintingIsOngoing = false
 				this.paint()
 			}
+			const { actionsAfterNextPaint } = this
+			if (actionsAfterNextPaint.length > 0) {
+				for (const action of actionsAfterNextPaint) {
+					action(timeInSec, delayInSec)
+				}
+				actionsAfterNextPaint.splice(0)
+			}
+			this.eventPaintEnter.dispatch(this)
 			this.eventPaint.dispatch(this)
 		} catch (error) {
 			this.console.error(error)

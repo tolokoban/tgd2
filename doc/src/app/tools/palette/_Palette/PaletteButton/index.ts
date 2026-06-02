@@ -1,1 +1,1 @@
-export * from "./PaletteButton"
+export * from "./PaletteButton";

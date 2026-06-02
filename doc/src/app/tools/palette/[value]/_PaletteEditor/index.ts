@@ -1,1 +1,1 @@
-export * from "./PaletteEditor"
+export * from "./PaletteEditor";

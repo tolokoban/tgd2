@@ -1,1 +1,1 @@
-export * from "./PalettePreviewHorizontal"
+export * from "./PalettePreviewHorizontal";

@@ -1,1 +1,1 @@
-export * from "./GltfTree"
+export * from "./GltfTree";

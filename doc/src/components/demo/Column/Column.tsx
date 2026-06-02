@@ -1,11 +1,17 @@
-import React from "react"
-import Style from "./Column.module.css"
+import type React from "react";
+import Style from "./Column.module.css";
 
 export interface ColumnProps {
-    align: "marginLeft" | "halfLeft" | "center" | "halfRight" | "marginRight" | "full"
-    children: React.ReactNode
+	align:
+		| "marginLeft"
+		| "halfLeft"
+		| "center"
+		| "halfRight"
+		| "marginRight"
+		| "full";
+	children: React.ReactNode;
 }
 
 export default function Column({ align, children }: ColumnProps) {
-    return <div className={Style[align]}>{children}</div>
+	return <div className={Style[align]}>{children}</div>;
 }

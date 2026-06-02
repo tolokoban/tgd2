@@ -1,120 +1,120 @@
 import {
-    type ArrayNumber2,
-    type ArrayNumber4,
-    tgdCanvasCreatePalette,
-    type TgdContext,
-    TgdControllerCameraOrbit,
-    TgdMaterialDiffuse,
-    TgdPainterClear,
-    TgdPainterLogic,
-    TgdPainterSegmentsData,
-    TgdPainterSegmentsMorphing,
-    TgdPainterState,
-    TgdTexture2D,
-    webglPresetDepth,
-} from "@tolokoban/tgd"
-import View from "@/components/demo/Tgd"
+	type ArrayNumber2,
+	type ArrayNumber4,
+	tgdCanvasCreatePalette,
+	type TgdContext,
+	TgdControllerCameraOrbit,
+	TgdMaterialDiffuse,
+	TgdPainterClear,
+	TgdPainterLogic,
+	TgdPainterSegmentsData,
+	TgdPainterSegmentsMorphing,
+	TgdPainterState,
+	TgdTexture2D,
+	webglPresetDepth,
+} from "@tolokoban/tgd";
+import View from "@/components/demo/Tgd";
 
 function init(context: TgdContext) {
-    // #begin
-    context.camera.transfo.distance = 75
-    new TgdControllerCameraOrbit(context, {
-        inertiaOrbit: 1000,
-        maxZoom: 10,
-        minZoom: 0.01,
-        speedZoom: 1,
-    })
-    const clear = new TgdPainterClear(context, {
-        color: [0.3, 0.3, 0.3, 1],
-        depth: 1,
-    })
-    const radius = 10
-    const width = 50
-    const data1 = new TgdPainterSegmentsData()
-    const nodes1: ArrayNumber4[] = [[0, -1000, 0, 0]]
-    for (let step = -width; step < width; step++) {
-        const ang = step * 0.5
-        const r = radius * Math.cos((step * Math.PI * 0.5) / width)
-        const x = r * Math.cos(ang)
-        const y = step * 0.2
-        const z = r * Math.sin(ang)
-        const thickness = Math.max(0, 1.0 - Math.abs(step) / width)
-        nodes1.push([x, y, z, thickness])
-    }
-    nodes1.push([0, 1000, 0, 0])
-    for (let i = 1; i < nodes1.length; i++) {
-        const uv0: ArrayNumber2 = [(i - 0.5) / (nodes1.length + 1), 0]
-        const uv1: ArrayNumber2 = [(i + 0.5) / (nodes1.length + 1), 0]
-        data1.add(nodes1[i - 1], nodes1[i], uv0, uv1)
-    }
-    const data2 = new TgdPainterSegmentsData()
-    const nodes2: ArrayNumber4[] = [[0, -1000, 0, 0]]
-    for (let step = -width; step < width; step++) {
-        const ang = step * 0.25
-        const r = radius * Math.cos((step * Math.PI * 0.5) / width) * 0.5
-        const x = r * Math.cos(ang)
-        const y = step * 0.3
-        const z = r * Math.sin(ang)
-        const thickness = Math.max(0, 1.0 - Math.abs(step) / (width - 1))
-        nodes2.push([x, y, z, thickness])
-    }
-    nodes2.push([0, 1000, 0, 0])
-    for (let i = 1; i < nodes2.length; i++) {
-        const uv0: ArrayNumber2 = [(i - 0.5) / (nodes2.length + 1), 0]
-        const uv1: ArrayNumber2 = [(i + 0.5) / (nodes2.length + 1), 0]
-        data2.add(nodes2[i - 1], nodes2[i], uv0, uv1)
-    }
-    const palette = new TgdTexture2D(context).loadBitmap(
-        tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
-    )
-    const segments = new TgdPainterSegmentsMorphing(context, {
-        datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
-        roundness: 64,
-        minRadius: 2,
-        radiusMultiplier: 1,
-        material: new TgdMaterialDiffuse({
-            color: palette,
-            lockLightsToCamera: true,
-        }),
-    })
-    const state = new TgdPainterState(context, {
-        depth: webglPresetDepth.less,
-        children: [segments],
-    })
-    context.add(
-        clear,
-        state,
-        new TgdPainterLogic((time, delta) => {
-            segments.mix = Math.abs(Math.sin(time))
-            segments.transfo.orbitAroundX(delta * 0.315481)
-            segments.transfo.orbitAroundZ(delta * 0.2)
-        }),
-    )
-    context.play()
-    return ({ radiusMultiplier }: { radiusMultiplier: number }) => {
-        segments.radiusMultiplier = radiusMultiplier
-        context.paint()
-    }
-    // #end
+	// #begin
+	context.camera.transfo.distance = 75;
+	new TgdControllerCameraOrbit(context, {
+		inertiaOrbit: 1000,
+		maxZoom: 10,
+		minZoom: 0.01,
+		speedZoom: 1,
+	});
+	const clear = new TgdPainterClear(context, {
+		color: [0.3, 0.3, 0.3, 1],
+		depth: 1,
+	});
+	const radius = 10;
+	const width = 50;
+	const data1 = new TgdPainterSegmentsData();
+	const nodes1: ArrayNumber4[] = [[0, -1000, 0, 0]];
+	for (let step = -width; step < width; step++) {
+		const ang = step * 0.5;
+		const r = radius * Math.cos((step * Math.PI * 0.5) / width);
+		const x = r * Math.cos(ang);
+		const y = step * 0.2;
+		const z = r * Math.sin(ang);
+		const thickness = Math.max(0, 1.0 - Math.abs(step) / width);
+		nodes1.push([x, y, z, thickness]);
+	}
+	nodes1.push([0, 1000, 0, 0]);
+	for (let i = 1; i < nodes1.length; i++) {
+		const uv0: ArrayNumber2 = [(i - 0.5) / (nodes1.length + 1), 0];
+		const uv1: ArrayNumber2 = [(i + 0.5) / (nodes1.length + 1), 0];
+		data1.add(nodes1[i - 1], nodes1[i], uv0, uv1);
+	}
+	const data2 = new TgdPainterSegmentsData();
+	const nodes2: ArrayNumber4[] = [[0, -1000, 0, 0]];
+	for (let step = -width; step < width; step++) {
+		const ang = step * 0.25;
+		const r = radius * Math.cos((step * Math.PI * 0.5) / width) * 0.5;
+		const x = r * Math.cos(ang);
+		const y = step * 0.3;
+		const z = r * Math.sin(ang);
+		const thickness = Math.max(0, 1.0 - Math.abs(step) / (width - 1));
+		nodes2.push([x, y, z, thickness]);
+	}
+	nodes2.push([0, 1000, 0, 0]);
+	for (let i = 1; i < nodes2.length; i++) {
+		const uv0: ArrayNumber2 = [(i - 0.5) / (nodes2.length + 1), 0];
+		const uv1: ArrayNumber2 = [(i + 0.5) / (nodes2.length + 1), 0];
+		data2.add(nodes2[i - 1], nodes2[i], uv0, uv1);
+	}
+	const palette = new TgdTexture2D(context).loadBitmap(
+		tgdCanvasCreatePalette(["#f44", "#ff4", "#4f4", "#4ff", "#44f"]),
+	);
+	const segments = new TgdPainterSegmentsMorphing(context, {
+		datasetsPairs: [[data1.makeDataset, data2.makeDataset]],
+		roundness: 64,
+		minRadius: 2,
+		radiusMultiplier: 1,
+		material: new TgdMaterialDiffuse({
+			color: palette,
+			lockLightsToCamera: true,
+		}),
+	});
+	const state = new TgdPainterState(context, {
+		depth: webglPresetDepth.less,
+		children: [segments],
+	});
+	context.add(
+		clear,
+		state,
+		new TgdPainterLogic((time, delta) => {
+			segments.mix = Math.abs(Math.sin(time));
+			segments.transfo.orbitAroundX(delta * 0.315481);
+			segments.transfo.orbitAroundZ(delta * 0.2);
+		}),
+	);
+	context.play();
+	return ({ radiusMultiplier }: { radiusMultiplier: number }) => {
+		segments.radiusMultiplier = radiusMultiplier;
+		context.paint();
+	};
+	// #end
 }
 
 export default function Demo() {
-    return (
-        <View
-            onReady={init}
-            gizmo
-            options={{
-                preserveDrawingBuffer: true,
-            }}
-            settings={{
-                radiusMultiplier: {
-                    label: "radiusMultiplier",
-                    value: 1,
-                    min: 0.1,
-                    max: 3,
-                    step: 0.1,
-                },
-            }}
-        />
-    )
+	return (
+		<View
+			onReady={init}
+			gizmo
+			options={{
+				preserveDrawingBuffer: true,
+			}}
+			settings={{
+				radiusMultiplier: {
+					label: "radiusMultiplier",
+					value: 1,
+					min: 0.1,
+					max: 3,
+					step: 0.1,
+				},
+			}}
+		/>
+	);
 }

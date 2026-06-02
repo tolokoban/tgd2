@@ -1,72 +1,72 @@
 .layout {
-    > aside {
-        display: flex;
-        justify-content: flex-start;
-        align-items: stretch;
-        gap: 0.25em;
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
+	> aside {
+		display: flex;
+		justify-content: flex-start;
+		align-items: stretch;
+		gap: 0.25em;
+		writing-mode: vertical-rl;
+		text-orientation: mixed;
 
-        button {
-            all: inherit;
-            background: var(--theme-color-primary-3);
-            color: var(--theme-color-on-primary-3);
-            cursor: pointer;
-            line-height: 2em;
-            padding: 0;
-            padding-inline: 1em;
-            font-size: 120%;
-            text-decoration: underline;
+		button {
+			all: inherit;
+			background: var(--theme-color-primary-3);
+			color: var(--theme-color-on-primary-3);
+			cursor: pointer;
+			line-height: 2em;
+			padding: 0;
+			padding-inline: 1em;
+			font-size: 120%;
+			text-decoration: underline;
 
-            &.active {
-                background: var(--theme-color-primary-5);
-                color: var(--theme-color-on-primary-5);
-                font-weight: bolder;
-                text-decoration: none;
-            }
-        }
+			&.active {
+				background: var(--theme-color-primary-5);
+				color: var(--theme-color-on-primary-5);
+				font-weight: bolder;
+				text-decoration: none;
+			}
+		}
 
-        > div:last-child {
-            flex: 1 1 auto;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding-inline-end: 1em;
-        }
-    }
+		> div:last-child {
+			flex: 1 1 auto;
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			padding-inline-end: 1em;
+		}
+	}
 
-    > main {
-        position: relative;
-        background: var(--theme-color-primary-5);
-        color: var(--theme-color-on-primary-5);
+	> main {
+		position: relative;
+		background: var(--theme-color-primary-5);
+		color: var(--theme-color-on-primary-5);
 
-        > div {
-            position: absolute;
-            left: 0.5em;
-            top: 0.5em;
-            right: 0.5em;
-            bottom: 0.5em;
-            width: calc(100% - 1em);
-            height: calc(100% - 1em);
-        }
-    }
+		> div {
+			position: absolute;
+			left: 0.5em;
+			top: 0.5em;
+			right: 0.5em;
+			bottom: 0.5em;
+			width: calc(100% - 1em);
+			height: calc(100% - 1em);
+		}
+	}
 
-    table {
-        display: inline-table;
-        border-collapse: collapse;
-        background-color: var(--theme-color-neutral-5);
-        color: var(--theme-color-on-neutral-5);
-        width: fit-content;
+	table {
+		display: inline-table;
+		border-collapse: collapse;
+		background-color: var(--theme-color-neutral-5);
+		color: var(--theme-color-on-neutral-5);
+		width: fit-content;
 
-        td,
-        th {
-            border: 1px solid var(--theme-color-neutral-1);
-            padding: 0.25em 0.5em;
-        }
+		td,
+		th {
+			border: 1px solid var(--theme-color-neutral-1);
+			padding: 0.25em 0.5em;
+		}
 
-        th {
-            background-color: var(--theme-color-primary-5);
-            color: var(--theme-color-on-primary-5);
-        }
-    }
+		th {
+			background-color: var(--theme-color-primary-5);
+			color: var(--theme-color-on-primary-5);
+		}
+	}
 }

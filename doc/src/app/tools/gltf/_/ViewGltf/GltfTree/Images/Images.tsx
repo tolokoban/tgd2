@@ -1,58 +1,63 @@
-import * as React from "react"
+import * as React from "react";
 
-import { IconImage, Theme } from "@tolokoban/ui"
-import { TgdDataGlb } from "@tolokoban/tgd"
+import { IconImage, Theme } from "@tolokoban/ui";
+import type { TgdDataGlb } from "@tolokoban/tgd";
 
-import { Expander } from "../Expander"
-import { Action } from "../../types"
+import { Expander } from "../Expander";
+import type { Action } from "../../types";
 
-import Styles from "./Images.module.css"
+import Styles from "./Images.module.css";
 
-const $ = Theme.classNames
+const $ = Theme.classNames;
 
 export type ViewImagesProps = {
-    className?: string
-    data: TgdDataGlb
-    onAction?(action: Action): void
-}
+	className?: string;
+	data: TgdDataGlb;
+	onAction?(action: Action): void;
+};
 
 export function ViewImages({ className, data, onAction }: ViewImagesProps) {
-    return (
-        <Expander className={$.join(className, Styles.images)} icon={IconImage} title="Images">
-            {(data.json.images ?? []).map((image, index) => (
-                <Expander
-                    key={index}
-                    title={image.name ?? `#${index}`}
-                    onClick={() =>
-                        onAction?.({
-                            type: "image",
-                            index,
-                        })
-                    }>
-                    <ul>
-                        {image.name && (
-                            <li>
-                                Name: <b>{image.name}</b>
-                            </li>
-                        )}
-                        {image.mimeType && (
-                            <li>
-                                Mime type: <b>{image.mimeType}</b>
-                            </li>
-                        )}
-                        {image.bufferView && (
-                            <li>
-                                Buffer view: <b>{image.bufferView}</b>
-                            </li>
-                        )}
-                        {image.uri && (
-                            <li>
-                                URI: <b>{image.uri}</b>
-                            </li>
-                        )}
-                    </ul>
-                </Expander>
-            ))}
-        </Expander>
-    )
+	return (
+		<Expander
+			className={$.join(className, Styles.images)}
+			icon={IconImage}
+			title="Images"
+		>
+			{(data.json.images ?? []).map((image, index) => (
+				<Expander
+					key={index}
+					title={image.name ?? `#${index}`}
+					onClick={() =>
+						onAction?.({
+							type: "image",
+							index,
+						})
+					}
+				>
+					<ul>
+						{image.name && (
+							<li>
+								Name: <b>{image.name}</b>
+							</li>
+						)}
+						{image.mimeType && (
+							<li>
+								Mime type: <b>{image.mimeType}</b>
+							</li>
+						)}
+						{image.bufferView && (
+							<li>
+								Buffer view: <b>{image.bufferView}</b>
+							</li>
+						)}
+						{image.uri && (
+							<li>
+								URI: <b>{image.uri}</b>
+							</li>
+						)}
+					</ul>
+				</Expander>
+			))}
+		</Expander>
+	);
 }

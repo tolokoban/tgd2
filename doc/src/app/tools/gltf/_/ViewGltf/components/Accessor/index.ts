@@ -1,1 +1,1 @@
-export * from "./Accessor"
+export * from "./Accessor";
