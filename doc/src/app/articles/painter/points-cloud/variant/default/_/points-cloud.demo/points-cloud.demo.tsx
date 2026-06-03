@@ -52,11 +52,10 @@ function init(context: TgdContext) {
 				coords.push(x, y, z, radius);
 				const u = index / 8;
 				uvs.push(u, u);
-				colors.push(TgdColor.fromHSL(u, 1, 0.5));
+				colors.push(TgdColor.fromHSL(u, .666, 0.5));
 				const dist = 1.666;
 				coords.push(dist * x, dist * y, dist * z, radius / 2);
-				uvs.push(u, u);
-				colors.push(TgdColor.fromHSL(u, 1, 0.5));
+				uvs.push(u+.5, u+.5);
 				index++;
 			}
 		}

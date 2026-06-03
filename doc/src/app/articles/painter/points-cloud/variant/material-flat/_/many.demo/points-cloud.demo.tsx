@@ -74,7 +74,7 @@ function makeDataset(glb: TgdDataGlb) {
 	glb.setAttrib(dataset, "POSITION");
 	const { set } = dataset.getAttribAccessor("POSITION");
 	const count = dataset.count;
-	const radius = 0.01;
+	const radius = 0.02;
 	for (let i = 0; i < count; i++) {
 		set(radius, i, 3);
 	}

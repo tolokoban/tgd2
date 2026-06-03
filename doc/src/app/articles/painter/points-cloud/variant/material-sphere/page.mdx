@@ -3,12 +3,16 @@ import DemoMorphing from "./_/many.demo"
 
 # Points Clouds
 
-## [TgdPainterPointsCloud](docs/classes/TgdPainterPointsCloud.html)
+## [TgdPainterPointsCloud.fragCodeSphere()](docs/types/TgdPointsCloudFragCodeSphereOptions.html)
+
+Use the cog to change the `depthPrecision` and see what's the difference.
+Rotate the scene and pay attention at the intersections between the spheres and the cube.
 
 <DemoSimple />
 
-## [TgdPainterPointsCloudMorphing](docs/classes/TgdPainterPointsCloudMorphing.html)
+----
 
-It is also possible to use morphing between two positions.
+You can speed up the render of these 500'000+ points by using **low** depth precision and no specular.
+With so many spheres, you will not often do a close up and won't notice the difference, but you will spare one square root per fragment.
 
 <DemoMorphing />

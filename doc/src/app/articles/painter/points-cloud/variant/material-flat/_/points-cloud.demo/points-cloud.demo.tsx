@@ -14,87 +14,57 @@ import {
 	TgdTexture2D,
 	tgdCanvasCreatePalette,
 	webglPresetDepth,
-} from "@tolokoban/tgd";
-import View from "@/components/demo/Tgd";
+} from "@tolokoban/tgd"
+import View from "@/components/demo/Tgd"
 
 function init(context: TgdContext) {
 	// #begin
-	context.camera = new TgdCameraOrthographic();
+	context.camera = new TgdCameraOrthographic()
 	context.execBeforeNextPaint(() => {
-		const radius = 3;
+		const radius = 3
 		context.camera.fitBoundingBox(
 			new TgdBoundingBox().addSphere(0, 0, 0, radius),
-		);
-	});
+		)
+	})
 	new TgdControllerCameraOrbit(context, {
 		inertiaOrbit: 1000,
 		maxZoom: 5,
 		minZoom: 0.25,
 		speedZoom: 1,
-	});
+	})
 	const clear = new TgdPainterClear(context, {
 		color: [0.1, 0.2, 0.3, 1],
 		depth: 1,
-	});
-	const dataset = new TgdDataset({
-		POSITION: "vec4",
-	});
-	const coords: number[] = [];
-	const uvs: number[] = [];
-	const colors: TgdColor[] = [];
-	const values = [-1, +1];
-	const radius = 1;
-	let index = 0;
-	for (const x of values) {
-		for (const y of values) {
-			for (const z of values) {
-				coords.push(x, y, z, radius);
-				const u = index / 8;
-				uvs.push(u, u);
-				colors.push(TgdColor.fromHSL(u, 1, 0.5));
-				const dist = 1.666;
-				coords.push(dist * x, dist * y, dist * z, radius / 2);
-				uvs.push(u, u);
-				colors.push(TgdColor.fromHSL(u, 1, 0.5));
-				index++;
-			}
-		}
-	}
-	dataset.set("POSITION", new Float32Array(coords));
-	const texture = new TgdTexture2D(context, {
-		params: {
-			minFilter: "NEAREST",
-			magFilter: "NEAREST",
-		},
-	}).loadBitmap(tgdCanvasCreatePalette(colors));
+	})
+	const { texture, dataPoint, dataUV } = createData(context)
 	const cloud = new TgdPainterPointsCloud(context, {
-		dataPoint: new Float32Array(dataset.data),
-		dataUV: new Float32Array(uvs),
+		dataPoint,
+		dataUV,
 		texture,
 		minSizeInPixels: 32,
 		fragCode: TgdPainterPointsCloud.fragCodeFlat(),
-	});
+	})
 	const cube = new TgdPainterMesh(context, {
 		geometry: new TgdGeometryBox({ sizeX: 2, sizeY: 2, sizeZ: 2 }),
 		material: new TgdMaterialFaceOrientation(),
-	});
+	})
 	const state = new TgdPainterState(context, {
 		depth: webglPresetDepth.less,
 		children: [cube, cloud],
 		// children: [cloud],
-	});
-	context.add(clear, state);
-	context.paint();
+	})
+	context.add(clear, state)
+	context.paint()
 	// #end
 	return (settings: Record<string, number>) => {
-		cloud.radiusMultiplier = settings.radiusMultiplier;
-		cloud.shadowIntensity = settings.shadowIntensity;
-		cloud.shadowThickness = settings.shadowThickness;
-		cloud.specularExponent = settings.specularExponent;
-		cloud.specularIntensity = settings.specularIntensity;
-		cloud.light = settings.light;
-		context.paint();
-	};
+		cloud.radiusMultiplier = settings.radiusMultiplier
+		cloud.shadowIntensity = settings.shadowIntensity
+		cloud.shadowThickness = settings.shadowThickness
+		cloud.specularExponent = settings.specularExponent
+		cloud.specularIntensity = settings.specularIntensity
+		cloud.light = settings.light
+		context.paint()
+	}
 }
 
 export default function Demo() {
@@ -140,5 +110,43 @@ export default function Demo() {
 				},
 			}}
 		/>
-	);
+	)
+}
+
+function createData(context: TgdContext) {
+	const dataset = new TgdDataset({
+		POSITION: "vec4",
+	})
+	const coords: number[] = []
+	const uvs: number[] = []
+	const colors: TgdColor[] = []
+	const values = [-1, +1]
+	const radius = 1
+	let index = 0
+	for (const x of values) {
+		for (const y of values) {
+			for (const z of values) {
+				coords.push(x, y, z, radius)
+				const u = index / 8
+				uvs.push(u, u)
+				colors.push(TgdColor.fromHSL(u, 1, 0.5))
+				const dist = 1.666
+				coords.push(dist * x, dist * y, dist * z, radius / 2)
+				uvs.push(u + 0.5, u + 0.5)
+				index++
+			}
+		}
+	}
+	dataset.set("POSITION", new Float32Array(coords))
+	const texture = new TgdTexture2D(context, {
+		params: {
+			minFilter: "NEAREST",
+			magFilter: "NEAREST",
+		},
+	}).loadBitmap(tgdCanvasCreatePalette(colors))
+	return {
+		texture,
+		dataUV: new Float32Array(uvs),
+		dataPoint: new Float32Array(dataset.data),
+	}
 }

@@ -9,6 +9,7 @@ export type TgdPainterGroupOptions = {
     onExit?(time: number, delta: number): void
     name?: string
     children?: (TgdPainter | TgdPainterFunction)[]
+    active?: boolean
 }
 
 /**
@@ -41,6 +42,7 @@ export class TgdPainterGroup extends TgdPainter {
             if (arg1.children) {
                 for (const painter of arg1.children) this.add(painter)
             }
+            this.active = arg1.active ?? true
         }
         if (arg2) {
             this.onEnter = arg2.onEnter
@@ -53,6 +55,7 @@ export class TgdPainterGroup extends TgdPainter {
                     this.add(painter)
                 }
             }
+            this.active = arg2.active ?? true
         }
     }
 

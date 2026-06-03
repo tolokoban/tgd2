@@ -23,7 +23,7 @@ export function vertInstancesCode(): TgdCodeBloc[] {
 		"gl_Position = uniProjectionMatrix * point;",
 		"vec4 depth = point + vec4(0, 0, radius, 0);",
 		"vec4 screenDepth = uniProjectionMatrix * depth;",
-		"varDepth = gl_Position.z - screenDepth.z;",
+		"varDepth = (gl_Position.z - screenDepth.z) * .5;",
 		"vec4 shift = point + vec4(radius, radius, 0, 0);",
 		"vec4 screenShift = uniProjectionMatrix * shift;",
 		"float pointSize = max(",
