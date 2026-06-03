@@ -158,6 +158,7 @@ export class TgdPainterSegments extends TgdPainter {
                 attUV1: "vec2",
             },
             varying: {
+                varRadiusHasBeenClamped: "float",
                 ...material.varyings,
             },
             functions: {
@@ -185,6 +186,7 @@ export class TgdPainterSegments extends TgdPainter {
                 "float radius = max(",
                 ["xyzr.w * uniRadiusMultiplier,", "minRadiusInCameraUnit"],
                 ");",
+                "varRadiusHasBeenClamped = minRadiusInCameraUnit > xyzr.w * uniRadiusMultiplier ? 1.0 : 0.0;",
                 "vec3 dir = attXYZR1.xyz - attXYZR0.xyz;",
                 "float len = length(dir);",
                 "if (len == 0.0) {",

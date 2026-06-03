@@ -1,7 +1,7 @@
 import { TgdLight } from "@tgd/light"
 import { TgdVec3, TgdVec4 } from "@tgd/math"
 import type { TgdProgram } from "@tgd/program"
-import type { TgdCodeBloc } from "@tgd/shader/code"
+import type { TgdCodeBloc } from "@tgd/shader"
 import { TgdTexture2D } from "@tgd/texture"
 import type {
 	ArrayNumber4,
@@ -57,7 +57,7 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 		}
 		const fragmentShaderCode: TgdCodeBloc = [
 			hasTexture
-				? "vec4 color = texture(texDiffuse, varUV);"
+				? "vec4 color = texture(uniTextureColor, varUV);"
 				: `vec4 color = vec4(${colorOrTexture.join(", ")});`,
 			"if (color.a < uniAlphaCut) discard;",
 			`vec3 normal = ${options.lockLightsToCamera ? "mat3(uniModelViewMatrix) * " : ""}normalize(varNormal);`,
@@ -81,7 +81,6 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 		}
 		if (hasTexture) {
 			varyings.varUV = "vec2"
-			uniforms.texDiffuse = "sampler2D"
 		}
 		const vertexShaderCode = () => {
 			const code: TgdCodeBloc = [
@@ -95,6 +94,11 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 
 		super({
 			uniforms,
+			textures: hasTexture
+				? {
+						uniTextureColor: colorOrTexture,
+					}
+				: {},
 			varyings,
 			vertexShaderCode,
 			fragmentShaderCode,
@@ -107,9 +111,6 @@ export class TgdMaterialDiffuse extends TgdMaterial {
 				program.uniform3fv("uniAmbient", this.ambientColor)
 				program.uniform1f("uniSpecularExponent", this.specularExponent)
 				program.uniform1f("uniSpecularIntensity", this.specularIntensity)
-
-				const { texture } = this
-				if (texture) texture.activate(0, program, "texDiffuse")
 			},
 		})
 
