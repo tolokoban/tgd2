@@ -20,6 +20,19 @@ npm start
 
 ## Release notes
 
+### v2.0.141
+
+- **TgdPainterPointsCloud rewritten with instanced billboards**: Points are now rendered using `TRIANGLE_FAN` instanced quads instead of `gl_Point`, removing the macOS 64px `gl_PointSize` limitation. New `enableSpecular` option, shared `fragCodeSphere`/`fragCodeFlat` shader helpers extracted into dedicated modules with configurable `lightDirection` and `depthPrecision`.
+- **TgdPainterPointsCloudMorphing uses instanced billboards**: Morphing cloud also switched from `gl_Point` to instanced quads for macOS compatibility, using the same shared shader helpers.
+- **TgdContext.pointSizeMin / pointSizeMax**: New readonly properties exposing the hardware `ALIASED_POINT_SIZE_RANGE`.
+- **TgdContext.execBeforeNextPaint / execAfterNextPaint**: Schedule one-shot actions to run before or after the next paint cycle.
+- **TgdCamera.fitBoundingBox()**: New method to automatically position the camera (distance, near, far, orientation) to frame a `TgdBoundingBox`.
+- **TgdCamera.setCurrentState() returns `this`**: Enables fluent chaining.
+- **TgdMaterial texture management**: Materials now accept a `textures` record (`Record<string, TgdTexture2D | TgdTextureCube>`) that auto-generates sampler uniforms and activates textures during paint — no manual `texture.activate()` needed.
+- **TgdPainterGroup `active` option**: Groups can now be created with `active: false` to skip painting.
+- **TgdPainterSegments `varRadiusHasBeenClamped`**: New varying that indicates when a segment radius was clamped to minimum size.
+- **TgdCodeBloc accepts `false`**: `false` values are now valid in code blocs (filtered out like `null`), simplifying conditional shader code generation.
+
 ### v2.0.140
 
 - **TgdPainterGizmo error handling**: The async initialization now catches errors via `context.console.error` and guards against painting on a deleted context.
