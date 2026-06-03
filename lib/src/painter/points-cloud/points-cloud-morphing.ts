@@ -12,7 +12,7 @@ import { tgdCanvasCreateGradientHorizontal } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../painter"
 import { fragCodeSphere, TgdPointsCloudFragCodeSphereOptions } from "./shaders/frag-sphere"
-import { vertCode } from "./shaders/vert"
+import { vertCode, vertInstancesCode } from "./shaders/vert"
 
 interface TgdPainterPointsCloudMorphingData {
     /**
@@ -165,10 +165,11 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         this.counts = options.data.map(([{ point }]) => point.length >> 2)
         this.program = this.createProgram(options.fragCode)
         this.vaos = options.data.map(([dataA, dataB]) => {
-            const datasetA = this.createDataset(dataA, "A")
-            const datasetB = this.createDataset(dataB, "B")
+            const datasetA = this.createDatasetForInstances(dataA, "A")
+            const datasetB = this.createDatasetForInstances(dataB, "B")
+            const billboard = this.createDatasetForBillboards()
             this.datasets.push(datasetA, datasetB)
-            return new TgdVertexArray(context.gl, this.program, [datasetA, datasetB])
+            return new TgdVertexArray(context.gl, this.program, [datasetA, datasetB, billboard])
         })
     }
 
@@ -194,16 +195,16 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         program.uniform1f("uniMix", this.mix)
         program.uniform1f("uniRadiusMultiplier", radiusMultiplier)
         program.uniform1f("uniMinSizeInPixels", minSizeInPixels)
-        program.uniform1f("uniScreenHeightInPixels", context.height)
         program.uniform1f("uniSpecularExponent", this.specularExponent)
         program.uniform1f("uniSpecularIntensity", this.specularIntensity)
         program.uniform1f("uniShadowIntensity", this.shadowIntensity)
         program.uniform1f("uniShadowThickness", this.shadowThickness)
         program.uniform1f("uniLight", this.light)
+        program.uniform2f("uniAspectRatio", context.aspectRatioInverse, 1)
         program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
         program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
         vao.bind()
-        gl.drawArrays(gl.POINTS, 0, count)
+        gl.drawArraysInstanced(gl.TRIANGLE_FAN, 0, 4, count)
         vao.unbind()
     }
 
@@ -214,7 +215,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         }
     }
 
-    private createDataset(
+    private createDatasetForInstances(
         data: TgdPainterPointsCloudMorphingData,
         suffix: "A" | "B",
     ) {
@@ -240,9 +241,20 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         const dataset = new TgdDataset({
             [attPoint]: "vec4",
             [attUV]: "vec2",
-        })
+        }, { divisor: 1 })
         dataset.set(attPoint, point)
         dataset.set(attUV, uv)
+        return dataset
+    }
+
+    private createDatasetForBillboards() {
+        const dataset = new TgdDataset({
+            attPointCoord: "vec2",
+        })
+        dataset.set(
+            "attPointCoord",
+            new Float32Array([-1, -1, -1, +1, +1, +1, +1, -1]),
+        )
         return dataset
     }
 
@@ -260,6 +272,8 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         const vert = new TgdShaderVertex({
             uniforms: {
                 uniMix: "float",
+                uniTexture: "sampler2D",
+                uniAspectRatio: "vec2",
                 uniMinSizeInPixels: "float",
                 uniRadiusMultiplier: "float",
                 uniScreenHeightInPixels: "float",
@@ -271,19 +285,24 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
                 attUV_A: "vec2",
                 attPoint_B: "vec4",
                 attUV_B: "vec2",
+                /**
+                 * Between -1.0 and +1.0
+                 */
+                attPointCoord: "vec2",
             },
             varying: {
-                varUV: "vec2",
+                varColor: "vec4",
+                varPointCoord: "vec2",
+                varDepth: "float",
             },
             mainCode: [
                 "vec4 attPoint = mix(attPoint_A, attPoint_B, uniMix);",
                 "vec2 attUV = mix(attUV_A, attUV_B, uniMix);",
-                ...vertCode(),
+                ...vertInstancesCode(),
             ],
         }).code
         const frag = new TgdShaderFragment({
             uniforms: {
-                uniTexture: "sampler2D",
                 uniSpecularExponent: "float",
                 uniSpecularIntensity: "float",
                 uniShadowIntensity: "float",
@@ -291,28 +310,23 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
                 uniLight: "float",
             },
             varying: {
-                varUV: "vec2",
+                varColor: "vec4",
+                varPointCoord: "vec2",
+                varDepth: "float",
             },
             outputs: { FragColor: "vec4" },
             functions: {
                 render: [
                     "vec4 render(vec4 color) {",
-                    render ?? [
-                        "vec2 coords = 2.0 * (gl_PointCoord - vec2(.5));",
-                        "float len = 1.0 - dot(coords, coords);",
-                        "if (len < 0.0) discard;",
-                        "gl_FragDepth = gl_FragCoord.z - len * 1e-5;",
-                        "float light = smoothstep(0.0, uniShadowThickness, len) * uniShadowIntensity + (1.0 - uniShadowIntensity);",
-                        "float spec = pow(len, uniSpecularExponent) * uniSpecularIntensity;",
-                        "return color * vec4(vec3(light * uniLight), 1.0) + vec4(vec3(spec), 0.0);",
-                    ],
+                    render ??
+                    fragCodeSphere({
+                        ...this.options,
+                        enableSpecular: this.options.enableSpecular ?? true,
+                    }),
                     "}",
                 ],
             },
-            mainCode: [
-                "vec4 color = texture(uniTexture, varUV);",
-                "FragColor = render(color);",
-            ],
+            mainCode: ["vec4 color = varColor;", "FragColor = render(color);"],
         }).code
         const program = new TgdProgram(this.context.gl, { vert, frag })
         return program
