@@ -1,7 +1,5 @@
 import type { TgdBuffer, TgdBufferOptionTarget, TgdBufferOptionUsage } from "@tgd/buffer"
-import type { TgdCamera } from "@tgd/camera"
-import { TgdContext } from "@tgd/context"
-import type { WebglParams } from "@tgd/context/webgl-params"
+import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { type TgdMaterial, TgdMaterialFaceOrientation } from "@tgd/material"
 import { TgdTransfo } from "@tgd/math"
@@ -170,7 +168,10 @@ export class TgdPainterSegments extends TgdPainter {
                 ],
                 applyMaterial: [
                     "void applyMaterial(vec3 position, vec3 normal, vec2 uv) {",
-                    [material.vertexShaderCode],
+                    [
+                        material.varyings["varUV"] ? "varUV = uv;" : "",
+                        material.vertexShaderCode
+                    ],
                     "}",
                 ],
             },
@@ -271,6 +272,13 @@ export class TgdPainterSegments extends TgdPainter {
         gl.disable(gl.DITHER)
         prg.use()
         this.material.setUniforms?.({ program: prg, context, time, delta })
+        const { textures } = material
+        const samplerNames = Object.keys(textures)
+        for (let unit = 0; unit < samplerNames.length; unit++) {
+            const uniformName = samplerNames[unit]
+            const texture = textures[uniformName]
+            texture.activate(unit, prg, uniformName)
+        }
         prg.uniform1f("uniPixelPerScreenUnit", gl.drawingBufferHeight)
         prg.uniform1f("uniMinRadiusInPixel", this.minRadius)
         prg.uniform1f("uniRadiusMultiplier", this.radiusMultiplier)

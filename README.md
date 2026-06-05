@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.142
+
+- **TgdPainterSegments** and **TgdPainterSegmentsMorphing**: fix a bug in the materials.
+
 ### v2.0.141
 
 - **TgdPainterPointsCloud rewritten with instanced billboards**: Points are now rendered using `TRIANGLE_FAN` instanced quads instead of `gl_Point`, removing the macOS 64px `gl_PointSize` limitation. New `enableSpecular` option, shared `fragCodeSphere`/`fragCodeFlat` shader helpers extracted into dedicated modules with configurable `lightDirection` and `depthPrecision`.
