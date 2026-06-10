@@ -1,3 +1,4 @@
+import { log } from "node:console"
 import type { TgdContext } from "@tgd/context"
 import { TgdDataset } from "@tgd/dataset"
 import { TgdEvent } from "@tgd/event"
@@ -263,14 +264,14 @@ export class TgdPainterOverlay extends TgdPainter {
     paint(time: number, delta: number): void {
         this.checkForResizeEvent()
         const { context, prg, vao, z, scaleX, scaleY, xLayoutToScreen, yLayoutToScreen, texture } = this
-        const { gl } = context
+        const { gl, resolution } = context
         prg.use()
         prg.uniform1f("uniZ", z)
-        const x0 = xLayoutToScreen(0)
-        const y0 = yLayoutToScreen(0)
+        const x0 = xLayoutToScreen(0, resolution)
+        const y0 = yLayoutToScreen(0, resolution)
         prg.uniform2f("uniCenter", x0, y0)
-        const x1 = xLayoutToScreen(1)
-        const y1 = yLayoutToScreen(1)
+        const x1 = xLayoutToScreen(1, resolution)
+        const y1 = yLayoutToScreen(1, resolution)
         prg.uniform2f("uniScale", x1 - x0, y1 - y0)
         prg.uniform2f("uniScaleUV", scaleX, scaleY)
         if (!texture) {
@@ -297,43 +298,45 @@ export class TgdPainterOverlay extends TgdPainter {
     }
 
     private xScreenToLayout = (xScreen: number) => {
+        const { resolution } = this.context
         const { context, alignX, marginLeft, marginRight } = this
         const marginPx = marginLeft + marginRight
-        const widthPx = this.width ?? context.width - marginPx
+        const widthPx = (this.width ? this.width * resolution : context.width) - marginPx
         const frameWidthPx = context.width - widthPx - marginPx
         const screenPerPixel = 2 / context.width
         const center = marginLeft + (widthPx + (1 + alignX) * frameWidthPx - context.width) / 2
         const factor = context.width / widthPx
         return (xScreen - center * screenPerPixel) * factor
     }
-    private readonly xLayoutToScreen = (xLayout: number) => {
+    private readonly xLayoutToScreen = (xLayout: number, resolution: number) => {
         const { context, alignX, marginLeft, marginRight } = this
-        const marginPx = marginLeft + marginRight
-        const widthPx = this.width ?? context.width - marginPx
+        const marginPx = (marginLeft + marginRight)
+        const widthPx = (this.width ? this.width * resolution : context.width) - marginPx
         const frameWidthPx = context.width - widthPx - marginPx
         const screenPerPixel = 2 / context.width
         const center = marginLeft + (widthPx + (1 + alignX) * frameWidthPx - context.width) / 2
         const factor = widthPx / context.width
-        return xLayout * factor + center * screenPerPixel
+        return (xLayout * factor + center * screenPerPixel)
     }
     private yScreenToLayout = (yScreen: number) => {
+        const { resolution } = this.context
         const { context, alignY, marginTop, marginBottom } = this
         const marginPx = marginTop + marginBottom
-        const heightPx = this.height ?? context.height - marginPx
+        const heightPx = (this.height ? this.height * resolution : context.height) - marginPx
         const frameHeightPx = context.height - heightPx - marginPx
         const screenPerPixel = 2 / context.height
         const center = marginBottom + (heightPx + (1 + alignY) * frameHeightPx - context.height) / 2
         const factor = context.height / heightPx
         return (yScreen - center * screenPerPixel) * factor
     }
-    private readonly yLayoutToScreen = (yLayout: number) => {
+    private readonly yLayoutToScreen = (yLayout: number, resolution: number) => {
         const { context, alignY, marginTop, marginBottom } = this
-        const marginPx = marginTop + marginBottom
-        const heightPx = this.height ?? context.height - marginPx
+        const marginPx = (marginTop + marginBottom)
+        const heightPx = (this.height ? this.height * resolution : context.height) - marginPx
         const frameHeightPx = context.height - heightPx - marginPx
         const screenPerPixel = 2 / context.height
         const center = marginBottom + (heightPx + (1 + alignY) * frameHeightPx - context.height) / 2
         const factor = heightPx / context.height
-        return yLayout * factor + center * screenPerPixel
+        return (yLayout * factor + center * screenPerPixel)
     }
 }
