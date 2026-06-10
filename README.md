@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.143
+
+- **TgdPainterOverlay resolution fix**: Overlay coordinate transformations now correctly account for `context.resolution`, fixing layout misalignment on high-DPI displays when a custom `width`/`height` is set.
+
 ### v2.0.142
 
 - **TgdPainterSegments** and **TgdPainterSegmentsMorphing**: fix a bug in the materials.
