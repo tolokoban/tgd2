@@ -1,6 +1,7 @@
 import {
 	TgdCameraPerspective,
 	type TgdContext,
+	TgdLight,
 	TgdMaterialDiffuse,
 	TgdPainterClear,
 	TgdPainterGizmo,
@@ -8,6 +9,7 @@ import {
 	TgdPainterState,
 	TgdTexture2D,
 	TgdUniformBufferObjectCamera,
+	tgdCalcMapRange,
 } from "@tolokoban/tgd"
 import TextureURL from "@/assets/image/uv-grid-2x2.webp"
 import View, { Assets } from "@/components/demo/Tgd"
@@ -26,6 +28,9 @@ function init(context: TgdContext, assets: Assets) {
 	const material = new TgdMaterialDiffuse({
 		lockLightsToCamera: true,
 		color: texture,
+		ambient: new TgdLight({
+			color: [0.5, 0.4, 0.3, 1],
+		}),
 	})
 	const meshes: TgdPainterMesh[] = []
 	const S = 0.6
@@ -65,6 +70,7 @@ function init(context: TgdContext, assets: Assets) {
 		}),
 	)
 	context.paint()
+
 	return ({
 		size,
 		alignY,

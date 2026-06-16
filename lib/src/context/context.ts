@@ -293,13 +293,6 @@ export class TgdContext extends TgdPainterGroup {
         if (this._resolution === resolution) return
 
         this._resolution = resolution
-        const { canvas } = this
-        if (isOffscreen(canvas)) return
-
-        const width = canvas.clientWidth * this.resolution
-        const height = canvas.clientHeight * this.resolution
-        canvas.width = width
-        canvas.height = height
     }
 
 
@@ -614,8 +607,14 @@ export class TgdContext extends TgdPainterGroup {
             return
         }
         try {
-            const { gl } = this
+            const { gl, canvas } = this
             this.virtualTime.update(this)
+            if (!isOffscreen(canvas)) {
+                const width = Math.ceil(canvas.clientWidth * this.resolution)
+                const height = Math.ceil(canvas.clientHeight * this.resolution)
+                if (canvas.width !== width) canvas.width = width
+                if (canvas.height !== height) canvas.height = height
+            }
             this.setCurrentSize(gl.drawingBufferWidth, gl.drawingBufferHeight)
             const delayInSec = timeInSec - this.lastTimeInSec
             this._fps = Math.round(1 / delayInSec)
