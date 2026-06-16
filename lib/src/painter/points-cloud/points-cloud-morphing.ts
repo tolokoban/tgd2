@@ -253,7 +253,7 @@ export class TgdPainterPointsCloudMorphing extends TgdPainter {
         })
         dataset.set(
             "attPointCoord",
-            new Float32Array([-1, -1, -1, +1, +1, +1, +1, -1]),
+            new Float32Array([-1, -1, +1, -1, +1, +1, -1, +1]),
         )
         return dataset
     }
