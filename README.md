@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.145
+
+- **TgdPainterPointsCloud** and **TgdPainterPointsCloudMorphing** were using squares with back face facing.
+
 ### v2.0.144
 
 - **TgdContext resolution deferred to paint cycle**: Setting `context.resolution` no longer immediately resizes the canvas. Instead, the canvas dimensions are updated at the top of the next `actualPaint` call using `Math.ceil`, avoiding mid-frame layout thrashing and ensuring consistent sizing.
