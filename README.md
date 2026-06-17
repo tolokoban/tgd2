@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.0.147
+
+- **TgdMaterialFlatTexture** provide a `texture` attribute, but until now, changing it was not working.
+
 ### v2.0.145
 
 - **TgdPainterPointsCloud** and **TgdPainterPointsCloudMorphing** were using squares with back face facing.
