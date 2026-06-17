@@ -4,96 +4,80 @@ import {
 	TgdColor,
 	type TgdContext,
 	TgdControllerCameraOrbit,
+	TgdDataGlb,
 	TgdDataset,
 	TgdGeometryBox,
 	TgdMaterialFaceOrientation,
+	TgdMaterialFlatTexture,
 	TgdPainterClear,
 	TgdPainterMesh,
+	TgdPainterMeshGltf,
 	TgdPainterPointsCloud,
+	TgdPainterPointsCloudMorphing,
 	TgdPainterState,
 	TgdTexture2D,
 	tgdCanvasCreatePalette,
 	webglPresetDepth,
-} from "@tolokoban/tgd";
-import View from "@/components/demo/Tgd";
+} from "@tolokoban/tgd"
+import TextureURL from "@/assets/image/suzanne-baked.webp"
 
-function init(context: TgdContext) {
+import MonkeyHighURL from "@/assets/mesh/suzanne.glb"
+import MonkeyLowURL from "@/assets/mesh/suzanne-low.glb"
+import View, { Assets } from "@/components/demo/Tgd"
+
+function init(context: TgdContext, assets: Assets) {
+	console.log("🐞 [points-cloud.demo@27] assets =", assets) // @FIXME: Remove this line written on 2026-06-16 at 16:50
 	// #begin
-	context.camera = new TgdCameraOrthographic();
+	context.camera = new TgdCameraOrthographic()
 	context.execBeforeNextPaint(() => {
-		const radius = 3;
+		const radius = 1.6
 		context.camera.fitBoundingBox(
 			new TgdBoundingBox().addSphere(0, 0, 0, radius),
-		);
-		context.camera.debug();
-	});
+		)
+	})
 	new TgdControllerCameraOrbit(context, {
 		inertiaOrbit: 1000,
-		maxZoom: 5,
-		minZoom: 0.25,
+		maxZoom: 10,
+		minZoom: 0.2,
 		speedZoom: 1,
-	});
+	})
 	const clear = new TgdPainterClear(context, {
 		color: [0.1, 0.2, 0.3, 1],
 		depth: 1,
-	});
-	const dataset = new TgdDataset({
-		POSITION: "vec4",
-	});
-	const coords: number[] = [];
-	const uvs: number[] = [];
-	const colors: TgdColor[] = [];
-	const values = [-1, +1];
-	const radius = 1;
-	let index = 0;
-	for (const x of values) {
-		for (const y of values) {
-			for (const z of values) {
-				coords.push(x, y, z, radius);
-				const u = index / 8;
-				uvs.push(u, u);
-				colors.push(TgdColor.fromHSL(u, .666, 0.5));
-				const dist = 1.666;
-				coords.push(dist * x, dist * y, dist * z, radius / 2);
-				uvs.push(u+.5, u+.5);
-				index++;
-			}
-		}
-	}
-	dataset.set("POSITION", new Float32Array(coords));
-	const texture = new TgdTexture2D(context, {
-		params: {
-			minFilter: "NEAREST",
-			magFilter: "NEAREST",
-		},
-	}).loadBitmap(tgdCanvasCreatePalette(colors));
+	})
+	const texture = new TgdTexture2D(context).loadBitmap(assets.image.texture)
+	const dataset = makeDataset(assets.glb.monkeyLow)
+	const dataPoint = new Float32Array(dataset.data)
+	const dataUV = new Float32Array(makeUV(assets.glb.monkeyLow).data)
 	const cloud = new TgdPainterPointsCloud(context, {
-		dataPoint: new Float32Array(dataset.data),
-		dataUV: new Float32Array(uvs),
+		dataPoint,
+		dataUV,
 		texture,
-		minSizeInPixels: 32,
-	});
-	const cube = new TgdPainterMesh(context, {
-		geometry: new TgdGeometryBox({ sizeX: 2, sizeY: 2, sizeZ: 2 }),
-		material: new TgdMaterialFaceOrientation(),
-	});
+	})
+	const material = new TgdMaterialFlatTexture({
+		texture,
+	})
+	const mesh = new TgdPainterMeshGltf(context, {
+		asset: assets.glb.monkeyHigh,
+		material,
+	})
+
 	const state = new TgdPainterState(context, {
 		depth: webglPresetDepth.less,
-		children: [cube, cloud],
-		// children: [cloud],
-	});
-	context.add(clear, state);
-	context.paint();
+		children: [mesh, cloud],
+	})
+	context.add(clear, state)
+	context.paint()
 	// #end
 	return (settings: Record<string, number>) => {
-		cloud.radiusMultiplier = settings.radiusMultiplier;
-		cloud.shadowIntensity = settings.shadowIntensity;
-		cloud.shadowThickness = settings.shadowThickness;
-		cloud.specularExponent = settings.specularExponent;
-		cloud.specularIntensity = settings.specularIntensity;
-		cloud.light = settings.light;
-		context.paint();
-	};
+		cloud.radiusMultiplier = settings.radiusMultiplier
+		cloud.shadowIntensity = settings.shadowIntensity
+		cloud.shadowThickness = settings.shadowThickness
+		cloud.specularExponent = settings.specularExponent
+		cloud.specularIntensity = settings.specularIntensity
+		cloud.light = settings.light
+		context.paint()
+	}
 }
 
 export default function Demo() {
@@ -101,6 +85,15 @@ export default function Demo() {
 		<View
 			onReady={init}
 			gizmo
+			assets={{
+				glb: {
+					monkeyHigh: MonkeyHighURL,
+					monkeyLow: MonkeyLowURL,
+				},
+				image: {
+					texture: TextureURL,
+				},
+			}}
 			options={{
 				preserveDrawingBuffer: true,
 			}}
@@ -139,5 +132,38 @@ export default function Demo() {
 				},
 			}}
 		/>
-	);
+	)
+}
+
+function createPalette() {
+	const colors: TgdColor[] = []
+	const S = 0.5
+	const L = 0.4
+	for (const H of [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]) {
+		colors.push(TgdColor.fromHSL(H, S, L))
+	}
+	return tgdCanvasCreatePalette(colors)
+}
+
+function makeDataset(glb: TgdDataGlb) {
+	const dataset = new TgdDataset({
+		POSITION: "vec4",
+	})
+	glb.setAttrib(dataset, "POSITION")
+	const { set } = dataset.getAttribAccessor("POSITION")
+	const count = dataset.count
+	const radius = 0.05
+	for (let i = 0; i < count; i++) {
+		set(radius, i, 3)
+	}
+	return dataset
+}
+
+function makeUV(glb: TgdDataGlb) {
+	const dataset = new TgdDataset({
+		TEXCOORD_0: "vec2",
+	})
+	glb.setAttrib(dataset, "TEXCOORD_0")
+	dataset.debug()
+	return dataset
 }
