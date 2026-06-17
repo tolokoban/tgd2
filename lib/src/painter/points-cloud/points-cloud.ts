@@ -216,6 +216,11 @@ export class TgdPainterPointsCloud extends TgdPainter {
         vao.unbind()
     }
 
+    debug(caption?: string) {
+        console.debug(`[${caption ?? this.name}] TgdPainterPointsCloudMorphing( options ):`, this.options)
+        this.vao.debug()
+    }
+
     private createDatasetForInstances() {
         const dataset = new TgdDataset(
             {

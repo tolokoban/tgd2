@@ -10,6 +10,7 @@ import {
 
 import { TestCase } from "@/types"
 import { makeCameraPerspective } from "@/factory/camera"
+import { compareImage, deleteReference, makeWebp, readReference } from "@/api"
 
 import BlackURL from "./black.png"
 import styles from "./Preview.module.css"
@@ -44,8 +45,7 @@ export function Preview({ name, testCase }: PreviewProps) {
         })
     }, [testCase])
     const handleDelete = async () => {
-        // Delete the reference.
-        await window.electronAPI.deleteReference(name)
+        await deleteReference(name)
         window.location.reload()
     }
     const diff = useDiff(name, steps, refImage, refCanvas, refDiff)
@@ -89,7 +89,7 @@ function useReferenceURL(id: string) {
             const ref = `${id}`
             console.log("🐞 [Preview@52] ref =", ref) // @FIXME: Remove this line written on 2026-04-30 at 12:58
             try {
-                const data = await window.electronAPI.readReference(ref)
+                const data = await readReference(ref)
                 if (data) {
                     const base64 = btoa(String.fromCharCode(...new Uint8Array(data)))
                     setUrl(`data:image/webp;base64,${base64}`)
@@ -144,7 +144,7 @@ function useDiff(
                 data.data[i + 3] = 255
             }
             ctx.putImageData(data, 0, 0)
-            setDiff(await window.electronAPI.compareImage(name, await tgdCanvasToArrayBuffer(canvas)))
+            setDiff(await compareImage(name, await tgdCanvasToArrayBuffer(canvas)))
         }
         action()
     }, [steps])
@@ -175,7 +175,7 @@ function computeDelta(data1: Uint8ClampedArray<ArrayBufferLike>, data2: Uint8Cla
 
 async function convertIntoWebpImage(canvas: HTMLCanvasElement): Promise<HTMLImageElement> {
     const arrayBuffer = await tgdCanvasToArrayBuffer(canvas)
-    const buffer = await window.electronAPI.makeWebp(arrayBuffer)
+    const buffer = await makeWebp(arrayBuffer)
     const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)))
     const url = `data:image/webp;base64,${base64}`
     const img = await tgdLoadImage(url)

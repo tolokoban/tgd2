@@ -17,6 +17,7 @@ export * from "./routes"
 export * from "./types"
 
 
+import NotFound0 from "./404"
 const Page0 = React.lazy(() => import("./page"))
 const Page4 = React.lazy(() => import("./cases/painter/clear/red/page"))
 const Page6 = React.lazy(() => import("./cases/painter/mesh/box/page"))
@@ -31,16 +32,16 @@ export default function App({ lang }: { lang?: string }) {
     const pg6 = Page6
     const pg7 = Page7
     return (
-        <Route path="/" Page={pg0} fallback={fb} context={context}>
-            <Route path="/cases" fallback={fb} context={context}>
-                <Route path="/cases/painter" fallback={fb} context={context}>
-                    <Route path="/cases/painter/clear" fallback={fb} context={context}>
-                        <Route path="/cases/painter/clear/red" Page={pg4} fallback={fb} context={context}/>
+        <Route path="/" Page={pg0} NotFound={NotFound0} fallback={fb} context={context}>
+            <Route path="/cases" NotFound={NotFound0} fallback={fb} context={context}>
+                <Route path="/cases/painter" NotFound={NotFound0} fallback={fb} context={context}>
+                    <Route path="/cases/painter/clear" NotFound={NotFound0} fallback={fb} context={context}>
+                        <Route path="/cases/painter/clear/red" Page={pg4} NotFound={NotFound0} fallback={fb} context={context}/>
                     </Route>
-                    <Route path="/cases/painter/mesh" fallback={fb} context={context}>
-                        <Route path="/cases/painter/mesh/box" Page={pg6} fallback={fb} context={context}/>
+                    <Route path="/cases/painter/mesh" NotFound={NotFound0} fallback={fb} context={context}>
+                        <Route path="/cases/painter/mesh/box" Page={pg6} NotFound={NotFound0} fallback={fb} context={context}/>
                     </Route>
-                    <Route path="/cases/painter/node" Page={pg7} fallback={fb} context={context}/>
+                    <Route path="/cases/painter/node" Page={pg7} NotFound={NotFound0} fallback={fb} context={context}/>
                 </Route>
             </Route>
         </Route>
@@ -77,6 +78,7 @@ interface RouteProps {
     Page?: PageComponent
     Layout?: ContainerComponent
     Template?: ContainerComponent
+    NotFound?: React.FC
     context: RouteMatch | null
 }
 
@@ -87,6 +89,7 @@ function Route({
     Page,
     Layout,
     Template,
+    NotFound,
     context,
 }: RouteProps) {
     const match = context && matchRoute(context.path, ROUTES[path as RoutePath])
@@ -94,7 +97,12 @@ function Route({
     if (!match) return null
 
     if (match.distance === 0) {
-        if (!Page) return null
+        if (!Page) {
+            if (NotFound) return Layout ? (
+                <Layout params={match.params}><NotFound /></Layout>
+            ) : <NotFound />
+            return null
+        }
 
         const element = Template ? (
             <Template params={match.params}>
@@ -114,9 +122,27 @@ function Route({
         }
         return <React.Suspense fallback={fallback}>{element}</React.Suspense>
     }
+
+    if (NotFound && !hasMatchingChild(context.path, children)) {
+        return Layout ? (
+            <Layout params={match.params}><NotFound /></Layout>
+        ) : (
+            <NotFound />
+        )
+    }
+
     return Layout ? (
         <Layout params={match.params}>{children}</Layout>
     ) : (
         <>{children}</>
     )
+}
+
+function hasMatchingChild(path: string, children: React.ReactNode): boolean {
+    return React.Children.toArray(children).some(child => {
+        if (!React.isValidElement(child)) return false
+        const childPath = (child.props as { path?: string }).path
+        if (!childPath) return false
+        return matchRoute(path, ROUTES[childPath as RoutePath]) !== null
+    })
 }

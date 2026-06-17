@@ -2,6 +2,7 @@ import { TgdContext, version } from "@tolokoban/tgd"
 import React from "react"
 import { testCases } from "@/cases"
 import { makeCameraPerspective } from "@/factory/camera"
+import { compareImage } from "@/api"
 import { TestCase } from "@/types"
 
 import styles from "./App.module.css"
@@ -61,7 +62,7 @@ export function App() {
 
                 const arrayBuffer = await blob.arrayBuffer()
                 console.log("🐞 [App@55] arrayBuffer =", arrayBuffer) // @FIXME: Remove this line written on 2026-04-30 at 11:11
-                const result = await window.electronAPI.compareImage(name, arrayBuffer)
+                const result = await compareImage(name, arrayBuffer)
                 console.log("🐞 [App@57] result =", result) // @FIXME: Remove this line written on 2026-04-30 at 11:11
 
                 setResults((prev) => prev.map((r) => (r.name === name ? { ...r, status: result } : r)))

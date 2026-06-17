@@ -1,17 +1,5 @@
 export {}
 
-declare global {
-    interface Window {
-        electronAPI: {
-            compareImage(name: string, imageData: ArrayBuffer): Promise<"NEW" | "SAME" | "DIFF">
-            readReference(name: string): Promise<ArrayBuffer | null>
-            deleteReference(name: string): Promise<void>
-            writeReference(name: string, imageData: ArrayBuffer): Promise<void>
-            makeWebp(imageData: ArrayBuffer): Promise<ArrayBuffer>
-        }
-    }
-}
-
 declare module "*.module.css" {
     const classes: { [key: string]: string }
     export = classes

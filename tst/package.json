@@ -3,36 +3,31 @@
     "version": "2.0.147",
     "private": true,
     "description": "Anti-regression visual tests for @tolokoban/tgd",
-    "main": "dist/back/main.js",
     "scripts": {
         "build:front": "rspack --mode=production",
-        "build:back": "tsc -p tsconfig.back.json",
-        "build": "npm run build:front && npm run build:back",
+        "build": "npm run build:front",
         "dev:front": "rspack serve --mode=development",
-        "dev:back": "tsc -p tsconfig.back.json --watch",
         "routes": "build-react-routes ./src/front/app/",
-        "start": "npm run build && electron .",
         "usecases": "node scripts/usecases.mjs",
-        "dev": "concurrently \"npm run dev:back\" \"npm run dev:front\" \"wait-on http://localhost:9321 && electron .\""
+        "start": "WEBKIT_DISABLE_DMABUF_RENDERER=1 npm run tauri dev",
+        "tauri": "tauri"
     },
     "dependencies": {
+        "@tauri-apps/api": "^2.11.1",
         "@tolokoban/tgd": "file:..",
         "react": "^19.2.5",
-        "react-dom": "^19.2.5",
-        "sharp": "^0.34.3"
+        "react-dom": "^19.2.5"
     },
     "devDependencies": {
-        "@rspack/cli": "^1.7.11",
-        "@rspack/core": "^1.7.11",
+        "@rspack/cli": "^1.7.12",
+        "@rspack/core": "^1.7.12",
+        "@tauri-apps/cli": "^2.0.0",
         "@types/node": "^25.6.0",
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
-        "build-react-routes": "^0.10.8",
-        "concurrently": "^9.1.2",
+        "build-react-routes": "^0.11.1",
         "css-loader": "^6.11.0",
-        "electron": "^41.3.0",
         "ts-loader": "^9.5.4",
-        "typescript": "^6.0.3",
-        "wait-on": "^8.0.5"
+        "typescript": "^6.0.3"
     }
 }

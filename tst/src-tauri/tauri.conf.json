@@ -1,0 +1,20 @@
+{
+    "$schema": "https://raw.githubusercontent.com/nicknisi/tauri-docs/refs/heads/fix/config-links-v2/core/tauri/schema.json",
+    "productName": "TGD Visual Tests",
+    "version": "2.0.147",
+    "identifier": "com.tolokoban.tgd-visual-tests",
+    "build": {
+        "beforeDevCommand": "npm run dev:front",
+        "beforeBuildCommand": "npm run build:front",
+        "devUrl": "http://localhost:9321",
+        "frontendDist": "../dist/front"
+    },
+    "app": {
+        "windows": [
+            {
+                "width": 1200,
+                "height": 800
+            }
+        ]
+    }
+}

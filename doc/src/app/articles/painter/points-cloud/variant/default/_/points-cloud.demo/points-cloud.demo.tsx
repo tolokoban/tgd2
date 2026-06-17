@@ -53,7 +53,9 @@ function init(context: TgdContext, assets: Assets) {
 		dataPoint,
 		dataUV,
 		texture,
+        minSizeInPixels: 16
 	})
+    cloud.debug()
 	const material = new TgdMaterialFlatTexture({
 		texture,
 	})
@@ -71,6 +73,7 @@ function init(context: TgdContext, assets: Assets) {
 	// #end
 	return (settings: Record<string, number>) => {
 		cloud.radiusMultiplier = settings.radiusMultiplier
+		cloud.minSizeInPixels = settings.minSizeInPixels
 		cloud.shadowIntensity = settings.shadowIntensity
 		cloud.shadowThickness = settings.shadowThickness
 		cloud.specularExponent = settings.specularExponent
@@ -104,6 +107,12 @@ export default function Demo() {
 					min: 0.5,
 					max: 2,
 				},
+                minSizeInPixels: {
+                    label: "minSizeInPixels",
+                    value: 16,
+                    min: 1,
+                    max: 64
+                },
 				shadowIntensity: {
 					label: "shadowIntensity",
 					value: 0.75,
