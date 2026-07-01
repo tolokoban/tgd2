@@ -48,6 +48,6 @@
 			"@tolokoban/tgd": ["./src/index"]
 		}
 	},
-	"include": ["./src/**/*"],
+	"include": ["./src/**/*", "src/painter/points-cloud/shaders/frag-flat/.ts"],
 	"exclude": ["./src/**/*.test.ts"]
 }
