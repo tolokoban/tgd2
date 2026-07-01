@@ -9,7 +9,7 @@ export function tgdTypeArrayForElements(
 	let max = 0
 	for (let i = 0; i < arr.length; i++) {
 		const value = arr[i]
-		if (value < i) {
+		if (value < 0) {
 			throw new Error(
 				`[tgdTypeArrayForElements] Index for elements cannot be negative. But arr[${i}] === ${value}!`,
 			)
