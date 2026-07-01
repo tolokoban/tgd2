@@ -1,45 +1,49 @@
 import { TgdDataset, TgdDatasetType, TgdDatasetTypeRecord } from "@tgd/dataset"
-import { isTgdTypeArrayForElements, TgdTypeArrayForElements, WebglDrawMode } from "@tgd/types"
 import { TgdVec3 } from "@tgd/math"
+import {
+	isTgdTypeArrayForElements,
+	TgdTypeArrayForElements,
+	WebglDrawMode,
+} from "@tgd/types"
 import { webglElementTypeFromTypedArray, webglLookup } from "@tgd/utils"
 import { TgdBoundingBox, tgdGeometryJoin } from ".."
 
 interface TgdGeometryOptionsCommon {
-    name?: string
-    /**
-     * Default mode is TRIANGLES.
-     */
-    drawMode?: WebglDrawMode | number
-    /**
-     * If the count is not defined, we will figure it out from
-     * the `elements` typed array or from the POSITION attribute.
-     */
-    count?: number
-    elements?: TgdTypeArrayForElements
-    /**
-     * Compute normals with a smooth shading if
-     * none has been provided.
-     */
-    computeNormalsIfMissing?: boolean
+	name?: string
+	/**
+	 * Default mode is TRIANGLES.
+	 */
+	drawMode?: WebglDrawMode | number
+	/**
+	 * If the count is not defined, we will figure it out from
+	 * the `elements` typed array or from the POSITION attribute.
+	 */
+	count?: number
+	elements?: TgdTypeArrayForElements
+	/**
+	 * Compute normals with a smooth shading if
+	 * none has been provided.
+	 */
+	computeNormalsIfMissing?: boolean
 }
 
 export interface TgdGeometryOptions1 extends TgdGeometryOptionsCommon {
-    dataset: TgdDataset
-    attPosition?: string
-    attNormal?: string
-    attUV?: string
+	dataset: TgdDataset
+	attPosition?: string
+	attNormal?: string
+	attUV?: string
 }
 
 export interface TgdGeometryOptions2 extends TgdGeometryOptionsCommon {
-    attPosition: Float32Attribute
-    attNormal?: Float32Attribute
-    attUV?: Float32Attribute
+	attPosition: Float32Attribute
+	attNormal?: Float32Attribute
+	attUV?: Float32Attribute
 }
 
 interface Float32Attribute {
-    name: string
-    data: Float32Array
-    type?: TgdDatasetType
+	name: string
+	data: Float32Array
+	type?: TgdDatasetType
 }
 
 /**
@@ -48,181 +52,195 @@ interface Float32Attribute {
  * for the vertices.
  */
 export class TgdGeometry {
-    public readonly name: string
-    /** Name of the POSITION attribute in the shader. */
-    public readonly attPosition: string
-    /** Name of the NORMAL attribute in the shader. */
-    public readonly attNormal: string
-    /** Name of the UV attribute in the shader. */
-    public readonly attUV: string
-    public readonly count: number
-    public readonly elements?: Readonly<TgdTypeArrayForElements>
-    public readonly drawMode: number
+	public readonly name: string
+	/** Name of the POSITION attribute in the shader. */
+	public readonly attPosition: string
+	/** Name of the NORMAL attribute in the shader. */
+	public readonly attNormal: string
+	/** Name of the UV attribute in the shader. */
+	public readonly attUV: string
+	public readonly count: number
+	public readonly elements?: Readonly<TgdTypeArrayForElements>
+	public readonly drawMode: number
 
-    protected _dataset: TgdDataset
-    protected _elementsType: number
+	protected _dataset: TgdDataset
+	protected _elementsType: number
 
-    private static counter = 1
+	private static counter = 1
 
-    public static make(options: TgdGeometryOptions2) {
-        const definition: TgdDatasetTypeRecord = {}
-        const { count, drawMode, elements, attPosition, attNormal, attUV, computeNormalsIfMissing } = options
-        definition[attPosition.name] = attPosition.type ?? "vec3"
-        if (attNormal) definition[attNormal.name] = attNormal.type ?? "vec3"
-        if (attUV) definition[attUV.name] = attUV.type ?? "vec2"
-        const dataset = new TgdDataset(definition)
-        dataset.set(attPosition.name, attPosition.data)
-        if (attNormal) dataset.set(attNormal.name, attNormal.data)
-        if (attUV) dataset.set(attUV.name, attUV.data)
-        return new TgdGeometry({
-            dataset,
-            count,
-            drawMode,
-            elements,
-            computeNormalsIfMissing,
-        })
-    }
+	public static make(options: TgdGeometryOptions2) {
+		const definition: TgdDatasetTypeRecord = {}
+		const {
+			count,
+			drawMode,
+			elements,
+			attPosition,
+			attNormal,
+			attUV,
+			computeNormalsIfMissing,
+		} = options
+		definition[attPosition.name] = attPosition.type ?? "vec3"
+		if (attNormal) definition[attNormal.name] = attNormal.type ?? "vec3"
+		if (attUV) definition[attUV.name] = attUV.type ?? "vec2"
+		const dataset = new TgdDataset(definition)
+		dataset.set(attPosition.name, attPosition.data)
+		if (attNormal) dataset.set(attNormal.name, attNormal.data)
+		if (attUV) dataset.set(attUV.name, attUV.data)
+		return new TgdGeometry({
+			dataset,
+			count,
+			drawMode,
+			elements,
+			computeNormalsIfMissing,
+		})
+	}
 
-    public static fitElementsInTypeArray(elements: TgdTypeArrayForElements | number[]): TgdTypeArrayForElements {
-        if (isTgdTypeArrayForElements(elements)) return elements
+	public static fitElementsInTypeArray(
+		elements: TgdTypeArrayForElements | number[],
+	): TgdTypeArrayForElements {
+		if (isTgdTypeArrayForElements(elements)) return elements
 
-        const max = elements.reduce((prv, cur) => Math.max(prv, cur), 0)
-        if (max <= 0xff) return new Uint8Array(elements)
-        if (max <= 0xffff) return new Uint16Array(elements)
-        return new Uint32Array(elements)
-    }
+		const max = elements.reduce((prv, cur) => Math.max(prv, cur), 0)
+		if (max <= 0xff) return new Uint8Array(elements)
+		if (max <= 0xffff) return new Uint16Array(elements)
+		return new Uint32Array(elements)
+	}
 
-    public static join(geometries: TgdGeometry[]): TgdGeometry {
-        return tgdGeometryJoin(geometries)
-    }
+	public static join(geometries: TgdGeometry[]): TgdGeometry {
+		return tgdGeometryJoin(geometries)
+	}
 
-    constructor(options: TgdGeometryOptions1) {
-        const {
-            dataset,
-            drawMode = "TRIANGLES",
-            attPosition = "POSITION",
-            attNormal = "NORMAL",
-            attUV = "TEXCOORD_0",
-            name = `TgdGeometry#${TgdGeometry.counter++}`,
-        } = options
-        this.name = name
-        this._dataset = dataset
-        this.drawMode = typeof drawMode === "number" ? drawMode : WebGL2RenderingContext[drawMode]
-        const { elements } = options
-        this.elements = elements
-        this._elementsType = elements ? webglElementTypeFromTypedArray(elements) : 0
-        this.attPosition = attPosition
-        this.attNormal = attNormal
-        this.attUV = attUV
-        this.count = elements?.length ?? dataset.count
-        if (options.computeNormalsIfMissing) this.computeNormals()
-    }
+	constructor(options: TgdGeometryOptions1) {
+		const {
+			dataset,
+			drawMode = "TRIANGLES",
+			attPosition = "POSITION",
+			attNormal = "NORMAL",
+			attUV = "TEXCOORD_0",
+			name = `TgdGeometry#${TgdGeometry.counter++}`,
+		} = options
+		this.name = name
+		this._dataset = dataset
+		this.drawMode =
+			typeof drawMode === "number" ? drawMode : WebGL2RenderingContext[drawMode]
+		const { elements } = options
+		this.elements = elements
+		this._elementsType = elements ? webglElementTypeFromTypedArray(elements) : 0
+		this.attPosition = attPosition
+		this.attNormal = attNormal
+		this.attUV = attUV
+		this.count = elements?.length ?? dataset.count
+		if (options.computeNormalsIfMissing) this.computeNormals()
+	}
 
-    debug(caption?: string) {
-        const label = `[${caption ?? this.name}]`
-        this.dataset.debug(`${label} Dataset`)
-        console.debug(`${label} Count:`, this.count)
-        console.debug(`${label} DrawMode:`, webglLookup(this.drawMode))
-        console.debug(this.computeBoundingBox())
-    }
+	debug(caption?: string) {
+		const label = `[${caption ?? this.name}]`
+		this.dataset.debug(`${label} Dataset`)
+		console.debug(`${label} Count:`, this.count)
+		console.debug(`${label} DrawMode:`, webglLookup(this.drawMode))
+		console.debug(this.computeBoundingBox())
+	}
 
-    get dataset(): Readonly<TgdDataset> {
-        return this._dataset
-    }
+	get dataset(): Readonly<TgdDataset> {
+		return this._dataset
+	}
 
-    get elementsType() {
-        return this._elementsType
-    }
+	get elementsType() {
+		return this._elementsType
+	}
 
-    /**
-     * Return the index of a vertex.
-     * If no elements array has been defined, we return `index` verbatim.
-     * Otherwise, we use this elements array.
-     */
-    public getElement(index: number): number {
-        return this.elements?.[index] ?? index
-    }
+	/**
+	 * Return the index of a vertex.
+	 * If no elements array has been defined, we return `index` verbatim.
+	 * Otherwise, we use this elements array.
+	 */
+	public getElement(index: number): number {
+		return this.elements?.[index] ?? index
+	}
 
-    public computeNormals(): this {
-        let normals: TgdVec3[] = []
-        if (this.drawMode === WebGL2RenderingContext.TRIANGLES) {
-            normals = this.computeNormalsForTrianglesDrawMode()
-        } else {
-            console.error("We don't know how to compute normals for this draw mode:", this.drawMode)
-            return this
-        }
-        const attNormalName = this.attNormal
-        this.dataset.addAttributes({
-            [attNormalName]: "vec3",
-        })
-        const values: number[] = []
-        for (const [nx, ny, nz] of normals) {
-            values.push(nx, ny, nz)
-        }
-        this.dataset.set(attNormalName, new Float32Array(values))
-        return this
-    }
+	public computeNormals(): this {
+		let normals: TgdVec3[] = []
+		if (this.drawMode === WebGL2RenderingContext.TRIANGLES) {
+			normals = this.computeNormalsForTrianglesDrawMode()
+		} else {
+			console.error(
+				"We don't know how to compute normals for this draw mode:",
+				this.drawMode,
+			)
+			return this
+		}
+		const attNormalName = this.attNormal
+		this.dataset.addAttributes({
+			[attNormalName]: "vec3",
+		})
+		const values: number[] = []
+		for (const [nx, ny, nz] of normals) {
+			values.push(nx, ny, nz)
+		}
+		this.dataset.set(attNormalName, new Float32Array(values))
+		return this
+	}
 
-    public computeBoundingBox(): TgdBoundingBox {
-        const bbox = new TgdBoundingBox()
-        const { get } = this.dataset.getAttribAccessor(this.attPosition)
-        for (let index = 0; index < this.count; index++) {
-            const x = get(index, 0)
-            const y = get(index, 1)
-            const z = get(index, 2)
-            bbox.addPoint(x, y, z)
-        }
-        return bbox
-    }
+	public computeBoundingBox(): TgdBoundingBox {
+		const bbox = new TgdBoundingBox()
+		const { get } = this.dataset.getAttribAccessor(this.attPosition)
+		for (let index = 0; index < this.count; index++) {
+			const x = get(index, 0)
+			const y = get(index, 1)
+			const z = get(index, 2)
+			bbox.addPoint(x, y, z)
+		}
+		return bbox
+	}
 
-    private computeNormalsForTrianglesDrawMode() {
-        const ds = this.dataset
-        const normalsAccumulator = new Map<number, TgdVec3>()
-        const addNormal = (index: number, A: TgdVec3, B: TgdVec3, C: TgdVec3) => {
-            const norm = computeNormal(A, B, C)
-            const item = normalsAccumulator.get(index)
-            if (item) {
-                item.add(norm)
-            } else {
-                normalsAccumulator.set(index, new TgdVec3(norm.x, norm.y, norm.z))
-            }
-        }
-        const { get } = ds.getAttribAccessor(this.attPosition)
-        const indexes = new Set<number>()
-        let indexMax = 0
-        for (let element = 0; element < this.count; element += 3) {
-            const index0 = this.getElement(element + 0)
-            indexes.add(index0)
-            indexMax = Math.max(indexMax, index0)
-            const index1 = this.getElement(element + 1)
-            indexes.add(index1)
-            indexMax = Math.max(indexMax, index1)
-            const index2 = this.getElement(element + 2)
-            indexes.add(index2)
-            indexMax = Math.max(indexMax, index2)
-            const A = new TgdVec3(get(index0, 0), get(index0, 1), get(index0, 2))
-            const B = new TgdVec3(get(index1, 0), get(index1, 1), get(index1, 2))
-            const C = new TgdVec3(get(index2, 0), get(index2, 1), get(index2, 2))
-            addNormal(index0, A, B, C)
-            addNormal(index1, B, C, A)
-            addNormal(index2, C, A, B)
-        }
-        const normals: TgdVec3[] = []
-        for (let index = 0; index <= indexMax; index++) {
-            const item = normalsAccumulator.get(index)
-            if (item) {
-                item.normalize()
-                normals.push(item)
-            } else {
-                normals.push(new TgdVec3())
-            }
-        }
-        return normals
-    }
+	private computeNormalsForTrianglesDrawMode() {
+		const ds = this.dataset
+		const normalsAccumulator = new Map<number, TgdVec3>()
+		const addNormal = (index: number, A: TgdVec3, B: TgdVec3, C: TgdVec3) => {
+			const norm = computeNormal(A, B, C)
+			const item = normalsAccumulator.get(index)
+			if (item) {
+				item.add(norm)
+			} else {
+				normalsAccumulator.set(index, new TgdVec3(norm.x, norm.y, norm.z))
+			}
+		}
+		const { get } = ds.getAttribAccessor(this.attPosition)
+		const indexes = new Set<number>()
+		let indexMax = 0
+		for (let element = 0; element < this.count; element += 3) {
+			const index0 = this.getElement(element + 0)
+			indexes.add(index0)
+			indexMax = Math.max(indexMax, index0)
+			const index1 = this.getElement(element + 1)
+			indexes.add(index1)
+			indexMax = Math.max(indexMax, index1)
+			const index2 = this.getElement(element + 2)
+			indexes.add(index2)
+			indexMax = Math.max(indexMax, index2)
+			const A = new TgdVec3(get(index0, 0), get(index0, 1), get(index0, 2))
+			const B = new TgdVec3(get(index1, 0), get(index1, 1), get(index1, 2))
+			const C = new TgdVec3(get(index2, 0), get(index2, 1), get(index2, 2))
+			addNormal(index0, A, B, C)
+			addNormal(index1, B, C, A)
+			addNormal(index2, C, A, B)
+		}
+		const normals: TgdVec3[] = []
+		for (let index = 0; index <= indexMax; index++) {
+			const item = normalsAccumulator.get(index)
+			if (item) {
+				item.normalize()
+				normals.push(item)
+			} else {
+				normals.push(new TgdVec3())
+			}
+		}
+		return normals
+	}
 }
 
 function computeNormal(A: TgdVec3, B: TgdVec3, C: TgdVec3) {
-    const AB = new TgdVec3(B).subtract(A)
-    const AC = new TgdVec3(C).subtract(A)
-    return AB.cross(AC).normalize()
+	const AB = new TgdVec3(B).subtract(A)
+	const AC = new TgdVec3(C).subtract(A)
+	return AB.cross(AC).normalize()
 }
