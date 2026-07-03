@@ -20,6 +20,11 @@ npm start
 
 ## Release notes
 
+### v2.2.0
+
+- **TgdPainterLOD Quadtree mode**: Added a `mode` option (`"xyz"` | `"xz"`) to `TgdPainterLODOptions`. When set to `"xz"`, the LOD uses a Quadtree instead of an Octree, subdividing only along the X and Z axes (Y axis is never split). Defaults to `"xyz"`.
+- **TgdPainterLOD mutable `surfaceThreshold`**: `surfaceThreshold` is now a public property that can be changed after construction.
+
 ### v2.1.4
 
 - **TgdUniformBufferObjectCamera new uniforms**: Added `uniScreenSize` (`vec2`, width/height in pixels), `uniScreenAspectRatio` (`float`, width/height), and `uniScreenAspectRatioInverse` (`float`, height/width) to the camera UBO.
