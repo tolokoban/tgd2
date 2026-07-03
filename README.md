@@ -20,6 +20,14 @@ npm start
 
 ## Release notes
 
+### v2.1.2
+
+- `TgdCamera.fitBoundingBox` now takes a `Readonly<TgdBoundingBox>` as unique argument.
+
+### v2.1.0
+
+- New util function `tgdTypeArrayForElements()` that will create the smallest typed array for elements indices.
+
 ### v2.0.147
 
 - **TgdMaterialFlatTexture** provide a `texture` attribute, but until now, changing it was not working.

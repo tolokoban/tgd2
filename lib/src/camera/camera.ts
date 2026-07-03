@@ -179,7 +179,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
      * The orientation will be reset to face Z, and with Y up.
      * @param bbox
      */
-    fitBoundingBox(bbox: TgdBoundingBox): this {
+    fitBoundingBox(bbox: Readonly<TgdBoundingBox>): this {
         const [width, height, depth] = bbox.size
         const radius = 0.5 * Math.sqrt(width ** 2 + height ** 2 + depth ** 2)
         this.transfo.position = bbox.center
