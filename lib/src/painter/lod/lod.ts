@@ -8,6 +8,12 @@ import { OctreeCache } from "./cache"
 import { listBBoxes } from "./octree"
 
 export interface TgdPainterLODOptions {
+    /**
+     * If mode is "xz", we don't use an Octree, but a Quadtree, and we never cut along axis Y.
+     * 
+     * Defaults to `xyz`.
+     */
+    mode?: "xyz" | "xz"
     bbox: Readonly<{
         min: Readonly<ArrayNumber3>
         max: Readonly<ArrayNumber3>
@@ -49,6 +55,7 @@ export interface TgdPainterLODOptions {
 export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformable {
     public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
 
+    private readonly mode: "xyz" | "xz"
     private readonly group = new TgdPainterGroup()
     private readonly cache = new OctreeCache<Promise<Readonly<TgdPainter> | null>>()
     private readonly paintersToDelete = new Set<TgdPainter>()
@@ -59,6 +66,7 @@ export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformab
         private readonly options: TgdPainterLODOptions,
     ) {
         super()
+        this.mode = options.mode ?? "xyz"
     }
 
     delete(): void {
@@ -85,6 +93,7 @@ export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformab
                 options.bbox,
                 options.subdivisions,
                 options.surfaceThreshold ?? 0.25,
+                this.mode
             )
             const promises: Promise<Readonly<TgdPainter> | null>[] = []
             for (const [x, y, z, level] of candidates) {
