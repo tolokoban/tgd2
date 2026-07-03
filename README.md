@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.1.4
+
+- **TgdUniformBufferObjectCamera new uniforms**: Added `uniScreenSize` (`vec2`, width/height in pixels), `uniScreenAspectRatio` (`float`, width/height), and `uniScreenAspectRatioInverse` (`float`, height/width) to the camera UBO.
+
 ### v2.1.3
 
 - **TgdPainterMesh.computeBoundingBox fix**: Now correctly uses `geometry.attPosition` instead of the hardcoded `"POSITION"` attribute name, fixing bounding box computation for geometries with a custom position attribute name.
