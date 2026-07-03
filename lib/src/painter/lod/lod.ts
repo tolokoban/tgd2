@@ -54,6 +54,7 @@ export interface TgdPainterLODOptions {
 
 export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformable {
     public readonly transfo: Readonly<{ matrix: TgdMat4 }> = new TgdTransfo()
+    public surfaceThreshold: number
 
     private readonly mode: "xyz" | "xz"
     private readonly group = new TgdPainterGroup()
@@ -66,6 +67,7 @@ export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformab
         private readonly options: TgdPainterLODOptions,
     ) {
         super()
+        this.surfaceThreshold = options.surfaceThreshold ?? .25
         this.mode = options.mode ?? "xyz"
     }
 
@@ -92,7 +94,7 @@ export class TgdPainterLOD extends TgdPainter implements TgdInterfaceTransformab
                 context.camera,
                 options.bbox,
                 options.subdivisions,
-                options.surfaceThreshold ?? 0.25,
+                this.surfaceThreshold,
                 this.mode
             )
             const promises: Promise<Readonly<TgdPainter> | null>[] = []

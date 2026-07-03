@@ -17,9 +17,8 @@ import {
 	tgdColorMakeHueWheel,
 	webglPresetDepth,
 } from "@tolokoban/tgd"
-
+import BevelURL from "@/assets/mesh/cube-bevel.glb"
 import View, { type Assets } from "@/components/demo/Tgd"
-
 import BoxURL from "./box.glb"
 
 // #begin
@@ -59,6 +58,13 @@ function init(context: TgdContext, assets: Assets) {
 				material: materials[i],
 			}),
 	)
+	const bevels = [0, 1, 2, 3, 4, 5].map(
+		(i) =>
+			new TgdPainterMeshGltf(context, {
+				asset: assets.glb.bevel,
+				material: materials[i],
+			}),
+	)
 	const lodXYZ = new TgdPainterLOD(context, {
 		mode: "xyz",
 		bbox,
@@ -89,18 +95,26 @@ function init(context: TgdContext, assets: Assets) {
 		async factory(x: number, y: number, z: number, level: number) {
 			const size = 2 ** -level
 			const sizeX = size * (maxX - minX)
-			const sizeY = size * (maxY - minY)
+			const sizeY = (maxY - minY) * 2 ** -5
 			const sizeZ = size * (maxZ - minZ)
 			const center: ArrayNumber3 = [
 				(x + 0.5) * sizeX + minX,
-				(y + 0.5) * sizeY + minY,
+				y,
 				(z + 0.5) * sizeZ + minZ,
 			]
+			console.log("🐞 [main.demo@105] x, y, z, level =", x, y, z, level) // @FIXME: Remove this line written on 2026-07-03 at 18:44
+			console.log(
+				"🐞 [main.demo@106] sizeX, sizeY, sizeZ =",
+				sizeX,
+				sizeY,
+				sizeZ,
+			) // @FIXME: Remove this line written on 2026-07-03 at 18:44
+			console.log("🐞 [main.demo@112] center =", center) // @FIXME: Remove this line written on 2026-07-03 at 18:46
 			const transfo = new TgdTransfo()
 			transfo.setPosition(center).setScale(sizeX, sizeY, sizeZ)
 			const node = new TgdPainterNode({
 				name: `(${x}, ${y}, ${z})/${level}`,
-				children: [boxes[level]],
+				children: [bevels[level]],
 				transfo,
 			})
 			return node
@@ -127,9 +141,17 @@ function init(context: TgdContext, assets: Assets) {
 		inertiaOrbit: 1000,
 		inertiaZoom: 1000,
 	})
-	return ({ mode }: { mode: number }) => {
+	return ({
+		mode,
+		surfaceThreshold,
+	}: {
+		mode: number
+		surfaceThreshold: number
+	}) => {
 		groupXYZ.active = mode === 0
 		groupXZ.active = mode === 1
+		lodXYZ.surfaceThreshold = surfaceThreshold
+		lodXZ.surfaceThreshold = surfaceThreshold
 		context.paint()
 	}
 }
@@ -141,13 +163,20 @@ export default function Demo() {
 			onReady={init}
 			gizmo
 			assets={{
-				glb: { box: BoxURL },
+				glb: { box: BoxURL, bevel: BevelURL },
 			}}
 			settings={{
 				mode: {
 					label: "mode",
 					value: 0,
 					step: ["xyz", "xz"],
+				},
+				surfaceThreshold: {
+					label: "surfaceThreshold",
+					value: 0.25,
+					min: 0.1,
+					max: 2,
+					step: 0.05,
 				},
 			}}
 		/>
