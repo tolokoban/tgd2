@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.1.3
+
+- **TgdPainterMesh.computeBoundingBox fix**: Now correctly uses `geometry.attPosition` instead of the hardcoded `"POSITION"` attribute name, fixing bounding box computation for geometries with a custom position attribute name.
+
 ### v2.1.2
 
 - `TgdCamera.fitBoundingBox` now takes a `Readonly<TgdBoundingBox>` as unique argument.
