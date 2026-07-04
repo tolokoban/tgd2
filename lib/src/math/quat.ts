@@ -1,9 +1,9 @@
+import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 import { quat } from "gl-matrix"
 import { TgdMat3 } from "./mat3"
-import { TgdMat4 } from "./mat4"
+import type { TgdMat4 } from "./mat4"
 import { TgdVec3 } from "./vec3"
 import { TgdVec4 } from "./vec4"
-import { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
 /**
  * A string with three axes:
@@ -31,6 +31,12 @@ export class TgdQuat extends TgdVec4 {
 
     static fromSlerp(valueAtT0: TgdQuat, valueAtT1: TgdQuat, t: number): TgdQuat {
         return new TgdQuat().fromSlerp(valueAtT0, valueAtT1, t)
+    }
+
+    static fromEuler(degreesAroundX: number, degreesAroundY: number, degreesAroundZ: number) {
+        const q = new TgdQuat()
+        quat.fromEuler(q, degreesAroundX, degreesAroundY, degreesAroundZ)
+        return q
     }
 
     constructor()
