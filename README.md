@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.3.1
+
+- **webglPresetDepth expanded**: Added `greater`, `greaterOrEqual`, `greaterReadOnly`, and `greaterOrEqualReadOnly` presets to the depth state utility.
+
 ### v2.3.0
 
 - **TgdQuat.fromEuler()**: New static factory method to create a quaternion from Euler angles (degrees around X, Y, Z axes).
