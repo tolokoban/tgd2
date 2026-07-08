@@ -1,14 +1,14 @@
 import { TgdColor } from "@tgd/color"
-import { TgdContext } from "@tgd/context"
+import type { TgdContext } from "@tgd/context"
 import { TgdEvent } from "@tgd/event"
 import type { TgdFilter } from "@tgd/filter"
 import { tgdLoadImage } from "@tgd/loader/image"
-import { TgdVec4 } from "@tgd/math"
+import type { TgdVec4 } from "@tgd/math"
 import { TgdPainterFilter, TgdPainterFramebuffer, TgdPainterLogic } from "@tgd/painter"
-import { TgdProgram } from "@tgd/program"
-import { ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
+import type { TgdProgram } from "@tgd/program"
+import { type ArrayNumber4, isWebglImage, type WebglImage, type WebglTexParameter } from "@tgd/types"
 import { isString } from "@tgd/types/guards"
-import { ensureArrayNumber4, resolveErrorMessage, tgdCanvasCreate, webglLookup } from "@tgd/utils"
+import { ensureArrayNumber4, resolveErrorMessage, tgdCanvasCreate, tgdCanvasCreateFill, webglLookup } from "@tgd/utils"
 import { type WebglTextureParameters, webglTextureParametersSet } from "@tgd/webgl"
 import { isLoadBmpOptions, type LoadBmpOptions } from "./types"
 
@@ -23,72 +23,72 @@ interface TgdTexture2DStorage {
      */
     premultipliedAlpha: boolean
     format:
-        | "R8 / RED / UNSIGNED_BYTE"
-        | "R8_SNORM / RED / BYTE"
-        | "R16F / RED / HALF_FLOAT"
-        | "R16F / RED / FLOAT"
-        | "R32F / RED / FLOAT"
-        | "R8UI / RED_INTEGER / UNSIGNED_BYTE"
-        | "R8I / RED_INTEGER / BYTE"
-        | "R16UI / RED_INTEGER / UNSIGNED_SHORT"
-        | "R16I / RED_INTEGER / SHORT"
-        | "R32UI / RED_INTEGER / UNSIGNED_INT"
-        | "R32I / RED_INTEGER / INT"
-        | "RG8 / RG / UNSIGNED_BYTE"
-        | "RG8_SNORM / RG / BYTE"
-        | "RG16F / RG / HALF_FLOAT"
-        | "RG16F / RG / FLOAT"
-        | "RG32F / RG / FLOAT"
-        | "RG8UI / RG_INTEGER / UNSIGNED_BYTE"
-        | "RG8I / RG_INTEGER / BYTE"
-        | "RG16UI / RG_INTEGER / UNSIGNED_SHORT"
-        | "RG16I / RG_INTEGER / SHORT"
-        | "RG32UI / RG_INTEGER / UNSIGNED_INT"
-        | "RG32I / RG_INTEGER / INT"
-        | "RGB8 / RGB / UNSIGNED_BYTE"
-        | "SRGB8 / RGB / UNSIGNED_BYTE"
-        | "RGB565 / RGB / UNSIGNED_BYTE"
-        | "RGB565 / RGB / UNSIGNED_SHORT_5_6_5"
-        | "RGB8_SNORM / RGB / BYTE"
-        | "R11F_G11F_B10F / RGB / UNSIGNED_INT_10F_11F_11F_REV"
-        | "R11F_G11F_B10F / RGB / HALF_FLOAT"
-        | "R11F_G11F_B10F / RGB / FLOAT"
-        | "RGB9_E5 / RGB / UNSIGNED_INT_5_9_9_9_REV"
-        | "RGB9_E5 / RGB / HALF_FLOAT"
-        | "RGB9_E5 / RGB / FLOAT"
-        | "RGB16F / RGB / HALF_FLOAT"
-        | "RGB16F / RGB / FLOAT"
-        | "RGB32F / RGB / FLOAT"
-        | "RGB8UI / RGB_INTEGER / UNSIGNED_BYTE"
-        | "RGB8I / RGB_INTEGER / BYTE"
-        | "RGB16UI / RGB_INTEGER / UNSIGNED_SHORT"
-        | "RGB16I / RGB_INTEGER / SHORT"
-        | "RGB32UI / RGB_INTEGER / UNSIGNED_INT"
-        | "RGB32I / RGB_INTEGER / INT"
-        | "RGBA8 / RGBA / UNSIGNED_BYTE"
-        | "SRGB8_ALPHA8 / RGBA / UNSIGNED_BYTE"
-        | "RGBA8_SNORM / RGBA / BYTE"
-        | "RGB5_A1 / RGBA / UNSIGNED_BYTE"
-        | "RGB5_A1 / RGBA / UNSIGNED_SHORT_5_5_5_1"
-        | "RGB5_A1 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
-        | "RGBA4 / RGBA / UNSIGNED_BYTE"
-        | "RGBA4 / RGBA / UNSIGNED_SHORT_4_4_4_4"
-        | "RGB10_A2 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
-        | "RGBA16F / RGBA / HALF_FLOAT"
-        | "RGBA16F / RGBA / FLOAT"
-        | "RGBA32F / RGBA / FLOAT"
-        | "RGBA8UI / RGBA_INTEGER / UNSIGNED_BYTE"
-        | "RGBA8I / RGBA_INTEGER / BYTE"
-        | "RGBA16UI / RGBA_INTEGER / UNSIGNED_SHORT"
-        | "RGBA16I / RGBA_INTEGER / SHORT"
-        | "RGBA32UI / RGBA_INTEGER / UNSIGNED_INT"
-        | "RGBA32I / RGBA_INTEGER / INT"
-        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_SHORT"
-        | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_INT"
-        | "DEPTH_COMPONENT24 / DEPTH_COMPONENT / UNSIGNED_INT"
-        | "DEPTH_COMPONENT32F / DEPTH_COMPONENT / FLOAT"
-        | "DEPTH24_STENCIL8 / DEPTH_STENCIL / UNSIGNED_INT_24_8"
-        | "DEPTH32F_STENCIL8 / DEPTH_STENCIL / FLOAT_32_UNSIGNED_INT_24_8_REV"
+    | "R8 / RED / UNSIGNED_BYTE"
+    | "R8_SNORM / RED / BYTE"
+    | "R16F / RED / HALF_FLOAT"
+    | "R16F / RED / FLOAT"
+    | "R32F / RED / FLOAT"
+    | "R8UI / RED_INTEGER / UNSIGNED_BYTE"
+    | "R8I / RED_INTEGER / BYTE"
+    | "R16UI / RED_INTEGER / UNSIGNED_SHORT"
+    | "R16I / RED_INTEGER / SHORT"
+    | "R32UI / RED_INTEGER / UNSIGNED_INT"
+    | "R32I / RED_INTEGER / INT"
+    | "RG8 / RG / UNSIGNED_BYTE"
+    | "RG8_SNORM / RG / BYTE"
+    | "RG16F / RG / HALF_FLOAT"
+    | "RG16F / RG / FLOAT"
+    | "RG32F / RG / FLOAT"
+    | "RG8UI / RG_INTEGER / UNSIGNED_BYTE"
+    | "RG8I / RG_INTEGER / BYTE"
+    | "RG16UI / RG_INTEGER / UNSIGNED_SHORT"
+    | "RG16I / RG_INTEGER / SHORT"
+    | "RG32UI / RG_INTEGER / UNSIGNED_INT"
+    | "RG32I / RG_INTEGER / INT"
+    | "RGB8 / RGB / UNSIGNED_BYTE"
+    | "SRGB8 / RGB / UNSIGNED_BYTE"
+    | "RGB565 / RGB / UNSIGNED_BYTE"
+    | "RGB565 / RGB / UNSIGNED_SHORT_5_6_5"
+    | "RGB8_SNORM / RGB / BYTE"
+    | "R11F_G11F_B10F / RGB / UNSIGNED_INT_10F_11F_11F_REV"
+    | "R11F_G11F_B10F / RGB / HALF_FLOAT"
+    | "R11F_G11F_B10F / RGB / FLOAT"
+    | "RGB9_E5 / RGB / UNSIGNED_INT_5_9_9_9_REV"
+    | "RGB9_E5 / RGB / HALF_FLOAT"
+    | "RGB9_E5 / RGB / FLOAT"
+    | "RGB16F / RGB / HALF_FLOAT"
+    | "RGB16F / RGB / FLOAT"
+    | "RGB32F / RGB / FLOAT"
+    | "RGB8UI / RGB_INTEGER / UNSIGNED_BYTE"
+    | "RGB8I / RGB_INTEGER / BYTE"
+    | "RGB16UI / RGB_INTEGER / UNSIGNED_SHORT"
+    | "RGB16I / RGB_INTEGER / SHORT"
+    | "RGB32UI / RGB_INTEGER / UNSIGNED_INT"
+    | "RGB32I / RGB_INTEGER / INT"
+    | "RGBA8 / RGBA / UNSIGNED_BYTE"
+    | "SRGB8_ALPHA8 / RGBA / UNSIGNED_BYTE"
+    | "RGBA8_SNORM / RGBA / BYTE"
+    | "RGB5_A1 / RGBA / UNSIGNED_BYTE"
+    | "RGB5_A1 / RGBA / UNSIGNED_SHORT_5_5_5_1"
+    | "RGB5_A1 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
+    | "RGBA4 / RGBA / UNSIGNED_BYTE"
+    | "RGBA4 / RGBA / UNSIGNED_SHORT_4_4_4_4"
+    | "RGB10_A2 / RGBA / UNSIGNED_INT_2_10_10_10_REV"
+    | "RGBA16F / RGBA / HALF_FLOAT"
+    | "RGBA16F / RGBA / FLOAT"
+    | "RGBA32F / RGBA / FLOAT"
+    | "RGBA8UI / RGBA_INTEGER / UNSIGNED_BYTE"
+    | "RGBA8I / RGBA_INTEGER / BYTE"
+    | "RGBA16UI / RGBA_INTEGER / UNSIGNED_SHORT"
+    | "RGBA16I / RGBA_INTEGER / SHORT"
+    | "RGBA32UI / RGBA_INTEGER / UNSIGNED_INT"
+    | "RGBA32I / RGBA_INTEGER / INT"
+    | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_SHORT"
+    | "DEPTH_COMPONENT16 / DEPTH_COMPONENT / UNSIGNED_INT"
+    | "DEPTH_COMPONENT24 / DEPTH_COMPONENT / UNSIGNED_INT"
+    | "DEPTH_COMPONENT32F / DEPTH_COMPONENT / FLOAT"
+    | "DEPTH24_STENCIL8 / DEPTH_STENCIL / UNSIGNED_INT_24_8"
+    | "DEPTH32F_STENCIL8 / DEPTH_STENCIL / FLOAT_32_UNSIGNED_INT_24_8_REV"
 }
 
 export interface TgdTexture2DOptions {
@@ -347,7 +347,7 @@ export class TgdTexture2D {
                 return this
             }
         }
-        const { storage, gl } = this
+        const { gl } = this
         const { level = 0 } = options
         this._width = bmp.width
         this._height = bmp.height
@@ -360,8 +360,7 @@ export class TgdTexture2D {
             `loadBitmap(${JSON.stringify({
                 width: bmp.width,
                 height: bmp.height,
-            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${
-                "RGBA" // storage.internalFormat
+            })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
             }, gl.${"RGBA"}, gl.UNSIGNED_BYTE, bmp)`,
             () => {
                 this.context.console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
@@ -389,6 +388,12 @@ export class TgdTexture2D {
         options.onLoad?.()
         this.eventChange.dispatch(this)
         return this
+    }
+
+    fill(color: string | TgdColor | ArrayNumber4 | TgdVec4) {
+        return this.loadBitmap(
+            tgdCanvasCreateFill(1, 1, color)
+        )
     }
 
     applyFilter(filter: TgdFilter) {

@@ -494,7 +494,7 @@ export class TgdContext extends TgdPainterGroup {
         this.playing = false
     }
 
-    takeSnapshot(): Promise<HTMLImageElement> {
+    takeSnapshot(options?: { type: string, quality?: number }): Promise<HTMLImageElement> {
         const { canvas } = this
         const img = new Image()
         return new Promise((resolve) => {
@@ -511,11 +511,11 @@ export class TgdContext extends TgdPainterGroup {
             this.doSnapshot = () => {
                 if (isOffscreen(canvas)) {
                     canvas
-                        .convertToBlob()
+                        .convertToBlob(options)
                         .then(blobToImage)
                         .catch(() => resolve(img))
                 } else {
-                    canvas.toBlob(blobToImage)
+                    canvas.toBlob(blobToImage, options?.type, options?.quality)
                 }
             }
         })

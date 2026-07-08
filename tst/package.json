@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd-visual-tests",
-    "version": "2.3.1",
+    "version": "2.3.3",
     "private": true,
     "description": "Anti-regression visual tests for @tolokoban/tgd",
     "scripts": {

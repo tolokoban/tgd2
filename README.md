@@ -20,6 +20,10 @@ npm start
 
 ## Release notes
 
+### v2.3.3
+
+- **TgdContext.takeSnapshot()**: Added an argument to set the mime type quan quality of the generated image.
+
 ### v2.3.1
 
 - **webglPresetDepth expanded**: Added `greater`, `greaterOrEqual`, `greaterReadOnly`, and `greaterOrEqualReadOnly` presets to the depth state utility.
