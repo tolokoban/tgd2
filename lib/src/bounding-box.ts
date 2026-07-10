@@ -19,9 +19,10 @@ export class TgdBoundingBox {
     private yMax = Number.NEGATIVE_INFINITY
     private zMax = Number.NEGATIVE_INFINITY
 
-    constructor(...points: ArrayNumber3[]) {
+    constructor(...points: (ArrayNumber3 | TgdVec3 | TgdVec4)[]) {
         for (const point of points) {
-            this.addPoint(...point)
+            const [x, y, z] = point
+            this.addPoint(x, y, z)
         }
     }
 

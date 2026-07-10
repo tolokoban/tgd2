@@ -1,5 +1,5 @@
-import { TgdVec4, tgdCalcClamp, tgdCalcModulo } from "@tgd/math"
-import type { ArrayNumber4 } from "@tgd/types"
+import { TgdVec3, TgdVec4, tgdCalcClamp, tgdCalcModulo } from "@tgd/math"
+import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
 export class TgdColor {
     static fromHSL(H: number, S: number, L: number): TgdColor {
@@ -79,10 +79,10 @@ export class TgdColor {
     private _L = 1
 
     constructor()
-    constructor(color: string | ArrayNumber4 | TgdVec4 | TgdColor)
+    constructor(color: string | ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4 | TgdColor)
     constructor(r: number, g: number, b: number)
     constructor(r: number, g: number, b: number, a: number)
-    constructor(r: number | string | ArrayNumber4 | TgdVec4 | TgdColor = 0, g = 0, b = 0, a = 1) {
+    constructor(r: number | string | ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4 | TgdColor = 0, g = 0, b = 0, a = 1) {
         if (typeof r === "string") {
             this.parse(r)
         } else if (r instanceof TgdColor) {
@@ -91,12 +91,12 @@ export class TgdColor {
             this.G = G
             this.B = B
             this.A = A
-        } else if (r instanceof TgdVec4 || Array.isArray(r)) {
+        } else if (r instanceof TgdVec4 || r instanceof TgdVec3 || Array.isArray(r)) {
             const [R, G, B, A] = r
             this.R = R
             this.G = G
             this.B = B
-            this.A = A
+            this.A = A ?? 1
         } else {
             this.R = r
             this.G = g

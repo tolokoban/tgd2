@@ -518,6 +518,7 @@ export class TgdContext extends TgdPainterGroup {
                     canvas.toBlob(blobToImage, options?.type, options?.quality)
                 }
             }
+            this.paint()
         })
     }
 

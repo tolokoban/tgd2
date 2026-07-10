@@ -142,19 +142,21 @@ export default function Tgd<T extends SettingsDefinitions>({
 
 		div.requestFullscreen()
 	}
-	const handleScreenshot = () => {
-		const context = refContext.current
+	const handleScreenshot = async() => {
+        const context = refContext.current
 		if (!context) return
 
-		context.takeSnapshot().then((img) => {
-			const a = document.createElement("a")
-			document.body.appendChild(a)
-			a.style.display = "none"
-			a.href = img.src
-			a.download = "snapshot.png"
-			a.click()
-			window.setTimeout(() => document.body.removeChild(a), 30000)
-		})
+        const ext = "webp"
+		const img = await context.takeSnapshot({
+            type: `image/${ext}`
+        })
+        const a = document.createElement("a")
+        document.body.appendChild(a)
+        a.style.display = "none"
+        a.href = img.src
+        a.download = `snapshot.${ext}`
+        a.click()
+        window.setTimeout(() => document.body.removeChild(a), 30000)
 	}
 	const handleSetCameraRestPosition = () => {
 		const orbiter = refOrbiter.current
