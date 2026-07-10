@@ -20,6 +20,13 @@ npm start
 
 ## Release notes
 
+### v2.4.0
+
+- **New TgdPainterBBox**: Painter to visualize a bounding box with configurable wireframe stroke and semi-transparent filled faces. Accepts a `TgdBoundingBox` or `{min, max}` object, with customizable `colorStroke` and `colorFill`.
+- **TgdColor constructor expanded**: Now accepts `ArrayNumber3 | TgdVec3` in addition to `ArrayNumber4 | TgdVec4`, making it easier to create colors from RGB triples.
+- **TgdBoundingBox constructor expanded**: Now accepts `TgdVec3 | TgdVec4` in addition to `ArrayNumber3` as constructor points.
+- **TgdContext.takeSnapshot() fix**: Now triggers a `paint()` call to ensure a frame is rendered before capturing the snapshot.
+
 ### v2.3.3
 
 - **TgdContext.takeSnapshot()**: Added an argument to set the mime type quan quality of the generated image.
