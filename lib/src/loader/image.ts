@@ -84,3 +84,47 @@ export async function tgdLoadCanvas(url: string): Promise<HTMLCanvasElement | nu
     context.drawImage(img, 0, 0)
     return canvas
 }
+
+/** 
+ * As soon as this function is called, the webcam stream is attached to `video`
+ * (if the user accepts it) and we return two functions: `takeSnapshot` to get a canvas with the current frame of the video,
+ * and `cancel` to stop the stream from the camera and clean all up.
+ * 
+ * @param video The video element that will display the stream from the webcam.
+ * @returns An object with two functions: `takeSnaphot(): HTMLCanvasElement` and `cancel(): void`.
+ */
+export function tgdLoadCanvasFromCamera(video: HTMLVideoElement) {
+    return new Promise<null | {
+        takeSnapshot(): HTMLCanvasElement
+        cancel(): void
+    }>((resolve) => {
+        video.autoplay = true
+        video.playsInline = true
+        let stream: MediaStream | null = null
+        const cancel = () => stream?.getTracks().forEach((t) => t.stop())
+        navigator.mediaDevices
+            .getUserMedia({ video: true })
+            .then((source) => {
+                stream = source
+                video.srcObject = source
+                resolve({
+                    takeSnapshot: () => {
+                        const canvas = document.createElement("canvas")
+                        canvas.width = video.videoWidth
+                        canvas.height = video.videoHeight
+                        const ctx = canvas.getContext("2d")
+                        if (!ctx) throw new Error(`Unable to create a 2D context of size ${video.videoWidth}×${video.videoHeight}!`)
+
+                        ctx.drawImage(video, 0, 0)
+                        cancel()
+                        return canvas
+                    },
+                    cancel
+                })
+            })
+            .catch(() => {
+                cancel()
+                resolve(null)
+            })
+    })
+}
