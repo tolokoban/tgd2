@@ -20,6 +20,14 @@ npm start
 
 ## Release notes
 
+### v2.5.0
+
+- **New TgdContextOffscreen**: New class extending `TgdContext` that creates an offscreen WebGL2 context backed by an `OffscreenCanvas`. Its size is automatically synchronized with a parent context on every paint cycle, and its camera transform is kept in sync with the parent's camera. Useful for postprocessing effects and object picking.
+- **TgdContext.createProxy()**: New static factory method that wraps a `TgdContext` in a `Proxy`, allowing the same painters to be reused across different actual context instances by transparently delegating all property accesses and method calls to the current delegate.
+- **tgdEasingCompose**: New utility function that chains multiple `TgdEasingFunction` values together, feeding the output of each into the next.
+- **New easing functions**: Added `tgdEasingFunctionLinearInverse`, `tgdEasingFunctionTriangle`, and `tgdEasingFunctionTriangleInverse`.
+- **tgdCalcPixelToIndex**: New math helper that converts a raw `Uint8Array` pixel (R, G, B) directly to an integer index, complementing the existing `tgdCalcRGBToIndex`.
+
 ### v2.4.0
 
 - **New TgdPainterBBox**: Painter to visualize a bounding box with configurable wireframe stroke and semi-transparent filled faces. Accepts a `TgdBoundingBox` or `{min, max}` object, with customizable `colorStroke` and `colorFill`.
