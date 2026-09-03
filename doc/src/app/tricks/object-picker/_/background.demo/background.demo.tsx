@@ -4,26 +4,26 @@ import {
     tgdCalcRandom3,
     tgdCalcRandom4,
     TgdColor,
-    type TgdContext,
+    TgdContext,
     TgdGeometrySphereIco,
     TgdMaterialDiffuse,
     TgdMaterialFlat,
-    TgdPainterObjectPicker,
     TgdPainterClear,
     TgdPainterMesh,
     TgdPainterState,
     TgdQuat,
     TgdTransfo,
     TgdVec3,
-    TgdAnimation,
-    tgdEasingFunctionInBounce,
-    tgdEasingFunctionInOutBack,
+    TgdContextOffscreen,
+    tgdCalcPixelToIndex,
+    tgdEasingFunctionTriangle,
 } from "@tolokoban/tgd"
 import View from "@/components/demo/Tgd"
 
 function init(context: TgdContext) {
     // #begin
-    let animation: TgdAnimation | null = null
+    const animations = new Set<number>()
+    const offscreen = new TgdContextOffscreen(context)
     context.camera.fitSpaceAtTarget(6, 6)
     const indexes = Array.from({ length: 64 }).map((_, i) => i)
     const materials = indexes.map(
@@ -46,11 +46,9 @@ function init(context: TgdContext) {
                 }),
             }),
     )
-    const picker = new TgdPainterObjectPicker(context)
-    const offscreem = picker.contextOffscreen
     const meshes2 = indexes.map((index) => {
         const mesh = meshes[index]
-        return new TgdPainterMesh(offscreem, {
+        return new TgdPainterMesh(offscreen, {
             geometry,
             material: new TgdMaterialFlat({
                 color: [...tgdCalcIndexToRGB(index + 1), 1],
@@ -58,12 +56,12 @@ function init(context: TgdContext) {
             transfo: mesh.transfo,
         })
     })
-    picker.add(
-        new TgdPainterClear(offscreem, {
+    offscreen.add(
+        new TgdPainterClear(offscreen, {
             color: [0, 0, 0, 1],
             depth: 1,
         }),
-        new TgdPainterState(offscreem, {
+        new TgdPainterState(offscreen, {
             depth: "lessOrEqual",
             children: meshes2,
         }),
@@ -78,31 +76,35 @@ function init(context: TgdContext) {
             depth: 1,
         }),
         state,
-        picker,
+        offscreen.paint,
     )
-    picker.onTap = (index: number, x: number, y: number) => {
+    context.inputs.pointer.eventTap.addListener((event) => {
+        const { x, y } = event
+        const pixel = offscreen.readPixel(x, y)
+        const index = tgdCalcPixelToIndex(pixel)
+        console.log("🐞 [background.demo@85] index =", index, x, y) // @FIXME: Remove this line written on 2026-09-03 at 11:41
         if (index < 1) return
 
         const k = index - 1
+        if (animations.has(k)) return
+
+        animations.add(k)
         const mesh = meshes[k]
         if (!mesh) return
 
         console.log("🐞 [background.demo@87] mesh =", mesh) // @FIXME: Remove this line written on 2026-09-02 at 17:03
-        if (animation) context.animCancel(animation)
-        animation = context.animSchedule({
-            duration: 0.6,
-            action: (alpha) => {
-                const beta = Math.sin(alpha * Math.PI)
-                const s = beta + 1
+        context.animSchedule({
+            duration: 1,
+            action: (alpha: number) => {
+                const s = 1 + alpha
                 mesh.transfo.setScale(s, s * 0.5, s * 0.5)
             },
             onEnd: () => {
-                console.log("🐞 [background.demo@98] mesh.transfo =", mesh.transfo) // @FIXME: Remove this line written on 2026-09-02 at 17:10
-                state.debugHierarchy()
+                animations.delete(k)
             },
-            easingFunction: tgdEasingFunctionInOutBack,
-        })[0]
-    }
+            easingFunction: tgdEasingFunctionTriangle,
+        })
+    })
     context.paint()
     // #end
 }

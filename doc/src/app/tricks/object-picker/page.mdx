@@ -1,0 +1,18 @@
+import Demo from "./_/background.demo"
+
+# Object picking
+
+Click on an object to start an animation on it.
+
+<Demo />
+
+The trick is to create a [`TgdContextOffscreen`](docs/classes/TgdContextOffscreen.html)
+and render the same objets with a different material: [`TgdMaterialFlat`](docs/classes/TgdMaterialFlat.html).
+
+The color you use for each object must reflect its index.
+Use [`tgdCalcIndexToRGB`](docs/functions/tgdCalcIndexToRGB.html) to create a color from an index.
+
+Now, the color of the pixel you click on is mapped to the index of the object.
+Just use `tgdCalcPixelToIndex(offscreen.readPixel(x, y))` to get it back.
+
+Look at the full code to get more details.

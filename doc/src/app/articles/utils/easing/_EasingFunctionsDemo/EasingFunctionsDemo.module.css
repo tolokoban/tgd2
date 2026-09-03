@@ -1,0 +1,8 @@
+.easingFunctionsDemo {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1em .125em;
+}

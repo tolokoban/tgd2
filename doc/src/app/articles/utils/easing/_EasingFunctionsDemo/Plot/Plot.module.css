@@ -1,0 +1,35 @@
+.plot {
+    all: inherit;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    gap: 0;
+    cursor: default;
+
+    svg {
+        width: 200px;
+        height: 200px;
+        background-color: #000;
+        border-radius: .5em;
+        box-shadow: 0 0 0 2px transparent;
+        transition: all .3s;
+
+        .line {
+            stroke: var(--theme-color-primary-5);
+            fill: none;
+            stroke-width: 2;
+        }
+    }
+
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            svg {
+                box-shadow: 0 0 0 2px var(--theme-color-secondary-5);
+            }
+        }
+    }
+}

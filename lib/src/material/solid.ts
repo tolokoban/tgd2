@@ -8,6 +8,13 @@ export type TgdMaterialSolidOptions = Partial<{
 
 const DEFAULT_COLOR: ArrayNumber4 = [1, 0.667, 0, 1]
 
+/**
+ * This material will paint a unique color for all fragments.
+ * The result will look totally flat (hence the name).
+ * 
+ * If you don't need to change the color later on, consider using
+ * `TgdMaterialFlat` which will be faster.
+ */
 export class TgdMaterialSolid extends TgdMaterial {
     public color: TgdVec4
 

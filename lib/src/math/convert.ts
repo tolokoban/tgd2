@@ -19,3 +19,11 @@ export function tgdCalcRGBToIndex(color: ArrayNumber3 | ArrayNumber4 | TgdVec3 |
     const B = tgdCalcClamp(Math.floor(0xff * BB), 0, 0xff)
     return R + (G << 8) + (B << 16)
 }
+
+export function tgdCalcPixelToIndex(pixel: Uint8Array): number {
+    const [RR, GG, BB] = pixel
+    const R = tgdCalcClamp(RR, 0, 0xff)
+    const G = tgdCalcClamp(GG, 0, 0xff)
+    const B = tgdCalcClamp(BB, 0, 0xff)
+    return R + (G << 8) + (B << 16)
+}

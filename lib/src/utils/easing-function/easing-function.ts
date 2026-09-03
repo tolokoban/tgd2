@@ -1,5 +1,27 @@
+export type TgdEasingFunction = (x: number) => number
+
+export const tgdEasingCompose = (...easings: TgdEasingFunction[]) => ((x: number) => {
+    let alpha = x
+    for (const easing of easings) {
+        alpha = easing(alpha)
+    }
+    return alpha
+})
+
+export function tgdEasingFunctionTriangle(x: number) {
+    return x < .5 ? x + x : 2 - (x + x)
+}
+
+export function tgdEasingFunctionTriangleInverse(x: number) {
+    return 1 - tgdEasingFunctionTriangle(x)
+}
+
 export function tgdEasingFunctionLinear(x: number) {
     return x
+}
+
+export function tgdEasingFunctionLinearInverse(x: number) {
+    return 1 - x
 }
 
 export function tgdEasingFunctionInSine(x: number): number {

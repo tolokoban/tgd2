@@ -83,6 +83,9 @@ export type TgdContextOptions = WebGLContextAttributes & {
  * }
  * ```
  */
+
+export type TgdContextProxy = TgdContext & { delegate: TgdContext }
+
 export class TgdContext extends TgdPainterGroup {
     private static incrementalId = 1
     /**
@@ -92,6 +95,43 @@ export class TgdContext extends TgdPainterGroup {
      */
     public static get devicePixelRatio() {
         return globalThis.devicePixelRatio ?? 1
+    }
+    /**
+     * Creating a proxy allows you to use the same painters on different actual TgdContext objects.
+     * 
+     * @param delegateContext 
+     */
+    public static createProxy(delegateContext: TgdContext): TgdContextProxy {
+        const handler: ProxyHandler<{ delegate: TgdContext }> = {
+            get(target, prop) {
+                // Expose the internal 'proxy' attribute directly
+                if (prop === 'delegate') {
+                    return target.delegate
+                }
+
+                const delegate = target.delegate as any
+                const value = delegate[prop]
+
+                // If the accessed property is a method, bind its execution to the targetContext
+                if (typeof value === 'function') {
+                    return value.bind(delegate)
+                }
+
+                // Forward property reads directly
+                return value
+            },
+
+            set(target, prop, value) {
+                if (prop === 'proxy') {
+                    target.delegate = value
+                    return true
+                }
+                (target.delegate as any)[prop] = value
+                return true
+            }
+        }
+
+        return new Proxy({ delegate: delegateContext }, handler) as TgdContextProxy
     }
 
     public readonly name: string
@@ -546,7 +586,7 @@ export class TgdContext extends TgdPainterGroup {
 
     /**
      * Most of the painters rely on the current viewport which is based on the canvas size.
-     * But if you want to paint in a framebuffer, you may want to use the texture widt/height
+     * But if you want to paint in a framebuffer, you may want to use the texture width/height
      * instead.
      */
     paintInCustomSize(width: number, height: number, paint: () => void) {
@@ -597,7 +637,7 @@ export class TgdContext extends TgdPainterGroup {
         }
     }
 
-    private readonly actualPaint = (time: number) => {
+    protected readonly actualPaint = (time: number) => {
         const timeInSec = time * 1e-3
         if (this.lastTimeInSec < 0) {
             this.lastTimeInSec = timeInSec
@@ -707,7 +747,7 @@ export class TgdContext extends TgdPainterGroup {
         globalThis.cancelAnimationFrame(this.requestAnimationFrame)
     }
 
-    private readonly createWebGLContext = () => {
+    private readonly createWebGLContext = (): WebGL2RenderingContext => {
         const { canvas, options } = this
         const gl = canvas.getContext("webgl2", options)
         if (!gl) throw new Error("Unable to create a WebGL2 context!")

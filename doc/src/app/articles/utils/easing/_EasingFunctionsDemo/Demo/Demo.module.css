@@ -1,0 +1,39 @@
+.demo {
+    margin: 0 2em;
+    width: 240px;
+    position: relative;
+    height: 4px;
+    overflow: visible;
+
+    >div.bar {
+        border-radius: 99vmax;
+        background-color: var(--theme-color-secondary-7);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    >div.pin,
+    div.y {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        margin: -.5em;
+    }
+
+    >div.pin {
+        background: var(--theme-color-primary-5-5);
+        border: 2px solid var(--theme-color-primary-5);
+        transform: scale(1.5);
+    }
+
+    >div.y {
+        background: var(--theme-color-secondary-7);
+        opacity: .5;
+    }
+}

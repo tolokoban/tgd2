@@ -95,7 +95,6 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/lod/neuron-test": ["/articles/painter/lod/neuron-test"],
     "/articles/painter/logic": ["/articles/painter/logic"],
     "/articles/painter/node": ["/articles/painter/node"],
-    "/articles/painter/object-picker": ["/articles/painter/object-picker"],
     "/articles/painter/overlay": ["/articles/painter/overlay"],
     "/articles/painter/particles": ["/articles/painter/particles"],
     "/articles/painter/particles/example1": ["/articles/painter/particles/example1"],
@@ -129,6 +128,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/texture/cube": ["/articles/texture/cube"],
     "/articles/time": ["/articles/time"],
     "/articles/utils": ["/articles/utils"],
+    "/articles/utils/easing": ["/articles/utils/easing"],
     "/articles/utils/loaders": ["/articles/utils/loaders"],
     "/articles/utils/loaders/tgdLoadCanvasFromCamera": ["/articles/utils/loaders/tgdLoadCanvasFromCamera"],
     "/articles/utils/loaders/tgdLoadImageFromElement": ["/articles/utils/loaders/tgdLoadImageFromElement"],
@@ -144,6 +144,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/tricks/color-mask": ["/tricks/color-mask"],
     "/tricks/color-mask/2": ["/tricks/color-mask/2"],
     "/tricks/color-mask/3": ["/tricks/color-mask/3"],
+    "/tricks/object-picker": ["/tricks/object-picker"],
     "/tricks/stereo-vision": ["/tricks/stereo-vision"],
 }
 
