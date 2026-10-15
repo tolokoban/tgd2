@@ -1,13 +1,20 @@
+import { TgdCameraOrthographic } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
 import { TgdMat4, TgdTransfo } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
+import { TgdTexture2D } from "@tgd/texture"
 import {
+    webglBlendGet,
+    webglBlendSet,
+    webglCreateFramebuffer,
     webglCullGet,
     webglCullSet,
     webglDepthGet,
     webglDepthSet,
+    webglLookup,
+    webglPresetBlend,
     webglPresetCull,
     webglPresetDepth,
 } from "@tgd/utils"
@@ -28,6 +35,11 @@ export interface TgdPainterShadowOptions {
         width: number
         height: number
     }
+    /**
+     * The size in pixel of the texture in the largest side.
+     * Defaults to 1024.
+     */
+    resolution?: number
     /**
      * Meshes casting shadows. Their `material` is ignored.
      * `children` and `visible` work like in {@link TgdPainterMeshes}.
@@ -52,6 +64,7 @@ interface MeshItem {
 
 /**
  * Framebuffer that holds the distance of a fragment from a light.
+ * The result is stored in {@link TgdPainterShadow.texture}.
  *
  * A mesh can have `children`. Their `transfo` is relative to the parent's one.
  * If `visible` is false, neither the mesh nor its children are painted.
@@ -61,6 +74,26 @@ interface MeshItem {
  */
 export class TgdPainterShadow extends TgdPainter {
     public readonly light: TgdPainterShadowOptions["light"]
+    /**
+     * Orthographic camera looking from the light.
+     * Its transfo and size are synchronized with `light` at each `paint()`,
+     * but you can tweak its `near` and `far` planes.
+     */
+    public readonly camera = new TgdCameraOrthographic()
+    /**
+     * Texture with a single 32 bits float channel (`R32F`) holding,
+     * for each texel, the distance from the light of the nearest fragment.
+     * Texels where nothing has been painted hold `camera.far`.
+     *
+     * Its size is computed from `resolution` and from the aspect ratio of the light.
+     * It uses `NEAREST` filtering, because linear filtering of 32 bits floats
+     * is not available everywhere.
+     */
+    public readonly texture: TgdTexture2D
+    /**
+     * Size in pixels of the largest side of {@link TgdPainterShadow.texture}.
+     */
+    public resolution: number
 
     /** We only need a new program if the `attPosition` name is different. */
     private readonly programs = new Map<string, ProgramCache>()
@@ -73,13 +106,39 @@ export class TgdPainterShadow extends TgdPainter {
     private readonly drawItems: MeshItem[] = []
     private readonly drawMatrices: TgdMat4[] = []
     private drawCount = 0
+    private framebuffer: WebGLFramebuffer | null = null
+    private depthBuffer: WebGLRenderbuffer | null = null
+    private framebufferWidth = 0
+    private framebufferHeight = 0
+    /** Value used to clear the texture. */
+    private readonly clearColor = new Float32Array(4)
+    private readonly clearDepth = new Float32Array([1])
 
     constructor(
         public readonly context: TgdContext,
         options: TgdPainterShadowOptions,
     ) {
         super()
+        if (!context.extensions.EXT_color_buffer_float) {
+            context.console.error(
+                "[TgdPainterShadow] Extension EXT_color_buffer_float is not available: the shadow texture cannot be rendered!",
+            )
+        }
         this.light = options.light
+        this.resolution = options.resolution ?? 1024
+        this.texture = new TgdTexture2D(context, {
+            name: `${this.name}/texture`,
+            storage: {
+                format: "R32F / RED / FLOAT",
+            },
+            params: {
+                magFilter: "NEAREST",
+                minFilter: "NEAREST",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+                wrapR: "CLAMP_TO_EDGE",
+            },
+        })
         for (const mesh of options.meshes ?? []) {
             this.add(mesh)
         }
@@ -109,12 +168,31 @@ export class TgdPainterShadow extends TgdPainter {
             poolIndex = this.collect(root, undefined, poolIndex)
         }
         this.releaseUnusedItems()
-        const { context, drawItems, drawMatrices, drawCount } = this
-        const { gl, camera } = context
+        const camera = this.updateCamera()
+        const [width, height] = this.computeSize()
+        const framebuffer = this.updateFramebuffer(width, height)
+        const { context } = this
+        const { gl } = context
+        const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+        context.paintInCustomSize(width, height, () => this.paintMeshes(camera))
+        gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
+    }
+
+    private paintMeshes(camera: TgdCameraOrthographic) {
+        const { context, drawItems, drawMatrices, drawCount, clearColor, clearDepth } = this
+        const { gl } = context
         const previousDepth = webglDepthGet(context)
         const previousCull = webglCullGet(context)
+        const previousBlend = webglBlendGet(context)
         webglDepthSet(context, webglPresetDepth.less)
         webglCullSet(context, webglPresetCull.back)
+        // Blending is not possible on 32 bits float textures without EXT_float_blend.
+        webglBlendSet(context, webglPresetBlend.off)
+        // Nothing can be farther than the far plane.
+        clearColor[0] = camera.far
+        gl.clearBufferfv(gl.COLOR, 0, clearColor)
+        gl.clearBufferfv(gl.DEPTH, 0, clearDepth)
         let currentPrg: TgdProgram | undefined
         for (let index = 0; index < drawCount; index++) {
             const { cache, vao, geometry } = drawItems[index]
@@ -136,6 +214,77 @@ export class TgdPainterShadow extends TgdPainter {
         }
         webglDepthSet(context, previousDepth)
         webglCullSet(context, previousCull)
+        webglBlendSet(context, previousBlend)
+    }
+
+    /**
+     * Size of the texture: `resolution` on the largest side,
+     * and the other side follows the aspect ratio of the light.
+     */
+    private computeSize(): [width: number, height: number] {
+        const { resolution, light } = this
+        const size = Math.max(1, Math.round(resolution))
+        if (light.width >= light.height) {
+            return [size, Math.max(1, Math.round((size * light.height) / light.width))]
+        }
+        return [Math.max(1, Math.round((size * light.width) / light.height)), size]
+    }
+
+    /**
+     * (Re)create the framebuffer if the size has changed.
+     */
+    private updateFramebuffer(width: number, height: number): WebGLFramebuffer {
+        const { framebuffer, framebufferWidth, framebufferHeight } = this
+        if (framebuffer && width === framebufferWidth && height === framebufferHeight) return framebuffer
+
+        this.deleteFramebuffer()
+        const { context, texture } = this
+        const { gl } = context
+        texture.resize(width, height)
+        const newFramebuffer = webglCreateFramebuffer(gl)
+        const depthBuffer = gl.createRenderbuffer()
+        if (!depthBuffer) throw new Error("[TgdPainterShadow] Unable to create WebGLRenderbuffer for depth!")
+
+        const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+        gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.glTexture, 0)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer)
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            context.console.error(`[TgdPainterShadow] The framebuffer is incomplete: ${webglLookup(status)}!`)
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
+        this.framebuffer = newFramebuffer
+        this.depthBuffer = depthBuffer
+        this.framebufferWidth = width
+        this.framebufferHeight = height
+        return newFramebuffer
+    }
+
+    private deleteFramebuffer() {
+        const { gl } = this.context
+        if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer)
+        if (this.depthBuffer) gl.deleteRenderbuffer(this.depthBuffer)
+        this.framebuffer = null
+        this.depthBuffer = null
+        this.framebufferWidth = 0
+        this.framebufferHeight = 0
+    }
+
+    /**
+     * Synchronize the camera with the light.
+     */
+    private updateCamera(): TgdCameraOrthographic {
+        const { camera, light } = this
+        camera.transfo.from(light.transfo)
+        camera.screenWidth = light.width
+        camera.screenHeight = light.height
+        // The orthographic projection goes from -spaceHeight to +spaceHeight.
+        camera.spaceHeight = light.height * 0.5
+        return camera
     }
 
     delete() {
@@ -143,6 +292,8 @@ export class TgdPainterShadow extends TgdPainter {
             this.releaseItem(mesh, item)
         }
         this.roots.splice(0)
+        this.deleteFramebuffer()
+        this.texture.delete()
     }
 
     /**
@@ -244,13 +395,22 @@ export class TgdPainterShadow extends TgdPainter {
             attributes: {
                 [attPosition]: "vec4",
             },
+            varying: {
+                varDistanceFromSun: "float",
+            },
             mainCode: [
-                `gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * ${attPosition};`,
+                `vec4 position = uniModelViewMatrix * uniTransfoMatrix * ${attPosition};`,
+                // The light looks toward -Z.
+                "varDistanceFromSun = -position.z;",
+                "gl_Position = uniProjectionMatrix * position;",
             ],
         })
         const frag = new TgdShaderFragment({
-            outputs: { FragColor: "vec4" },
-            mainCode: ["FragColor = vec4(1.0, 0.7, 0.1, 1.0);"],
+            varying: {
+                varDistanceFromSun: "float",
+            },
+            outputs: { FragColor: "float" },
+            mainCode: ["FragColor = varDistanceFromSun;"],
         })
         const prg = new TgdProgram(this.context.gl, {
             vert: vert.code,

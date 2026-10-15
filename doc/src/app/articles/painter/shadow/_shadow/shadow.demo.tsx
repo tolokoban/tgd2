@@ -2,7 +2,9 @@ import {
     type TgdContext,
     TgdGeometryBox,
     TgdGeometrySphereIco,
+    TgdFilter,
     TgdPainterClear,
+    TgdPainterFilter,
     TgdPainterShadow,
     TgdTransfo,
 } from "@tolokoban/tgd"
@@ -35,12 +37,37 @@ function init(context: TgdContext) {
             },
         ],
     })
-    context.add(clear, shadow)
-    context.camera.spaceWidthAtTarget = 6
+    shadow.camera.near = 0.1
+    shadow.camera.far = 10
+    // The texture holds distances from the light.
+    // Near fragments are white, far ones are black.
+    const filter = new TgdFilter({
+        uniforms: {
+            uniNear: "float",
+            uniFar: "float",
+        },
+        setUniforms({ program }) {
+            program.uniform1f("uniNear", shadow.camera.near)
+            program.uniform1f("uniFar", shadow.camera.far)
+        },
+        fragmentShaderCode: [
+            "float distance = texture(uniTexture, varUV).r;",
+            "float light = 1.0 - clamp((distance - uniNear) / (uniFar - uniNear), 0.0, 1.0);",
+            "FragColor = vec4(vec3(light), 1.0);",
+        ],
+    })
+    context.add(
+        clear,
+        shadow,
+        new TgdPainterFilter(context, {
+            texture: shadow.texture,
+            filters: [filter],
+        }),
+    )
     context.paint()
     // #end
 }
 
 export default function Demo() {
-    return <View onReady={init} controller={{ inertiaOrbit: 1000 }} gizmo />
+    return <View onReady={init} />
 }

@@ -328,7 +328,7 @@ export abstract class TgdCamera implements TgdInterfaceTransformable {
         if (this._zoom === v) return
 
         this._zoom = v
-        this._dirtyProjection = true
+        this.dirtyProjection = true
     }
 
     toCode(caption?: string): string {

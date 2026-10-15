@@ -98,7 +98,7 @@ export class TgdCameraPerspective extends TgdCamera {
         mat4.perspective(out, fovy, aspect, near, far)
         out[0] *= this.zoom
         out[5] *= this.zoom
-        this.dirtyProjection = true
+        this.dirtyProjection = false
     }
 
     toCode(caption?: string): string {

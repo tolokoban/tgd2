@@ -120,7 +120,7 @@ export class TgdCameraOrthographic extends TgdCamera {
         out[13] = (top + bottom) * bt
         out[14] = near * nf
         out[15] = 1
-        this.dirtyProjection = true
+        this.dirtyProjection = false
     }
 
     toCode(caption?: string): string {
