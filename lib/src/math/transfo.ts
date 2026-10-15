@@ -15,23 +15,23 @@ export interface TgdTransfoOptions {
 export class TgdTransfo {
     // prettier-ignore
     private readonly _matrix = new TgdMat4(
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-		0,
-		0,
-		0,
-		0,
-		1,
-	)
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+    )
     private readonly _position = new TgdVec3(0, 0, 0)
     private readonly _orientation = new TgdQuat(0, 0, 0, 1)
     private readonly _scale = new TgdVec3(1, 1, 1)
@@ -248,6 +248,33 @@ export class TgdTransfo {
 
     moveAlongAxes(dx: number, dy: number, dz: number): this {
         this.position.addWithScale(this.axisX, dx).addWithScale(this.axisY, dy).addWithScale(this.axisZ, dz)
+        this.updateMatrix()
+        return this
+    }
+
+    /**
+     * Change the orientation to make the `-Z` axis to point to `target`.
+     * Try to keep `+Y` axis up.
+     * If the `target` is equal to the current position, do nothing.
+     */
+    lookAt(target: Readonly<ArrayNumber3 | ArrayNumber4 | TgdVec3 | TgdVec4>): this {
+        const [tx, ty, tz] = target
+        const [px, py, pz] = this._position
+        // `-Z` points to the target, so `+Z` points from the target to us.
+        const Z = new TgdVec3(px - tx, py - ty, pz - tz)
+        if (Z.size === 0) return this
+
+        Z.normalize()
+        const X = new TgdVec3().fromCross(TgdVec3.Y, Z)
+        if (X.size < 1e-6) {
+            // Looking straight up or down: keep the current X axis.
+            X.from(this.axisX)
+            X.addWithScale(Z, -X.dot(Z))
+            if (X.size < 1e-6) X.from(TgdVec3.X)
+        }
+        X.normalize()
+        const Y = new TgdVec3().fromCross(Z, X)
+        this._orientation.fromAxesTransposed(X, Y, Z)
         this.updateMatrix()
         return this
     }

@@ -19,14 +19,14 @@ export interface TgdPainterBBoxOptions {
 
 export class TgdPainterBBox extends TgdPainterGroup {
     public bbox: TgdBoundingBox
-    public readonly colorStoke: TgdColor
+    public readonly colorStroke: TgdColor
     public readonly colorFill: TgdColor
 
     constructor(public readonly context: TgdContext, options: TgdPainterBBoxOptions) {
         super({ name: options.name })
         const { bbox } = options
         this.bbox = bbox instanceof TgdBoundingBox ? bbox : new TgdBoundingBox(bbox.min, bbox.max)
-        this.colorStoke = new TgdColor(options.colorStroke ?? [0, .5, 1])
+        this.colorStroke = new TgdColor(options.colorStroke ?? [0, .5, 1])
         this.colorFill = new TgdColor(options.colorFill ?? [1, .666, 0, .5])
         // biome-ignore format: keep matrix-like alignment
         // prettier-ignore
@@ -90,8 +90,8 @@ export class TgdPainterBBox extends TgdPainterGroup {
                 const { min, max } = this.bbox
                 uniforms.values.uniMin = min
                 uniforms.values.uniMax = max
-                uniforms.values.uniColorStroke = this.colorStoke.toArayNumber4()
-                uniforms.values.uniColorFill = this.colorFill.toArayNumber4()
+                uniforms.values.uniColorStroke = this.colorStroke.toArrayNumber4()
+                uniforms.values.uniColorFill = this.colorFill.toArrayNumber4()
             }
         })
         const fill = new TgdPainterProgram(context, {

@@ -31,12 +31,23 @@ export interface TgdGeometryOptions1 extends TgdGeometryOptionsCommon {
 	dataset: TgdDataset
 	attPosition?: string
 	attNormal?: string
+	/**
+	 * Name of the vec4 tangent attribute.
+	 * `xyz` is the tangent, and `w` is the handedness of the TBN basis
+	 * (`+1` or `-1`), as in glTF: `bitangent = cross(normal, tangent.xyz) * tangent.w`.
+	 * Default to `CUSTOM_ATTRIBUTE_3`, like {@link TgdMaterial.attTangent}.
+	 */
+	attTangent?: string
 	attUV?: string
 }
 
 export interface TgdGeometryOptions2 extends TgdGeometryOptionsCommon {
 	attPosition: Float32Attribute
 	attNormal?: Float32Attribute
+	/**
+	 * Tangents as vec4: `w` holds the handedness of the TBN basis (`+1` or `-1`).
+	 */
+	attTangent?: Float32Attribute
 	attUV?: Float32Attribute
 }
 
@@ -57,6 +68,12 @@ export class TgdGeometry {
 	public readonly attPosition: string
 	/** Name of the NORMAL attribute in the shader. */
 	public readonly attNormal: string
+	/**
+	 * Name of the vec4 TANGENT attribute in the shader.
+	 * `w` holds the handedness of the TBN basis (`+1` or `-1`):
+	 * `bitangent = cross(normal, tangent.xyz) * tangent.w`.
+	 */
+	public readonly attTangent: string
 	/** Name of the UV attribute in the shader. */
 	public readonly attUV: string
 	public readonly count: number
@@ -76,21 +93,28 @@ export class TgdGeometry {
 			elements,
 			attPosition,
 			attNormal,
+			attTangent,
 			attUV,
 			computeNormalsIfMissing,
 		} = options
 		definition[attPosition.name] = attPosition.type ?? "vec3"
 		if (attNormal) definition[attNormal.name] = attNormal.type ?? "vec3"
+		if (attTangent) definition[attTangent.name] = attTangent.type ?? "vec4"
 		if (attUV) definition[attUV.name] = attUV.type ?? "vec2"
 		const dataset = new TgdDataset(definition)
 		dataset.set(attPosition.name, attPosition.data)
 		if (attNormal) dataset.set(attNormal.name, attNormal.data)
+		if (attTangent) dataset.set(attTangent.name, attTangent.data)
 		if (attUV) dataset.set(attUV.name, attUV.data)
 		return new TgdGeometry({
 			dataset,
 			count,
 			drawMode,
 			elements,
+			attPosition: attPosition.name,
+			attNormal: attNormal?.name,
+			attTangent: attTangent?.name,
+			attUV: attUV?.name,
 			computeNormalsIfMissing,
 		})
 	}
@@ -116,6 +140,7 @@ export class TgdGeometry {
 			drawMode = "TRIANGLES",
 			attPosition = "POSITION",
 			attNormal = "NORMAL",
+			attTangent = "CUSTOM_ATTRIBUTE_3",
 			attUV = "TEXCOORD_0",
 			name = `TgdGeometry#${TgdGeometry.counter++}`,
 		} = options
@@ -128,6 +153,7 @@ export class TgdGeometry {
 		this._elementsType = elements ? webglElementTypeFromTypedArray(elements) : 0
 		this.attPosition = attPosition
 		this.attNormal = attNormal
+		this.attTangent = attTangent
 		this.attUV = attUV
 		this.count = elements?.length ?? dataset.count
 		if (options.computeNormalsIfMissing) this.computeNormals()

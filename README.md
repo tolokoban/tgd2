@@ -20,6 +20,13 @@ npm start
 
 ## Release notes
 
+### v2.6.0
+
+- **New TgdPainterMeshes**: Paints a tree of `TgdMesh`. `children` are painted after their parent, and their `transfo` is local to the parent's one. `visible: false` hides a mesh and all its children. A mesh without `material` uses the one of its closest ancestor. A mesh without `geometry` is not painted, but its children are.
+- **TgdTransfo.lookAt()**: New method that orients the transform so its `-Z` axis points to a target, keeping `+Y` as close to up as possible. When looking straight up or down, the current `X` axis is kept to avoid sudden flips. Does nothing if the target is equal to the position.
+- **TgdGeometry.attTangent**: New attribute name for the `vec4` tangents, where `w` holds the handedness of the TBN basis (`+1` or `-1`), as in glTF (default `CUSTOM_ATTRIBUTE_3`, like `TgdMaterial.attTangent`). `TgdPainterMesh` declares it in the vertex shader and copies it into the material, so materials can use tangents.
+- **TgdGeometry.make() fix**: The attribute names given in the options are now kept by the geometry. They used to be replaced by the defaults.
+
 ### v2.5.0
 
 - **New TgdContextOffscreen**: New class extending `TgdContext` that creates an offscreen WebGL2 context backed by an `OffscreenCanvas`. Its size is automatically synchronized with a parent context on every paint cycle, and its camera transform is kept in sync with the parent's camera. Useful for postprocessing effects and object picking.

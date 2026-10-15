@@ -183,7 +183,7 @@ export class TgdColor {
         return vec
     }
 
-    toArayNumber4(target?: ArrayNumber4): ArrayNumber4 {
+    toArrayNumber4(target?: ArrayNumber4): ArrayNumber4 {
         if (!target) return [this.R, this.G, this.B, this.A]
 
         target[0] = this.R

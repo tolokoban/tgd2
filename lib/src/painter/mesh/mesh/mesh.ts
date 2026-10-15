@@ -4,13 +4,10 @@ import type { TgdInterfaceTransformable } from "@tgd/interface"
 import { type TgdMaterial, TgdMaterialNormals } from "@tgd/material"
 import { TgdTransfo, type TgdTransfoOptions, TgdVec3 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
-import type { TgdCodeVariables } from "@tgd/shader"
-import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
-import type { WebglUniformType } from "@tgd/types"
 import type { TgdUniformBufferObjectCamera } from "@tgd/uniform"
-import { ensureArray } from "@tgd/utils"
 import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainter } from "../../painter"
+import { tgdMaterialApplyUniforms, tgdMaterialCreateProgram } from "../material-program"
 
 export interface TgdPainterMeshOptions {
     uniformCamera?: TgdUniformBufferObjectCamera
@@ -61,75 +58,8 @@ export class TgdPainterMesh
             typeof geometry.drawMode === "number"
                 ? geometry.drawMode
                 : context.gl[geometry.drawMode]
-        material.attPosition = geometry.attPosition
-        material.attNormal = geometry.attNormal
-        material.attUV = geometry.attUV
-        const uniforms: TgdCodeVariables<WebglUniformType> = {
-            uniTransfoMatrix: "mat4",
-            ...removeDuplicatedUniforms(material.uniforms, uniformCamera),
-        }
-        if (!uniformCamera) {
-            uniforms.uniModelViewMatrix = "mat4"
-            uniforms.uniProjectionMatrix = "mat4"
-        }
-        const vert = new TgdShaderVertex({
-            uniforms,
-            header: uniformCamera?.toShaderCode("uniformCamera"),
-            attributes: {
-                [geometry.attPosition]: "vec4",
-                [geometry.attNormal]: "vec3",
-                [geometry.attUV]: "vec2",
-            },
-            varying: material.varyings,
-            functions: {
-                ...material.extraVertexShaderFunctions,
-                getPosition: [
-                    "vec4 getPosition(vec4 pos) {",
-                    [material.vertexShaderCodeForGetPosition ?? "return pos;"],
-                    "}",
-                ],
-                applyMaterial: [
-                    "void applyMaterial(vec3 position, vec3 normal, vec2 uv) {",
-                    [material.vertexShaderCode],
-                    "}",
-                ],
-            },
-            mainCode: [
-                `vec4 position = getPosition(${geometry.attPosition});`,
-                "gl_Position = uniProjectionMatrix * uniModelViewMatrix * uniTransfoMatrix * position;",
-                `applyMaterial(position.xyz, ${geometry.attNormal}.xyz, ${geometry.attUV}.xy);`,
-            ],
-        })
-        const frag = new TgdShaderFragment({
-            header: [
-                ...ensureArray(material.fragmentShaderHeader),
-                ...ensureArray(uniformCamera?.toShaderCode("uniformCamera")),
-            ],
-            uniforms: removeDuplicatedUniforms(material.uniforms, uniformCamera),
-            outputs: { FragColor: "vec4" },
-            varying: material.varyings,
-            functions: {
-                ...material.extraFragmentShaderFunctions,
-                applyMaterial: [
-                    "vec4 applyMaterial() {",
-                    [material.fragmentShaderCode],
-                    "}",
-                ],
-            },
-            mainCode: ["FragColor = applyMaterial();"],
-        })
-        if (material.debug) {
-            vert.debug()
-            frag.debug()
-        }
-        const prg = new TgdProgram(context.gl, {
-            vert: vert.code,
-            frag: frag.code,
-        })
+        const prg = tgdMaterialCreateProgram(context.gl, material, geometry, uniformCamera)
         this.program = prg
-        if (uniformCamera) {
-            uniformCamera.bindToProgram(prg, "uniformCamera")
-        }
         this.vao = new TgdVertexArray(
             context.gl,
             prg,
@@ -191,14 +121,7 @@ export class TgdPainterMesh
         const { gl, camera } = context
         this.logic.exec(time, delta)
         program.use()
-        material.setUniforms?.({ context, program, time, delta })
-        const { textures } = material
-        const samplerNames = Object.keys(textures)
-        for (let unit = 0; unit < samplerNames.length; unit++) {
-            const uniformName = samplerNames[unit]
-            const texture = textures[uniformName]
-            texture.activate(unit, program, uniformName)
-        }
+        tgdMaterialApplyUniforms(material, context, program, time, delta)
         program.uniformMatrix4fv("uniTransfoMatrix", transfo.matrix)
         if (!uniformCamera) {
             program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
@@ -219,15 +142,4 @@ export class TgdPainterMesh
         this.vao.delete()
         this.program.delete()
     }
-}
-
-function removeDuplicatedUniforms(
-    uniforms: { [name: string]: WebglUniformType },
-    uniformCamera: TgdUniformBufferObjectCamera | undefined,
-): TgdCodeVariables<WebglUniformType> | undefined {
-    const copy = structuredClone(uniforms)
-    for (const name of uniformCamera?.names ?? []) {
-        delete copy[name]
-    }
-    return copy
 }

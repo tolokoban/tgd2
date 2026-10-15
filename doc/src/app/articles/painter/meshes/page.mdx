@@ -1,0 +1,20 @@
+import Demo from "./_meshes"
+
+# [TgdPainterMeshes](docs/classes/TgdPainterMeshes.html)
+
+<Demo />
+
+Paint a list of meshes, each one with its own geometry, material and transfo.
+Meshes sharing the same material share the same program.
+
+A mesh can have `children`: they are painted after their parent and their `transfo` is relative to the parent's one.
+If `visible` is false, the mesh and all its children are hidden.
+A mesh without `material` uses the one of its closest ancestor.
+A mesh without `geometry` is not painted, but its children are. Use it to group meshes.
+
+Here, a box with a `TgdMaterialNormals` orbits around a pulsing Suzanne with a `TgdMaterialFlatTexture`.
+The sphere is a child of the big one, so it follows it and uses its material.
+
+---
+
+[Back](#/articles/painter)

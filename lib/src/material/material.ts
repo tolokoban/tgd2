@@ -32,7 +32,10 @@ export interface TgdMaterialOptions {
      * Default to `NORMAL`.
      */
     attNormal: string
-    /** Name of the vec3 atribute holding the tangent.
+    /**
+     * Name of the vec4 attribute holding the tangent.
+     * `xyz` is the tangent, and `w` is the handedness of the TBN basis
+     * (`+1` or `-1`), as in glTF: `bitangent = cross(normal, tangent.xyz) * tangent.w`.
      * Default to `CUSTOM_ATTRIBUTE_3`
      */
     attTangent: string
