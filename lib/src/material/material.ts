@@ -1,4 +1,3 @@
-import { log } from "node:console"
 import type { WebglParams } from "@tgd/context/webgl-params"
 import type { TgdProgram } from "@tgd/program"
 import { tgdCodeStringify } from "@tgd/shader"

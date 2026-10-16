@@ -259,7 +259,7 @@ export class TgdTransfo {
      */
     lookAt(target: Readonly<ArrayNumber3 | ArrayNumber4 | TgdVec3 | TgdVec4>): this {
         const [tx, ty, tz] = target
-        const [px, py, pz] = this._position
+        const [px, py, pz] = this.actualPosition
         // `-Z` points to the target, so `+Z` points from the target to us.
         const Z = new TgdVec3(px - tx, py - ty, pz - tz)
         if (Z.size === 0) return this

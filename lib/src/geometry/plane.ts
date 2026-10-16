@@ -32,21 +32,23 @@ export class TgdGeometryPlane extends TgdGeometry {
             TEXCOORD_0: "vec2",
         })
         const H = 0.5
+        // Counter-clockwise when seen from the normal (vecX ^ vecY),
+        // so the front face looks in the direction of the normal.
         // prettier-ignore
         dataset.set("POSITION", new Float32Array([
-            ...vec(+H, -H),
             ...vec(-H, -H),
-            ...vec(+H, +H),
+            ...vec(+H, -H),
             ...vec(-H, +H),
+            ...vec(+H, +H),
         ]))
         const [u0, v0] = uv0
         const [u1, v1] = uv1
         // prettier-ignore
         dataset.set("TEXCOORD_0", new Float32Array([
-            u1, v1,
             u0, v1,
-            u1, v0,
+            u1, v1,
             u0, v0,
+            u1, v0,
         ]))
         const [nx, ny, nz] = new TgdVec3(vecX).normalize().cross(new TgdVec3(vecY).normalize())
 

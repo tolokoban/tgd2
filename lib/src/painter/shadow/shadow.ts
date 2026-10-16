@@ -1,7 +1,7 @@
-import { TgdCameraOrthographic } from "@tgd/camera"
+import type { TgdCamera } from "@tgd/camera"
 import { TgdContext } from "@tgd/context"
 import { TgdGeometry } from "@tgd/geometry"
-import { TgdMat4, TgdTransfo } from "@tgd/math"
+import { TgdMat4 } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdTexture2D } from "@tgd/texture"
@@ -23,18 +23,16 @@ import { mat4 } from "gl-matrix"
 import type { TgdMesh } from "../mesh/types"
 import { TgdPainter } from "../painter"
 
-export interface TgdPainterShadowOptions {
+export interface TgdPainterShadowOptions<C extends TgdCamera = TgdCamera> {
     /**
-     * The light is an oriented area.
-     * It works like a camera, -Z points to the target.
-     * X is the width.
-     * Y is the height.
+     * Camera looking from the light, -Z points to the target.
+     * Use a {@link TgdCameraOrthographic} for a directional light (like the sun),
+     * or a {@link TgdCameraPerspective} for a spot light.
+     *
+     * The aspect ratio of the texture is the one of the camera
+     * (`screenWidth / screenHeight`).
      */
-    light: {
-        transfo: TgdTransfo
-        width: number
-        height: number
-    }
+    camera: C
     /**
      * The size in pixel of the texture in the largest side.
      * Defaults to 1024.
@@ -72,20 +70,19 @@ interface MeshItem {
  *
  * @see {@link TgdPainterShadowOptions}
  */
-export class TgdPainterShadow extends TgdPainter {
-    public readonly light: TgdPainterShadowOptions["light"]
+export class TgdPainterShadow<C extends TgdCamera = TgdCamera> extends TgdPainter {
     /**
-     * Orthographic camera looking from the light.
-     * Its transfo and size are synchronized with `light` at each `paint()`,
-     * but you can tweak its `near` and `far` planes.
+     * Camera looking from the light.
+     * Its type is the one given in the options.
      */
-    public readonly camera = new TgdCameraOrthographic()
+    public readonly camera: C
     /**
      * Texture with a single 32 bits float channel (`R32F`) holding,
-     * for each texel, the distance from the light of the nearest fragment.
+     * for each texel, the distance from the light of the nearest fragment,
+     * measured along the -Z axis of the camera.
      * Texels where nothing has been painted hold `camera.far`.
      *
-     * Its size is computed from `resolution` and from the aspect ratio of the light.
+     * Its size is computed from `resolution` and from the aspect ratio of the camera.
      * It uses `NEAREST` filtering, because linear filtering of 32 bits floats
      * is not available everywhere.
      */
@@ -116,7 +113,7 @@ export class TgdPainterShadow extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterShadowOptions,
+        options: TgdPainterShadowOptions<C>,
     ) {
         super()
         if (!context.extensions.EXT_color_buffer_float) {
@@ -124,7 +121,7 @@ export class TgdPainterShadow extends TgdPainter {
                 "[TgdPainterShadow] Extension EXT_color_buffer_float is not available: the shadow texture cannot be rendered!",
             )
         }
-        this.light = options.light
+        this.camera = options.camera
         this.resolution = options.resolution ?? 1024
         this.texture = new TgdTexture2D(context, {
             name: `${this.name}/texture`,
@@ -168,7 +165,7 @@ export class TgdPainterShadow extends TgdPainter {
             poolIndex = this.collect(root, undefined, poolIndex)
         }
         this.releaseUnusedItems()
-        const camera = this.updateCamera()
+        const { camera } = this
         const [width, height] = this.computeSize()
         const framebuffer = this.updateFramebuffer(width, height)
         const { context } = this
@@ -179,7 +176,7 @@ export class TgdPainterShadow extends TgdPainter {
         gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
     }
 
-    private paintMeshes(camera: TgdCameraOrthographic) {
+    private paintMeshes(camera: TgdCamera) {
         const { context, drawItems, drawMatrices, drawCount, clearColor, clearDepth } = this
         const { gl } = context
         const previousDepth = webglDepthGet(context)
@@ -219,15 +216,16 @@ export class TgdPainterShadow extends TgdPainter {
 
     /**
      * Size of the texture: `resolution` on the largest side,
-     * and the other side follows the aspect ratio of the light.
+     * and the other side follows the aspect ratio of the camera.
      */
     private computeSize(): [width: number, height: number] {
-        const { resolution, light } = this
+        const { resolution, camera } = this
         const size = Math.max(1, Math.round(resolution))
-        if (light.width >= light.height) {
-            return [size, Math.max(1, Math.round((size * light.height) / light.width))]
+        const { screenWidth, screenHeight } = camera
+        if (screenWidth >= screenHeight) {
+            return [size, Math.max(1, Math.round((size * screenHeight) / screenWidth))]
         }
-        return [Math.max(1, Math.round((size * light.width) / light.height)), size]
+        return [Math.max(1, Math.round((size * screenWidth) / screenHeight)), size]
     }
 
     /**
@@ -272,19 +270,6 @@ export class TgdPainterShadow extends TgdPainter {
         this.depthBuffer = null
         this.framebufferWidth = 0
         this.framebufferHeight = 0
-    }
-
-    /**
-     * Synchronize the camera with the light.
-     */
-    private updateCamera(): TgdCameraOrthographic {
-        const { camera, light } = this
-        camera.transfo.from(light.transfo)
-        camera.screenWidth = light.width
-        camera.screenHeight = light.height
-        // The orthographic projection goes from -spaceHeight to +spaceHeight.
-        camera.spaceHeight = light.height * 0.5
-        return camera
     }
 
     delete() {

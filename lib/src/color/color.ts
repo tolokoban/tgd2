@@ -1,6 +1,7 @@
 import { TgdVec3, TgdVec4, tgdCalcClamp, tgdCalcModulo } from "@tgd/math"
 import type { ArrayNumber3, ArrayNumber4 } from "@tgd/types"
 
+export type TgdColorType = string | ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4 | TgdColor
 export class TgdColor {
     static fromHSL(H: number, S: number, L: number): TgdColor {
         const color = new TgdColor()
@@ -79,7 +80,7 @@ export class TgdColor {
     private _L = 1
 
     constructor()
-    constructor(color: string | ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4 | TgdColor)
+    constructor(color: TgdColorType)
     constructor(r: number, g: number, b: number)
     constructor(r: number, g: number, b: number, a: number)
     constructor(r: number | string | ArrayNumber3 | TgdVec3 | ArrayNumber4 | TgdVec4 | TgdColor = 0, g = 0, b = 0, a = 1) {

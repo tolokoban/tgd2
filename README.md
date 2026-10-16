@@ -22,10 +22,13 @@ npm start
 
 ### v2.6.0
 
+- **New TgdPainterShadow**: Paints the distance of meshes from a light into an `R32F` texture, to be used for shadow mapping. The light is a `TgdCamera`: orthographic for a directional light, perspective for a spot light. The aspect ratio of the texture follows the one of the camera.
 - **New TgdPainterMeshes**: Paints a tree of `TgdMesh`. `children` are painted after their parent, and their `transfo` is local to the parent's one. `visible: false` hides a mesh and all its children. A mesh without `material` uses the one of its closest ancestor. A mesh without `geometry` is not painted, but its children are.
 - **TgdTransfo.lookAt()**: New method that orients the transform so its `-Z` axis points to a target, keeping `+Y` as close to up as possible. When looking straight up or down, the current `X` axis is kept to avoid sudden flips. Does nothing if the target is equal to the position.
 - **TgdGeometry.attTangent**: New attribute name for the `vec4` tangents, where `w` holds the handedness of the TBN basis (`+1` or `-1`), as in glTF (default `CUSTOM_ATTRIBUTE_3`, like `TgdMaterial.attTangent`). `TgdPainterMesh` declares it in the vertex shader and copies it into the material, so materials can use tangents.
+- **TgdMaterialDiffuse**: The `color` option now accepts any `TgdColorType` (CSS string, `TgdColor`, `TgdVec3`/`TgdVec4`, 3 or 4 numbers array) in addition to a `TgdTexture2D`. The new `color` property changes the color after creation. The texture of a material created with a texture cannot be changed: TypeScript rejects the assignment, and at runtime it is ignored with an error in the console.
 - **TgdGeometry.make() fix**: The attribute names given in the options are now kept by the geometry. They used to be replaced by the defaults.
+- **TgdGeometryPlane fix**: The vertices are now in counter-clockwise order when seen from the normal (`vecX ^ vecY`). The front face used to look in the opposite direction of the normal, so planes disappeared with back-face culling. **Breaking change**: if you used to flip `vecX` or `vecY` to work around this, remove the flip.
 - **TgdCamera.matrixProjection fix**: `TgdCameraPerspective` and `TgdCameraOrthographic` used to recompute the projection matrix (and its inverse) at every access. They now only do it when a parameter changes. Changing `zoom` now also invalidates `matrixProjectionInverse`.
 
 ### v2.5.0
