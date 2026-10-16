@@ -22,6 +22,7 @@ export interface TgdMaterialProgramAttributes {
  *
  * The vertex shader expects the uniforms `uniTransfoMatrix`, `uniModelViewMatrix`
  * and `uniProjectionMatrix`. The last two come from `uniformCamera` if it is defined.
+ * Both shaders declare `uniMaterial_ScreenSize`, set by `tgdMaterialApplyUniforms()`.
  *
  * Warning: the attribute names of `material` are overwritten with the ones of `attributes`.
  */
@@ -38,6 +39,7 @@ export function tgdMaterialCreateProgram(
     material.attUV = attUV
     const uniforms: TgdCodeVariables<WebglUniformType> = {
         uniTransfoMatrix: "mat4",
+        uniMaterial_ScreenSize: "vec2",
         ...removeDuplicatedUniforms(material.uniforms, uniformCamera),
     }
     if (!uniformCamera) {
@@ -75,7 +77,10 @@ export function tgdMaterialCreateProgram(
             ...ensureArray(material.fragmentShaderHeader),
             ...ensureArray(uniformCamera?.toShaderCode("uniformCamera")),
         ],
-        uniforms: removeDuplicatedUniforms(material.uniforms, uniformCamera),
+        uniforms: {
+            uniMaterial_ScreenSize: "vec2",
+            ...removeDuplicatedUniforms(material.uniforms, uniformCamera),
+        },
         outputs: { FragColor: "vec4" },
         varying: material.varyings,
         functions: {
@@ -99,7 +104,8 @@ export function tgdMaterialCreateProgram(
 }
 
 /**
- * Call `material.setUniforms()` and activate the material's textures.
+ * Set `uniMaterial_ScreenSize`, call `material.setUniforms()`
+ * and activate the material's textures.
  * The program must already be in use.
  */
 export function tgdMaterialApplyUniforms(
@@ -109,6 +115,9 @@ export function tgdMaterialApplyUniforms(
     time: number,
     delta: number,
 ) {
+    if (program.hasUniform("uniMaterial_ScreenSize")) {
+        program.uniform2f("uniMaterial_ScreenSize", context.width, context.height)
+    }
     material.setUniforms?.({ context, program, time, delta })
     const { textures } = material
     const samplerNames = Object.keys(textures)

@@ -1,0 +1,23 @@
+import CornerDemo from "./_corner"
+
+# [TgdMaterialShadow](docs/classes/TgdMaterialShadow.html)
+
+Wrap a material to tint the fragments that are hidden from a light.
+The distances from the light are read from a texture computed by a
+[TgdPainterShadow](#/articles/painter/shadow) using the same camera.
+
+<CornerDemo />
+
+
+## Who casts, who catches
+
+Casting and catching shadows are independent:
+
+- Only the meshes given to the `TgdPainterShadow` **cast** a shadow.
+- Only the meshes using a `TgdMaterialShadow` **catch** a shadow.
+
+Here, only Suzanne casts a shadow, and only the three planes catch it.
+
+---
+
+[Back](#/articles/mesh/material)

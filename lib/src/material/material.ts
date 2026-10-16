@@ -86,6 +86,24 @@ export interface TgdMaterialOptions {
     debug: boolean
 }
 
+/**
+ * Shader code a mesh painter (`TgdPainterMesh`, `TgdPainterMeshes`)
+ * combines with a geometry to build its program.
+ *
+ * The painter already declares and sets these uniforms, so the material
+ * does not need to declare them in `uniforms`:
+ *
+ * - `mat4 uniTransfoMatrix` (vertex shader): local transformation of the mesh.
+ * - `mat4 uniModelViewMatrix` (vertex shader): camera model-view matrix.
+ * - `mat4 uniProjectionMatrix` (vertex shader): camera projection matrix.
+ * - `vec2 uniMaterial_ScreenSize` (both shaders): width and height, in pixels,
+ *   of the current render target (canvas, viewport or framebuffer).
+ *
+ * If the painter uses a `TgdUniformBufferObjectCamera`, `uniModelViewMatrix` and
+ * `uniProjectionMatrix` come from it instead, and both shaders also get
+ * `vec3 uniCameraPosition`, `vec2 uniPixel`, `vec2 uniScreenSize`,
+ * `float uniScreenAspectRatio` and `float uniScreenAspectRatioInverse`.
+ */
 export class TgdMaterial {
     public debug = false
     public attPosition: string

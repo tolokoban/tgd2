@@ -48,6 +48,10 @@ npm run patch | npm run minor  # bump the version everywhere (version.mjs syncs 
      Every demo must show its code with the "Show full code" button: the page imports the **folder**
      (`import Demo from "./_<name>"`, i.e. the generated `index.tsx`), never `./_<name>/<name>.demo` directly.
   5. Add a bullet to `doc/src/app/articles/painter/page.mdx`.
+     In demos, avoid inner functions (closures inside `init`): write helpers as top-level functions at the
+     end of the file, each wrapped in `// #begin <name>()` … `// #end`, and pass them what they need as
+     arguments. When a UI control must rebuild painters, keep the context and shared objects in React refs
+     in `Demo()` and call the helper from the handler.
   6. Add a release note in `README.md`.
 - **Release notes** go in the root `README.md` under `## Release notes`, newest version first:
   `### vX.Y.Z` followed by bullets like `- **TgdThing.method()**: what changed and why it matters.`

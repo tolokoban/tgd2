@@ -90,6 +90,14 @@ export class TgdProgram {
         return loc >= 0
     }
 
+    /**
+     * @returns `true` if `name` is an active uniform of this program.
+     * Uniforms not used by the shaders are removed by the GLSL compiler.
+     */
+    hasUniform(name: string): boolean {
+        return Boolean(this.uniformsLocations[name])
+    }
+
     getAttribLocation(name: string): number {
         const { gl, program } = this
         const loc = gl.getAttribLocation(program, name)

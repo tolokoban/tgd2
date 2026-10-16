@@ -107,13 +107,13 @@ function init(context: TgdContext, assets: Assets) {
         material: new TgdMaterialDiffuse({
             color: new TgdColor("#ddd").toArrayNumber4(),
         }),
-        tint: INITIAL_COLOR2,
+        color: INITIAL_COLOR2,
     })
     const material1 = new TgdMaterialShadow({
         camera: light1,
         texture: shadow1.texture,
         material: material2,
-        tint: INITIAL_COLOR1,
+        color: INITIAL_COLOR1,
     })
     // The ball casts a shadow, but it also catches the shadows.
     ball.material = material1

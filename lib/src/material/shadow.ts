@@ -4,14 +4,18 @@ import type { WebglParams } from "@tgd/context/webgl-params"
 import type { TgdTexture2D } from "@tgd/texture"
 import type { ArrayNumber4 } from "@tgd/types"
 import { TgdMaterial, type TgdMaterialContext } from "./material"
+import { TgdCodeBloc } from "@tgd/shader"
+import { tgdCalcClamp } from "@tgd/math"
 
 export type TgdMaterialShadowOptions<C extends TgdCamera = TgdCamera> = {
     /**
-     * The color of the material is multiplied by this tint
-     * for the fragments that are in the shadow.
+     * By default, the color of the material is multiplied
+     * by this tint for the fragments that are in the shadow.
+     * But depending on `shader`, this may be different.
+     * 
      * Defaults to `[0.5, 0.5, 0.5, 1]`.
      */
-    tint?: TgdColorType
+    color?: TgdColorType
     /**
      * Camera looking from the light.
      * It must be the one used to compute `texture`.
@@ -30,6 +34,7 @@ export type TgdMaterialShadowOptions<C extends TgdCamera = TgdCamera> = {
      * A fragment is in the shadow if its distance from the light is greater
      * than the one stored in the texture plus `bias`.
      * This prevents surfaces from shadowing themselves ("shadow acne").
+     * 
      * Defaults to `0.01`.
      */
     bias?: number
@@ -45,7 +50,42 @@ export type TgdMaterialShadowOptions<C extends TgdCamera = TgdCamera> = {
      * Defaults to "low"
      */
     accuracy?: "low" | "high"
+    /**
+     * Fragment shader operation.
+     * 
+     * Defaults to "multiply"
+     */
+    shader?: (keyof typeof SHADERS) | ((vars: Vars) => TgdCodeBloc[])
+
 }
+
+interface Vars {
+    color: string
+    uniTexture: string
+    uniColor: string
+    uniBias: string
+    varDistance: string
+}
+
+const SHADERS = {
+    "multiply": (vars: Vars) => [`return color * ${vars.uniColor};`],
+    "color": (vars: Vars) => [`return ${vars.uniColor};`],
+    "add": (vars: Vars) => [`return color + ${vars.uniColor};`],
+    "halftone": (vars: Vars) => [
+        "float size = 1.0 / 100.0;",
+        "float radius = .8;",
+        "float blur = 0.2;",
+        "float step = size * min(uniMaterial_ScreenSize.x, uniMaterial_ScreenSize.y);",
+        "float halftoneRadius = .5 * radius * step;",
+        "vec2 halftoneCell = mod(gl_FragCoord.xy, step) - vec2(0.5 * step);",
+        // 0.0 is very sharp, 1.0 very soft.
+        // smoothstep() is undefined when edge0 >= edge1, hence the `max()`.
+        "float halftoneBlur = max(blur, 0.001);",
+        // 1.0 up to `(1.0 - blur) * halftoneRadius`, 0.0 from `(1.0 + blur) * halftoneRadius`.
+        "float alpha = 1.0 - smoothstep((1.0 - halftoneBlur) * halftoneRadius, (1.0 + halftoneBlur) * halftoneRadius, length(halftoneCell));",
+        `return mix(${vars.color}, ${vars.color} * ${vars.uniColor}, alpha);`,
+    ],
+} satisfies Record<string, (vars: Vars) => TgdCodeBloc[]>
 
 const DEFAULT_TINT: ArrayNumber4 = [0.5, 0.5, 0.5, 1]
 
@@ -58,6 +98,27 @@ const DEFAULT_TINT: ArrayNumber4 = [0.5, 0.5, 0.5, 1]
  * @see {@link TgdMaterialShadowOptions}
  */
 export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMaterial {
+    public static shaderHalftone({ size = 100, radius = .8, blur = .2 }: Partial<{
+        size: number
+        radius: number
+        blur: number
+    }>) {
+        return ((vars: Vars) => [
+            `float size = ${clamp(size, 2, 1024)};`,
+            `float radius = ${clamp(radius * .5, 0.1, 2.0)};`,
+            `float blur = ${clamp(blur, 0.001, 1.0)};`,
+            "float step = size * min(uniMaterial_ScreenSize.x, uniMaterial_ScreenSize.y);",
+            "float halftoneRadius = radius * step;",
+            "vec2 halftoneCell = mod(gl_FragCoord.xy, step) - vec2(0.5 * step);",
+            // 0.0 is very sharp, 1.0 very soft.
+            // smoothstep() is undefined when edge0 >= edge1, hence the `max()`.
+            "float halftoneBlur = max(blur, 0.001);",
+            // 1.0 up to `(1.0 - blur) * halftoneRadius`, 0.0 from `(1.0 + blur) * halftoneRadius`.
+            "float alpha = 1.0 - smoothstep((1.0 - halftoneBlur) * halftoneRadius, (1.0 + halftoneBlur) * halftoneRadius, length(halftoneCell));",
+            `return mix(${vars.color}, ${vars.color} * ${vars.uniColor}, alpha);`,
+        ])
+    }
+
     /**
      * @see {@link TgdMaterialShadowOptions.camera}
      */
@@ -79,7 +140,7 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
      */
     public readonly accuracy: "low" | "high"
 
-    private _tint: TgdColor
+    private _color: TgdColor
 
     constructor(options: TgdMaterialShadowOptions<C>) {
         const { material } = options
@@ -87,7 +148,7 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
         const n = findFreeSuffix(material)
         const uniModelViewMatrix = `uniMaterialShadow_ModelViewMatrix_${n}`
         const uniProjectionMatrix = `uniMaterialShadow_ProjectionMatrix_${n}`
-        const uniTint = `uniMaterialShadow_Tint_${n}`
+        const uniColor = `uniMaterialShadow_Tint_${n}`
         const uniBias = `uniMaterialShadow_Bias_${n}`
         const uniTexture = `uniMaterialShadow_Texture_${n}`
         const varClipSpace = `varMaterialShadow_clipSpace_${n}`
@@ -96,6 +157,8 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
         const position = `materialShadow_position_${n}`
         const screen = `materialShadow_screen_${n}`
         const applyBaseMaterial = `materialShadow_applyBaseMaterial_${n}`
+        const shaderFactory = resolveShaderFactory(options.shader)
+
         super({
             attPosition: material.attPosition,
             attNormal: material.attNormal,
@@ -110,7 +173,7 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
                 ...material.uniforms,
                 [uniModelViewMatrix]: "mat4",
                 [uniProjectionMatrix]: "mat4",
-                [uniTint]: "vec4",
+                [uniColor]: "vec4",
                 [uniBias]: "float",
             },
             varyings: {
@@ -158,22 +221,27 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
                 // Outside of the light's frustum, there is no shadow.
                 "if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return color;",
                 `float distanceFromLight = texture(${uniTexture}, uv).r;`,
-                `if (distanceFromLight + ${uniBias} < ${varDistance}) {`,
-                `    color *= ${uniTint};`,
-                "}",
+                `bool isInShadow = distanceFromLight + ${uniBias} < ${varDistance};`,
+                `if (isInShadow) {`, shaderFactory({
+                    color: "color",
+                    uniBias,
+                    uniTexture,
+                    uniColor: uniColor,
+                    varDistance
+                }), "}",
                 "return color;",
             ],
             setUniforms: (materialContext: TgdMaterialContext) => {
                 material.setUniforms?.(materialContext)
                 const { program } = materialContext
-                const { camera, _tint: tint } = this
+                const { camera, _color: tint } = this
                 program.uniformMatrix4fv(uniModelViewMatrix, camera.matrixModelView)
                 program.uniformMatrix4fv(uniProjectionMatrix, camera.matrixProjection)
-                program.uniform4f(uniTint, tint.R, tint.G, tint.B, tint.A)
+                program.uniform4f(uniColor, tint.R, tint.G, tint.B, tint.A)
                 program.uniform1f(uniBias, this.bias)
             },
         })
-        this._tint = new TgdColor(options.tint ?? DEFAULT_TINT)
+        this._color = new TgdColor(options.color ?? DEFAULT_TINT)
         this.camera = options.camera
         this.texture = options.texture
         this.material = material
@@ -182,15 +250,15 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
     }
 
     /**
-     * @see {@link TgdMaterialShadowOptions.tint}
+     * @see {@link TgdMaterialShadowOptions.color}
      */
     get tint(): Readonly<TgdColor> {
-        return this._tint
+        return this._color
     }
     set tint(tint: TgdColorType) {
-        if (this._tint === tint) return
+        if (this._color === tint) return
 
-        this._tint = new TgdColor(tint)
+        this._color = new TgdColor(tint)
     }
 
     /**
@@ -224,4 +292,13 @@ function findFreeSuffix(material: TgdMaterial): number {
     let n = 1
     while (names.has(`uniMaterialShadow_Tint_${n}`)) n++
     return n
+}
+
+function resolveShaderFactory(shader: ((vars: Vars) => TgdCodeBloc[]) | keyof typeof SHADERS = "multiply"): (vars: Vars) => TgdCodeBloc {
+    const func = typeof shader === "string" ? SHADERS[shader] : shader
+    return func ?? SHADERS.multiply
+}
+
+function clamp(value: number, min: number, max: number, decimals = 6) {
+    return tgdCalcClamp(value, min, max).toFixed(decimals)
 }
