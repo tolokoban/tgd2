@@ -1,0 +1,30 @@
+import Demo from "./_lighting"
+
+# [TgdFilterDeferredShading](docs/classes/TgdFilterDeferredShading.html)
+
+Physically based lighting computed in screen space from the textures of a
+[TgdPainterDeferredShadingTextures](#/articles/painter/deferred-shading).
+The main texture of the `TgdPainterFilter` is `textureAlbedo`, and the filter reads the normals, the depth,
+the metallic, the roughness, the specular and the baked ambient occlusion from the other textures.
+
+<Demo />
+
+The light comes from two sources:
+
+- `light`: a directional `TgdLight`. Its `direction` is in world space, and the alpha of its `color` is the intensity.
+- `skyboxTexture`: a `TgdTextureCube` used for the reflections on metallic surfaces (blurrier with a higher roughness)
+  and for the global illumination. If you give a color instead, a cube texture of 1×1 pixels is created with this color.
+  `skyboxTransfo` orients the skybox.
+  The light coming from the skybox is `skyboxStrength * pow(skyboxTexture.rgb, skyboxExponent)`
+  (defaults: `skyboxStrength = 1` and `skyboxExponent = 2.2`).
+
+The specular parameter sets the reflectance of non metallic surfaces: 0.5 gives the usual 4%.
+
+Where nothing has been painted, the filter outputs a transparent black. The demo uses an alpha blending
+to see the skybox behind the meshes.
+
+On the box, metallic grows from left to right, and roughness from top to bottom.
+
+---
+
+[Back](#/articles/painter/deferred-shading)

@@ -108,6 +108,7 @@ constructor(
   the textures and the WebGL state itself.
 - In older painters that draw by hand, the order is: `program.use()`, set uniforms, activate textures,
   then draw inside a state wrapper so the WebGL state is restored afterwards:
+
   ```ts
   TgdPainterState.do(this.context, {
       cull: webglPresetCull.off,
@@ -119,11 +120,17 @@ constructor(
       },
   })
   ```
+
   With a material, use `material.applyState(context, () => {…})`.
 - If you change global GL state by hand (scissor, viewport…), read the previous value and restore it
   (see `scissor.ts`).
 - Camera matrices come from `context.camera.matrixModelView` / `matrixProjection`, or from
   `TgdUniformBufferObjectCamera`.
+
+### Materials
+
+Let says you want to create materiel `TgdMaterialFooBar`.
+Then, in the generated shader, you must prefix all variables with `foobar_`, all uniforms with `uniFooBar_`, all varyings with `varFooBar_` and all attributes with `attFooBar_`.
 
 ### Shaders: always use `TgdPainterProgram`
 
@@ -193,6 +200,7 @@ Matrix-like numeric literals (vertices, indices) are kept aligned by putting
 
 - Classes with explicit `public` / `private` / `protected` / `readonly`. Prefer `readonly` everywhere possible.
 - Getter/setter pairs that skip work when the value does not change:
+
   ```ts
   set resolution(resolution: number) {
       if (this._resolution === resolution) return
@@ -201,6 +209,7 @@ Matrix-like numeric literals (vertices, indices) are kept aligned by putting
       this.handleResize()
   }
   ```
+
 - **Guard clauses with an early `return`, followed by a blank line.** Single-statement `if`s may be
   written on one line without braces.
 - Callbacks stored as `private readonly handleXxx = (…) => {…}` so they can be removed from listeners.

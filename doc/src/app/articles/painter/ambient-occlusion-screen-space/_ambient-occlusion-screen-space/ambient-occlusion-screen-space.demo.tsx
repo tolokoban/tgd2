@@ -10,7 +10,7 @@ import {
     type TgdMesh,
     TgdPainterAmbientOcclusionScreenSpace,
     TgdPainterClear,
-    TgdPainterDeferredShading,
+    TgdPainterDeferredShadingTextures,
     TgdPainterFilter,
     TgdPainterFramebuffer,
     TgdPainterGroup,
@@ -19,7 +19,7 @@ import {
     TgdTexture2D,
     TgdTransfo,
 } from "@tolokoban/tgd"
-import { ViewOptions, ViewPanel, ViewSlider, ViewSwitch } from "@tolokoban/ui"
+import { ViewOptions, ViewPanel, ViewSlider } from "@tolokoban/ui"
 import React from "react"
 import View, { type Assets } from "@/components/demo/Tgd"
 import SuzanneURL from "@/assets/mesh/suzanne.glb"
@@ -32,14 +32,15 @@ type Quality = "low" | "medium" | "high"
 interface Settings {
     mode: Mode
     scale: Scale
-    blur: boolean
+    /** Size of the blur applied to textureAO (0 means no blur). */
+    blur: number
     radius: number
     quality: Quality
 }
 
 interface Refs {
     assets: Assets
-    /** Holds the whole scene, so we can rebuild it when `quality` changes. */
+    /** Holds the whole scene, so we can rebuild it when `quality` or `blur` changes. */
     root: TgdPainterGroup
     /** Textures that are not owned by any painter. */
     textures: TgdTexture2D[]
@@ -74,7 +75,7 @@ export default function Demo() {
     const refRefs = React.useRef<Refs | null>(null)
     const [mode, setMode] = React.useState<Mode>("both")
     const [scale, setScale] = React.useState<Scale>("1")
-    const [blur, setBlur] = React.useState(true)
+    const [blur, setBlur] = React.useState(2)
     const [radius, setRadius] = React.useState(0.5)
     // Same default as TgdPainterAmbientOcclusionScreenSpace.
     const [quality, setQuality] = React.useState<Quality>("medium")
@@ -87,13 +88,14 @@ export default function Demo() {
         activateGroups(refs, value, blur)
         context.paint()
     }
-    const handleBlurChange = (value: boolean) => {
+    const handleBlurChange = (value: number) => {
         setBlur(value)
         const context = refContext.current
         const refs = refRefs.current
         if (!context || !refs) return
 
-        activateGroups(refs, mode, value)
+        // The size of the blur is baked in the shader: we need new filters.
+        refRefs.current = rebuildScene(context, refs, { mode, scale, blur: value, radius, quality })
         context.paint()
     }
     const handleRadiusChange = (value: number) => {
@@ -157,18 +159,26 @@ export default function Demo() {
                     <div key="0.5">1/2</div>
                     <div key="0.25">1/4</div>
                 </ViewOptions>
-                <ViewSwitch value={blur} onChange={handleBlurChange}>
-                    Blur
-                </ViewSwitch>
-                <ViewSlider
-                    value={radius}
-                    onChange={handleRadiusChange}
-                    min={0}
-                    max={5}
-                    step={0.1}
-                    text={(value) => `radius: ${value.toFixed(1)}`}
-                    wide
-                />
+                <div style={{ display: "flex", gap: "1em", width: "100%" }}>
+                    <ViewSlider
+                        value={blur}
+                        onChange={handleBlurChange}
+                        min={0}
+                        max={32}
+                        step={1}
+                        text={(value) => `blur: ${value}`}
+                        wide
+                    />
+                    <ViewSlider
+                        value={radius}
+                        onChange={handleRadiusChange}
+                        min={0}
+                        max={5}
+                        step={0.1}
+                        text={(value) => `radius: ${value.toFixed(1)}`}
+                        wide
+                    />
+                </div>
             </ViewPanel>
         </View>
     )
@@ -213,7 +223,7 @@ function buildScene(
         makeCube(material, [0, 0, -3], 0.2),
     ]
     const meshes = [plane, suzanne, ...cubes]
-    const deferred = new TgdPainterDeferredShading(context, { meshes })
+    const deferred = new TgdPainterDeferredShadingTextures(context, { meshes })
     const ao = new TgdPainterAmbientOcclusionScreenSpace(context, {
         textureNormals: deferred.textureNormals,
         textureDepth: deferred.textureDepth,
@@ -274,7 +284,7 @@ function buildScene(
         children: [new TgdPainterFilter(context, { texture: ao.textureAO, flipY: true })],
     })
     // Horizontal and vertical blurs.
-    const blurs = TgdFilterBlur.createPair({ size: 4 })
+    const blurs = TgdFilterBlur.createPair({ size: blur })
     // Here, uniTexture is the blurred textureAO.
     const filterBothBlur = new TgdFilter({
         textures: { uniTextureScene: textureScene },
@@ -342,15 +352,15 @@ function rebuildScene(context: TgdContext, { assets, root, textures }: Refs, set
 // #begin activateGroups()
 /**
  * Only the group of the current `mode` is active.
- * The copy of textureAO is only needed when we blur it.
+ * The copy of textureAO is only needed when we blur it (`blur > 0`).
  */
-function activateGroups({ groups, groupsBlur, copy }: Refs, mode: Mode, blur: boolean) {
+function activateGroups({ groups, groupsBlur, copy }: Refs, mode: Mode, blur: number) {
     for (const key of Object.keys(groups) as Mode[]) {
         groups[key].active = false
         groupsBlur[key].active = false
     }
-    ;(blur ? groupsBlur : groups)[mode].active = true
-    copy.active = blur && mode !== "scene"
+    ;(blur > 0 ? groupsBlur : groups)[mode].active = true
+    copy.active = blur > 0 && mode !== "scene"
 }
 // #end
 

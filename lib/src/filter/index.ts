@@ -1,6 +1,7 @@
 export * from "./anti-aliasing"
 export * from "./blur"
 export * from "./chromatic-aberration"
+export * from "./deferred-shading"
 export * from "./filter"
 export * from "./hue-rotation"
 export * from "./multiply"

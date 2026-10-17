@@ -24,17 +24,29 @@ export interface TgdMeshTreeOptions {
      * The key must change as soon as the program would be different,
      * for instance if it depends on the attribute names of the geometry.
      *
+     * The key can also depend on `mesh`, if the program does.
+     * When the key of a mesh changes, a new program is used for it.
+     *
      * Default to the concatenation of `attPosition`, `attNormal`, `attTangent` and `attUV`.
      */
-    programKey?(geometry: TgdGeometry): string
+    programKey?(geometry: TgdGeometry, mesh: TgdMesh): string
     /**
      * Create the program used to paint `geometry` with `material`.
      * The vertex shader must declare the `mat4 uniTransfoMatrix` uniform:
      * it receives the world matrix of each mesh.
      *
+     * `mesh` is the first mesh that needs this program.
+     * If the program depends on it, `programKey()` must depend on it too.
+     *
      * The program is deleted by the tree when no mesh uses it anymore.
      */
-    createProgram(geometry: TgdGeometry, material: TgdMaterial | undefined): TgdProgram
+    createProgram(geometry: TgdGeometry, material: TgdMaterial | undefined, mesh: TgdMesh): TgdProgram
+    /**
+     * Called just before drawing each mesh, with the program already in use
+     * and `uniTransfoMatrix` already set.
+     * Use it to set uniforms or textures that depend on the mesh.
+     */
+    beforeDraw?(mesh: TgdMesh, program: TgdProgram): void
 }
 
 /**
@@ -119,8 +131,13 @@ export class TgdMeshTree {
     private readonly items = new Map<TgdMesh, Map<TgdMaterial | null, MeshItem>>()
     private readonly roots: TgdMesh[] = []
     private readonly ignoreMaterials: boolean
-    private readonly programKey: (geometry: TgdGeometry) => string
-    private readonly createProgram: (geometry: TgdGeometry, material: TgdMaterial | undefined) => TgdProgram
+    private readonly programKey: (geometry: TgdGeometry, mesh: TgdMesh) => string
+    private readonly createProgram: (
+        geometry: TgdGeometry,
+        material: TgdMaterial | undefined,
+        mesh: TgdMesh,
+    ) => TgdProgram
+    private readonly beforeDraw: ((mesh: TgdMesh, program: TgdProgram) => void) | undefined
     private frame = 0
     /** World matrices, reused from frame to frame to avoid allocations. */
     private readonly matricesPool: TgdMat4[] = []
@@ -144,6 +161,7 @@ export class TgdMeshTree {
         this.ignoreMaterials = options.ignoreMaterials ?? false
         this.programKey = options.programKey ?? defaultProgramKey
         this.createProgram = options.createProgram
+        this.beforeDraw = options.beforeDraw
         this.batch = {
             program: undefined,
             material: undefined,
@@ -223,8 +241,9 @@ export class TgdMeshTree {
         const { gl } = this.context
         const { drawItems, drawMatrices, batch } = this
         for (let index = batch.start; index < batch.end; index++) {
-            const { cache, vao, geometry } = drawItems[index]
+            const { mesh, cache, vao, geometry } = drawItems[index]
             cache.prg.uniformMatrix4fv("uniTransfoMatrix", drawMatrices[index])
+            this.beforeDraw?.(mesh, cache.prg)
             vao.bind()
             if (geometry.elements) {
                 gl.drawElements(geometry.drawMode, geometry.count, geometry.elementsType, 0)
@@ -309,13 +328,14 @@ export class TgdMeshTree {
             byMaterial = new Map<TgdMaterial | null, MeshItem>()
             this.items.set(mesh, byMaterial)
         }
+        const key = this.programKey(geometry, mesh)
         let item = byMaterial.get(materialKey)
-        if (item && item.geometry !== geometry) {
+        if (item && (item.geometry !== geometry || item.cache.key !== key)) {
             this.releaseItem(item)
             item = undefined
         }
         if (!item) {
-            const cache = this.getProgram(geometry, material)
+            const cache = this.getProgram(key, geometry, material, mesh)
             const vao = new TgdVertexArray(this.context.gl, cache.prg, [geometry.dataset], geometry.elements)
             item = { mesh, cache, vao, geometry, material, frame: this.frame }
             cache.items.add(item)
@@ -356,8 +376,12 @@ export class TgdMeshTree {
         if (byKey.size === 0) this.programs.delete(cacheMaterialKey)
     }
 
-    private getProgram(geometry: TgdGeometry, material: TgdMaterial | undefined): ProgramCache {
-        const key = this.programKey(geometry)
+    private getProgram(
+        key: string,
+        geometry: TgdGeometry,
+        material: TgdMaterial | undefined,
+        mesh: TgdMesh,
+    ): ProgramCache {
         const materialKey = material ?? NO_MATERIAL
         let byKey = this.programs.get(materialKey)
         if (!byKey) {
@@ -367,7 +391,7 @@ export class TgdMeshTree {
         const cache = byKey.get(key)
         if (cache) return cache
 
-        const prg = this.createProgram(geometry, material)
+        const prg = this.createProgram(geometry, material, mesh)
         const newCache: ProgramCache = { key, prg, material, items: new Set<MeshItem>() }
         byKey.set(key, newCache)
         return newCache

@@ -14,8 +14,8 @@ export interface TgdPainterAmbientOcclusionScreenSpaceOptions {
      */
     textureNormals: TgdTexture2D
     /**
-     * Distance from the camera along its -Z axis, normalized between
-     * 0 (near plane) and 1 (far plane).
+     * Depth texture (`DEPTH_COMPONENT*`) holding the window depth,
+     * between 0 (near plane) and 1 (far plane), as written by the depth test.
      * Same structure as {@link TgdPainterDeferredShading.textureDepth}.
      */
     textureDepth: TgdTexture2D
@@ -114,12 +114,10 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
     public readonly samples: number
 
     private readonly uniforms: TgdUniformBufferObject<
-        "uniProjectionMatrix" | "uniProjectionMatrixInverse" | "uniNear" | "uniDepthRange" | "uniRadius" | "uniBias",
+        "uniProjectionMatrix" | "uniProjectionMatrixInverse" | "uniRadius" | "uniBias",
         {
             uniProjectionMatrix: "mat4"
             uniProjectionMatrixInverse: "mat4"
-            uniNear: "float"
-            uniDepthRange: "float"
             uniRadius: "float"
             uniBias: "float"
         }
@@ -163,8 +161,6 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
             uniforms: {
                 uniProjectionMatrix: "mat4",
                 uniProjectionMatrixInverse: "mat4",
-                uniNear: "float",
-                uniDepthRange: "float",
                 uniRadius: "float",
                 uniBias: "float",
             },
@@ -203,21 +199,12 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
                 functions: [
                     ...codeKernel(samples),
                     "",
-                    "// The depth texture holds (-z - near) / (far - near).",
-                    "float viewZ(float depth) {",
-                    ["return -(uniNear + depth * uniDepthRange);"],
-                    "}",
-                    "",
+                    "// The depth texture holds the window depth (between 0 and 1).",
                     "// Works for perspective and orthographic projections.",
                     "vec3 viewPosition(vec2 uv, float depth) {",
                     [
-                        "vec2 ndc = uv * 2.0 - 1.0;",
-                        "vec4 a = uniProjectionMatrixInverse * vec4(ndc, -1.0, 1.0);",
-                        "vec4 b = uniProjectionMatrixInverse * vec4(ndc, +1.0, 1.0);",
-                        "a /= a.w;",
-                        "b /= b.w;",
-                        "float z = viewZ(depth);",
-                        "return mix(a.xyz, b.xyz, (z - a.z) / (b.z - a.z));",
+                        "vec4 p = uniProjectionMatrixInverse * vec4(vec3(uv, depth) * 2.0 - 1.0, 1.0);",
+                        "return p.xyz / p.w;",
                     ],
                     "}",
                     "",
@@ -248,7 +235,7 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
                         "vec2 uv = (clip.xy / clip.w) * 0.5 + 0.5;",
                         "if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) continue;",
                         "",
-                        "float sceneZ = viewZ(texture(uniDepth, uv).r);",
+                        "float sceneZ = viewPosition(uv, texture(uniDepth, uv).r).z;",
                         "// Occluders far from P must not darken it.",
                         "float rangeCheck = smoothstep(0.0, 1.0, uniRadius / abs(P.z - sceneZ));",
                         "occlusion += step(S.z + uniBias, sceneZ) * rangeCheck;",
@@ -261,8 +248,6 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
                 const { camera } = this.context
                 uniforms.values.uniProjectionMatrix = camera.matrixProjection
                 uniforms.values.uniProjectionMatrixInverse = camera.matrixProjectionInverse
-                uniforms.values.uniNear = camera.near
-                uniforms.values.uniDepthRange = camera.far - camera.near
                 uniforms.values.uniRadius = this.radius
                 uniforms.values.uniBias = this.bias
             },

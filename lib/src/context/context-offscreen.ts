@@ -46,7 +46,6 @@ export class TgdContextOffscreen extends TgdContext {
         this.camera = contextParent.camera.clone()
         this.resolution = resolution
         this.eventPaintEnter.addListener(this.handlePaintEnter)
-        console.log('🐞 [context-offscreen@50] canvas =', canvas) // @FIXME: Remove this line written on 2026-09-03 at 12:04
     }
 
     delete({

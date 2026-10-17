@@ -469,6 +469,8 @@ export class TgdDataGlb {
             primitiveIndex?: number
             attPositionName?: string
             attNormalName?: string
+            /** vec4 attribute. It is used only if the primitive has it. */
+            attTangentName?: string
             attTextureCoordsName?: string
         } = {},
     ): TgdGeometry {
@@ -478,17 +480,21 @@ export class TgdDataGlb {
             primitiveIndex = 0,
             attPositionName = "POSITION",
             attNormalName = "NORMAL",
+            attTangentName = "TANGENT",
             attTextureCoordsName = "TEXCOORD_0",
         } = options
         try {
             const dataset = this.makeDataset(options)
             const elements = this.getMeshPrimitiveIndices(meshIndex, primitiveIndex)
+            const hasTangent =
+                this.getMeshPrimitive(meshIndex, primitiveIndex).attributes?.[attTangentName] !== undefined
             return new TgdGeometry({
                 computeNormalsIfMissing: computeNormals,
                 dataset,
                 elements,
                 attPosition: attPositionName,
                 attNormal: attNormalName,
+                attTangent: hasTangent ? attTangentName : undefined,
                 attUV: attTextureCoordsName,
             })
         } catch (error) {
@@ -502,12 +508,15 @@ export class TgdDataGlb {
         primitiveIndex = 0,
         attPositionName = "POSITION",
         attNormalName = "NORMAL",
+        attTangentName = "TANGENT",
         attTextureCoordsName = "TEXCOORD_0",
     }: {
         meshIndex?: number | string
         primitiveIndex?: number
         attPositionName?: string
         attNormalName?: string
+        /** vec4 attribute. It is added to the dataset only if the primitive has it. */
+        attTangentName?: string
         attTextureCoordsName?: string
     } = {}): TgdDataset {
         const primitive = this.getMeshPrimitive(meshIndex, primitiveIndex)
@@ -519,6 +528,9 @@ export class TgdDataGlb {
             }
             if (attributes[attNormalName] !== undefined) {
                 definition[attNormalName] = "vec3"
+            }
+            if (attributes[attTangentName] !== undefined) {
+                definition[attTangentName] = "vec4"
             }
             if (attributes[attTextureCoordsName] !== undefined) {
                 definition[attTextureCoordsName] = "vec2"
@@ -542,6 +554,16 @@ export class TgdDataGlb {
                               this.getBufferViewData(this.getAccessorByAttributeName(primitive, attNormalName)),
                           )
                         : attributes[attNormalName].value,
+                )
+            }
+            if (typeof definition[attTangentName] === "string") {
+                dataset.set(
+                    attTangentName,
+                    isNumber(attributes[attTangentName])
+                        ? returnFloat32Array(
+                              this.getBufferViewData(this.getAccessorByAttributeName(primitive, attTangentName)),
+                          )
+                        : attributes[attTangentName].value,
                 )
             }
             if (typeof definition[attTextureCoordsName] === "string") {

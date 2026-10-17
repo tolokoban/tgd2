@@ -61,12 +61,13 @@ export class TgdMaterialToon extends TgdMaterial {
         super({
             uniforms,
             varyings,
+            vertexShaderCode,
             fragmentShaderCode: [
                 "vec3 normal = normalize(varNormal);",
                 `float light = .2 + .4 * (1.0 - dot(normal, uniLightDir));`,
                 `light *= uniShades;`,
                 `light -= fract(light);`,
-                `light /= uniShadesInverse;`,
+                `light *= uniShadesInverse;`,
                 hasTexture ? `vec4 color = texture(texDiffuse, varUV);` : `vec4 color = vec4(${color.join(", ")});`,
                 `vec3 normal2 = mat3(uniModelViewMatrix) * normal;`,
                 `float spec = max(0.0, reflect(uniLightDir, normal2).z);`,

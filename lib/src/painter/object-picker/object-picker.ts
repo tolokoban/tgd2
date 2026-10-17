@@ -65,7 +65,6 @@ export class TgdPainterObjectPicker extends TgdPainterGroup {
 
     indexAt(x: number, y: number): number {
         const [R, G, B] = this.contextOffscreen.readPixel(x, y)
-        console.log('🐞 [object-picker@68] R, G, B =', R, G, B) // @FIXME: Remove this line written on 2026-09-02 at 16:51
         const value = R + (G << 8) + (B << 16)
         return value
     }

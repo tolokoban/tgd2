@@ -65,6 +65,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/painter/clear": ["/articles/painter/clear"],
     "/articles/painter/custom": ["/articles/painter/custom"],
     "/articles/painter/deferred-shading": ["/articles/painter/deferred-shading"],
+    "/articles/painter/deferred-shading/lighting": ["/articles/painter/deferred-shading/lighting"],
     "/articles/painter/filter": ["/articles/painter/filter"],
     "/articles/painter/filter/bloom": ["/articles/painter/filter/bloom"],
     "/articles/painter/filter/blur": ["/articles/painter/filter/blur"],
