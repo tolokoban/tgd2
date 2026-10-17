@@ -165,14 +165,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/background",
-                                children: "Background"
+                                href: "#/articles/painter/ambient-occlusion-screen-space",
+                                children: "AmbientOcclusionScreenSpace"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 13,
                                 columnNumber: 3
                             }, this),
-                            ": fill the background with an\nimage."
+                            ": compute Screen Space Ambient Occlusion from the normals and the depth of a deferred shading pass."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -183,18 +183,36 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
+                                href: "#/articles/painter/background",
+                                children: "Background"
+                            }, undefined, false, {
+                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                lineNumber: 14,
+                                columnNumber: 3
+                            }, this),
+                            ": fill the background with an\nimage."
+                        ]
+                    }, undefined, true, {
+                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                        lineNumber: 14,
+                        columnNumber: 1
+                    }, this),
+                    "\n",
+                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
+                        children: [
+                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
                                 href: "#/articles/painter/background-with-depth",
                                 children: "BackgroundWithDepth"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 15,
+                                lineNumber: 16,
                                 columnNumber: 3
                             }, this),
                             ": fill the\nbackground and the depth buffer."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 15,
+                        lineNumber: 16,
                         columnNumber: 1
                     }, this),
                     "\n",
@@ -205,28 +223,10 @@ function _createMdxContent(props) {
                                 children: "BBox"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 17,
-                                columnNumber: 3
-                            }, this),
-                            ": display a bounding box."
-                        ]
-                    }, undefined, true, {
-                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 17,
-                        columnNumber: 1
-                    }, this),
-                    "\n",
-                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
-                        children: [
-                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/clear",
-                                children: "Clear"
-                            }, undefined, false, {
-                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 18,
                                 columnNumber: 3
                             }, this),
-                            ": fill all the pixels of the canvas with a\nunique color."
+                            ": display a bounding box."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -237,32 +237,69 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/filter",
-                                children: "Filter"
+                                href: "#/articles/painter/clear",
+                                children: "Clear"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 20,
+                                lineNumber: 19,
                                 columnNumber: 3
                             }, this),
-                            ": transform an image on pixel base."
+                            ": fill all the pixels of the canvas with a\nunique color."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 20,
+                        lineNumber: 19,
                         columnNumber: 1
                     }, this),
                     "\n",
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/fragment-shader",
-                                children: "FragmentShader"
+                                href: "#/articles/painter/deferred-shading",
+                                children: "DeferredShading"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 21,
                                 columnNumber: 3
                             }, this),
-                            ":paint the whole screen with a Fragment Shader."
+                            ": framebuffer that holds the normals and the depth of meshes seen from the camera, for deferred shading.",
+                            "\n",
+                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.ul, {
+                                children: [
+                                    "\n",
+                                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
+                                        children: [
+                                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
+                                                href: "#/articles/painter/deferred-shading/lighting",
+                                                children: "Lighting"
+                                            }, undefined, false, {
+                                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                                lineNumber: 22,
+                                                columnNumber: 5
+                                            }, this),
+                                            ": ",
+                                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.code, {
+                                                children: "TgdFilterDeferredShading"
+                                            }, undefined, false, {
+                                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                                lineNumber: 22,
+                                                columnNumber: 63
+                                            }, this),
+                                            " computes the lighting from these textures, with a directional light and a skybox."
+                                        ]
+                                    }, undefined, true, {
+                                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                        lineNumber: 22,
+                                        columnNumber: 3
+                                    }, this),
+                                    "\n"
+                                ]
+                            }, undefined, true, {
+                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                lineNumber: 22,
+                                columnNumber: 3
+                            }, this),
+                            "\n"
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -273,32 +310,32 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/framebuffer",
-                                children: "Framebuffer"
+                                href: "#/articles/painter/filter",
+                                children: "Filter"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 22,
+                                lineNumber: 23,
                                 columnNumber: 3
                             }, this),
-                            ":paint in a texture instead of\ndirectly to the screen."
+                            ": transform an image on pixel base."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 22,
+                        lineNumber: 23,
                         columnNumber: 1
                     }, this),
                     "\n",
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/gizmo",
-                                children: "Gizmo"
+                                href: "#/articles/painter/fragment-shader",
+                                children: "FragmentShader"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 24,
                                 columnNumber: 3
                             }, this),
-                            ": see and control the space axes."
+                            ":paint the whole screen with a Fragment Shader."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -309,14 +346,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/lod",
-                                children: "LOD"
+                                href: "#/articles/painter/framebuffer",
+                                children: "Framebuffer"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 25,
                                 columnNumber: 3
                             }, this),
-                            ": paint a mesh with levels of details depending on the camera proximity."
+                            ":paint in a texture instead of\ndirectly to the screen."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -327,32 +364,32 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/logic",
-                                children: "Logic"
+                                href: "#/articles/painter/gizmo",
+                                children: "Gizmo"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 26,
+                                lineNumber: 27,
                                 columnNumber: 3
                             }, this),
-                            ": update the status of your scene at every\nframe."
+                            ": see and control the space axes."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 26,
+                        lineNumber: 27,
                         columnNumber: 1
                     }, this),
                     "\n",
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/meshes",
-                                children: "Meshes"
+                                href: "#/articles/painter/lod",
+                                children: "LOD"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 28,
                                 columnNumber: 3
                             }, this),
-                            ": paint several meshes, each with its own geometry, material and transfo."
+                            ": paint a mesh with levels of details depending on the camera proximity."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -363,14 +400,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/node",
-                                children: "Node"
+                                href: "#/articles/painter/logic",
+                                children: "Logic"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 29,
                                 columnNumber: 3
                             }, this),
-                            ": allow you to compose local transformations."
+                            ": update the status of your scene at every\nframe."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -381,32 +418,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/overlay",
-                                children: "Overlay"
-                            }, undefined, false, {
-                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 30,
-                                columnNumber: 3
-                            }, this),
-                            ": a rectangular overlay with a texture."
-                        ]
-                    }, undefined, true, {
-                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 30,
-                        columnNumber: 1
-                    }, this),
-                    "\n",
-                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
-                        children: [
-                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/particles",
-                                children: "Particles"
+                                href: "#/articles/painter/meshes",
+                                children: "Meshes"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 31,
                                 columnNumber: 3
                             }, this),
-                            ": GPGPU particles (attributes modified in the vertex shader)."
+                            ": paint several meshes, each with its own geometry, material and transfo."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -417,14 +436,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/points-cloud",
-                                children: "PointsCloud"
+                                href: "#/articles/painter/node",
+                                children: "Node"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 32,
                                 columnNumber: 3
                             }, this),
-                            ": display a cloud of 3D points."
+                            ": allow you to compose local transformations."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -435,14 +454,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/program",
-                                children: "Program"
+                                href: "#/articles/painter/overlay",
+                                children: "Overlay"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 33,
                                 columnNumber: 3
                             }, this),
-                            ": create a painter from a custom program and data."
+                            ": a rectangular overlay with a texture."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -453,14 +472,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/segments",
-                                children: "Segments"
+                                href: "#/articles/painter/particles",
+                                children: "Particles"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 34,
                                 columnNumber: 3
                             }, this),
-                            ": lines with variable thickness."
+                            ": GPGPU particles (attributes modified in the vertex shader)."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -471,14 +490,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/sprites",
-                                children: "Sprites"
+                                href: "#/articles/painter/points-cloud",
+                                children: "PointsCloud"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 35,
                                 columnNumber: 3
                             }, this),
-                            ": fast paint of many atlas sprites."
+                            ": display a cloud of 3D points."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -489,14 +508,14 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
-                                href: "#/articles/painter/shadow",
-                                children: "Shadow"
+                                href: "#/articles/painter/program",
+                                children: "Program"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
                                 lineNumber: 36,
                                 columnNumber: 3
                             }, this),
-                            ": framebuffer that holds the distance of a fragment from a light"
+                            ": create a painter from a custom program and data."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
@@ -507,18 +526,72 @@ function _createMdxContent(props) {
                     (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
                         children: [
                             (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
+                                href: "#/articles/painter/segments",
+                                children: "Segments"
+                            }, undefined, false, {
+                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                lineNumber: 37,
+                                columnNumber: 3
+                            }, this),
+                            ": lines with variable thickness."
+                        ]
+                    }, undefined, true, {
+                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                        lineNumber: 37,
+                        columnNumber: 1
+                    }, this),
+                    "\n",
+                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
+                        children: [
+                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
+                                href: "#/articles/painter/sprites",
+                                children: "Sprites"
+                            }, undefined, false, {
+                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                lineNumber: 38,
+                                columnNumber: 3
+                            }, this),
+                            ": fast paint of many atlas sprites."
+                        ]
+                    }, undefined, true, {
+                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                        lineNumber: 38,
+                        columnNumber: 1
+                    }, this),
+                    "\n",
+                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
+                        children: [
+                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
+                                href: "#/articles/painter/shadow",
+                                children: "Shadow"
+                            }, undefined, false, {
+                                fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                                lineNumber: 39,
+                                columnNumber: 3
+                            }, this),
+                            ": framebuffer that holds the distance of a fragment from a light"
+                        ]
+                    }, undefined, true, {
+                        fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
+                        lineNumber: 39,
+                        columnNumber: 1
+                    }, this),
+                    "\n",
+                    (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.li, {
+                        children: [
+                            (0,react_jsx_dev_runtime__rspack_import_0.jsxDEV)(_components.a, {
                                 href: "#/articles/painter/x-ray",
                                 children: "XRay"
                             }, undefined, false, {
                                 fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                                lineNumber: 37,
+                                lineNumber: 40,
                                 columnNumber: 3
                             }, this),
                             ": X-Ray view."
                         ]
                     }, undefined, true, {
                         fileName: "/home/tolokoban/Code/github/game/tgd2/doc/src/app/articles/painter/page.mdx",
-                        lineNumber: 37,
+                        lineNumber: 40,
                         columnNumber: 1
                     }, this),
                     "\n"
@@ -644,4 +717,4 @@ function MDXProvider(properties) {
 },
 
 }]);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2NyL3NyY19hcHBfYXJ0aWNsZXNfcGFpbnRlcl9wYWdlX21keC4xMmM1NzBiNGMxZmUzNDU5LmpzIiwic291cmNlcyI6WyIvaG9tZS90b2xva29iYW4vQ29kZS9naXRodWIvZ2FtZS90Z2QyL2RvYy9zcmMvYXBwL2FydGljbGVzL3BhaW50ZXIvcGFnZS5tZHgiLCIvaG9tZS90b2xva29iYW4vQ29kZS9naXRodWIvZ2FtZS90Z2QyL2RvYy9ub2RlX21vZHVsZXMvQG1keC1qcy9yZWFjdC9saWIvaW5kZXguanMiXSwic291cmNlc0NvbnRlbnQiOlsiIiwiLyoqXG4gKiBAaW1wb3J0IHtNRFhDb21wb25lbnRzfSBmcm9tICdtZHgvdHlwZXMuanMnXG4gKiBAaW1wb3J0IHtDb21wb25lbnQsIFJlYWN0RWxlbWVudCwgUmVhY3ROb2RlfSBmcm9tICdyZWFjdCdcbiAqL1xuXG4vKipcbiAqIEBjYWxsYmFjayBNZXJnZUNvbXBvbmVudHNcbiAqICAgQ3VzdG9tIG1lcmdlIGZ1bmN0aW9uLlxuICogQHBhcmFtIHtSZWFkb25seTxNRFhDb21wb25lbnRzPn0gY3VycmVudENvbXBvbmVudHNcbiAqICAgQ3VycmVudCBjb21wb25lbnRzIGZyb20gdGhlIGNvbnRleHQuXG4gKiBAcmV0dXJucyB7TURYQ29tcG9uZW50c31cbiAqICAgQWRkaXRpb25hbCBjb21wb25lbnRzLlxuICpcbiAqIEB0eXBlZGVmIFByb3BzXG4gKiAgIENvbmZpZ3VyYXRpb24gZm9yIGBNRFhQcm92aWRlcmAuXG4gKiBAcHJvcGVydHkge1JlYWN0Tm9kZSB8IG51bGwgfCB1bmRlZmluZWR9IFtjaGlsZHJlbl1cbiAqICAgQ2hpbGRyZW4gKG9wdGlvbmFsKS5cbiAqIEBwcm9wZXJ0eSB7UmVhZG9ubHk8TURYQ29tcG9uZW50cz4gfCBNZXJnZUNvbXBvbmVudHMgfCBudWxsIHwgdW5kZWZpbmVkfSBbY29tcG9uZW50c11cbiAqICAgQWRkaXRpb25hbCBjb21wb25lbnRzIHRvIHVzZSBvciBhIGZ1bmN0aW9uIHRoYXQgY3JlYXRlcyB0aGVtIChvcHRpb25hbCkuXG4gKiBAcHJvcGVydHkge2Jvb2xlYW4gfCBudWxsIHwgdW5kZWZpbmVkfSBbZGlzYWJsZVBhcmVudENvbnRleHQ9ZmFsc2VdXG4gKiAgIFR1cm4gb2ZmIG91dGVyIGNvbXBvbmVudCBjb250ZXh0IChkZWZhdWx0OiBgZmFsc2VgKS5cbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnXG5cbi8qKiBAdHlwZSB7UmVhZG9ubHk8TURYQ29tcG9uZW50cz59ICovXG5jb25zdCBlbXB0eUNvbXBvbmVudHMgPSB7fVxuXG5jb25zdCBNRFhDb250ZXh0ID0gUmVhY3QuY3JlYXRlQ29udGV4dChlbXB0eUNvbXBvbmVudHMpXG5cbi8qKlxuICogR2V0IGN1cnJlbnQgY29tcG9uZW50cyBmcm9tIHRoZSBNRFggQ29udGV4dC5cbiAqXG4gKiBAcGFyYW0ge1JlYWRvbmx5PE1EWENvbXBvbmVudHM+IHwgTWVyZ2VDb21wb25lbnRzIHwgbnVsbCB8IHVuZGVmaW5lZH0gW2NvbXBvbmVudHNdXG4gKiAgIEFkZGl0aW9uYWwgY29tcG9uZW50cyB0byB1c2Ugb3IgYSBmdW5jdGlvbiB0aGF0IGNyZWF0ZXMgdGhlbSAob3B0aW9uYWwpLlxuICogQHJldHVybnMge01EWENvbXBvbmVudHN9XG4gKiAgIEN1cnJlbnQgY29tcG9uZW50cy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZU1EWENvbXBvbmVudHMoY29tcG9uZW50cykge1xuICBjb25zdCBjb250ZXh0Q29tcG9uZW50cyA9IFJlYWN0LnVzZUNvbnRleHQoTURYQ29udGV4dClcblxuICAvLyBNZW1vaXplIHRvIGF2b2lkIHVubmVjZXNzYXJ5IHRvcC1sZXZlbCBjb250ZXh0IGNoYW5nZXNcbiAgcmV0dXJuIFJlYWN0LnVzZU1lbW8oXG4gICAgZnVuY3Rpb24gKCkge1xuICAgICAgLy8gQ3VzdG9tIG1lcmdlIHZpYSBhIGZ1bmN0aW9uIHByb3BcbiAgICAgIGlmICh0eXBlb2YgY29tcG9uZW50cyA9PT0gJ2Z1bmN0aW9uJykge1xuICAgICAgICByZXR1cm4gY29tcG9uZW50cyhjb250ZXh0Q29tcG9uZW50cylcbiAgICAgIH1cblxuICAgICAgcmV0dXJuIHsuLi5jb250ZXh0Q29tcG9uZW50cywgLi4uY29tcG9uZW50c31cbiAgICB9LFxuICAgIFtjb250ZXh0Q29tcG9uZW50cywgY29tcG9uZW50c11cbiAgKVxufVxuXG4vKipcbiAqIFByb3ZpZGVyIGZvciBNRFggY29udGV4dC5cbiAqXG4gKiBAcGFyYW0ge1JlYWRvbmx5PFByb3BzPn0gcHJvcGVydGllc1xuICogICBQcm9wZXJ0aWVzLlxuICogQHJldHVybnMge1JlYWN0RWxlbWVudH1cbiAqICAgRWxlbWVudC5cbiAqIEBzYXRpc2ZpZXMge0NvbXBvbmVudH1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIE1EWFByb3ZpZGVyKHByb3BlcnRpZXMpIHtcbiAgLyoqIEB0eXBlIHtSZWFkb25seTxNRFhDb21wb25lbnRzPn0gKi9cbiAgbGV0IGFsbENvbXBvbmVudHNcblxuICBpZiAocHJvcGVydGllcy5kaXNhYmxlUGFyZW50Q29udGV4dCkge1xuICAgIGFsbENvbXBvbmVudHMgPVxuICAgICAgdHlwZW9mIHByb3BlcnRpZXMuY29tcG9uZW50cyA9PT0gJ2Z1bmN0aW9uJ1xuICAgICAgICA/IHByb3BlcnRpZXMuY29tcG9uZW50cyhlbXB0eUNvbXBvbmVudHMpXG4gICAgICAgIDogcHJvcGVydGllcy5jb21wb25lbnRzIHx8IGVtcHR5Q29tcG9uZW50c1xuICB9IGVsc2Uge1xuICAgIGFsbENvbXBvbmVudHMgPSB1c2VNRFhDb21wb25lbnRzKHByb3BlcnRpZXMuY29tcG9uZW50cylcbiAgfVxuXG4gIHJldHVybiBSZWFjdC5jcmVhdGVFbGVtZW50KFxuICAgIE1EWENvbnRleHQuUHJvdmlkZXIsXG4gICAge3ZhbHVlOiBhbGxDb21wb25lbnRzfSxcbiAgICBwcm9wZXJ0aWVzLmNoaWxkcmVuXG4gIClcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoi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
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2NyL3NyY19hcHBfYXJ0aWNsZXNfcGFpbnRlcl9wYWdlX21keC5hMDM5Njc5NGE2MThlZDVmLmpzIiwic291cmNlcyI6WyIvaG9tZS90b2xva29iYW4vQ29kZS9naXRodWIvZ2FtZS90Z2QyL2RvYy9zcmMvYXBwL2FydGljbGVzL3BhaW50ZXIvcGFnZS5tZHgiLCIvaG9tZS90b2xva29iYW4vQ29kZS9naXRodWIvZ2FtZS90Z2QyL2RvYy9ub2RlX21vZHVsZXMvQG1keC1qcy9yZWFjdC9saWIvaW5kZXguanMiXSwic291cmNlc0NvbnRlbnQiOlsiIiwiLyoqXG4gKiBAaW1wb3J0IHtNRFhDb21wb25lbnRzfSBmcm9tICdtZHgvdHlwZXMuanMnXG4gKiBAaW1wb3J0IHtDb21wb25lbnQsIFJlYWN0RWxlbWVudCwgUmVhY3ROb2RlfSBmcm9tICdyZWFjdCdcbiAqL1xuXG4vKipcbiAqIEBjYWxsYmFjayBNZXJnZUNvbXBvbmVudHNcbiAqICAgQ3VzdG9tIG1lcmdlIGZ1bmN0aW9uLlxuICogQHBhcmFtIHtSZWFkb25seTxNRFhDb21wb25lbnRzPn0gY3VycmVudENvbXBvbmVudHNcbiAqICAgQ3VycmVudCBjb21wb25lbnRzIGZyb20gdGhlIGNvbnRleHQuXG4gKiBAcmV0dXJucyB7TURYQ29tcG9uZW50c31cbiAqICAgQWRkaXRpb25hbCBjb21wb25lbnRzLlxuICpcbiAqIEB0eXBlZGVmIFByb3BzXG4gKiAgIENvbmZpZ3VyYXRpb24gZm9yIGBNRFhQcm92aWRlcmAuXG4gKiBAcHJvcGVydHkge1JlYWN0Tm9kZSB8IG51bGwgfCB1bmRlZmluZWR9IFtjaGlsZHJlbl1cbiAqICAgQ2hpbGRyZW4gKG9wdGlvbmFsKS5cbiAqIEBwcm9wZXJ0eSB7UmVhZG9ubHk8TURYQ29tcG9uZW50cz4gfCBNZXJnZUNvbXBvbmVudHMgfCBudWxsIHwgdW5kZWZpbmVkfSBbY29tcG9uZW50c11cbiAqICAgQWRkaXRpb25hbCBjb21wb25lbnRzIHRvIHVzZSBvciBhIGZ1bmN0aW9uIHRoYXQgY3JlYXRlcyB0aGVtIChvcHRpb25hbCkuXG4gKiBAcHJvcGVydHkge2Jvb2xlYW4gfCBudWxsIHwgdW5kZWZpbmVkfSBbZGlzYWJsZVBhcmVudENvbnRleHQ9ZmFsc2VdXG4gKiAgIFR1cm4gb2ZmIG91dGVyIGNvbXBvbmVudCBjb250ZXh0IChkZWZhdWx0OiBgZmFsc2VgKS5cbiAqL1xuXG5pbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnXG5cbi8qKiBAdHlwZSB7UmVhZG9ubHk8TURYQ29tcG9uZW50cz59ICovXG5jb25zdCBlbXB0eUNvbXBvbmVudHMgPSB7fVxuXG5jb25zdCBNRFhDb250ZXh0ID0gUmVhY3QuY3JlYXRlQ29udGV4dChlbXB0eUNvbXBvbmVudHMpXG5cbi8qKlxuICogR2V0IGN1cnJlbnQgY29tcG9uZW50cyBmcm9tIHRoZSBNRFggQ29udGV4dC5cbiAqXG4gKiBAcGFyYW0ge1JlYWRvbmx5PE1EWENvbXBvbmVudHM+IHwgTWVyZ2VDb21wb25lbnRzIHwgbnVsbCB8IHVuZGVmaW5lZH0gW2NvbXBvbmVudHNdXG4gKiAgIEFkZGl0aW9uYWwgY29tcG9uZW50cyB0byB1c2Ugb3IgYSBmdW5jdGlvbiB0aGF0IGNyZWF0ZXMgdGhlbSAob3B0aW9uYWwpLlxuICogQHJldHVybnMge01EWENvbXBvbmVudHN9XG4gKiAgIEN1cnJlbnQgY29tcG9uZW50cy5cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZU1EWENvbXBvbmVudHMoY29tcG9uZW50cykge1xuICBjb25zdCBjb250ZXh0Q29tcG9uZW50cyA9IFJlYWN0LnVzZUNvbnRleHQoTURYQ29udGV4dClcblxuICAvLyBNZW1vaXplIHRvIGF2b2lkIHVubmVjZXNzYXJ5IHRvcC1sZXZlbCBjb250ZXh0IGNoYW5nZXNcbiAgcmV0dXJuIFJlYWN0LnVzZU1lbW8oXG4gICAgZnVuY3Rpb24gKCkge1xuICAgICAgLy8gQ3VzdG9tIG1lcmdlIHZpYSBhIGZ1bmN0aW9uIHByb3BcbiAgICAgIGlmICh0eXBlb2YgY29tcG9uZW50cyA9PT0gJ2Z1bmN0aW9uJykge1xuICAgICAgICByZXR1cm4gY29tcG9uZW50cyhjb250ZXh0Q29tcG9uZW50cylcbiAgICAgIH1cblxuICAgICAgcmV0dXJuIHsuLi5jb250ZXh0Q29tcG9uZW50cywgLi4uY29tcG9uZW50c31cbiAgICB9LFxuICAgIFtjb250ZXh0Q29tcG9uZW50cywgY29tcG9uZW50c11cbiAgKVxufVxuXG4vKipcbiAqIFByb3ZpZGVyIGZvciBNRFggY29udGV4dC5cbiAqXG4gKiBAcGFyYW0ge1JlYWRvbmx5PFByb3BzPn0gcHJvcGVydGllc1xuICogICBQcm9wZXJ0aWVzLlxuICogQHJldHVybnMge1JlYWN0RWxlbWVudH1cbiAqICAgRWxlbWVudC5cbiAqIEBzYXRpc2ZpZXMge0NvbXBvbmVudH1cbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIE1EWFByb3ZpZGVyKHByb3BlcnRpZXMpIHtcbiAgLyoqIEB0eXBlIHtSZWFkb25seTxNRFhDb21wb25lbnRzPn0gKi9cbiAgbGV0IGFsbENvbXBvbmVudHNcblxuICBpZiAocHJvcGVydGllcy5kaXNhYmxlUGFyZW50Q29udGV4dCkge1xuICAgIGFsbENvbXBvbmVudHMgPVxuICAgICAgdHlwZW9mIHByb3BlcnRpZXMuY29tcG9uZW50cyA9PT0gJ2Z1bmN0aW9uJ1xuICAgICAgICA/IHByb3BlcnRpZXMuY29tcG9uZW50cyhlbXB0eUNvbXBvbmVudHMpXG4gICAgICAgIDogcHJvcGVydGllcy5jb21wb25lbnRzIHx8IGVtcHR5Q29tcG9uZW50c1xuICB9IGVsc2Uge1xuICAgIGFsbENvbXBvbmVudHMgPSB1c2VNRFhDb21wb25lbnRzKHByb3BlcnRpZXMuY29tcG9uZW50cylcbiAgfVxuXG4gIHJldHVybiBSZWFjdC5jcmVhdGVFbGVtZW50KFxuICAgIE1EWENvbnRleHQuUHJvdmlkZXIsXG4gICAge3ZhbHVlOiBhbGxDb21wb25lbnRzfSxcbiAgICBwcm9wZXJ0aWVzLmNoaWxkcmVuXG4gIClcbn1cbiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoi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
