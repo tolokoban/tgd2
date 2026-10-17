@@ -221,7 +221,7 @@ export class TgdTexture2D {
             0, // border
             sourceFormat, // source format
             sourceType, // source type
-            sourceType === gl.FLOAT ? new Float32Array(color4) : new Uint8Array(color4),
+            makeInitialPixel(gl, sourceType, color4),
         )
         this._width = 1
         this._height = 1
@@ -243,7 +243,17 @@ export class TgdTexture2D {
         const height = Math.ceil(h)
         if (width === this.width && height === this.height) return
 
-        this.loadBitmap(tgdCanvasCreate(width, height))
+        // Uploading an empty canvas does not work with every format
+        // (packed formats like RGB10_A2, for instance), but allocating with `null` does.
+        const { gl } = this
+        this._width = width
+        this._height = height
+        this.bind()
+        const [internalFormat, sourceFormat, sourceType] = this.splitFormat(gl)
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, null)
+        this.checkError(`resize(${width}, ${height})`)
+        this.unbind()
+        this.eventChange.dispatch(this)
     }
 
     private checkError(caption: string, action?: () => void) {
@@ -590,6 +600,22 @@ function isImageURL(url: string) {
         if (urlLowercase.endsWith(ext)) return true
     }
     return false
+}
+
+/**
+ * Data of the 1x1 texture created before any real content is loaded.
+ * Only `FLOAT` and `UNSIGNED_BYTE` types get the color.
+ * Other types (packed, half float, integers…) would need a different
+ * typed array, so they are just zero-filled.
+ */
+function makeInitialPixel(
+    gl: WebGL2RenderingContext,
+    sourceType: number,
+    color4: ArrayNumber4,
+): Float32Array | Uint8Array | null {
+    if (sourceType === gl.FLOAT) return new Float32Array(color4)
+    if (sourceType === gl.UNSIGNED_BYTE) return new Uint8Array(color4)
+    return null
 }
 
 function computeDataSizePerRow(format: TgdTexture2DStorage["format"], width: number): number {

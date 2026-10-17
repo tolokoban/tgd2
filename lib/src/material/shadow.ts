@@ -56,7 +56,12 @@ export type TgdMaterialShadowOptions<C extends TgdCamera = TgdCamera> = {
      * Defaults to "multiply"
      */
     shader?: (keyof typeof SHADERS) | ((vars: Vars) => TgdCodeBloc[])
-
+    /**
+     * If `inverted` is `true`, the shadow and light are reversed.
+     * 
+     * Defaults to `false`
+     */
+    inverted?: boolean
 }
 
 interface Vars {
@@ -85,6 +90,7 @@ const SHADERS = {
         "float alpha = 1.0 - smoothstep((1.0 - halftoneBlur) * halftoneRadius, (1.0 + halftoneBlur) * halftoneRadius, length(halftoneCell));",
         `return mix(${vars.color}, ${vars.color} * ${vars.uniColor}, alpha);`,
     ],
+    "discard": (vars: Vars) => [`discard;`]
 } satisfies Record<string, (vars: Vars) => TgdCodeBloc[]>
 
 const DEFAULT_TINT: ArrayNumber4 = [0.5, 0.5, 0.5, 1]
@@ -143,7 +149,7 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
     private _color: TgdColor
 
     constructor(options: TgdMaterialShadowOptions<C>) {
-        const { material } = options
+        const { material, inverted = false } = options
         const high = options.accuracy === "high"
         const n = findFreeSuffix(material)
         const uniModelViewMatrix = `uniMaterialShadow_ModelViewMatrix_${n}`
@@ -221,7 +227,9 @@ export class TgdMaterialShadow<C extends TgdCamera = TgdCamera> extends TgdMater
                 // Outside of the light's frustum, there is no shadow.
                 "if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return color;",
                 `float distanceFromLight = texture(${uniTexture}, uv).r;`,
-                `bool isInShadow = distanceFromLight + ${uniBias} < ${varDistance};`,
+                inverted
+                    ? `bool isInShadow = distanceFromLight + ${uniBias} > ${varDistance};`
+                    : `bool isInShadow = distanceFromLight + ${uniBias} < ${varDistance};`,
                 `if (isInShadow) {`, shaderFactory({
                     color: "color",
                     uniBias,

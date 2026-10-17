@@ -10,6 +10,7 @@ the order they are inserted.
 `TgdContext` has an internal `TgdPainterGroup`. That's why, you can see in many
 examples that we add painters directly to it.
 
+- [AmbientOcclusionScreenSpace](#/articles/painter/ambient-occlusion-screen-space): compute Screen Space Ambient Occlusion from the normals and the depth of a deferred shading pass.
 - [Background](#/articles/painter/background): fill the background with an
   image.
 - [BackgroundWithDepth](#/articles/painter/background-with-depth): fill the
@@ -17,6 +18,7 @@ examples that we add painters directly to it.
 - [BBox](#/articles/painter/bbox): display a bounding box.
 - [Clear](#/articles/painter/clear): fill all the pixels of the canvas with a
   unique color.
+- [DeferredShading](#/articles/painter/deferred-shading): framebuffer that holds the normals and the depth of meshes seen from the camera, for deferred shading.
 - [Filter](#/articles/painter/filter): transform an image on pixel base.
 - [FragmentShader](#/articles/painter/fragment-shader):paint the whole screen with a Fragment Shader.
 - [Framebuffer](#/articles/painter/framebuffer):paint in a texture instead of

@@ -14,7 +14,7 @@ import {
     TgdTexture2D,
     TgdTransfo,
 } from "@tolokoban/tgd"
-import { ViewOptions, ViewPanel } from "@tolokoban/ui"
+import { ViewOptions, ViewPanel, ViewSwitch } from "@tolokoban/ui"
 import React from "react"
 import View, { type Assets } from "@/components/demo/Tgd"
 
@@ -64,7 +64,7 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
     const texture = new TgdTexture2D(context).loadBitmap(assets.image.grid)
     const scene: Scene = { light, diffuseLight, suzanne, texture }
     refScene.current = scene
-    addPainters(context, "halftone", scene)
+    addPainters(context, "multiply", false, scene)
     // Look into the corner formed by the three planes,
     // a bit from the right to see the shadow behind Suzanne.
     const [cx, cy, cz] = [-1.4, 0.8, -0.5]
@@ -74,21 +74,31 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
     // so we look away from the camera to make her face it.
     const [sx, sy, sz] = suzanne.transfo.position
     suzanne.transfo.lookAt([sx - cx, sy - cy, sz - cz])
-    context.paint()
+    context.play()
     // #end
 }
 
 export default function Demo() {
     const refContext = React.useRef<TgdContext | null>(null)
     const refScene = React.useRef<Scene | null>(null)
-    const [shader, setShader] = React.useState<Shader>("halftone")
+    const [shader, setShader] = React.useState<Shader>("multiply")
+    const [inverted, setInverted] = React.useState(false)
     const handleShaderChange = (value: Shader) => {
         setShader(value)
         const context = refContext.current
         const scene = refScene.current
         if (!context || !scene) return
 
-        addPainters(context, value, scene)
+        addPainters(context, value, inverted, scene)
+        context.paint()
+    }
+    const handleInvertedChange = (value: boolean) => {
+        setInverted(value)
+        const context = refContext.current
+        const scene = refScene.current
+        if (!context || !scene) return
+
+        addPainters(context, shader, value, scene)
         context.paint()
     }
     return (
@@ -104,12 +114,16 @@ export default function Demo() {
             controller={{ inertiaOrbit: 1000 }}
             gizmo>
             <ViewPanel display="flex" justifyContent="space-around" alignItems="center" flexWrap="wrap">
-                <ViewOptions label="Shader" value={shader} onChange={handleShaderChange}>
+                <ViewOptions value={shader} onChange={handleShaderChange}>
                     <div key="multiply">multiply</div>
                     <div key="color">color</div>
                     <div key="add">add</div>
                     <div key="halftone">halftone</div>
+                    <div key="discard">discard</div>
                 </ViewOptions>
+                <ViewSwitch value={inverted} onChange={handleInvertedChange}>
+                    Inverted
+                </ViewSwitch>
             </ViewPanel>
         </View>
     )
@@ -119,7 +133,12 @@ export default function Demo() {
 /**
  * Clear the context and recreate the painters that depend on `shader`.
  */
-function addPainters(context: TgdContext, shader: Shader, { light, diffuseLight, suzanne, texture }: Scene) {
+function addPainters(
+    context: TgdContext,
+    shader: Shader,
+    inverted: boolean,
+    { light, diffuseLight, suzanne, texture }: Scene,
+) {
     context.removeAll()
     // Only Suzanne casts a shadow.
     const shadow = new TgdPainterShadow(context, {
@@ -136,6 +155,7 @@ function addPainters(context: TgdContext, shader: Shader, { light, diffuseLight,
             light: diffuseLight,
         }),
         shader,
+        inverted,
     })
     const planes = [
         // Facing +Y
@@ -147,7 +167,7 @@ function addPainters(context: TgdContext, shader: Shader, { light, diffuseLight,
     ]
     context.add(
         shadow,
-        new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1], depth: 1 }),
+        new TgdPainterClear(context, { color: [0.2, 0.4, 0.8, 1], depth: 1 }),
         new TgdPainterState(context, {
             depth: "less",
             cull: "back",
@@ -157,6 +177,10 @@ function addPainters(context: TgdContext, shader: Shader, { light, diffuseLight,
                 }),
             ],
         }),
+        (time) => {
+            const y = Math.abs(Math.sin(time)) * 2 - 1.5
+            suzanne.transfo.setPosition(-0.31, y, -0.31)
+        },
     )
 }
 // #end

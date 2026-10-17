@@ -1,0 +1,34 @@
+import Demo from "./_ambient-occlusion-screen-space"
+
+# [TgdPainterAmbientOcclusionScreenSpace](docs/classes/TgdPainterAmbientOcclusionScreenSpace.html)
+
+Screen Space Ambient Occlusion (SSAO) computed from the normals and the depth
+of a [TgdPainterDeferredShading](#/articles/painter/deferred-shading).
+
+<Demo />
+
+- `textureAO` (`R32F`) holds the ambient light factor, from 0 (fully occluded) to 1 (not occluded).
+  Texels where nothing has been painted hold 1.
+- `quality` sets the number of samples per pixel: 8 (`"low"`), 16 (`"medium"`) or 32 (`"high"`).
+- `radius` (default 0.5) is the size, in camera space units, of the hemisphere where we look for occluders,
+  and `bias` (default 0.02) prevents a surface from occluding itself.
+- `viewportMatchingScale` (default 1) multiplies the size of the context to get the size of `textureAO`.
+  Use 0.5 to compute four times fewer pixels.
+- `radius`, `bias` and `viewportMatchingScale` can be set in the options, and changed at any time.
+
+No blur is applied: each pixel rotates the samples by a different angle, so the result is noisy.
+`textureAO` has a single channel, so the demo displays it in shades of grey with a `TgdPainterFilter`.
+
+```ts
+const deferred = new TgdPainterDeferredShading(context, { meshes })
+const ao = new TgdPainterAmbientOcclusionScreenSpace(context, {
+    textureNormals: deferred.textureNormals,
+    textureDepth: deferred.textureDepth,
+    quality: "medium",
+})
+context.add(deferred, ao)
+```
+
+---
+
+[Back](#/articles/painter)

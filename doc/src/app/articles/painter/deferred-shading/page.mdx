@@ -1,0 +1,19 @@
+import Demo from "./_deferred-shading"
+
+# [TgdPainterDeferredShading](docs/classes/TgdPainterDeferredShading.html)
+
+Framebuffer that holds the surface normals and the depth of meshes, seen from the camera of the context.
+It is the first pass of a deferred shading pipeline.
+
+<Demo />
+
+- `textureNormals` (`RGB10_A2`) holds the normals in the camera space, encoded as `N * 0.5 + 0.5`.
+  The alpha channel is 1 where a mesh has been painted, and 0 elsewhere.
+- `textureDepth` (`R32F`) holds the distance from the camera along its -Z axis,
+  normalized between 0 (near plane) and 1 (far plane).
+
+Here, the left half of the screen shows the normals and the right half shows the depth.
+
+---
+
+[Back](#/articles/painter)

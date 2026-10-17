@@ -10,8 +10,7 @@ import { TgdVertexArray } from "@tgd/vao"
 import { TgdPainterState } from "../state"
 import { Framebuffers } from "./framebuffers"
 import { tgdTextureRecordToUniforms } from "@tgd/utils"
-import { WebglUniformType } from "@tgd/types"
-import { log } from "node:console"
+
 export interface TgdPainterFilterOptions {
     filters?: TgdFilter[]
     texture?: TgdTexture2D
@@ -74,7 +73,6 @@ export class TgdPainterFilter extends TgdPainter {
             const { textures } = filter
             this.texturesArray.push(textures)
             const uniformsForTextures = tgdTextureRecordToUniforms(textures)
-            console.log("🐞 [filter@77] filter =", filter) // @FIXME: Remove this line written on 2026-05-18 at 20:37
             const frag = new TgdShaderFragment({
                 uniforms: {
                     ...uniformsForTextures,
