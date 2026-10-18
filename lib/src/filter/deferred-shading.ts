@@ -1,7 +1,10 @@
+import type { TgdCamera } from "@tgd/camera"
 import { tgdCodeConstants } from "@tgd/code"
-import type { TgdColorType } from "@tgd/color"
+import { TgdColor, type TgdColorType } from "@tgd/color"
 import type { TgdContext } from "@tgd/context"
 import { TgdLight } from "@tgd/light"
+import type { TgdMaterialShadowOptions } from "@tgd/material"
+import { TGD_SHADOW_DEFAULT_BIAS, TGD_SHADOW_DEFAULT_COLOR, tgdShadowFragmentCode } from "@tgd/material/shadow-code"
 import { TgdMat4, TgdTransfo } from "@tgd/math"
 import type { TgdPainterDeferredShadingTextures } from "@tgd/painter/deferred-shading"
 import { type TgdTexture2D, TgdTextureCube } from "@tgd/texture"
@@ -54,6 +57,13 @@ export interface TgdFilterDeferredShadingOptions {
      * Default to a `new TgdLight()`.
      */
     light?: TgdLight
+    /**
+     * If defined, apply a shadow in the same way {@link TgdMaterialShadow} does,
+     * but in screen space: the position of each pixel is computed from the depth texture.
+     *
+     * `accuracy` is ignored because the projection is always computed per pixel.
+     */
+    shadow?: Omit<TgdMaterialShadowOptions, "material" | "accuracy">
     name?: string
 }
 
@@ -69,6 +79,9 @@ export interface TgdFilterDeferredShadingOptions {
  * and the result is converted back in sRGB space.
  * Where nothing has been painted, the output is `(0, 0, 0, 0)`.
  * Use an alpha blending to see what is behind.
+ *
+ * If `shadow` is defined, the output color is modified where the pixels are hidden from the
+ * shadow camera, exactly like {@link TgdMaterialShadow} does.
  *
  * If `skyboxTexture` is a color, this filter owns a cube texture: call `delete()` to release it.
  *
@@ -108,18 +121,31 @@ export class TgdFilterDeferredShading extends TgdFilter {
      * @see {@link TgdFilterDeferredShadingOptions.light}
      */
     public light: TgdLight
+    /**
+     * @see {@link TgdMaterialShadowOptions.camera}
+     */
+    public readonly shadowCamera: TgdCamera | null
+    /**
+     * @see {@link TgdMaterialShadowOptions.bias}
+     */
+    public shadowBias: number
+    /**
+     * @see {@link TgdMaterialShadowOptions.color}
+     */
+    public shadowColor: TgdColor
 
     private readonly skybox: TgdTextureCube
     /** `true` if we created the skybox texture from a color. */
     private readonly skyboxMustBeDeleted: boolean
     private readonly matrixViewInverse = new TgdMat4()
     private readonly matrixSkybox = new TgdMat4()
+    private readonly matrixShadow = new TgdMat4()
 
     constructor(
         private readonly context: TgdContext,
         options: TgdFilterDeferredShadingOptions,
     ) {
-        const { deferredShading } = options
+        const { deferredShading, shadow } = options
         const skyboxMustBeDeleted = !(options.skyboxTexture instanceof TgdTextureCube)
         const skybox =
             options.skyboxTexture instanceof TgdTextureCube
@@ -132,6 +158,7 @@ export class TgdFilterDeferredShading extends TgdFilter {
                 uniDepth: deferredShading.textureDepth,
                 uniMaterial: deferredShading.textureMetallicRoughnessSpecularBakedAO,
                 uniSkybox: skybox,
+                ...(shadow ? { uniShadowTexture: shadow.texture } : {}),
             },
             uniforms: {
                 uniProjectionMatrixInverse: "mat4",
@@ -142,6 +169,14 @@ export class TgdFilterDeferredShading extends TgdFilter {
                 uniSkyboxMaxLod: "float",
                 uniLightDirection: "vec3",
                 uniLightColor: "vec3",
+                ...(shadow
+                    ? {
+                          uniShadowModelViewMatrix: "mat4",
+                          uniShadowProjectionMatrix: "mat4",
+                          uniShadowColor: "vec4",
+                          uniShadowBias: "float",
+                      }
+                    : {}),
             },
             extraFunctions: {
                 ...tgdCodeConstants("PI"),
@@ -204,6 +239,33 @@ export class TgdFilterDeferredShading extends TgdFilter {
                     ],
                     "}",
                 ],
+                ...(shadow
+                    ? {
+                          applyShadow: [
+                              "// `P` is in camera space.",
+                              "vec4 applyShadow(vec4 color, vec3 P) {",
+                              [
+                                  "vec4 shadowPosition = uniShadowModelViewMatrix * vec4(P, 1.0);",
+                                  "// The light looks toward -Z.",
+                                  "float shadowDistance = -shadowPosition.z;",
+                                  "vec4 shadowScreen = uniShadowProjectionMatrix * shadowPosition;",
+                                  "vec2 uv = 0.5 * (vec2(1.0) + shadowScreen.xy / shadowScreen.w);",
+                                  tgdShadowFragmentCode(
+                                      {
+                                          uniTexture: "uniShadowTexture",
+                                          uniColor: "uniShadowColor",
+                                          uniBias: "uniShadowBias",
+                                          varDistance: "shadowDistance",
+                                          screenSize: "vec2(textureSize(uniTexture, 0))",
+                                      },
+                                      shadow.inverted ?? false,
+                                      shadow.shader,
+                                  ),
+                              ],
+                              "}",
+                          ],
+                      }
+                    : {}),
             },
             fragmentShaderCode: [
                 "vec4 normal = texture(uniNormals, varUV);",
@@ -244,6 +306,7 @@ export class TgdFilterDeferredShading extends TgdFilter {
                 "vec3 ambient = (kD_ambient * base * irradiance + F_ambient * reflection) * bakedAO;",
                 "vec3 color = direct + ambient;",
                 "FragColor = vec4(pow(clamp(color, 0.0, 1.0), vec3(1.0 / 2.2)), albedo.a);",
+                shadow ? "FragColor = applyShadow(FragColor, P);" : null,
             ],
             setUniforms: ({ program }) => {
                 const { context, matrixViewInverse, matrixSkybox, light } = this
@@ -260,6 +323,16 @@ export class TgdFilterDeferredShading extends TgdFilter {
                 program.uniform3fv("uniLightDirection", light.direction)
                 const [r, g, b, intensity] = light.color
                 program.uniform3f("uniLightColor", r * intensity, g * intensity, b * intensity)
+                const { shadowCamera } = this
+                if (shadowCamera) {
+                    // Camera space -> world space -> light space.
+                    this.matrixShadow.from(shadowCamera.matrixModelView).multiply(matrixViewInverse)
+                    program.uniformMatrix4fv("uniShadowModelViewMatrix", this.matrixShadow)
+                    program.uniformMatrix4fv("uniShadowProjectionMatrix", shadowCamera.matrixProjection)
+                    const { R, G, B, A } = this.shadowColor
+                    program.uniform4f("uniShadowColor", R, G, B, A)
+                    program.uniform1f("uniShadowBias", this.shadowBias)
+                }
             },
         })
         this.skybox = skybox
@@ -268,6 +341,9 @@ export class TgdFilterDeferredShading extends TgdFilter {
         this.skyboxStrength = options.skyboxStrength ?? 1
         this.skyboxExponent = options.skyboxExponent ?? 2.2
         this.light = options.light ?? new TgdLight()
+        this.shadowCamera = shadow?.camera ?? null
+        this.shadowBias = shadow?.bias ?? TGD_SHADOW_DEFAULT_BIAS
+        this.shadowColor = new TgdColor(shadow?.color ?? TGD_SHADOW_DEFAULT_COLOR)
     }
 
     /**

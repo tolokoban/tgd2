@@ -1,4 +1,5 @@
 import {
+    TgdCameraOrthographic,
     type TgdContext,
     TgdFilterDeferredShading,
     TgdGeometryBox,
@@ -8,11 +9,13 @@ import {
     type TgdMeshWithTextures,
     TgdPainterDeferredShadingTextures,
     TgdPainterFilter,
+    TgdPainterShadow,
     TgdPainterSkybox,
     TgdPainterState,
     TgdTexture2D,
     TgdTextureCube,
     TgdTransfo,
+    TgdVec3,
     tgdCanvasCreateCreateGradientvertical,
     tgdCanvasCreateGradientHorizontal,
 } from "@tolokoban/tgd"
@@ -85,18 +88,29 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
         imageNegY: assets.image.negY,
         imageNegZ: assets.image.negZ,
     })
-    const light = new TgdLight({ color: [1, 0.9, 0.8, 1], direction: [-1, -1, -1] })
+    // The shadow camera depends on the initial position of the main camera.
+    context.camera.fitSpaceAtTarget(4, 4)
+    const shadow = new TgdPainterShadow(context, {
+        camera: makeShadowCamera(context),
+        meshes: [box, helmet],
+    })
+    // The light camera looks toward its -Z axis.
+    const [lx, ly, lz] = shadow.camera.transfo.axisZ
+    const light = new TgdLight({ color: [1, 0.9, 0.8, 1], direction: [-lx, -ly, -lz] })
+    const shadowOptions = { camera: shadow.camera, texture: shadow.texture }
     const filters: Record<Mode, TgdFilterDeferredShading> = {
         skybox: new TgdFilterDeferredShading(context, {
             deferredShading: deferred,
             skyboxTexture: skybox,
             light,
+            shadow: shadowOptions,
         }),
         // A 1×1 cube texture is created from this color.
         color: new TgdFilterDeferredShading(context, {
             deferredShading: deferred,
             skyboxTexture: "#7af",
             light,
+            shadow: shadowOptions,
         }),
     }
     const painters: Record<Mode, TgdPainterFilter> = {
@@ -106,6 +120,7 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
     refScene.current = { filters, painters }
     applyMode(painters, "skybox")
     context.add(
+        shadow,
         deferred,
         new TgdPainterSkybox(context, { texture: skybox }),
         // Nothing is painted (alpha = 0) where there is no mesh.
@@ -115,11 +130,10 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
             blend: "alpha",
             children: [painters.skybox, painters.color],
         }),
-        (_time, delta) => {
+        (_time: number, delta: number) => {
             box.transfo.orbitAroundX(delta * 0.71).orbitAroundY(delta * 0.94)
         },
     )
-    context.camera.fitSpaceAtTarget(4, 4)
     context.play()
     // #end
 }
@@ -129,6 +143,7 @@ export default function Demo() {
     const refScene = React.useRef<Scene | null>(null)
     const [mode, setMode] = React.useState<Mode>("skybox")
     const [strength, setStrength] = React.useState(1)
+    const [exponent, setExponent] = React.useState(2.2)
     const handleModeChange = (value: Mode) => {
         setMode(value)
         const context = refContext.current
@@ -145,6 +160,15 @@ export default function Demo() {
         if (!context || !scene) return
 
         applyStrength(scene.filters, value)
+        context.paint()
+    }
+    const handleExponentChange = (value: number) => {
+        setExponent(value)
+        const context = refContext.current
+        const scene = refScene.current
+        if (!context || !scene) return
+
+        applyExponent(scene.filters, value)
         context.paint()
     }
     return (
@@ -172,6 +196,7 @@ export default function Demo() {
                     <div key="color">skybox color</div>
                 </ViewOptions>
                 <ViewInputNumber label="skyboxStrength" value={strength} onChange={handleStrengthChange} />
+                <ViewInputNumber label="skyboxExponent" value={exponent} onChange={handleExponentChange} />
             </ViewPanel>
         </View>
     )
@@ -194,6 +219,32 @@ function makePainterFilter(
 }
 // #end
 
+// #begin makeShadowCamera()
+/**
+ * The light is at the top left of the initial camera,
+ * at a distance of 8 from it, and looks at the camera's target.
+ */
+function makeShadowCamera(context: TgdContext) {
+    const { transfo } = context.camera
+    const target = new TgdVec3(transfo.position)
+    const offset = new TgdVec3(transfo.axisY).subtract(transfo.axisX).normalize().scale(8)
+    const position = new TgdVec3(transfo.actualPosition).add(offset)
+    const distance = new TgdVec3(position).subtract(target).size
+    const light = new TgdCameraOrthographic({
+        transfo: new TgdTransfo({ distance: 0, position }),
+        // Half of the height of the visible area.
+        spaceHeight: 3,
+        near: Math.max(0.1, distance - 5),
+        far: distance + 5,
+    })
+    light.transfo.lookAt(target)
+    // Square shadow texture.
+    light.screenWidth = 1
+    light.screenHeight = 1
+    return light
+}
+// #end
+
 // #begin applyMode()
 function applyMode(painters: Record<Mode, TgdPainterFilter>, mode: Mode) {
     for (const key of Object.keys(painters) as Mode[]) {
@@ -206,6 +257,14 @@ function applyMode(painters: Record<Mode, TgdPainterFilter>, mode: Mode) {
 function applyStrength(filters: Record<Mode, TgdFilterDeferredShading>, strength: number) {
     for (const filter of Object.values(filters)) {
         filter.skyboxStrength = strength
+    }
+}
+// #end
+
+// #begin applyExponent()
+function applyExponent(filters: Record<Mode, TgdFilterDeferredShading>, exponent: number) {
+    for (const filter of Object.values(filters)) {
+        filter.skyboxExponent = exponent
     }
 }
 // #end
