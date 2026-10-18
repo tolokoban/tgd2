@@ -1,8 +1,8 @@
 import type { TgdContext } from "@tgd/context"
-import { tgdMaterialApplyUniforms, tgdMaterialCreateProgram } from "./mesh/material-program"
-import { TgdMeshTree, type TgdMeshTreeBatch } from "./mesh/tree"
-import type { TgdMesh } from "./mesh/types"
-import { TgdPainter } from "./painter"
+import { tgdMaterialApplyUniforms, tgdMaterialCreateProgram } from "../mesh/material-program"
+import { TgdMeshTree, type TgdMeshTreeBatch } from "../mesh/tree"
+import type { TgdMesh } from "../mesh/types"
+import { TgdPainter } from "../painter"
 
 export interface TgdPainterMeshesOptions {
     meshes?: TgdMesh[]
