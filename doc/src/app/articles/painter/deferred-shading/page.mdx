@@ -2,8 +2,8 @@ import Demo from "./_deferred-shading"
 
 # [TgdPainterDeferredShading](docs/classes/TgdPainterDeferredShading.html)
 
-Framebuffer that holds the surface normals, the depth, the albedo and the material parameters of meshes,
-seen from the camera of the context. The four textures are rendered in a single pass.
+Framebuffer that holds the surface normals, the depth, the albedo, the material parameters and the emission of meshes,
+seen from the camera of the context. The five textures are rendered in a single pass.
 It is the first pass of a deferred shading pipeline.
 
 <Demo />
@@ -21,13 +21,15 @@ It is the first pass of a deferred shading pipeline.
   of a `TgdMeshWithTextures`, in the RED channel unless `metallicChannel`, `roughnessChannel`,
   `specularChannel` or `bakedAOChannel` says otherwise. A missing texture uses the default value:
   metallic 0.0, roughness 0.5, specular 0.5 and baked AO 1.0.
+- `textureEmission` (`RGBA8`) holds the color of the light emitted by each mesh, read from the optional
+  `emission` texture of a `TgdMeshWithTextures`. It is `(0, 0, 0, 1)` when the texture is missing.
 
 As in `TgdPainterMeshes`, a mesh without `material` uses the one of its closest ancestor,
 and it is not painted if there is none.
 
-Use the buttons to see the scene, the normals, the depth (linearized), the albedo or the material parameters.
+Use the buttons to see the scene, the normals, the depth (linearized), the albedo, the material parameters or the emission.
 The box has a metallic texture (from left to right) and a specular one (from top to bottom),
-while the helmet takes its metallic, roughness and baked AO from the textures of its GLB file.
+while the helmet takes its metallic, roughness, baked AO and emission from the textures of its GLB file.
 glTF stores metallic in the BLUE channel and roughness in the GREEN channel of the same image,
 so the demo uses this texture twice, with `metallicChannel: "b"` and `roughnessChannel: "g"`.
 The GLB file has no specular texture, so the helmet uses the default specular value.

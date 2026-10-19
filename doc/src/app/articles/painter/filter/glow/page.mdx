@@ -1,0 +1,68 @@
+import Demo from "./_glow"
+
+# [TgdFilterGlow](docs/classes/TgdFilterGlow.html)
+
+Adds a glow (also called bloom) around the emissive parts of the image.
+
+<Demo />
+
+## Controls
+
+Each control changes the option of the same name. The default values are the ones of `TgdFilterGlow`.
+The demo only changes `strength`, which starts at 1.5 to make the glow easier to see.
+
+- **radius** (default: `0.05`): spread of the glow, as a fraction of the screen height.
+  The glow gets grainy when it is too large: increase `levels` instead.
+- **strength** (default: `1`): multiplier of the glow. `0` disables it.
+- **tint** (default: white): color multiplier of the glow.
+- **additive / screen** (`blend`, default: `"additive"`): how the glow is combined with the image.
+  `"additive"` adds it (`color + glow`), `"screen"` gives `1 - (1 - color) × (1 - glow)`, which never exceeds 1.
+- **scale** (default: `0.5`): size of the first level of the blur, relative to the canvas.
+  Smaller is faster and blurs wider, but small sources can flicker when they move.
+- **levels** (default: `5`, from 1 to 10): number of levels of the blur, each one half the size of the previous one.
+  More levels give a wider halo, for almost the same cost.
+- **falloff** (default: `0.7`): weight of each level relative to the previous one.
+  `0` keeps only the tight glow of the first level, `1` gives the same weight to every level,
+  and greater values favour the wide halo.
+- **threshold** (default: `0`): brightness under which the emission is ignored.
+- **knee** (default: `0.5`, from 0 to 1): softness of the threshold, as a fraction of it.
+  `0` gives a hard cut. It has no effect when `threshold` is `0`.
+- **default / 13-tap** (`downsampleFilter`, default: `"default"`): kernel used to reduce the levels.
+  `"default"` takes 5 samples and is the fastest. `"13-tap"` takes 13 samples and is more stable
+  with small, bright and moving sources.
+- **hdr** (default: `false`): use 16 bits float textures for the blur, so intense emissions don't saturate.
+  It needs the `EXT_color_buffer_float` extension, and falls back to 8 bits textures without it.
+
+`levels`, `downsampleFilter` and `hdr` rebuild the passes of the blur. The other controls are free to change.
+
+## How it works
+
+The glow comes from `textureEmission`, here the `textureEmission` of a
+[TgdPainterDeferredShadingTextures](#/articles/painter/deferred-shading), filled with the emissive texture of the helmet.
+Before the filter is painted, this texture goes through a blur called **Dual Filtering**:
+
+1. It is reduced to `scale` times the size of the context (default: 0.5).
+   This first pass also ignores what is darker than `threshold`, with a soft transition set by `knee`.
+2. It is reduced `levels - 1` more times (default: 5 levels), each time by a factor 2.
+   Every reduction blurs a little: `downsampleFilter` is `"default"` (5 samples)
+   or `"13-tap"` (13 samples, more stable with small, bright and moving sources).
+3. It is enlarged back to the first level, mixing the levels with the weights `1, falloff, falloff²…`
+   (default: 0.7). A small `falloff` gives a tight glow, a big one a wide halo.
+
+Then the glow is multiplied by `strength` and `tint`, and combined with the input color according to `blend`:
+`"additive"` (`color + glow`) or `"screen"` (`1 - (1 - color) × (1 - glow)`, which never exceeds 1).
+
+`radius` is the spread of the glow, as a fraction of the screen height (default: 0.05).
+For a wider glow, increase `levels` rather than `radius`, which gives artifacts when it is too large.
+
+With `hdr: true`, the intermediate textures are 16 bits floats, so intense emissions don't saturate.
+
+All the options are public fields that can be changed at any time.
+Changing `levels`, `hdr`, `downsampleFilter` or `textureEmission` rebuilds the passes before the next paint.
+
+In this demo, the same `TgdPainterFilter` chains a
+[TgdFilterDeferredShading](#/articles/painter/deferred-shading/lighting) for the lighting, then the glow.
+
+---
+
+[Back](#/articles/painter/filter)

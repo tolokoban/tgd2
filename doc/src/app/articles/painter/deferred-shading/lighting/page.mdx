@@ -18,6 +18,18 @@ The light comes from two sources:
   The light coming from the skybox is `skyboxStrength * pow(skyboxTexture.rgb, skyboxExponent)`
   (defaults: `skyboxStrength = 1` and `skyboxExponent = 2.2`).
 
+If `cavity` is defined, the ridges are lightened and the valleys darkened, like the screen space cavity
+of Blender's viewport in "Solid" shading. The curvature is computed from the normals of the neighbour pixels.
+`cavityRidge` and `cavityValley` (default: 1) set the strength of each side and can be changed at any time.
+Set them to 0 to disable the effect.
+
+Set `shading: false` to skip the lighting: the albedo is used as is, but `cavity` and `shadow` are still applied.
+
+The three textures are optional. A missing one is replaced by a constant: a normal facing the camera
+(every pixel is considered painted), a depth of 0.5, and the default material
+(metallic 0, roughness 0.5, specular 0.5, baked AO 1).
+`cavity` needs `textureNormals`: without it, the cavity is disabled and an error is printed in the console.
+
 The specular parameter sets the reflectance of non metallic surfaces: 0.5 gives the usual 4%.
 
 Where nothing has been painted, the filter outputs a transparent black. The demo uses an alpha blending

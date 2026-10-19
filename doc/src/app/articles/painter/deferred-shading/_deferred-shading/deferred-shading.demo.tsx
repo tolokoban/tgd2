@@ -21,7 +21,7 @@ import React from "react"
 import View, { type Assets } from "@/components/demo/Tgd"
 import HelmetURL from "@/assets/mesh/helmet.glb"
 
-type Mode = "scene" | "normals" | "depth" | "albedo" | "material"
+type Mode = "scene" | "normals" | "depth" | "albedo" | "material" | "emission"
 
 type Groups = Record<Mode, TgdPainterGroup>
 
@@ -48,6 +48,7 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
     // - metallicRoughnessTexture: metallic in BLUE, roughness in GREEN.
     // - occlusionTexture: baked ambient occlusion in RED.
     // - normalTexture: normal map that bends the normals to simulate bumps.
+    // - emissiveTexture: color of the light emitted by the surface.
     //   The geometry has no tangents, so they are computed from the UV coordinates.
     // The `...Channel` attributes tell which channel to read in each texture (RED by default).
     // There is no specular texture in this file: the default value (0.5) is used.
@@ -57,6 +58,8 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
     const indexMetallicRoughness = gltfMaterial.pbrMetallicRoughness?.metallicRoughnessTexture?.index ?? 0
     const indexOcclusion = gltfMaterial.occlusionTexture?.index ?? 0
     const indexNormals = gltfMaterial.normalTexture?.index ?? 0
+    // The emission texture is optional in glTF.
+    const indexEmission = gltfMaterial.emissiveTexture?.index
     const textureMetallicRoughness = asset.createTexture2D(context, indexMetallicRoughness)
     const helmet: TgdMeshWithTextures = {
         geometry: asset.makeGeometry(),
@@ -73,6 +76,7 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
             roughnessChannel: "g",
             bakedAO: asset.createTexture2D(context, indexOcclusion),
             bakedAOChannel: "r",
+            emission: indexEmission === undefined ? undefined : asset.createTexture2D(context, indexEmission),
         },
     }
     const meshes = [box, helmet]
@@ -91,6 +95,7 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
         ]),
         albedo: makeBackground(deferred.textureAlbedo),
         material: makeBackground(deferred.textureMetallicRoughnessSpecularBakedAO),
+        emission: makeBackground(deferred.textureEmission),
     }
     refGroups.current = groups
     applyMode(groups, "scene")
@@ -108,7 +113,7 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
             depth: "off",
             cull: "off",
             blend: "off",
-            children: [groups.depth, groups.normals, groups.albedo, groups.material],
+            children: [groups.depth, groups.normals, groups.albedo, groups.material, groups.emission],
         }),
         (_time, delta) => {
             box.transfo.orbitAroundX(delta * 0.71).orbitAroundY(delta * 0.94)
@@ -151,6 +156,7 @@ export default function Demo() {
                     <div key="depth">depth</div>
                     <div key="albedo">albedo</div>
                     <div key="material">material</div>
+                    <div key="emission">emission</div>
                 </ViewOptions>
             </ViewPanel>
         </View>

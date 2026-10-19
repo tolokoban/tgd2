@@ -1,1 +1,1 @@
-export * from "./deferred-shading-fb"
+export * from "./deferred-shading"

@@ -52,6 +52,10 @@ import { TgdPainter } from "../painter"
  * - `specular`: 0.5
  * - `bakedAO`: 1.0
  *
+ * `emission` is the RGBA color of the light emitted by the surface (as glTF `emissiveTexture`).
+ * It is written as is in {@link TgdPainterDeferredShadingTextures.textureEmission},
+ * or `(0, 0, 0, 1)` if missing.
+ *
  * Unlike `material`, the textures are not inherited by the children.
  */
 export interface TgdMeshWithTextures extends TgdMesh {
@@ -66,6 +70,7 @@ export interface TgdMeshWithTextures extends TgdMesh {
         specularChannel: "r" | "g" | "b" | "a"
         bakedAO: TgdTexture2D
         bakedAOChannel: "r" | "g" | "b" | "a"
+        emission: TgdTexture2D
     }>
 }
 
@@ -77,7 +82,8 @@ export interface TgdPainterDeferredShadingTexturesOptions {
      * and it is not painted if there is none.
      *
      * The optional `textures` of a mesh fill
-     * {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}.
+     * {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}
+     * and {@link TgdPainterDeferredShadingTextures.textureEmission}.
      */
     meshes?: TgdMeshWithTextures[]
 }
@@ -96,16 +102,21 @@ const PARAMS_SAMPLERS = [
 
 /** Sampler name of the normal map. */
 const NORMALS_SAMPLER = "uniDeferredShading_Normals"
-/** Number of texture units used by the textures of a mesh: the parameters and the normal map. */
-const TEXTURE_UNITS_COUNT = PARAMS.length + 1
+/** Sampler name of the emission texture. */
+const EMISSION_SAMPLER = "uniDeferredShading_Emission"
+/** Value used when a mesh has no emission texture. */
+const DEFAULT_EMISSION = [0, 0, 0, 1] as const
+/** Number of texture units used by the textures of a mesh: the parameters, the normal map and the emission. */
+const TEXTURE_UNITS_COUNT = PARAMS.length + 2
 
 /**
  * Framebuffer that holds the surface normals, the depth, the albedo and the material parameters
  * of meshes seen from the camera of the context, to be used for deferred shading.
  * The results are stored in {@link TgdPainterDeferredShadingTextures.textureNormals},
- * {@link TgdPainterDeferredShadingTextures.textureDepth}, {@link TgdPainterDeferredShadingTextures.textureAlbedo}
- * and {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}.
- * The four textures are rendered in a single pass.
+ * {@link TgdPainterDeferredShadingTextures.textureDepth}, {@link TgdPainterDeferredShadingTextures.textureAlbedo},
+ * {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}
+ * and {@link TgdPainterDeferredShadingTextures.textureEmission}.
+ * The five textures are rendered in a single pass.
  * The size of the textures follows the size of the context.
  *
  * A mesh can have `children`. Their `transfo` is relative to the parent's one.
@@ -114,7 +125,7 @@ const TEXTURE_UNITS_COUNT = PARAMS.length + 1
  *
  * @example
  * ```ts
- * const deferred = new TgdPainterDeferredShading(context, { meshes: [suzanne] })
+ * const deferred = new TgdPainterDeferredShadingTextures(context, { meshes: [suzanne] })
  * context.add(deferred, new TgdPainterProgram(context, {
  *     textures: {
  *         uniNormals: deferred.textureNormals,
@@ -187,6 +198,17 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
      * Its size is the one of the context.
      */
     public readonly textureMetallicRoughnessSpecularBakedAO: TgdTexture2D
+    /**
+     * Color of the light emitted by the meshes (`RGBA8`).
+     *
+     * It is read from the `emission` texture of each mesh
+     * (see {@link TgdMeshWithTextures}), or takes the default value
+     * `(0, 0, 0, 1)` when the texture is missing.
+     * Texels where nothing has been painted hold the default value too.
+     *
+     * Its size is the one of the context.
+     */
+    public readonly textureEmission: TgdTexture2D
 
     private readonly tree: TgdMeshTree
     private framebuffer: WebGLFramebuffer | null = null
@@ -203,6 +225,7 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
     private readonly clearNormals = new Float32Array(4)
     private readonly clearAlbedo = new Float32Array(4)
     private readonly clearParams = new Float32Array(DEFAULT_PARAMS)
+    private readonly clearEmission = new Float32Array(DEFAULT_EMISSION)
     private readonly clearDepth = new Float32Array([1])
     /** 1 for each parameter that has a texture in the current mesh, reused to avoid allocations. */
     private readonly hasTexture = [0, 0, 0, 0]
@@ -273,6 +296,19 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
                 wrapR: "CLAMP_TO_EDGE",
             },
         })
+        this.textureEmission = new TgdTexture2D(context, {
+            name: `${this.name}/textureEmission`,
+            storage: {
+                format: "RGBA8 / RGBA / UNSIGNED_BYTE",
+            },
+            params: {
+                magFilter: "NEAREST",
+                minFilter: "NEAREST",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+                wrapR: "CLAMP_TO_EDGE",
+            },
+        })
         this.tree = new TgdMeshTree(context, {
             meshes: options.meshes,
             // The channels read in the textures are part of the shader code.
@@ -315,7 +351,7 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
     }
 
     private readonly paintMeshes = () => {
-        const { context, clearNormals, clearAlbedo, clearParams, clearDepth } = this
+        const { context, clearNormals, clearAlbedo, clearParams, clearEmission, clearDepth } = this
         const { gl } = context
         const previousDepth = webglDepthGet(context)
         const previousCull = webglCullGet(context)
@@ -327,6 +363,7 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         gl.clearBufferfv(gl.COLOR, 0, clearNormals)
         gl.clearBufferfv(gl.COLOR, 1, clearAlbedo)
         gl.clearBufferfv(gl.COLOR, 2, clearParams)
+        gl.clearBufferfv(gl.COLOR, 3, clearEmission)
         gl.clearBufferfv(gl.DEPTH, 0, clearDepth)
         this.tree.forEachBatch(this.handleBatch)
         webglDepthSet(context, previousDepth)
@@ -349,7 +386,7 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
 
     /**
      * Bind the textures of the mesh, or a white texture and a default value for the missing ones.
-     * The normal map uses the last texture unit.
+     * The normal map and the emission use the last texture units.
      */
     private readonly handleBeforeDraw = (mesh: TgdMeshWithTextures, program: TgdProgram) => {
         const { textureWhite, firstTextureUnit, hasTexture } = this
@@ -365,6 +402,10 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         const boundNormals = normals ?? textureWhite
         boundNormals.activate(firstTextureUnit + PARAMS.length, program, NORMALS_SAMPLER)
         program.uniform1f("uniDeferredShading_HasNormals", normals ? 1 : 0)
+        const emission = textures?.emission
+        const boundEmission = emission ?? textureWhite
+        boundEmission.activate(firstTextureUnit + PARAMS.length + 1, program, EMISSION_SAMPLER)
+        program.uniform1f("uniDeferredShading_HasEmission", emission ? 1 : 0)
     }
 
     /**
@@ -375,12 +416,20 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         if (framebuffer && width === framebufferWidth && height === framebufferHeight) return framebuffer
 
         this.deleteFramebuffer()
-        const { context, textureNormals, textureDepth, textureAlbedo, textureMetallicRoughnessSpecularBakedAO } = this
+        const {
+            context,
+            textureNormals,
+            textureDepth,
+            textureAlbedo,
+            textureMetallicRoughnessSpecularBakedAO,
+            textureEmission,
+        } = this
         const { gl } = context
         textureNormals.resize(width, height)
         textureDepth.resize(width, height)
         textureAlbedo.resize(width, height)
         textureMetallicRoughnessSpecularBakedAO.resize(width, height)
+        textureEmission.resize(width, height)
         const newFramebuffer = webglCreateFramebuffer(gl)
         const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
         gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
@@ -393,9 +442,10 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
             textureMetallicRoughnessSpecularBakedAO.glTexture,
             0,
         )
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT3, gl.TEXTURE_2D, textureEmission.glTexture, 0)
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textureDepth.glTexture, 0)
         // The draw buffers are part of the framebuffer state.
-        gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2])
+        gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2, gl.COLOR_ATTACHMENT3])
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
             context.console.error(`[TgdPainterDeferredShading] The framebuffer is incomplete: ${webglLookup(status)}!`)
@@ -422,14 +472,15 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         this.textureDepth.delete()
         this.textureAlbedo.delete()
         this.textureMetallicRoughnessSpecularBakedAO.delete()
+        this.textureEmission.delete()
         this.textureWhite.delete()
     }
 }
 
 /**
  * Same shaders as `tgdMaterialCreateProgram()`, but the fragment shader
- * writes the normal (bent by the optional normal map) and the material parameters
- * beside the color of the material.
+ * writes the normal (bent by the optional normal map), the material parameters
+ * and the emission beside the color of the material.
  * Our varyings are prefixed with `varDeferredShading_` (and our uniforms with `uniDeferredShading_`)
  * to avoid collisions with the ones of the material.
  *
@@ -508,12 +559,15 @@ function createProgram(
             uniDeferredShading_BakedAO: "sampler2D",
             uniDeferredShading_HasNormals: "float",
             [NORMALS_SAMPLER]: "sampler2D",
+            uniDeferredShading_HasEmission: "float",
+            [EMISSION_SAMPLER]: "sampler2D",
         },
         varying,
         outputs: {
             FragNormal: "vec4",
             FragAlbedo: "vec4",
             FragParams: "vec4",
+            FragEmission: "vec4",
         },
         functions: {
             ...material.extraFragmentShaderFunctions,
@@ -567,6 +621,7 @@ function createProgram(
             ],
             ");",
             `FragParams = mix(vec4(${DEFAULT_PARAMS.map((value) => value.toFixed(1)).join(", ")}), deferredShading_params, uniDeferredShading_HasTexture);`,
+            `FragEmission = mix(vec4(${DEFAULT_EMISSION.map((value) => value.toFixed(1)).join(", ")}), texture(${EMISSION_SAMPLER}, varDeferredShading_UV), uniDeferredShading_HasEmission);`,
         ],
     })
     if (material.debug) {
@@ -587,6 +642,7 @@ function getChannels(mesh: TgdMeshWithTextures): string {
     const { textures } = mesh
     if (!textures) return "rrrr"
 
-    return `${textures.metallicChannel ?? "r"}${textures.roughnessChannel ?? "r"}${textures.specularChannel ?? "r"
-        }${textures.bakedAOChannel ?? "r"}`
+    return `${textures.metallicChannel ?? "r"}${textures.roughnessChannel ?? "r"}${
+        textures.specularChannel ?? "r"
+    }${textures.bakedAOChannel ?? "r"}`
 }

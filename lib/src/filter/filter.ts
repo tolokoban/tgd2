@@ -9,7 +9,9 @@ import { WebglUniformType } from "@tgd/types"
  * A filter is mostly a fragment shader working on a texture.
  *
  * Always available varyings:
- *  * `vec2 varUV`
+ *  * `vec2 varUV`: texture coordinates. Every filter of a {@link TgdPainterFilter} receives its input
+ *    with the orientation of the original texture, so `varUV` can also be used to read other
+ *    textures of the same size and orientation (normals, depth, emission…).
  *
  * Always available uniforms:
  *  * `sampler2D uniTexture`: input texture.
@@ -44,6 +46,13 @@ export class TgdFilter {
         if (setUniforms) this.setUniforms = setUniforms
         this.name = options.name ?? `TgdFilter#${TgdFilter.id++}`
     }
+
+    /**
+     * Called by {@link TgdPainterFilter} at the beginning of each `paint()`,
+     * before any filter is painted.
+     * Override it if the filter needs to render intermediate textures in its own framebuffers.
+     */
+    prepare(_time: number, _delta: number): void {}
 
     /** Cleanup function. */
     delete() {}

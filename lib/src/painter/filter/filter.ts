@@ -115,18 +115,21 @@ export class TgdPainterFilter extends TgdPainter {
 
     paint(time: number, delta: number): void {
         const { framebuffers, filters } = this
+        for (const filter of filters) filter.prepare(time, delta)
+        framebuffers.reset()
         TgdPainterState.do(this.context, {
             depth: "off",
             blend: "off",
             cull: "off",
             action: () => {
+                // The intermediate passes keep the orientation of the input texture,
+                // so the extra textures of every filter (emission, normals…) are aligned with it.
                 for (let index = 0; index < filters.length - 1; index++) {
-                    framebuffers.paint(() => this.paintOneFilter(index, time, delta))
+                    framebuffers.paint(() => this.paintOneFilter(index, time, delta, KEEP_ORIENTATION))
                 }
             },
         })
-        this.paintOneFilter(filters.length - 1, time, delta, (filters.length & 1) === (this.flipY ? 0 : 1) ? +1 : -1)
-        if (filters.length % 2 === 0) framebuffers.swap()
+        this.paintOneFilter(filters.length - 1, time, delta, this.flipY ? KEEP_ORIENTATION : -KEEP_ORIENTATION)
     }
 
     private readonly paintOneFilter = (filterIndex: number, time: number, delta: number, flip = +1) => {
@@ -156,6 +159,12 @@ export class TgdPainterFilter extends TgdPainter {
         vao.unbind()
     }
 }
+
+/**
+ * The UV (0, 0) of the quad is at its top left corner. With this value for `uniFlipY`,
+ * it goes to the bottom left corner, where the texture coordinates start.
+ */
+const KEEP_ORIENTATION = -1
 
 function createVAO(context: { gl: WebGL2RenderingContext }, program: TgdProgram) {
     const dataset = new TgdDataset({

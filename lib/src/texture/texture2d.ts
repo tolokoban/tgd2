@@ -432,6 +432,9 @@ export class TgdTexture2D {
             fixedSize: true,
         })
         framebuffer.paint(0, 0)
+        framebuffer.delete()
+        painter.delete()
+        // `output` is not deleted, because we keep its WebGL texture.
         this.gl.deleteTexture(this._texture)
         this._texture = output.glTexture
         this.bind()
