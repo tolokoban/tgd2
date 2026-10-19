@@ -20,6 +20,11 @@ npm start
 
 ## Release notes
 
+### v2.8.0
+
+- **TgdTexture2D.loadWebcam()**: New method that streams the webcam into the texture. It accepts all the standard `MediaTrackConstraints` (`facingMode: "user" | "environment"` to pick the front or back camera, `deviceId`, `width`, `height`, `frameRate`, ...), plus optional `onLoad()` and `onError(error)` callbacks. Calling it again releases the previous camera, and `delete()` turns the camera off. `loadVideo()` now also stops the previous video instead of letting it play in the background.
+- **TgdTexture2D.loadBitmap() fix**: The size of a video is now read from `videoWidth` and `videoHeight` instead of `width` and `height`, which are the size of the HTML element and are often `0` when the video is not in the DOM. Images use `naturalWidth` and `naturalHeight` for the same reason. A bitmap with an empty size is now ignored, as canvases already were.
+
 ### v2.7.0
 
 - **TgdPainterDeferredShadingTextures.textureEmission**: New `RGBA8` texture, rendered in the same pass as the others, that holds the color of the light emitted by the meshes. It is read from the new optional `emission` texture of `TgdMeshWithTextures["textures"]` (like glTF `emissiveTexture`), or is `(0, 0, 0, 1)` when missing and where nothing has been painted.

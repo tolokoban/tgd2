@@ -132,6 +132,7 @@ export const ROUTES: Record<RoutePath, string[]> = {
     "/articles/texture/2d/data": ["/articles/texture/2d/data"],
     "/articles/texture/2d/fill": ["/articles/texture/2d/fill"],
     "/articles/texture/2d/video": ["/articles/texture/2d/video"],
+    "/articles/texture/2d/webcam": ["/articles/texture/2d/webcam"],
     "/articles/texture/cube": ["/articles/texture/cube"],
     "/articles/time": ["/articles/time"],
     "/articles/utils": ["/articles/utils"],

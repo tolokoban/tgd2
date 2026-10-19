@@ -104,6 +104,35 @@ export interface TgdTexture2DOptions {
     color?: ArrayNumber4 | TgdVec4 | TgdColor
 }
 
+/**
+ * Options of {@link TgdTexture2D.loadWebcam}.
+ *
+ * All the standard `MediaTrackConstraints` are accepted
+ * (`facingMode`, `deviceId`, `width`, `height`, `frameRate`, ...).
+ *
+ * @example
+ * ```ts
+ * // Back camera of a phone, in HD if possible.
+ * texture.loadWebcam({
+ *     facingMode: "environment",
+ *     width: { ideal: 1280 },
+ *     height: { ideal: 720 },
+ * })
+ * ```
+ */
+export interface TgdTexture2DWebcamOptions extends MediaTrackConstraints {
+    /**
+     * Called once the first frame of the webcam has been loaded in the texture.
+     */
+    onLoad?: () => void
+    /**
+     * Called if the webcam cannot be accessed
+     * (no camera, permission denied, insecure context, ...).
+     * By default, the error is logged in the console.
+     */
+    onError?: (error: unknown) => void
+}
+
 export class TgdTexture2D {
     public name: string
     public readonly gl: WebGL2RenderingContext
@@ -121,6 +150,8 @@ export class TgdTexture2D {
         wrapR: "REPEAT",
     }
     private videoUpdater: TgdPainterLogic | null = null
+    private video: HTMLVideoElement | null = null
+    private webcamStream: MediaStream | null = null
     private static counter = 0
 
     constructor(
@@ -187,8 +218,7 @@ export class TgdTexture2D {
     }
 
     delete() {
-        const { videoUpdater } = this
-        if (videoUpdater) this.context.remove(videoUpdater)
+        this.stopVideo()
         if (this._texture) this.gl.deleteTexture(this._texture)
         this._texture = null
     }
@@ -287,12 +317,71 @@ export class TgdTexture2D {
             onLoad?: () => void
         } = {},
     ): this {
+        const video = this.createVideo(options)
+        video.loop = true
+        video.src = url
+        video.play().catch(() => {
+            // We want to prevent this error:
+            // The fetching process for the media resource was aborted by the user agent at the user's request.
+        })
+        return this
+    }
+
+    /**
+     * Stream the webcam into this texture.
+     *
+     * The browser asks the user for the permission to use the camera,
+     * so the texture is updated asynchronously.
+     * Calling this function again (with a different `facingMode`, for instance)
+     * releases the previous camera first.
+     * The camera is released by {@link TgdTexture2D.delete}.
+     *
+     * The texture is updated by a logic painter added to the context,
+     * so the context must be playing (`context.play()`).
+     */
+    loadWebcam(options: TgdTexture2DWebcamOptions = {}): this {
+        const { onLoad, onError, ...constraints } = options
+        const video = this.createVideo({ onLoad })
+        const handleError = (error: unknown) => {
+            if (onError) onError(error)
+            else this.context.console.error(`[TgdTexture2D::${this.name}] Unable to access the webcam:`, error)
+        }
+        if (!globalThis.navigator?.mediaDevices?.getUserMedia) {
+            handleError(new Error("Webcam is not available (an HTTPS connection is required)!"))
+            return this
+        }
+        globalThis.navigator.mediaDevices
+            .getUserMedia({
+                audio: false,
+                video: Object.keys(constraints).length > 0 ? constraints : true,
+            })
+            .then((stream) => {
+                if (this.video !== video) {
+                    // `loadWebcam()`, `loadVideo()` or `delete()` has been called in the meantime.
+                    stopStream(stream)
+                    return
+                }
+                this.webcamStream = stream
+                video.srcObject = stream
+                return video.play()
+            })
+            .catch(handleError)
+        return this
+    }
+
+    /**
+     * Create a muted video element that will update this texture
+     * on each frame as soon as it starts playing.
+     */
+    private createVideo(options: { onLoad?: () => void }): HTMLVideoElement {
+        this.stopVideo()
         let playing = false
         let timeupdate = false
-        const video = document.createElement("video")
         let initialized = false
+        const video = document.createElement("video")
+        this.video = video
         const checkReady = () => {
-            if (!playing || !timeupdate || initialized) return
+            if (!playing || !timeupdate || initialized || this.video !== video) return
 
             initialized = true
             this.loadBitmap(video, options)
@@ -301,13 +390,11 @@ export class TgdTexture2D {
                     this.loadBitmap(video)
                 }
             })
-            if (this.videoUpdater) this.context.remove(this.videoUpdater)
             this.context.add(videoUpdater)
             this.videoUpdater = videoUpdater
         }
         video.playsInline = true
         video.muted = true
-        video.loop = true
         video.addEventListener("playing", () => {
             playing = true
             checkReady()
@@ -316,12 +403,26 @@ export class TgdTexture2D {
             timeupdate = true
             checkReady()
         })
-        video.src = url
-        video.play().catch(() => {
-            // We want to prevent this error:
-            // The fetching process for the media resource was aborted by the user agent at the user's request.
-        })
-        return this
+        return video
+    }
+
+    /**
+     * Stop updating the texture from a video or a webcam,
+     * and release the camera if any.
+     */
+    private stopVideo() {
+        const { videoUpdater, video, webcamStream } = this
+        if (videoUpdater) this.context.remove(videoUpdater)
+        this.videoUpdater = null
+        if (video) {
+            video.pause()
+            video.srcObject = null
+            video.removeAttribute("src")
+            video.load()
+        }
+        this.video = null
+        if (webcamStream) stopStream(webcamStream)
+        this.webcamStream = null
     }
 
     loadBitmap(
@@ -352,15 +453,14 @@ export class TgdTexture2D {
                 bmp.addEventListener("load", () => this.loadBitmap(bmp, options))
                 return this
             }
-        } else if (bmp instanceof HTMLCanvasElement) {
-            if (bmp.width <= 0 || bmp.height <= 0) {
-                return this
-            }
         }
+        const [width, height] = getBitmapSize(bmp)
+        if (width <= 0 || height <= 0) return this
+
         const { gl } = this
         const { level = 0 } = options
-        this._width = bmp.width
-        this._height = bmp.height
+        this._width = width
+        this._height = height
         this.bind()
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this.storage.flipY)
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
@@ -368,8 +468,8 @@ export class TgdTexture2D {
         gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, sourceFormat, sourceType, bmp)
         this.checkError(
             `loadBitmap(${JSON.stringify({
-                width: bmp.width,
-                height: bmp.height,
+                width,
+                height,
             })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
             }, gl.${"RGBA"}, gl.UNSIGNED_BYTE, bmp)`,
             () => {
@@ -383,8 +483,8 @@ export class TgdTexture2D {
             const { context } = this
             this.checkError(
                 `loadBitmap(${JSON.stringify({
-                    width: bmp.width,
-                    height: bmp.height,
+                    width,
+                    height,
                 })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${context.lookupWebglConstant(
                     internalFormat,
                 )}, gl.${context.lookupWebglConstant(sourceFormat)}, gl.${context.lookupWebglConstant(
@@ -594,6 +694,21 @@ function printArray(data: Uint8Array<ArrayBufferLike> | Uint8ClampedArray<ArrayB
         return `[${data.slice(0, 10).join(", ")}, ...] (${data.length} elements)`
     }
     return JSON.stringify(data)
+}
+
+/**
+ * Intrinsic size of a bitmap.
+ * For videos, `width` and `height` are the size of the HTML element
+ * (often 0 when it is not in the DOM), so we use `videoWidth` and `videoHeight`.
+ */
+function getBitmapSize(bmp: WebglImage): [width: number, height: number] {
+    if (bmp instanceof HTMLVideoElement) return [bmp.videoWidth, bmp.videoHeight]
+    if (bmp instanceof HTMLImageElement) return [bmp.naturalWidth, bmp.naturalHeight]
+    return [bmp.width, bmp.height]
+}
+
+function stopStream(stream: MediaStream) {
+    for (const track of stream.getTracks()) track.stop()
 }
 
 function isImageURL(url: string) {

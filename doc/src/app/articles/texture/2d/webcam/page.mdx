@@ -1,0 +1,28 @@
+import Demo from "./_/webcam.demo"
+
+# Texture2D from webcam
+
+<Demo />
+
+The browser asks for the permission to use the camera. This only works on a
+secure origin (HTTPS or `localhost`).
+
+```ts
+const texture = new TgdTexture2D(context).loadWebcam({
+    facingMode: "environment",
+})
+```
+
+`loadWebcam()` accepts all the standard
+[MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints)
+(`facingMode`, `deviceId`, `width`, `height`, `frameRate`, ...), plus the
+optional `onLoad()` and `onError(error)` callbacks.
+
+- `facingMode: "user"` is the front camera, `"environment"` the back camera.
+- Calling `loadWebcam()` again releases the previous camera first.
+- `texture.delete()` turns the camera off.
+- The texture is updated on each frame, so the context must be playing (`context.play()`).
+
+---
+
+[Back](#/articles/texture)
