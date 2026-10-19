@@ -124,7 +124,7 @@ export interface TgdTexture2DWebcamOptions extends MediaTrackConstraints {
     /**
      * Called once the first frame of the webcam has been loaded in the texture.
      */
-    onLoad?: () => void
+    onLoad?: (video: HTMLVideoElement) => void
     /**
      * Called if the webcam cannot be accessed
      * (no camera, permission denied, insecure context, ...).
@@ -373,7 +373,7 @@ export class TgdTexture2D {
      * Create a muted video element that will update this texture
      * on each frame as soon as it starts playing.
      */
-    private createVideo(options: { onLoad?: () => void }): HTMLVideoElement {
+    private createVideo({ onLoad }: { onLoad?: (video: HTMLVideoElement) => void }): HTMLVideoElement {
         this.stopVideo()
         let playing = false
         let timeupdate = false
@@ -384,7 +384,7 @@ export class TgdTexture2D {
             if (!playing || !timeupdate || initialized || this.video !== video) return
 
             initialized = true
-            this.loadBitmap(video, options)
+            this.loadBitmap(video, { onLoad: onLoad && (() => onLoad(video)) })
             const videoUpdater = new TgdPainterLogic(() => {
                 if (!video.paused && !video.ended) {
                     this.loadBitmap(video)
