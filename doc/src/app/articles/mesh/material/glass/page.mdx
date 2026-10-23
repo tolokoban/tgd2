@@ -1,12 +1,38 @@
 import Demo from "./_material"
+import DemoGltf from "./_gltf"
 
 # Glass material
 
-[Glass material]() will turn off the depth test and use an alpha blending.
+The glass material is rendered in a single pass, with a premultiplied alpha blending.
+
+- **Fresnel**: the glass reflects about 4% of the environment when you look at it straight on (`ior = 1.5`), and almost everything at grazing angles.
+- **Reflections** of `ambientColor` (usually the skybox) and of the `lights` are not tinted by `color`, and don't hide what is behind the glass.
+- **Thickness**: the tint opacity grows from the alpha of `color` (facing the camera) up to `opacityMax` near the silhouette.
+- **Roughness**: blurs the reflections (frosted glass) and widens the highlights of the lights.
+
+The depth is tested but not written, so paint the glass after the opaque objects.
 
 <Demo />
 
----
+## From a glTF file
+
+`TgdPainterMeshGltf` uses a `TgdMaterialGlass` by default when the glTF material has the
+[`KHR_materials_transmission`](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_transmission)
+extension with a `transmissionFactor` greater than 0. Blender exports it when the
+"Transmission Weight" of the Principled BSDF is not 0.
+
+- `color` is the `baseColorFactor` (or the `baseColorTexture`, multiplied by `baseColorFactor`).
+- The alpha of `color` (the minimal opacity of the tint) is `1 - 0.9 * transmissionFactor`, so 0.1 for a full transmission.
+- `ior` comes from the `KHR_materials_ior` extension (default 1.5).
+- `roughness` is the `roughnessFactor`.
+- `normalMap` is the `normalTexture`.
+- `ambientColor` is the `skybox` option of the painter.
+
+There is no light, so you only get the reflections of the environment.
+To add lights, pass your own `material` function: it receives the
+description of the glTF material, with a `transmission` attribute for glass.
+
+<DemoGltf />
 
 ---
 

@@ -1,0 +1,24 @@
+import Demo from "./_/scale.demo"
+
+# [TgdPainterFilter](docs/classes/TgdPainterFilter.html)
+
+[Back to the list of available filters](#..)
+
+## [TgdFilterScale](docs/classes/TgdFilterScale.html)
+
+<Demo />
+
+Fits the texture into the output while keeping its aspect ratio, then scales it around the center.
+
+- `mode: "cover"`: the texture fills the whole output, and the overflowing parts are cropped.
+- `mode: "contain"`: the whole texture is visible, and the empty parts are transparent.
+
+`scale` is applied after the fit, and values greater than 1 enlarge the texture.
+It can be a single number (same scale on X and Y), a `TgdVec2` or an `[x, y]` array.
+
+```ts
+const scaleFilter = new TgdFilterScale({ mode: "contain", scale: [1, 0.5] })
+context.add(new TgdPainterFilter(context, { texture, filters: [scaleFilter] }))
+```
+
+`mode` and `scale` are public fields, so you can change them at any time.

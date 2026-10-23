@@ -201,7 +201,7 @@ export class TgdPainterShadow<C extends TgdCamera = TgdCamera> extends TgdPainte
 
         const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
         gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.glTexture, 0)
+        texture.attachToFramebuffer(gl.COLOR_ATTACHMENT0)
         gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer)
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height)
         gl.bindRenderbuffer(gl.RENDERBUFFER, null)

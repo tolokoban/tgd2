@@ -41,8 +41,8 @@ function init(context: TgdContext, assets: Assets) {
 		viewportMatchingScale: 1 / 8,
 		textureColor0: new TgdTexture2D(context, {
 			params: {
-				magFilter: "NEAREST",
-				minFilter: "NEAREST",
+				magFilter: "LINEAR",
+				minFilter: "LINEAR",
 			},
 		}),
 		children: [clear, meshPainter],

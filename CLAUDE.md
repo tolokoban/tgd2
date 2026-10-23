@@ -53,6 +53,10 @@ npm run patch | npm run minor  # bump the version everywhere (version.mjs syncs 
      arguments. When a UI control must rebuild painters, keep the context and shared objects in React refs
      in `Demo()` and call the helper from the handler.
   6. Add a release note in `README.md`.
+- **Examples (`doc/src/app/example/<name>/`) are not demos.** They show a **fullscreen** canvas with no
+  code viewer, like `example/retro-futuristic-screen`: a `page.tsx` that renders the component from a
+  sibling `<name>.tsx` (not `.demo.tsx`, no `_<name>/` folder), which returns `<View fullscreen onReady={init} />`.
+  Link them from the list in `doc/src/app/articles/page.mdx`.
 - **Release notes** go in the root `README.md` under `## Release notes`, newest version first:
   `### vX.Y.Z` followed by bullets like `- **TgdThing.method()**: what changed and why it matters.`
   New classes are introduced as `**New TgdXxx**: …`, fixes as `**TgdXxx.method() fix**: …`.
@@ -78,4 +82,8 @@ npm run patch | npm run minor  # bump the version everywhere (version.mjs syncs 
   Match the surrounding file.
 - `doc` depends on the **built** library (`lib/dist`). If a new export is "not found" in a demo, rebuild `lib/`.
 - Every GPU resource created by a painter must be released in its `delete()`.
+- **Never delete a resource you have not created yourself.** If a class (material, painter, filter...) receives a
+  resource (e.g. a `TgdTexture2D` in its options), its `delete()` must not delete it. If the resource is optional
+  and the class creates a default one, the class owns that default and must delete it. Track this with a private
+  flag set in the constructor, e.g. `private readonly textureFoobarHasToBeDeleted: boolean`, checked in `delete()`.
 - `paint(time, delta)` receives **seconds**.

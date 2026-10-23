@@ -207,6 +207,110 @@ export class TgdGeometry {
 		return this
 	}
 
+	/**
+	 * Compute the vec4 tangents from the positions, normals and UVs,
+	 * and store them in the {@link attTangent} attribute (created if missing).
+	 *
+	 * `xyz` is the tangent, orthogonal to the normal, and `w` is the handedness
+	 * of the TBN basis (`+1` or `-1`), as in glTF:
+	 * `bitangent = cross(normal, tangent.xyz) * tangent.w`.
+	 *
+	 * The tangent of each triangle points towards increasing U.
+	 * It is accumulated on its vertices (weighted by the area), then
+	 * orthogonalized against the normal of each vertex (Gram-Schmidt).
+	 *
+	 * Normals are computed first if they are missing.
+	 * The geometry must use the TRIANGLES draw mode and have UVs.
+	 */
+	public computeTangents(): this {
+		if (this.drawMode !== WebGL2RenderingContext.TRIANGLES) {
+			console.error(
+				"We don't know how to compute tangents for this draw mode:",
+				this.drawMode,
+			)
+			return this
+		}
+		if (!this.dataset.hasAttribute(this.attUV)) {
+			console.error(
+				`Unable to compute tangents without UVs (attribute "${this.attUV}")!`,
+			)
+			return this
+		}
+		if (!this.dataset.hasAttribute(this.attNormal)) this.computeNormals()
+
+		const { count } = this.dataset
+		const tangents = new Float32Array(count * 3)
+		const bitangents = new Float32Array(count * 3)
+		// Sum of the lengths of the contributions, to detect when they cancel each other.
+		const weights = new Float32Array(count)
+		const position = this.dataset.getAttribAccessor(this.attPosition)
+		const uv = this.dataset.getAttribAccessor(this.attUV)
+		for (let element = 0; element + 2 < this.count; element += 3) {
+			const i0 = this.getElement(element)
+			const i1 = this.getElement(element + 1)
+			const i2 = this.getElement(element + 2)
+			const x1 = position.get(i1, 0) - position.get(i0, 0)
+			const y1 = position.get(i1, 1) - position.get(i0, 1)
+			const z1 = position.get(i1, 2) - position.get(i0, 2)
+			const x2 = position.get(i2, 0) - position.get(i0, 0)
+			const y2 = position.get(i2, 1) - position.get(i0, 1)
+			const z2 = position.get(i2, 2) - position.get(i0, 2)
+			const s1 = uv.get(i1, 0) - uv.get(i0, 0)
+			const t1 = uv.get(i1, 1) - uv.get(i0, 1)
+			const s2 = uv.get(i2, 0) - uv.get(i0, 0)
+			const t2 = uv.get(i2, 1) - uv.get(i0, 1)
+			const det = s1 * t2 - s2 * t1
+			// Degenerated UVs: this triangle gives no direction.
+			if (Math.abs(det) < 1e-12) continue
+
+			const r = 1 / det
+			const tx = (t2 * x1 - t1 * x2) * r
+			const ty = (t2 * y1 - t1 * y2) * r
+			const tz = (t2 * z1 - t1 * z2) * r
+			const bx = (s1 * x2 - s2 * x1) * r
+			const by = (s1 * y2 - s2 * y1) * r
+			const bz = (s1 * z2 - s2 * z1) * r
+			const weight = Math.hypot(tx, ty, tz)
+			for (const index of [i0, i1, i2]) {
+				weights[index] += weight
+				tangents[index * 3] += tx
+				tangents[index * 3 + 1] += ty
+				tangents[index * 3 + 2] += tz
+				bitangents[index * 3] += bx
+				bitangents[index * 3 + 1] += by
+				bitangents[index * 3 + 2] += bz
+			}
+		}
+		const normal = this.dataset.getAttribAccessor(this.attNormal)
+		const values = new Float32Array(count * 4)
+		const N = new TgdVec3()
+		const T = new TgdVec3()
+		const B = new TgdVec3()
+		for (let index = 0; index < count; index++) {
+			N.reset(normal.get(index, 0), normal.get(index, 1), normal.get(index, 2))
+			N.normalize()
+			T.reset(tangents[index * 3], tangents[index * 3 + 1], tangents[index * 3 + 2])
+			B.reset(
+				bitangents[index * 3],
+				bitangents[index * 3 + 1],
+				bitangents[index * 3 + 2],
+			)
+			// Gram-Schmidt: remove the component along the normal.
+			T.subtract(new TgdVec3(N).scale(N.dot(T)))
+			// The UV gradients of the triangles around this vertex cancel each other
+			// (for instance at the corner of a box where 3 faces share the same UV).
+			if (T.size <= 1e-4 * weights[index]) anyOrthogonal(N, T)
+			T.normalize()
+			const w = new TgdVec3(N).cross(T).dot(B) < 0 ? -1 : +1
+			values.set([T.x, T.y, T.z, w], index * 4)
+		}
+		this.dataset.addAttributes({
+			[this.attTangent]: "vec4",
+		})
+		this.dataset.set(this.attTangent, values)
+		return this
+	}
+
 	public computeBoundingBox(): TgdBoundingBox {
 		const bbox = new TgdBoundingBox()
 		const { get } = this.dataset.getAttribAccessor(this.attPosition)
@@ -269,4 +373,14 @@ function computeNormal(A: TgdVec3, B: TgdVec3, C: TgdVec3) {
 	const AB = new TgdVec3(B).subtract(A)
 	const AC = new TgdVec3(C).subtract(A)
 	return AB.cross(AC).normalize()
+}
+
+/**
+ * Store in `out` a unit vector orthogonal to `normal`.
+ * Used when a vertex has no usable tangent (no UV gradient).
+ */
+function anyOrthogonal(normal: TgdVec3, out: TgdVec3) {
+	if (Math.abs(normal.x) < 0.9) out.reset(1, 0, 0)
+	else out.reset(0, 1, 0)
+	out.subtract(new TgdVec3(normal).scale(normal.dot(out))).normalize()
 }

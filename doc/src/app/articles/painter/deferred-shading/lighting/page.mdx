@@ -3,7 +3,7 @@ import Demo from "./_lighting"
 # [TgdFilterDeferredShading](docs/classes/TgdFilterDeferredShading.html)
 
 Physically based lighting computed in screen space from the textures of a
-[TgdPainterDeferredShadingTextures](#/articles/painter/deferred-shading).
+[TgdPainterDeferredShading](#/articles/painter/deferred-shading).
 The main texture of the `TgdPainterFilter` is `textureAlbedo`, and the filter reads the normals, the depth,
 the metallic, the roughness, the specular and the baked ambient occlusion from the other textures.
 
@@ -22,6 +22,10 @@ If `cavity` is defined, the ridges are lightened and the valleys darkened, like 
 of Blender's viewport in "Solid" shading. The curvature is computed from the normals of the neighbour pixels.
 `cavityRidge` and `cavityValley` (default: 1) set the strength of each side and can be changed at any time.
 Set them to 0 to disable the effect.
+`outline` (default: `true`) keeps the dark contour that the curvature finds on each silhouette,
+in front of other objects and in front of nothing (where nothing has been painted, the filter outputs a transparent black
+that darkens what is behind it). Set it to `false` to remove this contour: the curvature is then ignored where the depth
+jumps between two neighbour pixels.
 
 Set `shading: false` to skip the lighting: the albedo is used as is, but `cavity` and `shadow` are still applied.
 

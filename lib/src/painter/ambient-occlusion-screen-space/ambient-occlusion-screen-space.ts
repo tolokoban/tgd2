@@ -286,7 +286,7 @@ export class TgdPainterAmbientOcclusionScreenSpace extends TgdPainter {
         const newFramebuffer = webglCreateFramebuffer(gl)
         const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
         gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureAO.glTexture, 0)
+        textureAO.attachToFramebuffer(gl.COLOR_ATTACHMENT0)
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
         if (status !== gl.FRAMEBUFFER_COMPLETE) {
             context.console.error(

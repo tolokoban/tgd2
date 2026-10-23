@@ -1,0 +1,64 @@
+import Demo from "./_/main.demo"
+
+# [TgdGeometryPath](docs/classes/TgdGeometryPath.html)
+
+<Demo />
+
+A shape filled from an [SVG path](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/d).
+It is flat (Z = 0), unless you give it a `thickness`.
+
+```ts
+const geometry = new TgdGeometryPath("M0,0 L4,0 L4,4 L0,4 Z M1,1 L3,1 L2,3 Z")
+```
+
+The demo shows the same SVG path four times:
+
+1. Flat.
+2. With a `thickness` of 4.
+3. With a thickness and a round `bevel` of 8 segments.
+4. With a thickness and a concave `bevel` of 32 segments and a `profileShape` of 0.125.
+
+Use the controls to switch between two paths and between the two `fillRule`:
+the ghost looks the same with both rules, because its eyes turn in the other direction,
+but the middle circle of the target disappears with `"nonzero"`, because all its circles turn in the same direction.
+
+All the SVG path commands are supported, with their lowercase (relative) versions:
+`M` (move), `L` (line), `H` (horizontal line), `V` (vertical line),
+`Q` and `T` (quadratic Bézier curve), `C` and `S` (cubic Bézier curve),
+`A` (elliptical arc) and `Z` (close).
+Each subpath is a closed contour, even without `Z`.
+Holes depend on the `fillRule` option, like the SVG [fill-rule](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/fill-rule) attribute.
+
+Options:
+
+- `curveSegments`: number of segments used to approximate each Bézier curve,
+  or each quarter turn of an arc (default to `16`).
+- `flipY`: the Y axis points down in SVG, but up in WebGL. Set it to `true` to see
+  the shape as in an SVG image (default to `false`).
+- `fillRule`: which parts of the path are inside the shape (default to `"evenodd"`):
+  - `"evenodd"`: a contour inside an odd number of other contours is a hole.
+  - `"nonzero"`: contours turning in the same direction are merged, and a contour
+    turning the other way inside them is a hole. Use it for font glyphs, whose contours
+    often overlap (the bar and the stem of a "T" are often two overlapping rectangles).
+
+  With both rules, the contours can cross themselves and each other:
+  the geometry only keeps the outline of the filled area, so there are no hidden faces inside the volume.
+- `thickness`: if greater than 0, the shape is extruded along Z, from `-thickness / 2`
+  to `+thickness / 2` (default to `0`, a flat shape at Z = 0).
+- `bevel`: rounds the edges of the front and back faces, like the Bevel modifier of Blender
+  (only with a `thickness`):
+  - `width`: bevel amount, no more than half the thickness. Keep it smaller than the
+    details of the shape (thin parts, small holes...), or the faces will overlap themselves.
+  - `segments`: number of segments of the curved edges.
+  - `profileShape`: superellipse factor, `0.25` for a straight chamfer, `0.5` for a
+    circular arc (default), towards `1` for a square corner, and towards `0` for a concave one.
+
+The geometry provides `POSITION`, `NORMAL` and `TEXCOORD_0` attributes.
+On the front and back faces, the UVs go from `[0, 1]` (bottom left) to `[1, 0]` (top right)
+over the bounding box of the shape.
+On the sides, U goes from 0 to 1 along the contour, and V from 1 (front) to 0 (back).
+The normals of the sides are smooth along the curves, but sharp on corners of more than 30°.
+
+---
+
+[Back](#/articles/mesh/geometry)

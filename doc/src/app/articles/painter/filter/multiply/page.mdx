@@ -1,0 +1,23 @@
+import Demo from "./_/multiply.demo"
+
+# [TgdPainterFilter](docs/classes/TgdPainterFilter.html)
+
+[Back to the list of available filters](#..)
+
+## [TgdFilterMultiply](docs/classes/TgdFilterMultiply.html)
+
+<Demo />
+
+Multiplies every pixel by a color, channel by channel (including the alpha channel).
+Use it to tint, darken or fade a texture.
+
+```ts
+const multiplyFilter = new TgdFilterMultiply({ color: [1, 0.5, 0.5, 1] })
+context.add(new TgdPainterFilter(context, { texture, filters: [multiplyFilter] }))
+```
+
+`color` is a public `TgdVec4`, so you can change it at any time:
+
+```ts
+multiplyFilter.color.reset(0.5, 1, 1, 1)
+```

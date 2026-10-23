@@ -1,6 +1,7 @@
 import { TgdContext } from "@tgd/context"
 import type { TgdGeometry } from "@tgd/geometry"
 import type { TgdMaterial } from "@tgd/material"
+import { tgdCalcClamp } from "@tgd/math"
 import { TgdProgram } from "@tgd/program"
 import { TgdShaderFragment, TgdShaderVertex } from "@tgd/shader"
 import { TgdTexture2D } from "@tgd/texture"
@@ -25,7 +26,7 @@ import { TgdPainter } from "../painter"
 
 /**
  * A {@link TgdMesh} with optional textures for the material parameters
- * written in {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}.
+ * written in {@link TgdPainterDeferredShading.textureMetallicRoughnessSpecularBakedAO}.
  * The textures are read with the UV coordinates of the geometry.
  * Only one channel of each texture is used: RED by default, or the one given
  * by `metallicChannel`, `roughnessChannel`, `specularChannel` or `bakedAOChannel`.
@@ -40,7 +41,7 @@ import { TgdPainter } from "../painter"
  * ```
  *
  * `normals` is a tangent space normal map (as glTF `normalTexture`): it bends the normals
- * written in {@link TgdPainterDeferredShadingTextures.textureNormals} to simulate bumps on the surface.
+ * written in {@link TgdPainterDeferredShading.textureNormals} to simulate bumps on the surface.
  * The TBN basis comes from the `attTangent` attribute of the geometry
  * (vec4, `bitangent = cross(normal, tangent.xyz) * tangent.w`).
  * If the geometry has no tangents, the basis is computed from the screen space derivatives
@@ -53,7 +54,7 @@ import { TgdPainter } from "../painter"
  * - `bakedAO`: 1.0
  *
  * `emission` is the RGBA color of the light emitted by the surface (as glTF `emissiveTexture`).
- * It is written as is in {@link TgdPainterDeferredShadingTextures.textureEmission},
+ * It is written as is in {@link TgdPainterDeferredShading.textureEmission},
  * or `(0, 0, 0, 1)` if missing.
  *
  * Unlike `material`, the textures are not inherited by the children.
@@ -74,7 +75,7 @@ export interface TgdMeshWithTextures extends TgdMesh {
     }>
 }
 
-export interface TgdPainterDeferredShadingTexturesOptions {
+export interface TgdPainterDeferredShadingOptions {
     /**
      * Meshes to paint.
      * `children`, `visible` and `material` work like in {@link TgdPainterMeshes}:
@@ -82,10 +83,25 @@ export interface TgdPainterDeferredShadingTexturesOptions {
      * and it is not painted if there is none.
      *
      * The optional `textures` of a mesh fill
-     * {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}
-     * and {@link TgdPainterDeferredShadingTextures.textureEmission}.
+     * {@link TgdPainterDeferredShading.textureMetallicRoughnessSpecularBakedAO}
+     * and {@link TgdPainterDeferredShading.textureEmission}.
      */
     meshes?: TgdMeshWithTextures[]
+    /**
+     * If not `false`, {@link TgdPainterDeferredShading.textureIDs} is filled
+     * with the `id` of the meshes in a second pass.
+     * The pass can be switched on/off at runtime with
+     * {@link TgdPainterDeferredShading.enableIDs}.
+     *
+     * By default the resolution of `textureIDs` is 1.
+     * But that can be changed by using a number here.
+     * For instance, `enableIDs: 1/4` will create a texture
+     * with a width and a height divided by 4 compared to
+     * `textureAlbedo`.
+     *
+     * Default to **false**
+     */
+    enableIDs?: boolean | number
 }
 
 /** Order of the material parameters in the channels of `textureMetallicRoughnessSpecularBakedAO`. */
@@ -108,16 +124,21 @@ const EMISSION_SAMPLER = "uniDeferredShading_Emission"
 const DEFAULT_EMISSION = [0, 0, 0, 1] as const
 /** Number of texture units used by the textures of a mesh: the parameters, the normal map and the emission. */
 const TEXTURE_UNITS_COUNT = PARAMS.length + 2
+/** Sampler name of the depth texture in the IDs pass. */
+const IDS_DEPTH_SAMPLER = "uniDeferredShading_Depth"
 
 /**
  * Framebuffer that holds the surface normals, the depth, the albedo and the material parameters
  * of meshes seen from the camera of the context, to be used for deferred shading.
- * The results are stored in {@link TgdPainterDeferredShadingTextures.textureNormals},
- * {@link TgdPainterDeferredShadingTextures.textureDepth}, {@link TgdPainterDeferredShadingTextures.textureAlbedo},
- * {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}
- * and {@link TgdPainterDeferredShadingTextures.textureEmission}.
+ * The results are stored in {@link TgdPainterDeferredShading.textureNormals},
+ * {@link TgdPainterDeferredShading.textureDepth}, {@link TgdPainterDeferredShading.textureAlbedo},
+ * {@link TgdPainterDeferredShading.textureMetallicRoughnessSpecularBakedAO}
+ * and {@link TgdPainterDeferredShading.textureEmission}.
  * The five textures are rendered in a single pass.
  * The size of the textures follows the size of the context.
+ *
+ * If {@link TgdPainterDeferredShading.enableIDs} is `true`, a second pass writes
+ * the `id` of the meshes in {@link TgdPainterDeferredShading.textureIDs}.
  *
  * A mesh can have `children`. Their `transfo` is relative to the parent's one.
  * If `visible` is false, neither the mesh nor its children are painted.
@@ -137,9 +158,39 @@ const TEXTURE_UNITS_COUNT = PARAMS.length + 2
  * }))
  * ```
  *
- * @see {@link TgdPainterDeferredShadingTexturesOptions}
+ * @see {@link TgdPainterDeferredShadingOptions}
  */
-export class TgdPainterDeferredShadingTextures extends TgdPainter {
+export class TgdPainterDeferredShading extends TgdPainter {
+    /**
+     * If `true`, the `id` of the meshes is written in {@link TgdPainterDeferredShading.textureIDs}
+     * in a second pass. You can switch it on/off at runtime.
+     *
+     * Initialized with the `enableIDs` option.
+     */
+    public enableIDs: boolean
+    /**
+     * Ratio between the size of {@link TgdPainterDeferredShading.textureIDs}
+     * and the size of the other textures.
+     *
+     * Initialized with the `enableIDs` option when it is a number, 1 otherwise.
+     */
+    public resolutionIDs: number
+    /**
+     * Holds the `id` of the meshes (`R32UI`).
+     * Cleared with 0.
+     *
+     * Only the meshes with an `id` greater than 0 are painted, in a second pass
+     * that is done only if {@link TgdPainterDeferredShading.enableIDs} is `true`
+     * and at least one mesh has such an `id`.
+     * The meshes without `id` still hide the ones behind them,
+     * because the pass is tested against {@link TgdPainterDeferredShading.textureDepth}.
+     * The materials are ignored in this pass:
+     * a material that moves the vertices will give wrong IDs.
+     *
+     * Its size is the one of the context multiplied by {@link TgdPainterDeferredShading.resolutionIDs}.
+     * Read it with a `usampler2D` and `texelFetch()`.
+     */
+    public readonly textureIDs: TgdTexture2D
     /**
      * Surface normals in the camera space (`RGB10_A2`).
      * The normal `N` is encoded as `N * 0.5 + 0.5` in the RGB channels,
@@ -214,6 +265,11 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
     private framebuffer: WebGLFramebuffer | null = null
     private framebufferWidth = 0
     private framebufferHeight = 0
+    /** Only the meshes with an `id` greater than 0. */
+    private readonly treeIDs: TgdMeshTree
+    private framebufferIDs: WebGLFramebuffer | null = null
+    private framebufferIDsWidth = 0
+    private framebufferIDsHeight = 0
     /** Bound instead of the missing textures of a mesh. */
     private readonly textureWhite: TgdTexture2D
     /**
@@ -227,6 +283,9 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
     private readonly clearParams = new Float32Array(DEFAULT_PARAMS)
     private readonly clearEmission = new Float32Array(DEFAULT_EMISSION)
     private readonly clearDepth = new Float32Array([1])
+    private readonly clearIDs = new Uint32Array(1)
+    /** Integer framebuffers can only be read as `RGBA_INTEGER`. */
+    private readonly readIDPixel = new Uint32Array(4)
     /** 1 for each parameter that has a texture in the current mesh, reused to avoid allocations. */
     private readonly hasTexture = [0, 0, 0, 0]
     /** Arguments of the current `paint()`, used by `handleBatch()`. */
@@ -235,10 +294,13 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
 
     constructor(
         public readonly context: TgdContext,
-        options: TgdPainterDeferredShadingTexturesOptions = {},
+        options: TgdPainterDeferredShadingOptions = {},
     ) {
         super()
         const { gl } = context
+        const { enableIDs = false } = options
+        this.enableIDs = enableIDs !== false
+        this.resolutionIDs = typeof enableIDs === "number" ? enableIDs : 1
         this.firstTextureUnit = (gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) as number) - TEXTURE_UNITS_COUNT
         this.textureWhite = new TgdTexture2D(context, {
             name: `${this.name}/textureWhite`,
@@ -309,6 +371,20 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
                 wrapR: "CLAMP_TO_EDGE",
             },
         })
+        this.textureIDs = new TgdTexture2D(context, {
+            name: `${this.name}/textureIDs`,
+            storage: {
+                format: "R32UI / RED_INTEGER / UNSIGNED_INT",
+            },
+            // Integer textures cannot be linearly filtered.
+            params: {
+                magFilter: "NEAREST",
+                minFilter: "NEAREST",
+                wrapS: "CLAMP_TO_EDGE",
+                wrapT: "CLAMP_TO_EDGE",
+                wrapR: "CLAMP_TO_EDGE",
+            },
+        })
         this.tree = new TgdMeshTree(context, {
             meshes: options.meshes,
             // The channels read in the textures are part of the shader code.
@@ -322,10 +398,19 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
             },
             beforeDraw: this.handleBeforeDraw,
         })
+        this.treeIDs = new TgdMeshTree(context, {
+            meshes: options.meshes,
+            ignoreMaterials: true,
+            programKey: (geometry) => geometry.attPosition,
+            createProgram: (geometry) => createProgramIDs(context.gl, geometry),
+            beforeDraw: this.handleBeforeDrawIDs,
+            filter: hasID,
+        })
     }
 
     add(mesh: TgdMeshWithTextures) {
         this.tree.add(mesh)
+        this.treeIDs.add(mesh)
     }
 
     /**
@@ -333,6 +418,7 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
      */
     remove(mesh: TgdMeshWithTextures) {
         this.tree.remove(mesh)
+        this.treeIDs.remove(mesh)
     }
 
     paint(time: number, delta: number): void {
@@ -347,7 +433,84 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
         context.paintInCustomSize(width, height, this.paintMeshes)
+        if (this.enableIDs) this.paintIDs(width, height)
         gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
+    }
+
+    /**
+     * Read the `id` of the mesh painted at a point of the screen, for object picking.
+     * Coordinates are the ones of the pointer events: between -1 and +1, with Y going up.
+     *
+     * The value comes from the last `paint()`. Reading it stalls the GPU pipeline,
+     * so avoid calling this method many times per frame.
+     *
+     * @returns The `id` of the mesh, or 0 if there is none or if
+     * {@link TgdPainterDeferredShading.enableIDs} is `false`.
+     */
+    readID(xScreen: number, yScreen: number): number {
+        const { framebufferIDs, framebufferIDsWidth, framebufferIDsHeight, readIDPixel } = this
+        if (!this.enableIDs || !framebufferIDs) return 0
+
+        const { gl } = this.context
+        const pixelX = tgdCalcClamp(Math.floor(0.5 * (xScreen + 1) * framebufferIDsWidth), 0, framebufferIDsWidth - 1)
+        const pixelY = tgdCalcClamp(Math.floor(0.5 * (yScreen + 1) * framebufferIDsHeight), 0, framebufferIDsHeight - 1)
+        const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebufferIDs)
+        gl.readPixels(pixelX, pixelY, 1, 1, gl.RGBA_INTEGER, gl.UNSIGNED_INT, readIDPixel)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
+        return readIDPixel[0]
+    }
+
+    /**
+     * Second pass: write the `id` of the meshes in `textureIDs`.
+     */
+    private paintIDs(width: number, height: number) {
+        this.treeIDs.update()
+        const { context } = this
+        const { gl } = context
+        const widthIDs = Math.max(1, Math.round(width * this.resolutionIDs))
+        const heightIDs = Math.max(1, Math.round(height * this.resolutionIDs))
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.updateFramebufferIDs(widthIDs, heightIDs))
+        context.paintInCustomSize(widthIDs, heightIDs, this.paintMeshesIDs)
+    }
+
+    private readonly paintMeshesIDs = () => {
+        const { context, treeIDs } = this
+        const { gl } = context
+        gl.clearBufferuiv(gl.COLOR, 0, this.clearIDs)
+        if (treeIDs.count === 0) return
+
+        const previousDepth = webglDepthGet(context)
+        const previousCull = webglCullGet(context)
+        const previousBlend = webglBlendGet(context)
+        // The depth test is done in the fragment shader, against `textureDepth`.
+        webglDepthSet(context, webglPresetDepth.off)
+        webglCullSet(context, webglPresetCull.back)
+        webglBlendSet(context, webglPresetBlend.off)
+        treeIDs.forEachBatch(this.handleBatchIDs)
+        webglDepthSet(context, previousDepth)
+        webglCullSet(context, previousCull)
+        webglBlendSet(context, previousBlend)
+    }
+
+    private readonly handleBatchIDs = (batch: TgdMeshTreeBatch) => {
+        const { context, textureDepth, textureIDs } = this
+        const { camera } = context
+        const { program } = batch
+        program.use()
+        program.uniformMatrix4fv("uniModelViewMatrix", camera.matrixModelView)
+        program.uniformMatrix4fv("uniProjectionMatrix", camera.matrixProjection)
+        program.uniform2f(
+            "uniDeferredShading_Scale",
+            textureDepth.width / textureIDs.width,
+            textureDepth.height / textureIDs.height,
+        )
+        textureDepth.activate(0, program, IDS_DEPTH_SAMPLER)
+        batch.draw()
+    }
+
+    private readonly handleBeforeDrawIDs = (mesh: TgdMesh, program: TgdProgram) => {
+        program.uniform1ui("uniDeferredShading_ID", mesh.id ?? 0)
     }
 
     private readonly paintMeshes = () => {
@@ -433,17 +596,11 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         const newFramebuffer = webglCreateFramebuffer(gl)
         const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
         gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureNormals.glTexture, 0)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, textureAlbedo.glTexture, 0)
-        gl.framebufferTexture2D(
-            gl.FRAMEBUFFER,
-            gl.COLOR_ATTACHMENT2,
-            gl.TEXTURE_2D,
-            textureMetallicRoughnessSpecularBakedAO.glTexture,
-            0,
-        )
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT3, gl.TEXTURE_2D, textureEmission.glTexture, 0)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textureDepth.glTexture, 0)
+        textureNormals.attachToFramebuffer(gl.COLOR_ATTACHMENT0)
+        textureAlbedo.attachToFramebuffer(gl.COLOR_ATTACHMENT1)
+        textureMetallicRoughnessSpecularBakedAO.attachToFramebuffer(gl.COLOR_ATTACHMENT2)
+        textureEmission.attachToFramebuffer(gl.COLOR_ATTACHMENT3)
+        textureDepth.attachToFramebuffer(gl.DEPTH_ATTACHMENT)
         // The draw buffers are part of the framebuffer state.
         gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2, gl.COLOR_ATTACHMENT3])
         const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
@@ -457,6 +614,43 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
         return newFramebuffer
     }
 
+    /**
+     * (Re)create the framebuffer of the IDs pass if the size has changed.
+     */
+    private updateFramebufferIDs(width: number, height: number): WebGLFramebuffer {
+        const { framebufferIDs, framebufferIDsWidth, framebufferIDsHeight } = this
+        if (framebufferIDs && width === framebufferIDsWidth && height === framebufferIDsHeight) return framebufferIDs
+
+        this.deleteFramebufferIDs()
+        const { context, textureIDs } = this
+        const { gl } = context
+        textureIDs.resize(width, height)
+        const newFramebuffer = webglCreateFramebuffer(gl)
+        const previousFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+        gl.bindFramebuffer(gl.FRAMEBUFFER, newFramebuffer)
+        textureIDs.attachToFramebuffer(gl.COLOR_ATTACHMENT0)
+        gl.drawBuffers([gl.COLOR_ATTACHMENT0])
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            context.console.error(
+                `[TgdPainterDeferredShading] The IDs framebuffer is incomplete: ${webglLookup(status)}!`,
+            )
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, previousFramebuffer)
+        this.framebufferIDs = newFramebuffer
+        this.framebufferIDsWidth = width
+        this.framebufferIDsHeight = height
+        return newFramebuffer
+    }
+
+    private deleteFramebufferIDs() {
+        const { gl } = this.context
+        if (this.framebufferIDs) gl.deleteFramebuffer(this.framebufferIDs)
+        this.framebufferIDs = null
+        this.framebufferIDsWidth = 0
+        this.framebufferIDsHeight = 0
+    }
+
     private deleteFramebuffer() {
         const { gl } = this.context
         if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer)
@@ -467,7 +661,10 @@ export class TgdPainterDeferredShadingTextures extends TgdPainter {
 
     delete() {
         this.tree.delete()
+        this.treeIDs.delete()
         this.deleteFramebuffer()
+        this.deleteFramebufferIDs()
+        this.textureIDs.delete()
         this.textureNormals.delete()
         this.textureDepth.delete()
         this.textureAlbedo.delete()
@@ -563,10 +760,21 @@ function createProgram(
             [EMISSION_SAMPLER]: "sampler2D",
         },
         varying,
+        // The order of the outputs must match the color attachments of the framebuffer.
         outputs: {
+            // COLOR_ATTACHMENT0 → `textureNormals` (RGB10_A2).
+            // View space normal, bent by the optional normal map, packed from [-1, 1] to [0, 1]
+            // in RGB (`N * 0.5 + 0.5`). Alpha is always 1.
             FragNormal: "vec4",
+            // COLOR_ATTACHMENT1 → `textureAlbedo` (RGBA8).
+            // Color of the surface, as returned by the `applyMaterial()` of the mesh's material.
             FragAlbedo: "vec4",
+            // COLOR_ATTACHMENT2 → `textureMetallicRoughnessSpecularBakedAO` (RGBA8).
+            // Material parameters in [0, 1]: R = metallic, G = roughness, B = specular, A = baked AO.
+            // Each one comes from a channel of its texture, or falls back to `DEFAULT_PARAMS`.
             FragParams: "vec4",
+            // COLOR_ATTACHMENT3 → `textureEmission` (RGBA8).
+            // RGBA color of the light emitted by the surface, or `DEFAULT_EMISSION` (black) without texture.
             FragEmission: "vec4",
         },
         functions: {
@@ -635,6 +843,54 @@ function createProgram(
 }
 
 /**
+ * Program of the IDs pass: it writes the `uniDeferredShading_ID` of the mesh,
+ * but only where the fragment is not behind `textureDepth`.
+ * That way, meshes without `id` still hide the ones behind them.
+ */
+function createProgramIDs(gl: WebGL2RenderingContext, geometry: TgdGeometry): TgdProgram {
+    const { attPosition } = geometry
+    const vert = new TgdShaderVertex({
+        uniforms: {
+            uniTransfoMatrix: "mat4",
+            uniModelViewMatrix: "mat4",
+            uniProjectionMatrix: "mat4",
+        },
+        attributes: {
+            [attPosition]: "vec4",
+        },
+        mainCode: [`gl_Position = uniProjectionMatrix * (uniModelViewMatrix * uniTransfoMatrix) * ${attPosition};`],
+    })
+    const frag = new TgdShaderFragment({
+        // The default precision of integers is `mediump` in fragment shaders.
+        header: ["precision highp int;"],
+        uniforms: {
+            uniDeferredShading_ID: "uint",
+            // Size of `textureDepth` divided by the size of `textureIDs`.
+            uniDeferredShading_Scale: "vec2",
+            [IDS_DEPTH_SAMPLER]: "sampler2D",
+        },
+        outputs: {
+            // COLOR_ATTACHMENT0 → `textureIDs` (R32UI).
+            FragID: "uint",
+        },
+        mainCode: [
+            `float depth = texelFetch(${IDS_DEPTH_SAMPLER}, ivec2(gl_FragCoord.xy * uniDeferredShading_Scale), 0).r;`,
+            // The tolerance grows with the slope, because `textureDepth` may have another resolution.
+            "if (gl_FragCoord.z > depth + fwidth(gl_FragCoord.z) + 1e-5) discard;",
+            "FragID = uniDeferredShading_ID;",
+        ],
+    })
+    return new TgdProgram(gl, {
+        vert: vert.code,
+        frag: frag.code,
+    })
+}
+
+function hasID(mesh: TgdMesh): boolean {
+    return (mesh.id ?? 0) > 0
+}
+
+/**
  * @returns The channels to read in the textures of the mesh, in the order of `PARAMS`.
  * For instance: `"bgrr"`.
  */
@@ -642,7 +898,6 @@ function getChannels(mesh: TgdMeshWithTextures): string {
     const { textures } = mesh
     if (!textures) return "rrrr"
 
-    return `${textures.metallicChannel ?? "r"}${textures.roughnessChannel ?? "r"}${
-        textures.specularChannel ?? "r"
-    }${textures.bakedAOChannel ?? "r"}`
+    return `${textures.metallicChannel ?? "r"}${textures.roughnessChannel ?? "r"}${textures.specularChannel ?? "r"
+        }${textures.bakedAOChannel ?? "r"}`
 }

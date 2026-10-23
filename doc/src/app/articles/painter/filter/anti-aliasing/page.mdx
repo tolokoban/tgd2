@@ -1,0 +1,39 @@
+import Demo from "./_/anti-aliasing.demo"
+
+# [TgdPainterFilter](docs/classes/TgdPainterFilter.html)
+
+[Back to the list of available filters](#..)
+
+## [TgdFilterAntiAliasing](docs/classes/TgdFilterAntiAliasing.html)
+
+<Demo />
+
+This demo uses deferred shading with a strong `cavity`: it draws thin bright and dark lines
+on the creases of the meshes, which are very aliased without anti-aliasing.
+The canvas has half the resolution of the screen, to make the pixels visible.
+Switch `FXAA` off and on to see the difference.
+
+Fast Approximate Anti-Aliasing (FXAA). Only the pixels on an edge are processed:
+the filter finds the direction and the ends of the edge, then blends the pixel with its neighbour
+across the edge. The rest of the image stays sharp.
+
+Framebuffers have no anti-aliasing, and MSAA cannot be used for deferred shading.
+In these cases, add this filter at the end of the chain, after the lighting:
+
+```ts
+new TgdPainterFilter(context, {
+    texture: deferred.textureAlbedo,
+    filters: [shading, new TgdFilterAntiAliasing({ alpha: true })],
+})
+```
+
+- `strength` (default 1): mix between the input (0) and the anti-aliased image (1).
+- `subpixel` (default 0.75): smoothing of the details smaller than a pixel.
+- `edgeThreshold` (default 0.166) and `edgeThresholdMin` (default 0.0833): minimal contrast of an edge.
+- `alpha` (default `false`): set it to `true` if the image has transparent parts, to smooth their edges too.
+
+They are public fields, so you can change them at any time.
+**The input texture must use `LINEAR` filtering.** FXAA blends a pixel with its neighbour by reading
+the texture between two texels, so with `NEAREST` the filter has almost no effect.
+The intermediate textures of `TgdPainterFilter` already use `LINEAR`, so this only matters
+when `TgdFilterAntiAliasing` is the first filter of the chain.

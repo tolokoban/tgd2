@@ -1,33 +1,25 @@
 /**
  * Warning! This code has been generated automatically.
  */
-import React from "react";
-import { ViewButton } from "@tolokoban/ui";
-import CodeViewer from "@/components/demo/CodeViewer";
-import Demo from "./main.demo";
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./main.demo"
 
-const FOCUS = {
-	"Detail #1":
-		"function init(context: TgdContext) {\n\tconst clear = new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1] })\n\tconst material = new TgdMaterialFaceOrientation()\n\tconst mesh = new TgdPainterMesh(context, {\n\t\tgeometry: new TgdGeometryBox({\n\t\t\tcenter: [-0.5, 0, 0],\n\t\t\tsizeX: 3,\n\t\t\tsizeY: 2,\n\t\t\tsizeZ: 1,\n\t\t}),\n\t\tmaterial,\n\t})\n\tcontext.add(\n\t\tclear,\n\t\tnew TgdPainterState(context, {\n\t\t\tchildren: [mesh],\n\t\t\tdepth: webglPresetDepth.less,\n\t\t}),\n\t)\n\tcontext.paint()\n\tnew TgdControllerCameraOrbit(context, {\n\t\tinertiaOrbit: 1000,\n\t\tinertiaZoom: 1000,\n\t})\n}",
-};
-const FULL =
-	'import {\n\ttype TgdContext,\n\tTgdControllerCameraOrbit,\n\tTgdGeometryBox,\n\tTgdMaterialFaceOrientation,\n\tTgdPainterClear,\n\tTgdPainterMesh,\n\tTgdPainterState,\n\twebglPresetDepth,\n} from "@tolokoban/tgd"\n\nimport View from "@/components/demo/Tgd"\n\nfunction init(context: TgdContext) {\n\tconst clear = new TgdPainterClear(context, { color: [0.1, 0.1, 0.1, 1] })\n\tconst material = new TgdMaterialFaceOrientation()\n\tconst mesh = new TgdPainterMesh(context, {\n\t\tgeometry: new TgdGeometryBox({\n\t\t\tcenter: [-0.5, 0, 0],\n\t\t\tsizeX: 3,\n\t\t\tsizeY: 2,\n\t\t\tsizeZ: 1,\n\t\t}),\n\t\tmaterial,\n\t})\n\tcontext.add(\n\t\tclear,\n\t\tnew TgdPainterState(context, {\n\t\t\tchildren: [mesh],\n\t\t\tdepth: webglPresetDepth.less,\n\t\t}),\n\t)\n\tcontext.paint()\n\tnew TgdControllerCameraOrbit(context, {\n\t\tinertiaOrbit: 1000,\n\t\tinertiaZoom: 1000,\n\t})\n}\n\nexport default function Demo() {\n\treturn <View onReady={init} gizmo />\n}\n';
+const FOCUS = {"createMesh()":"function createMesh(\n\tcontext: TgdContext,\n\tmaterial: TgdMaterial,\n\tsettings: Settings,\n): TgdPainterMesh {\n\tconst geometry = new TgdGeometryBox({\n\t\tsizeX: settings.sizeX,\n\t\tsizeY: settings.sizeY,\n\t\tsizeZ: settings.sizeZ,\n\t\tcenter: [settings.centerX, settings.centerY, settings.centerZ],\n\t\tuvs: UVS[settings.uvs],\n\t\tbevel:\n\t\t\tsettings.bevel === 1\n\t\t\t\t? {\n\t\t\t\t\t\twidth: settings.width,\n\t\t\t\t\t\tsegments: settings.segments,\n\t\t\t\t\t\tprofileShape: settings.profileShape,\n\t\t\t\t\t\tkeep: KEEP[settings.keep],\n\t\t\t\t\t}\n\t\t\t\t: undefined,\n\t});\n\treturn new TgdPainterMesh(context, { geometry, material });\n}"}
+const FULL = "import {\n\ttype TgdContext,\n\tTgdControllerCameraOrbit,\n\tTgdGeometryBox,\n\ttype TgdGeometryBoxOptions,\n\ttype TgdMaterial,\n\tTgdMaterialDiffuse,\n\tTgdMaterialFaceOrientation,\n\tTgdMaterialNormals,\n\tTgdPainterClear,\n\tTgdPainterMesh,\n\tTgdPainterState,\n\tTgdTexture2D,\n\twebglPresetDepth,\n} from \"@tolokoban/tgd\";\n\nimport View, { type Assets } from \"@/components/demo/Tgd\";\nimport UVGrid3x2URL from \"@/assets/image/uv-grid-3x2.webp\";\n\nconst UVS: Array<TgdGeometryBoxOptions[\"uvs\"]> = [\"sameOnEachFace\", \"3x2\"];\nconst KEEP = [\"both\", \"bevel\", \"face\"] as const;\n\ntype Settings = Record<\n\t| \"sizeX\"\n\t| \"sizeY\"\n\t| \"sizeZ\"\n\t| \"centerX\"\n\t| \"centerY\"\n\t| \"centerZ\"\n\t| \"uvs\"\n\t| \"bevel\"\n\t| \"width\"\n\t| \"segments\"\n\t| \"profileShape\"\n\t| \"keep\"\n\t| \"material\",\n\tnumber\n>;\n\nfunction init(context: TgdContext, assets: Assets) {\n\tconst clear = new TgdPainterClear(context, {\n\t\tcolor: [0.1, 0.1, 0.1, 1],\n\t\tdepth: 1,\n\t});\n\tconst texture = new TgdTexture2D(context).loadBitmap(assets.image.uvGrid);\n\tconst materials: TgdMaterial[] = [\n\t\tnew TgdMaterialDiffuse({ color: texture, lockLightsToCamera: true }),\n\t\tnew TgdMaterialNormals(),\n\t\tnew TgdMaterialFaceOrientation(),\n\t];\n\tconst state = new TgdPainterState(context, {\n\t\tdepth: webglPresetDepth.less,\n\t});\n\tcontext.add(clear, state);\n\tcontext.camera.fitSpaceAtTarget(4, 4);\n\tnew TgdControllerCameraOrbit(context, {\n\t\tinertiaOrbit: 1000,\n\t\tinertiaZoom: 1000,\n\t});\n\treturn (settings: Settings) => {\n\t\tstate.removeAll();\n\t\tstate.add(createMesh(context, materials[settings.material], settings));\n\t\tcontext.paint();\n\t};\n}\n\nexport default function Demo() {\n\treturn (\n\t\t<View\n\t\t\tonReady={init}\n\t\t\tgizmo\n\t\t\tassets={{ image: { uvGrid: UVGrid3x2URL } }}\n\t\t\tsettings={{\n\t\t\t\tsizeX: { label: \"sizeX\", value: 3, min: 0.1, max: 4 },\n\t\t\t\tsizeY: { label: \"sizeY\", value: 2, min: 0.1, max: 4 },\n\t\t\t\tsizeZ: { label: \"sizeZ\", value: 1, min: 0.1, max: 4 },\n\t\t\t\tcenterX: { label: \"center X\", value: -0.5, min: -2, max: 2 },\n\t\t\t\tcenterY: { label: \"center Y\", value: 0, min: -2, max: 2 },\n\t\t\t\tcenterZ: { label: \"center Z\", value: 0, min: -2, max: 2 },\n\t\t\t\tuvs: { label: \"uvs\", value: 1, step: [\"sameOnEachFace\", \"3x2\"] },\n\t\t\t\tbevel: { label: \"bevel\", value: 1, step: [\"Off\", \"On\"] },\n\t\t\t\twidth: { label: \"bevel.width\", value: 0.3, min: 0, max: 1 },\n\t\t\t\tsegments: {\n\t\t\t\t\tlabel: \"bevel.segments\",\n\t\t\t\t\tvalue: 4,\n\t\t\t\t\tmin: 1,\n\t\t\t\t\tmax: 16,\n\t\t\t\t\tstep: 1,\n\t\t\t\t},\n\t\t\t\tprofileShape: {\n\t\t\t\t\tlabel: \"bevel.profileShape\",\n\t\t\t\t\tvalue: 0.5,\n\t\t\t\t\tmin: 0,\n\t\t\t\t\tmax: 1,\n\t\t\t\t},\n\t\t\t\tkeep: {\n\t\t\t\t\tlabel: \"bevel.keep\",\n\t\t\t\t\tvalue: 0,\n\t\t\t\t\tstep: [\"both\", \"bevel\", \"face\"],\n\t\t\t\t},\n\t\t\t\tmaterial: {\n\t\t\t\t\tlabel: \"material\",\n\t\t\t\t\tvalue: 0,\n\t\t\t\t\tstep: [\"Diffuse\", \"Normals\", \"Face orientation\"],\n\t\t\t\t},\n\t\t\t}}\n\t\t/>\n\t);\n}\n\nfunction createMesh(\n\tcontext: TgdContext,\n\tmaterial: TgdMaterial,\n\tsettings: Settings,\n): TgdPainterMesh {\n\tconst geometry = new TgdGeometryBox({\n\t\tsizeX: settings.sizeX,\n\t\tsizeY: settings.sizeY,\n\t\tsizeZ: settings.sizeZ,\n\t\tcenter: [settings.centerX, settings.centerY, settings.centerZ],\n\t\tuvs: UVS[settings.uvs],\n\t\tbevel:\n\t\t\tsettings.bevel === 1\n\t\t\t\t? {\n\t\t\t\t\t\twidth: settings.width,\n\t\t\t\t\t\tsegments: settings.segments,\n\t\t\t\t\t\tprofileShape: settings.profileShape,\n\t\t\t\t\t\tkeep: KEEP[settings.keep],\n\t\t\t\t\t}\n\t\t\t\t: undefined,\n\t});\n\treturn new TgdPainterMesh(context, { geometry, material });\n}\n"
 
 export default function DemoContainer() {
-	const [full, setFull] = React.useState(false);
-	return (
-		<>
-			<div className="half-left">
-				<Demo />
-			</div>
-			<div className="half-right">
-				<div>
-					<ViewButton variant="elevated" onClick={() => setFull(!full)}>
-						{full ? "Show code details" : "Show full code"}
-					</ViewButton>
-				</div>
-				<CodeViewer language="tsx" value={full ? FULL : FOCUS} />
-			</div>
-		</>
-	);
+    const [full, setFull] = React.useState(false)
+    return <>
+        <div className="half-left"><Demo /></div>
+        <div className="half-right">
+            <div>
+                <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                    {full ? "Show code details" : "Show full code"}
+                </ViewButton>
+            </div>
+            <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+        </div>
+    </>
 }

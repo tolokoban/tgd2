@@ -98,7 +98,7 @@ function createFB({ gl, console }: TgdContext, texture: TgdTexture2D): WebGLFram
     const currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING)
     const fb = webglCreateFramebuffer(gl)
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.glTexture, 0)
+    texture.attachToFramebuffer(gl.COLOR_ATTACHMENT0)
     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
     if (status !== gl.FRAMEBUFFER_COMPLETE) {
         console.error(`[TgdPainterFilter] Your Framebuffer is incomplete: ${webglLookup(status)}!`)

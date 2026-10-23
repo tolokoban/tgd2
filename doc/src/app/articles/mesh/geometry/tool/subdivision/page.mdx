@@ -1,0 +1,33 @@
+import Demo from "./_/main.demo"
+
+# tgdGeometrySubdivision
+
+Subdivide a geometry, like the Subdivision Surface modifier of Blender.
+
+<Demo />
+
+From left to right: no subdivision, level 1 and level 2.
+
+```ts
+const geometry = tgdGeometrySubdivision(new TgdGeometryBox(), {
+    mode: "catmull-clark", // or "simple"
+    levels: 2,
+})
+```
+
+- `mode` (default **"catmull-clark"**): `"catmull-clark"` smoothes the shape, `"simple"` only splits the faces.
+- `levels` (default **2**): each level multiplies the number of faces by 4.
+- `rebuildQuads` (default **true**): merge pairs of coplanar triangles into quads before subdividing,
+  because Catmull-Clark gives much better results on quads.
+
+Vertices are welded by position, so the 6 faces of a box get connected.
+UVs are interpolated linearly in each face. Normals are recomputed (smooth) in `"catmull-clark"` mode.
+If the geometry has tangents, they are recomputed on the result.
+
+## Tangents
+
+`geometry.computeTangents()` computes the vec4 tangents from the positions, normals and UVs,
+and stores them in the `attTangent` attribute (`CUSTOM_ATTRIBUTE_3` by default).
+`xyz` points towards increasing U and is orthogonal to the normal.
+`w` is the handedness of the TBN basis, as in glTF: `bitangent = cross(normal, tangent.xyz) * tangent.w`.
+Select the "Tangents" material in the demo above to see them as colors.

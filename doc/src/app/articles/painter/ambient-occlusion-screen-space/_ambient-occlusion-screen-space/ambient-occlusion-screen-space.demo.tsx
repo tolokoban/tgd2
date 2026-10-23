@@ -10,7 +10,7 @@ import {
     type TgdMesh,
     TgdPainterAmbientOcclusionScreenSpace,
     TgdPainterClear,
-    TgdPainterDeferredShadingTextures,
+    TgdPainterDeferredShading,
     TgdPainterFilter,
     TgdPainterFramebuffer,
     TgdPainterGroup,
@@ -223,7 +223,7 @@ function buildScene(
         makeCube(material, [0, 0, -3], 0.2),
     ]
     const meshes = [plane, suzanne, ...cubes]
-    const deferred = new TgdPainterDeferredShadingTextures(context, { meshes })
+    const deferred = new TgdPainterDeferredShading(context, { meshes })
     const ao = new TgdPainterAmbientOcclusionScreenSpace(context, {
         textureNormals: deferred.textureNormals,
         textureDepth: deferred.textureDepth,

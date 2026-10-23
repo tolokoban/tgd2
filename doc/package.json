@@ -1,6 +1,6 @@
 {
     "name": "@tolokoban/tgd",
-    "version": "2.8.1",
+    "version": "2.9.0",
     "private": true,
     "description": "ToloGameDev library for WebGL2",
     "homepage": "https://tolokoban.github.io/tgd2",
@@ -24,6 +24,7 @@
         "@tolokoban/type-guards": "^0.9.0",
         "@tolokoban/ui": "^0.25.3",
         "colord": "^2.9.3",
+        "fontkit": "^2.0.4",
         "highlight.js": "^11.11.1",
         "prismjs": "^1.30.0",
         "react": "19.2.5",
@@ -35,6 +36,7 @@
         "@mdx-js/react": "^3.1.1",
         "@rspack/cli": "^1.7.10",
         "@rspack/core": "^1.7.10",
+        "@types/fontkit": "^2.0.9",
         "@types/mdx": "^2.0.13",
         "@types/node": "^25.2.2",
         "@types/prismjs": "^1.26.5",

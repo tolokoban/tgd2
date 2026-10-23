@@ -6,7 +6,7 @@ import {
     TgdMaterialFlatTexture,
     type TgdMeshWithTextures,
     TgdPainterClear,
-    TgdPainterDeferredShadingTextures,
+    TgdPainterDeferredShading,
     TgdPainterFilter,
     TgdPainterState,
 } from "@tolokoban/tgd"
@@ -78,7 +78,7 @@ function init(context: TgdContext, assets: Assets): TgdFilterGlow {
             emission: indexEmission === undefined ? undefined : asset.createTexture2D(context, indexEmission),
         },
     }
-    const deferred = new TgdPainterDeferredShadingTextures(context, { meshes: [helmet] })
+    const deferred = new TgdPainterDeferredShading(context, { meshes: [helmet] })
     const lighting = new TgdFilterDeferredShading(context, {
         textureNormals: deferred.textureNormals,
         textureDepth: deferred.textureDepth,

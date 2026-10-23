@@ -223,13 +223,7 @@ export class TgdPainterFramebuffer extends TgdPainterGroup {
         const { context } = this
         const { gl } = context
         tgdTexture.resize(width, height)
-        gl.framebufferTexture2D(
-            gl.FRAMEBUFFER,
-            gl.COLOR_ATTACHMENT0 + attachment,
-            gl.TEXTURE_2D,
-            tgdTexture.glTexture,
-            0,
-        )
+        tgdTexture.attachToFramebuffer(gl.COLOR_ATTACHMENT0 + attachment)
     }
 
     private updateTextureForDepth(gl: WebGL2RenderingContext, width: number, height: number) {

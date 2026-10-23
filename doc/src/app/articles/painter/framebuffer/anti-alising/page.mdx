@@ -5,7 +5,21 @@ import Demo from "./_/framebuffer.demo"
 By default, framebuffers do not use anti-aliasing.
 We can see this in the next example where we render a cube in a framebuffer in a low resolution canvas.
 
-Here we use a filter to apply anti-aliasing, but that's not the most performant way.
+Here we use [TgdFilterAntiAliasing](#/articles/painter/filter/anti-aliasing) (FXAA) to smooth the edges.
+It works on the final image only, so it is useful when MSAA cannot be used (with deferred shading, for instance),
+but that's not the most performant way for a simple framebuffer.
+
+FXAA blends each pixel on an edge with its neighbour by reading the texture between two texels.
+So **the input texture must use `LINEAR` filtering**: with `NEAREST`, the filter has almost no effect.
+
+```ts
+textureColor0: new TgdTexture2D(context, {
+    params: {
+        magFilter: "LINEAR",
+        minFilter: "LINEAR",
+    },
+}),
+```
 
 <Demo />
 

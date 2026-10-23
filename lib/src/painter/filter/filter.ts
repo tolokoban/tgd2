@@ -16,18 +16,49 @@ export interface TgdPainterFilterOptions {
     texture?: TgdTexture2D
     z?: number
     name?: string
-    flipY?: boolean
+    /**
+     * Where to paint the row `v = 0` of the input texture.
+     *
+     * - `"auto"`: use the {@link TgdTexture2D.orientation} of the input texture,
+     *   so it is painted the right way up, whether it is an image (`"top-down"`)
+     *   or the output of a framebuffer (`"bottom-up"`).
+     *   The orientation is read at every paint, so it can change at runtime.
+     * - `true`: at the bottom. This is right for a `"bottom-up"` texture.
+     * - `false`: at the top. This is right for a `"top-down"` texture.
+     *
+     * Default to **"auto"**.
+     */
+    flipY?: boolean | "auto"
 }
 
+/**
+ * Paint a texture on the whole viewport through a list of filters.
+ *
+ * Every filter but the last is painted in an intermediate texture that keeps
+ * the orientation of the input texture, so the extra textures of the filters
+ * (normals, depth, emission...) stay aligned with it.
+ * Only the last pass uses `flipY` to paint the result the right way up.
+ *
+ * If no filter is given, a {@link TgdFilterVerbatim} is used.
+ *
+ * @see {@link TgdPainterFilterOptions}
+ */
 export class TgdPainterFilter extends TgdPainter {
     public z = 0
-    public flipY: boolean
+    /**
+     * @see {@link TgdPainterFilterOptions.flipY}
+     */
+    public flipY: boolean | "auto"
 
     private readonly programs: TgdProgram[]
     private readonly filters: TgdFilter[]
     private readonly vaos: TgdVertexArray[]
     private readonly framebuffers: Framebuffers
+    private readonly texture: TgdTexture2D
     private readonly texturesArray: Record<string, TgdTexture2D | TgdTextureCube>[] = []
+    /** Width and height of the viewport before the first filter is applied. */
+    private viewportWidth = 1
+    private viewportHeight = 1
 
     constructor(
         public readonly context: TgdContext,
@@ -38,9 +69,10 @@ export class TgdPainterFilter extends TgdPainter {
         if (!texture) {
             throw new Error(`[TgdPainterFilter] A texture must be given for "${this.name}"!`)
         }
+        this.texture = texture
         this.framebuffers = new Framebuffers(context, texture)
         this.z = options.z ?? 0.999999
-        this.flipY = options.flipY ?? false
+        this.flipY = options.flipY ?? "auto"
         const filters = [...(options.filters ?? [])]
         if (filters.length === 0) {
             filters.push(new TgdFilterVerbatim())
@@ -77,6 +109,7 @@ export class TgdPainterFilter extends TgdPainter {
                 uniforms: {
                     ...uniformsForTextures,
                     uniTexture: "sampler2D",
+                    uniViewport: "vec2",
                     ...filter.uniforms,
                 },
                 varying: {
@@ -116,6 +149,9 @@ export class TgdPainterFilter extends TgdPainter {
     paint(time: number, delta: number): void {
         const { framebuffers, filters } = this
         for (const filter of filters) filter.prepare(time, delta)
+        const [, , viewportWidth, viewportHeight] = this.context.webglParams.viewport
+        this.viewportWidth = viewportWidth
+        this.viewportHeight = viewportHeight
         framebuffers.reset()
         TgdPainterState.do(this.context, {
             depth: "off",
@@ -129,7 +165,8 @@ export class TgdPainterFilter extends TgdPainter {
                 }
             },
         })
-        this.paintOneFilter(filters.length - 1, time, delta, this.flipY ? KEEP_ORIENTATION : -KEEP_ORIENTATION)
+        const flipY = this.flipY === "auto" ? this.texture.orientation === "bottom-up" : this.flipY
+        this.paintOneFilter(filters.length - 1, time, delta, flipY ? KEEP_ORIENTATION : -KEEP_ORIENTATION)
     }
 
     private readonly paintOneFilter = (filterIndex: number, time: number, delta: number, flip = +1) => {
@@ -144,6 +181,10 @@ export class TgdPainterFilter extends TgdPainter {
         program.use()
         program.uniform1f("uniZ", this.z)
         program.uniform1f("uniFlipY", flip)
+        // The uniform is optimized out by the shader compiler if the filter does not use it.
+        if (program.hasUniform("uniViewport")) {
+            program.uniform2f("uniViewport", this.viewportWidth, this.viewportHeight)
+        }
         const textures = this.texturesArray[filterIndex]
         if (textures) {
             let unit = 1

@@ -1,0 +1,32 @@
+import Demo from "./_/main.demo"
+
+# [TgdGeometryGltf](docs/classes/TgdGeometryGltf.html)
+
+<Demo />
+
+Extracts the geometry of a mesh primitive from a glTF binary file (`.glb`)
+loaded as a `TgdDataGlb`.
+
+```ts
+const geometry = new TgdGeometryGltf({
+	data: assets.glb.suzanne,
+	mesh: 0,
+	primitive: 0,
+})
+```
+
+- `data`: the parsed `.glb` file.
+- `mesh`: index or name of the mesh (default to `0`).
+- `primitive`: index of the primitive in this mesh (default to `0`).
+
+The geometry gets the `POSITION` and `NORMAL` attributes, plus `TEXCOORD_0` if the
+primitive has texture coordinates. If the file has no normals, they are computed
+with a smooth shading (and a warning is displayed in the console).
+
+This class only reads the geometry. To get the materials and the whole node
+hierarchy of the file, use [TgdPainterNode](#/articles/painter/node) and
+[TgdMaterialGltf](#/articles/mesh/material/gltf) instead.
+
+---
+
+[Back](#/articles/mesh/geometry)

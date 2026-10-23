@@ -1,0 +1,44 @@
+import Demo from "./_gltf"
+import DemoFrom from "./_from"
+
+# glTF material
+
+`TgdMaterialGltf` is a physically based material that uses the textures of a glTF file
+(albedo, normal, metallic/roughness, occlusion and emission) and a cube texture for the
+image based lighting.
+
+It is the default material of `TgdPainterMeshGltf`.
+
+There are two ways of creating this material.
+
+## With the constructor
+
+You give every texture yourself. This is the way to go if you want to pick
+the textures from different places, or to replace some of them.
+
+<Demo />
+
+## With `TgdMaterialGltf.from()`
+
+The static function `from()` reads the glTF material of a mesh primitive
+and creates all the textures for you. You just tell it which mesh
+(`meshIndexOrName`, defaults to `0`) and which primitive (`primitiveIndex`, defaults to `0`) to use.
+
+Textures missing in the asset are replaced by 1x1 textures filled with sensible defaults
+(the `baseColorFactor` for the albedo, a flat normal, no emission, ...).
+If you don't provide a `skybox`, a random bluish one is created.
+
+```ts
+const material = TgdMaterialGltf.from(context, {
+	data,
+	meshIndexOrName: 0,
+	primitiveIndex: 0,
+	skybox,
+})
+```
+
+<DemoFrom />
+
+---
+
+[Back](#/articles/mesh/material)

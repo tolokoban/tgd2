@@ -4,6 +4,10 @@ import { TgdTransfo } from "@tgd/math"
 
 export interface TgdMesh {
     /**
+     * Can be used for object picking.
+     */
+    id?: number
+    /**
      * If `geometry` is missing, the mesh is not painted, but its children are.
      */
     geometry?: TgdGeometry

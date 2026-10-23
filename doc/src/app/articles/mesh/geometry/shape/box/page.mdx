@@ -1,5 +1,34 @@
 import Demo from "./_/main.demo"
 
-# TgdGeometryBox
+# [TgdGeometryBox](docs/classes/TgdGeometryBox.html)
 
 <Demo />
+
+A box with flat normals, centered on `center`.
+The `uvs` option maps the same texture on each face (`"sameOnEachFace"`),
+or uses a texture split into 3 columns and 2 rows (`"3x2"`), one area per face.
+
+## Bevel
+
+The `bevel` option rounds the edges and corners, like the Bevel modifier of Blender:
+
+```ts
+const geometry = new TgdGeometryBox({
+    sizeX: 3,
+    sizeY: 2,
+    sizeZ: 1,
+    bevel: {
+        width: 0.3,
+        segments: 4,
+        profileShape: 0.5,
+    },
+})
+```
+
+- `width`: the bevel amount. It cannot be greater than half the smallest size.
+- `segments`: the number of segments of the curved edges.
+- `profileShape` (default **0.5**): the superellipse factor.
+  **0.25** is a straight chamfer, **0.5** a circular arc, **1.0** a square corner, and **0.0** a concave one.
+- `keep` (default **"both"**): `"bevel"` keeps only the bevel, `"face"` keeps only the (smaller) faces.
+
+The normals are smooth on the bevel, but stay sharp on the 6 faces.

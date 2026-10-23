@@ -1,0 +1,20 @@
+import Demo from "./_/main.demo"
+
+# [TgdGeometryPlane](docs/classes/TgdGeometryPlane.html)
+
+<Demo />
+
+A rectangle made of two triangles (drawn as a `TRIANGLE_STRIP`), centered on the origin.
+
+- `sizeX`, `sizeY`: dimensions of the rectangle (default to `1`).
+- `vecX`, `vecY`: the axes of the plane (default to `[1, 0, 0]` and `[0, 1, 0]`).
+  The normal is `vecX × vecY`, and the front face looks in its direction.
+- `uv0`, `uv1`: texture coordinates of the bottom-left and top-right corners
+  (default to `[0, 0]` and `[1, 1]`). Use them to show only a part of a texture.
+
+In this demo, the left plane shows the whole texture, while the right one is
+tilted and only shows its upper right quarter.
+
+---
+
+[Back](#/articles/mesh/geometry)

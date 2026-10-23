@@ -91,6 +91,19 @@ interface TgdTexture2DStorage {
     | "DEPTH32F_STENCIL8 / DEPTH_STENCIL / FLOAT_32_UNSIGNED_INT_24_8_REV"
 }
 
+/**
+ * Which edge of the picture is at the texture coordinate `v = 0` (the first row in memory).
+ *
+ * - `"top-down"`: `v = 0` is the top of the picture.
+ *   This is the case of the images, videos, canvases and webcams uploaded with `storage.flipY = false` (the default).
+ * - `"bottom-up"`: `v = 0` is the bottom of the picture.
+ *   This is the case of every texture rendered through a framebuffer,
+ *   because WebGL writes the bottom row of the viewport first.
+ *
+ * @see {@link TgdTexture2D.orientation}
+ */
+export type TgdTextureOrientation = "top-down" | "bottom-up"
+
 export interface TgdTexture2DOptions {
     name?: string
     storage?: Partial<TgdTexture2DStorage>
@@ -135,6 +148,20 @@ export interface TgdTexture2DWebcamOptions extends MediaTrackConstraints {
 
 export class TgdTexture2D {
     public name: string
+    /**
+     * Which edge of the picture is at `v = 0`.
+     *
+     * It is updated automatically:
+     * - {@link TgdTexture2D.loadBitmap} sets it to `"top-down"`, or to `"bottom-up"` if `storage.flipY` is `true`.
+     * - {@link TgdTexture2D.loadData} does the same, unless its `orientation` option is given.
+     * - {@link TgdTexture2D.attachToFramebuffer} sets it to `"bottom-up"`.
+     *
+     * Painters like {@link TgdPainterFilter} read it to paint the texture the right way up.
+     * Change it by hand if you fill the texture in another way.
+     *
+     * Default to **"top-down"**.
+     */
+    public orientation: TgdTextureOrientation = "top-down"
     public readonly gl: WebGL2RenderingContext
     public readonly eventChange = new TgdEvent<TgdTexture2D>()
 
@@ -466,6 +493,7 @@ export class TgdTexture2D {
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.storage.premultipliedAlpha)
         const [internalFormat, sourceFormat, sourceType] = this.splitFormat(gl)
         gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, sourceFormat, sourceType, bmp)
+        this.orientation = this.storage.flipY ? "bottom-up" : "top-down"
         this.checkError(
             `loadBitmap(${JSON.stringify({
                 width,
@@ -473,7 +501,6 @@ export class TgdTexture2D {
             })})\ngl.texImage2D(gl.TEXTURE_2D, ${level}, gl.${"RGBA" // storage.internalFormat
             }, gl.${"RGBA"}, gl.UNSIGNED_BYTE, bmp)`,
             () => {
-                this.context.console.log("bmp =", bmp) // @FIXME: Remove this line written on 2026-03-24 at 09:58
                 this.context.console.log("storage.flipY =", this.storage.flipY)
                 this.context.console.log("storage.premultipliedAlpha =", this.storage.premultipliedAlpha)
             },
@@ -522,6 +549,7 @@ export class TgdTexture2D {
         })
         const painter = new TgdPainterFilter(this.context, {
             filters: [filter],
+            // Keep the rows in the same order: the orientation of this texture does not change.
             flipY: true,
             texture: this,
         })
@@ -550,6 +578,13 @@ export class TgdTexture2D {
             level?: number
             offset?: number
             format?: TgdTexture2DStorage["format"]
+            /**
+             * Orientation of `data`, whose first row goes to `v = 0`.
+             *
+             * Default to **"top-down"**, or **"bottom-up"** if `storage.flipY` is `true`,
+             * like for {@link TgdTexture2D.loadBitmap}.
+             */
+            orientation?: TgdTextureOrientation
         },
     ) {
         try {
@@ -586,6 +621,7 @@ export class TgdTexture2D {
                 data,
                 // offset
             )
+            this.orientation = options.orientation ?? (this.storage.flipY ? "bottom-up" : "top-down")
             this.checkError(`loadData(${printArray(data)}, ${JSON.stringify(options)})
 internalFormat: ${context.lookupWebglConstant(internalFormat)}
 sourceFormat: ${context.lookupWebglConstant(sourceFormat)}
@@ -597,6 +633,24 @@ sourceType: ${context.lookupWebglConstant(sourceType)}
         } catch (error) {
             throw new Error(`[${this.name}::loadData()] ${resolveErrorMessage(error)}`)
         }
+    }
+
+    /**
+     * Attach this texture to the framebuffer currently bound to `gl.FRAMEBUFFER`.
+     *
+     * Its {@link TgdTexture2D.orientation} becomes `"bottom-up"`,
+     * because this is how WebGL writes in a framebuffer.
+     * Always use this method instead of calling `gl.framebufferTexture2D()` yourself,
+     * otherwise the orientation will be wrong.
+     *
+     * @param attachment `gl.COLOR_ATTACHMENT0`, `gl.DEPTH_ATTACHMENT`, ...
+     * @param level Mipmap level to attach. Default to **0**.
+     */
+    attachToFramebuffer(attachment: number, level = 0): this {
+        const { gl } = this
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, this.glTexture, level)
+        this.orientation = "bottom-up"
+        return this
     }
 
     /**

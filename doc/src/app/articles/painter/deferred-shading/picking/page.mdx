@@ -1,0 +1,35 @@
+import Demo from "./_picking"
+
+# Object picking with [TgdPainterDeferredShading](docs/classes/TgdPainterDeferredShading.html)
+
+Move the pointer over the objects to highlight them.
+Click to change their color.
+
+<Demo />
+
+Give an `id` greater than 0 to the meshes you want to pick, and set the `enableIDs` option.
+A second pass then writes the `id` of these meshes in `textureIDs` (`R32UI`), and 0 everywhere else.
+The meshes without `id` (like the big grey sphere) are not painted in this pass,
+but they still hide the objects behind them, because the pass is tested against `textureDepth`.
+
+```ts
+const deferred = new TgdPainterDeferredShading(context, {
+    meshes: [{ id: 1, geometry, material, transfo, visible: true }],
+    enableIDs: true,
+})
+// Same coordinates as the pointer events: between -1 and +1.
+const id = deferred.readID(x, y)
+```
+
+`readID()` reads the result of the last `paint()`. It stalls the GPU pipeline, so call it at most once per frame.
+In this demo, it is called at every frame because the objects move even if the pointer does not.
+
+If `enableIDs` is a number, it sets the resolution of `textureIDs` relative to the other textures:
+`1/4` divides its width and height by 4. The pass is cheaper, but the borders of the objects are less precise.
+Both can be changed at runtime with the `enableIDs` and `resolutionIDs` fields.
+
+The materials are ignored in this pass. A material that moves the vertices in its vertex shader will give wrong IDs.
+
+---
+
+[Back](#/articles/painter/deferred-shading)

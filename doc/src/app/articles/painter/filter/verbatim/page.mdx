@@ -1,0 +1,24 @@
+import Demo from "./_/verbatim.demo"
+
+# [TgdPainterFilter](docs/classes/TgdPainterFilter.html)
+
+[Back to the list of available filters](#..)
+
+## [TgdFilterVerbatim](docs/classes/TgdFilterVerbatim.html)
+
+<Demo />
+
+Paints the texture as it is, without any modification.
+
+It is useful to copy a texture (a framebuffer's for instance) to the screen,
+or to flip it vertically with the `flipY` option of `TgdPainterFilter`.
+
+```ts
+context.add(
+    new TgdPainterFilter(context, {
+        texture,
+        filters: [new TgdFilterVerbatim()],
+        flipY: true,
+    }),
+)
+```

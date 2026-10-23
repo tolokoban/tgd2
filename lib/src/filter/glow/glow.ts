@@ -136,7 +136,6 @@ export interface TgdFilterGlowOptions {
  *     new TgdPainterFilter(context, {
  *         texture: textureColor,
  *         filters: [glow],
- *         flipY: true,
  *     }),
  * )
  * ```

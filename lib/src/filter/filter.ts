@@ -15,6 +15,7 @@ import { WebglUniformType } from "@tgd/types"
  *
  * Always available uniforms:
  *  * `sampler2D uniTexture`: input texture.
+ *  * `vec2 uniViewport`: width and height (in pixels) of the viewport before the first filter is applied.
  *  * `float uniWidth`: width of the texture in pixels.
  *  * `float uniHeight`: height of the texture in pixels.
  */
@@ -29,12 +30,11 @@ export class TgdFilter {
     public readonly uniforms: Record<string, WebglUniformType> = {}
     public readonly textures: Record<string, TgdTexture2D | TgdTextureCube> = {}
     /**
-     * The code of a `vec4 applyColor()` function.
-     * Must return a `vec4` color.
+     * Must set `FragColor` with the resulting color.
      */
     public readonly fragmentShaderCode: TgdCodeBloc = ["vec4 color = texture(uniTexture, varUV);", "FragColor = color;"]
     public readonly extraFunctions: TgdCodeFunctions | TgdCodeBloc = {}
-    public readonly setUniforms = (_parameters: TgdFilterSerUniformsParameters): void => {}
+    public readonly setUniforms = (_parameters: TgdFilterSerUniformsParameters): void => { }
 
     constructor(options: Partial<TgdFilterOptions> = {}) {
         const { uniforms, textures, fragmentShaderCode, extraFunctions, setUniforms } = options
@@ -52,16 +52,29 @@ export class TgdFilter {
      * before any filter is painted.
      * Override it if the filter needs to render intermediate textures in its own framebuffers.
      */
-    prepare(_time: number, _delta: number): void {}
+    prepare(_time: number, _delta: number): void { }
 
     /** Cleanup function. */
-    delete() {}
+    delete() { }
 }
 
 export interface TgdFilterOptions {
     name: string
     uniforms: { [name: string]: WebglUniformType }
     textures?: Record<string, TgdTexture2D | TgdTextureCube>
+    /**
+     * Inputs:
+ *  * `sampler2D uniTexture`: input texture.
+ *  * `vec2 uniViewport`: width and height (in pixels) of the viewport before the first filter is applied.
+ *  * `float uniWidth`: width of the texture in pixels.
+ *  * `float uniHeight`: height of the texture in pixels.
+ *  * `vec2 varUV`: texture coordinates. Every filter of a {@link TgdPainterFilter} receives its input
+ *    with the orientation of the original texture, so `varUV` can also be used to read other
+ *    textures of the same size and orientation (normals, depth, emission…).
+     * 
+     * Output:
+     * * `vec4 FragColor`
+     */
     fragmentShaderCode: TgdCodeBloc
     extraFunctions: TgdCodeFunctions | TgdCodeBloc
     setUniforms(parameters: TgdFilterSerUniformsParameters): void

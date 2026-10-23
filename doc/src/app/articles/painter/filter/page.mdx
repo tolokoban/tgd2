@@ -4,14 +4,20 @@ Filtering is the process of transforming a texture.
 
 You can use existing filters:
 
+- [Anti-aliasing](#anti-aliasing): FXAA, to smooth the edges of framebuffers and deferred shading.
+- [Blur](#blur): blur along one direction (use a pair of them for a bidirectional blur).
 - [Chromatic Aberration](#chromatic-aberration)
+- [Deferred shading](#/articles/painter/deferred-shading): lighting, shadows, cavity and ambient occlusion from G-buffer textures.
 - [Glow](#glow): bloom around the emissive parts, with Dual Filtering.
 - [Hue Rotation](#hue)
+- [Multiply](#multiply): multiply every pixel by a color.
+- [Scale](#scale): fit the texture to the screen (`cover` or `contain`), then scale it.
+- [Verbatim](#verbatim): paint the texture as it is.
+- [Zoom](#zoom): zoom and translate the texture.
 
 Even combine several of them together:
 
 - [Several filters](#several)
-- [Bidirectional blur](#blur)
 - [Bloom effect](#bloom)
 
 

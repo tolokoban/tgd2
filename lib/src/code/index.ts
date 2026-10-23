@@ -1,6 +1,7 @@
 export * from "./color"
 export * from "./consts"
 export * from "./coords"
+export * from "./material"
 export * from "./math"
 export * from "./noise"
 export * from "./random"

@@ -1,8 +1,17 @@
 import { TgdVec2 } from "../math"
 import { TgdFilter, TgdFilterSerUniformsParameters as TgdFilterSetUniformsParameters } from "./filter"
 
+/**
+ * Zoom into the texture around its center, then translate it.
+ */
 export class TgdFilterZoom extends TgdFilter {
+    /**
+     * Values greater than 1 enlarge the texture.
+     */
     public zoom = 1
+    /**
+     * Translation in texture coordinates.
+     */
     public readonly translation: TgdVec2
 
     constructor({ zoom = 1 }: Partial<{ zoom: number }> = {}) {

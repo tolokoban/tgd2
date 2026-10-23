@@ -1,0 +1,24 @@
+import Demo from "./_/main.demo"
+
+# [TgdGeometryGrid](docs/classes/TgdGeometryGrid.html)
+
+<Demo />
+
+Like [TgdGeometryPlane](#/articles/mesh/geometry/shape/plane), but subdivided into
+a grid of quads (two triangles each). The extra vertices are useful when the vertex
+shader deforms the surface: terrains, water, flags, ...
+
+- `sizeX`, `sizeY`: dimensions of the grid (default to `1`).
+- `subdivisions`: number of quads along each axis (default to `10`).
+- `subdivisionsX`, `subdivisionsY`: override `subdivisions` for one axis.
+- `vecX`, `vecY`: the axes of the grid (default to `[1, 0, 0]` and `[0, 1, 0]`).
+  The normal is `vecX × vecY`.
+
+The geometry provides `POSITION`, `NORMAL` and `TEXCOORD_0` attributes.
+
+In this demo, the three grids have 2, 8 and 32 subdivisions, and a material
+pushes the vertices along the Z axis.
+
+---
+
+[Back](#/articles/mesh/geometry)

@@ -38,7 +38,7 @@ The demo only changes `strength`, which starts at 1.5 to make the glow easier to
 ## How it works
 
 The glow comes from `textureEmission`, here the `textureEmission` of a
-[TgdPainterDeferredShadingTextures](#/articles/painter/deferred-shading), filled with the emissive texture of the helmet.
+[TgdPainterDeferredShading](#/articles/painter/deferred-shading), filled with the emissive texture of the helmet.
 Before the filter is painted, this texture goes through a blur called **Dual Filtering**:
 
 1. It is reduced to `scale` times the size of the context (default: 0.5).

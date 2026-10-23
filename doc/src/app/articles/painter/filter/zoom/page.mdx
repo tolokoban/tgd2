@@ -1,0 +1,22 @@
+import Demo from "./_/zoom.demo"
+
+# [TgdPainterFilter](docs/classes/TgdPainterFilter.html)
+
+[Back to the list of available filters](#..)
+
+## [TgdFilterZoom](docs/classes/TgdFilterZoom.html)
+
+<Demo />
+
+Zooms into the texture around its center, then moves it.
+
+- `zoom`: values greater than 1 enlarge the texture, and values lower than 1 shrink it.
+- `translation`: a `TgdVec2` in texture coordinates (`[1, 0]` moves by the full width of the texture).
+
+```ts
+const zoomFilter = new TgdFilterZoom({ zoom: 2 })
+zoomFilter.translation.reset(0.1, 0)
+context.add(new TgdPainterFilter(context, { texture, filters: [zoomFilter] }))
+```
+
+What appears outside of the texture depends on its wrap parameters.

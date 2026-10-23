@@ -6,7 +6,7 @@ import type { TgdMaterialShadowOptions } from "@tgd/material"
 import { TGD_SHADOW_DEFAULT_BIAS, TGD_SHADOW_DEFAULT_COLOR } from "@tgd/material/shadow-code"
 import { TgdMat4, TgdTransfo } from "@tgd/math"
 import type { TgdPainterAmbientOcclusionScreenSpace } from "@tgd/painter/ambient-occlusion-screen-space"
-import type { TgdPainterDeferredShadingTextures } from "@tgd/painter/deferred-shading"
+import type { TgdPainterDeferredShading } from "@tgd/painter/deferred-shading"
 import { type TgdTexture2D, TgdTextureCube } from "@tgd/texture"
 import { tgdCanvasCreateFill } from "@tgd/utils"
 import { TgdFilter } from "../filter"
@@ -21,7 +21,7 @@ export interface TgdFilterDeferredShadingOptions {
      * The alpha channel is 0 where nothing has been painted.
      * Mandatory if `cavity` or `ambientOcclusion` is defined.
      *
-     * Usually {@link TgdPainterDeferredShadingTextures.textureNormals}, whose
+     * Usually {@link TgdPainterDeferredShading.textureNormals}, whose
      * `textureAlbedo` must be the input texture of the {@link TgdPainterFilter}.
      *
      * If not defined, every pixel is considered painted, with a normal facing the camera.
@@ -29,10 +29,11 @@ export interface TgdFilterDeferredShadingOptions {
     textureNormals?: TgdTexture2D
     /**
      * Window depth (between 0 and 1).
-     * Only used if `shading` is `true`, or if `shadow` or `ambientOcclusion` is defined.
+     * Only used if `shading` is `true`, if `shadow` or `ambientOcclusion` is defined,
+     * or if `cavity.outline` is `false`.
      * Mandatory if `ambientOcclusion` is defined.
      *
-     * Usually {@link TgdPainterDeferredShadingTextures.textureDepth}.
+     * Usually {@link TgdPainterDeferredShading.textureDepth}.
      *
      * If not defined, the depth is **0.5** everywhere.
      */
@@ -41,7 +42,7 @@ export interface TgdFilterDeferredShadingOptions {
      * Metallic, roughness, specular and baked ambient occlusion in the RGBA channels.
      * Only used if `shading` is `true`.
      *
-     * Usually {@link TgdPainterDeferredShadingTextures.textureMetallicRoughnessSpecularBakedAO}.
+     * Usually {@link TgdPainterDeferredShading.textureMetallicRoughnessSpecularBakedAO}.
      *
      * If not defined, metallic is **0**, roughness is **0.5**, specular is **0.5**
      * and baked AO is **1** everywhere.
@@ -58,8 +59,7 @@ export interface TgdFilterDeferredShadingOptions {
     /**
      * If defined, lighten the ridges and darken the valleys, like the screen space
      * cavity of Blender's viewport in "Solid" shading.
-     * The curvature is computed from the normals of the 4 neighbour pixels,
-     * and is ignored on the borders of the painted area.
+     * The curvature is computed from the normals of the 4 neighbour pixels.
      *
      * You can change `ridge` and `valley` at runtime through
      * {@link TgdFilterDeferredShading.cavityRidge} and {@link TgdFilterDeferredShading.cavityValley}.
@@ -77,6 +77,22 @@ export interface TgdFilterDeferredShadingOptions {
          * Default to **1.0**
          */
         valley?: number
+        /**
+         * The curvature sees a valley on each silhouette, because the normals of the object
+         * and of what is behind it are very different.
+         *
+         * If `true`, this gives a dark contour around every object, in front of other
+         * objects and in front of nothing: where nothing has been painted, the filter outputs a
+         * transparent black that darkens what is behind it (use an alpha blending).
+         * It costs 4 more texture reads on the pixels where nothing has been painted.
+         *
+         * If `false`, the silhouettes are ignored: no contour in front of nothing, and no
+         * contour in front of other objects if `textureDepth` is defined (a gap of depth
+         * between two neighbour pixels is considered as a silhouette).
+         *
+         * Default to **true**.
+         */
+        outline?: boolean
     }
     /**
      * If defined, darken the creases, the corners and the contact areas with a
@@ -156,7 +172,7 @@ export interface TgdFilterDeferredShadingOptions {
 
 /**
  * Physically based lighting computed in screen space from the textures of a
- * {@link TgdPainterDeferredShadingTextures}: albedo, normals, depth, metallic, roughness, specular
+ * {@link TgdPainterDeferredShading}: albedo, normals, depth, metallic, roughness, specular
  * and baked ambient occlusion.
  *
  * The lighting comes from a directional light (`light`) and from the skybox (`skyboxTexture`),
@@ -171,6 +187,8 @@ export interface TgdFilterDeferredShadingOptions {
  * shadow camera, exactly like {@link TgdMaterialShadow} does.
  *
  * If `cavity` is defined, the ridges are lightened and the valleys darkened.
+ * With `cavity.outline` (the default), the objects also get a dark contour, and the pixels where
+ * nothing has been painted next to an object output a transparent black.
  *
  * If `ambientOcclusion` is defined, the creases and the contact areas are darkened by a
  * Screen Space Ambient Occlusion, computed in extra passes before the filter is painted.
@@ -195,7 +213,6 @@ export interface TgdFilterDeferredShadingOptions {
  *     new TgdPainterFilter(context, {
  *         texture: deferred.textureAlbedo,
  *         filters: [filter],
- *         flipY: true,
  *     }),
  * )
  * ```
@@ -285,8 +302,10 @@ export class TgdFilterDeferredShading extends TgdFilter {
                   })
                 : null
         const shading = options.shading ?? true
-        // The position of the pixel is needed by the lighting and by the shadow.
-        const needsPosition = shading || Boolean(shadow)
+        const cavityOutline = cavity?.outline ?? true
+        // The position of the pixel is needed by the lighting, by the shadow
+        // and by the cavity to find the silhouettes.
+        const needsPosition = shading || Boolean(shadow) || Boolean(cavity && !cavityOutline && textureDepth)
         const skyboxMustBeDeleted = shading && !(options.skyboxTexture instanceof TgdTextureCube)
         const skybox = !shading
             ? null
@@ -295,7 +314,7 @@ export class TgdFilterDeferredShading extends TgdFilter {
               : createSkyboxFromColor(context, options.skyboxTexture ?? "#888")
         const combineWithLight = Boolean(skybox && options.ambientOcclusion?.combineWithLight)
         const shadingPart = skybox ? shadingEffect(skybox, textureMaterial, combineWithLight) : null
-        const cavityPart = cavity ? cavityEffect() : null
+        const cavityPart = cavity ? cavityEffect(cavityOutline, Boolean(textureDepth)) : null
         const aoPart = ambientOcclusion ? ambientOcclusionEffect(ambientOcclusion.texture, combineWithLight) : null
         const shadowPart = shadow ? shadowEffect(shadow) : null
         super({
@@ -340,7 +359,12 @@ export class TgdFilterDeferredShading extends TgdFilter {
                     ? "vec4 normal = texture(uniNormals, varUV);"
                     : "vec4 normal = vec4(0.5, 0.5, 1.0, 1.0);",
                 "if (normal.a < 0.5) {",
-                ["// Nothing has been painted here.", "FragColor = vec4(0.0);", "return;"],
+                [
+                    "// Nothing has been painted here.",
+                    "FragColor = vec4(0.0);",
+                    ...(cavityPart?.codeBackground ?? []),
+                    "return;",
+                ],
                 "}",
                 "vec4 albedo = texture(uniTexture, varUV);",
                 "vec3 base = pow(albedo.rgb, vec3(2.2));",

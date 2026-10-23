@@ -7,7 +7,7 @@ import {
     type TgdMeshWithTextures,
     TgdPainterBackground,
     TgdPainterClear,
-    TgdPainterDeferredShadingTextures,
+    TgdPainterDeferredShading,
     TgdPainterFilter,
     TgdPainterGroup,
     TgdPainterState,
@@ -80,7 +80,7 @@ function init(context: TgdContext, assets: Assets, refGroups: { current: Groups 
         },
     }
     const meshes = [box, helmet]
-    const deferred = new TgdPainterDeferredShadingTextures(context, { meshes })
+    const deferred = new TgdPainterDeferredShading(context, { meshes })
     const makeBackground = (texture: TgdTexture2D) =>
         new TgdPainterGroup([new TgdPainterBackground(context, { texture, scaleY: -1 })])
     const groups: Groups = {

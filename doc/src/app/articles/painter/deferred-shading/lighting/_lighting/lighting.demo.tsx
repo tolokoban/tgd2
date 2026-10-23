@@ -7,7 +7,7 @@ import {
     TgdMaterialFlat,
     TgdMaterialFlatTexture,
     type TgdMeshWithTextures,
-    TgdPainterDeferredShadingTextures,
+    TgdPainterDeferredShading,
     TgdPainterFilter,
     TgdPainterShadow,
     TgdPainterSkybox,
@@ -42,6 +42,7 @@ interface Settings {
     cavity: boolean
     ridge: number
     valley: number
+    outline: boolean
     ambientOcclusion: boolean
     ambientOcclusionIntensity: number
     ambientOcclusionBlur: boolean
@@ -56,6 +57,7 @@ const DEFAULT_SETTINGS: Settings = {
     cavity: true,
     ridge: 1,
     valley: 1,
+    outline: true,
     ambientOcclusion: true,
     ambientOcclusionIntensity: 1,
     ambientOcclusionBlur: true,
@@ -67,7 +69,7 @@ const DEFAULT_SETTINGS: Settings = {
  * or `ambientOcclusion` changes.
  */
 interface SceneBase {
-    deferred: TgdPainterDeferredShadingTextures
+    deferred: TgdPainterDeferredShading
     skybox: TgdTextureCube
     light: TgdLight
     shadow: TgdPainterShadow
@@ -135,7 +137,7 @@ function init(context: TgdContext, assets: Assets, refScene: { current: Scene | 
             emission: indexEmission === undefined ? undefined : asset.createTexture2D(context, indexEmission),
         },
     }
-    const deferred = new TgdPainterDeferredShadingTextures(context, { meshes: [box, suzanne, helmet] })
+    const deferred = new TgdPainterDeferredShading(context, { meshes: [box, suzanne, helmet] })
     const skybox = new TgdTextureCube(context, {
         imagePosX: assets.image.posX,
         imagePosY: assets.image.posY,
@@ -186,6 +188,7 @@ export default function Demo() {
     const [cavity, setCavity] = React.useState(DEFAULT_SETTINGS.cavity)
     const [ridge, setRidge] = React.useState(DEFAULT_SETTINGS.ridge)
     const [valley, setValley] = React.useState(DEFAULT_SETTINGS.valley)
+    const [outline, setOutline] = React.useState(DEFAULT_SETTINGS.outline)
     const [ambientOcclusion, setAmbientOcclusion] = React.useState(DEFAULT_SETTINGS.ambientOcclusion)
     const [ambientOcclusionIntensity, setAmbientOcclusionIntensity] = React.useState(
         DEFAULT_SETTINGS.ambientOcclusionIntensity,
@@ -202,6 +205,7 @@ export default function Demo() {
         cavity,
         ridge,
         valley,
+        outline,
         ambientOcclusion,
         ambientOcclusionIntensity,
         ambientOcclusionBlur,
@@ -246,6 +250,10 @@ export default function Demo() {
     const handleCavityChange = (value: boolean) => {
         setCavity(value)
         rebuild({ cavity: value })
+    }
+    const handleOutlineChange = (value: boolean) => {
+        setOutline(value)
+        rebuild({ outline: value })
     }
     const handleShadingChange = (value: boolean) => {
         setShading(value)
@@ -327,6 +335,9 @@ export default function Demo() {
                     </ViewSwitch>
                     <ViewInputNumber label="Ridge" value={ridge} onChange={handleRidgeChange} enabled={cavity} />
                     <ViewInputNumber label="Valley" value={valley} onChange={handleValleyChange} enabled={cavity} />
+                    <ViewSwitch value={outline} onChange={handleOutlineChange} enabled={cavity}>
+                        Outline
+                    </ViewSwitch>
                 </ViewPanel>
                 <ViewPanel display="flex" justifyContent="space-around" alignItems="center" flexWrap="wrap" gap="S">
                     <ViewSwitch value={ambientOcclusion} onChange={handleAmbientOcclusionChange}>
@@ -372,7 +383,7 @@ function rebuildFilters(
     state.removeAll()
     for (const filter of Object.values(scene.filters ?? {})) filter.delete()
     const shadowOptions = { camera: shadow.camera, texture: shadow.texture }
-    const cavity = settings.cavity ? { ridge: settings.ridge, valley: settings.valley } : undefined
+    const cavity = settings.cavity ? { ridge: settings.ridge, valley: settings.valley, outline: settings.outline } : undefined
     const ambientOcclusion = settings.ambientOcclusion
         ? {
               intensity: settings.ambientOcclusionIntensity,
@@ -423,11 +434,7 @@ function rebuildFilters(
 /**
  * The albedo is the input texture of the filter.
  */
-function makePainterFilter(
-    context: TgdContext,
-    deferred: TgdPainterDeferredShadingTextures,
-    filter: TgdFilterDeferredShading,
-) {
+function makePainterFilter(context: TgdContext, deferred: TgdPainterDeferredShading, filter: TgdFilterDeferredShading) {
     return new TgdPainterFilter(context, {
         texture: deferred.textureAlbedo,
         filters: [filter],

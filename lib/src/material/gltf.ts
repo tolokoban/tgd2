@@ -1,9 +1,20 @@
 import { WebglAttributeType, WebglUniformType } from "@tgd/types"
-import { TgdVec4 } from "@tgd/math"
+import { tgdCalcRandom, TgdVec4 } from "@tgd/math"
 import { TgdMaterial, TgdMaterialContext } from "./material"
 import { TgdLight } from "@tgd/light"
 import { TgdTexture2D, TgdTextureCube } from "@tgd/texture"
-import { tgdCodeConstants } from "@tgd/code"
+import {
+    tgdCodeFunction_distributionGGX,
+    tgdCodeFunction_fresnelSchlick,
+    tgdCodeFunction_fresnelSchlickRoughness,
+    tgdCodeFunction_geometrySmith,
+    tgdCodeFunction_getNormalFromMap,
+} from "@tgd/code"
+import type { TgdDataGlb } from "@tgd/parser"
+import type { TgdContext } from "@tgd/context"
+import { TgdColor } from "@tgd/color"
+import type { ArrayNumber4, TgdFormatGltfMesh } from "@tgd/types"
+import { tgdCanvasCreateFill } from "@tgd/utils"
 
 export type TgdMaterialGltfOptions = {
     textures: {
@@ -21,6 +32,69 @@ export class TgdMaterialGltf extends TgdMaterial {
     public ambient = new TgdLight({ color: new TgdVec4(0.2, 0.1, 0, 0) })
     public specularExponent = 32
     public specularIntensity = 0.8
+
+    /**
+     * Create a material from the GLTF material of a mesh primitive.
+     *
+     * Textures missing in the asset are replaced by 1x1 textures filled
+     * with sensible default colors.
+     *
+     * @param context The context used to create the textures.
+     * @param data The GLB asset.
+     * @param meshIndexOrName The mesh, its index or its name.
+     * @param primitiveIndex Index of the primitive in the mesh.
+     * @param skybox Cube texture used for image based lighting.
+     * If omitted, a random bluish one is created.
+     * @throws If the mesh or the primitive does not exist.
+     */
+    public static from(
+        context: TgdContext,
+        { data, meshIndexOrName = 0, primitiveIndex = 0, skybox }: {
+            data: TgdDataGlb,
+            meshIndexOrName?: TgdFormatGltfMesh | number | string,
+            primitiveIndex?: number,
+            skybox?: TgdTextureCube,
+        }
+    ): TgdMaterialGltf {
+        const mesh = data.getMesh(meshIndexOrName)
+        if (!mesh) {
+            throw new Error(
+                `[TgdMaterialGltf.from] No mesh found with ${typeof meshIndexOrName === "number" ? "index" : "name"
+                } ${JSON.stringify(meshIndexOrName)}!\n${describeMeshes(data)}`,
+            )
+        }
+        const primitive = mesh.primitives[primitiveIndex]
+        if (!primitive) {
+            throw new Error(
+                `[TgdMaterialGltf.from] No primitive #${primitiveIndex} in mesh ${JSON.stringify(
+                    mesh.name,
+                )}!\n${describeMeshes(data)}`,
+            )
+        }
+        const material = typeof primitive.material === "number" ? data.getMaterial(primitive.material) : undefined
+        const pbr = material?.pbrMetallicRoughness
+        const makeTexture = (textureIndex: number | undefined, name: string): TgdTexture2D | undefined => {
+            if (typeof textureIndex !== "number") return undefined
+
+            const texture = data.createTexture2D(context, textureIndex)
+            texture.name = name
+            return texture
+        }
+        return new TgdMaterialGltf({
+            textures: {
+                normal: makeTexture(material?.normalTexture?.index, "Normal") ?? fill(context, [0.5, 0.5, 1, 1]),
+                albedo:
+                    makeTexture(pbr?.baseColorTexture?.index, "Albedo") ??
+                    fill(context, pbr?.baseColorFactor ?? DEFAULT_COLOR),
+                emission: makeTexture(material?.emissiveTexture?.index, "Emission") ?? fill(context, [0, 0, 0, 1]),
+                occlusion: makeTexture(material?.occlusionTexture?.index, "Occlusion"),
+                metallicRoughness:
+                    makeTexture(pbr?.metallicRoughnessTexture?.index, "MetallicRoughness") ??
+                    fill(context, [0, 0.5, 0.5, 1]),
+                skybox: skybox ?? makeDefaultSkybox(context),
+            },
+        })
+    }
 
     private readonly textureNormal: TgdTexture2D
     private readonly textureAlbedo: TgdTexture2D
@@ -62,70 +136,11 @@ export class TgdMaterialGltf extends TgdMaterial {
                 `varPosition = uniTransfoMatrix * ${this.attPosition};`,
             ],
             extraFragmentShaderFunctions: {
-                ...tgdCodeConstants("PI"),
-                DistributionGGX: [
-                    "float DistributionGGX(vec3 N, vec3 H, float roughness) {",
-                    [
-                        "float a = roughness * roughness;",
-                        "float a2 = a * a;",
-                        "float NdotH = max(dot(N, H), 0.0);",
-                        "float NdotH2 = NdotH * NdotH;",
-                        "float nom   = a2;",
-                        "float denom = (NdotH2 * (a2 - 1.0) + 1.0);",
-                        "denom = PI * denom * denom;",
-                        "return nom / max(denom, 0.001);",
-                    ],
-                    "}",
-                ],
-                GeometrySchlickGGX: [
-                    "float GeometrySchlickGGX(float NdotV, float roughness) {",
-                    [
-                        "float r = (roughness + 1.0);",
-                        "float k = (r * r) / 8.0;",
-                        "return NdotV / (NdotV * (1.0 - k) + k);",
-                    ],
-                    "}",
-                ],
-                GeometrySmith: [
-                    "float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {",
-                    [
-                        "float NdotV = max(dot(N, V), 0.0);",
-                        "float NdotL = max(dot(N, L), 0.0);",
-                        "return GeometrySchlickGGX(NdotV, roughness) * GeometrySchlickGGX(NdotL, roughness);",
-                    ],
-                    "}",
-                ],
-                fresnelSchlick: [
-                    "vec3 fresnelSchlick(float cosTheta, vec3 F0) {",
-                    ["return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);"],
-                    "}",
-                ],
-                fresnelSchlickRoughness: [
-                    "// Roughness-dependent Fresnel for IBL",
-                    "vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {",
-                    ["return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);"],
-                    "}",
-                ],
-                getNormalFromMap: [
-                    "// --- TBN Generation (Screen-space derivatives) ---",
-                    "vec3 getNormalFromMap() {",
-                    [
-                        "vec3 tangentNormal = texture(texNormal, varUV).xyz * 2.0 - 1.0;",
-                        "",
-                        "vec3 Q1  = dFdx(varPosition.xyz);",
-                        "vec3 Q2  = dFdy(varPosition.xyz);",
-                        "vec2 st1 = dFdx(varUV);",
-                        "vec2 st2 = dFdy(varUV);",
-                        "",
-                        "vec3 N   = normalize(varNormal);",
-                        "vec3 T   = normalize(Q1 * st2.t - Q2 * st1.t);",
-                        "vec3 B   = -normalize(cross(N, T));",
-                        "mat3 TBN = mat3(T, B, N);",
-                        "",
-                        "return normalize(TBN * tangentNormal);",
-                    ],
-                    "}",
-                ],
+                ...tgdCodeFunction_distributionGGX(),
+                ...tgdCodeFunction_geometrySmith(),
+                ...tgdCodeFunction_fresnelSchlick(),
+                ...tgdCodeFunction_fresnelSchlickRoughness(),
+                ...tgdCodeFunction_getNormalFromMap(),
             },
             fragmentShaderCode: [
                 "// 1. Fetch Material Properties",
@@ -212,4 +227,52 @@ export class TgdMaterialGltf extends TgdMaterial {
         this.textureMetallicRoughness = options.textures.metallicRoughness
         this.textureSkybox = options.textures.skybox
     }
+}
+
+const DEFAULT_COLOR: ArrayNumber4 = [0.9, 0.5, 0.1, 1]
+
+function fill(context: TgdContext, [R, G, B, A]: ArrayNumber4): TgdTexture2D {
+    return new TgdTexture2D(context).loadBitmap(tgdCanvasCreateFill(1, 1, new TgdColor(R, G, B, A).toString()))
+}
+
+/**
+ * @returns A human readable list of the meshes of a GLB asset,
+ * with their primitives and the materials they use.
+ */
+function describeMeshes(data: TgdDataGlb): string {
+    const meshes = data.json.meshes ?? []
+    if (meshes.length === 0) return "This asset has no mesh at all."
+
+    const materials = data.json.materials ?? []
+    const lines = meshes.map((mesh, meshIndex) => {
+        const primitives = mesh.primitives.map((primitive, primitiveIndex) => {
+            if (typeof primitive.material !== "number") return `    - primitive #${primitiveIndex} (no material)`
+
+            const materialName = materials[primitive.material]?.name
+            return `    - primitive #${primitiveIndex} (material #${primitive.material}${
+                materialName ? ` ${JSON.stringify(materialName)}` : ""
+            })`
+        })
+        return [`  - mesh #${meshIndex} ${JSON.stringify(mesh.name)}`, ...primitives].join("\n")
+    })
+    return `Available meshes and primitives are:\n${lines.join("\n")}`
+}
+
+function makeDefaultSkybox(context: TgdContext): TgdTextureCube {
+    return new TgdTextureCube(context, {
+        imageNegX: randomCanvas(),
+        imageNegY: randomCanvas(),
+        imageNegZ: randomCanvas(),
+        imagePosX: randomCanvas(),
+        imagePosY: randomCanvas(),
+        imagePosZ: randomCanvas(),
+    })
+}
+
+function randomCanvas() {
+    return tgdCanvasCreateFill(
+        1,
+        1,
+        new TgdColor(tgdCalcRandom(0, 0.2), tgdCalcRandom(0.5, 0.7), tgdCalcRandom(0.7, 1), 1),
+    )
 }

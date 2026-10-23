@@ -134,6 +134,27 @@ export interface TgdFormatGltfMaterial {
     /** Default to 0.5 */
     alphaCutoff?: number
     doubleSided?: boolean
+    extensions?: TgdFormatGltfMaterialExtensions
+}
+
+export interface TgdFormatGltfMaterialExtensions {
+    /**
+     * Fraction of the light transmitted through the surface (glass, water, ...).
+     * @see https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_transmission
+     */
+    KHR_materials_transmission?: {
+        /** Default to 0. */
+        transmissionFactor?: number
+        transmissionTexture?: TextureInfo
+    }
+    /**
+     * @see https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_ior
+     */
+    KHR_materials_ior?: {
+        /** Index of refraction. Default to 1.5. */
+        ior?: number
+    }
+    [name: string]: unknown
 }
 
 export interface TgdFormatGltfMeshPrimitive {

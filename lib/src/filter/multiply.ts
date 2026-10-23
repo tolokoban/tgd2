@@ -3,7 +3,7 @@ import type { ArrayNumber4 } from "@tgd/types"
 import { TgdFilter } from "./filter"
 
 /**
- * Paint the texture as it is, without any modification.
+ * Multiply every pixel of the texture by `color`, channel by channel.
  */
 export class TgdFilterMultiply extends TgdFilter {
     public readonly color = new TgdVec4(1, 1, 1, 1)

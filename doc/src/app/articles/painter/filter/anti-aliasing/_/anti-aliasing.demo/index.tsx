@@ -1,0 +1,33 @@
+/**
+ * Warning! This code has been generated automatically.
+ */
+import React from "react"
+import { ViewButton } from "@tolokoban/ui"
+import CodeViewer from "@/components/demo/CodeViewer"
+import Demo from "./anti-aliasing.demo"
+
+const FOCUS = {
+    "Detail #1":
+        '    // The flat faces of a low poly mesh give sharp creases to the cavity.\n    const suzanne: TgdMeshWithTextures = {\n        geometry: assets.glb.suzanne.makeGeometry(),\n        transfo: new TgdTransfo(),\n        visible: true,\n        material: new TgdMaterialFlat({ color: [0.9, 0.5, 0.2, 1] }),\n    }\n    const box: TgdMeshWithTextures = {\n        geometry: new TgdGeometryBox({ sizeX: 0.5, sizeY: 0.5, sizeZ: 0.5 }),\n        transfo: new TgdTransfo({ position: [0, 0, 0], distance: 1.3 }),\n        visible: true,\n        material: new TgdMaterialFlat({ color: [0.2, 0.5, 0.9, 1] }),\n    }\n    const deferred = new TgdPainterDeferredShading(context, { meshes: [suzanne, box] })\n    const shading = new TgdFilterDeferredShading(context, {\n        textureNormals: deferred.textureNormals,\n        textureDepth: deferred.textureDepth,\n        textureMetallicRoughnessSpecularBakedAO: deferred.textureMetallicRoughnessSpecularBakedAO,\n        skyboxTexture: "#bcd",\n        light: new TgdLight({ color: [1, 0.95, 0.9, 1], direction: [-1, -1, -1] }),\n        // Thin bright and dark lines on the edges: the worst case for aliasing.\n        cavity: { ridge: 2, valley: 2 },\n    })\n    // The deferred shading has no anti-aliasing, and the background is transparent.\n    const filterAA = new TgdFilterAntiAliasing({ alpha: true })\n    context.add(\n        deferred,\n        new TgdPainterClear(context, { color: BACKGROUND, depth: 1 }),\n        // Nothing is painted (alpha = 0) where there is no mesh.\n        new TgdPainterState(context, {\n            depth: "off",\n            cull: "off",\n            blend: "alpha",\n            children: [\n                new TgdPainterFilter(context, {\n                    texture: deferred.textureAlbedo,\n                    filters: [shading, filterAA],\n                    flipY: true,\n                }),\n            ],\n        }),\n        (_time, delta) => {\n            suzanne.transfo.orbitAroundY(delta * 0.2)\n            box.transfo.orbitAroundY(-delta * 0.3).orbitAroundX(delta * 0.17)\n        },\n    )\n    context.play()',
+}
+const FULL =
+    'import {\n    type TgdContext,\n    TgdFilterAntiAliasing,\n    TgdFilterDeferredShading,\n    TgdGeometryBox,\n    TgdLight,\n    TgdMaterialFlat,\n    type TgdMeshWithTextures,\n    TgdPainterClear,\n    TgdPainterDeferredShading,\n    TgdPainterFilter,\n    TgdPainterState,\n    TgdTransfo,\n} from "@tolokoban/tgd"\nimport View, { type Assets } from "@/components/demo/Tgd"\nimport SuzanneURL from "@/assets/mesh/suzanne-low.glb"\n\nconst BACKGROUND: [number, number, number, number] = [0.9, 0.92, 0.95, 1]\n\nfunction init(context: TgdContext, assets: Assets) {\n    // Low resolution and pixelated canvas, to see the pixels.\n    context.resolution = 0.5\n    if (context.canvas instanceof HTMLCanvasElement) context.canvas.style.imageRendering = "pixelated"\n    context.camera.fitSpaceAtTarget(2.5, 2.5)\n    // The flat faces of a low poly mesh give sharp creases to the cavity.\n    const suzanne: TgdMeshWithTextures = {\n        geometry: assets.glb.suzanne.makeGeometry(),\n        transfo: new TgdTransfo(),\n        visible: true,\n        material: new TgdMaterialFlat({ color: [0.9, 0.5, 0.2, 1] }),\n    }\n    const box: TgdMeshWithTextures = {\n        geometry: new TgdGeometryBox({ sizeX: 0.5, sizeY: 0.5, sizeZ: 0.5 }),\n        transfo: new TgdTransfo({ position: [0, 0, 0], distance: 1.3 }),\n        visible: true,\n        material: new TgdMaterialFlat({ color: [0.2, 0.5, 0.9, 1] }),\n    }\n    const deferred = new TgdPainterDeferredShading(context, { meshes: [suzanne, box] })\n    const shading = new TgdFilterDeferredShading(context, {\n        textureNormals: deferred.textureNormals,\n        textureDepth: deferred.textureDepth,\n        textureMetallicRoughnessSpecularBakedAO: deferred.textureMetallicRoughnessSpecularBakedAO,\n        skyboxTexture: "#bcd",\n        light: new TgdLight({ color: [1, 0.95, 0.9, 1], direction: [-1, -1, -1] }),\n        // Thin bright and dark lines on the edges: the worst case for aliasing.\n        cavity: { ridge: 2, valley: 2 },\n    })\n    // The deferred shading has no anti-aliasing, and the background is transparent.\n    const filterAA = new TgdFilterAntiAliasing({ alpha: true })\n    context.add(\n        deferred,\n        new TgdPainterClear(context, { color: BACKGROUND, depth: 1 }),\n        // Nothing is painted (alpha = 0) where there is no mesh.\n        new TgdPainterState(context, {\n            depth: "off",\n            cull: "off",\n            blend: "alpha",\n            children: [\n                new TgdPainterFilter(context, {\n                    texture: deferred.textureAlbedo,\n                    filters: [shading, filterAA],\n                    flipY: true,\n                }),\n            ],\n        }),\n        (_time, delta) => {\n            suzanne.transfo.orbitAroundY(delta * 0.2)\n            box.transfo.orbitAroundY(-delta * 0.3).orbitAroundX(delta * 0.17)\n        },\n    )\n    context.play()\n    return ({ fxaa, subpixel, edgeThreshold }: { fxaa: number; subpixel: number; edgeThreshold: number }) => {\n        filterAA.strength = fxaa\n        filterAA.subpixel = subpixel\n        filterAA.edgeThreshold = edgeThreshold\n    }\n}\n\nexport default function Demo() {\n    return (\n        <View\n            onReady={init}\n            controller={{ inertiaOrbit: 1000 }}\n            assets={{ glb: { suzanne: SuzanneURL } }}\n            settings={{\n                fxaa: { label: "FXAA", value: 1, step: ["off", "on"] },\n                subpixel: { label: "subpixel", value: 0.75, min: 0, max: 1 },\n                edgeThreshold: { label: "edgeThreshold", value: 0.166, min: 0.063, max: 0.333 },\n            }}\n        />\n    )\n}\n'
+
+export default function DemoContainer() {
+    const [full, setFull] = React.useState(false)
+    return (
+        <>
+            <div className="half-left">
+                <Demo />
+            </div>
+            <div className="half-right">
+                <div>
+                    <ViewButton variant="elevated" onClick={() => setFull(!full)}>
+                        {full ? "Show code details" : "Show full code"}
+                    </ViewButton>
+                </div>
+                <CodeViewer language="tsx" value={full ? FULL : FOCUS} />
+            </div>
+        </>
+    )
+}

@@ -47,6 +47,12 @@ export interface TgdMeshTreeOptions {
      * Use it to set uniforms or textures that depend on the mesh.
      */
     beforeDraw?(mesh: TgdMesh, program: TgdProgram): void
+    /**
+     * If defined, a mesh is painted only if `filter(mesh)` returns `true`.
+     * Its children are still visited, even if it is filtered out.
+     * The filter is evaluated on every `update()`.
+     */
+    filter?(mesh: TgdMesh): boolean
 }
 
 /**
@@ -138,6 +144,7 @@ export class TgdMeshTree {
         mesh: TgdMesh,
     ) => TgdProgram
     private readonly beforeDraw: ((mesh: TgdMesh, program: TgdProgram) => void) | undefined
+    private readonly filter: ((mesh: TgdMesh) => boolean) | undefined
     private frame = 0
     /** World matrices, reused from frame to frame to avoid allocations. */
     private readonly matricesPool: TgdMat4[] = []
@@ -162,6 +169,7 @@ export class TgdMeshTree {
         this.programKey = options.programKey ?? defaultProgramKey
         this.createProgram = options.createProgram
         this.beforeDraw = options.beforeDraw
+        this.filter = options.filter
         this.batch = {
             program: undefined,
             material: undefined,
@@ -172,6 +180,13 @@ export class TgdMeshTree {
         for (const mesh of options.meshes ?? []) {
             this.add(mesh)
         }
+    }
+
+    /**
+     * Number of meshes to paint in the current frame, as computed by the last `update()`.
+     */
+    get count() {
+        return this.drawCount
     }
 
     add(mesh: TgdMesh) {
@@ -276,7 +291,7 @@ export class TgdMeshTree {
         if (parentMatrix) mat4.multiply(matrix, parentMatrix, mesh.transfo.matrix)
         else matrix.from(mesh.transfo.matrix)
         const material = this.resolveMaterial(mesh, parentMaterial)
-        const item = this.getItem(mesh, material)
+        const item = !this.filter || this.filter(mesh) ? this.getItem(mesh, material) : undefined
         if (item) {
             this.drawItems[this.drawCount] = item
             this.drawMatrices[this.drawCount] = matrix
